@@ -1,0 +1,174 @@
+
+.ulDiv{
+    background-color: rgb(49, 49, 49);
+    border: 1px solid rgb(151, 151, 151);
+    border-radius: 15px;
+    width: fit-content;
+    max-width: 600px;
+    height: 350px;
+    justify-self: center;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow-x: scroll;
+}
+
+.taskLi{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.doneLi{
+    width: fit-content;
+    display: flex;
+    flex-direction: row;
+    justify-self: center;
+    align-self: flex-start;
+    min-width: 200px;
+    justify-content: space-between;
+}
+
+.doneHeadDiv{
+    display: flex;
+    flex-direction: row;
+    min-width: 115px;
+    justify-content: space-between;
+}
+
+.taskLi input {
+    max-width: 5rem;
+}
+
+.taskLi + .taskLi{
+    margin-top: 1rem;
+    border-top: 1px solid gray;
+    padding-top: 1rem;
+}
+
+.h2{
+    color: white;
+    margin: 1rem 0;
+}
+
+.ul{
+    list-style-type: none;
+    padding: 0;
+    margin: 1rem 0.75rem;
+    height: 320px;;
+    padding: 15px 0;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: fit-content;
+}
+
+.startBtn{
+    all: unset;
+    height: 2rem;
+    width: 7rem;
+    align-self: center;
+    background-color: rgb(14, 211, 14);
+    color: rgb(49, 49, 49);
+    font-weight: 800;
+    border: 1px solid white;
+    border-bottom: 3px solid white;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px black;
+    transition: all 0.2s ease;
+}
+
+.startBtn:hover{
+    transform: translateY(-3px);
+}
+
+.startBtn:active{
+    transform: translateY(3px);
+}
+
+.taskHeader{
+    display: flex;
+    flex-direction: row;
+    justify-self: center;
+}
+.outerUlDiv{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 0 1rem;
+    margin: 1rem 0;
+    position: relative;
+}
+.btnDiv{
+    display: flex;
+    flex-direction: row;
+
+}
+.text{
+    max-width: 5rem;
+}
+.btn{
+    max-width: 5rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border: 2px solid grey;
+    border-right: none;
+    transition: all 0.2s ease;
+}
+.btn+.btn{
+    border-radius: 0;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+.btn:hover{
+    transform: translateY(-2px);
+}
+.btn:active{
+    transform: translateY(2px);
+}
+.delete{
+    border-radius: 8px;
+    border: 2px solid grey;
+}
+.expandDone, .collapseDone {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 40px;
+    aspect-ratio: 1/1;
+    border-radius: 10px;
+    border: 2px solid lightgray;
+    box-shadow: 0 2px 5px black;
+    margin: 5px;
+    transition: all 0.2s ease;
+}
+
+.expandDone:hover, .collapseDone:hover{
+    transform: translateY(-2px);
+}
+.expandDone:active, .collapseDone:active{
+    transform: translateY(2px);
+}
+.dragSvg{
+    width: 2rem;
+    height: 2rem;
+    margin: 0;
+    color: lightgray;
+}
+.dragDiv{
+    height: 2rem;
+    align-self: center;
+    justify-self: center;
+
+}

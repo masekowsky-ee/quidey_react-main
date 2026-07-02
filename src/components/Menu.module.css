@@ -1,0 +1,45 @@
+.menuDiv {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 250px;
+  background: #1a1a1a;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-out;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.menuDiv.open {
+  transform: translateX(0);
+}
+
+.menuTitle {
+  color: white;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgb(151, 151, 151);
+  padding-bottom: 20px;
+}
+
+.menuItem {
+  color: white;
+  text-decoration: none;
+  margin-bottom: 10px;
+  font-size: 18px;
+  border-radius: 5px;
+  padding: 10px 0;
+}
+
+.menuItem:hover {
+  background-color: #333;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+}

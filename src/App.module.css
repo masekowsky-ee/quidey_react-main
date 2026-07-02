@@ -1,0 +1,24 @@
+.langBtn{
+    all: unset;
+    height: 2rem;
+    width: 7rem;
+    align-self: center;
+    background-color: rgb(43, 43, 43);
+    color: white;
+    font-weight: 800;
+    border: 1px solid white;
+    border-bottom: 3px solid white;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px black;
+    transition: all 0.2s ease;
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+}
+
+.langBtn:hover{
+    transform: translateY(-3px);
+}
+.langBtn:active{
+    transform: translateY(3px);
+}

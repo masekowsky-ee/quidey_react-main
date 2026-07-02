@@ -1,0 +1,41 @@
+.header{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    background-color: rgb(43, 43, 43);
+    color: white;
+    border-bottom: 1px solid rgb(151, 151, 151);
+    position: fixed;
+    width: 100%;
+    height: 65px;
+    top: 0;
+    left: 0;
+    z-index: 2;
+
+}
+
+.h1{
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 auto;
+}
+
+.btn{
+    all: unset;
+    height: 3rem;
+    width: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px black;
+    margin: 0 1rem;
+}
+
+.svg{
+    height: 2rem;
+    width: 2rem;
+}

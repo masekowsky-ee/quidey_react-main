@@ -1,0 +1,58 @@
+.div{
+    width: fit-content;
+    padding: 1rem;
+    justify-self: center;
+    height: 100%;
+    background-color: rgb(49, 49, 49);
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border: 1px solid rgb(143, 143, 143);
+    border-top: none;
+    margin-top: 80px;
+}
+
+.h2{
+    margin: 1.5rem;
+}
+
+.signInDiv{
+    width: 50%;
+    max-width: 500px;
+    min-width: 350px;
+    border: 1px solid rgb(151, 151, 151);
+    border-radius: 15px;
+    align-self: center;
+    justify-self: center;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    margin: 1rem 0;
+}
+
+.signInForm{
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    min-width: 300px;
+    width: 80%;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem;
+    margin-top: 0;
+}
+
+.input{
+    margin-bottom: 1rem;
+}
+
+.profilePicture{
+    width: 150px;
+    height: 150px;
+    border-radius: 75px;
+    border: 2px solid rgb(161, 161, 161);
+    margin: 1rem;
+}

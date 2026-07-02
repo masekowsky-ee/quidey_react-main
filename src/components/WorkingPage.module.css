@@ -1,0 +1,134 @@
+.div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 80px;
+}
+
+.h2{
+    width: 100%;
+    margin: 2rem 0;
+}
+
+.taskRow{
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 0;
+}
+
+.toDoDiv{
+    background-color: rgb(49, 49, 49);
+    width: 50%;
+    max-width: 450px;
+    min-width: 300px;
+    border-radius: 10px;
+    border: 2px solid lightgray;
+    border-left: 1px solid lightgray!important;
+    padding: 1rem 0;
+}
+
+.h3{
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.doneDiv{
+    background-color: rgb(49, 49, 49);
+    width: 50%;
+    max-width: 450px;
+    min-width: 300px;
+    border-radius: 10px;
+    border: 2px solid lightgray;
+    border-left: 1px solid lightgray!important;
+    padding: 1rem 0;
+}
+
+.taskHeadDiv{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.sessionDoneBtn{
+    margin: 1rem;
+    width: 5rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    border: none;
+    border-bottom: 2px solid lightgray;
+    transition: all 0.2s ease;
+    box-sizing:content-box;
+}
+
+.sessionDoneBtn:hover{
+    transform: translateY(-2px);
+}
+
+.sessionDoneBtn:active{
+    transform: translateY(2px);
+}
+.divInner{
+    position: relative;
+    top: 80px;
+    padding-bottom: 80px;
+    width: 100%;
+}
+.currentTaskDiv{
+    min-width: 350px;
+    min-height: 6rem;
+    background-color: rgb(49, 49, 49);
+    border-radius: 2rem;
+    border: 2px solid rgb(49, 49, 49);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+}
+.li{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1rem;
+    width: fit-content;
+    margin: 0.5rem 0;
+    border-radius: 2rem;
+}
+.ul{
+    list-style: none;
+    padding: 1rem 0;
+    background-color: rgb(49, 49, 49);
+    border-radius: 1.5rem;
+    width: fit-content;
+    min-width: 350px;
+    align-self: center;
+    justify-self: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.pDiv{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-right: 0.5rem;
+}
+.dragSvg{
+    color: lightgray;
+    height: 2rem;
+    width:auto;
+}
+.notesDiv{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}

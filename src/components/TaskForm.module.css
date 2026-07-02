@@ -1,0 +1,75 @@
+.div{
+    margin-top: 1rem;
+    padding-top: 20px;
+    width: fit-content;
+    height: 250px;
+    border: 1px solid rgb(151, 151, 151);
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(49, 49, 49);
+    box-shadow: 0 2px 4px white;
+}
+
+.h2 {
+    color: white;
+    
+}
+
+.createBtn{
+    all: unset;
+    height: 2rem;
+    width: 7rem;
+    align-self: center;
+    background-color: rgb(14, 211, 14);
+    color: rgb(49, 49, 49);
+    font-weight: 800;
+    border: 1px solid white;
+    border-bottom: 3px solid white;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px black;
+    transition: all 0.2s ease;
+    justify-self: flex-end;
+    margin: auto 0 0.5rem 0;
+}
+
+.input{
+    margin-bottom: 1rem;
+}
+
+.hidden{
+    display: none!important;
+}
+
+.height{
+    height: fit-content!important;
+    display: flex!important;
+    align-items: center!important;
+    justify-content: center!important;
+    padding: 1rem!important;
+}
+
+.createBtn:hover{
+    transform: translateY(-3px);
+}
+
+.createBtn:active{
+    transform: translateY(3px);
+}
+
+.form{
+    height: 100%;
+    padding: 10px;
+    display: flex;
+    margin: 0 2rem;
+    flex-direction: column;
+    align-items: space-around;
+    justify-content: space-around;
+}
+
+.prioDiv{
+    display: flex;
+    flex-direction: row;
+}
