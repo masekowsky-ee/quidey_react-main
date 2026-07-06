@@ -39,3 +39,47 @@
         overflow-x: scroll;
     }
 }
+.calendarHeadDiv{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    background: linear-gradient( 
+        to left, 
+        rgb(29,29,29) 0.25rem, 
+        rgb(49, 49, 49)
+    );
+    border-left: 1px solid rgb(143, 142, 142);
+    width: 4rem;
+}
+.calendarIconDiv{
+    height: auto;
+    width: fit-content;
+    align-self: center;
+    margin: 0;
+    padding: 0;
+    background-color: rgb(29, 29, 29);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 3rem;
+    width: 2.5rem;
+    border-top-left-radius: 1.5rem;
+    border-bottom-left-radius: 1.5rem;
+    border: 1px solid rgb(143, 142, 142);
+    border-right: none;
+    transition: all 0.2s ease;
+    box-shadow: 0px 2px 5px black;
+}
+
+.calendarIconDiv svg {
+    color: rgb(143, 142, 142);
+    height: 1.5rem;
+    width: 1.5rem;
+}
+
+.calendarIconDiv:hover {
+    width: 3rem;
+}
+.calendarIconDiv:active {
+    width: 2.75rem;
+}
