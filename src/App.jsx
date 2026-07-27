@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import {useTranslation} from './i18n/LanguageContext'
 import mockData from './components/mockData'
@@ -11,6 +11,7 @@ import Settings from './components/Settings.jsx'
 import WorkingPage from './components/WorkingPage.jsx';
 import CustomError from './components/CustomError.jsx';
 import History from './components/History.jsx';
+import Calendar from  './components/Calendar.jsx';
 
 function App(){
   const { t, language, setLanguage } = useTranslation();
@@ -112,6 +113,7 @@ function App(){
       <Routes>
         <Route path="/" element={<Home t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} taskIndexCounter={taskIndexCounter} setSessionParams={setSessionParams} setTaskIndexCounter={setTaskIndexCounter} setCustomError={setCustomError} />} />
         <Route path="/working" element={<WorkingPage setWorkedSessions={setWorkedSessions} sessionParams={sessionParams} t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} taskIndexCounter={taskIndexCounter} setSessionParams={setSessionParams} setTaskIndexCounter={setTaskIndexCounter} setCustomError={setCustomError} />} />
+        <Route path="/calendar" element={<Calendar t={t} setCustomError={setCustomError} />} />
         <Route path="/history" element={<History workedSessions={workedSessions} t={t} tasks={tasks} groups={groups} setCustomError={setCustomError} />} />
         <Route path="/profile" element={<Profile t={t} users={users} setUsers={setUsers} signedIn={signedIn} setSignedIn={setSignedIn} user={user} setUser={setUser} setCustomError={setCustomError} />} />
         <Route path="/settings" element={<Settings t={t} setLanguage={setLanguage} language={language} setCustomError={setCustomError} />} />
