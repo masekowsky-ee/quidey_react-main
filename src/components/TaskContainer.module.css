@@ -9,7 +9,7 @@
     justify-self: center;
     margin-bottom: 1rem;
     position: relative;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 .taskLi{
