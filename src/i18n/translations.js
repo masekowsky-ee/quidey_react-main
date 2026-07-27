@@ -48,6 +48,7 @@ const translations = {
         history: 'Verlauf',
         total: 'Gesamt',
         noSessionsYet: 'Bisher noch nichts verzeichnet...',
+        current: 'Aktuell',
 
         dateNameTaskError: 'Bitte gib ein gültiges Datum / einen gültigen Namen ein',
         groupError: 'Bitte gib einen gültigen, unbenutzten Gruppennamen ein',
@@ -102,6 +103,7 @@ const translations = {
         history: 'History',
         total: 'Total',
         noSessionsYet: 'Nothing logged yet...',
+        current: 'Current',
 
     dateNameTaskError: 'Please enter a valid Date / Name',
         groupError: 'Please enter a valid, unused group name',

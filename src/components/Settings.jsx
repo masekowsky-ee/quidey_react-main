@@ -1,4 +1,3 @@
-import React from 'react'
 import styles from './Settings.module.css';
 
 export default function Settings(props){
@@ -10,7 +9,7 @@ export default function Settings(props){
             <div className={styles.settingsSectionDiv} >
                 <h2 className={styles.settingsH2} >{t('general')}</h2>
                 <div className={styles.individualSettingDiv}>
-                    <p>{t('language')}:</p>
+                    <p>{`${t('language')} (${t('current')}: ${language === 'en' ? t('english') : t('german')})`}:</p>
                     <button className={styles.settingBtn} onClick={()=>{setLanguage(language === 'de' ? 'en' : 'de')}}>
                         {language === 'de' ? t('english') : t('german')}
                     </button>

@@ -10,6 +10,8 @@
     margin-bottom: 1rem;
     position: relative;
     overflow-x: auto;
+    overflow-y: auto;
+    
 }
 
 .taskLi{
@@ -54,16 +56,15 @@
 
 .ul{
     list-style-type: none;
-    padding: 0;
-    margin: 1rem 0.75rem;
-    height: 320px;;
-    padding: 15px 0;
+    margin: 0;
+    padding: 1rem 0.75rem;
     transition: all 0.2s ease;
     display: flex;
     align-items: stretch;
     flex-direction: column;
     justify-content: flex-start;
     width: fit-content;
+    height: auto;
 }
 
 .startBtn{
