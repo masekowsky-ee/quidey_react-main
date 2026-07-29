@@ -53,6 +53,10 @@ const translations = {
         dateNameTaskError: 'Bitte gib ein gültiges Datum / einen gültigen Namen ein',
         groupError: 'Bitte gib einen gültigen, unbenutzten Gruppennamen ein',
         sessionTimeError: 'Bitte gib eine gültige Zeit ein (00:15 - 03:45)',
+
+        weekDays: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+        weekDaysFull: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
+        months: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
     },
     en: {
         app: 'App',
@@ -105,9 +109,13 @@ const translations = {
         noSessionsYet: 'Nothing logged yet...',
         current: 'Current',
 
-    dateNameTaskError: 'Please enter a valid Date / Name',
+        dateNameTaskError: 'Please enter a valid Date / Name',
         groupError: 'Please enter a valid, unused group name',
         sessionTimeError: 'Please enter a valid time (00:15 - 03:45)',
+
+        weekDays: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
+        weekDaysFull: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
     }
 }
 

@@ -6,7 +6,7 @@ const LanguageContext = createContext()
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState('de')
 
-  const t = (key) => translations[language]?.[key] ?? key
+  const t = (key, second = null) => second || second === 0 ? translations[language]?.[key][second] : translations[language]?.[key] ?? key
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
