@@ -1,4 +1,67 @@
+.div{
+    overflow-y: auto;
+    top: 80px;
+    position: relative;
+    z-index: 0;
+}
+
 .dayContainer{
     position: relative;
-    top: 80px;
+}
+
+.navDiv{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem 0;
+    position: relative;
+    width: fit-content;
+    padding: 0 3rem;
+    justify-self: center;
+}
+
+.navDiv h2 {
+    min-width: 200px;
+}
+
+.navBtn{
+    width: 2.5rem;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    border: none;
+    margin: 0 1rem;
+}
+
+.skipNavBtnL{
+    position: absolute;
+    left: 0;
+}
+
+.skipNavBtnR{
+    position: absolute;
+    right: 0;
+}
+
+.calendarTable{
+    align-self: center;
+    justify-self: center;
+    width: 80%;
+    aspect-ratio: 1/1.05;
+    min-height: 600px;
+    max-height: 750px;
+    min-width: 600px;
+    max-width: 1000px;
+}
+
+.calendarTable h3 {
+    background-color: rgb(49,49,49);
+    color: rgb(189, 189, 189);
+    margin: 0;
+}
+
+.calendarTable td div{
+    background-color: rgb(83, 83, 83);
+    width: 100px;
+    height: 100px; 
 }
