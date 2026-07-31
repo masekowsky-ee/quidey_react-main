@@ -3,13 +3,17 @@ import { useState } from 'react';
 
 export default function Calendar(props){
 
-    const {t} = props;
+    const {t, tasks} = props;
 
     const [monthsFromNow, setMonthsFromNow] = useState(0);
 
     const now = new Date();
 
     const displayDate = new Date(now.getFullYear(), now.getMonth() + monthsFromNow, 1);
+
+    const dateFormatter = (date) => {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
 
     const daysInCurrentMonth = (date) => {return (new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate())}
 
@@ -21,22 +25,39 @@ export default function Calendar(props){
         })
     }
 
-    const getDayOfMonth = (index, date) => {
-        return (index + 1 - firstDayOfMonth(date)) > 0 
-            && index < (daysInCurrentMonth(date) + firstDayOfMonth(date)) 
-            ? (index + 1 - firstDayOfMonth(date)) 
+    const getDayOfMonth = (indexDate, date) => {
+        return (indexDate) > 0 
+            && indexDate < (daysInCurrentMonth(date) + 1) 
+            ? indexDate 
             : null
     }
 
-    const returnDayTd = (index, subFromIndex) => {
-        if (!getDayOfMonth(index - subFromIndex, displayDate)) return <td></td>;
-        return (
-            <td key={`${index - subFromIndex}td`} className={styles.td}>
-                <h3 key={`${index - subFromIndex}h3`}>
-                    {getDayOfMonth(index - subFromIndex, displayDate)}
-                </h3>
-                <div key={`${index - subFromIndex}div`}>
+    const taskLiReturner = (dayOfMonth) => {
+        const dayDate = dateFormatter(
+            new Date(displayDate.getFullYear(), displayDate.getMonth(), dayOfMonth)
+        );
+        return tasks
+            .filter(task => {
+                const taskDate = dateFormatter(new Date(task.due));
+                return taskDate.getTime() === dayDate.getTime();
+            })
+            .map(task => (
+                <li key={task.index}>{task.name}</li>
+            ));
+    }
 
+    const returnDayTd = (index, subFromIndex) => {
+        const dateIndex = index - subFromIndex - firstDayOfMonth(displayDate) + 1;
+        if (!getDayOfMonth(dateIndex, displayDate)) return <td key={dateIndex}></td>;
+        return (
+            <td key={`${dateIndex}td`} className={styles.td}>
+                <h3 key={`${dateIndex}h3`}>
+                    {getDayOfMonth(dateIndex, displayDate)}
+                </h3>
+                <div key={`${dateIndex}div`}>
+                    <ul key={`${dateIndex}ul`}>
+                        {taskLiReturner(dateIndex)}
+                    </ul>       
                 </div>
             </td>
         )
@@ -73,6 +94,7 @@ export default function Calendar(props){
                             ))} 
                         </tr>
                     </thead>
+                    <tbody>
                         {
                             Array
                                 .from({ length: 43 })
@@ -88,6 +110,7 @@ export default function Calendar(props){
                                     }
                                 })
                         }
+                    </tbody>
                 </table>    
             </div>
         </div>

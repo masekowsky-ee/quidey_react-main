@@ -1,4 +1,4 @@
-import styles from './WeekDaysContainer.module.css';
+ import styles from './WeekDaysContainer.module.css';
 import { Link } from  'react-router-dom';
 
 const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];

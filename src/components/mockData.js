@@ -13,7 +13,7 @@ const mockData = {
         { name: 'test-description', tasks: [0], description: ''},
     ],
     taskIndexCounter: 5,
-    users: [
+    users: [ 
         {
             username: 'test',
             password: 'test',
