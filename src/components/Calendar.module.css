@@ -44,6 +44,7 @@
 }
 
 .calendarTable{
+    position: relative;
     align-self: center;
     justify-self: center;
     width: 80%;
@@ -54,14 +55,127 @@
     max-width: 1000px;
 }
 
+tr{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: 1;
+    width: 100%;
+    column-gap: 0;
+}
+
+.td {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 1fr;
+    transition: all 0.2s ease;
+    height: 100px;
+}
+
+.section{
+    width: 100%;
+    height: 100%;
+    transition: all 0.2s ease;
+}
+
+.tdHover:hover{
+    transform: scale(1.05);
+    outline: 2px solid grey;
+    outline-offset: -2px;
+    border-radius: 3px;
+    height: inherit;
+}
+
+.tdHover:active{
+    transform: scale(0.95);
+}
+
+.tdHover:focus{
+    outline: 2px solid grey;
+    outline-offset: -2px;
+    border-radius: 3px;
+}
+
+.activated{
+    z-index: 10;
+    position: absolute;
+    align-self: center;
+    justify-self: center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.activated .dayMainDiv{
+    height: 95%!important;
+}
+
+.activated .headDayDiv{
+    display: flex;
+    flex-direction: row;
+    height: 5%;
+}
+
+.headDayDiv{
+    position: relative;
+    background-color: rgb(49,49,49)!important;
+    height: 25px;
+    min-height: none!important;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.svgDiv{
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: fit-content!important;
+    display: flex;
+    flex-direction: row;
+    background-color: transparent!important;
+    height: 100%!important;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.headDayDiv .svgDiv svg {
+    height: 100%;
+    width: auto;
+}
+
+.editDiv svg{
+}
+
 .calendarTable h3 {
     background-color: rgb(49,49,49);
     color: rgb(189, 189, 189);
     margin: 0;
+    width: 100%;
+    height: 20%;
 }
 
 .calendarTable td div{
     background-color: rgb(83, 83, 83);
-    width: 100px;
-    height: 100px; 
+    width: 100%;
+    height: 80%;
+    margin: 0;
+}
+
+.td ul{
+    padding: 0;
+    padding-left: 1.75rem;
+    margin: 0;
+    width: 95% - padding-left;
+    height: fit-content;
+}
+
+.td ul li{
+    padding: 0;
+    margin: 0;
+    text-align: left;
 }
