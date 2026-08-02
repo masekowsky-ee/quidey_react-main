@@ -1,15 +1,22 @@
-import React, { useState } from 'react'
 import styles from './GroupForm.module.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { addGroup } from '../features/tasks/taskAction';
+
 
 export default function GroupForm(props){
-    const {t, setGroups, groups, setCustomError, showForms} = props;
+    const {t, setCustomError, showForms} = props;
+
+    const dispatch = useDispatch();
+
+    const groups = useSelector(state => state.task.groups);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const name = e.target[0].value;
         const description = e.target[1].value;
         if(name && name !== 'all' && !groups.some(g => g.name === name)){
-            setGroups((prev) => [...prev, { name: name, tasks: [], description: description }]);
+            const group = {name, description};
+            dispatch(addGroup(group));
             e.target[0].value = '';
             e.target[1].value = '';
         } else{

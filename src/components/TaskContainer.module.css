@@ -121,16 +121,19 @@
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
     border: 2px solid grey;
     border-right: none;
     transition: all 0.2s ease;
 }
 .btn+.btn{
-    border-radius: 0;
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left: none;
+}
+.btn:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
 }
 .btn:hover{
     transform: translateY(-2px);

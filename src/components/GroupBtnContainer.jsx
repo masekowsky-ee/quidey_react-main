@@ -3,9 +3,11 @@ import { deleteGroup, editDisplaygroup } from '../features/tasks/taskAction';
 import styles from './GroupBtnContainer.module.css';
 
 export default function GroupBtnContainer(props){
-    const { t, groups, setGroups, setGroupToDisplayName } = props;
+    const { t } = props;
 
     const dispatch = useDispatch();
+
+    const groups = useSelector(state => state.task.groups)
 
     const groupToDisplayName = useSelector(state => state.task.groupToDisplayName);
 
