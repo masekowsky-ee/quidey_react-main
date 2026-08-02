@@ -1,4 +1,4 @@
-import { ADD_TASK, DELETE_TASK, UPDATE_TASK_TITLE, UPDATE_TASK_DESCRIPTION, UPDATE_TASK_DUE, UPDATE_TASK_COMPLETED, UPDATE_TASK_PRIORITY } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, UPDATE_TASK_TITLE, UPDATE_TASK_DESCRIPTION, UPDATE_TASK_DUE, UPDATE_TASK_COMPLETED, UPDATE_TASK_PRIORITY, INC_TASKCOUNTER, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_GROUP_DESCRIPTION } from './taskActionTypes';
 
 // Action creators for task management
 export const addTask = (task) => {
@@ -8,10 +8,10 @@ export const addTask = (task) => {
     };
 }
 
-export const deleteTask = (task) => {
+export const deleteTask = (taskIndex) => {
     return {
         type: DELETE_TASK,
-        payload: task,
+        payload: taskIndex,
     };
 }
 
@@ -48,4 +48,52 @@ export const updateTaskPriority = (task) => {
         type: UPDATE_TASK_PRIORITY,
         payload: task,
     };
+}
+
+export const incTaskcounter = () => {
+    return {
+        type: INC_TASKCOUNTER,
+    };
+}
+
+export const addGroup = (group) => {
+    return {
+        type: ADD_GROUP,
+        payload: group,
+    };
+}
+
+export const deleteGroup = (groupName) => {
+    return {
+        type: DELETE_GROUP,
+        payload: groupName,
+    };
+}
+
+export const editDisplaygroup = (group) => {
+    return {
+        type: EDIT_DISPLAYGROUP,
+        payload: group,
+    };
+}
+
+export const addGroupTasks = (groupName, taskIndex) => {
+    return {
+        type: ADD_GROUP_TASKS,
+        payload: {groupName, taskIndex},
+    };
+}
+
+export const deleteGroupTasks = (taskIndex, groupName) => {
+    return {
+        type: DELETE_GROUP_TASKS,
+        payload: {taskIndex, groupName},
+    };
+}
+
+export const editGroupDes = (groupName, description) => {
+    return {
+        type: EDIT_GROUP_DESCRIPTION,
+        payload: {groupName, description},
+    }
 }

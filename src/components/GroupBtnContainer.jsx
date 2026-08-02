@@ -1,16 +1,20 @@
-import React, {useState} from "react";
-
+import { useSelector, useDispatch } from 'react-redux';
+import { deleteGroup, editDisplaygroup } from '../features/tasks/taskAction';
 import styles from './GroupBtnContainer.module.css';
 
 export default function GroupBtnContainer(props){
-    const { t, groups, setGroups, setGroupToDisplayName, groupToDisplayName } = props;
+    const { t, groups, setGroups, setGroupToDisplayName } = props;
+
+    const dispatch = useDispatch();
+
+    const groupToDisplayName = useSelector(state => state.task.groupToDisplayName);
 
     const handleRemoveGroup = (groupName) => {
-        setGroups(prev => prev.filter(g => g.name !== groupName));
+        dispatch(deleteGroup(groupName));
     }
 
     const handleDisplayGroups = (groupName) => {
-        setGroupToDisplayName(groupName);
+        dispatch(editDisplaygroup(groupName));
     }
 
     return (

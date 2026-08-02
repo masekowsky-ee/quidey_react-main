@@ -29,11 +29,6 @@ export default function TaskForm(props){
 
             dispatch(addTask(task));
 
-            setTasks((prev) => [
-                ...prev,
-                task
-            ]);
-
             setGroups((prev) => prev.map(p => {
                 if (p.name === 'all') {
                     return { ...p, tasks: [...p.tasks, index] }
