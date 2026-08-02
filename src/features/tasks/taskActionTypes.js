@@ -1,0 +1,8 @@
+// Action types for task management
+export const ADD_TASK = "ADD_TASK";
+export const DELETE_TASK = "DELETE_TASK";
+export const UPDATE_TASK_TITLE = "UPDATE_TASK_TITLE";
+export const UPDATE_TASK_DESCRIPTION = "UPDATE_TASK_DESCRIPTION";
+export const UPDATE_TASK_DUE = "UPDATE_TASK_DUE";
+export const UPDATE_TASK_COMPLETED = "UPDATE_TASK_COMPLETED";
+export const UPDATE_TASK_PRIORITY = "UPDATE_TASK_PRIORITY";
