@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import StartSettingsContainer from './StartSettingsContainer.jsx';
 import styles from './TaskContainer.module.css';
+import { useSelector } from 'react-redux';
 
 
 export default function TaskContainer(props){
-    const {tasks, setTasks, t, groups, setGroups, groupToDisplayName, setGroupToDisplayName, setSessionParams, setCustomError, showDone, setShowDone, working} = props;
+    const { setTasks, t, groups, setGroups, groupToDisplayName, setSessionParams, setCustomError, showDone, setShowDone, working} = props;
+
+    const tasks = useSelector(state => state.task.tasks)
 
     const [assignGroups, setAssignGroups] = useState(false);
     const [taskToAssign, setTaskToAssign] = useState(null);
@@ -28,7 +31,7 @@ export default function TaskContainer(props){
         const taskArray = groupArray.tasks
             .map(task=>tasks.find(t => t.index === task))
             .filter(Boolean);
-        const sortedArray = sortByPrio(taskArray)
+        const sortedArray = sortByPrio(taskArray);
         setTasksToDisplay(sortedArray);
     }, [ tasks, groupToDisplayName, groups ]);
 
@@ -163,7 +166,7 @@ export default function TaskContainer(props){
                                 )}
                                 <div className={styles.btnDiv}>
                                     <button className={styles.btn} onClick={() => handleAssignGroup(task)}>{t('assignGroup')}</button>
-                                    <button className={styles.btn} onClick={() => handleTaskDelete(task.index)}>{<svg onClick={()=>handleRemoveGroup(group.name)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
+                                    <button className={styles.btn} onClick={() => handleTaskDelete(task.index)}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
                                 </div>
                                 {working && (<div className={styles.dragDiv}><svg className={styles.dragSvg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-560q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-560q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z"/></svg></div>) }
                             </li>)

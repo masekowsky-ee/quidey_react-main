@@ -1,8 +1,11 @@
-import React, { useState } from 'react'
+import { useDispatch } from 'react-redux';
+import { addTask } from '../features/tasks/taskAction'
 import styles from './TaskForm.module.css';
 
 export default function TaskForm(props){
     const {t, setCustomError, setTasks, setGroups, taskIndexCounter, setTaskIndexCounter, showForms} = props;
+
+    const dispatch = useDispatch();
 
     function handleSubmit(e){
         e.preventDefault();
@@ -14,9 +17,21 @@ export default function TaskForm(props){
             const index = taskIndexCounter;
             setTaskIndexCounter((prev)=>prev+1);
 
+            const task = {
+                index,
+                name,
+                due,
+                description,
+                groups: ['all'],
+                prio,
+                notes: [],
+            }
+
+            dispatch(addTask(task));
+
             setTasks((prev) => [
                 ...prev,
-                { index: index, name: name, due: due, description: description, groups: ['all'], prio: prio, notes: [] }
+                task
             ]);
 
             setGroups((prev) => prev.map(p => {

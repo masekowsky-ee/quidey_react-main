@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState } from 'react'
 import TaskContainer from './TaskContainer.jsx'
 import TaskForm from './TaskForm.jsx'
 import styles from './Home.module.css';
@@ -25,7 +25,7 @@ export default function Home(props){
             </div>
             <GroupBtnContainer t={t} groups={groups} setGroups={setGroups} setGroupToDisplayName={setGroupToDisplayName} groupToDisplayName={groupToDisplayName} />
             <div className={styles.tcc}>
-            <TaskContainer working={false} showDone={showDone} setShowDone={setShowDone} setSessionParams={setSessionParams} tasks={props.tasks} groupToDisplayName={groupToDisplayName} setGroupToDisplayName={setGroupToDisplayName} setTasks={props.setTasks} t={props.t} groups={props.groups} setGroups={props.setGroups} setCustomError={setCustomError} />
+            <TaskContainer working={false} showDone={showDone} setShowDone={setShowDone} setSessionParams={setSessionParams} tasks={props.tasks} groupToDisplayName={groupToDisplayName} setTasks={props.setTasks} t={props.t} groups={props.groups} setGroups={props.setGroups} setCustomError={setCustomError} />
             </div>
             <Outlet />
         </div>
