@@ -25,16 +25,6 @@ function App(){
     }
   });
 
-  const [taskIndexCounter, setTaskIndexCounter] = useState(() => {
-    try {
-      const stored = localStorage.getItem("taskIndexCounter");
-      const parsed = stored !== null ? JSON.parse(stored) : null;
-      return typeof parsed === "number" ? parsed : mockData.taskIndexCounter;
-    } catch {
-      return mockData.taskIndexCounter;
-    }
-  });
-
   const [tasks, setTasks] = useState(() => {
     try {
       const stored = localStorage.getItem("tasks");
@@ -87,9 +77,6 @@ function App(){
     localStorage.setItem("tasks", JSON.stringify(tasks));
   },[tasks]);
   useEffect(()=>{
-    localStorage.setItem("taskIndexCounter", taskIndexCounter);
-  },[taskIndexCounter]);
-  useEffect(()=>{
     localStorage.setItem("groups", JSON.stringify(groups));
   },[groups]);
   useEffect(()=>{
@@ -102,7 +89,6 @@ function App(){
     localStorage.setItem("workedSessions", JSON.stringify(workedSessions));
   },[workedSessions]);
 
-  console.log(tasks);
   return (
     <div>
       <div className={styles.header}>
@@ -111,8 +97,8 @@ function App(){
       <Menu t={t} isOpen={showMenu} onClose={() => setShowMenu(false)} />
       <CustomError t={t} customError={customError} setCustomError={setCustomError} />
       <Routes>
-        <Route path="/" element={<Home t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} taskIndexCounter={taskIndexCounter} setSessionParams={setSessionParams} setTaskIndexCounter={setTaskIndexCounter} setCustomError={setCustomError} />} />
-        <Route path="/working" element={<WorkingPage setWorkedSessions={setWorkedSessions} sessionParams={sessionParams} t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} taskIndexCounter={taskIndexCounter} setSessionParams={setSessionParams} setTaskIndexCounter={setTaskIndexCounter} setCustomError={setCustomError} />} />
+        <Route path="/" element={<Home t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} setSessionParams={setSessionParams} setCustomError={setCustomError} />} />
+        <Route path="/working" element={<WorkingPage setWorkedSessions={setWorkedSessions} sessionParams={sessionParams} t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} setSessionParams={setSessionParams} setCustomError={setCustomError} />} />
         <Route path="/calendar" element={<Calendar t={t} setCustomError={setCustomError} tasks={tasks} />} />
         <Route path="/history" element={<History workedSessions={workedSessions} t={t} tasks={tasks} groups={groups} setCustomError={setCustomError} />} />
         <Route path="/profile" element={<Profile t={t} users={users} setUsers={setUsers} signedIn={signedIn} setSignedIn={setSignedIn} user={user} setUser={setUser} setCustomError={setCustomError} />} />

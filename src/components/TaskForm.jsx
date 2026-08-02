@@ -1,11 +1,13 @@
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addTask } from '../features/tasks/taskAction'
 import styles from './TaskForm.module.css';
 
 export default function TaskForm(props){
-    const {t, setCustomError, setTasks, setGroups, taskIndexCounter, setTaskIndexCounter, showForms} = props;
+    const {t, setCustomError, showForms} = props;
 
     const dispatch = useDispatch();
+
+    const taskIndexCounter = useSelector(state => state.task.taskIndexCounter);
 
     function handleSubmit(e){
         e.preventDefault();
@@ -15,7 +17,6 @@ export default function TaskForm(props){
         const prio = e.target[3].value;
         if(name && due){
             const index = taskIndexCounter;
-            setTaskIndexCounter((prev)=>prev+1);
 
             const task = {
                 index,
@@ -28,13 +29,6 @@ export default function TaskForm(props){
             }
 
             dispatch(addTask(task));
-
-            setGroups((prev) => prev.map(p => {
-                if (p.name === 'all') {
-                    return { ...p, tasks: [...p.tasks, index] }
-                }
-                return p;
-            }));
 
             console.log('submitted: '+ index + ' ' + name + ' ' + due + ' ' + description + ' ' + prio);
             e.target[0].value = '';

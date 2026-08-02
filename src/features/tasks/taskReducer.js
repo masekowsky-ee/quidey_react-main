@@ -1,12 +1,11 @@
-import { act } from 'react';
-import { ADD_TASK, DELETE_TASK, UPDATE_TASK_TITLE, UPDATE_TASK_DESCRIPTION, UPDATE_TASK_DUE, UPDATE_TASK_COMPLETED, UPDATE_TASK_PRIORITY, INC_TASKCOUNTER, ADD_GROUP, DELETE_GROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP_DESCRIPTION } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, UPDATE_TASK_TITLE, UPDATE_TASK_DESCRIPTION, UPDATE_TASK_DUE, UPDATE_TASK_COMPLETED, UPDATE_TASK_PRIORITY, ADD_GROUP, DELETE_GROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP_DESCRIPTION } from './taskActionTypes';
 
 const initialState = {
     tasks: [
         { index: 0, name: 'test-task', due: '2026-06-25', description: 'test-description', groups: ['all', 'prio'], prio: 34, done: false, notes: [] },
         { index: 1, name: 'test-task1', due: '2026-06-28', description: '', groups: ['all'], prio: 27, done: false, notes: [] },
         { index: 2, name: 'test-task2', due: '2026-07-07', description: 'test-description', groups: ['all'], prio: 45, done: false, notes: [] },
-        { index: 3, name: 'test-task3', due: '2026-09-12', description: '', groups: ['all'], prio: 23, done: true },
+        { index: 3, name: 'test-task3', due: '2026-09-12', description: '', groups: ['all'], prio: 23, done: true, notes: [] },
         { index: 4, name: 'test-task4', due: '2026-05-12', description: 'Overdue display test', groups: ['all'], prio: 73, done: false, notes: [] },
     ],
     taskIndexCounter: 5,
@@ -25,6 +24,7 @@ const taskReducer = (state = initialState, action) => {
             return {
                 ...state,
                 tasks: [...state.tasks, action.payload],
+                taskIndexCounter: state.taskIndexCounter + 1,
             };
         case DELETE_TASK: 
             return {
@@ -34,13 +34,28 @@ const taskReducer = (state = initialState, action) => {
         case UPDATE_TASK_TITLE:
             return {
                 ...state,
-                tasks: state.tasks.map(task => task.index === action.payload.taskindex ? {...task, name: action.payload.taskName} : task)
+                tasks: state.tasks.map(task => task.index === action.payload.taskIndex ? {...task, name: action.payload.value} : task)
             }
-        case INC_TASKCOUNTER: 
+        case UPDATE_TASK_DESCRIPTION:
             return {
                 ...state,
-                taskIndexCounter: state.taskIndexCounter + 1,
-            };
+                tasks: state.tasks.map(task => task.index === action.payload.taskIndex ? {...task, description: action.payload.value} : task)
+            }
+        case UPDATE_TASK_DUE:
+            return {
+                ...state,
+                tasks: state.tasks.map(task => task.index === action.payload.taskIndex ? {...task, due: action.payload.value} : task)
+            }
+        case UPDATE_TASK_COMPLETED:
+            return {
+                ...state,
+                tasks: state.tasks.map(task => task.index === action.payload ? {...task, done: !task.done} : task)
+            }
+        case UPDATE_TASK_PRIORITY:
+            return {
+                ...state,
+                tasks: state.tasks.map(task => task.index === action.payload.taskIndex ? {...task, prio: action.payload.value} : task)
+            }
         case ADD_GROUP:
             return {
                 ...state,
@@ -50,6 +65,10 @@ const taskReducer = (state = initialState, action) => {
             return {
                 ...state,
                 groups: state.groups.filter(group => group.name !== action.payload),
+                tasks: state.tasks.map(task => ({
+                    ...task,
+                    groups: task.groups.filter(groupName => groupName !== action.payload)
+                }))
             }
         case EDIT_DISPLAYGROUP:
             return {
@@ -72,7 +91,7 @@ const taskReducer = (state = initialState, action) => {
             return {
                 ...state,
                 groups: state.groups.map(group => group.name === action.payload.groupName ?
-                    {...group, description: action.payload.description}
+                    {...group, description: action.payload.value}
                     : group),
             };
 

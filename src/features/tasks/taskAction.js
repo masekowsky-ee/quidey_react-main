@@ -1,4 +1,4 @@
-import { ADD_TASK, DELETE_TASK, UPDATE_TASK_TITLE, UPDATE_TASK_DESCRIPTION, UPDATE_TASK_DUE, UPDATE_TASK_COMPLETED, UPDATE_TASK_PRIORITY, INC_TASKCOUNTER, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_GROUP_DESCRIPTION } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, UPDATE_TASK_TITLE, UPDATE_TASK_DESCRIPTION, UPDATE_TASK_DUE, UPDATE_TASK_COMPLETED, UPDATE_TASK_PRIORITY, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_GROUP_DESCRIPTION } from './taskActionTypes';
 
 // Action creators for task management
 export const addTask = (task) => {
@@ -15,44 +15,38 @@ export const deleteTask = (taskIndex) => {
     };
 }
 
-export const updateTaskTitle = (value) => {
+export const updateTaskTitle = (taskIndex, value) => {
     return {
         type: UPDATE_TASK_TITLE,
-        payload: value,
+        payload: {taskIndex, value},
     };
 }
 
-export const updateTaskDescription = (value) => {
+export const updateTaskDescription = (taskIndex, value) => {
     return {
         type: UPDATE_TASK_DESCRIPTION,
-        payload: value,
+        payload: {taskIndex, value},
     };
 }
 
-export const updateTaskDue = (task) => {
+export const updateTaskDue = (taskIndex, value) => {
     return {
         type: UPDATE_TASK_DUE,
-        payload: task,
+        payload: {taskIndex, value},
     };
 }
 
-export const updateTaskCompleted = (task) => {
+export const updateTaskCompleted = (taskIndex) => {
     return {
         type: UPDATE_TASK_COMPLETED,
-        payload: task,
+        payload: taskIndex,
     };
 }
 
-export const updateTaskPriority = (task) => {
+export const updateTaskPriority = (taskIndex, value) => {
     return {
         type: UPDATE_TASK_PRIORITY,
-        payload: task,
-    };
-}
-
-export const incTaskcounter = () => {
-    return {
-        type: INC_TASKCOUNTER,
+        payload: {taskIndex, value},
     };
 }
 
@@ -91,9 +85,9 @@ export const deleteGroupTasks = (taskIndex, groupName) => {
     };
 }
 
-export const editGroupDes = (groupName, description) => {
+export const editGroupDes = (groupName, value) => {
     return {
         type: EDIT_GROUP_DESCRIPTION,
-        payload: {groupName, description},
+        payload: {groupName, value},
     }
 }
