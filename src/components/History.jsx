@@ -1,8 +1,7 @@
-import React, {useState} from "react";
 import styles from './History.module.css';
 
 export default function History(props){
-    const { t, workedSessions, tasks, groups, setCustomError } = props;
+    const { t, workedSessions } = props;
 
 
     return (

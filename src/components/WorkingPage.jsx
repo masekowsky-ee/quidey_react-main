@@ -11,16 +11,7 @@ export default function WorkingPage(props){
 
     const {groups, tasks} = useSelector(state => state.task);
 
-    const [group, setGroup] = useState(groups.find(g => g.name === sessionParams.group) || groups.find(g => g.name === 'all'));   
     const [editNote, setEditNote] = useState(false);
-    const [tasksToWork, setTasksToWork] = useState([]);
-
-    const sortByPrio = (array) => {
-        const arrayToSort = [...array];
-        return arrayToSort.sort((a,b)=>{
-            return b.prio - a.prio;
-        });
-    }
 
     const [timer, setTimer] = useState({time: sessionParams.time, active: false});
     const [activeTask, setActiveTask] = useState(null);
@@ -92,21 +83,6 @@ export default function WorkingPage(props){
         };
     }, [draggedTask, handlePointerMove, handlePointerUp]); // handlePointerMove/Up ändern sich nie mehr → Effect läuft nur noch bei draggedTask-Wechsel
 
-    useEffect(()=>{
-        if(!groups.some(g => g.name === sessionParams.group)){
-            setSessionParams({group: 'all', time: 30*60*1000, breaks: true});
-            return;
-        }
-        const found = groups.find(g => g.name === sessionParams.group)
-        setGroup(found);
-    }, [sessionParams, groups]);
-
-    const handleTaskDone = (taskIndex) => {
-        setTasks(prev => prev.map(p => 
-            p.index === taskIndex ? { ...p, done: !p.done } : p
-        ));
-    }
-
     const handleSessionDone = () => {
         const currentSession = sessionData;
         if (currentSession.time > 0){
@@ -157,7 +133,6 @@ export default function WorkingPage(props){
         setActiveTask(updatedTask);
     }
 
-    if (!tasksToWork) return null;
     return(
         <div className={styles.div}>
             <h2 className={styles.h2}>{t('currentGroup')}: {sessionParams.group === 'all' ? t('all') : sessionParams.group}</h2>
@@ -181,7 +156,7 @@ export default function WorkingPage(props){
                 </div> : <p>{t('dragATask')}</p>}
             </div>
             <ul className={styles.ul}>
-                {tasks.filter(task => task.groups.includes(sessionParams.group))
+                {tasks.filter(task => task.groups.includes(sessionParams.group)) 
                     .map(task => {
                     if (task.done || task.index === activeTask?.index) { return null; }
 

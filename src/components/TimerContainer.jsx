@@ -1,16 +1,16 @@
-import React, {useState, useEffect, useRef} from 'react'
+import {useState, useEffect, useRef} from 'react'
 import styles from './TimerContainer.module.css'
 
 export default function TimerContainer(props){
     const { sessionParams, setSessionParams, timer, setTimer } = props;
     
-    let mins;
-    let hours;
-    let secs;
+    const [mins, setMins] = useState(null);
+    const [hours, setHours] = useState(null);
+    const [secs, setSecs] = useState(null);
 
     console.log(timer);
 
-    const [timeToDisplay, setTimeToDisplay] = useState();
+    const [timeToDisplay, setTimeToDisplay] = useState(null);
     const [percentWidth, setPercentWidth] = useState(0);
 
     const [editTimer, setEditTimer] = useState(false);
@@ -24,10 +24,10 @@ export default function TimerContainer(props){
 
     const timeoutRef = useRef(null);
 
-    useEffect(()=>{
-        hours = Math.floor(timer.time / 3600000);
-        mins = Math.floor((timer.time - hours * 3600000) / 60000);
-        secs = Math.floor((timer.time - hours * 3600000 - mins * 60000) / 1000);
+    useEffect(() => {
+        setHours(Math.floor(timer.time / 3600000));
+        setMins(Math.floor((timer.time - hours * 3600000) / 60000));
+        setSecs(Math.floor((timer.time - hours * 3600000 - mins * 60000) / 1000));
         setTimeToDisplay(`${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`);
 
         if (timer.active && timer.time >= 1000) {
@@ -39,7 +39,7 @@ export default function TimerContainer(props){
 
         //cleanup räumt effect auf BEVOR nochmal durchläuft
         return () => clearTimeout(timeoutRef.current);
-    },[timer]);
+    }, [timer, hours, mins, secs]);
 
     const timerAction = (action) => {
         if (action === 'start'){
