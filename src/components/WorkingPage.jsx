@@ -9,12 +9,18 @@ export default function WorkingPage(props){
 
     const navigate = useNavigate();
 
-    const {groups, tasks} = useSelector(state => state.task);
+    const tasks = useSelector(state => state.task.tasks);
 
     const [editNote, setEditNote] = useState(false);
 
     const [timer, setTimer] = useState({time: sessionParams.time, active: false});
     const [activeTask, setActiveTask] = useState(null);
+
+    const [sessionData] = useState(() => ({
+        time: 0,
+        workedTasks: [],
+        date: new Date()
+    }));
 
     // New state for drag logic:
     const [draggedTask, setDraggedTask] = useState(null); // currently dragged task
