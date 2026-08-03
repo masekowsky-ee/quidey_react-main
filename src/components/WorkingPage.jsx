@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import styles from './WorkingPage.module.css'
 import { useNavigate } from "react-router-dom";
 import TimerContainer from "./TimerContainer.jsx";
+import { useSelector } from "react-redux";
 
 export default function WorkingPage(props){
-    const { t, setTasks, tasks, groups, setGroups, setSessionParams, setCustomError, showDone, setShowDone, sessionParams, setWorkedSessions } = props;
+    const { t, setTasks, setSessionParams, sessionParams, setWorkedSessions } = props;
 
     const navigate = useNavigate();
 
+    const {groups, tasks} = useSelector(state => state.task);
+
     const [group, setGroup] = useState(groups.find(g => g.name === sessionParams.group) || groups.find(g => g.name === 'all'));   
-    const [working, setWorking] = useState(true);
     const [editNote, setEditNote] = useState(false);
     const [tasksToWork, setTasksToWork] = useState([]);
 
@@ -20,129 +22,75 @@ export default function WorkingPage(props){
         });
     }
 
-    useEffect(() => {
-        if (!group) return;
-        const taskArray = group.tasks
-            .map(task=>tasks.find(t => t.index === task))
-            .filter(Boolean);
-        const sortedArray = sortByPrio(taskArray)
-        setTasksToWork(sortedArray);
-        if(!activeTask) setActiveTask(sortedArray[0]);
-    }, []);
-
-    // Current State:
-    const [activeTask, setActiveTask] = useState(null);
-
     const [timer, setTimer] = useState({time: sessionParams.time, active: false});
-
-    //keep track of session 
-    const [sessionData, setSessionData] = useState(() => ({
-        time: 0,
-        workedTasks: [],
-        date: new Date()
-    }));
-    const resetSession = () => {
-        setSessionData({ time: 0, workedTasks: [], date: new Date() });
-    };
-
-    //add new task to session data
-    useEffect(()=>{
-        if (!activeTask) return;
-        if (sessionData.workedTasks.length === 0){
-            setSessionData( (prev)=>
-                ({...prev, 
-                    workedTasks: [{name: activeTask.name, index: activeTask.index, time: 0}]
-                })
-            );
-        }
-        if (!sessionData.workedTasks.find(t => t.index === activeTask.index) && sessionData.workedTasks.length > 0) {
-            setSessionData( (prev)=>
-                ({...prev, 
-                    workedTasks: [...prev.workedTasks, {name: activeTask.name, index: activeTask.index, time: 0}]
-                })
-            );
-        }
-    }, [activeTask]);
-
-    //add time to tasks and session data
-    useEffect(()=>{
-        if (!timer.active) return;
-        setSessionData((prev) => {
-            const taskToUpdate = prev.workedTasks.find(t => t.index === activeTask.index);
-            //only update time if no task to update
-            if (!taskToUpdate) return {...prev, time: prev.time + 1};
-            //otherwise update task and overall
-            return {
-                ...prev,
-                time: prev.time + 1, 
-                workedTasks: prev.workedTasks.map((t) => 
-                    t.index === activeTask.index ? { ...t, time: t.time + 1 } : t
-                )
-            };
-        });
-        console.log(sessionData);
-    }, [timer.time]);
+    const [activeTask, setActiveTask] = useState(null);
 
     // New state for drag logic:
     const [draggedTask, setDraggedTask] = useState(null); // currently dragged task
-    const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 }); // current pointer position
+    const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 }); // current pointer position (fürs Rendering)
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 }); // distance from clickpoint to element corner
 
     const dropZoneRef = useRef(null);
+    // Refs spiegeln draggedTask/dragPosition, damit handlePointerUp
+    // immer den aktuellen Wert lesen kann, ohne dass sich die Funktionsreferenz ändert
+    const draggedTaskRef = useRef(null);
+    const dragPositionRef = useRef({ x: 0, y: 0 });
 
-    const handlePointerDown = (e, task) => {
-        // Get the bounding box of the dragged element (the svg handle itself)
+    const handlePointerDown = useCallback((e, task) => {
         e.preventDefault();
         const liElement = e.currentTarget.closest("li");
         const rect = liElement.getBoundingClientRect();
 
-        // Calculate offset between pointer position and the element's top-left corner
         const offsetX = e.clientX - rect.left;
         const offsetY = e.clientY - rect.top;
+
+        draggedTaskRef.current = task;
+        dragPositionRef.current = { x: e.clientX, y: e.clientY };
 
         setDraggedTask(task);
         setDragOffset({ x: offsetX, y: offsetY });
         setDragPosition({ x: e.clientX, y: e.clientY });
-    }
+    }, []);
 
-    const handlePointerMove = (e) => {
-        setDragPosition({ x: e.clientX, y: e.clientY });
-    }
+    const handlePointerMove = useCallback((e) => {
+        dragPositionRef.current = { x: e.clientX, y: e.clientY };
+        setDragPosition({ x: e.clientX, y: e.clientY }); // löst Re-Render fürs Floating-Element aus
+    }, []);
 
-    const handlePointerUp = () => {
-        // Check if the drop zone ref actually exists before measuring it
-        if (dropZoneRef.current && draggedTask) {
+    const handlePointerUp = useCallback(() => {
+        const currentTask = draggedTaskRef.current;
+        const currentPos = dragPositionRef.current;
+
+        if (dropZoneRef.current && currentTask) {
             const dropRect = dropZoneRef.current.getBoundingClientRect();
 
-            // Check if the current pointer position is within the drop zone's boundaries
             const isOverDropZone =
-                dragPosition.x >= dropRect.left &&
-                dragPosition.x <= dropRect.right &&
-                dragPosition.y >= dropRect.top &&
-                dragPosition.y <= dropRect.bottom;
+                currentPos.x >= dropRect.left &&
+                currentPos.x <= dropRect.right &&
+                currentPos.y >= dropRect.top &&
+                currentPos.y <= dropRect.bottom;
 
             if (isOverDropZone) {
-                setActiveTask(draggedTask);
+                setActiveTask(currentTask);
             }
         }
 
-        // Reset drag state regardless of outcome
+        draggedTaskRef.current = null;
         setDraggedTask(null);
-    };
+    }, []); // <- bleibt stabil, keine Deps nötig
 
     useEffect(() => {
-        // Only register listeners while something is actively being dragged
+        // Nur registrieren, solange aktiv gedraggt wird
         if (!draggedTask) return;
 
         window.addEventListener("pointermove", handlePointerMove);
         window.addEventListener("pointerup", handlePointerUp);
 
-        // Cleanup: remove listeners when dragging stops or component unmounts
         return () => {
             window.removeEventListener("pointermove", handlePointerMove);
             window.removeEventListener("pointerup", handlePointerUp);
         };
-    }, [draggedTask, dragPosition]);
+    }, [draggedTask, handlePointerMove, handlePointerUp]); // handlePointerMove/Up ändern sich nie mehr → Effect läuft nur noch bei draggedTask-Wechsel
 
     useEffect(()=>{
         if(!groups.some(g => g.name === sessionParams.group)){
@@ -233,7 +181,8 @@ export default function WorkingPage(props){
                 </div> : <p>{t('dragATask')}</p>}
             </div>
             <ul className={styles.ul}>
-                {tasksToWork.map(task => {
+                {tasks.filter(task => task.groups.includes(sessionParams.group))
+                    .map(task => {
                     if (task.done || task.index === activeTask?.index) { return null; }
 
                     // Check if this specific task is the one currently being dragged
