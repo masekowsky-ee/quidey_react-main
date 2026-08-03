@@ -1,8 +1,13 @@
 import {useState, useEffect, useRef} from 'react'
 import styles from './TimerContainer.module.css'
+import { useSelector, useDispatch } from 'react-redux';
+import { setSessionParams, setTimer } from '../features/session/sessionAction';
 
 export default function TimerContainer(props){
-    const { sessionParams, setSessionParams, timer, setTimer } = props;
+    const { setWorkedTime } = props;
+
+    const {sessionParams, timer} = useSelector(state => state.session);
+    const dispatch = useDispatch();
     
     const [mins, setMins] = useState(null);
     const [hours, setHours] = useState(null);
@@ -32,7 +37,8 @@ export default function TimerContainer(props){
 
         if (timer.active && timer.time >= 1000) {
             timeoutRef.current = setTimeout(() => {
-                setTimer((prev) => ({ ...prev, time: prev.time - 1000 }));
+                dispatch(setTimer((prev) => ({ ...prev, time: prev.time - 1000 })));
+                setWorkedTime(prev => prev + 1);
             }, 1000);
         }
         setPercentWidth((sessionParams.time - timer.time) / sessionParams.time * 100);
@@ -43,19 +49,18 @@ export default function TimerContainer(props){
 
     const timerAction = (action) => {
         if (action === 'start'){
-            setTimer((prev)=>({ ...prev, active: true}));
+            dispatch(setTimer((prev)=>({ ...prev, active: true})));
+
             if(editTimer){
-                setSessionParams((prev)=>({
-                    ...prev, time: getEditTime() 
-                }));
-                setTimer((prev)=>({...prev, time: getEditTime()}));
+                dispatch(setSessionParams(prev => ({...prev, time: getEditTime()})));
+                //setTimer((prev)=>({...prev, time: getEditTime()}));
             }
             setEditTimer(false);
         } else if (action === 'pause'){
-            setTimer((prev)=>({ ...prev, active: false}));
+            dispatch(setTimer((prev)=>({ ...prev, active: false})));
         } else if (action === 'terminate'){
             clearTimeout(timeoutRef.current);
-            setTimer({ time: 0, active: false });
+            dispatch(setTimer({ time: 0, active: false }));
         }
     }
 

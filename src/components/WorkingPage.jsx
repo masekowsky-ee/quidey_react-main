@@ -2,25 +2,34 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import styles from './WorkingPage.module.css'
 import { useNavigate } from "react-router-dom";
 import TimerContainer from "./TimerContainer.jsx";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { saveSessionData } from "../features/session/sessionAction.js";
 
 export default function WorkingPage(props){
-    const { t, setTasks, setSessionParams, sessionParams, setWorkedSessions } = props;
+    const { t, setTasks } = props;
 
     const navigate = useNavigate();
 
+    const dispatch = useDispatch();
+
     const tasks = useSelector(state => state.task.tasks);
+    const sessionParams = useSelector(state => state.session.sessionParams);
 
     const [editNote, setEditNote] = useState(false);
 
     const [timer, setTimer] = useState({time: sessionParams.time, active: false});
     const [activeTask, setActiveTask] = useState(null);
+    const [workedTasks, setWorkedTasks] = useState([]);
+    const [workedTime, setWorkedTime] = useState(0);
 
-    const [sessionData] = useState(() => ({
-        time: 0,
-        workedTasks: [],
-        date: new Date()
-    }));
+    class sessionData {
+        constructor(group, tasksArray){
+            this.time = workedTime;
+            this.workedTasks = [tasksArray];
+            this.group = group;
+            this.date = new Date();
+        }
+    }
 
     // New state for drag logic:
     const [draggedTask, setDraggedTask] = useState(null); // currently dragged task
@@ -69,6 +78,7 @@ export default function WorkingPage(props){
 
             if (isOverDropZone) {
                 setActiveTask(currentTask);
+                setWorkedTasks(prev => [...prev, currentTask]);
             }
         }
 
@@ -90,11 +100,10 @@ export default function WorkingPage(props){
     }, [draggedTask, handlePointerMove, handlePointerUp]); // handlePointerMove/Up ändern sich nie mehr → Effect läuft nur noch bei draggedTask-Wechsel
 
     const handleSessionDone = () => {
-        const currentSession = sessionData;
+        const currentSession = new sessionData(sessionParams.group, workedTasks);
         if (currentSession.time > 0){
-            setWorkedSessions((prev) => ([ ...prev, currentSession ]));
+            dispatch(saveSessionData(currentSession));
         }
-        resetSession();
         navigate('/');
     }
 
@@ -142,7 +151,7 @@ export default function WorkingPage(props){
     return(
         <div className={styles.div}>
             <h2 className={styles.h2}>{t('currentGroup')}: {sessionParams.group === 'all' ? t('all') : sessionParams.group}</h2>
-            <TimerContainer setSessionParams={setSessionParams} sessionParams={sessionParams} timer={timer} setTimer={setTimer} />
+            <TimerContainer setWorkedTime={setWorkedTime} timer={timer} setTimer={setTimer} />
             <div ref={dropZoneRef} className={styles.currentTaskDiv}>
                 {activeTask ? <div>
                     <h2>{activeTask.name}</h2>

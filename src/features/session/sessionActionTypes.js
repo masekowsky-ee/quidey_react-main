@@ -1,2 +1,3 @@
 export const SET_SESSION_PARAMS = "SET_SESSION_PARAMS";
 export const SAVE_SESSION_DATA = "SAVE_SESSION_DATA";
+export const SET_TIMER = "SET_TIMER";
