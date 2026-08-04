@@ -21,7 +21,7 @@ const sessionReducer = (state = initialState, action) => {
         case SAVE_SESSION_DATA:
             return {
                 ...state,
-                workedSessionData: [state.workedSessionData, action.payload],
+                workedSessionData: [...state.workedSessionData, action.payload],
             }
         case SET_TIMER:
             return {

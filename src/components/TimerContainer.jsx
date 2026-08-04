@@ -8,10 +8,6 @@ export default function TimerContainer(props){
 
     const {sessionParams, timer} = useSelector(state => state.session);
     const dispatch = useDispatch();
-    
-    const [mins, setMins] = useState(null);
-    const [hours, setHours] = useState(null);
-    const [secs, setSecs] = useState(null);
 
     console.log(timer);
 
@@ -30,34 +26,38 @@ export default function TimerContainer(props){
     const timeoutRef = useRef(null);
 
     useEffect(() => {
-        setHours(Math.floor(timer.time / 3600000));
-        setMins(Math.floor((timer.time - hours * 3600000) / 60000));
-        setSecs(Math.floor((timer.time - hours * 3600000 - mins * 60000) / 1000));
-        setTimeToDisplay(`${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`);
+        // lokale Werte statt State im selben Tick verwenden
+        const h = Math.floor(timer.time / 3600000);
+        const m = Math.floor((timer.time - h * 3600000) / 60000);
+        const s = Math.floor((timer.time - h * 3600000 - m * 60000) / 1000);
+
+        setTimeToDisplay(
+            `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+        );
 
         if (timer.active && timer.time >= 1000) {
             timeoutRef.current = setTimeout(() => {
-                dispatch(setTimer((prev) => ({ ...prev, time: prev.time - 1000 })));
+                dispatch(setTimer({...timer, time: timer.time - 1000 }));
                 setWorkedTime(prev => prev + 1);
             }, 1000);
         }
-        setPercentWidth((sessionParams.time - timer.time) / sessionParams.time * 100);
 
-        //cleanup räumt effect auf BEVOR nochmal durchläuft
+        setPercentWidth(sessionParams.time ? ((sessionParams.time - timer.time) / sessionParams.time * 100) : 0);
+
         return () => clearTimeout(timeoutRef.current);
-    }, [timer, hours, mins, secs]);
+    }, [timer]); // hours/mins/secs raus aus den Deps — sie werden hier berechnet, nicht gelesen
 
     const timerAction = (action) => {
         if (action === 'start'){
-            dispatch(setTimer((prev)=>({ ...prev, active: true})));
+            dispatch(setTimer({...timer, active: true}));
 
             if(editTimer){
-                dispatch(setSessionParams(prev => ({...prev, time: getEditTime()})));
+                dispatch(setSessionParams({...sessionParams, time: getEditTime()}));
                 //setTimer((prev)=>({...prev, time: getEditTime()}));
             }
             setEditTimer(false);
         } else if (action === 'pause'){
-            dispatch(setTimer((prev)=>({ ...prev, active: false})));
+            dispatch(setTimer({...timer, active: false}));
         } else if (action === 'terminate'){
             clearTimeout(timeoutRef.current);
             dispatch(setTimer({ time: 0, active: false }));
@@ -97,7 +97,7 @@ export default function TimerContainer(props){
                     </button>
                 }
                 {!timer.active && timer.time === 0 &&
-                    <button className={styles.btn} onClick={()=>{setEditTimer(!editTimer); setTimer((prev)=>({...prev, time: 10000}))}}>
+                    <button className={styles.btn} onClick={()=>{setEditTimer(!editTimer); dispatch(setTimer({...timer, time: 10000}))}}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M400-840q-17 0-28.5-11.5T360-880q0-17 11.5-28.5T400-920h160q17 0 28.5 11.5T600-880q0 17-11.5 28.5T560-840H400Zm108.5 428.5Q520-423 520-440v-160q0-17-11.5-28.5T480-640q-17 0-28.5 11.5T440-600v160q0 17 11.5 28.5T480-400q17 0 28.5-11.5Zm-168 303Q275-137 226-186t-77.5-114.5Q120-366 120-440t28.5-139.5Q177-645 226-694t114.5-77.5Q406-800 480-800q62 0 119 20t107 58l28-28q11-11 28-11t28 11q11 11 11 28t-11 28l-28 28q38 50 58 107t20 119q0 74-28.5 139.5T734-186q-49 49-114.5 77.5T480-80q-74 0-139.5-28.5ZM678-242q82-82 82-198t-82-198q-82-82-198-82t-198 82q-82 82-82 198t82 198q82 82 198 82t198-82ZM480-440Z"/></svg>
                     </button>
                 }

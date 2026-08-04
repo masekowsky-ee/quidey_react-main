@@ -1,10 +1,15 @@
 import {useNavigate} from 'react-router-dom'
 import styles from './StartSettingsContainer.module.css'
+import { useDispatch, useSelector } from 'react-redux';
+import { setSessionParams } from '../features/session/sessionAction';
 
 const StartSettingsContainer = (props) => {
-    const { t, groups, setShowStartSettings, setSessionParams, setCustomError } = props;
+    const { t, setShowStartSettings, setCustomError } = props;
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const groups = useSelector(state => state.task.groups);
 
     const handleStartSession = (e) => {
         e.preventDefault();
@@ -12,7 +17,7 @@ const StartSettingsContainer = (props) => {
         const h = Number(form.elements.hours.value);
         const m = Number(form.elements.mins.value);
         if(h !== 0 || m !== 0){
-            setSessionParams({group: form.elements.groups.value ,time: (h * 3600 * 1000 + m * 60 * 1000), breaks: form.elements.breaks.checked});
+            dispatch(setSessionParams({group: form.elements.groups.value ,time: (h * 3600 * 1000 + m * 60 * 1000), breaks: form.elements.breaks.checked}));
             setShowStartSettings(false);
             navigate('/working');
         } else {
