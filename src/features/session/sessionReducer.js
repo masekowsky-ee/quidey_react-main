@@ -4,7 +4,7 @@ const initialState = {
     sessionParams: {
         group: 'all',
         time: 30 * 60 * 1000,
-        breaks: false,
+        breaks: true,
     },
     workedSessionData: [], // {time: x, workedTasks: [x1, x2, x3], group: 'xx', date: new Date()}
     timer: {time: 30 * 60 * 1000, active: false},

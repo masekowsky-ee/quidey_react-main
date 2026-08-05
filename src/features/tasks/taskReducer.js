@@ -94,6 +94,20 @@ const taskReducer = (state = initialState, action) => {
                     {...group, description: action.payload.value}
                     : group),
             };
+        case CREATE_NOTE:
+            return {
+                ...state,
+                tasks: state.tasks.map(task => task.index === action.payload.taskIndex ?
+                    {...task, notes: [...task.notes, action.payload.note]}
+                    : task),
+            }
+        case DELETE_NOTE:
+            return {
+                ...state,
+                tasks: state.tasks.map(task => task.index === action.payload.taskIndex ?
+                    {...task, notes: task.notes.filter((note) => note.index !== action.payload.noteIndex)}
+                    : task),
+            }
 
 
         default:

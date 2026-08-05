@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import TimerContainer from "./TimerContainer.jsx";
 import { useSelector, useDispatch } from "react-redux";
 import { saveSessionData } from "../features/session/sessionAction.js";
+import { createNote, deleteNote } from "../features/tasks/taskAction.js";
 
 export default function WorkingPage(props){
     const { t, setTasks } = props;
@@ -120,11 +121,9 @@ export default function WorkingPage(props){
 
     const handleCreateNote = (e) => {
         if(!e.target.value) return;
-        const newNote = {note: e.target.value, index: activeTask.notes[activeTask.notes.length-1]?.index + 1 || 0};
+        const newNote = {note: e.target.value, index: new Date()};
         const updatedTask = { ...activeTask, notes: [...(activeTask.notes || []), newNote] };
-        setTasks((prev) =>
-            prev.map((t) => (t.index === activeTask.index ? updatedTask : t))
-        );
+        dispatch(createNote(activeTask.index, newNote));
         setActiveTask(updatedTask);
         setEditNote(false);
         console.log(newNote);
@@ -132,9 +131,7 @@ export default function WorkingPage(props){
     const handleDeleteNote = (noteIndex) => {
         const filteredNotes = activeTask.notes.filter(n=> n.index!== noteIndex);
         const updatedTask = { ...activeTask, notes: filteredNotes };
-        setTasks((prev) =>
-            prev.map((t) => (t.index === activeTask.index ? updatedTask : t))
-        );
+        dispatch(deleteNote(activeTask.index, noteIndex));
         setActiveTask(updatedTask);
     }
 

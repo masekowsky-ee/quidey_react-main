@@ -92,16 +92,16 @@ export const editGroupDes = (groupName, value) => {
     }
 }
 
-export const createNote = (note) => {
+export const createNote = (taskIndex, note) => {
     return {
         type: CREATE_NOTE,
-        payload: note,
+        payload: { taskIndex, note },
     }
 }
 
-export const deleteNote = (noteId) => {
+export const deleteNote = (taskIndex, noteIndex) => {
     return {
         type: DELETE_NOTE,
-        payload: noteId,
+        payload: { taskIndex, noteIndex },
     }
 }
