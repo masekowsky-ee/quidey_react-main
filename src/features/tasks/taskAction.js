@@ -1,4 +1,4 @@
-import { ADD_TASK, DELETE_TASK, UPDATE_TASK_TITLE, UPDATE_TASK_DESCRIPTION, UPDATE_TASK_DUE, UPDATE_TASK_COMPLETED, UPDATE_TASK_PRIORITY, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_GROUP_DESCRIPTION } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, UPDATE_TASK_TITLE, UPDATE_TASK_DESCRIPTION, UPDATE_TASK_DUE, UPDATE_TASK_COMPLETED, UPDATE_TASK_PRIORITY, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_GROUP_DESCRIPTION, CREATE_NOTE, DELETE_NOTE } from './taskActionTypes';
 
 // Action creators for task management
 export const addTask = (task) => {
@@ -89,5 +89,19 @@ export const editGroupDes = (groupName, value) => {
     return {
         type: EDIT_GROUP_DESCRIPTION,
         payload: {groupName, value},
+    }
+}
+
+export const createNote = (note) => {
+    return {
+        type: CREATE_NOTE,
+        payload: note,
+    }
+}
+
+export const deleteNote = (noteId) => {
+    return {
+        type: DELETE_NOTE,
+        payload: noteId,
     }
 }

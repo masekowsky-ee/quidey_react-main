@@ -7,6 +7,10 @@ export const UPDATE_TASK_DUE = "UPDATE_TASK_DUE";
 export const UPDATE_TASK_COMPLETED = "UPDATE_TASK_COMPLETED";
 export const UPDATE_TASK_PRIORITY = "UPDATE_TASK_PRIORITY";
 
+//notes
+export const CREATE_NOTE = "CREATE_NOTE";
+export const DELETE_NOTE = "DELETE_NOTE";
+
 // Action types for group management
 export const ADD_GROUP = "ADD_GROUP";
 export const DELETE_GROUP = "DELETE_GROUP";

@@ -30,14 +30,14 @@ export default function TimerContainer(props){
         const h = Math.floor(timer.time / 3600000);
         const m = Math.floor((timer.time - h * 3600000) / 60000);
         const s = Math.floor((timer.time - h * 3600000 - m * 60000) / 1000);
-
+        console.log(timer);
         setTimeToDisplay(
             `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
         );
 
         if (timer.active && timer.time >= 1000) {
             timeoutRef.current = setTimeout(() => {
-                dispatch(setTimer({...timer, time: timer.time - 1000 }));
+                dispatch(setTimer(timer.time - 1000, timer.active));
                 setWorkedTime(prev => prev + 1);
             }, 1000);
         }
@@ -49,18 +49,19 @@ export default function TimerContainer(props){
 
     const timerAction = (action) => {
         if (action === 'start'){
-            dispatch(setTimer({...timer, active: true}));
-
-            if(editTimer){
-                dispatch(setSessionParams({...sessionParams, time: getEditTime()}));
-                //setTimer((prev)=>({...prev, time: getEditTime()}));
+            if (editTimer){
+                const newTime = getEditTime();
+                dispatch(setSessionParams({...sessionParams, time: newTime}));
+                dispatch(setTimer(newTime, true));
+            } else {
+                dispatch(setTimer(timer.time, true));
             }
             setEditTimer(false);
         } else if (action === 'pause'){
-            dispatch(setTimer({...timer, active: false}));
+            dispatch(setTimer(timer.time, false));
         } else if (action === 'terminate'){
             clearTimeout(timeoutRef.current);
-            dispatch(setTimer({ time: 0, active: false }));
+            dispatch(setTimer(0, false));
         }
     }
 

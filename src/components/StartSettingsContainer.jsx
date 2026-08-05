@@ -57,7 +57,7 @@ const StartSettingsContainer = (props) => {
             </div>
             <div className={styles.timerDiv + ' ' + styles.space}>
                 <label htmlFor="breaks">{t('breaks')}</label>
-                <input type="checkbox" id="breaks" name="breaks" />
+                <input type="checkbox" id="breaks" name="breaks" defaultChecked />
             </div>
             <button className={`${styles.space} ${styles.startBtn}`} type="submit">{t('start')}</button>
         </form>

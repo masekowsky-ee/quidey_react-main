@@ -18,7 +18,7 @@ export default function WorkingPage(props){
     const [editNote, setEditNote] = useState(false);
 
     const [timer, setTimer] = useState({time: sessionParams.time, active: false});
-    const [activeTask, setActiveTask] = useState(null);
+    const [activeTask, setActiveTask] = useState(tasks.find(task => task.groups.includes(sessionParams.group)));
     const [workedTasks, setWorkedTasks] = useState([]);
     const [workedTime, setWorkedTime] = useState(0);
 
