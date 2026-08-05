@@ -18,19 +18,24 @@ export default function WorkingPage(props){
 
     const [editNote, setEditNote] = useState(false);
 
+    const starterTask = tasks.find(task => task.groups.includes(sessionParams.group));
     const [timer, setTimer] = useState({time: sessionParams.time, active: false});
-    const [activeTask, setActiveTask] = useState(tasks.find(task => task.groups.includes(sessionParams.group)));
-    const [workedTasks, setWorkedTasks] = useState([]);
+    const [activeTask, setActiveTask] = useState(starterTask);
+    const [workedTasks, setWorkedTasks] = useState([{name: starterTask.name, index: starterTask.index, time: 0}]);
     const [workedTime, setWorkedTime] = useState(0);
 
     class sessionData {
         constructor(group, tasksArray){
             this.time = workedTime;
-            this.workedTasks = [tasksArray];
+            this.workedTasks = tasksArray;
             this.group = group;
             this.date = new Date();
         }
     }
+
+    useEffect(()=>{
+        setWorkedTasks(prev => prev.map(p => p.index === activeTask.index ? {...p, time: p.time + 1} : p))
+    }, [workedTime, activeTask])
 
     // New state for drag logic:
     const [draggedTask, setDraggedTask] = useState(null); // currently dragged task
@@ -79,7 +84,7 @@ export default function WorkingPage(props){
 
             if (isOverDropZone) {
                 setActiveTask(currentTask);
-                setWorkedTasks(prev => [...prev, currentTask]);
+                setWorkedTasks(prev => prev.find(t => t.index === currentTask.index) ? prev : [...prev, {name: currentTask.name, time: 0, index: currentTask.index}]);
             }
         }
 
