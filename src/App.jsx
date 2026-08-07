@@ -89,6 +89,13 @@ function App(){
     localStorage.setItem("workedSessions", JSON.stringify(workedSessions));
   },[workedSessions]);
 
+  useEffect(() => {
+    fetch("http://localhost:3000/api/hello")
+      .then((res) => res.json())
+      .then((data) => console.log("Backend sagt:", data))
+      .catch((err) => console.error("Fehler:", err));
+  }, []);
+
   return (
     <div>
       <div className={styles.header}>
