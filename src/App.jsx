@@ -98,19 +98,22 @@ function App(){
 
   return (
     <div>
-      <div className={styles.header}>
-        <Header t={t} showMenu={() => setShowMenu(true)} />
-      </div>
-      <Menu t={t} isOpen={showMenu} onClose={() => setShowMenu(false)} />
-      <CustomError t={t} customError={customError} setCustomError={setCustomError} />
-      <Routes>
-        <Route path="/" element={<Home t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} setSessionParams={setSessionParams} setCustomError={setCustomError} />} />
-        <Route path="/working" element={<WorkingPage setWorkedSessions={setWorkedSessions} sessionParams={sessionParams} t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} setSessionParams={setSessionParams} setCustomError={setCustomError} />} />
-        <Route path="/calendar" element={<Calendar t={t} setCustomError={setCustomError} tasks={tasks} />} />
-        <Route path="/history" element={<History workedSessions={workedSessions} t={t} tasks={tasks} groups={groups} setCustomError={setCustomError} />} />
-        <Route path="/profile" element={<Profile t={t} users={users} setUsers={setUsers} signedIn={signedIn} setSignedIn={setSignedIn} user={user} setUser={setUser} setCustomError={setCustomError} />} />
-        <Route path="/settings" element={<Settings t={t} setLanguage={setLanguage} language={language} setCustomError={setCustomError} />} />
-      </Routes>
+      {}
+      <section>
+        <div className={styles.header}>
+          <Header t={t} showMenu={() => setShowMenu(true)} />
+        </div>
+        <Menu t={t} isOpen={showMenu} onClose={() => setShowMenu(false)} />
+        <CustomError t={t} customError={customError} setCustomError={setCustomError} />
+        <Routes>
+          <Route path="/" element={<Home t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} setSessionParams={setSessionParams} setCustomError={setCustomError} />} />
+          <Route path="/working" element={<WorkingPage setWorkedSessions={setWorkedSessions} sessionParams={sessionParams} t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} setSessionParams={setSessionParams} setCustomError={setCustomError} />} />
+          <Route path="/calendar" element={<Calendar t={t} setCustomError={setCustomError} tasks={tasks} />} />
+          <Route path="/history" element={<History workedSessions={workedSessions} t={t} tasks={tasks} groups={groups} setCustomError={setCustomError} />} />
+          <Route path="/profile" element={<Profile t={t} users={users} setUsers={setUsers} signedIn={signedIn} setSignedIn={setSignedIn} user={user} setUser={setUser} setCustomError={setCustomError} />} />
+          <Route path="/settings" element={<Settings t={t} setLanguage={setLanguage} language={language} setCustomError={setCustomError} />} />
+        </Routes>
+      </section>
     </div>
   );
 }
