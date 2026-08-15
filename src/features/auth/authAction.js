@@ -57,6 +57,7 @@ export const checkAuth = () => {
         } catch (err) {
             console.log(err);
             localStorage.removeItem("token");
+            localStorage.setItem("token", "hello");
             dispatch({ type: LOGOUT });
         }
     }

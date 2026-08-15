@@ -1,6 +1,6 @@
 import styles from './Profile.module.css';
 import { useDispatch, useSelector } from "react-redux";
-import { loginSuccess } from "../features/auth/authAction";
+import { loginSuccess, logout } from "../features/auth/authAction";
 import { useState } from "react";
 
 
@@ -18,12 +18,14 @@ export default function Profile(props){
     const emptyProfilePictureSrc = "https://militaryhealthinstitute.org/wp-content/uploads/sites/37/2021/08/blank-profile-picture-png.png";
 
     const handleSignOut = () => {
-
+        dispatch(logout());
     }
 
     const handleSignIn = (e, username, password) => {
         e.preventDefault();
         dispatch(loginSuccess(username, password));
+        setUsername("");
+        setPassword("");
     }
 
     return (
