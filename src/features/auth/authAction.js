@@ -30,3 +30,34 @@ export const logout = () => {
         dispatch({ type: LOGOUT });
     };
 };
+
+export const checkAuth = () => {
+    return async (dispatch) => {
+        const token = localStorage.getItem("token");
+
+        if(!token) {
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:3000/api/me", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!response.ok) {
+                throw new Error("Token invalid");
+            }
+
+            const data = await response.json();
+
+            dispatch({
+                type: LOGIN_SUCCESS,
+                payload: { token, username: data.username },
+            });
+        } catch (err) {
+            console.log(err);
+            localStorage.removeItem("token");
+            dispatch({ type: LOGOUT });
+        }
+    }
+}

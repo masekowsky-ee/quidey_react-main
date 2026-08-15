@@ -12,8 +12,19 @@ import WorkingPage from './components/WorkingPage.jsx';
 import CustomError from './components/CustomError.jsx';
 import History from './components/History.jsx';
 import Calendar from  './components/Calendar.jsx';
+import { useDispatch, useSelector } from "react-redux";
+import { checkAuth } from "./features/auth/authAction";
 
 function App(){
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
+
+  const token = useSelector((state) => state.auth.token);
+  const signedIn = Boolean(token);
+
   const { t, language, setLanguage } = useTranslation();
 
   const [groups, setGroups] = useState(() => {
@@ -36,24 +47,6 @@ function App(){
 
   const [showMenu, setShowMenu] = useState(false);
 
-  const [signedIn, setSignedIn] = useState(() => {
-    try {
-      const stored = localStorage.getItem("signedIn");
-      return stored !== null ? JSON.parse(stored) : false;
-    } catch {
-      return false;
-    }
-  });
-
-  const [user, setUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem("user");
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  });
-
   const [workedSessions, setWorkedSessions] = useState(() => {
       try {
           const stored = localStorage.getItem("workedSessions");
@@ -64,8 +57,6 @@ function App(){
           return [];
       }
   });
-
-  const [users, setUsers] = useState(mockData.users);
 
   const [sessionParams, setSessionParams] = useState({ group: null, time: null, breaks: null });
 
@@ -80,12 +71,6 @@ function App(){
     localStorage.setItem("groups", JSON.stringify(groups));
   },[groups]);
   useEffect(()=>{
-    localStorage.setItem("signedIn", JSON.stringify(signedIn));
-  },[signedIn]);
-  useEffect(()=>{
-    localStorage.setItem("user", JSON.stringify(user));
-  },[user]);
-  useEffect(()=>{
     localStorage.setItem("workedSessions", JSON.stringify(workedSessions));
   },[workedSessions]);
 
@@ -98,8 +83,8 @@ function App(){
 
   return (
     <div>
-      {}
-      <section>
+      {!signedIn && <Profile t={t} />}
+      {signedIn && <section>
         <div className={styles.header}>
           <Header t={t} showMenu={() => setShowMenu(true)} />
         </div>
@@ -110,10 +95,11 @@ function App(){
           <Route path="/working" element={<WorkingPage setWorkedSessions={setWorkedSessions} sessionParams={sessionParams} t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} setSessionParams={setSessionParams} setCustomError={setCustomError} />} />
           <Route path="/calendar" element={<Calendar t={t} setCustomError={setCustomError} tasks={tasks} />} />
           <Route path="/history" element={<History workedSessions={workedSessions} t={t} tasks={tasks} groups={groups} setCustomError={setCustomError} />} />
-          <Route path="/profile" element={<Profile t={t} users={users} setUsers={setUsers} signedIn={signedIn} setSignedIn={setSignedIn} user={user} setUser={setUser} setCustomError={setCustomError} />} />
+          <Route path="/profile" element={<Profile t={t} />} />
           <Route path="/settings" element={<Settings t={t} setLanguage={setLanguage} language={language} setCustomError={setCustomError} />} />
         </Routes>
       </section>
+      }
     </div>
   );
 }
