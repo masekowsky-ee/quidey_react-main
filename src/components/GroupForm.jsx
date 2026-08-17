@@ -2,7 +2,6 @@ import styles from './GroupForm.module.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { addGroup } from '../features/tasks/taskAction';
 
-
 export default function GroupForm(props){
     const {t, setCustomError, showForms} = props;
 
@@ -15,8 +14,7 @@ export default function GroupForm(props){
         const name = e.target[0].value;
         const description = e.target[1].value;
         if(name && name !== 'all' && !groups.some(g => g.name === name)){
-            const group = {name, description};
-            dispatch(addGroup(group));
+            dispatch(addGroup(name, description));
             e.target[0].value = '';
             e.target[1].value = '';
         } else{

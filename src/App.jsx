@@ -14,6 +14,7 @@ import History from './components/History.jsx';
 import Calendar from  './components/Calendar.jsx';
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "./features/auth/authAction";
+import { fetchTaskState } from "./features/tasks/taskAction.js"
 
 function App(){
   const dispatch = useDispatch();
@@ -24,6 +25,12 @@ function App(){
 
   const token = useSelector((state) => state.auth.token);
   const signedIn = Boolean(token);
+
+  useEffect(() => {
+    if (signedIn) {
+      dispatch(fetchTaskState());
+    }
+  }, [signedIn, dispatch]);
 
   const { t, language, setLanguage } = useTranslation();
 

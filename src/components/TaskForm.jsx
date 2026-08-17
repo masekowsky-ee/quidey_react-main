@@ -7,7 +7,7 @@ export default function TaskForm(props){
 
     const dispatch = useDispatch();
 
-    const taskIndexCounter = useSelector(state => state.task.taskIndexCounter);
+    const groupToDisplay = useSelector((state)=>state.task.groupToDisplay)
 
     function handleSubmit(e){
         e.preventDefault();
@@ -16,27 +16,17 @@ export default function TaskForm(props){
         const description = e.target[2].value;
         const prio = e.target[3].value;
         if(name && due){
-            const index = taskIndexCounter;
 
-            const task = {
-                index,
-                name,
-                due,
-                description,
-                groups: ['all'],
-                prio,
-                notes: [],
-            }
+            dispatch(addTask(name, due, description, prio, ));
 
-            dispatch(addTask(task));
-
-            console.log('submitted: '+ index + ' ' + name + ' ' + due + ' ' + description + ' ' + prio);
+            console.log('submitted task');
             e.target[0].value = '';
             e.target[1].value = '';
             e.target[2].value = '';
         } else {
             setCustomError({bool: true, message: t('dateNameTaskError')})
         }
+        console.log(groupToDisplay)
     }
 
     return (

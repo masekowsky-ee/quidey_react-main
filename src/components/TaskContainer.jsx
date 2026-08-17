@@ -12,7 +12,7 @@ export default function TaskContainer(props){
 
     const tasks = useSelector(state => state.task.tasks);
     const groups = useSelector(state => state.task.groups);
-    const groupToDisplayName = useSelector(state => state.task.groupToDisplayName);
+    const groupToDisplay = useSelector(state => state.task.groupToDisplay);
 
     const [assignGroups, setAssignGroups] = useState(false);
     const [taskToAssign, setTaskToAssign] = useState(null);
@@ -20,27 +20,27 @@ export default function TaskContainer(props){
     const [showStartSettings, setShowStartSettings] = useState(false);
     const [editGroupDescription, setEditGroupDescription] = useState(false);
 
-    const handleTaskDelete = (taskIndex) => {
-        dispatch(deleteTask(taskIndex));
+    const handleTaskDelete = (taskId) => {
+        dispatch(deleteTask(taskId));
     }
 
     const [taskPropToEdit, setTaskPropToEdit] = useState(null);
 
-    const changePropHandler = (event, taskProp, taskIndex) => {
-        setTaskToEdit(tasks.find(t => t.index === taskIndex));
+    const changePropHandler = (event, taskProp, taskId) => {
+        setTaskToEdit(tasks.find(t => t.id === taskId));
         setTaskPropToEdit(taskProp);
     }
 
     const setTaskPropHandler = (input, propToEdit) => {
         switch(propToEdit){
             case 'name': 
-                dispatch(updateTaskTitle(taskToEdit.index, input));
+                dispatch(updateTaskTitle(taskToEdit.id, input));
                 break;
             case 'description':
-                dispatch(updateTaskDescription(taskToEdit.index, input));
+                dispatch(updateTaskDescription(taskToEdit.id, input));
                 break;
             case 'due':
-                dispatch(updateTaskDue(taskToEdit.index, input));
+                dispatch(updateTaskDue(taskToEdit.id, input));
                 break;
         }
         setTaskToEdit(null);
@@ -52,8 +52,8 @@ export default function TaskContainer(props){
         setTaskToAssign(task);
     }
 
-    const handleAddToGroup = (groupName) => {
-        dispatch(addGroupTasks(groupName, taskToAssign.index))
+    const handleAddToGroup = (groupId) => {
+        dispatch(addGroupTasks(groupId, taskToAssign.id))
         setAssignGroups(false);
         setTaskToAssign(null);
     }
@@ -63,8 +63,8 @@ export default function TaskContainer(props){
         setEditGroupDescription(false);
     }
 
-    const handleTaskDone = (taskIndex) => {
-        dispatch(updateTaskCompleted(taskIndex));
+    const handleTaskDone = (taskId) => {
+        dispatch(updateTaskCompleted(taskId));
     }
 
     function toDateOnly(date) {
@@ -77,16 +77,16 @@ export default function TaskContainer(props){
         return today > due; 
     }
 
-    const handlePrioChange = (taskIndex, e) => {
-        dispatch(updateTaskPriority(taskIndex, e.target.value))
+    const handlePrioChange = (taskId, e) => {
+        dispatch(updateTaskPriority(taskId, e.target.value))
     }
 
     const handleShowDone = () => {
         setShowDone(!showDone);
     }
 
-    const handleTaskRemove = (taskIndex) => {
-        dispatch(deleteGroupTasks(taskIndex, groupToDisplayName))
+    const handleTaskRemove = (taskId) => {
+        dispatch(deleteGroupTasks(taskId, groupToDisplay.group.id))
     }
 
     return (
@@ -94,20 +94,20 @@ export default function TaskContainer(props){
             {assignGroups && (
                 <div style={{position:'absolute', zIndex:"1000", width: '100%', height: 'auto', backgroundColor:'black', display: 'flex', flexDirection: 'column'}}>
                     {groups.map(group => group.name !== 'all' ? (
-                        <button key={group.name} style={{margin: '10px'}} onClick={() => handleAddToGroup(group.name)}>
+                        <button key={group.name} style={{margin: '10px'}} onClick={() => handleAddToGroup(group.id)}>
                             {group.name}
                         </button>
                     ) : null)}
                 </div>
             )}
             <h2 className={styles.h2}>{t('taskContainer')}</h2>
-            {groups.find(g => g.name === groupToDisplayName || g.name === 'all')?.description &&
+            {!groupToDisplay ? null : groupToDisplay.group.name?.description &&
             <div className={styles.groupDescriptionDiv}>
                 {editGroupDescription ?
-                    <input type="text" id="groupDescriptionInput" defaultValue={groups.find(g => g.name === groupToDisplayName).description} onBlur={(e) => {setGroupDescriptionHandler(e.target.value);}} />
+                    <input type="text" id="groupDescriptionInput" defaultValue={groups.find(g => g.id === groupToDisplay.group.id).description} onBlur={(e) => {setGroupDescriptionHandler(e.target.value);}} />
                     :
                     <p onClick={() => {setEditGroupDescription(true); document.getElementById('groupDescriptionInput')?.focus();}}>
-                        {groups.find(g => g.name === groupToDisplayName || g.name === 'all').description}
+                        {groups.find(g => g.id === groupToDisplay.group.id).description}
                     </p>
                 }
             </div>
@@ -115,41 +115,39 @@ export default function TaskContainer(props){
             <div className={styles.outerUlDiv}>
                 <div className={styles.ulDiv}>
                     <ul className={styles.ul}>
-                    {tasks.filter(task => task.groups.includes(groupToDisplayName)).length > 0 &&
-                        tasks
-                            .filter(task => task.groups.includes(groupToDisplayName))
+                    {groupToDisplay.tasks && groupToDisplay.tasks
                             .map((task) => {
                                 if(!task.done){
-                                    return (<li key={task.index} className={styles.taskLi}>
+                                    return (<li key={`${task.id}li`} className={styles.taskLi}>
                                         <div className={styles.taskHeader}>
                                             {
-                                            taskToEdit && taskPropToEdit === 'name' && taskToEdit.index === task.index
+                                            taskToEdit && taskPropToEdit === 'name' && taskToEdit.id === task.id
                                                 ? <input autoFocus type="text" defaultValue={task.name} onBlur={(e) => {setTaskPropHandler(e.target.value, 'name');}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'name')}}}/>
-                                                : <p onClick={(e) => changePropHandler(e, 'name', task.index)}>{task.name}</p>
+                                                : <p onClick={(e) => changePropHandler(e, 'name', task.id)}>{task.name}</p>
                                             }
-                                            <input type="checkbox" onChange={()=>{handleTaskDone(task.index)}} />
+                                            <input type="checkbox" onChange={()=>{handleTaskDone(task.id)}} />
                                         </div>
-                                        { taskToEdit && taskPropToEdit === 'due' && taskToEdit.index === task.index
+                                        { taskToEdit && taskPropToEdit === 'due' && taskToEdit.id === task.id
                                             ? <input autoFocus type="date" defaultValue={task.due ?? null} onBlur={(e) => {setTaskPropHandler(e.target.value, 'due');}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'due')}}}/>
-                                            : <p style={compareDate(task.due) ? { color: 'red' } : {}} onClick={(e) => changePropHandler(e, 'due', task.index)}>{task.due}</p>
+                                            : <p style={compareDate(task.due) ? { color: 'red' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>{task.due}</p>
                                         }
                                         <div>
                                             <label>{t('prioritise')}:</label>
-                                            <input type="number" name="prio" placeholder={task.prio} min="0" max="100" onKeyDown={(e) => {if(e.key === 'Enter'){handlePrioChange(task.index, e)}}} onBlur={(e)=>handlePrioChange(task.index, e)} />
+                                            <input type="number" name="prio" placeholder={task.prio} min="0" max="100" onKeyDown={(e) => {if(e.key === 'Enter'){handlePrioChange(task.id, e)}}} onBlur={(e)=>handlePrioChange(task.id, e)} />
                                         </div>
                                         {
-                                            taskToEdit && taskPropToEdit === 'description' && taskToEdit.index === task.index
+                                            taskToEdit && taskPropToEdit === 'description' && taskToEdit.id === task.id
                                             ? <input autoFocus type="text" defaultValue={task.description || null} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'description')}}} onBlur={(e) => {setTaskPropHandler(e.target.value, 'description');}} />
-                                            : <p onClick={(e) => changePropHandler(e, 'description', task.index)}>{task.description || t('description')}</p>
+                                            : <p onClick={(e) => changePropHandler(e, 'description', task.id)}>{task.description || t('description')}</p>
                                         }
                                         <div className={styles.btnDiv}>
                                             <button className={styles.btn} onClick={() => handleAssignGroup(task)}>{t('assignGroup')}</button>
-                                            {groupToDisplayName !== 'all' &&
-                                            <button className={styles.btn} onClick={() => handleTaskRemove(task.index)}>
+                                            {groupToDisplay.group.name &&
+                                            <button key={`${task.id}btn`} className={styles.btn} onClick={() => handleTaskRemove(task.id)}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>
                                             </button>
                                             }
-                                            <button className={styles.btn} onClick={() => handleTaskDelete(task.index)}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
+                                            <button className={styles.btn} onClick={() => handleTaskDelete(task.id)}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
                                         </div>
                                         {working && (<div className={styles.dragDiv}><svg className={styles.dragSvg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-560q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-560q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z"/></svg></div>) }
                                     </li>)
@@ -161,18 +159,17 @@ export default function TaskContainer(props){
                 {showDone &&
                 <div className={styles.ulDiv}>
                     <ul className={styles.ul}>
-                    {tasks
-                        .filter(task => task.groups.includes(groupToDisplayName))
+                    {groupToDisplay.tasks[0]
                         .map((task) => {
                             if(task.done){
-                                return (<li key={task.index} className={`${styles.taskLi} ${styles.doneLi}`}>
+                                return (<li key={task.id} className={`${styles.taskLi} ${styles.doneLi}`}>
                                     <div className={styles.taskHeader}>
                                         <div className={styles.doneHeadDiv}>
-                                            <p style={{textDecoration: 'line-through'}} onClick={(e) => changePropHandler(e, task.index, 'name')}>{task['name']}</p>
-                                            <input type="checkbox" checked onChange={()=>{handleTaskDone(task.index)}} />
+                                            <p style={{textDecoration: 'line-through'}} onClick={(e) => changePropHandler(e, task.id, 'name')}>{task['name']}</p>
+                                            <input type="checkbox" checked onChange={()=>{handleTaskDone(task.id)}} />
                                         </div>
                                     </div>
-                                    <button className={styles.btn + ' ' + styles.delete} onClick={() => handleTaskDelete(task.index)}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
+                                    <button className={styles.btn + ' ' + styles.delete} onClick={() => handleTaskDelete(task.id)}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
                                 </li>)
                             }
                         })
