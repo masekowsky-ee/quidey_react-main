@@ -1,4 +1,4 @@
-import { ADD_TASK, DELETE_TASK, UPDATE_TASK_TITLE, UPDATE_TASK_DESCRIPTION, UPDATE_TASK_DUE, UPDATE_TASK_COMPLETED, UPDATE_TASK_PRIORITY, ADD_GROUP, DELETE_GROUP, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP_DESCRIPTION, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS } from './taskActionTypes';
 
 const initialState = {
     tasks: [],
@@ -18,7 +18,8 @@ const taskReducer = (state = initialState, action) => {
         case ADD_TASK: 
             return {
                 ...state,
-                tasks: [...state.tasks, ({id: action.payload.id, name: action.payload.name, due: action.payload.due, description: action.payload.description, prio: action.payload.prio, })],
+                tasks: [...state.tasks, action.payload],
+                groupToDisplay: {...state.groupToDisplay, tasks: [...state.groupToDisplay.tasks, action.payload]}
             };
         case DELETE_TASK: 
             return {
@@ -26,30 +27,29 @@ const taskReducer = (state = initialState, action) => {
                 tasks: state.tasks.filter(task => task.id !== action.payload),
                 groupToDisplay: {...state.groupToDisplay, tasks: state.groupToDisplay.tasks.filter(task => task.id !== action.payload)}
             };
-        case UPDATE_TASK_TITLE:
+        case UPDATE_TASK_PROPS:
             return {
                 ...state,
-                tasks: state.tasks.map(task => task.id === action.payload.taskId ? {...task, name: action.payload.value} : task)
-            }
-        case UPDATE_TASK_DESCRIPTION:
-            return {
-                ...state,
-                tasks: state.tasks.map(task => task.id === action.payload.taskId ? {...task, description: action.payload.value} : task)
-            }
-        case UPDATE_TASK_DUE:
-            return {
-                ...state,
-                tasks: state.tasks.map(task => task.id === action.payload.taskId ? {...task, due: action.payload.value} : task)
-            }
-        case UPDATE_TASK_COMPLETED:
-            return {
-                ...state,
-                tasks: state.tasks.map(task => task.id === action.payload ? {...task, done: !task.done} : task)
-            }
-        case UPDATE_TASK_PRIORITY:
-            return {
-                ...state,
-                tasks: state.tasks.map(task => task.id === action.payload.taskId ? {...task, prio: action.payload.value} : task)
+                tasks: state.tasks.map(
+                    task => task.id === action.payload.id ? 
+                    {...task, 
+                        name: action.payload.name ?? task.name, 
+                        due: action.payload.due ?? task.due, 
+                        description: action.payload.description ?? task.description, 
+                        prio: action.payload.prio ?? task.prio, 
+                        done: action.payload.done ?? task.done
+                    } : task),
+                groupToDisplay: {
+                    ...state.groupToDisplay, 
+                    tasks: state.groupToDisplay.tasks.map(task =>
+                        task.id === action.payload.id ? {...task, 
+                            name: action.payload.name ?? task.name, 
+                            due: action.payload.due ?? task.due, 
+                            description: action.payload.description ?? task.description, 
+                            prio: action.payload.prio ?? task.prio, 
+                            done: action.payload.done ?? task.done
+                        } : task
+                )}
             }
         case ADD_GROUP:
             return {
@@ -59,16 +59,13 @@ const taskReducer = (state = initialState, action) => {
         case DELETE_GROUP:
             return {
                 ...state,
-                groups: state.groups.filter(group => group.name !== action.payload),
-                tasks: state.tasks.map(task => ({
-                    ...task,
-                    groups: task.groups.filter(groupName => groupName !== action.payload)
-                }))
+                groups: state.groups.filter(group => group.id !== action.payload),
+                groupToDisplay: ({...state.groupToDisplay.group.id === action.payload ? {group: {}, tasks: state.tasks} : state.groupToDisplay})
             }
         case EDIT_DISPLAYGROUP:
             return {
                 ...state,
-                groupToDisplay: action.payload,
+                groupToDisplay: {group: action.payload.group, tasks: action.payload.tasks},
             }
 
         case DELETE_GROUP_TASKS:
@@ -76,12 +73,13 @@ const taskReducer = (state = initialState, action) => {
                 ...state,
                 groupToDisplay: {...state.groupToDisplay, tasks: state.groupToDisplay.tasks.filter(task => task.id !== action.payload)}
             };
-        case EDIT_GROUP_DESCRIPTION:
+        case EDIT_GROUP:
             return {
                 ...state,
-                groups: state.groups.map(group => group.name === action.payload.groupName ?
-                    {...group, description: action.payload.value}
+                groups: state.groups.map(group => group.id === action.payload.id ?
+                    action.payload
                     : group),
+                groupToDisplay: {group: action.payload, tasks: state.groupToDisplay.tasks}
             };
         case CREATE_NOTE:
             return {

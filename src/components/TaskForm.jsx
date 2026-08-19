@@ -15,14 +15,16 @@ export default function TaskForm(props){
         const due = e.target[1].value;
         const description = e.target[2].value;
         const prio = e.target[3].value;
+        const activeGroupId = groupToDisplay.group.id || null;
         if(name && due){
 
-            dispatch(addTask(name, due, description, prio, ));
+            dispatch(addTask(name, due, description, prio, activeGroupId));
 
             console.log('submitted task');
             e.target[0].value = '';
             e.target[1].value = '';
             e.target[2].value = '';
+            e.target[3].value = '';
         } else {
             setCustomError({bool: true, message: t('dateNameTaskError')})
         }
