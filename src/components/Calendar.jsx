@@ -1,9 +1,12 @@
 import styles from './Calendar.module.css';
 import { useState } from 'react';
+import { useSelector } from "react-redux"
 
 export default function Calendar(props){
 
-    const {t, tasks} = props;
+    const {t} = props;
+
+    const tasks = useSelector(state => state.task.tasks)
 
     const [monthsFromNow, setMonthsFromNow] = useState(0);
 
