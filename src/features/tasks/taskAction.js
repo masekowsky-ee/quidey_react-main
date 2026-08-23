@@ -130,7 +130,6 @@ export const deleteGroupTasks = (taskId, groupId) => {
 
 export const editGroup = (groupId, groupObj, group) => {
     const defaultObj = group;
-    const updatedObj = groupObj;
 
     const fetchObj = {...defaultObj, ...groupObj};
 

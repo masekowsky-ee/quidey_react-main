@@ -1,8 +1,13 @@
-import { LOGIN_SUCCESS, LOGOUT } from "./authActionTypes";
+import { LOGIN_SUCCESS, LOGOUT, SET_USER } from "./authActionTypes";
 
 const initialState = {
     token: localStorage.getItem('token') || null,
-    username: null,
+    user: {
+        username: null,
+        display_name: null,
+        email: null,
+        birth_date: null,
+    }
 };
 
 const authReducer = (state = initialState, action) => {
@@ -11,14 +16,29 @@ const authReducer = (state = initialState, action) => {
             return {
                 ...state,
                 token: action.payload.token,
-                username: action.payload.username,
+                user: {
+                    ...state.user,
+                    username: action.payload.username,
+                },
             };
         case LOGOUT:
             return {
                 ...state,
                 token: null,
-                username: null,
+                user: null,
             };
+        case SET_USER:
+            return {
+                ...state,
+                user: {
+                    ...state.user,
+                    username: action.payload[0].username,
+                    display_name: action.payload[0].display_name,
+                    email: action.payload[0].email,
+                    birth_date: action.payload[0].birth_date,
+                },
+            };
+        
         default:
             return state;
     }

@@ -10,6 +10,8 @@ export default function Profile(props){
     const token = useSelector((state) => state.auth.token);
     const signedIn = Boolean(token);
 
+    const user = useSelector(state => state.auth.user)
+
     const dispatch = useDispatch();
 
     const [username, setUsername] = useState("");
@@ -28,12 +30,17 @@ export default function Profile(props){
         setPassword("");
     }
 
+    console.log(user)
+
     return (
         <div className={styles.div}>
             {signedIn ? 
                 <div id="profileDiv">
-                    <img /* src={user.profilePicture ? user.profilePicture : emptyProfilePictureSrc} className={styles.profilePicture} */ />
-                    <h2>{/*user.username*/}</h2>
+                    <img src={emptyProfilePictureSrc} className={styles.profilePicture}/>
+                    <h2>{user.display_name}</h2>
+                    <h4>{user.username}</h4>
+                    <p>{`${new Date(user.birth_date).getDate()}.${new Date(user.birth_date).getMonth()+1}.${new Date(user.birth_date).getFullYear()}`}</p>
+                    <p>{user.email}</p>
 
                     <button onClick={() => handleSignOut()}>{t('signOut')}</button>
                 </div> 

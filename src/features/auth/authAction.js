@@ -1,4 +1,5 @@
-import { LOGIN_SUCCESS, LOGOUT } from "./authActionTypes";
+import { LOGIN_SUCCESS, LOGOUT, SET_USER } from "./authActionTypes";
+import { apiFetch } from '../helperFunction';
 
 export const loginSuccess = (username, password) => {
     return async (dispatch) => {
@@ -60,5 +61,19 @@ export const checkAuth = () => {
             localStorage.setItem("token", "hello");
             dispatch({ type: LOGOUT });
         }
+    }
+}
+
+export const setUser = () => {
+    return async (dispatch) => {
+
+        const data = await apiFetch(`http://localhost:3000/api/users`, {method: "GET"});
+
+        dispatch({
+            type: SET_USER,
+            payload: data,
+        });
+
+        console.log("User data fetched and dispatched:", data);
     }
 }
