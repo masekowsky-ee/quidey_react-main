@@ -56,3 +56,31 @@
     border: 2px solid rgb(161, 161, 161);
     margin: 1rem;
 }
+
+.btnDiv{
+    display: flex;
+    flex-direction: row;
+    align-self: center;
+    justify-content: center;
+    width: 75%;
+}
+
+.signBtn{
+    all: unset;
+    width: 50%;
+    background-color: rgb(161, 161, 161);
+    font-size: 0.6rem;
+    color: rgb(49, 49, 49);
+    border-radius: 5px;
+
+}
+
+.signIn + .signIn {
+    border-top-left-radius: 0;
+}
+
+.signIn{
+
+}
+
+.signUp{}

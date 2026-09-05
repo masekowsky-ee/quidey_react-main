@@ -92,10 +92,10 @@ function App(){
   return (
     <div>
       {!signedIn && <Profile t={t} />}
-      {signedIn && <section>
         <div className={styles.header}>
           <Header t={t} showMenu={() => setShowMenu(true)} />
         </div>
+        {signedIn && <section>
         <Menu t={t} isOpen={showMenu} onClose={() => setShowMenu(false)} />
         <CustomError t={t} customError={customError} setCustomError={setCustomError} />
         <Routes>
