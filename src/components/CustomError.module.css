@@ -26,17 +26,15 @@
 
 .okBtn{
     all: unset;
-    background-color: rgb(25, 25, 25);
+    background-color: rgb(10, 10, 10);
     height: 3rem;
     width: 6rem;
     border-radius: 1rem;
     border: 3px solid red;
-    outline: 2px solid red;
-    outline-offset: 2px;
 }
 
 .h2{
     font-weight: 800;
-    color: red;
+    color: rgb(10,10,10);
     margin-bottom: 2rem;
 }
