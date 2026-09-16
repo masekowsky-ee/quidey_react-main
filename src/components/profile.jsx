@@ -1,6 +1,6 @@
 import styles from './Profile.module.css';
 import { useDispatch, useSelector } from "react-redux";
-import { loginSuccess, logout } from "../features/auth/authAction";
+import { loginSuccess, logout, register } from "../features/auth/authAction";
 import { useState } from "react";
 import CustomError from './CustomError.jsx'
 
@@ -60,7 +60,7 @@ export default function Profile(props){
         if (!email || !birthDate || !displayName || !username || !password || !passwordValidate) {
             setCustomError({bool: true, message: `${t('missingFieldsError')}`});
         }else if (password || passwordValidate === password && validateAge(birthDate)) {
-            dispatch(loginSuccess(username, password));
+            dispatch(register( email, birthDate, displayName, username, password));
             setUsername("");
             setPassword("");
             setPasswordValidate("");
