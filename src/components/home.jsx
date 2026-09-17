@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import TaskContainer from './TaskContainer.jsx'
 import TaskForm from './TaskForm.jsx'
 import styles from './Home.module.css';
@@ -12,8 +12,77 @@ export default function Home(props){
     const {t, tasks, groups, setGroups, setSessionParams, setCustomError, showDone, setShowDone} = props;
 
     const [groupToDisplayName, setGroupToDisplayName] = useState('all');
-
     const [showForms, setShowForms] = useState(true);
+
+    // --- Gehobener State für Drag & Drop + aktive Task/Worked Tasks ---
+    const starterTask = tasks[0] || null;
+    const [activeTask, setActiveTask] = useState(starterTask);
+    const [workedTasks, setWorkedTasks] = useState(starterTask ? [{name: starterTask.name, index: starterTask.index, time: 0}] : [null]);
+
+    const [draggedTask, setDraggedTask] = useState(null);
+    const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+    const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+    const dropZoneRef = useRef(null);
+    const draggedTaskRef = useRef(null);
+    const dragPositionRef = useRef({ x: 0, y: 0 });
+
+    const handlePointerDown = useCallback((e, task) => {
+        e.preventDefault();
+        const liElement = e.currentTarget.closest("li");
+        const rect = liElement.getBoundingClientRect();
+
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+
+        draggedTaskRef.current = task;
+        dragPositionRef.current = { x: e.clientX, y: e.clientY };
+
+        setDraggedTask(task);
+        setDragOffset({ x: offsetX, y: offsetY });
+        setDragPosition({ x: e.clientX, y: e.clientY });
+    }, []);
+
+    const handlePointerMove = useCallback((e) => {
+        dragPositionRef.current = { x: e.clientX, y: e.clientY };
+        setDragPosition({ x: e.clientX, y: e.clientY });
+    }, []);
+
+    const handlePointerUp = useCallback(() => {
+        const currentTask = draggedTaskRef.current;
+        const currentPos = dragPositionRef.current;
+
+        if (dropZoneRef.current && currentTask) {
+            const dropRect = dropZoneRef.current.getBoundingClientRect();
+
+            const isOverDropZone =
+                currentPos.x >= dropRect.left &&
+                currentPos.x <= dropRect.right &&
+                currentPos.y >= dropRect.top &&
+                currentPos.y <= dropRect.bottom;
+
+            if (isOverDropZone) {
+                setActiveTask(currentTask);
+                setWorkedTasks(prev => prev.find(t => t?.index === currentTask.index) ? prev : [...prev, {name: currentTask.name, time: 0, index: currentTask.index}]);
+            }
+        }
+
+        draggedTaskRef.current = null;
+        setDraggedTask(null);
+    }, []);
+
+    useEffect(() => {
+        if (!draggedTask) return;
+
+        window.addEventListener("pointermove", handlePointerMove);
+        window.addEventListener("pointerup", handlePointerUp);
+
+        return () => {
+            window.removeEventListener("pointermove", handlePointerMove);
+            window.removeEventListener("pointerup", handlePointerUp);
+        };
+    }, [draggedTask, handlePointerMove, handlePointerUp]);
+    // --- Ende gehobener State ---
 
     console.log(props.tasks);
     return (
@@ -24,10 +93,35 @@ export default function Home(props){
                 <GroupForm showForms={showForms} t={props.t} setGroups={props.setGroups} groups={props.groups} setCustomError={setCustomError} />
                 <button className={`${styles.sizeBtn} ${showForms ? '' : styles.collapsed}`} onClick={()=>{setShowForms(!showForms)}}>{showForms ? <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-264 324-108q-11 11-28 11t-28-11q-11-11-11-28t11-28l155-155q23-23 57-23t57 23l155 155q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-264Zm0-432 156-156q11-11 28-11t28 11q11 11 11 28t-11 28L537-641q-23 23-57 23t-57-23L268-796q-11-11-11-28t11-28q11-11 28-11t28 11l156 156Z"/></svg> : <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m480-194 155-155q12-12 28-12t28 12q12 12 12 28.5T691-292L537-137q-23 23-57 23t-57-23L268-292q-12-12-11.5-28.5T269-349q12-12 28.5-12t28.5 12l154 155Zm0-572L326-612q-12 12-28 11.5T270-612q-12-12-12.5-28.5T269-669l154-154q23-23 57-23t57 23l154 154q12 12 11.5 28.5T690-612q-12 11-28 11.5T634-612L480-766Z"/></svg>}</button>
             </div>
-            <WorkingContainer t={t}></WorkingContainer>
+            <WorkingContainer
+                t={t}
+                dropZoneRef={dropZoneRef}
+                activeTask={activeTask}
+                setActiveTask={setActiveTask}
+                workedTasks={workedTasks}
+                setWorkedTasks={setWorkedTasks}
+                setTasks={props.setTasks}
+                setSessionParams={setSessionParams}
+            />
             <GroupBtnContainer t={t} groups={groups} setGroups={setGroups} setGroupToDisplayName={setGroupToDisplayName} groupToDisplayName={groupToDisplayName} />
             <div className={styles.tcc}>
-            <TaskContainer working={false} showDone={showDone} setShowDone={setShowDone} setSessionParams={setSessionParams} tasks={props.tasks} groupToDisplayName={groupToDisplayName} setTasks={props.setTasks} t={props.t} groups={props.groups} setGroups={props.setGroups} setCustomError={setCustomError} />
+            <TaskContainer
+                working={false}
+                showDone={showDone}
+                setShowDone={setShowDone}
+                setSessionParams={setSessionParams}
+                tasks={props.tasks}
+                groupToDisplayName={groupToDisplayName}
+                setTasks={props.setTasks}
+                t={props.t}
+                groups={props.groups}
+                setGroups={props.setGroups}
+                setCustomError={setCustomError}
+                handlePointerDown={handlePointerDown}
+                draggedTask={draggedTask}
+                dragPosition={dragPosition}
+                dragOffset={dragOffset}
+            />
             </div>
             <Outlet />
         </div>

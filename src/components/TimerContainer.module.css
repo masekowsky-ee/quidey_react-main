@@ -6,6 +6,10 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 1rem;
+    background-color: rgb(49,49,49);
+    padding: 1rem 0;
+    border-top: 1px solid rgb(151, 151, 151);
+    border-bottom: 1px solid rgb(151, 151, 151);
 }
 .timerH2{
     font-size: 2rem;

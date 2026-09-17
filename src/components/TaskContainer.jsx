@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import StartSettingsContainer from './StartSettingsContainer.jsx';
 import styles from './TaskContainer.module.css';
 import { useSelector, useDispatch } from 'react-redux';
 import {deleteTask, deleteGroupTasks, addGroupTasks, editGroup, updateTaskProps} from '../features/tasks/taskAction'
 
 
 export default function TaskContainer(props){
-    const { t, setSessionParams, setCustomError, showDone, setShowDone, working} = props;
+    const { t, showDone, setShowDone, working, handlePointerDown, draggedTask, dragPosition, dragOffset } = props;
 
     const dispatch = useDispatch();
 
@@ -17,7 +16,6 @@ export default function TaskContainer(props){
     const [assignGroups, setAssignGroups] = useState(false);
     const [taskToAssign, setTaskToAssign] = useState(null);
     const [taskToEdit, setTaskToEdit] = useState(null);
-    const [showStartSettings, setShowStartSettings] = useState(false);
     const [editGroupDescription, setEditGroupDescription] = useState(false);
 
     const handleTaskDelete = (taskId) => {
@@ -113,10 +111,23 @@ export default function TaskContainer(props){
             <div className={styles.outerUlDiv}>
                 <div className={styles.ulDiv}>
                     <ul className={styles.ul}>
+                        <h3 className={styles.ulH3}>To Do</h3>
                     {groupToDisplay.tasks.find(task => task.done !== true) && groupToDisplay.tasks
                             .map((task) => {
+                                // Check if this specific task is the one currently being dragged
+                                const isBeingDragged = draggedTask?.index === task.index;
+
+                                // Calculate the floating position only if this task is being dragged
+                                const dragStyle = isBeingDragged ? {
+                                    position: "fixed",
+                                    left: dragPosition.x - dragOffset.x,
+                                    top: dragPosition.y - dragOffset.y,
+                                    zIndex: 1000,
+                                    pointerEvents: "none", // prevents the floating element from blocking pointer events underneath
+                                } : undefined;
                                 if(!task.done){
-                                    return (<li key={`${task.id}li`} className={styles.taskLi}>
+                                    return (<li key={`${task.id}li`} className={styles.taskLi} style={dragStyle}>
+                                        <svg onPointerDown={(e) => handlePointerDown(e, task)} className={styles.dragSvg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor" style={{ touchAction: "none" }}><path d="M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-560q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-560q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z"/></svg>
                                         <div className={styles.taskHeader}>
                                             {
                                             taskToEdit && taskPropToEdit === 'name' && taskToEdit.id === task.id
@@ -157,6 +168,7 @@ export default function TaskContainer(props){
                 {showDone && groupToDisplay.tasks.find(task => task.done === true) &&
                 <div className={styles.ulDiv}>
                     <ul className={styles.ul}>
+                        <h3 className={styles.ulH3}>Done</h3>
                     {groupToDisplay.tasks
                         .map((task) => {
                             if(task.done){
@@ -177,7 +189,7 @@ export default function TaskContainer(props){
                 }
             </div>
             { groupToDisplay.tasks.find(task => task.done === true) &&
-                <div>
+                <div>{
                     !showDone ? 
                     <button className={styles.expandDone} onClick={handleShowDone}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-280h120q17 0 28.5 11.5T440-240q0 17-11.5 28.5T400-200H240q-17 0-28.5-11.5T200-240v-160q0-17 11.5-28.5T240-440q17 0 28.5 11.5T280-400v120Zm400-400H560q-17 0-28.5-11.5T520-720q0-17 11.5-28.5T560-760h160q17 0 28.5 11.5T760-720v160q0 17-11.5 28.5T720-520q-17 0-28.5-11.5T680-560v-120Z"/></svg>
@@ -185,12 +197,8 @@ export default function TaskContainer(props){
                     :
                     <button className={styles.collapseDone} onClick={handleShowDone}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M360-360H240q-17 0-28.5-11.5T200-400q0-17 11.5-28.5T240-440h160q17 0 28.5 11.5T440-400v160q0 17-11.5 28.5T400-200q-17 0-28.5-11.5T360-240v-120Zm240-240h120q17 0 28.5 11.5T760-560q0 17-11.5 28.5T720-520H560q-17 0-28.5-11.5T520-560v-160q0-17 11.5-28.5T560-760q17 0 28.5 11.5T600-720v120Z"/></svg>
-                    </button>
+                    </button>}
                 </div>}
-        {/*    
-            {!showStartSettings && <button className={styles.startBtn} onClick={() => setShowStartSettings(true)}>{t('start')}</button>}
-            {showStartSettings && <StartSettingsContainer setCustomError={setCustomError} setSessionParams={setSessionParams} setShowStartSettings={setShowStartSettings} t={t} groups={groups} />}
-        */}
         </div>
     );
 }

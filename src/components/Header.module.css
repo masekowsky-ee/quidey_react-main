@@ -39,3 +39,10 @@
     height: 2rem;
     width: 2rem;
 }
+
+.div{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+}

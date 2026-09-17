@@ -11,7 +11,7 @@
     position: relative;
     overflow-x: auto;
     overflow-y: auto;
-    
+    position: relative;
 }
 
 .taskLi{
@@ -20,6 +20,10 @@
     align-items: center;
     justify-content: space-between;
     gap: 1.5rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 0;
+    position: relative!important;
 }
 
 .doneLi{
@@ -57,7 +61,7 @@
 .ul{
     list-style-type: none;
     margin: 0;
-    padding: 1rem 0.75rem;
+    padding: 0rem 0.75rem 0.75rem 1rem;
     transition: all 0.2s ease;
     display: flex;
     align-items: stretch;
@@ -65,6 +69,7 @@
     justify-content: flex-start;
     width: fit-content;
     height: auto;
+    position: relative;
 }
 
 .startBtn{
@@ -175,4 +180,9 @@
     align-self: center;
     justify-self: center;
 
+}
+
+.ulH3{
+    width: 10rem;
+    align-self: center;
 }
