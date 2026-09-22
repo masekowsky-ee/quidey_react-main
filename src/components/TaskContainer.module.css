@@ -4,26 +4,25 @@
     border: 1px solid rgb(151, 151, 151);
     border-radius: 15px;
     width: fit-content;
-    max-width: 600px;
+    max-width: 1000px;
     height: 350px;
     justify-self: center;
     margin-bottom: 1rem;
     position: relative;
     overflow-x: auto;
     overflow-y: auto;
-    position: relative;
 }
 
 .taskLi{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 2fr 3fr 4fr 5fr 3fr;
+    gap: 0.5rem;
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
     padding: 0.5rem 0;
-    position: relative!important;
+    position: relative;
+    z-index: 10000!important;
+    pointer-events:auto;
 }
 
 .doneLi{
@@ -69,7 +68,6 @@
     justify-content: flex-start;
     width: fit-content;
     height: auto;
-    position: relative;
 }
 
 .startBtn{
@@ -109,7 +107,6 @@
     gap: 1rem;
     padding: 0 1rem;
     margin: 1rem 0;
-    position: relative;
 }
 .btnDiv{
     display: flex;
@@ -174,6 +171,7 @@
     height: 2rem;
     margin: 0;
     color: lightgray;
+    pointer-events: auto;
 }
 .dragDiv{
     height: 2rem;

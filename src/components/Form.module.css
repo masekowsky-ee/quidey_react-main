@@ -11,12 +11,15 @@
     justify-content: center;
     background-color: rgb(49, 49, 49);
     box-shadow: 0 2px 4px white;
+    position: relative;
+
 }
 
 .h2 {
     color: white;
     
 }
+
 
 .createBtn{
     all: unset;
@@ -36,7 +39,7 @@
 }
 
 .input{
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .hidden{
@@ -69,7 +72,27 @@
     justify-content: space-around;
 }
 
-.prioDiv{
+.rowDiv{
     display: flex;
     flex-direction: row;
+}
+
+.closeBtn{
+    all: unset;
+    position: absolute;
+    display: flex;
+    margin: 0.25rem;
+    top: 0;
+    right: 0;
+    aspect-ratio: 1 / 1;
+    width: 1.5rem;
+    height: 1.5rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.closeBtn:hover{
+    background-color: rgb(151, 151, 151);
+    color: rgb(49, 49, 49);
+    border-radius: 25%;
 }

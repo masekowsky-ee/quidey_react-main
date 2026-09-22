@@ -1,20 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import styles from './WorkingPage.module.css'
-import { useNavigate } from "react-router-dom";
 import TimerContainer from "./TimerContainer.jsx";
 import { useSelector, useDispatch } from "react-redux";
-import { saveSessionData } from "../features/session/sessionAction.js";
 import { createNote, deleteNote } from "../features/tasks/taskAction.js";
 
 export default function WorkingContainer (props) {
     const { t, setTasks, dropZoneRef, activeTask, setActiveTask, workedTasks, setWorkedTasks, setSessionParams } = props;
 
-        const navigate = useNavigate();
-
         const dispatch = useDispatch();
 
-        const tasks = useSelector(state => state.task.tasks);
-        const groups = useSelector(state => state.task.groups);
         const sessionParams = useSelector(state => state.session.sessionParams);
 
         const [editNote, setEditNote] = useState(false);
@@ -22,26 +16,18 @@ export default function WorkingContainer (props) {
         const [timer, setTimer] = useState({time: sessionParams.time, active: false});
         const [workedTime, setWorkedTime] = useState(0);
 
-        class sessionData {
+        /*class sessionData {
             constructor(group, tasksArray){
                 this.time = workedTime;
                 this.workedTasks = tasksArray;
                 this.group = group;
                 this.date = new Date();
             }
-        }
+        } */
 
         useEffect(()=>{
             setWorkedTasks(prev => prev.map(p => p?.index === activeTask?.index ? {...p, time: p?.time + 1} : p))
         }, [workedTime, activeTask, setWorkedTasks])
-
-        const handleSessionDone = () => {
-            const currentSession = new sessionData(sessionParams.group, workedTasks);
-            if (currentSession.time > 0){
-                dispatch(saveSessionData(currentSession));
-            }
-            navigate('/');
-        }
 
         const noteInputRef = useRef(null);
         useEffect(() => {
