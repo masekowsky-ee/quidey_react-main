@@ -51,6 +51,9 @@ export const updateTaskProps = (taskPropObject, task) => {
     const defaults = task;
     const params = {...defaults, ...taskPropObject};
     const {name, due, description, prio, done, id} = params;
+
+    console.log(`Updating task (id: ${id}) with properties:`, {name, due, description, prio, done});
+    
     return async (dispatch) => {
         const data = await apiFetch(`http://localhost:3000/api/tasks/${params.id}`, {
             method: "PUT", 

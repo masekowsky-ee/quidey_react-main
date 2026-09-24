@@ -7,14 +7,21 @@ import { Outlet } from 'react-router-dom';
 import WeekDaysContainer from './WeekDaysContainer.jsx';
 import GroupBtnContainer from './GroupBtnContainer.jsx';
 import WorkingContainer from './WorkingContainer.jsx';
+import TimerContainer from './TimerContainer.jsx';
+
+import {useSelector} from 'react-redux';
 
 export default function Home(props){
-    const {t, tasks, groups, setGroups, setSessionParams, setCustomError, showDone, setShowDone} = props;
+    const {t, tasks, groups, setGroups, setSessionParams, setCustomError, showDone, setShowDone, setPercentWidth, percentWidth, setActiveTimer} = props;
 
     const [groupToDisplayName, setGroupToDisplayName] = useState('all');
 
     const [createTask, setCreateTask] = useState(false);
     const [createGroup, setCreateGroup] = useState(false);
+
+    const sessionParams = useSelector(state => state.session.sessionParams)
+    const [timer, setTimer] = useState({time: sessionParams.time, active: false});
+    const [workedTime, setWorkedTime] = useState(0);
 
     // --- Gehobener State für Drag & Drop + aktive Task/Worked Tasks ---
     const starterTask = tasks[0] || null;
@@ -132,6 +139,7 @@ export default function Home(props){
                     dragOffset={dragOffset}
                 />
             </div>
+            <TimerContainer setActiveTimer={setActiveTimer} percentWidth={percentWidth} setPercentWidth={setPercentWidth} setWorkedTime={setWorkedTime} timer={timer} setTimer={setTimer} />
             <Outlet />
         </div>
     );

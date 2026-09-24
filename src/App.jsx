@@ -26,6 +26,8 @@ function App(){
   const token = useSelector((state) => state.auth.token);
   const signedIn = Boolean(token);
 
+  const [percentWidth, setPercentWidth] = useState(0);
+
   useEffect(() => {
     if (signedIn) {
       dispatch(fetchTaskState());
@@ -89,17 +91,19 @@ function App(){
       .catch((err) => console.error("Fehler:", err));
   }, []);
 
+  const [activeTimer, setActiveTimer] = useState(false);
+
   return (
     <div>
       {!signedIn && <Profile t={t} />}
         <div className={styles.header}>
-          <Header t={t} showMenu={() => setShowMenu(true)} />
+          <Header activeTimer={activeTimer} t={t} showMenu={() => setShowMenu(true)} percentWidth={percentWidth}/>
         </div>
         {signedIn && <section>
         <Menu t={t} isOpen={showMenu} onClose={() => setShowMenu(false)} />
         <CustomError t={t} customError={customError} setCustomError={setCustomError} />
         <Routes>
-          <Route path="/" element={<Home t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} setSessionParams={setSessionParams} setCustomError={setCustomError} />} />
+          <Route path="/" element={<Home setActiveTimer={setActiveTimer} setPercentWidth={setPercentWidth} percentWidth={percentWidth} t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} setSessionParams={setSessionParams} setCustomError={setCustomError} />} />
           <Route path="/working" element={<WorkingPage setWorkedSessions={setWorkedSessions} sessionParams={sessionParams} t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} setSessionParams={setSessionParams} setCustomError={setCustomError} />} />
           <Route path="/calendar" element={<Calendar t={t} setCustomError={setCustomError} tasks={tasks} />} />
           <Route path="/history" element={<History workedSessions={workedSessions} t={t} tasks={tasks} groups={groups} setCustomError={setCustomError} />} />

@@ -34,7 +34,7 @@ const taskReducer = (state = initialState, action) => {
                     task => task.id === action.payload.id ? 
                     {...task, 
                         name: action.payload.name ?? task.name, 
-                        due: action.payload.due ?? task.due, 
+                        due: action.payload.due ?? new Date(task.due.getTime() + 1), 
                         description: action.payload.description ?? task.description, 
                         prio: action.payload.prio ?? task.prio, 
                         done: action.payload.done ?? task.done
@@ -44,7 +44,7 @@ const taskReducer = (state = initialState, action) => {
                     tasks: state.groupToDisplay.tasks.map(task =>
                         task.id === action.payload.id ? {...task, 
                             name: action.payload.name ?? task.name, 
-                            due: action.payload.due ?? task.due, 
+                            due: action.payload.due ?? new Date(task.due.getTime() + 1), 
                             description: action.payload.description ?? task.description, 
                             prio: action.payload.prio ?? task.prio, 
                             done: action.payload.done ?? task.done

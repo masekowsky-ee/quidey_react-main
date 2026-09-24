@@ -70,13 +70,13 @@ export default function TaskContainer(props){
     }
 
     function toDateOnly(date) {
-        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
     }
 
     function compareDate(dueDate){
         const today = toDateOnly(new Date());
         const due = toDateOnly(new Date(dueDate));
-        return today > due; 
+        return today > due;
     }
 
     const handleShowDone = () => {
@@ -122,7 +122,7 @@ export default function TaskContainer(props){
                     {groupToDisplay.tasks.find(task => task.done !== true) && groupToDisplay.tasks
                             .map((task) => {
                                 // Check if this specific task is the one currently being dragged
-                                console.log(task.index)
+                                console.log(task.id)
                                 const isBeingDragged = draggedTask?.id === task.id;
 
                                 if(!task.done){
@@ -139,11 +139,11 @@ export default function TaskContainer(props){
                                                     ? <input autoFocus type="text" defaultValue={task.name} onBlur={(e) => {setTaskPropHandler(e.target.value, 'name', task);}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'name', task)}}}/>
                                                     : <p onClick={(e) => changePropHandler(e, 'name', task.id)}>{task.name}</p>
                                                 }
-                                                <input type="checkbox" onChange={()=>{setTaskPropHandler(!task.done, 'done', task)}} />
                                             </div>
+                                            <input type="checkbox" onChange={()=>{setTaskPropHandler(!task.done, 'done', task)}} />
                                             { taskToEdit && taskPropToEdit === 'due' && taskToEdit.id === task.id
                                                 ? <input autoFocus type="date" defaultValue={task.due ?? null} onBlur={(e) => {setTaskPropHandler(e.target.value, 'due', task);}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'due', task)}}}/>
-                                                : <p style={compareDate(task.due) ? { color: 'red' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>{`${new Date(task.due).getUTCDate()+1}.${new Date(task.due).getUTCMonth()+1}.${new Date(task.due).getUTCFullYear()}`}</p>
+                                                : <p style={compareDate(task.due) ? { color: 'red' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>{`${new Date(task.due).getUTCDate()}.${new Date(task.due).getUTCMonth()+1}.${new Date(task.due).getUTCFullYear()}`}</p>
                                             }
                                             <div>
                                                 <label>{t('prioritise')}:</label>
@@ -151,8 +151,8 @@ export default function TaskContainer(props){
                                             </div>
                                             {
                                                 taskToEdit && taskPropToEdit === 'description' && taskToEdit.id === task.id
-                                                ? <input autoFocus type="text" defaultValue={task.description || null} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'description', task)}}} onBlur={(e) => {setTaskPropHandler(e.target.value, 'description', task);}} />
-                                                : <p onClick={(e) => changePropHandler(e, 'description', task.id)}>{task.description || t('description')}</p>
+                                                ? <input style={{width: '100%', marginLeft: '0.5rem',}} autoFocus type="text" defaultValue={task.description || null} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'description', task)}}} onBlur={(e) => {setTaskPropHandler(e.target.value, 'description', task);}} />
+                                                : <p style={{textAlign: 'left', marginLeft: '0.5rem',}} onClick={(e) => changePropHandler(e, 'description', task.id)}>{task.description || t('description')}</p>
                                             }
                                             <div className={styles.btnDiv}>
                                                 <button className={styles.btn} onClick={() => handleAssignGroup(task)}>{t('assignGroup')}</button>

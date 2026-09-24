@@ -13,7 +13,7 @@ export default function WorkingContainer (props) {
 
         const [editNote, setEditNote] = useState(false);
 
-        const [timer, setTimer] = useState({time: sessionParams.time, active: false});
+        //const [timer, setTimer] = useState({time: sessionParams.time, active: false});
         const [workedTime, setWorkedTime] = useState(0);
 
         /*class sessionData {
@@ -68,7 +68,6 @@ export default function WorkingContainer (props) {
 
         return(
             <div className={styles.div}>
-                <TimerContainer setWorkedTime={setWorkedTime} timer={timer} setTimer={setTimer} />
                 <div ref={dropZoneRef} className={styles.currentTaskDiv}>
                     {activeTask ? <div>
                         

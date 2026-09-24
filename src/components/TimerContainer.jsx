@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setSessionParams, setTimer } from '../features/session/sessionAction';
 
 export default function TimerContainer(props){
-    const { setWorkedTime } = props;
+    const { setWorkedTime, percentWidth, setPercentWidth, setActiveTimer } = props;
 
     const {sessionParams, timer} = useSelector(state => state.session);
     const dispatch = useDispatch();
@@ -12,7 +12,7 @@ export default function TimerContainer(props){
     console.log(timer);
 
     const [timeToDisplay, setTimeToDisplay] = useState(null);
-    const [percentWidth, setPercentWidth] = useState(0);
+    
 
     const [editTimer, setEditTimer] = useState(false);
     const getEditTime = () => {
@@ -57,11 +57,13 @@ export default function TimerContainer(props){
                 dispatch(setTimer(timer.time, true));
             }
             setEditTimer(false);
+            setActiveTimer(true);
         } else if (action === 'pause'){
             dispatch(setTimer(timer.time, false));
         } else if (action === 'terminate'){
             clearTimeout(timeoutRef.current);
             dispatch(setTimer(0, false));
+            setActiveTimer(false);
         }
     }
 
