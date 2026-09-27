@@ -12,7 +12,9 @@ import TimerContainer from './TimerContainer.jsx';
 import {useSelector} from 'react-redux';
 
 export default function Home(props){
-    const {t, tasks, groups, setGroups, setSessionParams, setCustomError, showDone, setShowDone, setPercentWidth, percentWidth, setActiveTimer} = props;
+    const {t, groups, setGroups, setSessionParams, setCustomError, showDone, setShowDone, setPercentWidth, percentWidth, setActiveTimer} = props;
+
+    const tasks = useSelector(state => state.task.tasks);
 
     const [groupToDisplayName, setGroupToDisplayName] = useState('all');
 
@@ -73,6 +75,7 @@ export default function Home(props){
 
             if (isOverDropZone) {
                 setActiveTask(currentTask);
+                console.log(currentTask)
                 setWorkedTasks(prev => prev.find(t => t?.index === currentTask.index) ? prev : [...prev, {name: currentTask.name, time: 0, index: currentTask.index}]);
             }
         }

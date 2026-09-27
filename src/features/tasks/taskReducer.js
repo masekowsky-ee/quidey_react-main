@@ -1,8 +1,9 @@
-import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, GET_NOTES, EDIT_NOTE } from './taskActionTypes';
 
 const initialState = {
     tasks: [],
     groups: [],
+    notes: [],
     groupToDisplay: {group: {}, tasks: []},
 };
 
@@ -84,18 +85,20 @@ const taskReducer = (state = initialState, action) => {
         case CREATE_NOTE:
             return {
                 ...state,
-                tasks: state.tasks.map(task => task.id === action.payload.taskId ?
-                    {...task, notes: [...task.notes, action.payload.note]}
-                    : task),
+                notes: [...state.notes, action.payload.note],
             }
         case DELETE_NOTE:
             return {
                 ...state,
-                tasks: state.tasks.map(task => task.id === action.payload.taskId ?
-                    {...task, notes: task.notes.filter((note) => note.id !== action.payload.noteId)}
-                    : task),
+                notes: state.notes.filter(note => note.id !== action.payload.noteId),
             }
-
+        case EDIT_NOTE:
+            return {
+                ...state,
+                notes: state.notes.map(note => note.id === action.payload.noteId ?
+                    {...note, note: action.payload.note}
+                    : note),
+            }
 
         default:
             return state;

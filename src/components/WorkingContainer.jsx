@@ -44,7 +44,8 @@ export default function WorkingContainer (props) {
             if(!e.target.value) return;
             const newNote = {note: e.target.value, index: new Date()};
             const updatedTask = { ...activeTask, notes: [...(activeTask.notes || []), newNote] };
-            dispatch(createNote(activeTask.index, newNote));
+            console.log(activeTask);
+            dispatch(createNote(activeTask.id, newNote));
             setActiveTask(updatedTask);
             setEditNote(false);
             console.log(newNote);

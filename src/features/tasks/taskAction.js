@@ -1,4 +1,4 @@
-import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, GET_NOTES } from './taskActionTypes';
 import { apiFetch } from '../helperFunction';
 
 
@@ -149,15 +149,52 @@ export const editGroup = (groupId, groupObj, group) => {
 }
 
 export const createNote = (taskId, note) => {
-    return {
-        type: CREATE_NOTE,
-        payload: { taskId, note },
-    }
-}
+    return async (dispatch) => {
+        const data = await apiFetch(`http://localhost:3000/api/tasks/${taskId}/notes`, {
+            method: "POST",
+            body: JSON.stringify({ taskId, content: note })
+        });
+
+        dispatch({
+            type: CREATE_NOTE,
+            payload: { taskId, note: data },
+        });
+    };
+};
 
 export const deleteNote = (taskId, noteId) => {
-    return {
-        type: DELETE_NOTE,
-        payload: { taskId, noteId },
-    }
-}
+    return async (dispatch) => {
+        await apiFetch(`http://localhost:3000/api/notes/${noteId}`, {method: "DELETE"});
+
+        dispatch({
+            type: DELETE_NOTE,
+            payload: { taskId, noteId },
+        });
+    };
+};
+
+export const editNote = (taskId, note) => {
+    return async (dispatch) => {
+        const data = await apiFetch(`http://localhost:3000/api/notes/${note.id}`, {
+            method: "PUT",
+            body: JSON.stringify({ taskId, note: data })
+        });
+
+        dispatch({
+            type: EDIT_NOTE,
+            payload: { taskId, note: data },
+        });
+    };
+};
+
+export const getNotes = (taskId) => {
+    return async (dispatch) => {
+        const notes = await apiFetch(`http://localhost:3000/api/notes?taskId=${taskId}`, {method: "GET"});
+
+        dispatch({
+            type: GET_NOTES,
+            payload: { taskId, notes },
+        });
+    };
+};
+
