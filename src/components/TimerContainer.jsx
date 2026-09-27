@@ -30,18 +30,19 @@ export default function TimerContainer(props){
     const minSetter = (dirAm) => {
         const min = newM;
         if(dirAm > 0){
-            if(min + dirAm < 60){
+            if((min + dirAm) < 60){
                 setNewM(min + dirAm);
             } else {
                 setNewM(0);
                 setNewH(prev => prev + 1);
             }
         } else {
-            if(min - dirAm >= 0){
-                setNewM(min - dirAm);
+            if (newH === 0 && newM + dirAm < 0) return;
+            if((min + dirAm) >= 0){
+                setNewM(prev => prev + dirAm);
             } else {
                 setNewH(prev => prev - 1);
-                setNewM(60 - dirAm);
+                setNewM(60 + dirAm);
             }
         }
     }
@@ -49,18 +50,19 @@ export default function TimerContainer(props){
     const secSetter = (dir) => {
         const sec = newS;
         if(dir > 0){
-            if(sec + 15 < 60){
+            if((sec + 15) < 60){
                 setNewS(sec + 15);
             } else {
                 setNewS(0);
-                minSetter(1)
+                minSetter(dir);
             }
         } else {
-            if(sec - 15 >= 0){
+            if (newM === 0 && newH === 0 && newS + dir < 0) return;
+            if((sec - 15) >= 0){
                 setNewS(sec - 15);
             } else {
                 setNewS(45);
-                minSetter(-1)
+                minSetter(dir);
             }
         }
     }
@@ -98,6 +100,7 @@ export default function TimerContainer(props){
 
     const timerAction = (action) => {
         if (action === 'start'){
+            if (timer.time <= 1000) return;
             if (editTimer){
                 const newTime = getEditTime();
                 dispatch(setSessionParams({...sessionParams, time: newTime}));
@@ -129,39 +132,35 @@ export default function TimerContainer(props){
             {!editTimer ? 
                 <h2 onClick={()=>{editTimerFunc(); timerAction('pause')}} className={styles.timerH2}>{timeToDisplay}</h2>
                 :
-                <div className={styles.editTimerDiv}>
-                    <div style={{flexDirection: 'column'}}>
-                    <svg onClick={()=>setNewH(prev => prev + 1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
-                    <h2 id="timerH">{newH || timeToDisplay.slice(0,2)}</h2>
-                    <svg onClick={()=>setNewH(prev => prev - 1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
+                    <div className={styles.editTimerDiv}>
+                        <div style={{flexDirection: 'column'}}>
+                        <svg onClick={()=>setNewH(prev => prev + 1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
+                        <h2 className={styles.setTimerH2} id="timerH">{`${String(newH).padStart(2, '0')}`}</h2>
+                        <svg onClick={()=>{if (newH === 0) return;setNewH(prev => prev - 1)}} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
+                        </div>
+
+                        <h2 className={styles.timerH2}>:</h2>
+
+                        <div style={{flexDirection: 'column'}}>
+                        <svg onClick={()=>minSetter(5)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
+                        <h2 className={styles.setTimerH2} id="timerM">{`${String(newM).padStart(2, '0')}`}</h2>
+                        <svg onClick={()=>minSetter(-5)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
+                        </div>
+
+                        <h2 className={styles.timerH2}>:</h2>
+
+                        <div style={{flexDirection: 'column'}}>
+                        <svg onClick={()=>secSetter(1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
+                        <h2 className={styles.setTimerH2} id="timerS">{`${String(newS).padStart(2, '0')}`}</h2>
+                        <svg onClick={()=>secSetter(-1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
+                        </div>
                     </div>
-
-                    <h2 className={styles.timerH2}>:</h2>
-
-                    <div style={{flexDirection: 'column'}}>
-                    <svg onClick={()=>minSetter(5)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
-                    <h2 id="timerM">{newM || timeToDisplay.slice(3,5)}</h2>
-                    <svg onClick={()=>minSetter(-5)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
-                    </div>
-
-                    <h2 className={styles.timerH2}>:</h2>
-
-                    <div style={{flexDirection: 'column'}}>
-                    <svg onClick={()=>secSetter(1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
-                    <h2 id="timerS">{newS || timeToDisplay.slice(6,8)}</h2>
-                    <svg onClick={()=>secSetter(-1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
-                    </div>
-
-                    <button onClick={setTimerFunc}>
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
-                    </button>
-                </div>
             }
             <div className={styles.outerTimer}>
                 <div style={{width: `${percentWidth}%`}} className={styles.innerTimer}></div>
             </div>
             <div className={styles.timerNav}>
-                {!timer.active && timer.time !== 0 &&
+                {!timer.active && timer.time !== 0 && !editTimer &&
                     <button className={styles.btn} onClick={()=>timerAction('start')}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M320-273v-414q0-17 12-28.5t28-11.5q5 0 10.5 1.5T381-721l326 207q9 6 13.5 15t4.5 19q0 10-4.5 19T707-446L381-239q-5 3-10.5 4.5T360-233q-16 0-28-11.5T320-273Zm80-207Zm0 134 210-134-210-134v268Z"/></svg>
                     </button>
@@ -176,9 +175,14 @@ export default function TimerContainer(props){
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M240-320v-320q0-33 23.5-56.5T320-720h320q33 0 56.5 23.5T720-640v320q0 33-23.5 56.5T640-240H320q-33 0-56.5-23.5T240-320Zm80 0h320v-320H320v320Zm160-160Z"/></svg>
                     </button>
                 }
-                {!timer.active && timer.time === 0 &&
+                {!timer.active && timer.time === 0 && !editTimer && 
                     <button className={styles.btn} onClick={()=>{setEditTimer(!editTimer); dispatch(setTimer({...timer, time: 10000}))}}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M400-840q-17 0-28.5-11.5T360-880q0-17 11.5-28.5T400-920h160q17 0 28.5 11.5T600-880q0 17-11.5 28.5T560-840H400Zm108.5 428.5Q520-423 520-440v-160q0-17-11.5-28.5T480-640q-17 0-28.5 11.5T440-600v160q0 17 11.5 28.5T480-400q17 0 28.5-11.5Zm-168 303Q275-137 226-186t-77.5-114.5Q120-366 120-440t28.5-139.5Q177-645 226-694t114.5-77.5Q406-800 480-800q62 0 119 20t107 58l28-28q11-11 28-11t28 11q11 11 11 28t-11 28l-28 28q38 50 58 107t20 119q0 74-28.5 139.5T734-186q-49 49-114.5 77.5T480-80q-74 0-139.5-28.5ZM678-242q82-82 82-198t-82-198q-82-82-198-82t-198 82q-82 82-82 198t82 198q82 82 198 82t198-82ZM480-440Z"/></svg>
+                    </button>
+                }
+                {editTimer &&
+                    <button onClick={setTimerFunc}>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
                     </button>
                 }
             </div>
