@@ -116,6 +116,14 @@ export default function TimerContainer(props){
         }
     }
 
+    const setTimerFunc = () => {
+        console.log(`${newS} ${newM} ${newH}`);
+        const newTime = (Number(newS) * 1000 + Number(newM) * 60 * 1000 + Number(newH) * 60 * 60 * 1000);
+        console.log(newTime)
+        dispatch(setTimer(newTime, false));
+        setEditTimer(false);
+    }
+
     return(
         <div className={styles.div}>
             {!editTimer ? 
@@ -144,7 +152,7 @@ export default function TimerContainer(props){
                     <svg onClick={()=>secSetter(-1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
                     </div>
 
-                    <button onClick={() => setTimer()}>
+                    <button onClick={setTimerFunc}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
                     </button>
                 </div>
