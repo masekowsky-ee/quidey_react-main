@@ -3,7 +3,7 @@ import { apiFetch } from '../helperFunction';
 
 export const loginSuccess = (username, password) => {
     return async (dispatch) => {
-        const response = await fetch("http://localhost:3000/api/login", {
+        const response = await fetch("/api/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, password }),
@@ -41,7 +41,7 @@ export const checkAuth = () => {
         }
 
         try {
-            const response = await fetch("http://localhost:3000/api/me", {
+            const response = await fetch("/api/me", {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -67,7 +67,7 @@ export const checkAuth = () => {
 export const setUser = () => {
     return async (dispatch) => {
 
-        const data = await apiFetch(`http://localhost:3000/api/users`, {method: "GET"});
+        const data = await apiFetch(`/api/users`, {method: "GET"});
 
         dispatch({
             type: SET_USER,
@@ -80,7 +80,7 @@ export const setUser = () => {
 
 export const register = (username, display_name, email, birth_date, password) => {
     return async (dispatch) => {
-        const response = await fetch("http://localhost:3000/api/register", {
+        const response = await fetch("/api/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, display_name, email, birth_date, password }),

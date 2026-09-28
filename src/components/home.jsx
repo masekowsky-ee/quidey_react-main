@@ -97,7 +97,7 @@ export default function Home(props){
     }, [draggedTask, handlePointerMove, handlePointerUp]);
     // --- Ende gehobener State ---
 
-    console.log(props.tasks);
+    console.log(tasks);
     return (
         <div className={styles.div}>
             <WeekDaysContainer t={t} tasks={tasks} />
@@ -124,6 +124,7 @@ export default function Home(props){
             />
             <div className={styles.tcc}>
                 <TaskContainer
+                    activeTask={activeTask}
                     setCreateTask={setCreateTask}
                     working={false}
                     showDone={showDone}

@@ -6,7 +6,7 @@ import { createPortal } from 'react-dom';
 
 
 export default function TaskContainer(props){
-    const { t, showDone, setShowDone, working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask } = props;
+    const { t, showDone, setShowDone, working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask } = props;
 
     const dispatch = useDispatch();
 
@@ -125,7 +125,7 @@ export default function TaskContainer(props){
                                 console.log(task.id)
                                 const isBeingDragged = draggedTask?.id === task.id;
 
-                                if(!task.done){
+                                if(!task.done && task.id !== activeTask.id){
                                     return (
                                         <li
                                             key={`${task.id}li`}
@@ -177,7 +177,7 @@ export default function TaskContainer(props){
                         <h3 className={styles.ulH3}>Done</h3>
                     {groupToDisplay.tasks
                         .map((task) => {
-                            if(task.done){
+                            if(task.done && task.id !== activeTask.id){
                                 return (<li key={task.id} className={`${styles.taskLi} ${styles.doneLi}`}>
                                     <div className={styles.taskHeader}>
                                         <div className={styles.doneHeadDiv}>

@@ -8,4 +8,22 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.js',
   },
+  server: {
+    host: true,
+    port: 5173,
+    strictPort: true,
+    proxy: {
+      // forward every request starting with /api to the backend
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+  preview: {
+    host: true,
+    port: 4173,
+    strictPort: true,
+  },
 })

@@ -15,6 +15,7 @@ const taskReducer = (state = initialState, action) => {
                 tasks: action.payload.tasks,
                 groups:  action.payload.groups,
                 groupToDisplay: {...state.groupToDisplay, tasks: action.payload.tasks},
+                notes: action.payload.notes,
             }
         case ADD_TASK: 
             return {
@@ -85,7 +86,7 @@ const taskReducer = (state = initialState, action) => {
         case CREATE_NOTE:
             return {
                 ...state,
-                notes: [...state.notes, action.payload.note],
+                notes: [...state.notes, action.payload],
             }
         case DELETE_NOTE:
             return {
@@ -96,7 +97,7 @@ const taskReducer = (state = initialState, action) => {
             return {
                 ...state,
                 notes: state.notes.map(note => note.id === action.payload.noteId ?
-                    {...note, note: action.payload.note}
+                    {...note, note: action.payload}
                     : note),
             }
 
