@@ -125,7 +125,7 @@ export default function TaskContainer(props){
                                 console.log(task.id)
                                 const isBeingDragged = draggedTask?.id === task.id;
 
-                                if(!task.done && task.id !== activeTask.id){
+                                if(!task.done && task.id !== activeTask?.id){
                                     return (
                                         <li
                                             key={`${task.id}li`}
