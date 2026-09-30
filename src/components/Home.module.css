@@ -1,7 +1,6 @@
 .div{
     position: relative;
     top: 80px;
-    padding-bottom: 80px;
     width: 100%;
 }
 .formsDiv{
@@ -11,8 +10,11 @@
     justify-content: center;
     gap: 2rem;
     width: 100%;
-    position: relative;
+    height: 100%;
+    position: fixed;
     margin-bottom: 1rem;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 10001;
 }
 .weekTable{
     width: 100%;

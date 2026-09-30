@@ -1,20 +1,21 @@
-import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, GET_NOTES } from './taskActionTypes';
 import { apiFetch } from '../helperFunction';
 
 
 // Action creators for task management
 export const fetchTaskState = () => {
     return async (dispatch) => {
-        const tasks = await apiFetch("http://localhost:3000/api/tasks");
-        const groups = await apiFetch("http://localhost:3000/api/groups");
-        dispatch({ type: SET_TASK_STATE, payload: {tasks, groups} });
+        const tasks = await apiFetch("/api/tasks");
+        const groups = await apiFetch("/api/groups");
+        const notes = await apiFetch("/api/notes");
+        dispatch({ type: SET_TASK_STATE, payload: {tasks, groups, notes} });
     }
 }
 
 export const addTask = (name, due, description, prio, activeGroupId = null, userId) => {
     return async (dispatch) => {
         const data = await apiFetch(
-            "http://localhost:3000/api/tasks", {
+            "/api/tasks", {
                 method: "POST",
                 body: JSON.stringify({name, due, description, prio, userId})
             }
@@ -23,7 +24,7 @@ export const addTask = (name, due, description, prio, activeGroupId = null, user
         const { id } = data;
 
         if (activeGroupId) {
-            await apiFetch(`http://localhost:3000/api/tasks/${id}/groups/${activeGroupId}`, {method: "POST"}
+            await apiFetch(`/api/tasks/${id}/groups/${activeGroupId}`, {method: "POST"}
             );
         }
 
@@ -38,7 +39,7 @@ export const addTask = (name, due, description, prio, activeGroupId = null, user
 
 export const deleteTask = (taskId) => {
     return async (dispatch) => {
-        await apiFetch(`http://localhost:3000/api/tasks/${taskId}`, {method: "DELETE"});
+        await apiFetch(`/api/tasks/${taskId}`, {method: "DELETE"});
         
         dispatch({
             type: DELETE_TASK,
@@ -51,8 +52,11 @@ export const updateTaskProps = (taskPropObject, task) => {
     const defaults = task;
     const params = {...defaults, ...taskPropObject};
     const {name, due, description, prio, done, id} = params;
+
+    console.log(`Updating task (id: ${id}) with properties:`, {name, due, description, prio, done});
+    
     return async (dispatch) => {
-        const data = await apiFetch(`http://localhost:3000/api/tasks/${params.id}`, {
+        const data = await apiFetch(`/api/tasks/${params.id}`, {
             method: "PUT", 
             body: JSON.stringify({name, due, description, prio, done, id})
         });
@@ -67,7 +71,7 @@ export const updateTaskProps = (taskPropObject, task) => {
 
 export const addGroup = (name, description) => {
     return async (dispatch) => {
-        const data = await apiFetch("http://localhost:3000/api/groups", {
+        const data = await apiFetch("/api/groups", {
             method: "POST", body: JSON.stringify({name, description})
         });
 
@@ -82,7 +86,7 @@ export const addGroup = (name, description) => {
 
 export const deleteGroup = (groupId) => {
     return async (dispatch) => {
-        await apiFetch(`http://localhost:3000/api/groups/${groupId}`, {method: "DELETE"});
+        await apiFetch(`/api/groups/${groupId}`, {method: "DELETE"});
 
         dispatch({
             type: DELETE_GROUP,
@@ -95,14 +99,14 @@ export const editDisplaygroup = (group, groupToDisplayId) => {
     console.log(group);
     return async (dispatch) => {
         if(groupToDisplayId === group.id) {
-            const tasks = await apiFetch(`http://localhost:3000/api/tasks`, {method: "GET",});
+            const tasks = await apiFetch(`/api/tasks`, {method: "GET",});
             console.log(tasks)
             dispatch({
                 type: EDIT_DISPLAYGROUP,
                 payload: {group: {}, tasks},
             });
         } else{
-            const tasks = await apiFetch(`http://localhost:3000/api/groups/${group.id}/tasks`, {method: "GET",});
+            const tasks = await apiFetch(`/api/groups/${group.id}/tasks`, {method: "GET",});
             console.log(tasks)
             dispatch({
                 type: EDIT_DISPLAYGROUP,
@@ -114,13 +118,13 @@ export const editDisplaygroup = (group, groupToDisplayId) => {
 
 export const addGroupTasks = (groupId, taskId) => {
     return async () => {
-        await apiFetch(`http://localhost:3000/api/tasks/${taskId}/groups/${groupId}`, {method: "POST"});
+        await apiFetch(`/api/tasks/${taskId}/groups/${groupId}`, {method: "POST"});
     };
 }
 
 export const deleteGroupTasks = (taskId, groupId) => {
     return async (dispatch) => {
-        await apiFetch(`http://localhost:3000/api/task-groups/${taskId}/${groupId}`, {method: "DELETE"});
+        await apiFetch(`/api/task-groups/${taskId}/${groupId}`, {method: "DELETE"});
         dispatch({
             type: DELETE_GROUP_TASKS,
             payload: taskId,
@@ -134,7 +138,7 @@ export const editGroup = (groupId, groupObj, group) => {
     const fetchObj = {...defaultObj, ...groupObj};
 
     return async (dispatch) => {
-        const data = await apiFetch(`http://localhost:3000/api/groups/${groupId}`, 
+        const data = await apiFetch(`/api/groups/${groupId}`, 
             {method: "PUT", body: JSON.stringify(fetchObj)}
         );
 
@@ -146,15 +150,56 @@ export const editGroup = (groupId, groupObj, group) => {
 }
 
 export const createNote = (taskId, note) => {
-    return {
-        type: CREATE_NOTE,
-        payload: { taskId, note },
-    }
-}
+    return async (dispatch) => {
+        const data = await apiFetch(`/api/tasks/${taskId}/notes`, {
+            method: "POST",
+            body: JSON.stringify({ content: note })
+        });
+
+        console.log("Note created successfully:", data);
+
+        dispatch({
+            type: CREATE_NOTE,
+            payload: data ,
+        });
+    };
+};
 
 export const deleteNote = (taskId, noteId) => {
-    return {
-        type: DELETE_NOTE,
-        payload: { taskId, noteId },
-    }
-}
+    return async (dispatch) => {
+        await apiFetch(`/api/notes/${noteId}`, {method: "DELETE"});
+
+        dispatch({
+            type: DELETE_NOTE,
+            payload: { taskId, noteId },
+        });
+    };
+};
+
+export const editNote = (taskId, noteId, noteContent) => {
+    return async (dispatch) => {
+        const data = await apiFetch(`/api/notes/${noteId}`, {
+            method: "PUT",
+            body: JSON.stringify({ taskId, content: noteContent })
+        });
+
+        console.log("Note updated successfully:", data);
+
+        dispatch({
+            type: EDIT_NOTE,
+            payload: data,
+        });
+    };
+};
+
+export const getNotes = (taskId) => {
+    return async (dispatch) => {
+        const notes = await apiFetch(`/api/notes?taskId=${taskId}`, {method: "GET"});
+
+        dispatch({
+            type: GET_NOTES,
+            payload: { taskId, notes },
+        });
+    };
+};
+

@@ -15,14 +15,17 @@
 
 .taskLi{
     display: grid;
-    grid-template-columns: 1fr 2fr 3fr 4fr 5fr 3fr;
+    grid-template-columns: 2fr 3fr 1fr 4fr 5fr 7fr 5fr;
     gap: 0.5rem;
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
-    padding: 0.5rem 0;
+    padding: 0;
     position: relative;
     z-index: 10000!important;
     pointer-events:auto;
+    height: 3rem;
+    justify-content: center;
+    align-items: center;
 }
 
 .doneLi{
@@ -49,7 +52,6 @@
 .taskLi + .taskLi{
     margin-top: 1rem;
     border-top: 1px solid gray;
-    padding-top: 1rem;
 }
 
 .h2{
@@ -96,8 +98,13 @@
 .taskHeader{
     display: flex;
     flex-direction: row;
-    justify-self: center;
+    justify-self: flex-start;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: center;
+    margin: auto 0;
 }
+
 .outerUlDiv{
     display: flex;
     flex-direction: row;
@@ -111,7 +118,7 @@
 .btnDiv{
     display: flex;
     flex-direction: row;
-
+    justify-content: flex-end;
 }
 .text{
     max-width: 5rem;

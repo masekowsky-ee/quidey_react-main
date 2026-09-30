@@ -1,8 +1,9 @@
-import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, GET_NOTES, EDIT_NOTE } from './taskActionTypes';
 
 const initialState = {
     tasks: [],
     groups: [],
+    notes: [],
     groupToDisplay: {group: {}, tasks: []},
 };
 
@@ -14,6 +15,7 @@ const taskReducer = (state = initialState, action) => {
                 tasks: action.payload.tasks,
                 groups:  action.payload.groups,
                 groupToDisplay: {...state.groupToDisplay, tasks: action.payload.tasks},
+                notes: action.payload.notes,
             }
         case ADD_TASK: 
             return {
@@ -34,7 +36,7 @@ const taskReducer = (state = initialState, action) => {
                     task => task.id === action.payload.id ? 
                     {...task, 
                         name: action.payload.name ?? task.name, 
-                        due: action.payload.due ?? task.due, 
+                        due: action.payload.due ?? new Date(task.due.getTime() + 1), 
                         description: action.payload.description ?? task.description, 
                         prio: action.payload.prio ?? task.prio, 
                         done: action.payload.done ?? task.done
@@ -44,7 +46,7 @@ const taskReducer = (state = initialState, action) => {
                     tasks: state.groupToDisplay.tasks.map(task =>
                         task.id === action.payload.id ? {...task, 
                             name: action.payload.name ?? task.name, 
-                            due: action.payload.due ?? task.due, 
+                            due: action.payload.due ?? new Date(task.due.getTime() + 1), 
                             description: action.payload.description ?? task.description, 
                             prio: action.payload.prio ?? task.prio, 
                             done: action.payload.done ?? task.done
@@ -84,18 +86,20 @@ const taskReducer = (state = initialState, action) => {
         case CREATE_NOTE:
             return {
                 ...state,
-                tasks: state.tasks.map(task => task.id === action.payload.taskId ?
-                    {...task, notes: [...task.notes, action.payload.note]}
-                    : task),
+                notes: [...state.notes, action.payload],
             }
         case DELETE_NOTE:
             return {
                 ...state,
-                tasks: state.tasks.map(task => task.id === action.payload.taskId ?
-                    {...task, notes: task.notes.filter((note) => note.id !== action.payload.noteId)}
-                    : task),
+                notes: state.notes.filter(note => note.id !== action.payload.noteId),
             }
-
+        case EDIT_NOTE:
+            return {
+                ...state,
+                notes: state.notes.map(note => note.id === action.payload.noteId ?
+                    {...note, note: action.payload}
+                    : note),
+            }
 
         default:
             return state;

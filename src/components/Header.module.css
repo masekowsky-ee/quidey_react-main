@@ -1,6 +1,6 @@
 .header{
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: space-between;
     padding: 0.5rem 0;
@@ -13,7 +13,6 @@
     top: 0;
     left: 0;
     z-index: 10;
-
 }
 
 .h1{
@@ -45,4 +44,10 @@
     flex-direction: row;
     width: 100%;
     justify-content: space-between;
+}
+
+.top{
+    margin-top: 0rem;
+    opacity: 75%;
+    min-height: 0.75rem!important;
 }

@@ -6,7 +6,7 @@ import { createPortal } from 'react-dom';
 
 
 export default function TaskContainer(props){
-    const { t, showDone, setShowDone, working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask } = props;
+    const { t, showDone, setShowDone, working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask } = props;
 
     const dispatch = useDispatch();
 
@@ -70,13 +70,13 @@ export default function TaskContainer(props){
     }
 
     function toDateOnly(date) {
-        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
     }
 
     function compareDate(dueDate){
         const today = toDateOnly(new Date());
         const due = toDateOnly(new Date(dueDate));
-        return today > due; 
+        return today > due;
     }
 
     const handleShowDone = () => {
@@ -101,7 +101,7 @@ export default function TaskContainer(props){
             <div className={styles.outerUlDiv}>
                 <h2 className={styles.h2}>{t('taskContainer')}</h2>
                 <button onClick={()=>{setCreateTask(true)}}> 
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M440-440v120q0 17 11.5 28.5T480-280q17 0 28.5-11.5T520-320v-120h120q17 0 28.5-11.5T680-480q0-17-11.5-28.5T640-520H520v-120q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640v120H320q-17 0-28.5 11.5T280-480q0 17 11.5 28.5T320-440h120Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M440-440H240q-17 0-28.5-11.5T200-480q0-17 11.5-28.5T240-520h200v-200q0-17 11.5-28.5T480-760q17 0 28.5 11.5T520-720v200h200q17 0 28.5 11.5T760-480q0 17-11.5 28.5T720-440H520v200q0 17-11.5 28.5T480-200q-17 0-28.5-11.5T440-240v-200Z"/></svg>
                 </button>
             </div>
             {!groupToDisplay ? null : groupToDisplay.group?.description &&
@@ -122,10 +122,10 @@ export default function TaskContainer(props){
                     {groupToDisplay.tasks.find(task => task.done !== true) && groupToDisplay.tasks
                             .map((task) => {
                                 // Check if this specific task is the one currently being dragged
-                                console.log(task.index)
+                                console.log(task.id)
                                 const isBeingDragged = draggedTask?.id === task.id;
 
-                                if(!task.done){
+                                if(!task.done && task.id !== activeTask?.id){
                                     return (
                                         <li
                                             key={`${task.id}li`}
@@ -139,11 +139,11 @@ export default function TaskContainer(props){
                                                     ? <input autoFocus type="text" defaultValue={task.name} onBlur={(e) => {setTaskPropHandler(e.target.value, 'name', task);}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'name', task)}}}/>
                                                     : <p onClick={(e) => changePropHandler(e, 'name', task.id)}>{task.name}</p>
                                                 }
-                                                <input type="checkbox" onChange={()=>{setTaskPropHandler(!task.done, 'done', task)}} />
                                             </div>
+                                            <input type="checkbox" onChange={()=>{setTaskPropHandler(!task.done, 'done', task)}} />
                                             { taskToEdit && taskPropToEdit === 'due' && taskToEdit.id === task.id
                                                 ? <input autoFocus type="date" defaultValue={task.due ?? null} onBlur={(e) => {setTaskPropHandler(e.target.value, 'due', task);}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'due', task)}}}/>
-                                                : <p style={compareDate(task.due) ? { color: 'red' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>{`${new Date(task.due).getUTCDate()+1}.${new Date(task.due).getUTCMonth()+1}.${new Date(task.due).getUTCFullYear()}`}</p>
+                                                : <p style={compareDate(task.due) ? { color: 'red' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>{`${new Date(task.due).getUTCDate()}.${new Date(task.due).getUTCMonth()+1}.${new Date(task.due).getUTCFullYear()}`}</p>
                                             }
                                             <div>
                                                 <label>{t('prioritise')}:</label>
@@ -151,8 +151,8 @@ export default function TaskContainer(props){
                                             </div>
                                             {
                                                 taskToEdit && taskPropToEdit === 'description' && taskToEdit.id === task.id
-                                                ? <input autoFocus type="text" defaultValue={task.description || null} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'description', task)}}} onBlur={(e) => {setTaskPropHandler(e.target.value, 'description', task);}} />
-                                                : <p onClick={(e) => changePropHandler(e, 'description', task.id)}>{task.description || t('description')}</p>
+                                                ? <input style={{width: '100%', marginLeft: '0.5rem',}} autoFocus type="text" defaultValue={task.description || null} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'description', task)}}} onBlur={(e) => {setTaskPropHandler(e.target.value, 'description', task);}} />
+                                                : <p style={{textAlign: 'left', marginLeft: '0.5rem',}} onClick={(e) => changePropHandler(e, 'description', task.id)}>{task.description || t('description')}</p>
                                             }
                                             <div className={styles.btnDiv}>
                                                 <button className={styles.btn} onClick={() => handleAssignGroup(task)}>{t('assignGroup')}</button>
@@ -177,7 +177,7 @@ export default function TaskContainer(props){
                         <h3 className={styles.ulH3}>Done</h3>
                     {groupToDisplay.tasks
                         .map((task) => {
-                            if(task.done){
+                            if(task.done && task.id !== activeTask.id){
                                 return (<li key={task.id} className={`${styles.taskLi} ${styles.doneLi}`}>
                                     <div className={styles.taskHeader}>
                                         <div className={styles.doneHeadDiv}>

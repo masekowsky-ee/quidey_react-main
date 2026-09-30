@@ -7,14 +7,23 @@ import { Outlet } from 'react-router-dom';
 import WeekDaysContainer from './WeekDaysContainer.jsx';
 import GroupBtnContainer from './GroupBtnContainer.jsx';
 import WorkingContainer from './WorkingContainer.jsx';
+import TimerContainer from './TimerContainer.jsx';
+
+import {useSelector} from 'react-redux';
 
 export default function Home(props){
-    const {t, tasks, groups, setGroups, setSessionParams, setCustomError, showDone, setShowDone} = props;
+    const {t, groups, setGroups, setSessionParams, setCustomError, showDone, setShowDone, setPercentWidth, percentWidth, setActiveTimer} = props;
+
+    const tasks = useSelector(state => state.task.tasks);
 
     const [groupToDisplayName, setGroupToDisplayName] = useState('all');
 
     const [createTask, setCreateTask] = useState(false);
     const [createGroup, setCreateGroup] = useState(false);
+
+    const sessionParams = useSelector(state => state.session.sessionParams)
+    const [timer, setTimer] = useState({time: sessionParams.time, active: false});
+    const [workedTime, setWorkedTime] = useState(0);
 
     // --- Gehobener State für Drag & Drop + aktive Task/Worked Tasks ---
     const starterTask = tasks[0] || null;
@@ -66,6 +75,7 @@ export default function Home(props){
 
             if (isOverDropZone) {
                 setActiveTask(currentTask);
+                console.log(currentTask)
                 setWorkedTasks(prev => prev.find(t => t?.index === currentTask.index) ? prev : [...prev, {name: currentTask.name, time: 0, index: currentTask.index}]);
             }
         }
@@ -87,7 +97,7 @@ export default function Home(props){
     }, [draggedTask, handlePointerMove, handlePointerUp]);
     // --- Ende gehobener State ---
 
-    console.log(props.tasks);
+    console.log(tasks);
     return (
         <div className={styles.div}>
             <WeekDaysContainer t={t} tasks={tasks} />
@@ -114,6 +124,7 @@ export default function Home(props){
             />
             <div className={styles.tcc}>
                 <TaskContainer
+                    activeTask={activeTask}
                     setCreateTask={setCreateTask}
                     working={false}
                     showDone={showDone}
@@ -132,6 +143,7 @@ export default function Home(props){
                     dragOffset={dragOffset}
                 />
             </div>
+            <TimerContainer setActiveTimer={setActiveTimer} percentWidth={percentWidth} setPercentWidth={setPercentWidth} setWorkedTime={setWorkedTime} timer={timer} setTimer={setTimer} />
             <Outlet />
         </div>
     );
