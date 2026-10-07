@@ -34,8 +34,9 @@ export default function Profile(props){
         e.preventDefault();
         if (!username || !password) {
             setCustomError({bool: true, message: `${t('missingFieldsError')}`});
-        }else if (password || passwordValidate === password && validateAge(birthDate)) {
-            dispatch(loginSuccess(username, password));
+        } else {
+            dispatch(loginSuccess(username, password))
+                .catch(err => setCustomError({bool: true, message: err.message}));
             setUsername("");
             setPassword("");
         }
@@ -55,22 +56,29 @@ export default function Profile(props){
         return age >= minAge;
     }
 
-    const handleSignUp = (e, email, birthDate, displayName, username, password, passwordValidate) => {
+    // Parse "YYYY-MM-DD" as a local date; new Date(str) would treat it as UTC
+    const parseDateInput = (value) => {
+        const [year, month, day] = value.split('-').map(Number);
+        return new Date(year, month - 1, day);
+    }
+
+    const handleSignUp =(e, email, birthDate, displayName, username, password, passwordValidate) => {
         e.preventDefault();
         if (!email || !birthDate || !displayName || !username || !password || !passwordValidate) {
             setCustomError({bool: true, message: `${t('missingFieldsError')}`});
-        }else if (password || passwordValidate === password && validateAge(birthDate)) {
-            dispatch(register( email, birthDate, displayName, username, password));
+        } else if (passwordValidate !== password) {
+            setCustomError({bool: true, message: `${t('passwordValidateError')}`});
+        } else if (!validateAge(parseDateInput(birthDate))) {
+            setCustomError({bool: true, message: `${t('ageError')}`});
+        } else {
+            dispatch(register(username, displayName, email, birthDate, password))
+                .catch(err => setCustomError({bool: true, message: err.message}));
             setUsername("");
             setPassword("");
             setPasswordValidate("");
             setDisplayName("");
             setEmail("");
             setBirthDate("");
-        } else if (passwordValidate !== password || !password) {
-            setCustomError({bool: true, message: `${t('passwordValidateError')}`});
-        } else {
-            setCustomError({bool: true, message: `${t('ageError')}`});
         }
     }
 

@@ -96,9 +96,8 @@ const taskReducer = (state = initialState, action) => {
         case EDIT_NOTE:
             return {
                 ...state,
-                notes: state.notes.map(note => note.id === action.payload.noteId ?
-                    {...note, note: action.payload}
-                    : note),
+                // Replace the matching note with the row returned by the API
+                notes: state.notes.map(note => note.id === action.payload.id ? action.payload : note),
             }
 
         default:

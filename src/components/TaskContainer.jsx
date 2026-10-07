@@ -46,7 +46,8 @@ export default function TaskContainer(props){
                 dispatch(updateTaskProps({done: input}, task));
                 break;
             case 'prio':
-                dispatch(updateTaskProps({prio: input}, task));
+                // An empty field would send "" to the integer column
+                if (input !== '') dispatch(updateTaskProps({prio: Number(input)}, task));
                 break;
         }
         setTaskToEdit(null);
@@ -177,11 +178,11 @@ export default function TaskContainer(props){
                         <h3 className={styles.ulH3}>Done</h3>
                     {groupToDisplay.tasks
                         .map((task) => {
-                            if(task.done && task.id !== activeTask.id){
+                            if(task.done && task.id !== activeTask?.id){
                                 return (<li key={task.id} className={`${styles.taskLi} ${styles.doneLi}`}>
                                     <div className={styles.taskHeader}>
                                         <div className={styles.doneHeadDiv}>
-                                            <p style={{textDecoration: 'line-through'}} onClick={(e) => changePropHandler(e, task.id, 'name')}>{task['name']}</p>
+                                            <p style={{textDecoration: 'line-through'}} onClick={(e) => changePropHandler(e, 'name', task.id)}>{task['name']}</p>
                                             <input type="checkbox" checked onChange={()=>{setTaskPropHandler(!task.done, 'done', task)}} />
                                         </div>
                                     </div>

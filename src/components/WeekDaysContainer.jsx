@@ -16,7 +16,7 @@ export default function WeekDaysContainer(props){
     const today = new Date();
     const weekDates = Array.from(
         { length: 8 },
-        (_, i) => new Date(today.getTime() + i * 24 * 60 * 60 * 1000)
+        (_, i) => new Date(today.getFullYear(), today.getMonth(), today.getDate() + i)
     );
 
     function dayTaskList(date){

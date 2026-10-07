@@ -1,4 +1,4 @@
-import { LOGIN_SUCCESS, LOGOUT, SET_USER, REGISTER } from "./authActionTypes";
+import { LOGIN_SUCCESS, LOGOUT, SET_USER } from "./authActionTypes";
 import { apiFetch } from '../helperFunction';
 
 export const loginSuccess = (username, password) => {
@@ -69,16 +69,12 @@ export const setUser = () => {
 
 export const register = (username, display_name, email, birth_date, password) => {
     return async (dispatch) => {
-        const data = await apiFetch("/api/register", {
+        await apiFetch("/api/register", {
             method: "POST",
             body: JSON.stringify({ username, display_name, email, birth_date, password }),
         });
 
-        localStorage.setItem("token", data.token);
-
-        dispatch({
-            type: REGISTER,
-            payload: { data, token: data.token },
-        });
+        // The register endpoint returns no token, so sign in right away
+        await dispatch(loginSuccess(username, password));
     };
 }

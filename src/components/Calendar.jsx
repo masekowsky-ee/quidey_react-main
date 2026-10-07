@@ -39,7 +39,7 @@ export default function Calendar(props){
 
     const getTasksForDate = (dayOfMonth, monthAdd = monthsFromNow) => {
         const dayDate = dateFormatter(
-            new Date(displayDate.getFullYear(), now.getMonth() + monthAdd, dayOfMonth)
+            new Date(now.getFullYear(), now.getMonth() + monthAdd, dayOfMonth)
         );
         return tasks
             .filter(task => {

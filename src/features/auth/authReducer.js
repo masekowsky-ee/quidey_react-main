@@ -1,4 +1,4 @@
-import { LOGIN_SUCCESS, LOGOUT, SET_USER, REGISTER } from "./authActionTypes";
+import { LOGIN_SUCCESS, LOGOUT, SET_USER } from "./authActionTypes";
 
 const initialState = {
     token: localStorage.getItem('token') || null,
@@ -38,19 +38,6 @@ const authReducer = (state = initialState, action) => {
                     birth_date: action.payload[0].birth_date,
                 },
             };
-        case REGISTER:
-            return {
-                ...state,
-                token: action.payload.token,
-                user: {
-                    ...state.user,
-                    username: action.payload.data.username,
-                    display_name: action.payload.data.display_name,
-                    email: action.payload.data.email,
-                    birth_date: action.payload.data.birth_date,
-                },
-            };
-        
         default:
             return state;
     }
