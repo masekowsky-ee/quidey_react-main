@@ -3,18 +3,10 @@ import { apiFetch } from '../helperFunction';
 
 export const loginSuccess = (username, password) => {
     return async (dispatch) => {
-        const response = await fetch("/api/login", {
+        const data = await apiFetch("/api/login", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, password }),
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Login failed");
-        }
-
-        const data = await response.json();
 
         localStorage.setItem("token", data.token);
 
@@ -58,7 +50,6 @@ export const checkAuth = () => {
         } catch (err) {
             console.log(err);
             localStorage.removeItem("token");
-            localStorage.setItem("token", "hello");
             dispatch({ type: LOGOUT });
         }
     }
@@ -73,25 +64,15 @@ export const setUser = () => {
             type: SET_USER,
             payload: data,
         });
-
-        console.log("User data fetched and dispatched:", data);
     }
 }
 
 export const register = (username, display_name, email, birth_date, password) => {
     return async (dispatch) => {
-        const response = await fetch("/api/register", {
+        const data = await apiFetch("/api/register", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, display_name, email, birth_date, password }),
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Sign up failed");
-        }
-
-        const data = await response.json();
 
         localStorage.setItem("token", data.token);
 

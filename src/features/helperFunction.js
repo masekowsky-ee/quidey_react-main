@@ -12,7 +12,7 @@ export async function apiFetch(url, options = {}) {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Reqest Failed");
+        throw new Error(errorData.error || "Request failed");
     }
 
     return response.json();
