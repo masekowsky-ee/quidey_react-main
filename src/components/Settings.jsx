@@ -10,7 +10,7 @@ export default function Settings(props){
                 <h2 className={styles.settingsH2} >{t('general')}</h2>
                 <div className={styles.individualSettingDiv}>
                     <p>{`${t('language')} (${t('current')}: ${language === 'en' ? t('english') : t('german')})`}:</p>
-                    <button className={styles.settingBtn} onClick={()=>{setLanguage(language === 'de' ? 'en' : 'de')}}>
+                    <button onClick={()=>{setLanguage(language === 'de' ? 'en' : 'de')}}>
                         {language === 'de' ? t('english') : t('german')}
                     </button>
                 </div>  

@@ -4,13 +4,15 @@
   left: 0;
   height: 100vh;
   width: 250px;
-  background: #1a1a1a;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
   transform: translateX(-100%);
   transition: transform 0.3s ease-out;
   z-index: 1001;
   display: flex;
   flex-direction: column;
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .menuDiv.open {
@@ -18,28 +20,25 @@
 }
 
 .menuTitle {
-  color: white;
   margin-bottom: 20px;
-  border-bottom: 1px solid rgb(151, 151, 151);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 20px;
 }
 
 .menuItem {
-  color: white;
+  color: var(--text-h);
   text-decoration: none;
   margin-bottom: 10px;
-  font-size: 18px;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   padding: 10px 0;
+  transition: background-color var(--ease);
 }
 
 .menuItem:hover {
-  background-color: #333;
+  background-color: var(--surface-hover);
 }
 
 .overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  composes: overlay from './ui.module.css';
   z-index: 1000;
 }

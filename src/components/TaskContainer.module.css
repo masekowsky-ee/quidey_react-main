@@ -1,31 +1,34 @@
-
 .ulDiv{
-    background-color: rgb(49, 49, 49);
-    border: 1px solid rgb(151, 151, 151);
-    border-radius: 15px;
+    composes: panel from './ui.module.css';
     width: fit-content;
     max-width: 1000px;
     height: 350px;
     justify-self: center;
     margin-bottom: 1rem;
     position: relative;
-    overflow-x: auto;
-    overflow-y: auto;
+    overflow: auto;
 }
 
 .taskLi{
     display: grid;
     grid-template-columns: 2fr 3fr 1fr 4fr 5fr 7fr 5fr;
     gap: 0.5rem;
-    border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
     padding: 0;
     position: relative;
-    z-index: 10000!important;
-    pointer-events:auto;
+    z-index: 10000 !important;
+    pointer-events: auto;
     height: 3rem;
     justify-content: center;
     align-items: center;
+}
+
+.taskLi + .taskLi{
+    margin-top: 1rem;
+}
+
+.taskLi input:not([type='checkbox']) {
+    max-width: 5rem;
 }
 
 .doneLi{
@@ -43,65 +46,34 @@
     flex-direction: row;
     min-width: 115px;
     justify-content: space-between;
-}
-
-.taskLi input {
-    max-width: 5rem;
-}
-
-.taskLi + .taskLi{
-    margin-top: 1rem;
-    border-top: 1px solid gray;
+    align-items: center;
 }
 
 .h2{
-    color: white;
     margin: 1rem 0;
 }
 
 .ul{
     list-style-type: none;
     margin: 0;
-    padding: 0rem 0.75rem 0.75rem 1rem;
-    transition: all 0.2s ease;
+    padding: 0 0.75rem 0.75rem 1rem;
     display: flex;
     align-items: stretch;
     flex-direction: column;
     justify-content: flex-start;
     width: fit-content;
-    height: auto;
 }
 
-.startBtn{
-    all: unset;
-    height: 2rem;
-    width: 7rem;
+.ulH3{
+    width: 10rem;
     align-self: center;
-    background-color: rgb(14, 211, 14);
-    color: rgb(49, 49, 49);
-    font-weight: 800;
-    border: 1px solid white;
-    border-bottom: 3px solid white;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px black;
-    transition: all 0.2s ease;
-}
-
-.startBtn:hover{
-    transform: translateY(-3px);
-}
-
-.startBtn:active{
-    transform: translateY(3px);
 }
 
 .taskHeader{
     display: flex;
     flex-direction: row;
-    justify-self: flex-start;
     justify-content: flex-start;
     align-items: center;
-    text-align: center;
     margin: auto 0;
 }
 
@@ -115,79 +87,82 @@
     padding: 0 1rem;
     margin: 1rem 0;
 }
+
+.groupDescriptionDiv{
+    composes: panel from './ui.module.css';
+    margin: 0.5rem 0;
+    padding: 0.5rem 0;
+    width: 95%;
+    max-width: 600px;
+    justify-self: center;
+}
+
+.groupDescriptionDiv p,
+.groupDescriptionDiv input{
+    width: 90%;
+    margin: 0;
+    justify-self: center;
+}
+
+/* Buttons in a row are joined into one segmented control */
 .btnDiv{
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
 }
-.text{
-    max-width: 5rem;
-}
+
 .btn{
-    max-width: 5rem;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    border: 2px solid grey;
-    border-right: none;
-    transition: all 0.2s ease;
+    padding: 0.25rem;
+    border-radius: 0;
 }
-.btn+.btn{
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+
+.btn:first-child{
+    border-top-left-radius: var(--radius-sm);
+    border-bottom-left-radius: var(--radius-sm);
+}
+
+.btn:last-child{
+    border-top-right-radius: var(--radius-sm);
+    border-bottom-right-radius: var(--radius-sm);
+}
+
+.btn + .btn{
     border-left: none;
 }
-.btn:not(:last-child) {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right: none;
-}
-.btn:hover{
-    transform: translateY(-2px);
-}
-.btn:active{
-    transform: translateY(2px);
-}
+
 .delete{
-    border-radius: 8px;
-    border: 2px solid grey;
+    border-radius: var(--radius-sm);
 }
-.expandDone, .collapseDone {
+
+.expandDone,
+.collapseDone{
+    composes: iconBtn from './ui.module.css';
     position: absolute;
     top: 0;
     right: 0;
-    height: 40px;
-    aspect-ratio: 1/1;
-    border-radius: 10px;
-    border: 2px solid lightgray;
-    box-shadow: 0 2px 5px black;
     margin: 5px;
-    transition: all 0.2s ease;
 }
 
-.expandDone:hover, .collapseDone:hover{
-    transform: translateY(-2px);
-}
-.expandDone:active, .collapseDone:active{
-    transform: translateY(2px);
-}
 .dragSvg{
     width: 2rem;
     height: 2rem;
-    margin: 0;
-    color: lightgray;
+    color: var(--text);
     pointer-events: auto;
+    cursor: grab;
 }
+
 .dragDiv{
     height: 2rem;
     align-self: center;
     justify-self: center;
-
 }
 
-.ulH3{
-    width: 10rem;
-    align-self: center;
+.assignGroupsDiv{
+    composes: overlay from './ui.module.css';
+    z-index: 10001;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
 }

@@ -4,9 +4,9 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.5rem 0;
-    background-color: rgb(43, 43, 43);
-    color: white;
-    border-bottom: 1px solid rgb(151, 151, 151);
+    background-color: var(--surface-bar);
+    color: var(--text-h);
+    border-bottom: 1px solid var(--border);
     position: fixed;
     width: 100%;
     height: 65px;
@@ -15,22 +15,10 @@
     z-index: 10;
 }
 
-.h1{
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin: 0 auto;
-}
-
 .btn{
-    all: unset;
-    height: 3rem;
+    composes: iconBtn from './ui.module.css';
     width: 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid white;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px black;
+    height: 3rem;
     margin: 0 1rem;
 }
 
@@ -47,7 +35,6 @@
 }
 
 .top{
-    margin-top: 0rem;
     opacity: 75%;
-    min-height: 0.75rem!important;
+    min-height: 0.75rem !important;
 }

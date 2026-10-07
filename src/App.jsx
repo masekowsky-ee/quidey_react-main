@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import {useTranslation} from './i18n/LanguageContext'
 import mockData from './components/mockData'
-import styles from './App.module.css';
 import Header from './components/Header.jsx';
 import Home from './components/home.jsx'
 import Menu from './components/menu.jsx'
@@ -96,7 +95,7 @@ function App(){
   return (
     <div>
       {!signedIn && <Profile t={t} />}
-        <div className={styles.header}>
+        <div>
           <Header activeTimer={activeTimer} t={t} showMenu={() => setShowMenu(true)} percentWidth={percentWidth}/>
         </div>
         {signedIn && <section>

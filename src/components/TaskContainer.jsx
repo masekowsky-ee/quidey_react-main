@@ -91,9 +91,9 @@ export default function TaskContainer(props){
     return (
         <div>
             {assignGroups && (
-                <div style={{position:'absolute', zIndex:"1000", width: '100%', height: 'auto', backgroundColor:'black', display: 'flex', flexDirection: 'column'}}>
+                <div className={styles.assignGroupsDiv}>
                     {groups.map(group => group.name !== 'all' ? (
-                        <button key={group.name} style={{margin: '10px'}} onClick={() => handleAddToGroup(group.id)}>
+                        <button key={group.name} onClick={() => handleAddToGroup(group.id)}>
                             {group.name}
                         </button>
                     ) : null)}

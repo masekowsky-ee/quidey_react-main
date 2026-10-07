@@ -1,15 +1,13 @@
 .div{
+    composes: page from './ui.module.css';
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 100%;
-    margin-top: 80px;
 }
 
 .h2{
-    color: lightgray;
     margin: 2rem;
     font-size: 1.5rem;
 }

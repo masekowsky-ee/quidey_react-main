@@ -117,7 +117,7 @@ export default function Profile(props){
                 <div>{signState === 0 && 
                     <div id="signInDiv" className={styles.signInDiv}>
                         <div className={styles.btnDiv}>
-                            <button className={`${styles.signBtn} ${styles.signIn}`} onClick={setSignStateHandler}>{t(`${signArr[signState + 1] || signArr[0]}`)}</button>
+                            <button className={styles.signBtn} onClick={setSignStateHandler}>{t(`${signArr[signState + 1] || signArr[0]}`)}</button>
                         </div>
                         <h2 className={styles.h2}>{t(signArr[signState])}</h2>
                         <form className={styles.signInForm} onSubmit={(e) => handleSignIn(e, username, password)} >
@@ -133,7 +133,7 @@ export default function Profile(props){
                     ||
                     <div id="signUpDiv" className={styles.signInDiv}>
                         <div className={styles.btnDiv}>
-                            <button className={`${styles.signBtn} ${styles.signIn}`} onClick={setSignStateHandler}>{t(`${signArr[signState + 1] || signArr[0]}`)}</button>
+                            <button className={styles.signBtn} onClick={setSignStateHandler}>{t(`${signArr[signState + 1] || signArr[0]}`)}</button>
                         </div>
                         <h2 className={styles.h2}>{t(signArr[signState])}</h2>
                         <form className={styles.signInForm} onSubmit={(e) => handleSignUp(e, email, birthDate, displayName, username, password, passwordValidate)} >

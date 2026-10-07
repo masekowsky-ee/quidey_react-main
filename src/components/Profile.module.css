@@ -1,35 +1,25 @@
 .div{
+    composes: sheet from './ui.module.css';
     width: fit-content;
     padding: 1rem;
     justify-self: center;
-    height: 100%;
-    background-color: rgb(49, 49, 49);
     align-items: center;
     justify-content: center;
     display: flex;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    border: 1px solid rgb(143, 143, 143);
-    border-top: none;
-    margin-top: 80px;
+    margin-top: var(--header-h);
 }
 
 .h2{
     margin: 0.5rem;
     margin-top: 1.5rem;
     user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
 }
 
 .signInDiv{
+    composes: panel from './ui.module.css';
     width: 50%;
     max-width: 500px;
     min-width: 350px;
-    border: 1px solid rgb(151, 151, 151);
-    border-radius: 15px;
-    align-self: center;
-    justify-self: center;
     align-items: center;
     justify-content: center;
     display: flex;
@@ -50,59 +40,48 @@
 }
 
 .input{
-    margin: 0;
     margin-bottom: 0.5rem;
     width: 65%;
 }
 
 .label{
     align-self: flex-start;
-    margin: 0;
     margin-left: 18%;
     font-size: 0.7rem;
-    padding: 0;
+    color: var(--text-muted);
     user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
+}
+
+.Btn{
+    composes: btnPrimary from './ui.module.css';
+    margin-top: 0.5rem;
 }
 
 .profilePicture{
     width: 150px;
     height: 150px;
-    border-radius: 75px;
-    border: 2px solid rgb(161, 161, 161);
+    border-radius: 50%;
+    border: 2px solid var(--border-strong);
     margin: 1rem;
 }
 
 .btnDiv{
     display: flex;
     flex-direction: row;
-    align-self: center;
     justify-content: center;
     width: 75%;
 }
 
+/* Switches between the sign-in and sign-up form */
 .signBtn{
-    all: unset;
     width: 50%;
-    background-color: rgb(161, 161, 161);
-    font-size: 0.6rem;
-    color: rgb(49, 49, 49);
-    border-radius: 5px;
-    user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    align-self: center;
-    justify-self: center;
     margin-top: 1rem;
+    font-size: 0.7rem;
+    user-select: none;
+    background-color: var(--border-strong);
+    color: var(--primary-text);
 }
 
-.signIn + .signIn {
-    border-top-left-radius: 0;
+.signBtn:hover{
+    background-color: var(--text-h);
 }
-
-.signIn{
-
-}
-
-.signUp{}

@@ -37,7 +37,7 @@ export default function TaskForm(props){
             <button className={styles.closeBtn} onClick={()=>{setCreateTask(false)}}>
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
             </button>
-            <h2 className={styles.h2}>{t('createTaskH2')}</h2>
+            <h2>{t('createTaskH2')}</h2>
             <form className={`${styles.form}`}onSubmit={handleSubmit}>
                 <input className={styles.input} type="text" placeholder={t('taskName')} />
                 <input className={styles.input} type="date" />

@@ -1,0 +1,102 @@
+/* Shared building blocks. Pull them into a component class with
+   `composes: panel from './ui.module.css';` instead of copying the rules. */
+
+/* Pushes page content below the fixed header */
+.page {
+    padding-top: var(--header-h);
+}
+
+/* Rounded dark box */
+.panel {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+/* Box that hangs from the header: no top border, rounded bottom corners */
+.sheet {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+}
+
+/* Full-width strip with a line above and below */
+.band {
+    width: 100%;
+    background-color: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    box-sizing: border-box;
+}
+
+/* Dimmed full-screen backdrop */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--overlay);
+}
+
+/* Green call-to-action button */
+.btnPrimary {
+    min-width: 7rem;
+    height: 2.25rem;
+    padding: 0 1rem;
+    background-color: var(--primary);
+    color: var(--primary-text);
+    font-weight: 800;
+    border: 1px solid var(--border-strong);
+    border-bottom-width: 3px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+}
+
+.btnPrimary:hover {
+    background-color: var(--primary);
+    filter: brightness(1.1);
+}
+
+/* Square button that holds one icon. Self-contained so it also works on links. */
+.iconBtn {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    color: var(--text);
+    background-color: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--ease), background-color var(--ease);
+}
+
+.iconBtn:hover {
+    background-color: var(--surface-hover);
+    transform: translateY(-2px);
+}
+
+.iconBtn:active {
+    transform: translateY(1px);
+}
+
+/* Round variant */
+.iconBtnRound {
+    composes: iconBtn;
+    border-radius: 50%;
+}
+
+/* Button that only shows its background on hover */
+.ghostBtn {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.ghostBtn:hover {
+    background-color: var(--surface-hover);
+    border-color: transparent;
+    transform: none;
+}
