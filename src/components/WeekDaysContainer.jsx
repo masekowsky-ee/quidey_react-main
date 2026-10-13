@@ -1,6 +1,8 @@
  import styles from './WeekDaysContainer.module.css';
 import { Link } from  'react-router-dom';
 import { useSelector } from "react-redux"
+import {useTranslation} from '../i18n/LanguageContext'
+
 
 const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
@@ -8,8 +10,8 @@ function toDateOnly(date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-export default function WeekDaysContainer(props){
-    const { t } = props;
+export default function WeekDaysContainer(){
+    const {t} = useTranslation();
 
     const tasks = useSelector(state => state.task.tasks);
 

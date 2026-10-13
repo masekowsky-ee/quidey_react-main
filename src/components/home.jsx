@@ -12,7 +12,7 @@ import TimerContainer from './TimerContainer.jsx';
 import {useSelector} from 'react-redux';
 
 export default function Home(props){
-    const {t, groups, setGroups, setSessionParams, setCustomError, showDone, setShowDone, setPercentWidth, percentWidth, setActiveTimer} = props;
+    const {t, setCustomError, showDone, setShowDone, setPercentWidth, percentWidth, setActiveTimer} = props;
 
     const tasks = useSelector(state => state.task.tasks);
 
@@ -113,12 +113,10 @@ export default function Home(props){
                 workedTasks={workedTasks}
                 setWorkedTasks={setWorkedTasks}
                 setTasks={props.setTasks}
-                setSessionParams={setSessionParams}
             />
             <GroupBtnContainer 
                 setCreateGroup={setCreateGroup} 
-                t={t} groups={groups} 
-                setGroups={setGroups} 
+                t={t}
                 setGroupToDisplayName={setGroupToDisplayName} 
                 groupToDisplayName={groupToDisplayName} 
             />
@@ -129,7 +127,6 @@ export default function Home(props){
                     working={false}
                     showDone={showDone}
                     setShowDone={setShowDone}
-                    setSessionParams={setSessionParams}
                     tasks={props.tasks}
                     groupToDisplayName={groupToDisplayName}
                     setTasks={props.setTasks}

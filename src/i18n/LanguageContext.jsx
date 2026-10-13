@@ -1,15 +1,27 @@
-import { createContext, useState, useContext } from 'react'
+import { createContext, useContext } from 'react'
 import  translations  from './translations'
+import {useSelector, useDispatch} from 'react-redux'
+import {setLanguage} from '../features/settings/settingsAction'
 
 const LanguageContext = createContext()
 
 export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState('de')
+  const language = useSelector((state) => state.settings.language);
 
-  const t = (key, second = null) => second || second === 0 ? translations[language]?.[key][second] : translations[language]?.[key] ?? key
+  const dispatch = useDispatch();
+
+  const setLanguageFunc = (languageKey) => {
+    dispatch(setLanguage(languageKey))
+  }
+
+  const t = (key, second = null) => {
+    const value = translations[language]?.[key]
+    if (second !== null && second !== undefined) return value?.[second] ?? key
+    return value ?? key
+  }
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguageFunc,  t }}>
       {children}
     </LanguageContext.Provider>
   )

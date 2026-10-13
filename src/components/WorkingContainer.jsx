@@ -3,11 +3,14 @@ import styles from './WorkingPage.module.css'
 import TimerContainer from "./TimerContainer.jsx";
 import { useSelector, useDispatch } from "react-redux";
 import { createNote, deleteNote, editNote } from "../features/tasks/taskAction.js";
+import {useTranslation} from '../i18n/LanguageContext'
 
 export default function WorkingContainer (props) {
-    const { t, setTasks, dropZoneRef, activeTask, setActiveTask, workedTasks, setWorkedTasks, setSessionParams } = props;
+    const { setTasks, dropZoneRef, activeTask, setActiveTask, workedTasks, setWorkedTasks, setSessionParams } = props;
 
         const dispatch = useDispatch();
+
+        const {t} = useTranslation();
 
         const sessionParams = useSelector(state => state.session.sessionParams);
 

@@ -1,19 +1,17 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
-import {useTranslation} from './i18n/LanguageContext'
-import mockData from './components/mockData'
 import Header from './components/Header.jsx';
 import Home from './components/home.jsx'
 import Menu from './components/menu.jsx'
 import Profile from './components/profile.jsx'
 import Settings from './components/Settings.jsx'
-import WorkingPage from './components/WorkingPage.jsx';
 import CustomError from './components/CustomError.jsx';
 import History from './components/History.jsx';
 import Calendar from  './components/Calendar.jsx';
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth, setUser } from "./features/auth/authAction";
 import { fetchTaskState } from "./features/tasks/taskAction.js"
+import {useTranslation} from './i18n/LanguageContext'
 
 function App(){
   const dispatch = useDispatch();
@@ -29,59 +27,10 @@ function App(){
 
   useEffect(() => {
     if (signedIn) {
-      dispatch(fetchTaskState());
       dispatch(setUser());
+      dispatch(fetchTaskState());
     }
   }, [signedIn, dispatch]);
-
-  const { t, language, setLanguage } = useTranslation();
-
-  const [groups, setGroups] = useState(() => {
-    try {
-      const stored = localStorage.getItem("groups");
-      return stored ? JSON.parse(stored) : mockData.groups;
-    } catch {
-      return mockData.groups;
-    }
-  });
-
-  const [tasks, setTasks] = useState(() => {
-    try {
-      const stored = localStorage.getItem("tasks");
-      return stored ? JSON.parse(stored) : mockData.tasks;
-    } catch {
-      return mockData.tasks;
-    }
-  });
-
-  const [showMenu, setShowMenu] = useState(false);
-
-  const [workedSessions, setWorkedSessions] = useState(() => {
-      try {
-          const stored = localStorage.getItem("workedSessions");
-          if (!stored) return [];
-          const parsed = JSON.parse(stored);
-          return parsed.map(session => ({ ...session, date: new Date(session.date) }));
-      } catch {
-          return [];
-      }
-  });
-
-  const [sessionParams, setSessionParams] = useState({ group: null, time: null, breaks: null });
-
-  const [customError, setCustomError] = useState({ bool: false, message: '' });
-
-  const [showDone, setShowDone] = useState(false);
-
-  useEffect(()=>{
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  },[tasks]);
-  useEffect(()=>{
-    localStorage.setItem("groups", JSON.stringify(groups));
-  },[groups]);
-  useEffect(()=>{
-    localStorage.setItem("workedSessions", JSON.stringify(workedSessions));
-  },[workedSessions]);
 
   useEffect(() => {
     fetch("http://localhost:3000/api/hello")
@@ -92,22 +41,25 @@ function App(){
 
   const [activeTimer, setActiveTimer] = useState(false);
 
+  const { setLanguage } = useTranslation();
+
+
   return (
     <div>
-      {!signedIn && <Profile t={t} />}
+      {!signedIn && <Profile/>}
         <div>
-          <Header activeTimer={activeTimer} t={t} showMenu={() => setShowMenu(true)} percentWidth={percentWidth}/>
+          <Header activeTimer={activeTimer} percentWidth={percentWidth}/>
         </div>
         {signedIn && <section>
-        <Menu t={t} isOpen={showMenu} onClose={() => setShowMenu(false)} />
-        <CustomError t={t} customError={customError} setCustomError={setCustomError} />
+        <Menu/>
+        <CustomError/>
         <Routes>
-          <Route path="/" element={<Home setActiveTimer={setActiveTimer} setPercentWidth={setPercentWidth} percentWidth={percentWidth} t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} setSessionParams={setSessionParams} setCustomError={setCustomError} />} />
-          <Route path="/working" element={<WorkingPage setWorkedSessions={setWorkedSessions} sessionParams={sessionParams} t={t} showDone={showDone} setShowDone={setShowDone} tasks={tasks} setTasks={setTasks} groups={groups} setGroups={setGroups} setSessionParams={setSessionParams} setCustomError={setCustomError} />} />
-          <Route path="/calendar" element={<Calendar t={t} setCustomError={setCustomError} tasks={tasks} />} />
-          <Route path="/history" element={<History workedSessions={workedSessions} t={t} tasks={tasks} groups={groups} setCustomError={setCustomError} />} />
-          <Route path="/profile" element={<Profile t={t} />} />
-          <Route path="/settings" element={<Settings t={t} setLanguage={setLanguage} language={language} setCustomError={setCustomError} />} />
+          <Route path="/" element={<Home setActiveTimer={setActiveTimer} setPercentWidth={setPercentWidth} percentWidth={percentWidth}/>} />
+          {/*<Route path="/working" element={<WorkingPage t={t}  />} /> */}
+          <Route path="/calendar" element={<Calendar/>} />
+          <Route path="/history" element={<History  />} />
+          <Route path="/profile" element={<Profile/>} />
+          <Route path="/settings" element={<Settings setLanguage={setLanguage}/>} />
         </Routes>
       </section>
       }

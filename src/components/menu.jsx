@@ -1,8 +1,18 @@
 import { Link } from 'react-router-dom';
 import styles from './Menu.module.css';
+import {useSelector, useDispatch} from 'react-redux'
+import {useTranslation} from '../i18n/LanguageContext'
+import {setShowMenu} from '../features/settings/settingsAction';
 
-export default function Menu(props){
-    const { isOpen, onClose, t } = props;
+export default function Menu(){
+    const isOpen = useSelector((state) => state.settings.showMenu);
+    const { t } = useTranslation();
+
+    const dispatch = useDispatch();
+
+    const onClose = () => {
+        dispatch(setShowMenu);
+    }
 
     return (
         <>

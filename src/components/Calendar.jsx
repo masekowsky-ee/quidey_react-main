@@ -1,10 +1,11 @@
 import styles from './Calendar.module.css';
 import { useState } from 'react';
 import { useSelector } from "react-redux"
+import {useTranslation} from '../i18n/LanguageContext'
 
-export default function Calendar(props){
 
-    const {t} = props;
+export default function Calendar(){
+    const { t } = useTranslation();
 
     const tasks = useSelector(state => state.task.tasks)
 

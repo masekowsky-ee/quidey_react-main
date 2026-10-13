@@ -1,8 +1,10 @@
 import styles from './History.module.css';
 import { useSelector } from 'react-redux';
+import {useTranslation} from '../i18n/LanguageContext'
 
-export default function History(props){
-    const { t } = props;
+
+export default function History(){
+    const { t } = useTranslation();
 
     const workedSessionData = useSelector(state => state.session.workedSessionData);
 

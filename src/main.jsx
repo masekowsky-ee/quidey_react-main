@@ -10,11 +10,11 @@ import store from "./features/store";
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <LanguageProvider>
-        <Provider store={store}>
+      <Provider store={store}>
+        <LanguageProvider>
           <App />
-        </Provider>
-      </LanguageProvider>
+        </LanguageProvider>
+      </Provider>
     </BrowserRouter>
   </StrictMode>,
 )

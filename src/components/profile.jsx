@@ -3,10 +3,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess, logout, register } from "../features/auth/authAction";
 import { useState } from "react";
 import CustomError from './CustomError.jsx'
+import {useTranslation} from '../i18n/LanguageContext'
 
-
-export default function Profile(props){
-    const { t } = props;
+export default function Profile(){
+    const { t } = useTranslation();
 
     const token = useSelector((state) => state.auth.token);
     const signedIn = Boolean(token);

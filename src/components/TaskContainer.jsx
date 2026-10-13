@@ -3,11 +3,12 @@ import styles from './TaskContainer.module.css';
 import { useSelector, useDispatch } from 'react-redux';
 import {deleteTask, deleteGroupTasks, addGroupTasks, editGroup, updateTaskProps} from '../features/tasks/taskAction'
 import { createPortal } from 'react-dom';
-
+import {useTranslation} from '../i18n/LanguageContext'
 
 export default function TaskContainer(props){
-    const { t, showDone, setShowDone, working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask } = props;
-
+    const { showDone, setShowDone, working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask } = props;
+    
+    const {t} = useTranslation();
     const dispatch = useDispatch();
 
     const tasks = useSelector(state => state.task.tasks);
