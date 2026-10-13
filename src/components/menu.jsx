@@ -11,7 +11,7 @@ export default function Menu(){
     const dispatch = useDispatch();
 
     const onClose = () => {
-        dispatch(setShowMenu);
+        dispatch(setShowMenu());
     }
 
     return (

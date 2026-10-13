@@ -4,6 +4,7 @@ import {useSelector, useDispatch} from 'react-redux';
 import {setLanguage} from '../features/settings/settingsAction';
 
 
+
 export default function Settings(){
     const { t } = useTranslation();
     const language = useSelector((state) => state.settings.language);
