@@ -2,7 +2,7 @@
 import { Link } from  'react-router-dom';
 import { useSelector } from "react-redux"
 import {useTranslation} from '../i18n/LanguageContext'
-
+ 
 
 const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
@@ -33,7 +33,7 @@ export default function WeekDaysContainer(){
         }
 
         return daysTasks.map((task) => (
-            <li key={task.index} 
+            <li key={task.id} 
                 className={`${task.done ? styles.done : styles.notDone}`}
             >
                 {task.name}

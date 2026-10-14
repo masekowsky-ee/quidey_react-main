@@ -24,7 +24,7 @@ export const logout = () => {
     };
 };
 
-export const checkAuth = () => {3
+export const checkAuth = () => {
     return async (dispatch) => {
         const token = localStorage.getItem("token");
 

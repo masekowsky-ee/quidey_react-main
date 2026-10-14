@@ -9,10 +9,12 @@ import GroupBtnContainer from './GroupBtnContainer.jsx';
 import WorkingContainer from './WorkingContainer.jsx';
 import TimerContainer from './TimerContainer.jsx';
 
-import {useSelector} from 'react-redux';
+import {useSelector, useDispatch} from 'react-redux';
 
 export default function Home(props){
-    const {t, setCustomError, showDone, setShowDone, setPercentWidth, percentWidth, setActiveTimer} = props;
+    const {t, setCustomError, setPercentWidth, percentWidth, setActiveTimer} = props;
+
+    const dispatch = useDispatch();
 
     const tasks = useSelector(state => state.task.tasks);
 
@@ -28,7 +30,7 @@ export default function Home(props){
     // --- Gehobener State für Drag & Drop + aktive Task/Worked Tasks ---
     const starterTask = tasks[0] || null;
     const [activeTask, setActiveTask] = useState(starterTask);
-    const [workedTasks, setWorkedTasks] = useState(starterTask ? [{name: starterTask.name, index: starterTask.index, time: 0}] : [null]);
+    const [workedTasks, setWorkedTasks] = useState(starterTask ? [{name: starterTask.name, id: starterTask.id, time: 0}] : [null]);
 
     const [draggedTask, setDraggedTask] = useState(null);
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -76,7 +78,7 @@ export default function Home(props){
             if (isOverDropZone) {
                 setActiveTask(currentTask);
                 console.log(currentTask)
-                setWorkedTasks(prev => prev.find(t => t?.index === currentTask.index) ? prev : [...prev, {name: currentTask.name, time: 0, index: currentTask.index}]);
+                setWorkedTasks(prev => prev.find(t => t?.id === currentTask.id) ? prev : [...prev, {name: currentTask.name, time: 0, id: currentTask.id}]);
             }
         }
 
@@ -102,8 +104,8 @@ export default function Home(props){
         <div className={styles.div}>
             <WeekDaysContainer t={t} tasks={tasks} />
             {(createTask || createGroup) && <div className={styles.formsDiv}>
-                {createTask && <TaskForm setCreateTask={setCreateTask} setCustomError={setCustomError} setTasks={props.setTasks} t={props.t} setGroups={props.setGroups} taskIndexCounter={props.taskIndexCounter} setTaskIndexCounter={props.setTaskIndexCounter} />}
-                {createGroup && <GroupForm setCreateGroup={setCreateGroup} t={props.t} setGroups={props.setGroups} groups={props.groups} setCustomError={setCustomError} />}
+                {createTask && <TaskForm setCreateTask={setCreateTask}/>}
+                {createGroup && <GroupForm setCreateGroup={setCreateGroup}/>}
             </div>}
             <WorkingContainer
                 t={t}
@@ -125,8 +127,6 @@ export default function Home(props){
                     activeTask={activeTask}
                     setCreateTask={setCreateTask}
                     working={false}
-                    showDone={showDone}
-                    setShowDone={setShowDone}
                     tasks={props.tasks}
                     groupToDisplayName={groupToDisplayName}
                     setTasks={props.setTasks}

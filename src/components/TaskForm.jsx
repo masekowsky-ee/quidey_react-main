@@ -1,11 +1,17 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { addTask } from '../features/tasks/taskAction'
 import styles from './Form.module.css';
+import {useTranslation} from '../i18n/LanguageContext';
+import {setCustomError} from '../features/settings/settingsAction';
+
 
 export default function TaskForm(props){
-    const {t, setCustomError, setCreateTask} = props;
+    const {setCreateTask} = props;
 
     const dispatch = useDispatch();
+
+    const { t } = useTranslation();
+
 
     const groupToDisplay = useSelector((state)=>state.task.groupToDisplay)
 
@@ -27,7 +33,7 @@ export default function TaskForm(props){
             e.target[3].value = '';
             setCreateTask(false);
         } else {
-            setCustomError({bool: true, message: t('dateNameTaskError')})
+            dispatch( setCustomError({bool: true, message: t('dateNameTaskError') }) );
         }
         console.log(groupToDisplay);
     }

@@ -2,3 +2,4 @@ export const SET_SHOW_MENU = "SET_SHOW_MENU";
 export const SET_SHOW_DONE_TASKS = "SET_SHOW_DONE_TASKS";
 export const SET_CUSTOM_ERROR = "SET_CUSTOM_ERROR";
 export const SET_LANGUAGE = "SET_LANGUAGE";
+export const SET_SHOW_FORMS = "SET_SHOW_FORMS";

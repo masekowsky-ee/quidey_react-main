@@ -1,11 +1,15 @@
 import styles from './Form.module.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { addGroup } from '../features/tasks/taskAction';
+import {useTranslation} from '../i18n/LanguageContext';
+import {setCustomError} from '../features/settings/settingsAction';
 
 export default function GroupForm(props){
-    const {t, setCustomError, showForms, setCreateGroup} = props;
+    const {setCreateGroup} = props;
 
     const dispatch = useDispatch();
+
+    const { t } = useTranslation();
 
     const groups = useSelector(state => state.task.groups);
 
@@ -19,7 +23,7 @@ export default function GroupForm(props){
             e.target[1].value = '';
             setCreateGroup(false);
         } else{
-            setCustomError({bool: true, message: t('groupError')})
+            dispatch(setCustomError({bool: true, message: t('groupError')}))
         }
     }
 

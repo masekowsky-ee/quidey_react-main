@@ -68,7 +68,7 @@ export default function Calendar(){
     const taskLiReturner = (dayOfMonth) => {
         return getTasksForDate(dayOfMonth)
             .map(task => (
-                <li key={task.index}>{task.name}</li>
+                <li key={task.id}>{task.name}</li>
             ));
     }
 

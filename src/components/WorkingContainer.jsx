@@ -1,18 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import styles from './WorkingPage.module.css'
-import TimerContainer from "./TimerContainer.jsx";
 import { useSelector, useDispatch } from "react-redux";
 import { createNote, deleteNote, editNote } from "../features/tasks/taskAction.js";
 import {useTranslation} from '../i18n/LanguageContext'
 
 export default function WorkingContainer (props) {
-    const { setTasks, dropZoneRef, activeTask, setActiveTask, workedTasks, setWorkedTasks, setSessionParams } = props;
+    const {dropZoneRef, activeTask, setWorkedTasks } = props;
 
         const dispatch = useDispatch();
 
         const {t} = useTranslation();
-
-        const sessionParams = useSelector(state => state.session.sessionParams);
 
         const notes = useSelector(state => state.task.notes);
         console.log(notes);
@@ -32,7 +29,7 @@ export default function WorkingContainer (props) {
         } */
 
         useEffect(()=>{
-            setWorkedTasks(prev => prev.map(p => p?.index === activeTask?.index ? {...p, time: p?.time + 1} : p))
+            setWorkedTasks(prev => prev.map(p => p?.id === activeTask?.id ? {...p, time: p?.time + 1} : p))
         }, [workedTime, activeTask, setWorkedTasks])
 
         const noteInputRef = useRef(null);
@@ -53,8 +50,8 @@ export default function WorkingContainer (props) {
             setEditNoteState(false);
             console.log(newNote);
         }
-        const handleDeleteNote = (noteIndex) => {
-            dispatch(deleteNote(activeTask.id, noteIndex));
+        const handleDeleteNote = (noteId) => {
+            dispatch(deleteNote(activeTask.id, noteId));
         }
 
         const handleEditNote = (e, noteId) => {
