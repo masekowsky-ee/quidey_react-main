@@ -2,25 +2,56 @@
     composes: panel from './ui.module.css';
     width: fit-content;
     max-width: 1000px;
-    height: 350px;
+    min-height: 15rem; /* keeps a sensible size when empty or nearly empty */
+    max-height: 70vh; /* grows with its tasks, scrolls only for very long lists */
+    box-sizing: border-box;
     justify-self: center;
     margin-bottom: 1rem;
     position: relative;
     overflow: auto;
 }
 
+/* All cells of a task share one grid row; extra cells (e.g. the drag handle
+   while working) get their own column instead of wrapping to a new row.
+   Long names/descriptions wrap and the row grows, border included. */
 .taskLi{
     display: grid;
-    grid-template-columns: 2fr 3fr 1fr 4fr 5fr 7fr 5fr;
+    /* name and description share the free space (wrapping below 8rem); everything else always fits */
+    grid-template-columns: auto minmax(8rem, 3fr) auto auto auto minmax(8rem, 7fr) auto;
+    grid-auto-flow: column;
+    grid-auto-columns: auto;
     gap: 0.5rem;
     border-bottom: 1px solid var(--border);
     padding: 0;
     position: relative;
-    z-index: 10000 !important;
     pointer-events: auto;
-    height: 3rem;
+    min-height: 3rem;
+    padding: 0.4rem 0;
+    box-sizing: border-box;
     justify-content: center;
     align-items: center;
+    white-space: nowrap;
+}
+
+.taskLi > *{
+    min-width: 0;
+}
+
+.taskLi p{
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+.prioDiv{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.prioDiv input{
+    width: 3.5rem;
 }
 
 .taskLi + .taskLi{
@@ -49,10 +80,6 @@
     align-items: center;
 }
 
-.h2{
-    margin: 1rem 0;
-}
-
 .ul{
     list-style-type: none;
     margin: 0;
@@ -64,9 +91,15 @@
     width: fit-content;
 }
 
+/* Small uppercase label at the top of the To Do / Done panels */
 .ulH3{
-    width: 10rem;
-    align-self: center;
+    align-self: flex-start;
+    margin: 1rem 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
 }
 
 .taskHeader{
@@ -77,10 +110,14 @@
     margin: auto 0;
 }
 
+.taskHeader p{
+    text-align: left;
+}
+
 .outerUlDiv{
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     flex-wrap: wrap;
     gap: 1rem;
@@ -104,43 +141,81 @@
     justify-self: center;
 }
 
-/* Buttons in a row are joined into one segmented control */
 .btnDiv{
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.btn{
-    padding: 0.25rem;
-    border-radius: 0;
+/* Compact single-line button that fits the 3rem task row */
+.assignBtn{
+    height: 2rem;
+    padding: 0 0.7rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
 }
 
-.btn:first-child{
-    border-top-left-radius: var(--radius-sm);
-    border-bottom-left-radius: var(--radius-sm);
+.deleteBtn{
+    composes: deleteBtn from './ui.module.css';
 }
 
-.btn:last-child{
-    border-top-right-radius: var(--radius-sm);
-    border-bottom-right-radius: var(--radius-sm);
+/* "Tasks" title with its actions on one line */
+.sectionHead{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin: 1.5rem 1rem 1rem;
 }
 
-.btn + .btn{
-    border-left: none;
+.sectionTitle{
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
 }
 
-.delete{
-    border-radius: var(--radius-sm);
+/* Nested so the size beats the global icon-button rule */
+.sectionHead > .addBtn{
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    corner-shape: round;
+    background-color: var(--surface);
+    border: 1px solid var(--btn-border);
 }
 
-.expandDone,
-.collapseDone{
-    composes: iconBtn from './ui.module.css';
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 5px;
+/* Shows/hides the Done list; count in a small badge */
+.doneToggle{
+    gap: 0.5rem;
+    padding: 0.25rem 0.4rem 0.25rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.doneToggleOn{
+    color: var(--text-h);
+    border-color: color-mix(in srgb, var(--primary) 50%, transparent);
+}
+
+.doneCount{
+    min-width: 1.4rem;
+    padding: 0 0.35rem;
+    box-sizing: border-box;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.4rem;
+    text-align: center;
+    color: var(--primary-text);
+    background-color: var(--border-strong);
+    border-radius: 999px;
+}
+
+.doneToggleOn .doneCount{
+    background-color: var(--primary);
 }
 
 .dragSvg{
@@ -159,10 +234,87 @@
 
 .assignGroupsDiv{
     composes: overlay from './ui.module.css';
-    z-index: 10001;
+    z-index: var(--z-modal);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
+    padding: 1rem;
+}
+
+/* ---------- Tablet & phone: each task becomes a small card ----------
+   Cell order in a row: 1 drag handle, 2 name, 3 checkbox, 4 due date,
+   5 priority, 6 description, 7 buttons, (8 drag handle while working) */
+@media (max-width: 900px) {
+    .outerUlDiv{
+        padding: 0 0.75rem;
+    }
+
+    /* no inner scrolling on touch screens; the page scrolls instead */
+    .ulDiv{
+        width: 100%;
+        max-width: 640px;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .ul{
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0 0.75rem 0.75rem;
+    }
+
+    .taskLi{
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-auto-flow: row;
+        column-gap: 0.75rem;
+        row-gap: 0.35rem;
+        padding: 0.75rem 0;
+    }
+
+    .taskLi + .taskLi{
+        margin-top: 0;
+    }
+
+    .taskLi > :nth-child(1){ grid-area: 1 / 1; }                       /* drag handle */
+    .taskLi > :nth-child(2){ grid-area: 1 / 2; font-weight: 600; }     /* name */
+    .taskLi > :nth-child(3){ grid-area: 1 / 3; justify-self: end; }    /* checkbox */
+    .taskLi > :nth-child(4){ grid-area: 2 / 2; justify-self: start; }  /* due date */
+    .taskLi > :nth-child(5){ grid-area: 2 / 3; justify-self: end; }    /* priority */
+    .taskLi > :nth-child(6){                                           /* description */
+        grid-area: 3 / 2 / 4 / 4;
+        margin-left: 0 !important; /* overrides the inline desktop indent */
+        color: var(--text-muted);
+    }
+    .taskLi > :nth-child(7){ grid-area: 4 / 1 / 5 / 4; }              /* buttons */
+    .taskLi > :nth-child(8){ grid-area: 1 / 3; }                       /* drag handle while working */
+
+    .taskLi > :nth-child(4),
+    .prioDiv{
+        font-size: 0.85rem;
+    }
+
+    .btnDiv{
+        justify-content: flex-end;
+    }
+
+    .doneLi{
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .sectionHead{
+        margin: 1.25rem 0.75rem 0.75rem;
+    }
+
+    .sectionTitle{
+        font-size: 1.25rem;
+    }
+
+    .assignBtn{
+        flex: 1;
+    }
 }

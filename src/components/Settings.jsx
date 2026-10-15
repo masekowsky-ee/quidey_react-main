@@ -3,7 +3,10 @@ import {useTranslation} from '../i18n/LanguageContext'
 import {useSelector, useDispatch} from 'react-redux';
 import {setLanguage} from '../features/settings/settingsAction';
 
-
+const LANGUAGES = [
+    { code: 'de', label: 'german' },
+    { code: 'en', label: 'english' },
+];
 
 export default function Settings(){
     const { t } = useTranslation();
@@ -11,19 +14,26 @@ export default function Settings(){
     const dispatch = useDispatch();
 
     return (
-        <div className={styles.div}>
-            <h1 className={styles.settingsH1} >{t('settings')}</h1>
-            <div className={styles.settingsSectionDiv} >
-                <h2 className={styles.settingsH2} >{t('general')}</h2>
-                <div className={styles.individualSettingDiv}>
-                    <p>{`${t('language')} (${t('current')}: ${language === 'en' ? t('english') : t('german')})`}:</p>
-                    <button onClick={()=>{
-                        dispatch(setLanguage(language === 'de' ? 'en' : 'de'))
-                        }}>
-                        {language === 'de' ? t('english') : t('german')}
-                    </button>
-                </div>  
-            </div>
+        <div className={styles.page}>
+            <h1 className={styles.title}>{t('settings')}</h1>
+            <section className={styles.card}>
+                <h2 className={styles.cardTitle}>{t('general')}</h2>
+                <div className={styles.row}>
+                    <span className={styles.rowLabel}>{t('language')}</span>
+                    <div className={styles.segmented} role="group" aria-label={t('language')}>
+                        {LANGUAGES.map(({ code, label }) => (
+                            <button
+                                key={code}
+                                className={language === code ? styles.segmentActive : undefined}
+                                aria-pressed={language === code}
+                                onClick={() => dispatch(setLanguage(code))}
+                            >
+                                {t(label)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </section>
         </div>
     );
 }

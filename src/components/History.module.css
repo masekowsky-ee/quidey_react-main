@@ -1,13 +1,112 @@
-.div{
-    composes: page from './ui.module.css';
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
+.page{
+    composes: pageColumn from './ui.module.css';
 }
 
-.h2{
-    margin: 2rem;
-    font-size: 1.5rem;
+.title{
+    composes: pageTitle from './ui.module.css';
+}
+
+.card{
+    composes: card from './ui.module.css';
+}
+
+/* Summary numbers above the list */
+.stats{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.stat{
+    composes: card from './ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.statValue{
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-h);
+    font-variant-numeric: tabular-nums;
+}
+
+.statLabel{
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.session{
+    composes: card from './ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.sessionHead{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.sessionDate{
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.sessionMeta{
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Green pill with the session length */
+.duration{
+    flex-shrink: 0;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+    background-color: color-mix(in srgb, var(--primary) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+    border-radius: 999px;
+}
+
+/* Worked tasks as small tags */
+.tags{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.tag{
+    padding: 0.15rem 0.6rem;
+    font-size: 0.8rem;
+    color: var(--text);
+    background-color: var(--surface-inset);
+    border: 1px solid var(--btn-border);
+    border-radius: 999px;
+}
+
+.empty{
+    text-align: center;
+    color: var(--text-muted);
+    padding: 2.5rem 1.5rem;
 }

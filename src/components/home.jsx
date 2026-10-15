@@ -8,6 +8,7 @@ import WeekDaysContainer from './WeekDaysContainer.jsx';
 import GroupBtnContainer from './GroupBtnContainer.jsx';
 import WorkingContainer from './WorkingContainer.jsx';
 import TimerContainer from './TimerContainer.jsx';
+import { updateCurrentSessionData, addWorkedTask } from '../features/session/sessionAction.js'
 
 import {useSelector, useDispatch} from 'react-redux';
 
@@ -39,6 +40,14 @@ export default function Home(props){
     const dropZoneRef = useRef(null);
     const draggedTaskRef = useRef(null);
     const dragPositionRef = useRef({ x: 0, y: 0 });
+
+    useEffect(()=>{
+        dispatch(updateCurrentSessionData({totalTime: workedTime}));
+    }, [timer.time, dispatch, workedTime]);
+
+    useEffect(() => {
+        if (activeTask) dispatch(addWorkedTask(activeTask));
+    }, [activeTask, dispatch]);
 
     const handlePointerDown = useCallback((e, task) => {
         console.log('pointerdown fired', task); // TEST
@@ -140,7 +149,7 @@ export default function Home(props){
                     dragOffset={dragOffset}
                 />
             </div>
-            <TimerContainer setActiveTimer={setActiveTimer} percentWidth={percentWidth} setPercentWidth={setPercentWidth} setWorkedTime={setWorkedTime} timer={timer} setTimer={setTimer} />
+            <TimerContainer setActiveTimer={setActiveTimer} percentWidth={percentWidth} setPercentWidth={setPercentWidth} setWorkedTime={setWorkedTime} timer={timer} setTimer={setTimer} activeTask={activeTask} />
             <Outlet />
         </div>
     );

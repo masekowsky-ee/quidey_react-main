@@ -1,123 +1,396 @@
-.div{
+.page{
     composes: page from './ui.module.css';
-    overflow-y: auto;
-    position: relative;
-    z-index: 0;
-}
-
-.dayContainer{
-    position: relative;
-}
-
-.navDiv{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    margin: 1rem 0;
-    position: relative;
-    width: fit-content;
-    padding: 0 3rem;
-    justify-self: center;
-}
-
-.monthH2{
-    min-width: 200px;
-    margin: 0;
-}
-
-.navBtn{
-    composes: iconBtnRound from './ui.module.css';
-    margin: 0 1rem;
-}
-
-.skipNavBtnL{
-    position: absolute;
-    left: 0;
-}
-
-.skipNavBtnR{
-    position: absolute;
-    right: 0;
-}
-
-.calendarTable{
-    position: relative;
-    justify-self: center;
-    width: 80%;
-    aspect-ratio: 1/1.05;
-    min-height: 600px;
-    max-height: 750px;
-    min-width: 600px;
-    max-width: 1000px;
-    border-spacing: 4px;
-}
-
-.calendarTable tr{
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    width: 100%;
-    column-gap: 4px;
-}
-
-.td{
+    width: min(1100px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding-bottom: 3rem;
     box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    height: 100px;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    transition: transform var(--ease), outline-color var(--ease);
-    outline: 2px solid transparent;
-    outline-offset: -2px;
-    cursor: pointer;
-}
-
-.td:hover{
-    transform: scale(1.05);
-    outline-color: var(--border);
-}
-
-.td:active{
-    transform: scale(0.97);
-}
-
-.td h3{
-    background-color: var(--surface);
-    color: var(--text);
-    margin: 0;
-    height: 20%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-}
-
-.td div{
-    background-color: var(--surface-strong);
-    height: 80%;
-}
-
-.td ul{
-    margin: 0;
-    padding: 0 0 0 1.75rem;
-}
-
-.td ul li{
     text-align: left;
 }
 
-.dayFocusDiv{
-    composes: panel from './ui.module.css';
-    position: absolute;
-    width: 80%;
-    aspect-ratio: 1/1.05;
-    min-height: 600px;
-    max-height: 750px;
-    min-width: 600px;
-    max-width: 1000px;
-    z-index: 25;
-    background-color: var(--surface-strong);
-    justify-self: center;
-    box-shadow: var(--shadow);
+/* Month title on the left, navigation on the right */
+.toolbar{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 2rem 0 1rem;
+}
+
+.monthTitle{
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.toolbarActions{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.todayBtn{
+    margin-right: 0.4rem;
+}
+
+/* Round icon buttons (month and day navigation) */
+.navBtn{
+    composes: iconBtnRound from './ui.module.css';
+}
+
+.toolbarActions > .navBtn,
+.dayPanelHead > .navBtn{
+    width: 2.25rem;
+    height: 2.25rem;
+    background-color: var(--surface);
+    border: 1px solid var(--btn-border);
+    corner-shape: round;
+}
+
+.calendar{
+    composes: card from './ui.module.css';
+    padding: 0.75rem;
+}
+
+.weekdays{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.4rem;
+    padding: 0.25rem 0 0.6rem;
+}
+
+.weekdays span{
+    padding-left: 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.weekdays .weekend{
+    opacity: 0.7;
+}
+
+.grid{
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-auto-rows: minmax(6.5rem, auto);
+    gap: 0.4rem;
+}
+
+/* One day. Overrides the global button look: flat tile, content top-left */
+.grid > .cell{
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0.35rem;
+    min-width: 0;
+    padding: 0.45rem 0.5rem;
+    text-align: left;
+    font-weight: 400;
+    color: var(--text);
+    background: var(--surface-hover);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transition: border-color var(--ease-out), background-color var(--ease-out), transform var(--ease-out);
+}
+
+.grid > .cell:hover{
+    background: color-mix(in srgb, var(--surface-hover) 80%, var(--surface-strong));
+    border-color: var(--btn-border-hover);
+    box-shadow: none;
+    filter: none;
+    transform: translateY(-1px);
+}
+
+.grid > .cell:active{
+    transform: scale(0.98);
+    box-shadow: none;
+}
+
+/* Days of the previous/next month: no tile, dimmed content */
+.grid > .outside{
+    background: transparent;
+    box-shadow: none;
+}
+
+.outside .dayNum{
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.outside .chips{
+    opacity: 0.5;
+}
+
+.dayNum{
+    align-self: flex-start;
+    min-width: 1.7rem;
+    height: 1.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-h);
+    font-variant-numeric: tabular-nums;
+    border-radius: 50%;
+    corner-shape: round;
+}
+
+/* Today: green circle behind the number, green edge on the tile */
+.grid > .todayCell{
+    border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
+.todayCell .dayNum{
+    color: var(--primary-text);
+    background-color: var(--primary);
+    box-shadow: 0 0 10px -2px var(--primary);
+}
+
+.chips{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.chips li{
+    padding: 0.05rem 0.4rem;
+    font-size: 0.75rem;
+    color: var(--text);
+    background-color: var(--surface-inset);
+    border-left: 2px solid var(--primary);
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chips .chipDone{
+    text-decoration: line-through;
+    color: var(--text-muted);
+    border-left-color: var(--text-muted);
+}
+
+.chips .chipMore{
+    background: none;
+    border-left: none;
+    padding-left: 0.1rem;
+    color: var(--text-muted);
+}
+
+/* ---------- Day panel ---------- */
+
+.backdrop{
+    composes: overlay from './ui.module.css';
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    backdrop-filter: blur(3px);
+    animation: fadeIn 0.2s ease;
+}
+
+.dayPanel{
+    composes: card from './ui.module.css';
+    width: min(480px, 100%);
+    max-height: 80vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    box-shadow: var(--shadow), 0 20px 50px -20px rgba(0, 0, 0, 0.8);
+    animation: panelIn 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes panelIn {
+    from { opacity: 0; transform: translateY(0.75rem) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .backdrop,
+    .dayPanel{
+        animation: none;
+    }
+}
+
+.dayPanelHead{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.dayPanelTitle{
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+}
+
+.dayPanelTitle h2{
+    margin: 0;
+    font-size: 1.15rem;
+}
+
+.dayPanelWeekday{
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.dayPanelHead > .closeBtn{
+    width: 2rem;
+    height: 2rem;
+    margin-left: 0.25rem;
+    color: var(--text-muted);
+}
+
+.dayTasks{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Name and date on one line, description below */
+.dayTasks li{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 1rem;
+    row-gap: 0.15rem;
+    padding: 0.7rem 0 0.7rem 0.75rem;
+    border-left: 2px solid var(--primary);
+}
+
+.dayTasks li + li{
+    margin-top: 0.5rem;
+}
+
+.dayTaskName{
+    color: var(--text-h);
+    font-weight: 500;
+    overflow-wrap: break-word;
+    min-width: 0;
+}
+
+.dayTaskDue{
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.dayTaskDesc{
+    grid-column: 1 / -1;
+    grid-row: 2;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    overflow-wrap: break-word;
+}
+
+.dayTasks .dayTaskDone{
+    border-left-color: var(--text-muted);
+}
+
+.dayTaskDone .dayTaskName{
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.dayEmpty{
+    padding: 1.5rem 0;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+    .grid{
+        grid-auto-rows: minmax(5.5rem, auto);
+    }
+}
+
+@media (max-width: 640px) {
+    .page{
+        width: calc(100% - 1rem);
+    }
+
+    .toolbar{
+        margin: 1.25rem 0.25rem 0.75rem;
+    }
+
+    .monthTitle{
+        font-size: 1.3rem;
+    }
+
+    .calendar{
+        padding: 0.4rem;
+    }
+
+    .weekdays span{
+        padding-left: 0;
+        text-align: center;
+        font-size: 0.65rem;
+        letter-spacing: 0.04em;
+    }
+
+    .grid{
+        grid-auto-rows: minmax(4rem, auto);
+        gap: 0.25rem;
+    }
+
+    .grid > .cell{
+        align-items: center;
+        padding: 0.3rem 0.2rem;
+    }
+
+    .dayNum{
+        align-self: center;
+        min-width: 1.5rem;
+        height: 1.5rem;
+        font-size: 0.8rem;
+    }
+
+    .chips{
+        justify-content: center;
+    }
+
+    /* On phones only a dot per task fits */
+    .chips{
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 3px;
+    }
+
+    .chips li{
+        width: 6px;
+        height: 6px;
+        padding: 0;
+        font-size: 0;
+        border: none;
+        border-radius: 50%;
+        background-color: var(--primary);
+    }
+
+    .chips .chipMore{
+        display: none;
+    }
 }

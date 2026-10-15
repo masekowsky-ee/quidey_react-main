@@ -3,6 +3,8 @@
     margin-top: 1rem;
     padding-top: 20px;
     width: fit-content;
+    max-width: calc(100vw - 2rem);
+    box-sizing: border-box;
     min-height: 250px;
     display: flex;
     flex-direction: column;
@@ -26,7 +28,7 @@
     height: 100%;
     padding: 10px;
     display: flex;
-    margin: 0 2rem;
+    margin: 0 clamp(0.75rem, 4vw, 2rem);
     flex-direction: column;
     justify-content: space-around;
 }
@@ -39,7 +41,6 @@
 }
 
 .closeBtn{
-    composes: ghostBtn from './ui.module.css';
     position: absolute;
     top: 0.25rem;
     right: 0.25rem;

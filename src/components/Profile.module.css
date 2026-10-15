@@ -1,87 +1,161 @@
-.div{
-    composes: sheet from './ui.module.css';
-    width: fit-content;
-    padding: 1rem;
-    justify-self: center;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    margin-top: var(--header-h);
+.page{
+    composes: pageColumn from './ui.module.css';
 }
 
-.h2{
-    margin: 0.5rem;
-    margin-top: 1.5rem;
+.title{
+    composes: pageTitle from './ui.module.css';
+}
+
+.card{
+    composes: card from './ui.module.css';
+}
+
+.cardTitle{
+    composes: cardTitle from './ui.module.css';
+}
+
+/* ---------- Signed in ---------- */
+
+.identity{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+/* Initials in a circle instead of a placeholder photo */
+.avatar{
+    flex-shrink: 0;
+    width: 4.5rem;
+    height: 4.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--primary-text);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 85%, white), color-mix(in srgb, var(--primary) 70%, black));
+    border-radius: 50%;
+    corner-shape: round;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 14px -6px var(--primary);
     user-select: none;
 }
 
-.signInDiv{
-    composes: panel from './ui.module.css';
-    width: 50%;
-    max-width: 500px;
-    min-width: 350px;
-    align-items: center;
-    justify-content: center;
+.identityText{
+    min-width: 0;
+}
+
+.name{
+    margin: 0;
+    overflow-wrap: break-word;
+}
+
+.handle{
+    color: var(--text-muted);
+}
+
+.details{
+    margin: 0;
     display: flex;
     flex-direction: column;
-    margin: 1rem 0;
 }
 
-.signInForm{
+.detailRow{
     display: flex;
-    flex-direction: column;
-    max-width: 400px;
-    min-width: 300px;
-    width: 80%;
-    align-items: center;
-    justify-content: center;
-    margin: 1rem;
-    margin-top: 0;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0;
 }
 
-.input{
-    margin-bottom: 0.5rem;
-    width: 65%;
+.detailRow + .detailRow{
+    border-top: 1px solid var(--btn-border);
 }
 
-.label{
+.detailRow dt{
+    color: var(--text-muted);
+}
+
+.detailRow dd{
+    margin: 0;
+    color: var(--text-h);
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+/* Quiet red outline; the action is reversible, so no big red block */
+.signOutBtn{
+    composes: glowDanger from './ui.module.css';
     align-self: flex-start;
-    margin-left: 18%;
-    font-size: 0.7rem;
+    color: var(--danger);
+    background: transparent;
+    border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+    box-shadow: none;
+}
+
+.signOutBtn:hover{
+    border-color: var(--danger);
+}
+
+/* ---------- Signed out ---------- */
+
+.authCard{
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.tabs{
+    composes: segmented from './ui.module.css';
+    display: flex;
+}
+
+.tabActive{
+    composes: segmentActive from './ui.module.css';
+}
+
+.form{
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+/* Label above its input */
+.field{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.field label{
+    font-size: 0.75rem;
+    font-weight: 500;
     color: var(--text-muted);
     user-select: none;
 }
 
-.Btn{
-    composes: btnPrimary from './ui.module.css';
-    margin-top: 0.5rem;
+.field input{
+    width: 100%;
 }
 
-.profilePicture{
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    border: 2px solid var(--border-strong);
-    margin: 1rem;
-}
-
-.btnDiv{
+/* Two short fields side by side, stacked on narrow screens */
+.fieldRow{
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    width: 75%;
+    gap: 0.9rem;
 }
 
-/* Switches between the sign-in and sign-up form */
-.signBtn{
-    width: 50%;
-    margin-top: 1rem;
-    font-size: 0.7rem;
-    user-select: none;
-    background-color: var(--border-strong);
-    color: var(--primary-text);
+@media (max-width: 520px) {
+    .fieldRow{
+        flex-direction: column;
+    }
 }
 
-.signBtn:hover{
-    background-color: var(--text-h);
+.submitBtn{
+    composes: btnPrimary from './ui.module.css';
+    width: 100%;
+    margin-top: 0.4rem;
 }

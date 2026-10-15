@@ -11,6 +11,7 @@ import Calendar from  './components/Calendar.jsx';
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth, setUser } from "./features/auth/authAction";
 import { fetchTaskState } from "./features/tasks/taskAction.js"
+import { fetchSessions } from "./features/session/sessionAction.js"
 import {useTranslation} from './i18n/LanguageContext'
 
 function App(){
@@ -29,6 +30,7 @@ function App(){
     if (signedIn) {
       dispatch(setUser());
       dispatch(fetchTaskState());
+      dispatch(fetchSessions());
     }
   }, [signedIn, dispatch]);
 

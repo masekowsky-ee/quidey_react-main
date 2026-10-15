@@ -4,6 +4,13 @@ import { loginSuccess, logout, register } from "../features/auth/authAction";
 import { useState } from "react";
 import CustomError from './CustomError.jsx'
 import {useTranslation} from '../i18n/LanguageContext'
+import { formatDate } from '../features/helperFunction'
+
+// "Jane Doe" -> "JD", "jane" -> "J"
+function getInitials(name) {
+    if (!name) return '?';
+    return name.trim().split(/\s+/).slice(0, 2).map(part => part[0].toUpperCase()).join('');
+}
 
 export default function Profile(){
     const { t } = useTranslation();
@@ -22,9 +29,6 @@ export default function Profile(){
     const [birthDate, setBirthDate] = useState("");
     const [email, setEmail] = useState("");
     const [displayName, setDisplayName] = useState("");
-
-
-    const emptyProfilePictureSrc = "https://militaryhealthinstitute.org/wp-content/uploads/sites/37/2021/08/blank-profile-picture-png.png";
 
     const handleSignOut = () => {
         dispatch(logout());
@@ -82,84 +86,108 @@ export default function Profile(){
         }
     }
 
+    // 0 = sign in, 1 = sign up
     const [signState, setSignState] = useState(0);
 
     const signArr = ['signIn', 'signUp'];
 
-    const setSignStateHandler = () => {
-        if (signState === 1){ 
-            setSignState(0) 
-        } else if (signState === 0){ 
-            setSignState(1) 
-        } else { 
-            setSignState(0) 
-        };
-    }
-
     const [customError, setCustomError] = useState({ bool: false, message: '' });
 
-    console.log(user)
+    const name = user?.display_name || user?.username;
 
     return (
-        <div className={styles.div}>
+        <div className={styles.page}>
             <CustomError customError={customError} setCustomError={setCustomError}></CustomError>
-            {signedIn ? 
-                <div id="profileDiv">
-                    <img src={emptyProfilePictureSrc} className={styles.profilePicture}/>
-                    <h2>{user.display_name}</h2>
-                    <h4>{user.username}</h4>
-                    <p>{`${new Date(user.birth_date).getDate()}.${new Date(user.birth_date).getMonth()+1}.${new Date(user.birth_date).getFullYear()}`}</p>
-                    <p>{user.email}</p>
+            {signedIn ?
+                <>
+                    <h1 className={styles.title}>{t('profile')}</h1>
 
-                    <button onClick={() => handleSignOut()}>{t('signOut')}</button>
-                </div> 
-                : 
-                <div>{signState === 0 && 
-                    <div id="signInDiv" className={styles.signInDiv}>
-                        <div className={styles.btnDiv}>
-                            <button className={styles.signBtn} onClick={setSignStateHandler}>{t(`${signArr[signState + 1] || signArr[0]}`)}</button>
+                    <section className={`${styles.card} ${styles.identity}`}>
+                        <div className={styles.avatar} aria-hidden="true">{getInitials(name)}</div>
+                        <div className={styles.identityText}>
+                            <h2 className={styles.name}>{name}</h2>
+                            {user?.username && <p className={styles.handle}>@{user.username}</p>}
                         </div>
-                        <h2 className={styles.h2}>{t(signArr[signState])}</h2>
-                        <form className={styles.signInForm} onSubmit={(e) => handleSignIn(e, username, password)} >
-                            <label htmlFor="userNameInput" className={styles.label}>{t('userName')}</label>
-                            <input className={styles.input} placeholder={t('userName')} value={username} onChange={(e) => setUsername(e.target.value)} id="userNameInput" type="text" />
+                    </section>
 
-                            <label htmlFor="passwordInput" className={styles.label}>{t('password')}</label>
-                            <input className={styles.input} placeholder={t('password')} value={password} onChange={(e) => setPassword(e.target.value)} id="passwordInput" type="password" />
+                    <section className={styles.card}>
+                        <h2 className={styles.cardTitle}>{t('account')}</h2>
+                        <dl className={styles.details}>
+                            <div className={styles.detailRow}>
+                                <dt>{t('email')}</dt>
+                                <dd>{user?.email || '–'}</dd>
+                            </div>
+                            <div className={styles.detailRow}>
+                                <dt>{t('birthDate')}</dt>
+                                <dd>{user?.birth_date ? formatDate(user.birth_date) : '–'}</dd>
+                            </div>
+                        </dl>
+                    </section>
 
-                            <button className={styles.Btn} type="submit">{t('signIn')}</button>
-                        </form>
+                    <button className={styles.signOutBtn} onClick={() => handleSignOut()}>{t('signOut')}</button>
+                </>
+                :
+                <section className={`${styles.card} ${styles.authCard}`}>
+                    <div className={styles.tabs} role="tablist">
+                        {signArr.map((key, i) => (
+                            <button
+                                key={key}
+                                role="tab"
+                                aria-selected={signState === i}
+                                className={signState === i ? styles.tabActive : undefined}
+                                onClick={() => setSignState(i)}
+                            >
+                                {t(key)}
+                            </button>
+                        ))}
                     </div>
-                    ||
-                    <div id="signUpDiv" className={styles.signInDiv}>
-                        <div className={styles.btnDiv}>
-                            <button className={styles.signBtn} onClick={setSignStateHandler}>{t(`${signArr[signState + 1] || signArr[0]}`)}</button>
-                        </div>
-                        <h2 className={styles.h2}>{t(signArr[signState])}</h2>
-                        <form className={styles.signInForm} onSubmit={(e) => handleSignUp(e, email, birthDate, displayName, username, password, passwordValidate)} >
-                            <label htmlFor="emailInput" className={styles.label}>{t('email')}</label>
-                            <input className={styles.input} placeholder={t('email')} value={email} onChange={(e) => setEmail(e.target.value)} id="emailInput" type="email" />
 
-                            <label htmlFor="birthDateInput" className={styles.label}>{t('birthDate')}</label>
-                            <input className={styles.input} value={birthDate} onChange={(e) => setBirthDate(e.target.value)} id="birthDateInput" type="date" />
-
-                            <label htmlFor="displayNameInput" className={styles.label}>{t('displayName')}</label>
-                            <input className={styles.input} placeholder={t('displayName')} value={displayName} onChange={(e) => setDisplayName(e.target.value)} id="displayNameInput" type="text" />
-
-                            <label htmlFor="userNameInput" className={styles.label}>{t('userName')}</label>
-                            <input className={styles.input} placeholder={t('userName')} value={username} onChange={(e) => setUsername(e.target.value)} id="userNameInput" type="text" />
-
-                            <label htmlFor="passwordInput" className={styles.label}>{t('password')}</label>
-                            <input className={styles.input} placeholder={t('password')} value={password} onChange={(e) => setPassword(e.target.value)} id="passwordInput" type="password" />
-
-                            <label htmlFor="passwordValidateInput" className={styles.label}>{t('passwordValidate')}</label>
-                            <input className={styles.input} placeholder={t('passwordValidate')} value={passwordValidate} onChange={(e) => setPasswordValidate(e.target.value)} id="passwordValidateInput" type="password" />
-
-                            <button className={styles.Btn} type="submit">{t('signUp')}</button>
+                    {signState === 0 ?
+                        <form className={styles.form} onSubmit={(e) => handleSignIn(e, username, password)} >
+                            <div className={styles.field}>
+                                <label htmlFor="userNameInput">{t('userName')}</label>
+                                <input placeholder={t('userName')} value={username} onChange={(e) => setUsername(e.target.value)} id="userNameInput" type="text" autoComplete="username" />
+                            </div>
+                            <div className={styles.field}>
+                                <label htmlFor="passwordInput">{t('password')}</label>
+                                <input placeholder={t('password')} value={password} onChange={(e) => setPassword(e.target.value)} id="passwordInput" type="password" autoComplete="current-password" />
+                            </div>
+                            <button className={styles.submitBtn} type="submit">{t('signIn')}</button>
                         </form>
-                    </div>
+                        :
+                        <form className={styles.form} onSubmit={(e) => handleSignUp(e, email, birthDate, displayName, username, password, passwordValidate)} >
+                            <div className={styles.field}>
+                                <label htmlFor="emailInput">{t('email')}</label>
+                                <input placeholder={t('email')} value={email} onChange={(e) => setEmail(e.target.value)} id="emailInput" type="email" autoComplete="email" />
+                            </div>
+                            <div className={styles.fieldRow}>
+                                <div className={styles.field}>
+                                    <label htmlFor="displayNameInput">{t('displayName')}</label>
+                                    <input placeholder={t('displayName')} value={displayName} onChange={(e) => setDisplayName(e.target.value)} id="displayNameInput" type="text" autoComplete="name" />
+                                </div>
+                                <div className={styles.field}>
+                                    <label htmlFor="birthDateInput">{t('birthDate')}</label>
+                                    <input value={birthDate} onChange={(e) => setBirthDate(e.target.value)} id="birthDateInput" type="date" autoComplete="bday" />
+                                </div>
+                            </div>
+                            <div className={styles.field}>
+                                <label htmlFor="userNameInput">{t('userName')}</label>
+                                <input placeholder={t('userName')} value={username} onChange={(e) => setUsername(e.target.value)} id="userNameInput" type="text" autoComplete="username" />
+                            </div>
+                            <div className={styles.fieldRow}>
+                                <div className={styles.field}>
+                                    <label htmlFor="passwordInput">{t('password')}</label>
+                                    <input placeholder={t('password')} value={password} onChange={(e) => setPassword(e.target.value)} id="passwordInput" type="password" autoComplete="new-password" />
+                                </div>
+                                <div className={styles.field}>
+                                    <label htmlFor="passwordValidateInput">{t('passwordValidate')}</label>
+                                    <input placeholder={t('passwordValidate')} value={passwordValidate} onChange={(e) => setPasswordValidate(e.target.value)} id="passwordValidateInput" type="password" autoComplete="new-password" />
+                                </div>
+                            </div>
+                            <button className={styles.submitBtn} type="submit">{t('signUp')}</button>
+                        </form>
                     }
-                </div>
+                </section>
             }
         </div>
     );

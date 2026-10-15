@@ -54,6 +54,11 @@ const translations = {
         passwordValidate: 'Passwort bestätigen',
         birthDate: 'Geburtsdatum',
         email: 'E-Mail',
+        account: 'Konto',
+        sessions: 'Sitzungen',
+        focusTime: 'Fokuszeit',
+        calendar: 'Kalender',
+        noTasks: 'Keine Aufgaben',
 
         passwordValidateError: 'Die Passwörter stimmen nicht überein',
         ageError: 'Du musst mindestens 14 Jahre alt sein, um die App zu nutzen',
@@ -121,6 +126,11 @@ const translations = {
         displayName: 'Display Name',
         birthDate: 'Birth Date',
         email: 'Email',
+        account: 'Account',
+        sessions: 'Sessions',
+        focusTime: 'Focus time',
+        calendar: 'Calendar',
+        noTasks: 'No tasks',
 
         dateNameTaskError: 'Please enter a valid Date / Name',
         groupError: 'Please enter a valid, unused group name',

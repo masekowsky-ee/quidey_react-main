@@ -4,9 +4,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import {deleteTask, deleteGroupTasks, addGroupTasks, editGroup, updateTaskProps} from '../features/tasks/taskAction'
 import { createPortal } from 'react-dom';
 import {useTranslation} from '../i18n/LanguageContext'
+import { formatDate, toInputDate } from '../features/helperFunction'
 
 export default function TaskContainer(props){
-    const { showDone, setShowDone, working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask } = props;
+    const { working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask } = props;
+
+    // whether the Done list is shown; only this component uses it
+    const [showDone, setShowDone] = useState(false);
     
     const {t} = useTranslation();
     const dispatch = useDispatch();
@@ -85,6 +89,8 @@ export default function TaskContainer(props){
         setShowDone(!showDone);
     }
 
+    const doneCount = groupToDisplay?.tasks?.filter(task => task.done === true).length ?? 0;
+
     const handleTaskRemove = (taskId) => {
         dispatch(deleteGroupTasks(taskId, groupToDisplay.group.id))
     }
@@ -100,11 +106,21 @@ export default function TaskContainer(props){
                     ) : null)}
                 </div>
             )}
-            <div className={styles.outerUlDiv}>
-                <h2 className={styles.h2}>{t('taskContainer')}</h2>
-                <button onClick={()=>{setCreateTask(true)}}> 
+            <div className={styles.sectionHead}>
+                <h2 className={styles.sectionTitle}>{t('taskContainer')}</h2>
+                <button className={styles.addBtn} onClick={()=>{setCreateTask(true)}} title={t('createTaskH2')} aria-label={t('createTaskH2')}>
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M440-440H240q-17 0-28.5-11.5T200-480q0-17 11.5-28.5T240-520h200v-200q0-17 11.5-28.5T480-760q17 0 28.5 11.5T520-720v200h200q17 0 28.5 11.5T760-480q0 17-11.5 28.5T720-440H520v200q0 17-11.5 28.5T480-200q-17 0-28.5-11.5T440-240v-200Z"/></svg>
                 </button>
+                {doneCount > 0 &&
+                    <button
+                        className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}
+                        onClick={handleShowDone}
+                        aria-pressed={showDone}
+                    >
+                        {t('done')}
+                        <span className={styles.doneCount}>{doneCount}</span>
+                    </button>
+                }
             </div>
             {!groupToDisplay ? null : groupToDisplay.group?.description &&
             <div className={styles.groupDescriptionDiv}>
@@ -120,7 +136,7 @@ export default function TaskContainer(props){
             <div className={styles.outerUlDiv}>
                 <div className={styles.ulDiv}>
                     <ul className={styles.ul}>
-                        <h3 className={styles.ulH3}>To Do</h3>
+                        <h3 className={styles.ulH3}>{t('toDo')}</h3>
                     {groupToDisplay.tasks.find(task => task.done !== true) && groupToDisplay.tasks
                             .map((task) => {
                                 // Check if this specific task is the one currently being dragged
@@ -144,10 +160,10 @@ export default function TaskContainer(props){
                                             </div>
                                             <input type="checkbox" onChange={()=>{setTaskPropHandler(!task.done, 'done', task)}} />
                                             { taskToEdit && taskPropToEdit === 'due' && taskToEdit.id === task.id
-                                                ? <input autoFocus type="date" defaultValue={task.due ?? null} onBlur={(e) => {setTaskPropHandler(e.target.value, 'due', task);}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'due', task)}}}/>
-                                                : <p style={compareDate(task.due) ? { color: 'red' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>{`${new Date(task.due).getUTCDate()}.${new Date(task.due).getUTCMonth()+1}.${new Date(task.due).getUTCFullYear()}`}</p>
+                                                ? <input autoFocus type="date" defaultValue={toInputDate(task.due)} onBlur={(e) => {setTaskPropHandler(e.target.value, 'due', task);}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'due', task)}}}/>
+                                                : <p style={compareDate(task.due) ? { color: 'red' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>{formatDate(task.due)}</p>
                                             }
-                                            <div>
+                                            <div className={styles.prioDiv}>
                                                 <label>{t('prioritise')}:</label>
                                                 <input type="number" name="prio" placeholder={task.prio} min="0" max="100" onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'prio', task)}}} onBlur={(e)=>setTaskPropHandler(e.target.value, 'prio', task)} />
                                             </div>
@@ -157,13 +173,13 @@ export default function TaskContainer(props){
                                                 : <p style={{textAlign: 'left', marginLeft: '0.5rem',}} onClick={(e) => changePropHandler(e, 'description', task.id)}>{task.description || t('description')}</p>
                                             }
                                             <div className={styles.btnDiv}>
-                                                <button className={styles.btn} onClick={() => handleAssignGroup(task)}>{t('assignGroup')}</button>
+                                                <button className={styles.assignBtn} onClick={() => handleAssignGroup(task)}>{t('assignGroup')}</button>
                                                 {groupToDisplay.group.name &&
-                                                <button key={`${task.id}btn`} className={styles.btn} onClick={() => handleTaskRemove(task.id)}>
+                                                <button key={`${task.id}btn`} onClick={() => handleTaskRemove(task.id)}>
                                                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>
                                                 </button>
                                                 }
-                                                <button className={styles.btn} onClick={() => handleTaskDelete(task.id)}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
+                                                <button className={styles.deleteBtn} onClick={() => handleTaskDelete(task.id)}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
                                             </div>
                                             {working && (<div className={styles.dragDiv}><svg className={styles.dragSvg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-560q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-560q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z"/></svg></div>) }
                                         </li>
@@ -176,7 +192,7 @@ export default function TaskContainer(props){
                 {showDone && groupToDisplay.tasks.find(task => task.done === true) &&
                 <div className={styles.ulDiv}>
                     <ul className={styles.ul}>
-                        <h3 className={styles.ulH3}>Done</h3>
+                        <h3 className={styles.ulH3}>{t('done')}</h3>
                     {groupToDisplay.tasks
                         .map((task) => {
                             if(task.done && task.id !== activeTask?.id){
@@ -187,7 +203,7 @@ export default function TaskContainer(props){
                                             <input type="checkbox" checked onChange={()=>{setTaskPropHandler(!task.done, 'done', task)}} />
                                         </div>
                                     </div>
-                                    <button className={styles.btn + ' ' + styles.delete} onClick={() => handleTaskDelete(task.id)}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
+                                    <button className={styles.deleteBtn} onClick={() => handleTaskDelete(task.id)}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
                                 </li>)
                             }
                         })
@@ -196,17 +212,6 @@ export default function TaskContainer(props){
                 </div>
                 }
             </div>
-            { groupToDisplay.tasks.find(task => task.done === true) &&
-                <div>{
-                    !showDone ? 
-                    <button className={styles.expandDone} onClick={handleShowDone}>
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-280h120q17 0 28.5 11.5T440-240q0 17-11.5 28.5T400-200H240q-17 0-28.5-11.5T200-240v-160q0-17 11.5-28.5T240-440q17 0 28.5 11.5T280-400v120Zm400-400H560q-17 0-28.5-11.5T520-720q0-17 11.5-28.5T560-760h160q17 0 28.5 11.5T760-720v160q0 17-11.5 28.5T720-520q-17 0-28.5-11.5T680-560v-120Z"/></svg>
-                    </button> 
-                    :
-                    <button className={styles.collapseDone} onClick={handleShowDone}>
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M360-360H240q-17 0-28.5-11.5T200-400q0-17 11.5-28.5T240-440h160q17 0 28.5 11.5T440-400v160q0 17-11.5 28.5T400-200q-17 0-28.5-11.5T360-240v-120Zm240-240h120q17 0 28.5 11.5T760-560q0 17-11.5 28.5T720-520H560q-17 0-28.5-11.5T520-560v-160q0-17 11.5-28.5T560-760q17 0 28.5 11.5T600-720v120Z"/></svg>
-                    </button>}
-                </div>}
 
             {/* Ghost-Klon: schwebt per Portal direkt in document.body, unabhängig
                 von transform/filter-Vorfahren, damit position:fixed wirklich
@@ -220,7 +225,7 @@ export default function TaskContainer(props){
                         position: 'fixed',
                         left: dragPosition.x - dragOffset.x,
                         top: dragPosition.y - dragOffset.y,
-                        zIndex: 1000,
+                        zIndex: 'var(--z-drag)',
                         pointerEvents: 'none',
                         margin: 0,
                         listStyle: 'none',

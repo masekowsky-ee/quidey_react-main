@@ -2,9 +2,11 @@ import {useState, useEffect, useRef} from 'react'
 import styles from './TimerContainer.module.css'
 import { useSelector, useDispatch } from 'react-redux';
 import { setSessionParams, setTimer } from '../features/session/sessionAction';
+import {saveSessionData} from '../features/session/sessionAction'
+import { addWorkedTask } from '../features/session/sessionAction.js'
 
 export default function TimerContainer(props){
-    const { setWorkedTime, percentWidth, setPercentWidth, setActiveTimer } = props;
+    const { setWorkedTime, percentWidth, setPercentWidth, setActiveTimer, activeTask } = props;
 
     const {sessionParams, timer} = useSelector(state => state.session);
     const dispatch = useDispatch();
@@ -93,10 +95,11 @@ export default function TimerContainer(props){
             }, 1000);
         }
 
-        setPercentWidth(sessionParams.time ? ((sessionParams.time - timer.time) / sessionParams.time * 100) : 0);
+        const elapsed = sessionParams.time ? (sessionParams.time - timer.time) / sessionParams.time * 100 : 0;
+        setPercentWidth(Math.min(100, Math.max(0, elapsed)));
 
         return () => clearTimeout(timeoutRef.current);
-    }, [timer]); // hours/mins/secs raus aus den Deps — sie werden hier berechnet, nicht gelesen
+    }, [timer, dispatch, sessionParams.time, setPercentWidth, setWorkedTime]); // hours/mins/secs raus aus den Deps — sie werden hier berechnet, nicht gelesen
 
     const timerAction = (action) => {
         if (action === 'start'){
@@ -110,12 +113,16 @@ export default function TimerContainer(props){
             }
             setEditTimer(false);
             setActiveTimer(true);
+            if (!activeTask) return;
+            dispatch(addWorkedTask(activeTask))
         } else if (action === 'pause'){
             dispatch(setTimer(timer.time, false));
         } else if (action === 'terminate'){
             clearTimeout(timeoutRef.current);
             dispatch(setTimer(0, false));
             setActiveTimer(false);
+
+            dispatch(saveSessionData()).catch(err => console.error("Saving session failed:", err));
         }
     }
 
@@ -123,7 +130,9 @@ export default function TimerContainer(props){
         console.log(`${newS} ${newM} ${newH}`);
         const newTime = (Number(newS) * 1000 + Number(newM) * 60 * 1000 + Number(newH) * 60 * 60 * 1000);
         console.log(newTime)
-        dispatch(setTimer(newTime, false));
+        // the new time is also the new session length, otherwise the progress bar
+        // is measured against the old length (and stays empty if the new one is longer)
+        dispatch(setSessionParams({...sessionParams, time: newTime}));
         setEditTimer(false);
     }
 
@@ -134,44 +143,44 @@ export default function TimerContainer(props){
                 :
                     <div className={styles.editTimerDiv}>
                         <div>
-                        <svg onClick={()=>setNewH(prev => prev + 1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
+                        <svg className={styles.timerArrow} onClick={()=>setNewH(prev => prev + 1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
                         <h2 className={styles.setTimerH2} id="timerH">{`${String(newH).padStart(2, '0')}`}</h2>
-                        <svg onClick={()=>{if (newH === 0) return;setNewH(prev => prev - 1)}} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
+                        <svg className={styles.timerArrow} onClick={()=>{if (newH === 0) return;setNewH(prev => prev - 1)}} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
                         </div>
 
                         <h2 className={styles.timerH2}>:</h2>
 
                         <div>
-                        <svg onClick={()=>minSetter(5)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
+                        <svg className={styles.timerArrow} onClick={()=>minSetter(5)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
                         <h2 className={styles.setTimerH2} id="timerM">{`${String(newM).padStart(2, '0')}`}</h2>
-                        <svg onClick={()=>minSetter(-5)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
+                        <svg className={styles.timerArrow} onClick={()=>minSetter(-5)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
                         </div>
 
                         <h2 className={styles.timerH2}>:</h2>
 
                         <div>
-                        <svg onClick={()=>secSetter(1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
+                        <svg className={styles.timerArrow} onClick={()=>secSetter(1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
                         <h2 className={styles.setTimerH2} id="timerS">{`${String(newS).padStart(2, '0')}`}</h2>
-                        <svg onClick={()=>secSetter(-1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
+                        <svg className={styles.timerArrow} onClick={()=>secSetter(-1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
                         </div>
                     </div>
             }
-            <div className={styles.outerTimer}>
-                <div style={{width: `${percentWidth}%`}} className={styles.innerTimer}></div>
+            <div className={styles.progress}>
+                <div style={{width: `${percentWidth}%`}} className={styles.progressFill}></div>
             </div>
             <div className={styles.timerNav}>
                 {!timer.active && timer.time !== 0 && !editTimer &&
-                    <button className={styles.btn} onClick={()=>timerAction('start')}>
+                    <button className={styles.btnGo} onClick={()=>timerAction('start')}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M320-273v-414q0-17 12-28.5t28-11.5q5 0 10.5 1.5T381-721l326 207q9 6 13.5 15t4.5 19q0 10-4.5 19T707-446L381-239q-5 3-10.5 4.5T360-233q-16 0-28-11.5T320-273Zm80-207Zm0 134 210-134-210-134v268Z"/></svg>
                     </button>
                 }
-                {timer.active && sessionParams.breaks &&
+                {timer.active &&
                     <button className={styles.btn} onClick={()=>timerAction('pause')}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M600-200q-33 0-56.5-23.5T520-280v-400q0-33 23.5-56.5T600-760h80q33 0 56.5 23.5T760-680v400q0 33-23.5 56.5T680-200h-80Zm-320 0q-33 0-56.5-23.5T200-280v-400q0-33 23.5-56.5T280-760h80q33 0 56.5 23.5T440-680v400q0 33-23.5 56.5T360-200h-80Zm320-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z"/></svg>
                     </button>
                 }
                 {timer.active &&
-                    <button className={styles.btn} onClick={()=>timerAction('terminate')}>
+                    <button className={styles.btnStop} onClick={()=>timerAction('terminate')}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M240-320v-320q0-33 23.5-56.5T320-720h320q33 0 56.5 23.5T720-640v320q0 33-23.5 56.5T640-240H320q-33 0-56.5-23.5T240-320Zm80 0h320v-320H320v320Zm160-160Z"/></svg>
                     </button>
                 }
@@ -181,7 +190,7 @@ export default function TimerContainer(props){
                     </button>
                 }
                 {editTimer &&
-                    <button className={styles.btn} onClick={setTimerFunc}>
+                    <button className={styles.btnGo} onClick={setTimerFunc}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
                     </button>
                 }
