@@ -120,10 +120,10 @@ export default function Home(props){
                 t={t}
                 dropZoneRef={dropZoneRef}
                 activeTask={activeTask}
-                setActiveTask={setActiveTask}
                 workedTasks={workedTasks}
                 setWorkedTasks={setWorkedTasks}
                 setTasks={props.setTasks}
+                setActiveTask={setActiveTask}
             />
             <GroupBtnContainer 
                 setCreateGroup={setCreateGroup} 

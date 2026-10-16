@@ -158,7 +158,9 @@ export default function TaskContainer(props){
                                                     : <p onClick={(e) => changePropHandler(e, 'name', task.id)}>{task.name}</p>
                                                 }
                                             </div>
-                                            <input type="checkbox" onChange={()=>{setTaskPropHandler(!task.done, 'done', task)}} />
+                                            <button onClick={()=>{setTaskPropHandler(!task.done, 'done', task)}}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
+                                            </button>
                                             { taskToEdit && taskPropToEdit === 'due' && taskToEdit.id === task.id
                                                 ? <input autoFocus type="date" defaultValue={toInputDate(task.due)} onBlur={(e) => {setTaskPropHandler(e.target.value, 'due', task);}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'due', task)}}}/>
                                                 : <p style={compareDate(task.due) ? { color: 'red' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>{formatDate(task.due)}</p>

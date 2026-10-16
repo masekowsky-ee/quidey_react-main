@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import styles from './WorkingPage.module.css'
 import { useSelector, useDispatch } from "react-redux";
-import { createNote, deleteNote, editNote } from "../features/tasks/taskAction.js";
+import { createNote, deleteNote, editNote, updateTaskProps } from "../features/tasks/taskAction.js";
 import {useTranslation} from '../i18n/LanguageContext'
 import { formatDate } from '../features/helperFunction'
 
+
 export default function WorkingContainer (props) {
-    const {dropZoneRef, activeTask, setWorkedTasks } = props;
+    const {dropZoneRef, activeTask, setWorkedTasks, setActiveTask } = props;
 
         const dispatch = useDispatch();
 
@@ -59,6 +60,19 @@ export default function WorkingContainer (props) {
             dispatch(editNote(activeTask.id, noteId, e.target.value));
         }
 
+        const [editActiveDescription, setEditActiveDescription] = useState(false);
+
+        const [activeDescription, setActiveDescription] = useState(null);
+
+        const editActiveDecriptionHandler = () => {
+            setActiveTask(prev => ({...prev, description: activeDescription})); dispatch(updateTaskProps({description: activeDescription}, activeTask)); setEditActiveDescription(false); setActiveDescription(null);
+        }
+
+        const setActiveDoneHandler = () => {
+            dispatch(updateTaskProps({done: true}, activeTask));
+            setActiveTask(null);
+        }
+
         return(
             <div className={styles.div}>
                 <div ref={dropZoneRef} className={`${styles.currentTaskDiv} ${activeTask ? '' : styles.dropZoneEmpty}`}>
@@ -66,8 +80,20 @@ export default function WorkingContainer (props) {
                         <div className={styles.taskCardHead}>
                             <h2 className={styles.taskTitle}>{activeTask.name}</h2>
                             {activeTask.due && <span className={styles.dueChip}>{formatDate(activeTask.due)}</span>}
+                            <button onClick={()=>{setActiveDoneHandler()}}>
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
+                            </button>
                         </div>
-                        {activeTask.description && <p className={styles.taskDesc}>{activeTask.description}</p>}
+                        {activeTask.description && !editActiveDescription ? 
+                        <p onClick={()=>{setEditActiveDescription(true); setActiveDescription(activeTask.description)}} className={styles.taskDesc}>{activeTask.description}</p> : 
+                        <input 
+                            defaultValue={activeTask.description} 
+                            onChange={(e)=>setActiveDescription(e.target.value)}
+                            onBlur={()=>{editActiveDecriptionHandler()}} 
+                            onKeyDown={(e)=>{
+                                if(e.key !== "Enter") return; 
+                                editActiveDecriptionHandler();
+                            }}></input>}
                         <div className={styles.notesHead}>
                             <h3>{t('taskNotes')}</h3>
                             <svg className={styles.noteAdd} onClick={handleCreateNoteSvg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M440-440H240q-17 0-28.5-11.5T200-480q0-17 11.5-28.5T240-520h200v-200q0-17 11.5-28.5T480-760q17 0 28.5 11.5T520-720v200h200q17 0 28.5 11.5T760-480q0 17-11.5 28.5T720-440H520v200q0 17-11.5 28.5T480-200q-17 0-28.5-11.5T440-240v-200Z"/></svg>
