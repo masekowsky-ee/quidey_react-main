@@ -1,7 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { deleteGroup, editDisplaygroup } from '../features/tasks/taskAction';
 import styles from './GroupBtnContainer.module.css';
-import {useTranslation} from '../i18n/LanguageContext'
+import {useTranslation} from '../i18n/useTranslation'
 
 export default function GroupBtnContainer(props){
     const { setCreateGroup } = props;

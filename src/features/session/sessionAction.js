@@ -18,6 +18,14 @@ export const setSessionParams = (paramsObj) => {
 
 export const selectCurrentSessionData = (state) => state.session.currentSessionData;
 
+// How much of the session has elapsed, as a percentage from 0 to 100
+export const selectTimerProgress = (state) => {
+    const total = state.session.sessionParams.time;
+    if (!total) return 0;
+    const elapsed = (total - state.session.timer.time) / total * 100;
+    return Math.min(100, Math.max(0, elapsed));
+};
+
 export const fetchSessions = () => {
     return async (dispatch) => {
         const sessions = await apiFetch("/api/sessions");

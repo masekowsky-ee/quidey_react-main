@@ -1,5 +1,5 @@
 import styles from './Settings.module.css';
-import {useTranslation} from '../i18n/LanguageContext'
+import {useTranslation} from '../i18n/useTranslation'
 import {useSelector, useDispatch} from 'react-redux';
 import {setLanguage} from '../features/settings/settingsAction';
 

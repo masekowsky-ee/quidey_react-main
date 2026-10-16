@@ -12,7 +12,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { checkAuth, setUser } from "./features/auth/authAction";
 import { fetchTaskState } from "./features/tasks/taskAction.js"
 import { fetchSessions } from "./features/session/sessionAction.js"
-import {useTranslation} from './i18n/LanguageContext'
 
 function App(){
   const dispatch = useDispatch();
@@ -24,8 +23,6 @@ function App(){
   const token = useSelector((state) => state.auth.token);
   const signedIn = Boolean(token);
 
-  const [percentWidth, setPercentWidth] = useState(0);
-
   useEffect(() => {
     if (signedIn) {
       dispatch(setUser());
@@ -34,34 +31,24 @@ function App(){
     }
   }, [signedIn, dispatch]);
 
-  useEffect(() => {
-    fetch("http://localhost:3000/api/hello")
-      .then((res) => res.json())
-      .then((data) => console.log("Backend sagt:", data))
-      .catch((err) => console.error("Fehler:", err));
-  }, []);
-
   const [activeTimer, setActiveTimer] = useState(false);
-
-  const { setLanguage } = useTranslation();
 
 
   return (
     <div>
       {!signedIn && <Profile/>}
         <div>
-          <Header activeTimer={activeTimer} percentWidth={percentWidth}/>
+          <Header activeTimer={activeTimer}/>
         </div>
         {signedIn && <section>
         <Menu/>
         <CustomError/>
         <Routes>
-          <Route path="/" element={<Home setActiveTimer={setActiveTimer} setPercentWidth={setPercentWidth} percentWidth={percentWidth}/>} />
-          {/*<Route path="/working" element={<WorkingPage t={t}  />} /> */}
+          <Route path="/" element={<Home setActiveTimer={setActiveTimer}/>} />
           <Route path="/calendar" element={<Calendar/>} />
           <Route path="/history" element={<History  />} />
           <Route path="/profile" element={<Profile/>} />
-          <Route path="/settings" element={<Settings setLanguage={setLanguage}/>} />
+          <Route path="/settings" element={<Settings/>} />
         </Routes>
       </section>
       }

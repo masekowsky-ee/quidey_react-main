@@ -47,8 +47,8 @@ export const checkAuth = () => {
                 type: LOGIN_SUCCESS,
                 payload: { token, username: data.username },
             });
-        } catch (err) {
-            console.log(err);
+        } catch {
+            // token rejected (or the check failed): treat as signed out
             localStorage.removeItem("token");
             dispatch({ type: LOGOUT });
         }

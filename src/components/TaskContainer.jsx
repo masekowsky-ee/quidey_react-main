@@ -3,7 +3,7 @@ import styles from './TaskContainer.module.css';
 import { useSelector, useDispatch } from 'react-redux';
 import {deleteTask, deleteGroupTasks, addGroupTasks, editGroup, updateTaskProps} from '../features/tasks/taskAction'
 import { createPortal } from 'react-dom';
-import {useTranslation} from '../i18n/LanguageContext'
+import {useTranslation} from '../i18n/useTranslation'
 import { formatDate, toInputDate } from '../features/helperFunction'
 
 export default function TaskContainer(props){
@@ -18,7 +18,6 @@ export default function TaskContainer(props){
     const tasks = useSelector(state => state.task.tasks);
     const groups = useSelector(state => state.task.groups);
     const groupToDisplay = useSelector(state => state.task.groupToDisplay);
-    console.log(groupToDisplay);
 
     const [assignGroups, setAssignGroups] = useState(false);
     const [taskToAssign, setTaskToAssign] = useState(null);
@@ -140,7 +139,6 @@ export default function TaskContainer(props){
                     {groupToDisplay.tasks.find(task => task.done !== true) && groupToDisplay.tasks
                             .map((task) => {
                                 // Check if this specific task is the one currently being dragged
-                                console.log(task.id)
                                 const isBeingDragged = draggedTask?.id === task.id;
 
                                 if(!task.done && task.id !== activeTask?.id){

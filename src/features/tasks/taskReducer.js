@@ -1,4 +1,4 @@
-import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, GET_NOTES, EDIT_NOTE } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE } from './taskActionTypes';
 
 const initialState = {
     tasks: [],
@@ -34,9 +34,9 @@ const taskReducer = (state = initialState, action) => {
                 ...state,
                 tasks: state.tasks.map(
                     task => task.id === action.payload.id ? 
-                    {...task, 
-                        name: action.payload.name ?? task.name, 
-                        due: action.payload.due ?? new Date(task.due.getTime() + 1), 
+                    {...task,
+                        name: action.payload.name ?? task.name,
+                        due: action.payload.due ?? task.due,
                         description: action.payload.description ?? task.description, 
                         prio: action.payload.prio ?? task.prio, 
                         done: action.payload.done ?? task.done
@@ -44,9 +44,9 @@ const taskReducer = (state = initialState, action) => {
                 groupToDisplay: {
                     ...state.groupToDisplay, 
                     tasks: state.groupToDisplay.tasks.map(task =>
-                        task.id === action.payload.id ? {...task, 
-                            name: action.payload.name ?? task.name, 
-                            due: action.payload.due ?? new Date(task.due.getTime() + 1), 
+                        task.id === action.payload.id ? {...task,
+                            name: action.payload.name ?? task.name,
+                            due: action.payload.due ?? task.due,
                             description: action.payload.description ?? task.description, 
                             prio: action.payload.prio ?? task.prio, 
                             done: action.payload.done ?? task.done

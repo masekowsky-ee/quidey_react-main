@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { addTask } from '../features/tasks/taskAction'
 import styles from './Form.module.css';
-import {useTranslation} from '../i18n/LanguageContext';
+import {useTranslation} from '../i18n/useTranslation';
 import {setCustomError} from '../features/settings/settingsAction';
 
 
@@ -26,7 +26,6 @@ export default function TaskForm(props){
 
             dispatch(addTask(name, due, description, prio, activeGroupId));
 
-            console.log('submitted task');
             e.target[0].value = '';
             e.target[1].value = '';
             e.target[2].value = '';
@@ -35,7 +34,6 @@ export default function TaskForm(props){
         } else {
             dispatch( setCustomError({bool: true, message: t('dateNameTaskError') }) );
         }
-        console.log(groupToDisplay);
     }
 
     return (

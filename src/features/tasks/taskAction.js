@@ -28,7 +28,6 @@ export const addTask = (name, due, description, prio, activeGroupId = null, user
             );
         }
 
-        console.log("Task created successfully:", data);
 
         dispatch({
             type: ADD_TASK,
@@ -53,7 +52,6 @@ export const updateTaskProps = (taskPropObject, task) => {
     const params = {...defaults, ...taskPropObject};
     const {name, due, description, prio, done, id} = params;
 
-    console.log(`Updating task (id: ${id}) with properties:`, {name, due, description, prio, done});
     
     return async (dispatch) => {
         const data = await apiFetch(`/api/tasks/${params.id}`, {
@@ -61,7 +59,6 @@ export const updateTaskProps = (taskPropObject, task) => {
             body: JSON.stringify({name, due, description, prio, done, id})
         });
 
-        console.log(`Task updated (id: ${id})`);
         dispatch({
             type: UPDATE_TASK_PROPS,
             payload: data,
@@ -75,7 +72,6 @@ export const addGroup = (name, description) => {
             method: "POST", body: JSON.stringify({name, description})
         });
 
-        console.log("Group created successfully:", data);
     
         dispatch({
             type: ADD_GROUP,
@@ -96,18 +92,15 @@ export const deleteGroup = (groupId) => {
 }
 
 export const editDisplaygroup = (group, groupToDisplayId) => {
-    console.log(group);
     return async (dispatch) => {
         if(groupToDisplayId === group.id) {
             const tasks = await apiFetch(`/api/tasks`, {method: "GET",});
-            console.log(tasks)
             dispatch({
                 type: EDIT_DISPLAYGROUP,
                 payload: {group: {}, tasks},
             });
         } else{
             const tasks = await apiFetch(`/api/groups/${group.id}/tasks`, {method: "GET",});
-            console.log(tasks)
             dispatch({
                 type: EDIT_DISPLAYGROUP,
                 payload: {group, tasks},
@@ -156,7 +149,6 @@ export const createNote = (taskId, note) => {
             body: JSON.stringify({ content: note })
         });
 
-        console.log("Note created successfully:", data);
 
         dispatch({
             type: CREATE_NOTE,
@@ -183,7 +175,6 @@ export const editNote = (taskId, noteId, noteContent) => {
             body: JSON.stringify({ taskId, content: noteContent })
         });
 
-        console.log("Note updated successfully:", data);
 
         dispatch({
             type: EDIT_NOTE,

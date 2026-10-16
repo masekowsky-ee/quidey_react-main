@@ -1,6 +1,6 @@
 import styles from './History.module.css';
 import { useSelector } from 'react-redux';
-import {useTranslation} from '../i18n/LanguageContext'
+import {useTranslation} from '../i18n/useTranslation'
 
 // 95 -> "1 h 35 min", 40 -> "40 min"
 function formatMinutes(totalMinutes) {

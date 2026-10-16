@@ -1,7 +1,7 @@
 import styles from './Form.module.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { addGroup } from '../features/tasks/taskAction';
-import {useTranslation} from '../i18n/LanguageContext';
+import {useTranslation} from '../i18n/useTranslation';
 import {setCustomError} from '../features/settings/settingsAction';
 
 export default function GroupForm(props){

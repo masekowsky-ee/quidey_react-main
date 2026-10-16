@@ -1,7 +1,7 @@
 import styles from './WeekDaysContainer.module.css';
 import { Link } from  'react-router-dom';
 import { useSelector } from "react-redux"
-import {useTranslation} from '../i18n/LanguageContext'
+import {useTranslation} from '../i18n/useTranslation'
 
 const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const MAX_VISIBLE_TASKS = 3;

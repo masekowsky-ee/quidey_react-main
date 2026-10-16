@@ -1,29 +1,10 @@
 import styles from './Calendar.module.css';
 import { useState, useEffect } from 'react';
 import { useSelector } from "react-redux"
-import {useTranslation} from '../i18n/LanguageContext'
-import { formatDate } from '../features/helperFunction'
+import {useTranslation} from '../i18n/useTranslation'
+import { formatDate, toDateOnly, sameDay, mondayIndex, monthGrid } from '../features/helperFunction'
 
 const MAX_VISIBLE_TASKS = 3;
-
-function toDateOnly(date) {
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
-function sameDay(a, b) {
-    return toDateOnly(a).getTime() === toDateOnly(b).getTime();
-}
-
-// Monday = 0 ... Sunday = 6, matching the weekDays translations
-function mondayIndex(date) {
-    return (date.getDay() + 6) % 7;
-}
-
-// Always 6 weeks, starting on the Monday on/before the 1st, so the grid never jumps in height
-function monthGrid(viewMonth) {
-    const start = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1 - mondayIndex(viewMonth));
-    return Array.from({ length: 42 }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
-}
 
 const icons = {
     prev: "m432-480 156 156q11 11 11 28t-11 28q-11 11-28 11t-28-11L348-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l184-184q11-11 28-11t28 11q11 11 11 28t-11 28L432-480Z",

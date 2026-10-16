@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess, logout, register } from "../features/auth/authAction";
 import { useState } from "react";
 import CustomError from './CustomError.jsx'
-import {useTranslation} from '../i18n/LanguageContext'
+import {useTranslation} from '../i18n/useTranslation'
 import { formatDate } from '../features/helperFunction'
 
 // "Jane Doe" -> "JD", "jane" -> "J"

@@ -6,11 +6,6 @@
     margin-top: 1rem;
 }
 
-.h2{
-    width: 100%;
-    margin: 2rem 0;
-}
-
 /* Drop zone for the task being worked on: hugs its content between
    a comfortable minimum and a readable maximum width */
 .currentTaskDiv{
@@ -133,52 +128,6 @@
     min-width: 0;
 }
 
-.ul{
-    list-style: none;
-    padding: 1rem 0;
-    background-color: var(--surface);
-    border-radius: var(--radius-xl);
-    width: fit-content;
-    min-width: 350px;
-    align-self: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-
-.li{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 1rem;
-    width: fit-content;
-    margin: 0.5rem 0;
-}
-
-.pDiv{
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-right: 0.5rem;
-}
-
-.dragSvg{
-    color: var(--text);
-    height: 2rem;
-    width: auto;
-    cursor: grab;
-}
-
-.notesDiv{
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-}
-
 .noteAdd{
     composes: iconHover from './ui.module.css';
 }
@@ -190,9 +139,4 @@
 .noteInput{
     background-color: transparent;
     border-color: transparent;
-}
-
-.sessionDoneBtn{
-    composes: btnPrimary from './ui.module.css';
-    margin: 1rem;
 }

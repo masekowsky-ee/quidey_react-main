@@ -13,7 +13,7 @@ import { updateCurrentSessionData, addWorkedTask } from '../features/session/ses
 import {useSelector, useDispatch} from 'react-redux';
 
 export default function Home(props){
-    const {t, setCustomError, setPercentWidth, percentWidth, setActiveTimer} = props;
+    const {t, setCustomError, setActiveTimer} = props;
 
     const dispatch = useDispatch();
 
@@ -31,7 +31,6 @@ export default function Home(props){
     // --- Gehobener State für Drag & Drop + aktive Task/Worked Tasks ---
     const starterTask = tasks[0] || null;
     const [activeTask, setActiveTask] = useState(starterTask);
-    const [workedTasks, setWorkedTasks] = useState(starterTask ? [{name: starterTask.name, id: starterTask.id, time: 0}] : [null]);
 
     const [draggedTask, setDraggedTask] = useState(null);
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -50,7 +49,6 @@ export default function Home(props){
     }, [activeTask, dispatch]);
 
     const handlePointerDown = useCallback((e, task) => {
-        console.log('pointerdown fired', task); // TEST
         e.preventDefault();
         const liElement = e.currentTarget.closest("li");
         const rect = liElement.getBoundingClientRect();
@@ -86,8 +84,6 @@ export default function Home(props){
 
             if (isOverDropZone) {
                 setActiveTask(currentTask);
-                console.log(currentTask)
-                setWorkedTasks(prev => prev.find(t => t?.id === currentTask.id) ? prev : [...prev, {name: currentTask.name, time: 0, id: currentTask.id}]);
             }
         }
 
@@ -108,7 +104,6 @@ export default function Home(props){
     }, [draggedTask, handlePointerMove, handlePointerUp]);
     // --- Ende gehobener State ---
 
-    console.log(tasks);
     return (
         <div className={styles.div}>
             <WeekDaysContainer t={t} tasks={tasks} />
@@ -120,8 +115,6 @@ export default function Home(props){
                 t={t}
                 dropZoneRef={dropZoneRef}
                 activeTask={activeTask}
-                workedTasks={workedTasks}
-                setWorkedTasks={setWorkedTasks}
                 setTasks={props.setTasks}
                 setActiveTask={setActiveTask}
             />
@@ -149,7 +142,7 @@ export default function Home(props){
                     dragOffset={dragOffset}
                 />
             </div>
-            <TimerContainer setActiveTimer={setActiveTimer} percentWidth={percentWidth} setPercentWidth={setPercentWidth} setWorkedTime={setWorkedTime} timer={timer} setTimer={setTimer} activeTask={activeTask} />
+            <TimerContainer setActiveTimer={setActiveTimer} setWorkedTime={setWorkedTime} timer={timer} setTimer={setTimer} activeTask={activeTask} />
             <Outlet />
         </div>
     );

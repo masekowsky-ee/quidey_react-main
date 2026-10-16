@@ -2,37 +2,20 @@ import { useState, useEffect, useRef } from "react";
 import styles from './WorkingPage.module.css'
 import { useSelector, useDispatch } from "react-redux";
 import { createNote, deleteNote, editNote, updateTaskProps } from "../features/tasks/taskAction.js";
-import {useTranslation} from '../i18n/LanguageContext'
+import {useTranslation} from '../i18n/useTranslation'
 import { formatDate } from '../features/helperFunction'
 
 
 export default function WorkingContainer (props) {
-    const {dropZoneRef, activeTask, setWorkedTasks, setActiveTask } = props;
+    const {dropZoneRef, activeTask, setActiveTask } = props;
 
         const dispatch = useDispatch();
 
         const {t} = useTranslation();
 
         const notes = useSelector(state => state.task.notes);
-        console.log(notes);
 
         const [editNoteState, setEditNoteState] = useState(false);
-
-        //const [timer, setTimer] = useState({time: sessionParams.time, active: false});
-        const [workedTime, setWorkedTime] = useState(0);
-
-        /*class sessionData {
-            constructor(group, tasksArray){
-                this.time = workedTime;
-                this.workedTasks = tasksArray;
-                this.group = group;
-                this.date = new Date();
-            }
-        } */
-
-        useEffect(()=>{
-            setWorkedTasks(prev => prev.map(p => p?.id === activeTask?.id ? {...p, time: p?.time + 1} : p))
-        }, [workedTime, activeTask, setWorkedTasks])
 
         const noteInputRef = useRef(null);
         useEffect(() => {
@@ -50,7 +33,6 @@ export default function WorkingContainer (props) {
             const newNote = e.target.value;
             dispatch(createNote(activeTask.id, newNote));
             setEditNoteState(false);
-            console.log(newNote);
         }
         const handleDeleteNote = (noteId) => {
             dispatch(deleteNote(activeTask.id, noteId));

@@ -1,10 +1,8 @@
 import styles from './CustomError.module.css';
-import {useTranslation} from '../i18n/LanguageContext'
 import {useSelector, useDispatch} from 'react-redux';
 import {setCustomError} from '../features/settings/settingsAction'
 
 export default function CustomError(){
-    const { t } = useTranslation();
     const customError = useSelector((state) => state.settings.customError);
     const dispatch = useDispatch();
     

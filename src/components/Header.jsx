@@ -2,6 +2,7 @@ import styles from './Header.module.css';
 import {Link} from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { setShowMenu } from '../features/settings/settingsAction'
+import { selectTimerProgress } from '../features/session/sessionAction'
 
 function formatTime(ms) {
     const h = Math.floor(ms / 3600000);
@@ -12,7 +13,8 @@ function formatTime(ms) {
 }
 
 export default function Header(props){
-    const {percentWidth, activeTimer} = props;
+    const {activeTimer} = props;
+    const percentWidth = useSelector(selectTimerProgress);
     const dispatch = useDispatch();
     const showMenu = () => {
         dispatch(setShowMenu());
