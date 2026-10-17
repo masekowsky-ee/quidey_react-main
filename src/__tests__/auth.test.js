@@ -6,7 +6,7 @@ import { checkAuth, loginSuccess, logout } from '../features/auth/authAction'
 import { LOGIN_SUCCESS, SET_USER } from '../features/auth/authActionTypes'
 
 const makeStore = () => configureStore({ reducer: rootReducer })
-const respond = (ok, body) => fetch.mockResolvedValue({ ok, json: () => Promise.resolve(body) })
+const respond = (ok, body, status = ok ? 200 : 400) => fetch.mockResolvedValue({ ok, status, json: () => Promise.resolve(body) })
 
 beforeEach(() => {
     localStorage.clear()
@@ -83,11 +83,42 @@ describe('checkAuth', () => {
     it('signs out when the server rejects the token', async () => {
         const store = makeStore()
         localStorage.setItem('token', 'expired')
-        respond(false, { error: 'Token invalid or expired' })
+        respond(false, { error: 'Token invalid or expired' }, 403)
 
         await store.dispatch(checkAuth())
 
         expect(localStorage.getItem('token')).toBeNull()
         expect(store.getState().auth.token).toBeNull()
+    })
+
+    it('signs out when no valid token is sent at all (401)', async () => {
+        const store = makeStore()
+        localStorage.setItem('token', 'garbage')
+        respond(false, { error: 'No existing token' }, 401)
+
+        await store.dispatch(checkAuth())
+
+        expect(localStorage.getItem('token')).toBeNull()
+    })
+
+    it('keeps the token when the backend is not reachable', async () => {
+        const store = makeStore()
+        localStorage.setItem('token', 'good')
+        fetch.mockRejectedValue(new TypeError('Failed to fetch'))
+
+        await store.dispatch(checkAuth())
+
+        expect(localStorage.getItem('token')).toBe('good')
+    })
+
+    it('keeps the token on a server error', async () => {
+        // the dev proxy answers 500 while the backend is down
+        const store = makeStore()
+        localStorage.setItem('token', 'good')
+        respond(false, {}, 500)
+
+        await store.dispatch(checkAuth())
+
+        expect(localStorage.getItem('token')).toBe('good')
     })
 })

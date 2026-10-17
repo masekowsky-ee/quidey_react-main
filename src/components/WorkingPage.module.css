@@ -81,7 +81,27 @@
     white-space: nowrap;
 }
 
+/* Marks the active task as done; green glow like the other "go" actions */
+.doneBtn{
+    composes: glowPrimary from './ui.module.css';
+}
+
+/* Nested so the size beats the global icon-button rule */
+.taskCardHead > .doneBtn{
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    color: var(--primary);
+}
+
+/* Description being edited: same size as the text it replaces */
+.descInput{
+    width: 100%;
+    font-size: 1rem;
+}
+
 .taskDesc{
+    cursor: text;
     color: var(--text-muted);
     overflow-wrap: break-word;
 }

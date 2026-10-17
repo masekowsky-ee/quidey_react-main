@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
-    apiFetch, formatDate, toInputDate, formatClock,
+    apiFetch, apiUrl, formatDate, toInputDate, formatClock,
     toDateOnly, sameDay, mondayIndex, monthGrid,
 } from '../features/helperFunction'
 
@@ -83,6 +83,25 @@ describe('calendar helpers', () => {
     })
 })
 
+describe('apiUrl', () => {
+    afterEach(() => vi.unstubAllEnvs())
+
+    it('keeps the relative path locally, so the Vite proxy handles it', () => {
+        vi.stubEnv('VITE_API_URL', '')
+        expect(apiUrl('/api/tasks')).toBe('/api/tasks')
+    })
+
+    it('prefixes the backend address in production builds', () => {
+        vi.stubEnv('VITE_API_URL', 'https://api.quidey.example.com')
+        expect(apiUrl('/api/tasks')).toBe('https://api.quidey.example.com/api/tasks')
+    })
+
+    it('ignores a trailing slash in the configured address', () => {
+        vi.stubEnv('VITE_API_URL', 'https://api.quidey.example.com/')
+        expect(apiUrl('/api/tasks')).toBe('https://api.quidey.example.com/api/tasks')
+    })
+})
+
 describe('apiFetch', () => {
     beforeEach(() => {
         localStorage.clear()
@@ -91,6 +110,14 @@ describe('apiFetch', () => {
 
     afterEach(() => {
         vi.unstubAllGlobals()
+        vi.unstubAllEnvs()
+    })
+
+    it('calls the configured backend address', async () => {
+        vi.stubEnv('VITE_API_URL', 'https://api.quidey.example.com')
+        fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({}) })
+        await apiFetch('/api/tasks')
+        expect(fetch.mock.calls[0][0]).toBe('https://api.quidey.example.com/api/tasks')
     })
 
     const respond = (ok, body) => fetch.mockResolvedValue({ ok, json: () => Promise.resolve(body) })

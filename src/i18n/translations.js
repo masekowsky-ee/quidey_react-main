@@ -59,6 +59,7 @@ const translations = {
         focusTime: 'Fokuszeit',
         calendar: 'Kalender',
         noTasks: 'Keine Aufgaben',
+        markDone: 'Als erledigt markieren',
 
         passwordValidateError: 'Die Passwörter stimmen nicht überein',
         ageError: 'Du musst mindestens 14 Jahre alt sein, um die App zu nutzen',
@@ -131,6 +132,7 @@ const translations = {
         focusTime: 'Focus time',
         calendar: 'Calendar',
         noTasks: 'No tasks',
+        markDone: 'Mark as done',
 
         dateNameTaskError: 'Please enter a valid Date / Name',
         groupError: 'Please enter a valid, unused group name',

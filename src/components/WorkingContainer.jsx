@@ -44,10 +44,14 @@ export default function WorkingContainer (props) {
 
         const [editActiveDescription, setEditActiveDescription] = useState(false);
 
-        const [activeDescription, setActiveDescription] = useState(null);
-
-        const editActiveDecriptionHandler = () => {
-            setActiveTask(prev => ({...prev, description: activeDescription})); dispatch(updateTaskProps({description: activeDescription}, activeTask)); setEditActiveDescription(false); setActiveDescription(null);
+        // Saves on blur only (Enter just blurs), and only when the text really changed,
+        // so clicking in and out never sends a request or overwrites the description
+        const saveDescription = (e) => {
+            setEditActiveDescription(false);
+            const description = e.target.value.trim();
+            if (description === (activeTask.description ?? '')) return;
+            setActiveTask(prev => ({...prev, description}));
+            dispatch(updateTaskProps({description}, activeTask));
         }
 
         const setActiveDoneHandler = () => {
@@ -62,20 +66,21 @@ export default function WorkingContainer (props) {
                         <div className={styles.taskCardHead}>
                             <h2 className={styles.taskTitle}>{activeTask.name}</h2>
                             {activeTask.due && <span className={styles.dueChip}>{formatDate(activeTask.due)}</span>}
-                            <button onClick={()=>{setActiveDoneHandler()}}>
+                            <button className={styles.doneBtn} onClick={()=>{setActiveDoneHandler()}} title={t('markDone')} aria-label={t('markDone')}>
                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
                             </button>
                         </div>
-                        {activeTask.description && !editActiveDescription ? 
-                        <p onClick={()=>{setEditActiveDescription(true); setActiveDescription(activeTask.description)}} className={styles.taskDesc}>{activeTask.description}</p> : 
-                        <input 
-                            defaultValue={activeTask.description} 
-                            onChange={(e)=>setActiveDescription(e.target.value)}
-                            onBlur={()=>{editActiveDecriptionHandler()}} 
-                            onKeyDown={(e)=>{
-                                if(e.key !== "Enter") return; 
-                                editActiveDecriptionHandler();
-                            }}></input>}
+                        {activeTask.description && !editActiveDescription ?
+                        <p onClick={()=>setEditActiveDescription(true)} className={styles.taskDesc} title={t('description')}>{activeTask.description}</p> :
+                        <input
+                            key={activeTask.id} // a fresh input per task, so text never carries over
+                            className={styles.descInput}
+                            defaultValue={activeTask.description ?? ''}
+                            placeholder={t('description')}
+                            autoFocus={editActiveDescription}
+                            onBlur={saveDescription}
+                            onKeyDown={(e)=>{ if(e.key === "Enter") e.currentTarget.blur(); }}
+                        />}
                         <div className={styles.notesHead}>
                             <h3>{t('taskNotes')}</h3>
                             <svg className={styles.noteAdd} onClick={handleCreateNoteSvg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M440-440H240q-17 0-28.5-11.5T200-480q0-17 11.5-28.5T240-520h200v-200q0-17 11.5-28.5T480-760q17 0 28.5 11.5T520-720v200h200q17 0 28.5 11.5T760-480q0 17-11.5 28.5T720-440H520v200q0 17-11.5 28.5T480-200q-17 0-28.5-11.5T440-240v-200Z"/></svg>

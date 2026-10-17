@@ -1,7 +1,14 @@
+// Full URL for an API path. VITE_API_URL is the backend's address in production builds
+// (e.g. https://api.quidey.example.com); locally it's empty and Vite's proxy forwards /api.
+export function apiUrl(path) {
+    const base = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+    return base + path;
+}
+
 export async function apiFetch(url, options = {}) {
     const token = localStorage.getItem("token");
 
-    const response = await fetch(url, {
+    const response = await fetch(apiUrl(url), {
         ...options,
         headers: {
             ...options.headers,
@@ -17,6 +24,7 @@ export async function apiFetch(url, options = {}) {
 
     return response.json();
 }
+
 // Same calendar day, time of day dropped (local time)
 export function toDateOnly(date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
