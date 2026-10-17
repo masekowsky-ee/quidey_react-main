@@ -1,4 +1,4 @@
-import { SET_SESSION_PARAMS, SAVE_SESSION_DATA, UPDATE_CURRENT_SESSION_DATA, SET_TIMER, ADD_WORKED_TASK, SET_WORKED_SESSIONS } from "./sessionActionTypes";
+import { SET_SESSION_PARAMS, SAVE_SESSION_DATA, UPDATE_CURRENT_SESSION_DATA, SET_TIMER, ADD_WORKED_TASK, ADD_TASK_TIME, SET_WORKED_SESSIONS } from "./sessionActionTypes";
 
 const initialState = {
     workedSessionData: [],
@@ -52,6 +52,18 @@ const sessionReducer = (state = initialState, action) => {
                     ...state.currentSessionData,
                     workedTasks: [...tasks, { id: action.payload.id, name: action.payload.name, time: 0 }],
                 },
+            };
+        }
+        case ADD_TASK_TIME: {
+            // time is in seconds, like totalTime; a task that isn't listed yet is added
+            const { id, name, seconds } = action.payload;
+            const tasks = state.currentSessionData.workedTasks;
+            const workedTasks = tasks.some(t => t.id === id)
+                ? tasks.map(t => t.id === id ? { ...t, time: t.time + seconds } : t)
+                : [...tasks, { id, name, time: seconds }];
+            return {
+                ...state,
+                currentSessionData: { ...state.currentSessionData, workedTasks },
             };
         }
 

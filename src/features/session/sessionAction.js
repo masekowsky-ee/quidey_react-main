@@ -1,4 +1,4 @@
-import { SET_SESSION_PARAMS, SAVE_SESSION_DATA, UPDATE_CURRENT_SESSION_DATA, SET_TIMER, ADD_WORKED_TASK, SET_WORKED_SESSIONS } from "./sessionActionTypes";
+import { SET_SESSION_PARAMS, SAVE_SESSION_DATA, UPDATE_CURRENT_SESSION_DATA, SET_TIMER, ADD_WORKED_TASK, ADD_TASK_TIME, SET_WORKED_SESSIONS } from "./sessionActionTypes";
 import { apiFetch } from '../helperFunction';
 
 export const setTimer = (time, active) => {
@@ -70,3 +70,15 @@ export const addWorkedTask = (task) => {
         payload: {id: task.id, name: task.name},
     }
 }
+
+// Books worked time (seconds) on a task in the current session
+export const addTaskTime = (task, seconds) => {
+    return {
+        type: ADD_TASK_TIME,
+        payload: {id: task.id, name: task.name, seconds},
+    }
+}
+
+// Seconds spent on a task in the current session (0 if not worked on yet)
+export const selectTaskTime = (state, taskId) =>
+    state.session.currentSessionData.workedTasks.find(t => t.id === taskId)?.time ?? 0;

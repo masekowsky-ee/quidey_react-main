@@ -6,6 +6,7 @@ import { createRef } from 'react'
 import rootReducer from '../features/rootReducer'
 import { apiFetch } from '../features/helperFunction'
 import WorkingContainer from '../components/WorkingContainer'
+import { addTaskTime } from '../features/session/sessionAction'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
     ...(await importOriginal()),
@@ -23,7 +24,7 @@ function renderCard(activeTask) {
         </Provider>
     )
     const view = render(ui(activeTask))
-    return { setActiveTask, rerender: (t) => view.rerender(ui(t)) }
+    return { store, setActiveTask, rerender: (t) => view.rerender(ui(t)) }
 }
 
 // German is the default language
@@ -75,6 +76,15 @@ describe('WorkingContainer', () => {
         rerender(task(2))
 
         expect(descriptionInput()).toHaveValue('')
+    })
+
+    it('shows the time spent on the active task in this session, live', async () => {
+        const { store } = renderCard(task(1))
+        expect(screen.getByText('00:00:00')).toBeInTheDocument()
+
+        await act(async () => { store.dispatch(addTaskTime(task(1), 75)) })
+
+        expect(screen.getByText('00:01:15')).toBeInTheDocument()
     })
 
     it('the checkmark marks the task done and clears the drop zone', async () => {

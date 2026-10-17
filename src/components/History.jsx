@@ -9,6 +9,14 @@ function formatMinutes(totalMinutes) {
     return h > 0 ? `${h} h ${m} min` : `${m} min`;
 }
 
+// Time on one task: "<1 min" for a few seconds, nothing for sessions saved before
+// per-task times existed (they come back as 0)
+function formatTaskTime(seconds) {
+    if (!seconds) return null;
+    if (seconds < 60) return '<1 min';
+    return formatMinutes(Math.round(seconds / 60));
+}
+
 export default function History(){
     const { t } = useTranslation();
 
@@ -55,9 +63,17 @@ export default function History(){
                                     </div>
                                     {ws.workedTasks.length > 0 &&
                                         <ul className={styles.tags}>
-                                            {ws.workedTasks.map((task) => (
-                                                <li key={task.id} className={styles.tag}>{task.name}</li>
-                                            ))}
+                                            {[...ws.workedTasks]
+                                                .sort((a, b) => (b.time ?? 0) - (a.time ?? 0))
+                                                .map((task) => {
+                                                    const time = formatTaskTime(task.time);
+                                                    return (
+                                                        <li key={task.id} className={styles.tag}>
+                                                            {task.name}
+                                                            {time && <span className={styles.tagTime}>{time}</span>}
+                                                        </li>
+                                                    );
+                                                })}
                                         </ul>
                                     }
                                 </li>

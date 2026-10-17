@@ -3,7 +3,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
 import { apiFetch } from '../features/helperFunction'
 import { addTask, deleteTask, updateTaskProps } from '../features/tasks/taskAction'
-import { saveSessionData, setSessionParams, addWorkedTask, updateCurrentSessionData } from '../features/session/sessionAction'
+import { saveSessionData, setSessionParams, addWorkedTask, addTaskTime, updateCurrentSessionData } from '../features/session/sessionAction'
 
 // Replace only apiFetch; the formatting helpers stay real
 vi.mock('../features/helperFunction', async (importOriginal) => ({
@@ -91,6 +91,20 @@ describe('saveSessionData', () => {
             workedTasks: [{ id: 1, name: 'a', time: 0 }],
             group: 'work',
         })
+    })
+
+    it('sends the time spent on each task, in seconds', async () => {
+        const store = makeStore()
+        store.dispatch(addTaskTime({ id: 1, name: 'a' }, 120))
+        store.dispatch(addTaskTime({ id: 2, name: 'b' }, 45))
+        apiFetch.mockResolvedValueOnce({ id: 5 })
+
+        await store.dispatch(saveSessionData())
+
+        expect(bodyOf(apiFetch.mock.calls[0]).workedTasks).toEqual([
+            { id: 1, name: 'a', time: 120 },
+            { id: 2, name: 'b', time: 45 },
+        ])
     })
 
     it('falls back to "all" when no group was chosen', async () => {

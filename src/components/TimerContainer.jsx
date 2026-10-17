@@ -3,7 +3,7 @@ import styles from './TimerContainer.module.css'
 import { useSelector, useDispatch } from 'react-redux';
 import { setSessionParams, setTimer, selectTimerProgress } from '../features/session/sessionAction';
 import {saveSessionData} from '../features/session/sessionAction'
-import { addWorkedTask } from '../features/session/sessionAction.js'
+import { addWorkedTask, addTaskTime } from '../features/session/sessionAction.js'
 import { formatClock } from '../features/helperFunction';
 
 export default function TimerContainer(props){
@@ -80,12 +80,19 @@ export default function TimerContainer(props){
 
     const timeoutRef = useRef(null);
 
-    // Ticks the running timer down once per second; display and progress are derived above
+    // Read inside the tick instead of being an effect dependency: switching tasks must not
+    // restart the running second, or the countdown would drift with every drop
+    const activeTaskRef = useRef(activeTask);
+    useEffect(() => { activeTaskRef.current = activeTask; }, [activeTask]);
+
+    // Ticks the running timer down once per second and books that second on the active task;
+    // display and progress are derived above
     useEffect(() => {
         if (timer.active && timer.time >= 1000) {
             timeoutRef.current = setTimeout(() => {
                 dispatch(setTimer(timer.time - 1000, timer.active));
                 setWorkedTime(prev => prev + 1);
+                if (activeTaskRef.current) dispatch(addTaskTime(activeTaskRef.current, 1));
             }, 1000);
         }
 

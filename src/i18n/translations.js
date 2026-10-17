@@ -60,6 +60,7 @@ const translations = {
         calendar: 'Kalender',
         noTasks: 'Keine Aufgaben',
         markDone: 'Als erledigt markieren',
+        timeThisSession: 'In dieser Sitzung',
 
         passwordValidateError: 'Die Passwörter stimmen nicht überein',
         ageError: 'Du musst mindestens 14 Jahre alt sein, um die App zu nutzen',
@@ -133,6 +134,7 @@ const translations = {
         calendar: 'Calendar',
         noTasks: 'No tasks',
         markDone: 'Mark as done',
+        timeThisSession: 'This session',
 
         dateNameTaskError: 'Please enter a valid Date / Name',
         groupError: 'Please enter a valid, unused group name',

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import sessionReducer from '../features/session/sessionReducer'
-import { setTimer, setSessionParams, addWorkedTask, updateCurrentSessionData, selectTimerProgress } from '../features/session/sessionAction'
+import { setTimer, setSessionParams, addWorkedTask, addTaskTime, selectTaskTime, updateCurrentSessionData, selectTimerProgress } from '../features/session/sessionAction'
 import { SAVE_SESSION_DATA, SET_WORKED_SESSIONS } from '../features/session/sessionActionTypes'
 
 const initial = sessionReducer(undefined, { type: '@@INIT' })
@@ -39,6 +39,25 @@ describe('sessionReducer', () => {
         expect(sessionReducer(once, addWorkedTask({ id: 1, name: 'a' }))).toBe(once)
     })
 
+    it('ADD_TASK_TIME adds seconds to a task that is already recorded', () => {
+        let state = sessionReducer(initial, addWorkedTask({ id: 1, name: 'a' }))
+        state = sessionReducer(state, addTaskTime({ id: 1, name: 'a' }, 1))
+        state = sessionReducer(state, addTaskTime({ id: 1, name: 'a' }, 1))
+        expect(state.currentSessionData.workedTasks).toEqual([{ id: 1, name: 'a', time: 2 }])
+    })
+
+    it('ADD_TASK_TIME records a task it has not seen yet, so no time gets lost', () => {
+        const state = sessionReducer(initial, addTaskTime({ id: 5, name: 'new' }, 1))
+        expect(state.currentSessionData.workedTasks).toEqual([{ id: 5, name: 'new', time: 1 }])
+    })
+
+    it('ADD_TASK_TIME only changes the task it is for', () => {
+        let state = sessionReducer(initial, addWorkedTask({ id: 1, name: 'a' }))
+        state = sessionReducer(state, addWorkedTask({ id: 2, name: 'b' }))
+        state = sessionReducer(state, addTaskTime({ id: 2, name: 'b' }, 3))
+        expect(state.currentSessionData.workedTasks.map(t => t.time)).toEqual([0, 3])
+    })
+
     it('UPDATE_CURRENT_SESSION_DATA merges into the current session', () => {
         const withTask = sessionReducer(initial, addWorkedTask({ id: 1, name: 'a' }))
         const state = sessionReducer(withTask, updateCurrentSessionData({ totalTime: 42 }))
@@ -64,6 +83,14 @@ describe('sessionReducer', () => {
     it('SET_WORKED_SESSIONS replaces the history list', () => {
         const state = sessionReducer(initial, { type: SET_WORKED_SESSIONS, payload: [{ id: 9 }] })
         expect(state.workedSessionData).toEqual([{ id: 9 }])
+    })
+})
+
+describe('selectTaskTime', () => {
+    it('returns the seconds booked on a task, or 0 for tasks not worked on', () => {
+        const session = sessionReducer(initial, addTaskTime({ id: 1, name: 'a' }, 42))
+        expect(selectTaskTime({ session }, 1)).toBe(42)
+        expect(selectTaskTime({ session }, 99)).toBe(0)
     })
 })
 

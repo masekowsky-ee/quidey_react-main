@@ -94,6 +94,19 @@
     color: var(--primary);
 }
 
+/* Time spent on the active task in this session */
+.taskTime{
+    margin-top: -0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.taskTime span{
+    color: var(--primary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
 /* Description being edited: same size as the text it replaces */
 .descInput{
     width: 100%;

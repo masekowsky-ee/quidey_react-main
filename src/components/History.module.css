@@ -105,6 +105,15 @@
     border-radius: 999px;
 }
 
+.tagTime{
+    margin-left: 0.45rem;
+    padding-left: 0.45rem;
+    border-left: 1px solid var(--btn-border);
+    color: var(--primary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
 .empty{
     text-align: center;
     color: var(--text-muted);

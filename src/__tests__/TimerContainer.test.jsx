@@ -12,12 +12,19 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
     apiFetch: vi.fn().mockResolvedValue({ id: 1 }),
 }))
 
-function renderTimer() {
+function renderTimer(activeTask = null) {
     const store = configureStore({ reducer: rootReducer })
-    const props = { setActiveTimer: vi.fn(), setWorkedTime: vi.fn(), activeTask: null }
-    render(<Provider store={store}><TimerContainer {...props} /></Provider>)
-    return { store, props }
+    const props = { setActiveTimer: vi.fn(), setWorkedTime: vi.fn(), activeTask }
+    const ui = (task) => <Provider store={store}><TimerContainer {...props} activeTask={task} /></Provider>
+    const view = render(ui(activeTask))
+    // dropping another task into the work area while the timer runs
+    const switchTask = (task) => view.rerender(ui(task))
+    return { store, props, switchTask }
 }
+
+const workedTasks = (store) => store.getState().session.currentSessionData.workedTasks
+const taskA = { id: 1, name: 'write report' }
+const taskB = { id: 2, name: 'answer mails' }
 
 // Let the fake clock run, flushing React updates in between
 const advance = async (ms) => {
@@ -53,6 +60,60 @@ describe('TimerContainer', () => {
         await advance(3000)
         const { timer, sessionParams } = store.getState().session
         expect(sessionParams.time - timer.time).toBe(3000)
+    })
+
+    describe('time per task', () => {
+        it('books every running second on the active task', async () => {
+            const { store } = renderTimer(taskA)
+            fireEvent.click(screen.getByRole('button', { name: 'start timer' }))
+
+            await advance(3000)
+
+            expect(workedTasks(store)).toEqual([{ ...taskA, time: 3 }])
+        })
+
+        it('splits the time between tasks when another one is dropped in', async () => {
+            const { store, switchTask } = renderTimer(taskA)
+            fireEvent.click(screen.getByRole('button', { name: 'start timer' }))
+            await advance(2000)
+
+            switchTask(taskB)
+            await advance(3000)
+
+            expect(workedTasks(store)).toEqual([{ ...taskA, time: 2 }, { ...taskB, time: 3 }])
+        })
+
+        it('switching tasks does not make the countdown drift', async () => {
+            const { switchTask } = renderTimer(taskA)
+            fireEvent.click(screen.getByRole('button', { name: 'start timer' }))
+            await act(async () => { vi.advanceTimersByTime(600) })
+
+            switchTask(taskB) // mid-second
+            await act(async () => { vi.advanceTimersByTime(400) })
+
+            // still exactly one tick after one second in total
+            expect(screen.getByText('00:29:59')).toBeInTheDocument()
+        })
+
+        it('books nothing while paused', async () => {
+            const { store } = renderTimer(taskA)
+            fireEvent.click(screen.getByRole('button', { name: 'start timer' }))
+            await advance(1000)
+            fireEvent.click(screen.getByRole('button', { name: 'pause timer' }))
+
+            await advance(5000)
+
+            expect(workedTasks(store)[0].time).toBe(1)
+        })
+
+        it('books nothing on any task when no task is in the work area', async () => {
+            const { store } = renderTimer(null)
+            fireEvent.click(screen.getByRole('button', { name: 'start timer' }))
+
+            await advance(3000)
+
+            expect(workedTasks(store)).toEqual([])
+        })
     })
 
     it('stops counting while paused', async () => {
