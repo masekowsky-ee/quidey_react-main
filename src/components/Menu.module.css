@@ -49,6 +49,23 @@
   transform: translateX(3px) scale(0.98);
 }
 
+/* Number of open friend requests next to "Social" */
+.badge {
+  display: inline-block;
+  min-width: 1.25rem;
+  margin-left: 0.5rem;
+  padding: 0 0.35rem;
+  box-sizing: border-box;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+  text-align: center;
+  vertical-align: 0.1em;
+  color: var(--primary-text);
+  background-color: var(--primary);
+  border-radius: 999px;
+}
+
 .overlay {
   composes: overlay from './ui.module.css';
   z-index: var(--z-menu-overlay);

@@ -4,13 +4,7 @@ import { loginSuccess, logout, register } from "../features/auth/authAction";
 import { useState } from "react";
 import CustomError from './CustomError.jsx'
 import {useTranslation} from '../i18n/useTranslation'
-import { formatDate } from '../features/helperFunction'
-
-// "Jane Doe" -> "JD", "jane" -> "J"
-function getInitials(name) {
-    if (!name) return '?';
-    return name.trim().split(/\s+/).slice(0, 2).map(part => part[0].toUpperCase()).join('');
-}
+import { formatDate, getInitials } from '../features/helperFunction'
 
 export default function Profile(){
     const { t } = useTranslation();

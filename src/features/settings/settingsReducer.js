@@ -1,4 +1,5 @@
-import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS } from "./settingsActionTypes";
+import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME } from "./settingsActionTypes";
+import { THEMES, readStoredTheme } from "./theme";
 
 const intitialState = {
     showMenu: false,
@@ -6,6 +7,7 @@ const intitialState = {
     showForms: false,
     customError: { bool: false, message: '' },
     language: 'de',
+    theme: readStoredTheme(), // 'dark' | 'light' | 'system', remembered in localStorage
 }
 
 const settingsReducer = (state = intitialState, action) => {
@@ -20,6 +22,8 @@ const settingsReducer = (state = intitialState, action) => {
             return { ...state, customError: action.payload };
         case SET_SHOW_FORMS:
             return { ...state, showForms: !state.showForms };
+        case SET_THEME:
+            return THEMES.includes(action.payload) ? { ...state, theme: action.payload } : state;
         default:
             return state;
     }

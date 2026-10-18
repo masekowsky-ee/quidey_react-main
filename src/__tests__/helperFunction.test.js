@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
-    apiFetch, apiUrl, formatDate, toInputDate, formatClock,
+    apiFetch, apiUrl, formatDate, toInputDate, formatClock, getInitials,
     toDateOnly, sameDay, mondayIndex, monthGrid,
 } from '../features/helperFunction'
 
@@ -30,6 +30,28 @@ describe('toInputDate', () => {
 
     it('returns an empty string for missing dates', () => {
         expect(toInputDate(null)).toBe('')
+    })
+})
+
+describe('getInitials', () => {
+    it('takes the first letters of up to two words', () => {
+        expect(getInitials('anna berg')).toBe('AB')
+        expect(getInitials('Anna Maria Berg')).toBe('AM')
+        expect(getInitials('ben')).toBe('B')
+    })
+
+    it('skips symbols at the start of a word', () => {
+        expect(getInitials('__ben')).toBe('B')
+        expect(getInitials('@anna _berg')).toBe('AB')
+        expect(getInitials('2fast')).toBe('2')
+        expect(getInitials('élodie')).toBe('É')
+    })
+
+    it('shows a question mark when there is no name', () => {
+        expect(getInitials('')).toBe('?')
+        expect(getInitials('   ')).toBe('?')
+        expect(getInitials(null)).toBe('?')
+        expect(getInitials('___')).toBe('?')
     })
 })
 
@@ -151,6 +173,11 @@ describe('apiFetch', () => {
     it('throws the error message the API sent', async () => {
         respond(false, { error: 'Token invalid or expired' })
         await expect(apiFetch('/api/tasks')).rejects.toThrow('Token invalid or expired')
+    })
+
+    it('attaches the HTTP status and the API error code to the error', async () => {
+        fetch.mockResolvedValue({ ok: false, status: 404, json: () => Promise.resolve({ error: 'User not found', code: 'USER_NOT_FOUND' }) })
+        await expect(apiFetch('/api/friends/requests')).rejects.toMatchObject({ status: 404, code: 'USER_NOT_FOUND' })
     })
 
     it('throws a generic message when the error body is not JSON', async () => {

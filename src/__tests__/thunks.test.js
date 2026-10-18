@@ -14,7 +14,7 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 const makeStore = () => configureStore({ reducer: rootReducer })
 const bodyOf = (call) => JSON.parse(call[1].body)
 
-beforeEach(() => apiFetch.mockReset())
+beforeEach(() => { apiFetch.mockReset() })
 
 describe('addTask', () => {
     it('creates the task and adds the returned row to the store', async () => {

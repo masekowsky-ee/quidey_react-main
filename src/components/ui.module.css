@@ -45,7 +45,7 @@
     background-color: var(--surface-inset);
     border: 1px solid var(--btn-border);
     border-radius: var(--radius);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-inset);
 }
 
 .segmented > button {
@@ -69,9 +69,9 @@
 /* Two classes so it beats the plain option above */
 .segmented > .segmentActive,
 .segmented > .segmentActive:hover {
-    background: linear-gradient(180deg, var(--text-h), var(--border-strong));
-    color: var(--primary-text);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 3px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(180deg, var(--contrast-top), var(--contrast-bottom));
+    color: var(--contrast-text);
+    box-shadow: var(--contrast-shadow);
 }
 
 /* Rounded dark box */
@@ -146,13 +146,12 @@
         0 10px 24px -8px var(--glow);
 }
 
-/* Light, high-contrast button (selected tab, secondary switch) */
+/* High-contrast button (selected tab, secondary switch): light in dark mode, dark in light mode */
 .btnLight {
-    background: linear-gradient(180deg, var(--text-h), var(--border-strong));
-    color: var(--primary-text);
-    border-color: rgba(255, 255, 255, 0.6);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 2px rgba(0, 0, 0, 0.5),
-        0 6px 14px -8px rgba(255, 255, 255, 0.35);
+    background: linear-gradient(180deg, var(--contrast-top), var(--contrast-bottom));
+    color: var(--contrast-text);
+    border-color: var(--contrast-border);
+    box-shadow: var(--contrast-shadow);
 }
 
 /* Bare icon button with a fixed hit area. Self-contained so it also works on links. */

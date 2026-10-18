@@ -209,7 +209,7 @@
     max-height: 80vh;
     overflow-y: auto;
     box-sizing: border-box;
-    box-shadow: var(--shadow), 0 20px 50px -20px rgba(0, 0, 0, 0.8);
+    box-shadow: var(--shadow), var(--shadow-modal);
     animation: panelIn 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 

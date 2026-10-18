@@ -91,7 +91,7 @@
     flex-shrink: 0;
     width: 2rem;
     height: 2rem;
-    color: var(--primary);
+    color: var(--primary-fg);
 }
 
 /* Time spent on the active task in this session */
@@ -102,7 +102,7 @@
 }
 
 .taskTime span{
-    color: var(--primary);
+    color: var(--primary-fg);
     font-weight: 600;
     font-variant-numeric: tabular-nums;
 }

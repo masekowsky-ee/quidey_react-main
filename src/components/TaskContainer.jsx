@@ -161,7 +161,7 @@ export default function TaskContainer(props){
                                             </button>
                                             { taskToEdit && taskPropToEdit === 'due' && taskToEdit.id === task.id
                                                 ? <input autoFocus type="date" defaultValue={toInputDate(task.due)} onBlur={(e) => {setTaskPropHandler(e.target.value, 'due', task);}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'due', task)}}}/>
-                                                : <p style={compareDate(task.due) ? { color: 'red' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>{formatDate(task.due)}</p>
+                                                : <p style={compareDate(task.due) ? { color: 'var(--danger)' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>{formatDate(task.due)}</p>
                                             }
                                             <div className={styles.prioDiv}>
                                                 <label>{t('prioritise')}:</label>

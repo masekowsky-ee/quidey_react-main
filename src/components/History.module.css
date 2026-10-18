@@ -80,7 +80,7 @@
     font-size: 0.85rem;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
-    color: var(--primary);
+    color: var(--primary-fg);
     background-color: color-mix(in srgb, var(--primary) 12%, transparent);
     border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
     border-radius: 999px;
@@ -109,7 +109,7 @@
     margin-left: 0.45rem;
     padding-left: 0.45rem;
     border-left: 1px solid var(--btn-border);
-    color: var(--primary);
+    color: var(--primary-fg);
     font-weight: 600;
     font-variant-numeric: tabular-nums;
 }

@@ -15,9 +15,18 @@
   --text-muted: #979797;
 
   --primary: #0ed30e;
-  --primary-text: #313131;
+  --primary-text: #313131;   /* text on a green background */
+  --primary-fg: var(--primary); /* green used as text or outline on the page background */
   --danger: #ff4d4d;
   --glow: color-mix(in srgb, var(--text-h) 45%, transparent);
+
+  /* High-contrast "selected" look (active tab, sign-in switch): light on dark, dark on light */
+  --contrast-top: #fff;
+  --contrast-bottom: #d3d3d3;
+  --contrast-text: #313131;
+  --contrast-border: rgba(255, 255, 255, 0.6);
+  --contrast-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 2px rgba(0, 0, 0, 0.5),
+    0 6px 14px -8px rgba(255, 255, 255, 0.35);
 
   --radius-sm: 6px;
   --radius: 10px;
@@ -26,6 +35,9 @@
 
   --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.6);
   --shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.4);       /* sunken wells: tabs, timer chip */
+  --shadow-float: 0 8px 24px -8px rgba(0, 0, 0, 0.7);       /* things hovering over the page */
+  --shadow-modal: 0 20px 50px -20px rgba(0, 0, 0, 0.8);     /* dialogs */
   --overlay: rgba(0, 0, 0, 0.5);
   --ease: 0.2s ease;
   --ease-out: 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -66,6 +78,57 @@
   @media (max-width: 1024px) {
     font-size: 16px;
   }
+}
+
+/* Light theme: same tokens, light values. Set on <html> by the theme setting
+   (and before the first paint by the script in index.html). */
+:root[data-theme="light"] {
+  --bg: #f2f3f5;
+  --surface-inset: #eceef1;
+  --surface-bar: #ffffff;
+  --surface: #ffffff;
+  --surface-hover: #f4f5f7;
+  --surface-strong: #dfe2e7;
+
+  --border: #c4c9d1;
+  --border-strong: #4b5563;
+
+  --text: #374151;
+  --text-h: #111827;
+  --text-muted: #6b7280;
+
+  --primary: #22c55e;
+  --primary-text: #102a1a;
+  --primary-fg: #15803d;   /* darker green, readable as text on white */
+  --danger: #dc2626;
+  --glow: rgba(17, 24, 39, 0.22);
+
+  --contrast-top: #374151;
+  --contrast-bottom: #111827;
+  --contrast-text: #ffffff;
+  --contrast-border: rgba(0, 0, 0, 0.6);
+  --contrast-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 2px rgba(0, 0, 0, 0.25),
+    0 6px 14px -8px rgba(0, 0, 0, 0.35);
+
+  --shadow-sm: 0 1px 3px rgba(17, 24, 39, 0.12);
+  --shadow: 0 4px 12px rgba(17, 24, 39, 0.12);
+  --shadow-inset: inset 0 1px 2px rgba(17, 24, 39, 0.08);
+  --shadow-float: 0 10px 28px -10px rgba(17, 24, 39, 0.3);
+  --shadow-modal: 0 24px 60px -24px rgba(17, 24, 39, 0.35);
+  --overlay: rgba(17, 24, 39, 0.35);
+
+  --btn-border: rgba(17, 24, 39, 0.14);
+  --btn-border-hover: rgba(17, 24, 39, 0.28);
+  --btn-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --btn-shadow: var(--btn-highlight), 0 1px 2px rgba(17, 24, 39, 0.1), 0 4px 10px -6px rgba(17, 24, 39, 0.18);
+  --btn-shadow-hover: var(--btn-highlight), 0 2px 4px rgba(17, 24, 39, 0.12),
+    0 10px 22px -10px rgba(17, 24, 39, 0.25), 0 0 16px -8px var(--glow);
+  --btn-shadow-active: inset 0 1px 3px rgba(17, 24, 39, 0.18);
+
+  --scrollbar-thumb: rgba(17, 24, 39, 0.18);
+  --scrollbar-thumb-hover: rgba(17, 24, 39, 0.32);
+
+  color-scheme: light; /* native date pickers, checkboxes, etc. */
 }
 
 body {

@@ -55,7 +55,7 @@
 }
 
 .today .weekday{
-    color: var(--primary);
+    color: var(--primary-fg);
 }
 
 .dayNum{

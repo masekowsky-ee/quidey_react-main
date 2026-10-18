@@ -1,0 +1,551 @@
+/* Shared sessions: the list page (Together.jsx) and one session (SharedSession.jsx) */
+
+.page{
+    composes: pageColumn from './ui.module.css';
+}
+
+.title{
+    composes: pageTitle from './ui.module.css';
+}
+
+.card{
+    composes: card from './ui.module.css';
+}
+
+.cardTitle{
+    composes: cardTitle from './ui.module.css';
+}
+
+.intro{
+    color: var(--text-muted);
+    margin: -0.5rem 0 0.25rem;
+}
+
+.back{
+    margin-top: 1.5rem;
+    margin-bottom: -1.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    align-self: flex-start;
+}
+
+.back:hover{
+    color: var(--text-h);
+}
+
+.titleRow{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.endedBadge{
+    flex-shrink: 0;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border: 1px solid var(--btn-border);
+    border-radius: 999px;
+}
+
+/* ---------- stats ---------- */
+
+.stats{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.stat{
+    composes: card from './ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.statValue{
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-h);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.statLabel{
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* ---------- lists and rows ---------- */
+
+.list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.list > li + li{
+    border-top: 1px solid var(--btn-border);
+}
+
+.row,
+.taskRow,
+.sessionLink{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.7rem 0;
+}
+
+.sessionLink{
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+}
+
+.sessionLink:hover .name{
+    color: var(--primary-fg);
+}
+
+.avatar,
+.avatarSmall,
+.chipAvatar{
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--text-h);
+    background: linear-gradient(145deg, var(--surface-strong), var(--surface-hover));
+    border: 1px solid var(--btn-border);
+    border-radius: 50%;
+    user-select: none;
+}
+
+.avatar{
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.95rem;
+}
+
+.avatarSmall{
+    width: 1.6rem;
+    height: 1.6rem;
+    font-size: 0.65rem;
+}
+
+.chipAvatar{
+    width: 1.4rem;
+    height: 1.4rem;
+    font-size: 0.6rem;
+}
+
+.who{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.name{
+    color: var(--text-h);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.meta{
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.desc{
+    font-size: 0.85rem;
+    color: var(--text);
+    margin-top: 0.15rem;
+}
+
+.times{
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.timeMain{
+    flex-shrink: 0;
+    font-weight: 700;
+    color: var(--text-h);
+    font-variant-numeric: tabular-nums;
+}
+
+.actions{
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.actions button{
+    font-size: 0.85rem;
+    padding: 0.25rem 0.7rem;
+}
+
+/* ---------- "working now" ---------- */
+
+.live{
+    flex-shrink: 1;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--primary-fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.liveDot{
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: var(--primary);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 60%, transparent);
+    animation: pulse 1.8s var(--ease-out) infinite;
+}
+
+@keyframes pulse{
+    to{ box-shadow: 0 0 0 0.45rem transparent; }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .liveDot{ animation: none; }
+}
+
+.workers{
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* ---------- my work ---------- */
+
+.workingCard{
+    border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+
+.workRow{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+}
+
+.clock{
+    font-family: var(--mono);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-h);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- tasks ---------- */
+
+.addTask{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.addRow{
+    display: flex;
+    flex-direction: row;
+    gap: 0.6rem;
+}
+
+.addRow input{
+    flex: 1;
+    min-width: 0;
+}
+
+.select{
+    align-self: flex-start;
+    max-width: 100%;
+}
+
+.check{
+    flex-shrink: 0;
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--primary);
+}
+
+.taskDone .name{
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.taskMine .name{
+    color: var(--primary-fg);
+}
+
+/* ---------- who worked on what ---------- */
+
+.summary{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.summaryPerson{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.summaryHead{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.summaryHead .name{
+    flex: 1;
+}
+
+.shareBar{
+    height: 0.4rem;
+    background-color: var(--surface-inset);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.shareBar > div{
+    height: 100%;
+    background-color: var(--primary);
+    border-radius: inherit;
+    transition: width var(--ease);
+}
+
+.breakdown{
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 3.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: 0.85rem;
+}
+
+.breakdown li{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.breakdownName{
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.breakdownTime{
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- forms ---------- */
+
+.form{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label{
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.hint{
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.formActions{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.invite{
+    margin-top: 0.75rem;
+}
+
+.chips{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.chip,
+.chipOn{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.75rem 0.25rem 0.3rem;
+    font-size: 0.85rem;
+    border-radius: 999px;
+}
+
+.chipOn{
+    color: var(--primary-text);
+    background: var(--primary);
+    border-color: color-mix(in srgb, var(--primary) 55%, black);
+}
+
+/* ---------- buttons ---------- */
+
+.primaryBtn{
+    composes: btnPrimary from './ui.module.css';
+}
+
+a.primaryBtn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.acceptBtn{
+    composes: btnPrimary from './ui.module.css';
+    min-width: 0;
+    height: auto;
+}
+
+.secondaryBtn{
+    flex-shrink: 0;
+}
+
+.quietBtn,
+.quietDangerBtn{
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--text-muted);
+}
+
+.quietBtn:hover{
+    color: var(--text-h);
+    border-color: var(--btn-border);
+}
+
+.quietDangerBtn:hover{
+    color: var(--danger);
+    border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.dangerBtn{
+    composes: glowDanger from './ui.module.css';
+    color: var(--danger);
+    border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.footerActions{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.confirmText{
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* ---------- empty states ---------- */
+
+.empty{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.emptyLine{
+    color: var(--text-muted);
+}
+
+@media (max-width: 520px) {
+    .stats{
+        gap: 0.5rem;
+    }
+
+    .stat{
+        padding: 0.9rem 1rem;
+    }
+
+    .statValue{
+        font-size: 1.1rem;
+    }
+
+    .taskRow,
+    .row{
+        flex-wrap: wrap;
+    }
+
+    /* buttons drop under the name instead of squeezing it */
+    .taskRow .actions,
+    .row .actions{
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .breakdown{
+        padding-left: 0;
+    }
+
+    .clock{
+        font-size: 1.25rem;
+    }
+}

@@ -209,12 +209,13 @@
     font-weight: 700;
     line-height: 1.4rem;
     text-align: center;
-    color: var(--primary-text);
+    color: var(--contrast-text); /* light text on dark, dark text on light, like the other "selected" elements */
     background-color: var(--border-strong);
     border-radius: 999px;
 }
 
 .doneToggleOn .doneCount{
+    color: var(--primary-text);
     background-color: var(--primary);
 }
 

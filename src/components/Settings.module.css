@@ -29,6 +29,13 @@
     color: var(--text-h);
 }
 
+/* Settings in one card are separated by a thin line */
+.row + .row{
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--btn-border);
+}
+
 .segmented{
     composes: segmented from './ui.module.css';
 }

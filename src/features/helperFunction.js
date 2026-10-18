@@ -19,10 +19,31 @@ export async function apiFetch(url, options = {}) {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Request failed");
+        const error = new Error(errorData.error || "Request failed");
+        // status and the API's error code let the UI show a translated message
+        error.status = response.status;
+        error.code = errorData.code;
+        throw error;
     }
 
     return response.json();
+}
+
+// "Jane Doe" -> "JD", "jane" -> "J", "__ben" -> "B", for avatar circles.
+// Uses the first letter or digit of each word, so symbols like "_" or "@" are skipped.
+export function getInitials(name) {
+    const initials = (name ?? '').trim().split(/\s+/)
+        .map(part => part.match(/[\p{L}\p{N}]/u)?.[0])
+        .filter(Boolean)
+        .slice(0, 2)
+        .join('')
+        .toUpperCase();
+    return initials || '?';
+}
+
+// Name to show for a user from the api ({ username, displayName })
+export function displayName(user) {
+    return user?.displayName || user?.username || '?';
 }
 
 // Same calendar day, time of day dropped (local time)
@@ -53,6 +74,16 @@ export function formatClock(ms) {
     const m = Math.floor((totalSeconds % 3600) / 60);
     const s = totalSeconds % 60;
     return [h, m, s].map(n => String(n).padStart(2, '0')).join(':');
+}
+
+// Worked time for summaries: 45000 -> "45 s", 3900000 -> "1 h 5 min"
+export function formatDuration(ms) {
+    const totalSeconds = Math.max(0, Math.floor((ms ?? 0) / 1000));
+    if (totalSeconds < 60) return `${totalSeconds} s`;
+    const totalMinutes = Math.floor(totalSeconds / 60);
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    return h > 0 ? `${h} h ${m} min` : `${m} min`;
 }
 
 // The api sends date columns as local midnight in UTC (e.g. 2026-10-19T22:00:00.000Z
