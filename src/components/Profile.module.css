@@ -204,6 +204,40 @@
     border-color: var(--danger);
 }
 
+/* Sign out | sign out on all devices */
+.signOutRow{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+}
+
+.signOutRow > .quietBtn,
+.confirmEverywhere .quietBtn{
+    padding: 0.25rem 0.7rem;
+    font-size: 0.85rem;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--text-muted);
+}
+
+.signOutRow > .quietBtn:hover,
+.confirmEverywhere .quietBtn:hover{
+    color: var(--text-h);
+    border-color: var(--btn-border);
+}
+
+.confirmEverywhere{
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
 /* ---------- Signed out ---------- */
 
 .authCard{

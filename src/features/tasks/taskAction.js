@@ -1,4 +1,4 @@
-import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, GET_NOTES } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, GET_NOTES } from './taskActionTypes';
 import { apiFetch } from '../helperFunction';
 
 
@@ -31,7 +31,8 @@ export const addTask = (name, due, description, prio, activeGroupId = null, user
 
         dispatch({
             type: ADD_TASK,
-            payload: data,
+            // the groups it's in, for its labels (POST /api/tasks doesn't send them)
+            payload: { ...data, group_ids: activeGroupId ? [activeGroupId] : [] },
         });
     };
 }
@@ -77,6 +78,7 @@ export const addGroup = (name, description) => {
             type: ADD_GROUP,
             payload: data,
         });
+        return data;
     };
 }
 
@@ -93,6 +95,11 @@ export const deleteGroup = (groupId) => {
 
 export const editDisplaygroup = (group, groupToDisplayId) => {
     return async (dispatch) => {
+        // a shared session's group: its tasks come from the session (TaskContainer reads them live)
+        if (group.shared && groupToDisplayId !== group.id) {
+            dispatch({ type: EDIT_DISPLAYGROUP, payload: { group, tasks: [] } });
+            return;
+        }
         if(groupToDisplayId === group.id) {
             const tasks = await apiFetch(`/api/tasks`, {method: "GET",});
             dispatch({
@@ -110,8 +117,12 @@ export const editDisplaygroup = (group, groupToDisplayId) => {
 }
 
 export const addGroupTasks = (groupId, taskId) => {
-    return async () => {
+    return async (dispatch) => {
         await apiFetch(`/api/tasks/${taskId}/groups/${groupId}`, {method: "POST"});
+        dispatch({
+            type: ADD_GROUP_TASKS,
+            payload: { taskId, groupId },
+        });
     };
 }
 
@@ -120,7 +131,7 @@ export const deleteGroupTasks = (taskId, groupId) => {
         await apiFetch(`/api/task-groups/${taskId}/${groupId}`, {method: "DELETE"});
         dispatch({
             type: DELETE_GROUP_TASKS,
-            payload: taskId,
+            payload: { taskId, groupId },
         });
     };
 }

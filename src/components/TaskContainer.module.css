@@ -102,11 +102,12 @@
     color: var(--text-muted);
 }
 
+/* name, with the group labels below it */
 .taskHeader{
     display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
     margin: auto 0;
 }
 
@@ -233,15 +234,49 @@
     justify-self: center;
 }
 
-.assignGroupsDiv{
-    composes: overlay from './ui.module.css';
-    z-index: var(--z-modal);
-    display: flex;
-    flex-direction: column;
+/* ---------- tasks from shared sessions ---------- */
+
+/* a thin team-colored edge marks them */
+.sharedLi{
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--primary) 55%, transparent);
+    padding-left: 0.5rem !important;
+}
+
+/* my time on it, where own tasks show their due date */
+.sharedTime{
+    font-size: 0.85rem;
+    color: var(--primary-fg);
+    font-variant-numeric: tabular-nums;
+}
+
+.sharedDesc{
+    margin-left: 0.5rem;
+    text-align: left;
+    color: var(--text-muted);
+}
+
+.btnDiv a.assignBtn{
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    padding: 1rem;
+    text-decoration: none;
+    color: var(--text);
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius-sm);
+}
+
+.btnDiv a.assignBtn:hover{
+    color: var(--text-h);
+    border-color: var(--btn-border-hover);
+}
+
+/* under the title while a session's group is shown */
+.sharedGroupHint{
+    margin: -0.5rem auto 0.5rem;
+    max-width: 600px;
+    padding: 0 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: center;
 }
 
 /* ---------- Tablet & phone: each task becomes a small card ----------

@@ -25,7 +25,7 @@ beforeEach(() => { apiFetch.mockReset() })
 
 describe('togetherReducer', () => {
     it('starts empty', () => {
-        expect(initial).toEqual({ sessions: [], invites: [], current: null, currentSeq: 0, work: idleWork })
+        expect(initial).toEqual({ sessions: [], invites: [], current: null, currentSeq: 0, work: idleWork, mine: [], history: null })
     })
 
     it('ignores a session that comes from an older request than the one shown', () => {

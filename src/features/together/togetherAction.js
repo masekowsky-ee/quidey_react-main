@@ -1,4 +1,5 @@
-import { SET_SHARED_SESSIONS, SET_SHARED_SESSION, SHARED_SESSION_GONE } from './togetherActionTypes';
+import { createSelector } from '@reduxjs/toolkit';
+import { SET_SHARED_SESSIONS, SET_SHARED_SESSION, SHARED_SESSION_GONE, SET_MY_SHARED_TASKS, SET_SHARED_HISTORY } from './togetherActionTypes';
 import { apiFetch } from '../helperFunction';
 
 const base = (id) => `/api/shared-sessions/${id}`;
@@ -103,6 +104,58 @@ export const deleteSharedSession = (id) => {
 };
 
 export const selectInviteCount = (state) => state.together.invites.length;
+
+// ---------- shared sessions in the solo view and the history ----------
+
+// Running sessions I joined, with their tasks (the groups on the solo home page)
+export const fetchMySharedTasks = () => async (dispatch) => {
+    const sessions = await apiFetch('/api/shared-sessions/my-tasks');
+    dispatch({ type: SET_MY_SHARED_TASKS, payload: sessions });
+};
+
+// My work in shared sessions, for the history page
+export const fetchSharedHistory = () => async (dispatch) => {
+    const entries = await apiFetch('/api/shared-sessions/history');
+    dispatch({ type: SET_SHARED_HISTORY, payload: entries });
+};
+
+// Ids of shared tasks in the solo view: "shared-<id>", so they never clash with own task ids
+export const SHARED_TASK_PREFIX = 'shared-';
+export const isSharedTaskId = (id) => typeof id === 'string' && id.startsWith(SHARED_TASK_PREFIX);
+export const sharedTaskIdOf = (id) => Number(String(id).slice(SHARED_TASK_PREFIX.length));
+export const sharedGroupId = (sessionId) => `session-${sessionId}`;
+
+// A shared task in the shape of an own task, plus where it belongs:
+// shared: { sessionId, sessionName, taskId }, assignee, myMs (my time on it so far)
+export const toSoloTask = (session, task) => ({
+    id: `${SHARED_TASK_PREFIX}${task.id}`,
+    name: task.name,
+    description: task.description,
+    done: task.done,
+    due: null,
+    prio: null,
+    assignee: task.assignee,
+    myMs: task.myMs,
+    shared: { sessionId: session.id, sessionName: session.name, taskId: task.id },
+});
+
+// One group per running session I'm in: { id: 'session-5', name, sessionId, shared: true, tasks }.
+// They can't be deleted; they go away when I leave or the session ends.
+export const selectSharedGroups = createSelector(
+    [(state) => state.together.mine],
+    (mine) => mine.map(session => ({
+        id: sharedGroupId(session.id),
+        name: session.name,
+        sessionId: session.id,
+        shared: true,
+        tasks: session.tasks.map(task => toSoloTask(session, task)),
+    })),
+);
+
+export const selectSharedSoloTasks = createSelector(
+    [selectSharedGroups],
+    (groups) => groups.flatMap(group => group.tasks),
+);
 
 // Translated message for an API error, using the error code the backend sends
 export function togetherErrorText(t, err) {

@@ -6,6 +6,9 @@ import CustomError from './CustomError.jsx'
 import ProfileView from './ProfileView.jsx'
 import {useTranslation} from '../i18n/useTranslation'
 
+// Same rule as the server: 3-30 letters, digits, _ . or -
+const USERNAME_PATTERN = /^[A-Za-z0-9_.-]{3,30}$/;
+
 export default function Profile(){
     const { t } = useTranslation();
 
@@ -26,15 +29,23 @@ export default function Profile(){
         dispatch(logout());
     }
 
+    // The server's reason as a translated message (error.code, or the HTTP status for sign-in)
+    const authErrorText = (err) => {
+        const code = err?.code ?? (err?.status === 401 ? 'INVALID_LOGIN' : err?.status === 429 ? 'RATE_LIMITED' : null);
+        const key = `authError_${code}`;
+        return code && t(key) !== key ? t(key) : t('friendError_generic');
+    };
+
     const handleSignIn = (e, username, password) => {
         e.preventDefault();
         if (!username || !password) {
             setCustomError({bool: true, message: `${t('missingFieldsError')}`});
         } else {
             dispatch(loginSuccess(username, password))
-                .catch(err => setCustomError({bool: true, message: err.message}));
-            setUsername("");
-            setPassword("");
+                .catch(err => {
+                    setCustomError({bool: true, message: authErrorText(err)});
+                    setPassword("");
+                });
         }
     }
 
@@ -66,15 +77,14 @@ export default function Profile(){
             setCustomError({bool: true, message: `${t('passwordValidateError')}`});
         } else if (!validateAge(parseDateInput(birthDate))) {
             setCustomError({bool: true, message: `${t('ageError')}`});
+        } else if (!USERNAME_PATTERN.test(username.trim())) {
+            setCustomError({bool: true, message: t('authError_INVALID_USERNAME')});
+        } else if (password.length < 8 || new TextEncoder().encode(password).length > 72) {
+            setCustomError({bool: true, message: t('authError_WEAK_PASSWORD')});
         } else {
-            dispatch(register(username, displayName, email, birthDate, password))
-                .catch(err => setCustomError({bool: true, message: err.message}));
-            setUsername("");
-            setPassword("");
-            setPasswordValidate("");
-            setDisplayName("");
-            setEmail("");
-            setBirthDate("");
+            // on failure everything stays filled in, so only the wrong field needs fixing
+            dispatch(register(username.trim(), displayName, email, birthDate, password))
+                .catch(err => setCustomError({bool: true, message: authErrorText(err)}));
         }
     }
 

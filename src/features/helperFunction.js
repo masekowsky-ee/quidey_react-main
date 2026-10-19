@@ -5,6 +5,14 @@ export function apiUrl(path) {
     return base + path;
 }
 
+// Fired when the server says the app is only for pro users (closed beta)
+export const PRO_REQUIRED_EVENT = 'quidey:pro-required';
+
+// Fired when the server no longer accepts my login (expired, password changed elsewhere,
+// "sign out everywhere"): App signs out
+export const SIGNED_OUT_EVENT = 'quidey:signed-out';
+const SIGNED_OUT_CODES = ['TOKEN_REVOKED', 'TOKEN_INVALID'];
+
 export async function apiFetch(url, options = {}) {
     const token = localStorage.getItem("token");
 
@@ -23,6 +31,9 @@ export async function apiFetch(url, options = {}) {
         // status and the API's error code let the UI show a translated message
         error.status = response.status;
         error.code = errorData.code;
+        // pro was taken away while the app is open: App checks access again and shows the beta screen
+        if (errorData.code === 'PRO_REQUIRED') window.dispatchEvent(new Event(PRO_REQUIRED_EVENT));
+        if (token && SIGNED_OUT_CODES.includes(errorData.code)) window.dispatchEvent(new Event(SIGNED_OUT_EVENT));
         throw error;
     }
 
@@ -57,10 +68,13 @@ export function fill(template, values) {
     return template.replace(/\{(\w+)\}/g, (match, key) => values[key] ?? match);
 }
 
-// Rows as CSV text (comma separated, quoted where needed), e.g. for a download
+// Rows as CSV text (comma separated, quoted where needed), e.g. for a download.
+// Text starting with = + - @ (or a tab/return) would run as a formula in Excel, so it gets a
+// leading ' and is shown as plain text: a task called "=HYPERLINK(...)" stays harmless.
 export function toCsv(rows) {
     const cell = (value) => {
-        const text = String(value ?? '');
+        let text = String(value ?? '');
+        if (typeof value === 'string' && /^[=+\-@\t\r]/.test(text)) text = `'${text}`;
         return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
     };
     return rows.map(row => row.map(cell).join(',')).join('\r\n');

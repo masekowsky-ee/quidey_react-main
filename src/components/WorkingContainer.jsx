@@ -5,6 +5,10 @@ import { createNote, deleteNote, editNote, updateTaskProps } from "../features/t
 import {useTranslation} from '../i18n/useTranslation'
 import { formatDate, formatClock } from '../features/helperFunction'
 import { selectTaskTime } from '../features/session/sessionAction'
+import { setSharedTaskDone, togetherErrorText } from '../features/together/togetherAction'
+import { showToast } from '../features/toast/toast'
+import { Link } from 'react-router-dom'
+import TaskLabels from './TaskLabels.jsx'
 
 
 export default function WorkingContainer (props) {
@@ -57,8 +61,39 @@ export default function WorkingContainer (props) {
         }
 
         const setActiveDoneHandler = () => {
-            dispatch(updateTaskProps({done: true}, activeTask));
+            if (activeTask.shared) {
+                dispatch(setSharedTaskDone(activeTask.shared.sessionId, activeTask.shared.taskId, true))
+                    .catch(err => dispatch(showToast(togetherErrorText(t, err), 'error')));
+            } else {
+                dispatch(updateTaskProps({done: true}, activeTask));
+            }
             setActiveTask(null);
+        }
+
+        // a task from a shared session: its time goes to the session; notes and editing stay there
+        if (activeTask?.shared) {
+            return (
+                <div className={styles.div}>
+                    <div ref={dropZoneRef} className={styles.currentTaskDiv}>
+                        <div className={`${styles.taskCard} ${styles.sharedCard}`}>
+                            <div className={styles.taskCardHead}>
+                                <h2 className={styles.taskTitle}>{activeTask.name}</h2>
+                                <button className={styles.doneBtn} onClick={setActiveDoneHandler} title={t('markDone')} aria-label={t('markDone')}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
+                                </button>
+                            </div>
+                            <TaskLabels task={activeTask} />
+                            <p className={styles.taskTime}>
+                                {t('timeThisSession')}: <span>{formatClock(taskSeconds * 1000)}</span>
+                            </p>
+                            {activeTask.description && <p className={styles.taskDesc}>{activeTask.description}</p>}
+                            <p className={styles.sharedNote}>
+                                {t('sharedTaskWorkHint')} <Link to={`/together/${activeTask.shared.sessionId}`}>{t('openSession')} →</Link>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
         }
 
         return(

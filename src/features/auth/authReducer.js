@@ -1,4 +1,4 @@
-import { LOGIN_SUCCESS, LOGOUT, SET_USER } from "./authActionTypes";
+import { LOGIN_SUCCESS, LOGOUT, SET_USER, SET_ACCESS } from "./authActionTypes";
 
 const initialState = {
     token: localStorage.getItem('token') || null,
@@ -7,7 +7,11 @@ const initialState = {
         display_name: null,
         email: null,
         birth_date: null,
-    }
+    },
+    // closed beta: may I use the app? checked = the server answered (until then nothing is shown)
+    // betaRequest: my request for access, { status: 'pending' | 'approved' | 'declined', reason, createdAt } or null
+    // isAdmin: sees the admin panel; adminPendingCount: open beta requests (admins only)
+    access: { checked: false, isPro: false, isAdmin: false, adminPendingCount: 0, betaRequest: null },
 };
 
 const authReducer = (state = initialState, action) => {
@@ -26,6 +30,18 @@ const authReducer = (state = initialState, action) => {
                 ...state,
                 token: null,
                 user: null,
+                access: initialState.access,
+            };
+        case SET_ACCESS:
+            return {
+                ...state,
+                access: {
+                    checked: true,
+                    isPro: Boolean(action.payload.isPro),
+                    isAdmin: Boolean(action.payload.isAdmin),
+                    adminPendingCount: action.payload.adminPendingCount ?? 0,
+                    betaRequest: action.payload.betaRequest ?? null,
+                },
             };
         case SET_USER:
             return {

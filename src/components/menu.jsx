@@ -5,11 +5,14 @@ import {useTranslation} from '../i18n/useTranslation'
 import {setShowMenu} from '../features/settings/settingsAction';
 import { selectIncomingCount } from '../features/friends/friendsAction';
 import { selectInviteCount } from '../features/together/togetherAction';
+import { selectIsAdmin, selectAdminPendingCount } from '../features/admin/adminAction';
 
 export default function Menu(){
     const isOpen = useSelector((state) => state.settings.showMenu);
     const incomingCount = useSelector(selectIncomingCount);
     const inviteCount = useSelector(selectInviteCount);
+    const isAdmin = useSelector(selectIsAdmin);
+    const adminPendingCount = useSelector(selectAdminPendingCount);
     const { t } = useTranslation();
 
     const dispatch = useDispatch();
@@ -41,6 +44,12 @@ export default function Menu(){
                     {t('together')}
                     {inviteCount > 0 && <span className={styles.badge} aria-label={`${inviteCount} ${t('sessionInvites')}`}>{inviteCount}</span>}
                 </Link>
+                {isAdmin && (
+                    <Link to="/admin" className={styles.menuItem} onClick={onClose}>
+                        {t('admin')}
+                        {adminPendingCount > 0 && <span className={styles.badge} aria-label={`${adminPendingCount} ${t('adminOpenRequests')}`}>{adminPendingCount}</span>}
+                    </Link>
+                )}
                 <Link to="/settings" className={styles.menuItem} onClick={onClose}>
                     {t('settings')}
                 </Link>

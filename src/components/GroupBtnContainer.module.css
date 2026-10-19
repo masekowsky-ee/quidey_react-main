@@ -87,3 +87,30 @@
         pointer-events: auto;
     }
 }
+
+/* Groups of shared sessions: team color, no delete badge (they belong to the session) */
+.sharedGroupBtn{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--primary-fg);
+    border-color: color-mix(in srgb, var(--primary) 40%, var(--btn-border));
+    white-space: nowrap;
+}
+
+.sharedGroupBtn.activeGroup{
+    color: var(--contrast-text);
+}
+
+/* open tasks in it */
+.sharedCount{
+    min-width: 1.2rem;
+    padding: 0 0.3rem;
+    box-sizing: border-box;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.2rem;
+    text-align: center;
+    border-radius: 999px;
+    background-color: color-mix(in srgb, var(--primary) 18%, transparent);
+}

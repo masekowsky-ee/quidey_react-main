@@ -41,7 +41,6 @@
   background: linear-gradient(180deg, var(--surface-hover), var(--surface));
   border-color: var(--btn-border);
   box-shadow: var(--btn-shadow);
-  transform: translateX(3px);
 }
 
 .menuItem:active {

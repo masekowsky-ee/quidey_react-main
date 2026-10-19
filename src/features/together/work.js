@@ -71,7 +71,8 @@ export const startWork = (session, task) => (dispatch, getState) => {
         sessionName: session.name,
         taskId: task.id,
         taskName: task.name,
-        baseMs: timeOf(task, session.me),
+        // myMs when the task comes from the solo view, which knows my time but not everybody's
+        baseMs: task.myMs ?? timeOf(task, session.me),
     }));
 };
 

@@ -1,5 +1,6 @@
 import { SET_SESSION_PARAMS, SAVE_SESSION_DATA, UPDATE_CURRENT_SESSION_DATA, SET_TIMER, ADD_WORKED_TASK, ADD_TASK_TIME, SET_WORKED_SESSIONS } from "./sessionActionTypes";
 import { apiFetch } from '../helperFunction';
+import { isSharedTaskId, sharedTaskIdOf } from '../together/togetherAction';
 
 export const setTimer = (time, active) => {
     return {
@@ -39,9 +40,15 @@ export const fetchSessions = () => {
 export const saveSessionData = () => {
     return async (dispatch, getState) => {
         const state = getState();
+        const current = selectCurrentSessionData(state);
         const sessionDataObj = {
-            ...selectCurrentSessionData(state),
-            group: state.session.sessionParams.group ?? selectCurrentSessionData(state).group,
+            ...current,
+            group: state.session.sessionParams.group ?? current.group,
+            // tasks from shared sessions ("shared-12") are sent by their own id, so they are
+            // never mixed up with an own task that has the same number
+            workedTasks: current.workedTasks.map(task => isSharedTaskId(task.id)
+                ? { sharedTaskId: sharedTaskIdOf(task.id), name: task.name, time: task.time }
+                : task),
         };
         const data = await apiFetch(
             `/api/sessions`, {

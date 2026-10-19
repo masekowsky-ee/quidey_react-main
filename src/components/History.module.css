@@ -13,7 +13,7 @@
 /* Summary numbers above the list */
 .stats{
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
 }
 
@@ -118,4 +118,66 @@
     text-align: center;
     color: var(--text-muted);
     padding: 2.5rem 1.5rem;
+}
+
+/* ---------- work in shared sessions ---------- */
+
+.sharedStat .statValue{
+    color: var(--primary-fg);
+}
+
+.sharedSession{
+    border-left: 3px solid color-mix(in srgb, var(--primary) 55%, transparent);
+}
+
+.sharedLabel{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-bottom: 0.2rem;
+    padding: 0.05rem 0.55rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--primary-fg);
+    background-color: color-mix(in srgb, var(--primary) 12%, transparent);
+    border-radius: 999px;
+}
+
+.sessionLink{
+    color: inherit;
+    text-decoration: none;
+}
+
+.sessionLink:hover{
+    color: var(--primary-fg);
+    text-decoration: underline;
+}
+
+/* a shared task inside a solo session */
+.sharedTag{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border-color: color-mix(in srgb, var(--primary) 40%, var(--btn-border));
+}
+
+.sharedTag > svg{
+    color: var(--primary-fg);
+}
+
+.tagSession{
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.tagSession::before{
+    content: '· ';
+}
+
+@media (max-width: 520px) {
+    .stats{
+        gap: 0.5rem;
+    }
 }

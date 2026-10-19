@@ -172,7 +172,7 @@ describe('Shared session page', () => {
         await act(async () => { fireEvent.change(within(taskRow('Report')).getByRole('combobox'), { target: { value: '2' } }) })
         expect(calls.at(-1)).toMatchObject({ url: '/api/shared-sessions/5/tasks/10', method: 'PATCH', body: { assigneeId: 2 } })
         // "assigned to me" filter: ben has both now, ann (me) none
-        await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Mir zugewiesen/ })) })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Für mich/ })) })
         expect(screen.getByText('Keine offenen Aufgaben in diesem Filter.')).toBeInTheDocument()
     })
 

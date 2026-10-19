@@ -656,15 +656,23 @@ a.primaryBtn{
     padding: 0.2rem 0.6rem;
 }
 
+/* never wider than the card; scrolls sideways in a very narrow column instead of breaking */
 .filters{
     composes: segmented from './ui.module.css';
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
 }
 
 .filter,
 .filterOn{
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
     font-size: 0.78rem;
     padding: 0.2rem 0.65rem !important;
     gap: 0.3rem;
+    white-space: nowrap;
 }
 
 .filterOn{
@@ -795,6 +803,13 @@ a.primaryBtn{
     border-color: transparent;
 }
 
+/* always on its own line under assignment and time, so every row wraps the same way */
+.addedBy{
+    flex-basis: 100%;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
 .doneToggle{
     margin-top: 0.75rem;
     padding: 0.2rem 0.5rem;
@@ -862,18 +877,33 @@ a.primaryBtn{
 .feed{
     list-style: none;
     margin: 0;
-    padding: 0 0.25rem 0 0;
+    /* the top padding matches the fade below, so nothing is hidden when scrolled to the top */
+    padding: 1.25rem 0.25rem 0.25rem 0;
     max-height: 22rem;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 0.55rem;
     overscroll-behavior: contain;
+    /* older entries fade out at the top edge instead of being cut off hard */
+    mask-image: linear-gradient(to bottom, transparent 0, #000 1.25rem);
+}
+
+/* entries keep their height and the list scrolls; otherwise the column squeezes and clips them */
+.feed > li{
+    flex-shrink: 0;
+}
+
+/* in the team sidebar the feed fills whatever height is left */
+.feedTall{
+    flex: 1;
+    min-height: 0;
 }
 
 .feedTall .feed{
-    max-height: min(32rem, calc(100vh - 26rem));
-    min-height: 12rem;
+    flex: 1;
+    max-height: none;
+    min-height: 8rem;
 }
 
 .feedEvent{
@@ -1172,10 +1202,12 @@ a.primaryBtn{
     margin-top: 0;
 }
 
-/* tasks | focus | team; the outer columns stick while the middle one scrolls */
+/* tasks | focus | team. The team column is a sidebar as tall as the window that stays put
+   while the page scrolls; the feed inside it takes the room the member list leaves. */
 .teamGrid{
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.95fr);
+    grid-template-areas: "tasks focus team";
     gap: 1rem;
     align-items: start;
 }
@@ -1189,9 +1221,24 @@ a.primaryBtn{
     gap: 1rem;
 }
 
+.teamColTasks{ grid-area: tasks; }
+.teamColFocus{ grid-area: focus; }
+
 .teamColTeam{
+    grid-area: team;
     position: sticky;
     top: calc(var(--header-h) + 1rem);
+    /* short enough that the chat input is visible before scrolling, below the session tabs
+       (about 4.5rem above the grid); when scrolled, that leaves a small gap at the bottom */
+    height: calc(100vh - var(--header-h) - 5.5rem);
+    min-height: 26rem;
+}
+
+/* a long member list scrolls on its own, so the chat keeps its space */
+.teamColTeam > section:first-child{
+    flex-shrink: 0;
+    max-height: 45%;
+    overflow-y: auto;
 }
 
 .teamSessionHead{
@@ -1225,30 +1272,42 @@ a.primaryBtn{
 
 /* ---------- smaller screens ---------- */
 
-@media (max-width: 1100px) {
-    /* focus first, then tasks, then the team below both */
+@media (max-width: 1280px) {
+    /* focus above tasks on the left, the team stays a sidebar on the right */
     .teamGrid{
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    }
-
-    .teamColFocus{
-        order: -1;
-    }
-
-    .teamColTeam{
-        grid-column: 1 / -1;
-        position: static;
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        align-items: start;
+        grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+        grid-template-areas:
+            "focus team"
+            "tasks team";
     }
 }
 
 @media (max-width: 860px) {
+    /* one column: focus, tasks, then the team; the feed gets a fixed height again */
     .roomGrid,
-    .teamGrid,
-    .teamColTeam{
+    .teamGrid{
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .teamGrid{
+        grid-template-areas:
+            "focus"
+            "tasks"
+            "team";
+    }
+
+    .teamColTeam{
+        position: static;
+        height: auto;
+        min-height: 0;
+    }
+
+    .teamColTeam > section:first-child{
+        max-height: none;
+    }
+
+    .feedTall .feed{
+        max-height: 24rem;
     }
 
     .roomSide{

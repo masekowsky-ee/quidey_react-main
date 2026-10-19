@@ -1,0 +1,178 @@
+/* Closed beta screen: one centered card, no header or menu */
+.page{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
+    background-color: var(--bg);
+    text-align: left;
+}
+
+.card{
+    composes: card from './ui.module.css';
+    width: min(32rem, 100%);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 2rem;
+}
+
+.badge{
+    align-self: flex-start;
+    padding: 0.15rem 0.7rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary-fg);
+    background-color: color-mix(in srgb, var(--primary) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+    border-radius: 999px;
+}
+
+.title{
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-h);
+}
+
+.text{
+    margin: 0;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.signedInAs{
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.form{
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    margin-top: 0.5rem;
+}
+
+.label{
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.textarea{
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 7rem;
+    resize: vertical;
+    font: inherit;
+    line-height: 1.45;
+}
+
+.formFoot{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.8rem;
+}
+
+.hint{
+    color: var(--text-muted);
+}
+
+.counter,
+.counterLow{
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.counterLow{
+    color: var(--danger);
+}
+
+.error{
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--danger);
+}
+
+.primaryBtn{
+    composes: btnPrimary from './ui.module.css';
+    align-self: flex-end;
+    margin-top: 0.25rem;
+}
+
+.statusPending,
+.statusDeclined{
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1rem 1.1rem;
+    border-radius: var(--radius);
+    background-color: color-mix(in srgb, var(--primary) 9%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+}
+
+.statusDeclined{
+    background-color: color-mix(in srgb, var(--danger) 8%, var(--surface));
+    border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+}
+
+.statusTitle{
+    margin: 0;
+    font-weight: 700;
+    color: var(--text-h);
+}
+
+.reason{
+    margin: 0.25rem 0 0;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    border-left: 3px solid var(--btn-border);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.actions{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.secondaryBtn{
+    flex-shrink: 0;
+}
+
+.quietBtn{
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--text-muted);
+}
+
+.quietBtn:hover{
+    color: var(--text-h);
+    border-color: var(--btn-border);
+}
+
+@media (max-width: 520px) {
+    .card{
+        padding: 1.5rem 1.25rem;
+    }
+
+    .primaryBtn{
+        align-self: stretch;
+    }
+}

@@ -26,7 +26,8 @@ describe('addTask', () => {
         expect(apiFetch).toHaveBeenCalledTimes(1)
         expect(apiFetch.mock.calls[0][0]).toBe('/api/tasks')
         expect(bodyOf(apiFetch.mock.calls[0])).toMatchObject({ name: 'Write report', due: '2026-10-20', description: 'desc', prio: '50' })
-        expect(store.getState().task.tasks).toEqual([{ id: 7, name: 'Write report', due: '2026-10-20', prio: 50 }])
+        // group_ids: not in any group yet (for the labels)
+        expect(store.getState().task.tasks).toEqual([{ id: 7, name: 'Write report', due: '2026-10-20', prio: 50, group_ids: [] }])
     })
 
     it('also links the new task to the group that is currently shown', async () => {

@@ -105,7 +105,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                             </select>
                         ) : task.assignee && <span className={styles.assignedChip}>{displayName(task.assignee)}</span>}
                         {total > 0 && <span className={styles.meta}>{formatDuration(total)}</span>}
-                        {task.addedBy && <span className={styles.meta}>{t('addedBy')} {displayName(task.addedBy)}</span>}
+                        {task.addedBy && <span className={styles.addedBy}>{t('addedBy')} {displayName(task.addedBy)}</span>}
                     </span>
                 </div>
                 {workers.length > 0 && (

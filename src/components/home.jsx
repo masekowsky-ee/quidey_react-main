@@ -10,8 +10,13 @@ import WorkingContainer from './WorkingContainer.jsx';
 import TimerContainer from './TimerContainer.jsx';
 import SoloTogetherStrip from './together/SoloTogetherStrip.jsx';
 import { updateCurrentSessionData, addWorkedTask } from '../features/session/sessionAction.js'
+import { fetchMySharedTasks, selectSharedSoloTasks } from '../features/together/togetherAction.js'
+import { useSoloSharedWork } from '../features/together/useSoloSharedWork.js'
 
 import {useSelector, useDispatch} from 'react-redux';
+
+// how often the shared sessions' tasks are fetched again while the page is open
+const SHARED_REFRESH_MS = 30 * 1000;
 
 export default function Home(props){
     const {t, setCustomError, setActiveTimer} = props;
@@ -19,6 +24,7 @@ export default function Home(props){
     const dispatch = useDispatch();
 
     const tasks = useSelector(state => state.task.tasks);
+    const sharedTasks = useSelector(selectSharedSoloTasks);
 
     const [groupToDisplayName, setGroupToDisplayName] = useState('all');
 
@@ -31,7 +37,23 @@ export default function Home(props){
 
     // --- Gehobener State für Drag & Drop + aktive Task/Worked Tasks ---
     const starterTask = tasks[0] || null;
-    const [activeTask, setActiveTask] = useState(starterTask);
+    const [chosenTask, setActiveTask] = useState(starterTask);
+    // a task from a shared session is read live, so done/assignee changes show up; it's gone
+    // (nothing active) when I left the session or it ended
+    const activeTask = chosenTask?.shared
+        ? sharedTasks.find(task => task.id === chosenTask.id) ?? null
+        : chosenTask;
+
+    // the shared sessions' tasks, kept fresh while the page is open
+    useEffect(() => {
+        const load = () => dispatch(fetchMySharedTasks()).catch(() => {});
+        load();
+        const interval = setInterval(() => { if (!document.hidden) load(); }, SHARED_REFRESH_MS);
+        return () => clearInterval(interval);
+    }, [dispatch]);
+
+    // time on a shared task goes to its session
+    useSoloSharedWork(activeTask);
 
     const [draggedTask, setDraggedTask] = useState(null);
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });

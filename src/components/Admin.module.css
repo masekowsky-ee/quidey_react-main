@@ -1,0 +1,400 @@
+.page{
+    composes: pageColumn from './ui.module.css';
+    width: min(820px, calc(100% - 2rem));
+}
+
+.title{
+    composes: pageTitle from './ui.module.css';
+}
+
+.card{
+    composes: card from './ui.module.css';
+}
+
+.cardTitle{
+    composes: cardTitle from './ui.module.css';
+    margin: 0;
+}
+
+.cardHead{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+/* Requests | Users | Overview */
+.tabs{
+    composes: segmented from './ui.module.css';
+    display: flex;
+}
+
+.tabs > button{
+    gap: 0.45rem;
+}
+
+.tabActive{
+    composes: segmentActive from './ui.module.css';
+}
+
+.segmented{
+    composes: segmented from './ui.module.css';
+}
+
+.segmented > button{
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+    white-space: nowrap;
+}
+
+.segmentActive{
+    composes: segmentActive from './ui.module.css';
+}
+
+.badge{
+    min-width: 1.25rem;
+    padding: 0 0.35rem;
+    box-sizing: border-box;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.25rem;
+    text-align: center;
+    color: var(--primary-text);
+    background-color: var(--primary);
+    border-radius: 999px;
+}
+
+.empty{
+    color: var(--text-muted);
+}
+
+.list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.list > li + li{
+    border-top: 1px solid var(--btn-border);
+}
+
+/* ---------- people ---------- */
+
+.person{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.avatar{
+    flex-shrink: 0;
+    width: 2.4rem;
+    height: 2.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-h);
+    background: linear-gradient(145deg, var(--surface-strong), var(--surface-hover));
+    border: 1px solid var(--btn-border);
+    border-radius: 50%;
+}
+
+.who{
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.name{
+    color: var(--text-h);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.meta{
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---------- chips ---------- */
+
+.chip,
+.chip_pending,
+.chip_approved,
+.chip_declined,
+.chip_admin{
+    flex-shrink: 0;
+    padding: 0.05rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    border-radius: 999px;
+    color: var(--text-muted);
+    background-color: var(--surface-inset);
+    white-space: nowrap;
+}
+
+.chip_pending{
+    color: var(--text-h);
+    background-color: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.chip_approved{
+    color: var(--primary-fg);
+    background-color: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.chip_declined{
+    color: var(--danger);
+    background-color: color-mix(in srgb, var(--danger) 12%, transparent);
+}
+
+.chip_admin{
+    color: var(--contrast-text);
+    background: linear-gradient(180deg, var(--contrast-top), var(--contrast-bottom));
+}
+
+/* ---------- requests ---------- */
+
+.request{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem 0;
+}
+
+.requestHead,
+.requestFoot{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.reason{
+    margin: 0 0 0 3.15rem;
+    padding: 0.5rem 0.8rem;
+    color: var(--text);
+    background-color: var(--surface-inset);
+    border-left: 3px solid color-mix(in srgb, var(--primary) 55%, var(--btn-border));
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.requestFoot{
+    padding-left: 3.15rem;
+}
+
+.actions{
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+}
+
+.actions button{
+    font-size: 0.85rem;
+    padding: 0.3rem 0.8rem;
+}
+
+.primaryBtn{
+    composes: btnPrimary from './ui.module.css';
+    min-width: 0;
+    height: auto;
+}
+
+.quietBtn,
+.quietDanger{
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--text-muted);
+}
+
+.quietBtn:hover{
+    color: var(--text-h);
+    border-color: var(--btn-border);
+}
+
+.quietDanger:hover{
+    color: var(--danger);
+    border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.dangerBtn{
+    composes: glowDanger from './ui.module.css';
+    color: var(--danger);
+    border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.confirmText{
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ---------- users ---------- */
+
+.search{
+    flex: 0 1 16rem;
+    min-width: 0;
+}
+
+.userRow{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    padding: 0.8rem 0;
+}
+
+.userInfo{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* Pro / Admin switches */
+.toggle,
+.toggleOn{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 600;
+}
+
+.toggleKnob{
+    position: relative;
+    width: 1.9rem;
+    height: 1.05rem;
+    border-radius: 999px;
+    background-color: var(--surface-inset);
+    border: 1px solid var(--btn-border);
+    transition: background-color var(--ease);
+}
+
+.toggleKnob::after{
+    content: '';
+    position: absolute;
+    top: 0.1rem;
+    left: 0.12rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background-color: var(--text-muted);
+    transition: transform var(--ease), background-color var(--ease);
+}
+
+.toggleOn .toggleKnob{
+    background-color: color-mix(in srgb, var(--primary) 55%, transparent);
+    border-color: transparent;
+}
+
+.toggleOn .toggleKnob::after{
+    transform: translateX(0.82rem);
+    background-color: var(--primary-text);
+}
+
+.footnote{
+    margin: 1rem 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ---------- overview ---------- */
+
+.stats{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.stat{
+    composes: card from './ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.statValue{
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-h);
+    font-variant-numeric: tabular-nums;
+}
+
+.statLabel{
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.log{
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.log > li{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.log time{
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .stats{
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+
+    .reason,
+    .requestFoot{
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    .requestFoot{
+        flex-wrap: wrap;
+    }
+
+    .userRow .actions{
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .search{
+        flex-basis: 100%;
+    }
+}

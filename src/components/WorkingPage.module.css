@@ -173,3 +173,15 @@
     background-color: transparent;
     border-color: transparent;
 }
+
+/* ---------- a task from a shared session ---------- */
+
+.sharedCard{
+    border-left: 3px solid color-mix(in srgb, var(--primary) 55%, transparent);
+}
+
+.sharedNote{
+    margin: 0.75rem 0 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}

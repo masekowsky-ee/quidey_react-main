@@ -1,6 +1,7 @@
 import {
     SET_SHARED_SESSIONS, SET_SHARED_SESSION, SHARED_SESSION_GONE,
     WORK_SWITCHED, WORK_SETTLED, WORK_RESTORED, WORK_STOPPED,
+    SET_MY_SHARED_TASKS, SET_SHARED_HISTORY,
 } from './togetherActionTypes';
 import { LOGOUT } from '../auth/authActionTypes';
 
@@ -20,6 +21,26 @@ export const idleWork = {
     inFlight: {},
 };
 
+// The tasks of a session as GET /api/shared-sessions/my-tasks lists them
+const toMineTask = (task, me) => ({
+    id: task.id,
+    name: task.name,
+    description: task.description,
+    done: task.done,
+    assignee: task.assignee ?? null,
+    myMs: task.time.find(t => t.userId === me)?.ms ?? 0,
+    totalMs: task.totalMs,
+});
+
+// A session page answered: keep its group in the solo view up to date (or drop it once it ended)
+function updateMine(mine, session) {
+    if (!mine.some(s => s.id === session.id)) return mine;
+    if (session.endedAt) return mine.filter(s => s.id !== session.id);
+    return mine.map(s => s.id === session.id
+        ? { ...s, name: session.name, tasks: session.tasks.map(task => toMineTask(task, session.me)) }
+        : s);
+}
+
 // sessions/invites: the list page (GET /api/shared-sessions)
 // current: the open session page, as GET /api/shared-sessions/:id returns it
 // currentSeq: number of the request `current` came from. The page polls and also gets the
@@ -30,6 +51,10 @@ const initialState = {
     current: null,
     currentSeq: 0,
     work: idleWork,
+    // mine: running sessions I joined with their tasks, shown as groups on the solo home page
+    mine: [],
+    // history: my work in shared sessions, for the history page (null until loaded)
+    history: null,
 };
 
 const addInFlight = (inFlight, taskId, ms) => ({ ...inFlight, [taskId]: (inFlight[taskId] ?? 0) + ms });
@@ -49,6 +74,7 @@ const togetherReducer = (state = initialState, action) => {
                 invites: state.invites.filter(invite => invite.id !== session.id),
                 // keep the names in the header pill current (renamed session)
                 work: state.work.sessionId === session.id ? { ...state.work, sessionName: session.name } : state.work,
+                mine: updateMine(state.mine, session),
             };
         }
         case SHARED_SESSION_GONE:
@@ -59,7 +85,12 @@ const togetherReducer = (state = initialState, action) => {
                 sessions: state.sessions.filter(s => s.id !== action.payload),
                 invites: state.invites.filter(invite => invite.id !== action.payload),
                 work: state.work.sessionId === action.payload ? { ...idleWork, inFlight: state.work.inFlight } : state.work,
+                mine: state.mine.filter(s => s.id !== action.payload),
             };
+        case SET_MY_SHARED_TASKS:
+            return { ...state, mine: action.payload };
+        case SET_SHARED_HISTORY:
+            return { ...state, history: action.payload };
 
         // From now on I work on `next` ({ sessionId, sessionName, taskId, taskName, baseMs }, or null to stop).
         // `booked` ({ taskId, ms }) is the time since the last report, which is now on its way.

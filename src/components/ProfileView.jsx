@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
 import { formatDate, formatDuration, getInitials } from '../features/helperFunction';
-import { updateProfile, changePassword } from '../features/auth/authAction';
+import { updateProfile, changePassword, logoutEverywhere } from '../features/auth/authAction';
 import { fetchFriends } from '../features/friends/friendsAction';
 
 // Translated message for a profile API error, using the error code the backend sends
@@ -86,6 +86,20 @@ export default function ProfileView({ onSignOut }) {
             setPasswordMessage({ ok: false, text: errorText(t, err) });
         } finally {
             setChanging(false);
+        }
+    };
+
+    // sign out on all devices, after a "really?"
+    const [confirmEverywhere, setConfirmEverywhere] = useState(false);
+    const [signingOutEverywhere, setSigningOutEverywhere] = useState(false);
+    const signOutEverywhere = async () => {
+        setSigningOutEverywhere(true);
+        try {
+            await dispatch(logoutEverywhere());
+        } catch (err) {
+            setPasswordMessage({ ok: false, text: errorText(t, err) });
+            setSigningOutEverywhere(false);
+            setConfirmEverywhere(false);
         }
     };
 
@@ -200,7 +214,20 @@ export default function ProfileView({ onSignOut }) {
                 </form>
             </section>
 
-            <button className={styles.signOutBtn} onClick={onSignOut}>{t('signOut')}</button>
+            <div className={styles.signOutRow}>
+                <button className={styles.signOutBtn} onClick={onSignOut}>{t('signOut')}</button>
+                {confirmEverywhere ? (
+                    <span className={styles.confirmEverywhere}>
+                        <span>{t('confirmLogoutEverywhere')}</span>
+                        <button className={styles.signOutBtn} disabled={signingOutEverywhere} onClick={signOutEverywhere}>{t('logoutEverywhere')}</button>
+                        <button className={styles.quietBtn} onClick={() => setConfirmEverywhere(false)}>{t('cancel')}</button>
+                    </span>
+                ) : (
+                    <button className={styles.quietBtn} onClick={() => setConfirmEverywhere(true)} title={t('logoutEverywhereHint')}>
+                        {t('logoutEverywhere')}
+                    </button>
+                )}
+            </div>
         </>
     );
 }

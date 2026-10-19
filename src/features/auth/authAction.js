@@ -1,4 +1,4 @@
-import { LOGIN_SUCCESS, LOGOUT, SET_USER } from "./authActionTypes";
+import { LOGIN_SUCCESS, LOGOUT, SET_USER, SET_ACCESS } from "./authActionTypes";
 import { apiFetch, apiUrl } from '../helperFunction';
 
 export const loginSuccess = (username, password) => {
@@ -14,6 +14,29 @@ export const loginSuccess = (username, password) => {
             type: LOGIN_SUCCESS,
             payload: { token: data.token, username },
         });
+        // right after login/registration: pro users go to the app, everybody else to the beta screen
+        await dispatch(fetchAccess()).catch(() => {});
+    };
+};
+
+// Asks the server whether I may use the app (closed beta) and how my access request stands
+export const fetchAccess = () => {
+    return async (dispatch) => {
+        const me = await apiFetch('/api/me');
+        dispatch({ type: SET_ACCESS, payload: me });
+        return me;
+    };
+};
+
+// Asks for beta access, once, with a reason (10-1000 characters).
+// Rejects with the API error (error.code: REASON_TOO_SHORT, REASON_TOO_LONG, ALREADY_REQUESTED, ALREADY_PRO).
+export const requestBetaAccess = (reason) => {
+    return async (dispatch, getState) => {
+        const betaRequest = await apiFetch('/api/beta-requests', {
+            method: 'POST',
+            body: JSON.stringify({ reason }),
+        });
+        dispatch({ type: SET_ACCESS, payload: { ...getState().auth.access, betaRequest } });
     };
 };
 
@@ -55,6 +78,7 @@ export const checkAuth = () => {
             type: LOGIN_SUCCESS,
             payload: { token, username: data.username },
         });
+        dispatch({ type: SET_ACCESS, payload: data });
     }
 }
 
@@ -82,13 +106,26 @@ export const updateProfile = (display_name, email) => {
     };
 }
 
-// Rejects with the API error (error.code: WRONG_PASSWORD, WEAK_PASSWORD)
+// Rejects with the API error (error.code: WRONG_PASSWORD, WEAK_PASSWORD).
+// All other logins of the account end; this device gets a new token and stays signed in.
 export const changePassword = (currentPassword, newPassword) => {
-    return async () => {
-        await apiFetch('/api/users/password', {
+    return async (dispatch, getState) => {
+        const data = await apiFetch('/api/users/password', {
             method: 'PUT',
             body: JSON.stringify({ currentPassword, newPassword }),
         });
+        if (data?.token) {
+            localStorage.setItem('token', data.token);
+            dispatch({ type: LOGIN_SUCCESS, payload: { token: data.token, username: getState().auth.user?.username } });
+        }
+    };
+}
+
+// Ends every login of this account, on all devices (this one too)
+export const logoutEverywhere = () => {
+    return async (dispatch) => {
+        await apiFetch('/api/users/logout-all', { method: 'POST' });
+        dispatch(logout());
     };
 }
 

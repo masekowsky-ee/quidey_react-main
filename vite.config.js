@@ -1,9 +1,12 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+import { securityHeaders } from './security-headers.js'
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
+// The build also writes dist/_headers (security headers, see security-headers.js) for the
+// API address in VITE_API_URL, e.g. from .env.production.local.
+export default defineConfig(({ mode }) => ({
+  plugins: [react(), securityHeaders(loadEnv(mode, '.', 'VITE_').VITE_API_URL)],
   test: {
     environment: 'jsdom',
     setupFiles: './src/setupTests.js',
@@ -26,4 +29,4 @@ export default defineConfig({
     port: 4173,
     strictPort: true,
   },
-})
+}))
