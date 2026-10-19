@@ -8,10 +8,10 @@ import HomeLayoutSwitch from './together/HomeLayoutSwitch';
 
 // Swatch color shown for each palette (its dark-mode accent)
 const ACCENT_OPTIONS = [
+    { value: 'sunset', label: 'accentSunset', color: '#fb923c' }, // the default
     { value: 'green', label: 'accentGreen', color: '#0ed30e' },
     { value: 'ocean', label: 'accentOcean', color: '#38bdf8' },
     { value: 'violet', label: 'accentViolet', color: '#a78bfa' },
-    { value: 'sunset', label: 'accentSunset', color: '#fb923c' },
     { value: 'rose', label: 'accentRose', color: '#fb7185' },
     { value: 'gold', label: 'accentGold', color: '#facc15' },
 ];

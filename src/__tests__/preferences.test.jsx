@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, renderHook } from '@testing-library/react'
+import { render, screen, fireEvent, renderHook, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
@@ -9,6 +9,7 @@ import { setTimer } from '../features/session/sessionAction'
 import { readStoredLanguage, readStoredAccent, readStoredSessionMinutes } from '../features/settings/preferences'
 import { useApplyTheme } from '../features/settings/theme'
 import Settings from '../components/Settings'
+import Logo from '../components/Logo'
 
 const makeStore = () => configureStore({ reducer: rootReducer })
 const initial = settingsReducer(undefined, { type: '@@INIT' })
@@ -19,9 +20,9 @@ beforeEach(() => {
 })
 
 describe('stored preferences', () => {
-    it('fall back to German, green and 30 minutes', () => {
+    it('fall back to German, Abendrot (sunset) and 30 minutes', () => {
         expect(readStoredLanguage()).toBe('de')
-        expect(readStoredAccent()).toBe('green')
+        expect(readStoredAccent()).toBe('sunset')
         expect(readStoredSessionMinutes()).toBe(30)
     })
 
@@ -39,13 +40,14 @@ describe('stored preferences', () => {
         localStorage.setItem('accent', 'neon')
         localStorage.setItem('sessionMinutes', '7')
         expect(readStoredLanguage()).toBe('de')
-        expect(readStoredAccent()).toBe('green')
+        expect(readStoredAccent()).toBe('sunset')
         expect(readStoredSessionMinutes()).toBe(30)
     })
 
     it('survive blocked storage', () => {
         const spy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked') })
         expect(readStoredLanguage()).toBe('de')
+        expect(readStoredAccent()).toBe('sunset')
         expect(readStoredSessionMinutes()).toBe(30)
         spy.mockRestore()
     })
@@ -82,12 +84,36 @@ describe('accent on <html>', () => {
     it('follows the setting', () => {
         const store = makeStore()
         renderHook(() => useApplyTheme(), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> })
-        expect(document.documentElement.dataset.accent).toBe('green')
+        // Abendrot (sunset) unless another one was chosen
+        expect(document.documentElement.dataset.accent).toBe('sunset')
 
-        store.dispatch(setAccent('sunset'))
+        store.dispatch(setAccent('green'))
         // effects run synchronously inside act via renderHook's rerender
         renderHook(() => useApplyTheme(), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> })
-        expect(document.documentElement.dataset.accent).toBe('sunset')
+        expect(document.documentElement.dataset.accent).toBe('green')
+    })
+})
+
+describe('logo in the accent color', () => {
+    it('the tab icon follows the setting', () => {
+        const link = document.createElement('link')
+        link.rel = 'icon'
+        link.href = '/quidey-logo.svg'
+        document.head.appendChild(link)
+        const store = makeStore()
+        const { rerender } = renderHook(() => useApplyTheme(), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> })
+        expect(decodeURIComponent(link.href)).toContain('stroke="#fb923c"')
+
+        act(() => { store.dispatch(setAccent('ocean')) })
+        rerender()
+        expect(decodeURIComponent(link.href)).toContain('stroke="#38bdf8"')
+        link.remove()
+    })
+
+    it('the logo is drawn in the accent color', () => {
+        const { container } = render(<Logo />)
+        const strokes = [...container.querySelectorAll('circle, path[stroke-linejoin]')].map(el => el.style.stroke)
+        expect(strokes).toEqual(['var(--primary, #fb923c)', 'var(--primary, #fb923c)'])
     })
 })
 
@@ -100,7 +126,7 @@ describe('Settings page', () => {
 
     it('picks an accent color', () => {
         const store = renderSettings()
-        expect(screen.getByRole('button', { name: 'Grün' })).toHaveAttribute('aria-pressed', 'true')
+        expect(screen.getByRole('button', { name: 'Abendrot' })).toHaveAttribute('aria-pressed', 'true')
 
         fireEvent.click(screen.getByRole('button', { name: 'Ozean' }))
 

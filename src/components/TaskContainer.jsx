@@ -2,10 +2,11 @@ import { useState } from 'react'
 import styles from './TaskContainer.module.css';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import {deleteTask, deleteGroupTasks, editGroup, updateTaskProps, editDisplaygroup} from '../features/tasks/taskAction'
+import {deleteTask, deleteGroupTasks, editGroup, updateTaskProps, editDisplaygroup, leaveTask, isSharedWithMe} from '../features/tasks/taskAction'
+import TaskMeta from './task/TaskMeta.jsx'
 import { createPortal } from 'react-dom';
 import {useTranslation} from '../i18n/useTranslation'
-import { formatDate, toInputDate, formatDuration } from '../features/helperFunction'
+import { formatDate, toInputDate, formatDuration, isOverdue } from '../features/helperFunction'
 import { selectSharedGroups, selectSharedSoloTasks, setSharedTaskDone, togetherErrorText } from '../features/together/togetherAction'
 import { showToast } from '../features/toast/toast'
 import GroupPicker from './GroupPicker.jsx'
@@ -50,7 +51,15 @@ export default function TaskContainer(props){
     const [taskToEdit, setTaskToEdit] = useState(null);
     const [editGroupDescription, setEditGroupDescription] = useState(false);
 
+    // my task is deleted; a task a friend shared with me is only left (it stays theirs)
     const handleTaskDelete = (taskId) => {
+        const task = tasks.find(t => t.id === taskId);
+        if (task && isSharedWithMe(task)) {
+            dispatch(leaveTask(task))
+                .then(() => dispatch(showToast(t('taskLeft'), 'info')))
+                .catch(() => dispatch(showToast(t('friendError_generic'), 'error')));
+            return;
+        }
         dispatch(deleteTask(taskId));
     }
 
@@ -91,16 +100,6 @@ export default function TaskContainer(props){
     const setGroupDescriptionHandler = (description) => {
         dispatch(editGroup(groupToDisplay.group.id, {description: description}, groupToDisplay.group));
         setEditGroupDescription(false);
-    }
-
-    function toDateOnly(date) {
-        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-    }
-
-    function compareDate(dueDate){
-        const today = toDateOnly(new Date());
-        const due = toDateOnly(new Date(dueDate));
-        return today > due;
     }
 
     const handleShowDone = () => {
@@ -196,6 +195,7 @@ export default function TaskContainer(props){
                                                     ? <input autoFocus type="text" defaultValue={task.name} onBlur={(e) => {setTaskPropHandler(e.target.value, 'name', task);}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'name', task)}}}/>
                                                     : <p onClick={(e) => changePropHandler(e, 'name', task.id)}>{task.name}</p>
                                                 }
+                                                <TaskMeta task={task} showTime={false} />
                                                 <TaskLabels task={task} onOpenGroup={openGroup} />
                                             </div>
                                             <button onClick={()=>{setTaskPropHandler(!task.done, 'done', task)}}>
@@ -203,7 +203,9 @@ export default function TaskContainer(props){
                                             </button>
                                             { taskToEdit && taskPropToEdit === 'due' && taskToEdit.id === task.id
                                                 ? <input autoFocus type="date" defaultValue={toInputDate(task.due)} onBlur={(e) => {setTaskPropHandler(e.target.value, 'due', task);}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'due', task)}}}/>
-                                                : <p style={compareDate(task.due) ? { color: 'var(--danger)' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>{formatDate(task.due)}</p>
+                                                : <p style={isOverdue(task) ? { color: 'var(--danger)' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>
+                                                    {formatDate(task.due)}{task.due_time && <span className={styles.dueTime}> {task.due_time}</span>}
+                                                </p>
                                             }
                                             <div className={styles.prioDiv}>
                                                 <label>{t('prioritise')}:</label>
@@ -221,7 +223,8 @@ export default function TaskContainer(props){
                                                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>
                                                 </button>
                                                 }
-                                                <button className={styles.deleteBtn} onClick={() => handleTaskDelete(task.id)}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
+                                                <button className={styles.deleteBtn} onClick={() => handleTaskDelete(task.id)}
+                                                    title={t(isSharedWithMe(task) ? 'leaveTask' : 'deleteTask')} aria-label={`${t(isSharedWithMe(task) ? 'leaveTask' : 'deleteTask')}: ${task.name}`}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
                                             </div>
                                             {working && (<div className={styles.dragDiv}><svg className={styles.dragSvg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-560q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-560q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z"/></svg></div>) }
                                         </li>
@@ -257,7 +260,8 @@ export default function TaskContainer(props){
                                         </div>
                                         <TaskLabels task={task} onOpenGroup={openGroup} />
                                     </div>
-                                    <button className={styles.deleteBtn} onClick={() => handleTaskDelete(task.id)}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
+                                    <button className={styles.deleteBtn} onClick={() => handleTaskDelete(task.id)}
+                                                    title={t(isSharedWithMe(task) ? 'leaveTask' : 'deleteTask')} aria-label={`${t(isSharedWithMe(task) ? 'leaveTask' : 'deleteTask')}: ${task.name}`}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
                                 </li>)
                             }
                         })

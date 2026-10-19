@@ -14,9 +14,10 @@
   --text-h: #fff;
   --text-muted: #979797;
 
-  --primary: #0ed30e;
-  --primary-text: #313131;   /* text on a green background */
-  --primary-fg: var(--primary); /* green used as text or outline on the page background */
+  /* accent: "Abendrot" (sunset) by default, the other palettes are below */
+  --primary: #fb923c;
+  --primary-text: #2a1305;   /* text on an accent background */
+  --primary-fg: var(--primary); /* accent used as text or outline on the page background */
   --danger: #ff4d4d;
   --glow: color-mix(in srgb, var(--text-h) 45%, transparent);
 
@@ -51,8 +52,12 @@
     0 10px 22px -8px rgba(0, 0, 0, 0.75), 0 0 18px -6px var(--glow);
   --btn-shadow-active: inset 0 1px 3px rgba(0, 0, 0, 0.55);
 
-  /* Fixed header height; the running timer sits inline, so it never grows */
-  --header-h: 4rem;
+  /* Fixed header: the button row plus the daily line strip below it.
+     The running timer sits inline, so it never grows */
+  --header-bar-h: 4rem;
+  --ticker-h: 1.75rem;
+  /* plus the iPhone status bar / notch when the app runs full screen (0 everywhere else) */
+  --header-h: calc(var(--header-bar-h) + var(--ticker-h) + env(safe-area-inset-top, 0px));
 
   /* Stacking order for everything that floats above the page, lowest first */
   --z-header: 10;
@@ -97,9 +102,9 @@
   --text-h: #111827;
   --text-muted: #6b7280;
 
-  --primary: #22c55e;
-  --primary-text: #102a1a;
-  --primary-fg: #15803d;   /* darker green, readable as text on white */
+  --primary: #f97316;
+  --primary-text: #1c0a00;
+  --primary-fg: #c2410c;   /* darker orange, readable as text on white */
   --danger: #dc2626;
   --glow: rgba(17, 24, 39, 0.22);
 
@@ -131,15 +136,17 @@
   color-scheme: light; /* native date pickers, checkboxes, etc. */
 }
 
-/* Accent color palettes, chosen in the settings (<html data-accent>). Green is the default above.
+/* Accent color palettes, chosen in the settings (<html data-accent>). Abendrot (sunset) is the default above.
    --primary: buttons, progress, badges | --primary-text: text on --primary | --primary-fg: accent-colored text.
    Light mode gets a deeper button color and a much darker text tone so it stays readable on white. */
+:root[data-accent="green"]  { --primary: #0ed30e; --primary-text: #313131; --primary-fg: #0ed30e; }
 :root[data-accent="ocean"]  { --primary: #38bdf8; --primary-text: #082f49; --primary-fg: #38bdf8; }
 :root[data-accent="violet"] { --primary: #a78bfa; --primary-text: #1e1238; --primary-fg: #a78bfa; }
 :root[data-accent="sunset"] { --primary: #fb923c; --primary-text: #2a1305; --primary-fg: #fb923c; }
 :root[data-accent="rose"]   { --primary: #fb7185; --primary-text: #2b0a12; --primary-fg: #fb7185; }
 :root[data-accent="gold"]   { --primary: #facc15; --primary-text: #2a2100; --primary-fg: #facc15; }
 
+:root[data-theme="light"][data-accent="green"]  { --primary: #22c55e; --primary-text: #102a1a; --primary-fg: #15803d; }
 :root[data-theme="light"][data-accent="ocean"]  { --primary: #0ea5e9; --primary-text: #082f49; --primary-fg: #0369a1; }
 :root[data-theme="light"][data-accent="violet"] { --primary: #8b5cf6; --primary-text: #ffffff; --primary-fg: #6d28d9; }
 :root[data-theme="light"][data-accent="sunset"] { --primary: #f97316; --primary-text: #1c0a00; --primary-fg: #c2410c; }
@@ -149,6 +156,17 @@
 body {
   margin: 0;
   background: var(--bg);
+  /* phones in landscape: keep the content beside the notch (0 everywhere else) */
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* iOS Safari zooms into any field with text under 16px when it is tapped (and stays
+   zoomed); 16px there stops that. Only iOS matches this, other devices keep the design size. */
+@supports (-webkit-touch-callout: none) {
+  input:not([type='checkbox'], [type='radio'], [type='range']), select, textarea {
+    font-size: max(16px, 1em) !important;
+  }
 }
 
 #root {
@@ -221,11 +239,15 @@ code {
   transition: transform var(--ease-out), box-shadow var(--ease-out), border-color var(--ease-out), filter var(--ease-out);
 }
 
-:where(button:hover) {
-  border-color: var(--btn-border-hover);
-  box-shadow: var(--btn-shadow-hover);
-  filter: brightness(1.08);
-  transform: translateY(-1px);
+/* Hover effects only where there is a real hover (mouse, trackpad): on touch screens the
+   hover state sticks after a tap and the button would stay lifted */
+@media (hover: hover) {
+  :where(button:hover) {
+    border-color: var(--btn-border-hover);
+    box-shadow: var(--btn-shadow-hover);
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+  }
 }
 
 :where(button:active) {
@@ -244,10 +266,12 @@ code {
   transition: transform var(--ease-out), filter var(--ease-out);
 }
 
-:where(button:has(svg):hover) {
-  box-shadow: none;
-  transform: scale(1.12);
-  filter: drop-shadow(0 0 4px var(--glow));
+@media (hover: hover) {
+  :where(button:has(svg):hover) {
+    box-shadow: none;
+    transform: scale(1.12);
+    filter: drop-shadow(0 0 4px var(--glow));
+  }
 }
 
 :where(button:has(svg):active) {

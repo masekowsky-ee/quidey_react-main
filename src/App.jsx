@@ -13,7 +13,8 @@ import { checkAuth, setUser, fetchAccess } from "./features/auth/authAction";
 import { PRO_REQUIRED_EVENT, SIGNED_OUT_EVENT } from "./features/helperFunction";
 import { logout } from "./features/auth/authAction";
 import BetaGate, { AccessPending } from "./components/BetaGate.jsx";
-import { fetchTaskState } from "./features/tasks/taskAction.js"
+import { fetchTaskState, fetchTaskInvites, refreshTasks } from "./features/tasks/taskAction.js"
+import { useTaskReminders } from "./features/tasks/reminders.js"
 import { fetchSessions } from "./features/session/sessionAction.js"
 import { fetchFriendRequests } from "./features/friends/friendsAction.js"
 import Social from './components/Social.jsx';
@@ -24,6 +25,8 @@ import { useWorkReporter } from './features/together/work.js'
 import TeamHome from './components/TeamHome.jsx';
 import Toaster from './components/Toaster.jsx';
 import Admin from './components/Admin.jsx';
+import Tutorial from './components/Tutorial.jsx';
+import FunPage from './components/fun/FunPage.jsx';
 import { useApplyTheme } from './features/settings/theme.js';
 
 const REQUEST_REFRESH_MS = 60 * 1000;
@@ -84,6 +87,8 @@ function App(){
       dispatch(fetchSharedSessions()).catch(() => {});
       // the shared sessions' tasks for the solo view
       dispatch(fetchMySharedTasks()).catch(() => {});
+      // tasks friends sent me
+      dispatch(fetchTaskInvites()).catch(() => {});
     };
     refresh();
     window.addEventListener('focus', refresh);
@@ -93,6 +98,22 @@ function App(){
       clearInterval(interval);
     };
   }, [allowed, dispatch]);
+
+  // tasks shared with friends can change on their side: the list is read again when the tab
+  // gets focus and once a minute (not right at the start, fetchTaskState just loaded it)
+  useEffect(() => {
+    if (!allowed) return;
+    const refresh = () => { if (!document.hidden) dispatch(refreshTasks()).catch(() => {}); };
+    window.addEventListener('focus', refresh);
+    const interval = setInterval(refresh, REQUEST_REFRESH_MS);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      clearInterval(interval);
+    };
+  }, [allowed, dispatch]);
+
+  // reminders of tasks with a time, while the app is open
+  useTaskReminders(allowed);
 
   const [activeTimer, setActiveTimer] = useState(false);
 
@@ -117,6 +138,7 @@ function App(){
         <Menu/>
         <CustomError/>
         <Toaster/>
+        <Tutorial/>
         <Routes>
           <Route path="/" element={homeLayout === 'team' ? <TeamHome/> : <Home setActiveTimer={setActiveTimer}/>} />
           <Route path="/calendar" element={<Calendar/>} />
@@ -127,6 +149,8 @@ function App(){
           <Route path="/together" element={<Together/>} />
           <Route path="/together/:id" element={<SharedSession/>} />
           <Route path="/admin" element={access.isAdmin ? <Admin/> : <Navigate to="/" replace />} />
+          {/* hidden: only reachable through the daily line in the header */}
+          <Route path="/fun" element={<FunPage/>} />
           <Route path="/beta" element={<Navigate to="/" replace />} />
         </Routes>
       </section>

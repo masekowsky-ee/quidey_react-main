@@ -1,30 +1,66 @@
 .page{
     composes: page from './ui.module.css';
-    width: min(1100px, calc(100% - 2rem));
+    width: min(1180px, calc(100% - 2rem));
     margin: 0 auto;
     padding-bottom: 3rem;
     box-sizing: border-box;
     text-align: left;
 }
 
-/* Month title on the left, navigation on the right */
+/* Read by screen readers only */
+.srOnly{
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ---------- Toolbar: title and navigation, below it view switch and filters ---------- */
+
 .toolbar{
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin: 2rem 0 1rem;
+}
+
+.titleRow,
+.controls{
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    margin: 2rem 0 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
 }
 
-.monthTitle{
+.title{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
     margin: 0;
     font-size: 1.75rem;
     font-weight: 600;
     letter-spacing: -0.01em;
 }
 
-.toolbarActions{
+.weekBadge{
+    padding: 0.1rem 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+    border: 1px solid var(--btn-border);
+    border-radius: 999px;
+}
+
+.nav{
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -32,16 +68,19 @@
 }
 
 .todayBtn{
-    margin-right: 0.4rem;
+    margin-right: 0.35rem;
 }
 
-/* Round icon buttons (month and day navigation) */
+/* Already showing today's month/week: still works (jumps to today), but steps back */
+.todayBtnQuiet{
+    color: var(--text-muted);
+}
+
 .navBtn{
     composes: iconBtnRound from './ui.module.css';
 }
 
-.toolbarActions > .navBtn,
-.dayPanelHead > .navBtn{
+.nav > .navBtn{
     width: 2.25rem;
     height: 2.25rem;
     background-color: var(--surface);
@@ -49,20 +88,197 @@
     corner-shape: round;
 }
 
-.calendar{
+.overdueBtn{
+    margin-right: 0.35rem;
+    padding: 0.25rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--danger);
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+    border-radius: 999px;
+    box-shadow: none;
+}
+
+.overdueBtn:hover{
+    border-color: var(--danger);
+    box-shadow: 0 0 14px -6px var(--danger);
+}
+
+.segmented{
+    composes: segmented from './ui.module.css';
+}
+
+.segmentActive{
+    composes: segmentActive from './ui.module.css';
+}
+
+.filters{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.search{
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+}
+
+.search svg{
+    position: absolute;
+    left: 0.55rem;
+    pointer-events: none;
+}
+
+.search input{
+    width: 12rem;
+    height: 2.15rem;
+    padding-left: 2rem;
+}
+
+.groupSelect{
+    height: 2.15rem;
+    max-width: 12rem;
+}
+
+.doneToggle{
+    height: 2.15rem;
+    gap: 0.5rem;
+    padding: 0 0.85rem 0 0.55rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-radius: 999px;
+}
+
+.doneToggleOn{
+    color: var(--text-h);
+    border-color: color-mix(in srgb, var(--primary) 50%, transparent);
+}
+
+.doneBox{
+    width: 1.05rem;
+    height: 1.05rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    line-height: 1;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.doneToggleOn .doneBox{
+    color: var(--primary-text);
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.doneToggleOn .doneBox::after{
+    content: '✓';
+    font-weight: 700;
+}
+
+/* Has an icon, so it brings back the box the base styles take from icon buttons */
+.exportBtn{
+    height: 2.15rem;
+    gap: 0.35rem;
+    padding: 0 0.85rem 0 0.6rem;
+    font-size: 0.85rem;
+    color: var(--text-h);
+    background: linear-gradient(180deg, var(--surface-hover), var(--surface));
+    border: 1px solid var(--btn-border);
+    box-shadow: var(--btn-shadow);
+}
+
+.exportBtn:hover{
+    border-color: var(--btn-border-hover);
+    box-shadow: var(--btn-shadow-hover);
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+}
+
+.exportBtn:active{
+    box-shadow: var(--btn-shadow-active);
+    transform: scale(0.98);
+}
+
+/* tasks friends sent me, above the calendar */
+.invites:not(:empty){
+    margin-bottom: 1rem;
+}
+
+/* "09:30" in front of a timed task's name */
+.chipTime{
+    margin-right: 0.3rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-h);
+}
+
+.chipDone .chipTime{
+    color: inherit;
+}
+
+/* the week has room for the time (with its end) on its own line */
+.weekList .chipTime{
+    display: block;
+    margin-right: 0;
+    font-size: 0.72rem;
+}
+
+.chipMeta{
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chipShared{
+    margin-left: 0.25rem;
+    color: var(--primary-fg);
+}
+
+.hint{
+    margin-top: 0.85rem;
+    font-size: 0.78rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+/* no dragging or keyboard on phones and tablets */
+@media (hover: none), (pointer: coarse) {
+    .hint{
+        display: none;
+    }
+}
+
+/* ---------- Month ---------- */
+
+.monthCard{
     composes: card from './ui.module.css';
     padding: 0.75rem;
 }
 
-.weekdays{
+/* Week number column, then Monday to Sunday */
+.month{
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: 2rem repeat(7, minmax(0, 1fr));
+    grid-auto-rows: auto;
     gap: 0.4rem;
-    padding: 0.25rem 0 0.6rem;
 }
 
-.weekdays span{
-    padding-left: 0.6rem;
+.monthRow{
+    display: contents;
+}
+
+.weekdayHead{
+    padding: 0.25rem 0 0.35rem 0.6rem;
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -70,51 +286,82 @@
     color: var(--text-muted);
 }
 
-.weekdays .weekend{
+.weekend{
     opacity: 0.7;
 }
 
-.grid{
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    grid-auto-rows: minmax(6.5rem, auto);
-    gap: 0.4rem;
+.weekNumHead{
+    padding-top: 0.3rem;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-align: center;
+    color: var(--text-muted);
+    opacity: 0.6;
 }
 
-/* One day. Overrides the global button look: flat tile, content top-left */
-.grid > .cell{
+.weekNumCell{
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 0.45rem;
+}
+
+/* Opens that week in the week view */
+.weekNum{
+    min-width: 1.6rem;
+    height: 1.6rem;
+    padding: 0;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    box-shadow: none;
+}
+
+.weekNum:hover{
+    color: var(--text-h);
+    border-color: var(--btn-border-hover);
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+/* One day: flat tile, content top-left */
+.cell{
+    position: relative;
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
     gap: 0.35rem;
     min-width: 0;
+    min-height: 6.75rem;
     padding: 0.45rem 0.5rem;
-    text-align: left;
-    font-weight: 400;
-    color: var(--text);
+    box-sizing: border-box;
     background: var(--surface-hover);
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    transition: border-color var(--ease-out), background-color var(--ease-out), transform var(--ease-out);
+    cursor: pointer;
+    outline: none;
+    transition: border-color var(--ease-out), background-color var(--ease-out);
 }
 
-.grid > .cell:hover{
+.cell:hover{
     background: color-mix(in srgb, var(--surface-hover) 80%, var(--surface-strong));
     border-color: var(--btn-border-hover);
-    box-shadow: none;
-    filter: none;
-    transform: translateY(-1px);
 }
 
-.grid > .cell:active{
-    transform: scale(0.98);
-    box-shadow: none;
+.cell:focus-visible,
+.weekDay:focus-visible{
+    outline: 2px solid var(--border-strong);
+    outline-offset: 1px;
 }
 
 /* Days of the previous/next month: no tile, dimmed content */
-.grid > .outside{
+.outside{
     background: transparent;
     box-shadow: none;
 }
@@ -125,11 +372,36 @@
 }
 
 .outside .chips{
-    opacity: 0.5;
+    opacity: 0.55;
+}
+
+/* Today: accent circle behind the number, accent edge on the tile */
+.todayCell{
+    border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
+.todayCell .dayNum{
+    color: var(--primary-text);
+    background-color: var(--primary);
+    box-shadow: 0 0 10px -2px var(--primary);
+}
+
+/* The day a dragged task would land on */
+.dropTarget,
+.dropTarget:hover{
+    background: color-mix(in srgb, var(--primary) 14%, var(--surface-hover));
+    border: 1px dashed var(--primary);
+}
+
+.cellHead{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem;
 }
 
 .dayNum{
-    align-self: flex-start;
     min-width: 1.7rem;
     height: 1.7rem;
     display: flex;
@@ -143,16 +415,20 @@
     corner-shape: round;
 }
 
-/* Today: green circle behind the number, green edge on the tile */
-.grid > .todayCell{
-    border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+/* How long I focused that day */
+.focusBadge{
+    padding: 0 0.4rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1.35rem;
+    white-space: nowrap;
+    color: var(--primary-fg);
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
 }
 
-.todayCell .dayNum{
-    color: var(--primary-text);
-    background-color: var(--primary);
-    box-shadow: 0 0 10px -2px var(--primary);
-}
+/* ---------- Task chips (month and week) ---------- */
 
 .chips{
     list-style: none;
@@ -164,167 +440,525 @@
     min-width: 0;
 }
 
-.chips li{
-    padding: 0.05rem 0.4rem;
+.chips li,
+.weekList li{
+    display: flex;
+    min-width: 0;
+}
+
+/* --chip-color: the priority color on the left edge */
+.chip{
+    --chip-color: var(--primary);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+    gap: 0;
+    padding: 0.08rem 0.4rem;
     font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.4;
+    text-align: left;
     color: var(--text);
-    background-color: var(--surface-inset);
-    border-left: 2px solid var(--primary);
+    background: var(--surface-inset);
+    border: none;
+    border-left: 2px solid var(--chip-color);
     border-radius: 4px;
+    box-shadow: none;
+    cursor: grab;
+    user-select: none;
+    transition: background-color var(--ease-out), opacity var(--ease-out);
+}
+
+.chip:hover{
+    background: color-mix(in srgb, var(--chip-color) 16%, var(--surface-inset));
+    border-color: var(--chip-color);
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.chip:active{
+    cursor: grabbing;
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.chipName{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chipDesc{
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
+.prioHigh{
+    --chip-color: var(--danger);
+}
+
+.prioMedium{
+    --chip-color: var(--primary);
+}
+
+.prioLow{
+    --chip-color: color-mix(in srgb, var(--primary) 40%, var(--text-muted));
+}
+
+/* Still open, day is over */
+.chipOverdue{
+    color: var(--text-h);
+    background: color-mix(in srgb, var(--danger) 16%, var(--surface-inset));
+}
+
+.chipDone{
+    --chip-color: var(--text-muted);
+    color: var(--text-muted);
+    background: var(--surface-inset);
+}
+
+.chipDone .chipName{
+    text-decoration: line-through;
+}
+
+.chipDragging{
+    opacity: 0.35;
+}
+
+.chipMore{
+    padding-left: 0.1rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+/* The chip under the pointer while dragging */
+.dragGhost{
+    position: fixed;
+    z-index: var(--z-drag);
+    max-width: 14rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    color: var(--text-h);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    background-color: var(--surface);
+    border: 1px solid var(--btn-border-hover);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-float);
+    pointer-events: none;
+    transform: translate(12px, 8px) rotate(-2deg);
 }
 
-.chips .chipDone{
-    text-decoration: line-through;
-    color: var(--text-muted);
-    border-left-color: var(--text-muted);
-}
+/* ---------- Week ---------- */
 
-.chips .chipMore{
-    background: none;
-    border-left: none;
-    padding-left: 0.1rem;
-    color: var(--text-muted);
-}
-
-/* ---------- Day panel ---------- */
-
-.backdrop{
-    composes: overlay from './ui.module.css';
-    z-index: var(--z-modal);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    box-sizing: border-box;
-    backdrop-filter: blur(3px);
-    animation: fadeIn 0.2s ease;
-}
-
-.dayPanel{
+.week{
     composes: card from './ui.module.css';
-    width: min(480px, 100%);
-    max-height: 80vh;
-    overflow-y: auto;
+    /* the days' screen reader labels (position: absolute) stay inside the box that scrolls
+       sideways; otherwise they stretch the whole page on tablets */
+    position: relative;
+    padding: 0.75rem;
+}
+
+.weekRow{
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.4rem;
+}
+
+.weekDay{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    min-width: 0;
+    min-height: 24rem;
+    padding: 0.55rem;
     box-sizing: border-box;
-    box-shadow: var(--shadow), var(--shadow-modal);
-    animation: panelIn 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    background: var(--surface-hover);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    outline: none;
+    transition: border-color var(--ease-out), background-color var(--ease-out);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.weekDay:hover{
+    border-color: var(--btn-border-hover);
 }
 
-@keyframes panelIn {
-    from { opacity: 0; transform: translateY(0.75rem) scale(0.98); }
-    to { opacity: 1; transform: none; }
+.weekWeekend{
+    background: color-mix(in srgb, var(--surface-hover) 55%, transparent);
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .backdrop,
-    .dayPanel{
-        animation: none;
-    }
+.weekToday{
+    border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+    box-shadow: inset 0 2px 0 var(--primary);
 }
 
-.dayPanelHead{
+.weekDayHead{
     display: flex;
     flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    align-items: baseline;
+    gap: 0.45rem;
 }
 
-.dayPanelTitle{
-    flex: 1;
-    min-width: 0;
-    text-align: center;
+.weekDayHead .focusBadge{
+    margin-left: auto;
+    align-self: center;
 }
 
-.dayPanelTitle h2{
-    margin: 0;
-    font-size: 1.15rem;
-}
-
-.dayPanelWeekday{
-    font-size: 0.75rem;
+.weekDayName{
+    font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
 }
 
-.dayPanelHead > .closeBtn{
-    width: 2rem;
-    height: 2rem;
-    margin-left: 0.25rem;
-    color: var(--text-muted);
+.weekToday .weekDayName{
+    color: var(--primary-fg);
 }
 
-.dayTasks{
+.weekDayNum{
+    font-size: 1.35rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--text-h);
+    font-variant-numeric: tabular-nums;
+}
+
+.weekList{
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
+    gap: 0.3rem;
 }
 
-/* Name and date on one line, description below */
-.dayTasks li{
-    display: grid;
-    grid-template-columns: 1fr auto;
-    column-gap: 1rem;
-    row-gap: 0.15rem;
-    padding: 0.7rem 0 0.7rem 0.75rem;
-    border-left: 2px solid var(--primary);
+.weekList .chip{
+    gap: 0.1rem;
+    padding: 0.3rem 0.45rem;
+    font-size: 0.8rem;
 }
 
-.dayTasks li + li{
-    margin-top: 0.5rem;
+.weekEmpty{
+    color: var(--text-muted);
+    opacity: 0.5;
 }
 
-.dayTaskName{
+/* Shows on hover; always on touch screens */
+.weekAdd{
+    align-self: stretch;
+    height: 1.9rem;
+    margin-top: auto;
+    color: var(--text-muted);
+    border: 1px dashed var(--btn-border-hover);
+    border-radius: var(--radius-sm);
+    opacity: 0;
+    transition: opacity var(--ease-out), color var(--ease-out), border-color var(--ease-out);
+}
+
+.weekDay:hover .weekAdd,
+.weekDay:focus-within .weekAdd{
+    opacity: 1;
+}
+
+.weekAdd:hover{
     color: var(--text-h);
-    font-weight: 500;
-    overflow-wrap: break-word;
-    min-width: 0;
+    border-color: var(--primary);
+    filter: none;
+    transform: none;
 }
 
-.dayTaskDue{
+@media (hover: none) {
+    .weekAdd{
+        opacity: 1;
+    }
+}
+
+/* ---------- Agenda ---------- */
+
+.agenda{
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.agendaSection{
+    composes: card from './ui.module.css';
+    padding: 0.85rem 1.1rem;
+}
+
+.agendaToday{
+    border-color: color-mix(in srgb, var(--primary) 50%, transparent);
+    box-shadow: inset 3px 0 0 var(--primary), var(--shadow-sm);
+}
+
+.agendaOverdue{
+    border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.agendaOverdue .agendaHeadDate{
+    color: var(--danger);
+}
+
+.agendaHead{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 0 0.45rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0;
+}
+
+.agendaHeadDate{
+    padding: 0;
+    font: inherit;
+    color: var(--text-h);
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+button.agendaHeadDate:hover{
+    text-decoration: underline;
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.agendaCount{
+    min-width: 1.4rem;
+    padding: 0 0.4rem;
+    box-sizing: border-box;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.4rem;
+    text-align: center;
+    color: var(--text-muted);
+    background-color: var(--surface-inset);
+    border-radius: 999px;
+}
+
+.todayTag{
+    padding: 0.05rem 0.5rem;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--primary-text);
+    background-color: var(--primary);
+    border-radius: 999px;
+}
+
+.agendaList{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.agendaRow{
+    --chip-color: var(--primary);
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.5rem 0 0.5rem 0.7rem;
+    border-left: 2px solid var(--chip-color);
+}
+
+/* .agendaRow comes after the priority classes above, so they are repeated with it */
+.agendaRow.prioHigh{
+    --chip-color: var(--danger);
+}
+
+.agendaRow.prioLow{
+    --chip-color: color-mix(in srgb, var(--primary) 40%, var(--text-muted));
+}
+
+.agendaText{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.agendaName{
+    align-self: flex-start;
+    max-width: 100%;
+    padding: 0;
+    font: inherit;
+    font-weight: 500;
+    text-align: left;
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+button.agendaName:hover{
+    text-decoration: underline;
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.agendaDesc{
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+}
+
+.agendaMeta{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.5rem;
+    min-height: 1.5rem;
+}
+
+.agendaDue,
+.agendaDueLate{
     font-size: 0.8rem;
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
 }
 
-.dayTaskDesc{
-    grid-column: 1 / -1;
-    grid-row: 2;
+.agendaDueLate{
+    font-weight: 600;
+    color: var(--danger);
+}
+
+.prioDot{
+    width: 0.55rem;
+    height: 0.55rem;
+    background-color: var(--chip-color);
+    border-radius: 50%;
+    corner-shape: round;
+}
+
+.agendaDone{
+    --chip-color: var(--text-muted);
+}
+
+.agendaDone .agendaName{
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+/* Round tick to mark a task done */
+.check{
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    color: transparent;
+    background-color: var(--surface-inset);
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    corner-shape: round;
+    box-shadow: none;
+    transition: background-color var(--ease-out), border-color var(--ease-out), color var(--ease-out);
+}
+
+.check:hover{
+    color: var(--text-muted);
+    border-color: var(--primary);
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.check[aria-pressed="true"]{
+    color: var(--primary-text);
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.agendaEmptyDay{
+    width: 100%;
+    gap: 0.35rem;
+    padding: 0.45rem;
     font-size: 0.85rem;
     color: var(--text-muted);
-    overflow-wrap: break-word;
+    border: 1px dashed var(--btn-border-hover);
+    border-radius: var(--radius-sm);
 }
 
-.dayTasks .dayTaskDone{
-    border-left-color: var(--text-muted);
+.agendaEmptyDay:hover{
+    color: var(--text-h);
+    border-color: var(--primary);
+    filter: none;
+    transform: none;
 }
 
-.dayTaskDone .dayTaskName{
-    text-decoration: line-through;
-    color: var(--text-muted);
-}
-
-.dayEmpty{
-    padding: 1.5rem 0;
+.agendaEmpty{
+    composes: card from './ui.module.css';
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2.5rem 1rem;
     text-align: center;
     color: var(--text-muted);
 }
 
-@media (max-width: 900px) {
-    .grid{
-        grid-auto-rows: minmax(5.5rem, auto);
+.scheduleForm{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.scheduleForm input{
+    height: 2rem;
+}
+
+.scheduleForm button{
+    height: 2rem;
+    font-size: 0.8rem;
+}
+
+.scheduleForm button:disabled{
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* ---------- Smaller screens ---------- */
+
+@media (max-width: 1000px) {
+    .cell{
+        min-height: 5.75rem;
+    }
+
+    /* the week scrolls sideways instead of squeezing seven columns */
+    .week{
+        overflow-x: auto;
+    }
+
+    .weekRow{
+        grid-template-columns: repeat(7, minmax(8.5rem, 1fr));
     }
 }
 
@@ -335,62 +969,144 @@
 
     .toolbar{
         margin: 1.25rem 0.25rem 0.75rem;
+        gap: 0.65rem;
     }
 
-    .monthTitle{
+    .title{
         font-size: 1.3rem;
     }
 
-    .calendar{
+    .controls,
+    .filters{
+        width: 100%;
+    }
+
+    .segmented{
+        width: 100%;
+    }
+
+    /* search on its own row, group, done and export below */
+    .search{
+        flex: 1 1 100%;
+    }
+
+    .search input{
+        width: 100%;
+    }
+
+    .groupSelect{
+        flex: 1;
+        max-width: none;
+    }
+
+    .exportBtn span{
+        display: none;
+    }
+
+    .exportBtn{
+        padding: 0 0.6rem;
+    }
+
+    .monthCard{
         padding: 0.4rem;
     }
 
-    .weekdays span{
+    .month{
+        grid-template-columns: 1.1rem repeat(7, minmax(0, 1fr));
+        gap: 0.25rem;
+    }
+
+    .weekdayHead{
         padding-left: 0;
         text-align: center;
         font-size: 0.65rem;
         letter-spacing: 0.04em;
     }
 
-    .grid{
-        grid-auto-rows: minmax(4rem, auto);
-        gap: 0.25rem;
+    .weekNumHead{
+        font-size: 0;
     }
 
-    .grid > .cell{
+    .weekNumCell{
+        padding-top: 0.35rem;
+    }
+
+    .weekNum{
+        min-width: 1.1rem;
+        font-size: 0.58rem;
+    }
+
+    .cell{
         align-items: center;
-        padding: 0.3rem 0.2rem;
+        min-height: 3.9rem;
+        padding: 0.3rem 0.15rem;
+    }
+
+    .cellHead{
+        justify-content: center;
     }
 
     .dayNum{
-        align-self: center;
         min-width: 1.5rem;
         height: 1.5rem;
         font-size: 0.8rem;
     }
 
-    .chips{
-        justify-content: center;
+    .cell .focusBadge,
+    .chips .chipMore{
+        display: none;
     }
 
     /* On phones only a dot per task fits */
     .chips{
         flex-direction: row;
         flex-wrap: wrap;
+        justify-content: center;
         gap: 3px;
     }
 
-    .chips li{
+    .chips .chip{
         width: 6px;
         height: 6px;
         padding: 0;
-        font-size: 0;
+        background: var(--chip-color);
         border: none;
         border-radius: 50%;
-        background-color: var(--primary);
+        corner-shape: round;
+        pointer-events: none;
     }
 
-    .chips .chipMore{
+    .chips .chipOverdue{
+        background: var(--danger);
+    }
+
+    .chips .chipName{
         display: none;
+    }
+
+    /* the week as a list of days */
+    .week{
+        padding: 0.4rem;
+        overflow-x: visible;
+    }
+
+    .weekRow{
+        grid-template-columns: 1fr;
+    }
+
+    .weekDay{
+        min-height: 0;
+    }
+
+    .agendaSection{
+        padding: 0.75rem 0.85rem;
+    }
+
+    .agendaRow{
+        flex-wrap: wrap;
+    }
+
+    .agendaMeta{
+        margin-left: 2.25rem;
     }
 }

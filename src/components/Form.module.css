@@ -40,6 +40,77 @@
     gap: 0.5rem;
 }
 
+.grow{
+    flex: 1;
+    min-width: 0;
+}
+
+/* "More options": duration, reminder, location, link, extra info, friends */
+.moreToggle{
+    align-self: flex-start;
+    gap: 0.35rem;
+    margin: 0.5rem 0 0.25rem;
+    padding: 0.2rem 0;
+    font-size: 0.85rem;
+    color: var(--primary-fg);
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.moreToggle:hover{
+    text-decoration: underline;
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.more{
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    width: min(28rem, calc(100vw - 4rem));
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    box-sizing: border-box;
+    text-align: left;
+    background-color: var(--surface-inset);
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius-sm);
+}
+
+.shareBlock{
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.shareBlock ul{
+    margin: 0;
+}
+
+.shareLabel{
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.shareHint{
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.shareHint a{
+    color: var(--primary-fg);
+}
+
+.createBtn:disabled{
+    opacity: 0.6;
+    cursor: default;
+}
+
 .closeBtn{
     position: absolute;
     top: 0.25rem;

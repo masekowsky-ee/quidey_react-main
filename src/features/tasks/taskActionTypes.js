@@ -18,3 +18,12 @@ export const DELETE_GROUP_TASKS = "DELETE_GROUP_TASKS";
 export const EDIT_GROUP = "EDIT_GROUP";
 
 export const SET_TASK_STATE = "SET_TASK_STATE";
+// the task list fetched again (friends may have changed shared tasks)
+export const REFRESH_TASKS = "REFRESH_TASKS";
+
+// tasks shared with friends
+export const TASK_REPLACED = "TASK_REPLACED";
+export const SET_TASK_INVITES = "SET_TASK_INVITES";
+export const TASK_INVITE_ACCEPTED = "TASK_INVITE_ACCEPTED";
+export const TASK_INVITE_REMOVED = "TASK_INVITE_REMOVED";
+export const TASK_SHARE_REMOVED = "TASK_SHARE_REMOVED";

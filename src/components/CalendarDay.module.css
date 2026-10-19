@@ -1,0 +1,698 @@
+/* The day panel of the calendar: a dialog on larger screens, a sheet from the bottom on phones */
+
+.backdrop{
+    composes: overlay from './ui.module.css';
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    text-align: left;
+    backdrop-filter: blur(3px);
+    animation: fadeIn 0.2s ease;
+}
+
+.panel{
+    composes: card from './ui.module.css';
+    width: min(540px, 100%);
+    max-height: min(86vh, 780px);
+    overflow-y: auto;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    outline: none;
+    box-shadow: var(--shadow), var(--shadow-modal);
+    animation: panelIn 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Editing a task: more room, so the fields sit side by side instead of piling up */
+.panelWide{
+    width: min(720px, 100%);
+    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 2rem);
+}
+
+.panelWide .field textarea{
+    min-height: 3rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes panelIn {
+    from { opacity: 0; transform: translateY(0.75rem) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes sheetIn {
+    from { transform: translateY(100%); }
+    to { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .backdrop,
+    .panel{
+        animation: none;
+    }
+}
+
+/* ---------- Head: day before, date, day after, close ---------- */
+
+.head{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.titles{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    text-align: center;
+}
+
+.weekday{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.todayTag{
+    padding: 0.05rem 0.5rem;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--primary-text);
+    background-color: var(--primary);
+    border-radius: 999px;
+}
+
+.title{
+    margin: 0;
+    font-size: 1.15rem;
+}
+
+.navBtn{
+    composes: iconBtnRound from './ui.module.css';
+}
+
+.head > .navBtn{
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    background-color: var(--surface);
+    border: 1px solid var(--btn-border);
+    corner-shape: round;
+}
+
+.closeBtn{
+    composes: iconBtn from './ui.module.css';
+}
+
+.head > .closeBtn{
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    margin-left: 0.25rem;
+    color: var(--text-muted);
+}
+
+/* ---------- Adding a task ---------- */
+
+.quickAdd{
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+}
+
+.quickAdd input{
+    flex: 1;
+    min-width: 0;
+    height: 2.4rem;
+}
+
+.addBtn{
+    composes: btnPrimary from './ui.module.css';
+}
+
+.quickAdd > .quickTime{
+    flex: 0 0 auto;
+    width: 6.75rem;
+    height: 2.4rem;
+}
+
+.quickAdd > .addBtn{
+    min-width: 0;
+    height: 2.4rem;
+}
+
+.addBtn:disabled,
+.saveBtn:disabled{
+    opacity: 0.5;
+    cursor: default;
+    filter: none;
+    transform: none;
+}
+
+.addHint{
+    margin-top: -0.5rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* ---------- Tasks of the day ---------- */
+
+.list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+/* --chip-color: the priority color on the left edge, as in the calendar */
+.row{
+    --chip-color: var(--primary);
+    padding: 0.55rem 0.6rem 0.55rem 0.75rem;
+    border-left: 2px solid var(--chip-color);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    transition: background-color var(--ease-out);
+}
+
+.row:hover,
+.rowEditing{
+    background-color: var(--surface-hover);
+}
+
+.prioHigh{
+    --chip-color: var(--danger);
+}
+
+.prioMedium{
+    --chip-color: var(--primary);
+}
+
+.prioLow{
+    --chip-color: color-mix(in srgb, var(--primary) 40%, var(--text-muted));
+}
+
+.rowDone{
+    --chip-color: var(--text-muted);
+}
+
+.rowDone .rowName{
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+.rowMain{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.7rem;
+}
+
+/* Round tick to mark a task done */
+.check{
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    color: transparent;
+    background-color: var(--surface-inset);
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    corner-shape: round;
+    box-shadow: none;
+    transition: background-color var(--ease-out), border-color var(--ease-out), color var(--ease-out);
+}
+
+.check:hover{
+    color: var(--text-muted);
+    border-color: var(--primary);
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.check[aria-pressed="true"]{
+    color: var(--primary-text);
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.rowText{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.rowName{
+    align-self: flex-start;
+    max-width: 100%;
+    padding: 0;
+    font: inherit;
+    font-weight: 500;
+    text-align: left;
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.rowName:hover{
+    text-decoration: underline;
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.rowDesc{
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+}
+
+.rowMeta{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.4rem;
+    min-height: 1.5rem;
+}
+
+.prioPill,
+.overduePill{
+    padding: 0 0.45rem;
+    box-sizing: border-box;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.35rem;
+    text-align: center;
+    border-radius: 999px;
+}
+
+.prioPill{
+    min-width: 1.6rem;
+    color: var(--chip-color);
+    background-color: color-mix(in srgb, var(--chip-color) 14%, transparent);
+    font-variant-numeric: tabular-nums;
+}
+
+.overduePill{
+    font-size: 0.64rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--danger);
+    background-color: color-mix(in srgb, var(--danger) 12%, transparent);
+}
+
+.editBtn{
+    width: 1.9rem;
+    height: 1.9rem;
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.row:hover .editBtn,
+.editBtn:focus-visible{
+    opacity: 1;
+}
+
+@media (hover: none) {
+    .editBtn{
+        opacity: 1;
+    }
+}
+
+.empty{
+    padding: 1rem 0;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+/* ---------- Editing a task ---------- */
+
+.editor{
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--btn-border);
+}
+
+.fieldRow{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.field{
+    flex: 1;
+    min-width: 10rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.field > span{
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    text-transform: uppercase;
+}
+
+.field input:not([type='range']),
+.field textarea{
+    width: 100%;
+    font-weight: 400;
+    letter-spacing: normal;
+}
+
+.field textarea{
+    min-height: 4.5rem;
+    padding: 0.4rem 0.5rem;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 0.9rem;
+    color: var(--text);
+    background-color: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    resize: vertical;
+    transition: border-color var(--ease);
+}
+
+.field textarea:hover{
+    border-color: var(--border-strong);
+}
+
+.field textarea:focus-visible{
+    outline: 2px solid var(--border-strong);
+    outline-offset: 2px;
+}
+
+.field input[type='range']{
+    width: 100%;
+    margin: 0.5rem 0 0;
+}
+
+/* Optional time: empty means the whole day */
+.timeField{
+    flex: 0 1 9.5rem;
+    min-width: 8rem;
+}
+
+.timeInput{
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.timeInput input{
+    padding-right: 1.9rem;
+}
+
+.clearTime{
+    position: absolute;
+    right: 0.3rem;
+    width: 1.4rem;
+    height: 1.4rem;
+    color: var(--text-muted);
+}
+
+.allDayNote{
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--text-muted);
+}
+
+.moreToggle{
+    align-self: flex-start;
+    scroll-margin-top: 0.5rem; /* opening scrolls it to the top of the panel */
+    max-width: 100%;
+    min-width: 0;
+    gap: 0.4rem;
+    padding: 0.2rem 0.1rem;
+    font-size: 0.85rem;
+    color: var(--primary-fg);
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.moreToggle:hover{
+    text-decoration: underline;
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.moreChevron{
+    width: 0.8rem;
+    font-size: 0.75rem;
+}
+
+.more{
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 0.75rem;
+    background-color: var(--surface-inset);
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius-sm);
+}
+
+.leaveBtn{
+    composes: ghostBtn from './ui.module.css';
+    font-size: 0.85rem;
+    color: var(--danger);
+}
+
+.prioValue{
+    font-size: 0.8rem;
+    color: var(--text-h);
+    text-transform: none;
+    font-variant-numeric: tabular-nums;
+}
+
+.error{
+    font-size: 0.85rem;
+    color: var(--danger);
+}
+
+/* Stays at the bottom of the panel while the editor scrolls, so Save is always in reach */
+.editorActions{
+    position: sticky;
+    bottom: -1.25rem; /* the panel's bottom padding */
+    z-index: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 -0.6rem -0.55rem -0.75rem; /* to the row's edges */
+    padding: 0.6rem 0.6rem 0.75rem 0.75rem;
+    background-color: var(--surface-hover);
+    border-top: 1px solid var(--btn-border);
+}
+
+.prioField{
+    flex: 1 1 9rem;
+}
+
+.sharedNote{
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.moreLabel{
+    flex-shrink: 0;
+}
+
+/* what is set inside, while closed */
+.moreSummary{
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-muted);
+}
+
+.moreSummary:not(:empty)::before{
+    content: '· ';
+}
+
+.spacer{
+    flex: 1;
+}
+
+.groupsBtn,
+.cancelBtn{
+    font-size: 0.85rem;
+}
+
+.cancelBtn{
+    composes: ghostBtn from './ui.module.css';
+}
+
+.deleteBtn{
+    composes: deleteBtn from './ui.module.css';
+    width: 2rem;
+    height: 2rem;
+    color: var(--text-muted);
+}
+
+.deleteBtn:hover{
+    color: var(--danger);
+}
+
+.saveBtn{
+    composes: btnPrimary from './ui.module.css';
+}
+
+.editorActions > .saveBtn{
+    min-width: 5.5rem;
+}
+
+/* ---------- Focus sessions of the day ---------- */
+
+.focus{
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--btn-border);
+}
+
+.sectionTitle{
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.focusTotal{
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--primary-fg);
+}
+
+.focusList{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.focusList li{
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.focusTime{
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.focusWhat{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text);
+}
+
+.focusGroup{
+    color: var(--text-muted);
+}
+
+.focusDuration{
+    font-weight: 600;
+    color: var(--text-h);
+    font-variant-numeric: tabular-nums;
+}
+
+.focusShared .focusWhat a{
+    color: var(--primary-fg);
+    text-decoration: none;
+}
+
+.focusShared .focusWhat a:hover{
+    text-decoration: underline;
+}
+
+.historyLink{
+    display: inline-block;
+    margin-top: 0.6rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.historyLink:hover{
+    color: var(--text-h);
+}
+
+/* ---------- Phones: sheet from the bottom ---------- */
+
+@media (max-width: 640px) {
+    .backdrop{
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .panel{
+        width: 100%;
+        max-height: 90vh;
+        max-height: 90dvh; /* the visible height, without the browser's bars */
+        padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+        border-bottom: none;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        animation: sheetIn 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .editorActions{
+        bottom: calc(-1rem - env(safe-area-inset-bottom));
+    }
+
+    .rowMain{
+        flex-wrap: wrap;
+    }
+}

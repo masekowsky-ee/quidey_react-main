@@ -82,8 +82,9 @@ export function toCsv(rows) {
 
 // Offers text as a file download
 export function downloadFile(filename, text, type = 'text/csv') {
-    // the BOM makes Excel read umlauts correctly
-    const blob = new Blob(['﻿', text], { type: `${type};charset=utf-8` });
+    // the BOM makes Excel read umlauts correctly; other formats (e.g. .ics) must not start with one
+    const parts = type === 'text/csv' ? ['﻿', text] : [text];
+    const blob = new Blob(parts, { type: `${type};charset=utf-8` });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -139,17 +140,35 @@ export function formatDuration(ms) {
     return h > 0 ? `${h} h ${m} min` : `${m} min`;
 }
 
+// A day from the api or a form as a local Date (null when empty or invalid).
 // The api sends date columns as local midnight in UTC (e.g. 2026-10-19T22:00:00.000Z
-// for Oct 20), so read them with local getters to get the day that was saved.
+// for Oct 20), so they are read with local getters to get the day that was saved.
+// A plain "2026-10-20" would be read as UTC midnight by new Date(), which is the day
+// before west of Greenwich, so it is built from its parts instead.
+export function parseDate(value) {
+    if (!value) return null;
+    if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : new Date(value);
+    const plain = typeof value === 'string' && value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const date = plain ? new Date(Number(plain[1]), Number(plain[2]) - 1, Number(plain[3])) : new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export function formatDate(value) {
-    if (!value) return '';
-    const date = new Date(value);
+    const date = parseDate(value);
+    if (!date) return '';
     return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
 }
 
-// Same date as YYYY-MM-DD, the format <input type="date"> expects
+// Same date as YYYY-MM-DD, the format <input type="date"> expects. Also what the api is
+// sent: the time of day in an ISO timestamp would be dropped and could shift the day.
 export function toInputDate(value) {
-    if (!value) return '';
-    const date = new Date(value);
+    const date = parseDate(value);
+    if (!date) return '';
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+// Open task whose day is before today
+export function isOverdue(task, today = new Date()) {
+    const due = parseDate(task?.due);
+    return Boolean(due && !task.done && toDateOnly(due) < toDateOnly(today));
 }

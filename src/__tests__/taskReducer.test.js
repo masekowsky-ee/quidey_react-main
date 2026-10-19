@@ -23,7 +23,7 @@ const loaded = taskReducer(initial, {
 
 describe('taskReducer', () => {
     it('starts empty, showing no group', () => {
-        expect(initial).toEqual({ tasks: [], groups: [], notes: [], groupToDisplay: { group: {}, tasks: [] } })
+        expect(initial).toEqual({ tasks: [], groups: [], notes: [], groupToDisplay: { group: {}, tasks: [] }, invites: [] })
     })
 
     it('ignores unknown actions', () => {

@@ -7,8 +7,8 @@ try {
   var light = theme === 'light' ||
     (theme === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches);
   document.documentElement.dataset.theme = light ? 'light' : 'dark';
-  // accent color palette; unknown values simply fall back to the default green in CSS
-  document.documentElement.dataset.accent = localStorage.getItem('accent') || 'green';
+  // accent color palette; unknown values simply fall back to the CSS default, Abendrot (sunset)
+  document.documentElement.dataset.accent = localStorage.getItem('accent') || 'sunset';
 } catch {
-  // storage blocked (private mode): the CSS default, dark green, stays
+  // storage blocked (private mode): the CSS default, dark Abendrot, stays
 }

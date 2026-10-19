@@ -1,17 +1,83 @@
-import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, REFRESH_TASKS, TASK_REPLACED, SET_TASK_INVITES, TASK_INVITE_ACCEPTED, TASK_INVITE_REMOVED, TASK_SHARE_REMOVED } from './taskActionTypes';
 
 // task.group_ids: the groups a task is in (for its labels)
 const withGroupIds = (task, change) => ({ ...task, group_ids: change(task.group_ids ?? []) });
+
+// The fields of an updated task the api sent back. null counts (a cleared description
+// or date), a field that wasn't sent keeps its old value.
+const UPDATABLE = [
+    'name', 'due', 'description', 'prio', 'done',
+    'due_time', 'duration_minutes', 'reminder_minutes', 'location', 'link', 'details',
+    'group_ids', 'isOwner', 'owner', 'shareId', 'sharedWith',
+];
+const applyUpdate = (task, row) => {
+    const changes = {};
+    for (const key of UPDATABLE) if (row[key] !== undefined) changes[key] = row[key];
+    return { ...task, ...changes };
+};
+
+// Changes one task (by id) in the list and in the shown group
+const mapTask = (state, id, change) => ({
+    ...state,
+    tasks: state.tasks.map(task => task.id === id ? change(task) : task),
+    groupToDisplay: {
+        ...state.groupToDisplay,
+        tasks: state.groupToDisplay.tasks.map(task => task.id === id ? change(task) : task),
+    },
+});
+
+const showingAllTasks = (state) => !state.groupToDisplay.group?.id || state.groupToDisplay.group.name === 'all';
 
 const initialState = {
     tasks: [],
     groups: [],
     notes: [],
     groupToDisplay: {group: {}, tasks: []},
+    // tasks friends sent me, not answered yet: [{ id, createdAt, from, task }]
+    invites: [],
 };
 
 const taskReducer = (state = initialState, action) => {
     switch (action.type) {
+        case REFRESH_TASKS: {
+            const fresh = new Map(action.payload.map(task => [task.id, task]));
+            return {
+                ...state,
+                tasks: action.payload,
+                groupToDisplay: {
+                    ...state.groupToDisplay,
+                    // a group keeps showing its tasks, with their new values; gone ones drop out
+                    tasks: showingAllTasks(state)
+                        ? action.payload
+                        : state.groupToDisplay.tasks.filter(task => fresh.has(task.id)).map(task => fresh.get(task.id)),
+                },
+            };
+        }
+        case TASK_REPLACED:
+            return mapTask(state, action.payload.id, task => applyUpdate(task, action.payload));
+        case SET_TASK_INVITES:
+            return { ...state, invites: action.payload };
+        case TASK_INVITE_REMOVED:
+            return { ...state, invites: state.invites.filter(invite => invite.id !== action.payload) };
+        case TASK_INVITE_ACCEPTED: {
+            const { inviteId, task } = action.payload;
+            const known = state.tasks.some(t => t.id === task.id);
+            return {
+                ...state,
+                invites: state.invites.filter(invite => invite.id !== inviteId),
+                tasks: known ? state.tasks : [...state.tasks, task],
+                groupToDisplay: !known && showingAllTasks(state)
+                    ? { ...state.groupToDisplay, tasks: [...state.groupToDisplay.tasks, task] }
+                    : state.groupToDisplay,
+            };
+        }
+        case TASK_SHARE_REMOVED: {
+            const { taskId, shareId } = action.payload;
+            return mapTask(state, taskId, task => ({
+                ...task,
+                sharedWith: (task.sharedWith ?? []).filter(share => share.shareId !== shareId),
+            }));
+        }
         case SET_TASK_STATE: 
             return {
                 ...state,
@@ -35,26 +101,12 @@ const taskReducer = (state = initialState, action) => {
         case UPDATE_TASK_PROPS:
             return {
                 ...state,
-                tasks: state.tasks.map(
-                    task => task.id === action.payload.id ? 
-                    {...task,
-                        name: action.payload.name ?? task.name,
-                        due: action.payload.due ?? task.due,
-                        description: action.payload.description ?? task.description, 
-                        prio: action.payload.prio ?? task.prio, 
-                        done: action.payload.done ?? task.done
-                    } : task),
+                tasks: state.tasks.map(task => task.id === action.payload.id ? applyUpdate(task, action.payload) : task),
                 groupToDisplay: {
-                    ...state.groupToDisplay, 
+                    ...state.groupToDisplay,
                     tasks: state.groupToDisplay.tasks.map(task =>
-                        task.id === action.payload.id ? {...task,
-                            name: action.payload.name ?? task.name,
-                            due: action.payload.due ?? task.due,
-                            description: action.payload.description ?? task.description, 
-                            prio: action.payload.prio ?? task.prio, 
-                            done: action.payload.done ?? task.done
-                        } : task
-                )}
+                        task.id === action.payload.id ? applyUpdate(task, action.payload) : task),
+                }
             }
         case ADD_GROUP:
             return {

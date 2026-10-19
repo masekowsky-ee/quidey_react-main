@@ -9,6 +9,7 @@ import GroupBtnContainer from './GroupBtnContainer.jsx';
 import WorkingContainer from './WorkingContainer.jsx';
 import TimerContainer from './TimerContainer.jsx';
 import SoloTogetherStrip from './together/SoloTogetherStrip.jsx';
+import TaskInvites from './task/TaskInvites.jsx';
 import { updateCurrentSessionData, addWorkedTask } from '../features/session/sessionAction.js'
 import { fetchMySharedTasks, selectSharedSoloTasks } from '../features/together/togetherAction.js'
 import { useSoloSharedWork } from '../features/together/useSoloSharedWork.js'
@@ -130,6 +131,7 @@ export default function Home(props){
     return (
         <div className={styles.div}>
             <SoloTogetherStrip />
+            <div className={styles.invites}><TaskInvites /></div>
             <WeekDaysContainer t={t} tasks={tasks} />
             {(createTask || createGroup) && <div className={styles.formsDiv}>
                 {createTask && <TaskForm setCreateTask={setCreateTask}/>}

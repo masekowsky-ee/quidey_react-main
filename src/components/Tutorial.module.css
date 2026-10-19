@@ -1,0 +1,213 @@
+/* Intro tour: one card at a time over a dimmed, blurred page */
+
+.backdrop{
+    composes: overlay from './ui.module.css';
+    z-index: calc(var(--z-menu) + 10); /* above everything, even an open menu */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.25s ease-out;
+}
+
+.dialog{
+    position: relative;
+    width: min(28rem, 100%);
+    max-height: calc(100svh - 2rem);
+    overflow-y: auto;
+    padding: 1.25rem 1.5rem 1.5rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    color: var(--text);
+    background:
+        radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 70%),
+        var(--surface);
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+    animation: popIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.top{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 2rem;
+}
+
+.counter{
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.skip{
+    composes: ghostBtn from './ui.module.css';
+    height: 2rem;
+    padding: 0 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.body{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 13rem;
+}
+
+.fromRight{
+    animation: slideFromRight 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.fromLeft{
+    animation: slideFromLeft 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Glowing badge around the step's icon */
+.iconWrap{
+    width: 5rem;
+    height: 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    corner-shape: round;
+    color: var(--primary-fg);
+    background: radial-gradient(circle at 30% 25%,
+        color-mix(in srgb, var(--primary) 30%, var(--surface)),
+        color-mix(in srgb, var(--primary) 8%, var(--surface)) 70%);
+    border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--primary) 8%, transparent),
+        0 10px 30px -10px color-mix(in srgb, var(--primary) 70%, transparent);
+}
+
+.icon{
+    width: 2.6rem;
+    height: 2.6rem;
+}
+
+/* The welcome card shows the logo itself, a bit larger than the step icons */
+.logo{
+    width: 5.5rem;
+    height: 5.5rem;
+    filter: drop-shadow(0 6px 18px color-mix(in srgb, var(--primary) 40%, transparent));
+}
+
+.title{
+    margin: 0.5rem 0 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.text{
+    max-width: 24rem;
+    line-height: 1.55;
+    color: var(--text);
+}
+
+.dots{
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+/* Small pill per step; the current one is wider and accent-colored */
+.dot{
+    position: relative;
+    width: 0.5rem;
+    height: 0.5rem;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background-color: var(--surface-strong);
+    box-shadow: none;
+    transition: width var(--ease-out), background-color var(--ease-out);
+}
+
+/* a 24px tap area around the small dot (fingers, WCAG 2.2), without changing its look */
+.dot::after{
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 1.5rem);
+    height: 1.5rem;
+    transform: translate(-50%, -50%);
+}
+
+.dot:hover{
+    background-color: var(--text-muted);
+    border: none;
+    box-shadow: none;
+}
+
+.dotActive,
+.dotActive:hover{
+    width: 1.5rem;
+    background-color: var(--primary);
+}
+
+.actions{
+    display: flex;
+    gap: 0.75rem;
+}
+
+.back{
+    flex: 1;
+    height: 2.5rem;
+}
+
+.back:disabled{
+    opacity: 0.4;
+    cursor: default;
+}
+
+.next{
+    composes: btnPrimary from './ui.module.css';
+    flex: 2;
+    height: 2.5rem;
+}
+
+@keyframes fadeIn{
+    from { opacity: 0; }
+}
+
+@keyframes popIn{
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.97);
+    }
+}
+
+@keyframes slideFromRight{
+    from {
+        opacity: 0;
+        transform: translateX(24px);
+    }
+}
+
+@keyframes slideFromLeft{
+    from {
+        opacity: 0;
+        transform: translateX(-24px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .backdrop,
+    .dialog,
+    .fromRight,
+    .fromLeft{
+        animation: none;
+    }
+}

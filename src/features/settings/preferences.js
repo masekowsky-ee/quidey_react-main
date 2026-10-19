@@ -21,7 +21,9 @@ export const storeLanguage = (language) => store('language', language);
 
 // Accent color palettes; the values live in index.css under [data-accent]
 export const ACCENTS = ['green', 'ocean', 'violet', 'sunset', 'rose', 'gold'];
-export const readStoredAccent = () => readStored('accent', ACCENTS, 'green');
+// "Abendrot" (sunset) unless another one was chosen
+export const DEFAULT_ACCENT = 'sunset';
+export const readStoredAccent = () => readStored('accent', ACCENTS, DEFAULT_ACCENT);
 export const storeAccent = (accent) => store('accent', accent);
 
 // Length of a new session in minutes
@@ -29,3 +31,8 @@ export const SESSION_LENGTHS = [15, 25, 30, 45, 60];
 export const readStoredSessionMinutes = () =>
     Number(readStored('sessionMinutes', SESSION_LENGTHS.map(String), '30'));
 export const storeSessionMinutes = (minutes) => store('sessionMinutes', String(minutes));
+
+// Whether this account has seen the intro tour on this device (shown once to new users)
+const tutorialKey = (username) => `tutorialSeen:${username}`;
+export const hasSeenTutorial = (username) => readStored(tutorialKey(username), ['1'], null) === '1';
+export const storeTutorialSeen = (username) => store(tutorialKey(username), '1');

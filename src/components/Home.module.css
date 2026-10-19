@@ -19,3 +19,13 @@
 .tcc{
     position: relative;
 }
+
+/* tasks friends sent me, above the week */
+.invites{
+    width: min(1200px, calc(100% - 2rem));
+    margin: 1rem auto 0;
+}
+
+.invites:empty{
+    display: none;
+}

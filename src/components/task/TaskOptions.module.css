@@ -1,0 +1,354 @@
+/* Task details (duration, reminder, location, link, extra info), sharing, invites and the
+   small meta line under a task. Used by the task form, the calendar and the task list. */
+
+.options{
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    text-align: left;
+}
+
+.row{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.field{
+    flex: 1;
+    min-width: 9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.field > span{
+    text-transform: uppercase;
+}
+
+.field input,
+.field select,
+.field textarea{
+    width: 100%;
+    font-weight: 400;
+    letter-spacing: normal;
+}
+
+.field select{
+    height: 2.15rem;
+}
+
+.field select:disabled{
+    opacity: 0.55;
+}
+
+.field textarea{
+    min-height: 4rem;
+    padding: 0.4rem 0.5rem;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 0.9rem;
+    color: var(--text);
+    background-color: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    resize: vertical;
+}
+
+.field textarea:hover{
+    border-color: var(--border-strong);
+}
+
+.field textarea:focus-visible{
+    outline: 2px solid var(--border-strong);
+    outline-offset: 2px;
+}
+
+.field input[aria-invalid="true"]{
+    border-color: var(--danger);
+}
+
+.hint,
+.error{
+    margin: -0.35rem 0 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.error{
+    color: var(--danger);
+}
+
+.hint a{
+    color: var(--primary-fg);
+}
+
+/* ---------- Sharing ---------- */
+
+.sharing{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: left;
+}
+
+.sectionLabel{
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.sharedHint{
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.shareList{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.shareList li{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0.35rem 0.15rem 0.2rem;
+    font-size: 0.82rem;
+    color: var(--text-h);
+    background-color: var(--surface-inset);
+    border: 1px solid var(--btn-border);
+    border-radius: 999px;
+}
+
+.shareList .sharePending{
+    color: var(--text-muted);
+    border-style: dashed;
+}
+
+.avatar{
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--primary-text);
+    background-color: var(--primary);
+    border-radius: 50%;
+    corner-shape: round;
+}
+
+.sharePending .avatar{
+    color: var(--text);
+    background-color: var(--surface-strong);
+}
+
+.shareStatus{
+    font-size: 0.7rem;
+    font-style: italic;
+}
+
+.shareRemove{
+    width: 1.3rem;
+    height: 1.3rem;
+    padding: 0;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-radius: 50%;
+    box-shadow: none;
+}
+
+.shareRemove:hover{
+    color: var(--danger);
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.inviteRow{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.inviteRow > ul{
+    margin: 0;
+}
+
+.inviteBtn{
+    font-size: 0.85rem;
+}
+
+.inviteBtn:disabled{
+    opacity: 0.5;
+    cursor: default;
+    filter: none;
+    transform: none;
+}
+
+/* ---------- Meta line: time, location, link ---------- */
+
+.meta{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.15rem 0.7rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.metaTime{
+    font-weight: 600;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.metaLocation::before{
+    content: '⌖ ';
+}
+
+.metaLink{
+    color: var(--primary-fg);
+    text-decoration: none;
+}
+
+.metaLink:hover{
+    text-decoration: underline;
+}
+
+/* ---------- Invites: tasks friends sent me ---------- */
+
+.invites{
+    composes: card from '../ui.module.css';
+    padding: 0.85rem 1.1rem;
+    text-align: left;
+    border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
+.invitesTitle{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary-fg);
+}
+
+.invitesCount{
+    min-width: 1.3rem;
+    padding: 0 0.35rem;
+    box-sizing: border-box;
+    font-size: 0.7rem;
+    line-height: 1.3rem;
+    text-align: center;
+    letter-spacing: 0;
+    color: var(--primary-text);
+    background-color: var(--primary);
+    border-radius: 999px;
+}
+
+.inviteList{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.invite{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.invite > .avatar{
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.75rem;
+}
+
+.inviteText{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+}
+
+.inviteFrom{
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.inviteName{
+    font-weight: 600;
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+}
+
+.inviteWhen{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.inviteActions{
+    display: flex;
+    flex-direction: row;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+
+.acceptBtn{
+    composes: btnPrimary from '../ui.module.css';
+}
+
+.inviteActions > .acceptBtn{
+    min-width: 0;
+    height: 2rem;
+    padding: 0 0.9rem;
+}
+
+.declineBtn{
+    composes: ghostBtn from '../ui.module.css';
+    height: 2rem;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+    .invite{
+        flex-wrap: wrap;
+    }
+
+    .inviteActions{
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

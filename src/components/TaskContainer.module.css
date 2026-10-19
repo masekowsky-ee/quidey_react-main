@@ -158,6 +158,12 @@
     white-space: nowrap;
 }
 
+/* the time after a task's date */
+.dueTime{
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
 .deleteBtn{
     composes: deleteBtn from './ui.module.css';
 }

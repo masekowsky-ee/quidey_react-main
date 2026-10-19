@@ -2,7 +2,7 @@
 .toaster{
     position: fixed;
     left: 50%;
-    bottom: 5.5rem;
+    bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
     transform: translateX(-50%);
     z-index: var(--z-alert);
     display: flex;

@@ -1231,6 +1231,7 @@ a.primaryBtn{
     /* short enough that the chat input is visible before scrolling, below the session tabs
        (about 4.5rem above the grid); when scrolled, that leaves a small gap at the bottom */
     height: calc(100vh - var(--header-h) - 5.5rem);
+    height: calc(100dvh - var(--header-h) - 5.5rem); /* without the mobile browser's bars */
     min-height: 26rem;
 }
 

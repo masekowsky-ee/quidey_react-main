@@ -1,7 +1,7 @@
 /* Floating timer pill, docked to the bottom edge of the screen */
 .div{
     position: fixed;
-    bottom: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); /* above an iPhone's home indicator */
     left: 50%;
     transform: translateX(-50%);
     z-index: var(--z-header);

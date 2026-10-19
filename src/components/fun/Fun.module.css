@@ -1,0 +1,610 @@
+/* The hidden playground: hero with today's line, a game picker and the game itself */
+
+.page{
+    composes: page from '../ui.module.css';
+    /* Result colors, the same whatever accent is chosen: green = right spot,
+       yellow = in the word elsewhere, grey = not in the word */
+    --res-correct: #2ea44f;
+    --res-correct-text: #ffffff;
+    --res-present: #d9a520;
+    --res-present-text: #1f1600;
+    --res-absent: #4a4e55;
+    --res-absent-text: #e5e7eb;
+    width: min(760px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding-bottom: 3rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+:global(:root[data-theme="light"]) .page{
+    --res-correct: #1f9d47;
+    --res-present: #e3ac1c;
+    --res-absent: #8b9099;
+    --res-absent-text: #ffffff;
+}
+
+/* ---------- hero ---------- */
+
+.hero{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    padding-top: 1.75rem;
+}
+
+.secret{
+    padding: 0.2rem 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--primary-fg);
+    border: 1px dashed color-mix(in srgb, var(--primary) 60%, transparent);
+    border-radius: 999px;
+}
+
+.title{
+    margin: 0;
+    font-size: clamp(2rem, 6vw, 2.75rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    background: linear-gradient(100deg, var(--text-h) 20%, var(--primary) 50%, var(--text-h) 80%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: titleShimmer 6s ease-in-out infinite alternate;
+}
+
+@keyframes titleShimmer{
+    from { background-position: 100% 0; }
+    to { background-position: 0% 0; }
+}
+
+.intro{
+    max-width: 32rem;
+    color: var(--text-muted);
+}
+
+/* Today's line as a quote card */
+.lineCard{
+    composes: card from '../ui.module.css';
+    position: relative;
+    width: 100%;
+    margin: 0.75rem 0 0;
+    box-sizing: border-box;
+    text-align: left;
+    overflow: hidden;
+}
+
+.lineCard::before{
+    content: '\201C';
+    position: absolute;
+    top: -1.5rem;
+    right: 1rem;
+    font-size: 7rem;
+    font-weight: 800;
+    line-height: 1;
+    color: color-mix(in srgb, var(--primary) 18%, transparent);
+    pointer-events: none;
+}
+
+.lineLabel{
+    margin-bottom: 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary-fg);
+}
+
+.lineText{
+    position: relative;
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: var(--text-h);
+}
+
+/* ---------- game picker ---------- */
+
+.picker{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.pick{
+    composes: panel from '../ui.module.css';
+    min-width: 0;
+    padding: 0.9rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    text-align: center;
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.pickActive,
+.pickActive:hover{
+    border-color: var(--primary);
+    background:
+        radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 70%),
+        var(--surface);
+    box-shadow: 0 0 0 1px var(--primary), 0 10px 26px -12px color-mix(in srgb, var(--primary) 70%, transparent);
+}
+
+.pickGlyph{
+    font-family: var(--mono);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary-fg);
+}
+
+.pickTitle{
+    font-weight: 700;
+    color: var(--text-h);
+}
+
+.pickDesc{
+    font-size: 0.8rem;
+    line-height: 1.35;
+    color: var(--text-muted);
+}
+
+/* ---------- shared game parts ---------- */
+
+.stage{
+    composes: card from '../ui.module.css';
+    padding: 1.5rem 1rem;
+}
+
+.game{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stats{
+    display: flex;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.stat{
+    min-width: 4.5rem;
+    padding: 0.35rem 0.75rem;
+    background-color: var(--surface-inset);
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-inset);
+}
+
+.stat dt{
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.stat dd{
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-h);
+}
+
+.help{
+    max-width: 30rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.status{
+    min-height: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.statusWin{
+    color: var(--primary-fg);
+}
+
+.rule{
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.primary{
+    composes: btnPrimary from '../ui.module.css';
+    height: 2.5rem;
+}
+
+.quiet{
+    composes: ghostBtn from '../ui.module.css';
+    color: var(--text-muted);
+}
+
+.shake{
+    animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake{
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+/* Result colors, used by tiles, keys, slots and the sequence gap.
+   Doubled class so they beat the tile/key/slot borders and the button gradient. */
+.correct.correct,
+.correct.correct:hover{
+    color: var(--res-correct-text);
+    background: var(--res-correct);
+    border-color: var(--res-correct);
+}
+
+.present.present,
+.present.present:hover{
+    color: var(--res-present-text);
+    background: var(--res-present);
+    border-color: var(--res-present);
+}
+
+.absent.absent,
+.absent.absent:hover{
+    color: var(--res-absent-text);
+    background: var(--res-absent);
+    border-color: var(--res-absent);
+}
+
+/* ---------- difficulty ---------- */
+
+.levelBar{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.levelLabel{
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.segmented{
+    composes: segmented from '../ui.module.css';
+}
+
+.segmentActive{
+    composes: segmentActive from '../ui.module.css';
+}
+
+.levelHint{
+    margin: 0.5rem 0 1.25rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* typed answer (hard number sequences) */
+.answerForm{
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.answerInput{
+    width: 9rem;
+    height: 2.5rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* ---------- word guess ---------- */
+
+.board{
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.boardRow{
+    display: flex;
+    gap: 0.35rem;
+}
+
+.tile{
+    width: 3.25rem;
+    height: 3.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-h);
+    border: 2px solid var(--surface-strong);
+    border-radius: var(--radius-sm);
+}
+
+.tileFilled{
+    border-color: var(--border);
+    animation: pop 0.12s ease-out;
+}
+
+.tile.correct,
+.tile.present,
+.tile.absent{
+    animation: flip 0.45s ease-out backwards;
+}
+
+@keyframes pop{
+    50% { transform: scale(1.08); }
+}
+
+@keyframes flip{
+    0% {
+        transform: rotateX(90deg);
+        color: transparent;
+        background: transparent;
+        border-color: var(--border);
+    }
+    100% {
+        transform: rotateX(0);
+    }
+}
+
+.keyboard{
+    width: 100%;
+    max-width: 34rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.keyRow{
+    display: flex;
+    justify-content: center;
+    gap: 0.3rem;
+}
+
+.key{
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 2.6rem;
+    height: 3rem;
+    padding: 0;
+    font-weight: 700;
+}
+
+.keyWide{
+    max-width: 4.2rem;
+    flex-grow: 1.6;
+    font-size: 0.75rem;
+}
+
+/* ---------- letter salad ---------- */
+
+.answerRow,
+.letterPool{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.slot{
+    width: 2.6rem;
+    height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-h);
+    border-bottom: 3px solid var(--surface-strong);
+    transition: border-color var(--ease);
+}
+
+.slotFilled{
+    border-bottom-color: var(--primary);
+}
+
+.slotHint{
+    color: var(--primary-fg);
+}
+
+.slot.correct{
+    border-radius: var(--radius-sm);
+    animation: pop 0.3s ease-out backwards;
+}
+
+.letter{
+    width: 2.9rem;
+    height: 2.9rem;
+    padding: 0;
+    font-size: 1.35rem;
+    font-weight: 800;
+    border-radius: var(--radius);
+}
+
+.letter:disabled{
+    opacity: 0.2;
+    cursor: default;
+    transform: scale(0.9);
+}
+
+.toolRow{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.toolRow > button{
+    height: 2.25rem;
+    padding: 0 0.9rem;
+    font-size: 0.85rem;
+}
+
+.toolRow > button:disabled{
+    opacity: 0.45;
+    cursor: default;
+}
+
+/* ---------- number sequence ---------- */
+
+.sequence{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.seqNum{
+    min-width: 3.25rem;
+    height: 3.25rem;
+    padding: 0 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    font-size: 1.3rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-h);
+    background-color: var(--surface-inset);
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-inset);
+}
+
+.seqGap{
+    border: 2px dashed var(--primary);
+    color: var(--primary-fg);
+    background: transparent;
+    box-shadow: none;
+}
+
+.seqGap.correct,
+.seqGap.present{
+    border-style: solid;
+    animation: pop 0.3s ease-out;
+}
+
+.choices{
+    width: min(22rem, 100%);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+}
+
+.choice{
+    height: 3rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.choice:disabled{
+    opacity: 0.4;
+    cursor: default;
+}
+
+.choiceRight,
+.choiceRight:hover{
+    color: var(--primary-text);
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.choiceWrong,
+.choiceWrong:hover{
+    color: #fff;
+    background: var(--danger);
+    border-color: var(--danger);
+}
+
+/* ---------- footer ---------- */
+
+.backLink{
+    align-self: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.backLink:hover{
+    color: var(--text-h);
+}
+
+@media (max-width: 640px){
+    .picker{
+        gap: 0.5rem;
+    }
+
+    .pick{
+        padding: 0.7rem 0.4rem;
+    }
+
+    .pickDesc{
+        display: none;
+    }
+
+    /* long German titles ("Buchstabensalat") must fit a third of a phone */
+    .pickTitle{
+        font-size: 0.85rem;
+        overflow-wrap: anywhere;
+    }
+
+    .tile{
+        width: 2.9rem;
+        height: 2.9rem;
+        font-size: 1.4rem;
+    }
+
+    .slot{
+        width: 2.1rem;
+    }
+
+    .letter{
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    .key{
+        height: 2.75rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .title,
+    .shake,
+    .tileFilled,
+    .tile.correct,
+    .tile.present,
+    .tile.absent,
+    .slot.correct,
+    .seqGap.correct,
+    .seqGap.present{
+        animation: none;
+    }
+}

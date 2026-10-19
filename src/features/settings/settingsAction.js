@@ -1,4 +1,4 @@
-import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES } from "./settingsActionTypes";
+import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL } from "./settingsActionTypes";
 import { HOME_LAYOUTS, storeHomeLayout } from "./homeLayout";
 import { LANGUAGES, storeLanguage, ACCENTS, storeAccent, SESSION_LENGTHS, storeSessionMinutes } from "./preferences";
 
@@ -60,3 +60,9 @@ export const setDefaultSessionMinutes = (minutes) => {
         payload: minutes
     };
 };
+
+// Opens (true) or closes (false) the intro tour
+export const setShowTutorial = (show) => ({
+    type: SET_SHOW_TUTORIAL,
+    payload: show
+});
