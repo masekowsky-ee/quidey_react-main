@@ -5,6 +5,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
 import { apiFetch } from '../features/helperFunction'
+import { useWorkReporter } from '../features/together/work'
 import SharedSession from '../components/SharedSession'
 import Together from '../components/Together'
 
@@ -25,24 +26,29 @@ const baseSession = () => ({
         { user: ben, status: 'joined', isOwner: false, joinedAt: '2026-10-18T10:01:00Z', workingOn: 11, totalMs: 120000 },
     ],
     tasks: [
-        { id: 10, name: 'Report', description: null, done: false, addedBy: ann, sourceTaskId: null, createdAt: '', totalMs: 60000, time: [{ userId: 1, ms: 60000 }] },
-        { id: 11, name: 'Slides', description: 'for friday', done: false, addedBy: ben, sourceTaskId: null, createdAt: '', totalMs: 120000, time: [{ userId: 2, ms: 120000 }] },
+        { id: 10, name: 'Report', description: null, done: false, addedBy: ann, assignee: null, sourceTaskId: null, createdAt: '', totalMs: 60000, time: [{ userId: 1, ms: 60000 }] },
+        { id: 11, name: 'Slides', description: 'for friday', done: false, addedBy: ben, assignee: ben, sourceTaskId: null, createdAt: '', totalMs: 120000, time: [{ userId: 2, ms: 120000 }] },
+    ],
+    events: [
+        { id: 1, type: 'created', user: ann, target: null, taskId: null, taskName: null, text: 'Study group', createdAt: '2026-10-18T10:00:00Z' },
+        { id: 2, type: 'started', user: ben, target: null, taskId: 11, taskName: 'Slides', text: null, createdAt: '2026-10-18T10:02:00Z' },
     ],
 })
 
 let current
-let activity
+let calls
 
+// Answers like the backend: copies (like JSON), so the store never shares objects with the mock
 function mockApi() {
     current = baseSession()
-    activity = []
+    calls = []
     apiFetch.mockImplementation(async (url, options = {}) => {
+        const body = options.body ? JSON.parse(options.body) : undefined
+        calls.push({ url, method: options.method ?? 'GET', body, keepalive: options.keepalive })
         if (url === '/api/friends') return [ann, ben]
-        // copies, like JSON from a real server: the store must never share objects with the mock
+        if (url === '/api/shared-sessions' && !options.method) return { sessions: [], invites: [] }
         if (url === '/api/shared-sessions/5' && !options.method) return structuredClone(current)
         if (url === '/api/shared-sessions/5/activity') {
-            const body = JSON.parse(options.body)
-            activity.push(body)
             if (body.time) {
                 const task = current.tasks.find(t => t.id === body.time.taskId)
                 task.totalMs += body.time.ms
@@ -53,9 +59,30 @@ function mockApi() {
             }
             return structuredClone(current)
         }
-        if (url === '/api/shared-sessions' && !options.method) return { sessions: [], invites: [] }
+        if (url === '/api/shared-sessions/5/messages') {
+            current.events.push({ id: 99, type: 'message', user: ann, target: null, taskId: null, taskName: null, text: body.text, createdAt: new Date().toISOString() })
+            return structuredClone(current)
+        }
+        if (url.startsWith('/api/shared-sessions/5/tasks/') && options.method === 'PATCH') {
+            const task = current.tasks.find(t => t.id === Number(url.split('/').pop()))
+            if ('assigneeId' in body) task.assignee = [ann, ben].find(u => u.id === body.assigneeId) ?? null
+            return structuredClone(current)
+        }
         throw new Error(`unexpected call ${options.method ?? 'GET'} ${url}`)
     })
+}
+
+const activity = () => calls.filter(c => c.url.endsWith('/activity'))
+
+// like App: the reporter that sends the stopwatch's reports runs outside the page
+function Harness() {
+    useWorkReporter()
+    return (
+        <Routes>
+            <Route path="/together/:id" element={<SharedSession />} />
+            <Route path="/together" element={<Together />} />
+        </Routes>
+    )
 }
 
 async function renderSession() {
@@ -63,19 +90,15 @@ async function renderSession() {
     await act(async () => {
         render(
             <Provider store={store}>
-                <MemoryRouter initialEntries={['/together/5']}>
-                    <Routes>
-                        <Route path="/together/:id" element={<SharedSession />} />
-                        <Route path="/together" element={<Together />} />
-                    </Routes>
-                </MemoryRouter>
+                <MemoryRouter initialEntries={['/together/5']}><Harness /></MemoryRouter>
             </Provider>
         )
     })
     return store
 }
 
-const taskRow = (name) => screen.getAllByText(name).map(el => el.closest('li')).find(li => li?.querySelector('input[type=checkbox]'))
+const card = (title) => screen.getByRole('heading', { name: title }).closest('section')
+const taskRow = (name) => within(card('Gemeinsame Aufgaben')).getAllByText(name).map(el => el.closest('li')).find(li => li?.querySelector('input[type=checkbox]'))
 
 describe('Shared session page', () => {
     beforeEach(() => {
@@ -85,49 +108,80 @@ describe('Shared session page', () => {
     })
     afterEach(() => { vi.useRealTimers() })
 
-    it('shows tasks, who is working on what, and who worked how long', async () => {
+    it('shows tasks, who is working on what, the feed, and who worked how long', async () => {
         await renderSession()
-        expect(screen.getByRole('heading', { name: 'Study group' })).toBeInTheDocument()
-        // ben works on Slides right now: shown in the members list
-        const members = screen.getByRole('heading', { name: 'Mitglieder' }).closest('section')
-        expect(within(within(members).getByText('Ben').closest('li')).getByText('Slides')).toBeInTheDocument()
-        // summary: ben 2 min on Slides, ann 1 min on Report
-        const summary = screen.getByText('Wer hat woran gearbeitet').closest('section')
+        expect(screen.getByRole('heading', { name: /Study group/ })).toBeInTheDocument()
+        // ben works on Slides right now
+        expect(within(card('Team')).getByText('an Slides')).toBeInTheDocument()
+        // assignment shown on the task
+        expect(within(taskRow('Slides')).getByRole('combobox')).toHaveValue('2')
+        // the feed says it in words
+        expect(within(card('Aktivität & Chat')).getByText('Ben arbeitet an „Slides“')).toBeInTheDocument()
+        // summary: ben 2 min, ann 1 min
+        const summary = card('Wer hat woran gearbeitet')
         expect(within(summary).getByText('2 min', { selector: '[class*=timeMain]' })).toBeInTheDocument()
-        expect(within(summary).getByText('Report')).toBeInTheDocument()
-        // 3 minutes together
-        expect(screen.getByText('3 min')).toBeInTheDocument()
+        expect(within(summary).getByText('67%')).toBeInTheDocument()
     })
 
     it('tracks my time on a task and books it on the server', async () => {
         await renderSession()
         await act(async () => { fireEvent.click(within(taskRow('Report')).getByText('Daran arbeiten')) })
-        expect(activity.at(-1)).toEqual({ currentTaskId: 10 })
+        expect(activity().at(-1).body).toEqual({ currentTaskId: 10 })
         expect(screen.getByText('Du arbeitest gerade daran')).toBeInTheDocument()
 
-        // after 10 s the time goes to the server
+        // after 10 s the time goes to the server; the clock doesn't count it twice
         await act(async () => { await vi.advanceTimersByTimeAsync(10000) })
-        expect(activity.at(-1)).toEqual({ currentTaskId: 10, time: { taskId: 10, ms: 10000 } })
-        expect(screen.getByText('00:01:10')).toBeInTheDocument()
+        expect(activity().at(-1).body).toEqual({ currentTaskId: 10, time: { taskId: 10, ms: 10000 } })
+        expect(within(card('Meine Arbeit')).getByText('00:01:10')).toBeInTheDocument()
 
         // switching books the rest on the old task, pause books on the new one
         await act(async () => { await vi.advanceTimersByTimeAsync(3000) })
         await act(async () => { fireEvent.click(within(taskRow('Slides')).getByText('Daran arbeiten')) })
-        expect(activity.at(-1)).toEqual({ currentTaskId: 11, time: { taskId: 10, ms: 3000 } })
+        expect(activity().at(-1).body).toEqual({ currentTaskId: 11, time: { taskId: 10, ms: 3000 } })
         await act(async () => { await vi.advanceTimersByTimeAsync(2000) })
         await act(async () => { fireEvent.click(within(taskRow('Slides')).getByText('Pause')) })
-        expect(activity.at(-1)).toEqual({ currentTaskId: null, time: { taskId: 11, ms: 2000 } })
+        expect(activity().at(-1).body).toEqual({ currentTaskId: null, time: { taskId: 11, ms: 2000 } })
         expect(current.tasks[1].time.find(t => t.userId === 1).ms).toBe(2000)
     })
 
-    it('books the last seconds when leaving the page', async () => {
-        await renderSession()
+    it('keeps working on other pages, and books the last seconds when the tab closes', async () => {
+        const store = await renderSession()
         await act(async () => { fireEvent.click(within(taskRow('Report')).getByText('Daran arbeiten')) })
-        await act(async () => { await vi.advanceTimersByTimeAsync(4000) })
         await act(async () => { fireEvent.click(screen.getByText(/← Zusammen/)) })
-        const last = apiFetch.mock.calls.filter(([url]) => url.endsWith('/activity')).at(-1)
-        expect(JSON.parse(last[1].body)).toEqual({ currentTaskId: null, time: { taskId: 10, ms: 4000 } })
-        expect(last[1].keepalive).toBe(true)
+        expect(activity().at(-1).body).toEqual({ currentTaskId: 10 })
+        expect(store.getState().together.work.taskId).toBe(10)
+
+        await act(async () => { await vi.advanceTimersByTimeAsync(4000) })
+        await act(async () => { window.dispatchEvent(new Event('pagehide')) })
+        expect(activity().at(-1)).toMatchObject({ body: { currentTaskId: null, time: { taskId: 10, ms: 4000 } }, keepalive: true })
+        expect(store.getState().together.work.taskId).toBeNull()
+    })
+
+    it('sends chat messages', async () => {
+        await renderSession()
+        const input = screen.getByPlaceholderText('Nachricht an das Team…')
+        fireEvent.change(input, { target: { value: 'Hallo zusammen' } })
+        await act(async () => { fireEvent.submit(input.closest('form')) })
+        expect(calls.at(-1)).toMatchObject({ url: '/api/shared-sessions/5/messages', method: 'POST', body: { text: 'Hallo zusammen' } })
+        expect(screen.getByText('Hallo zusammen')).toBeInTheDocument()
+        expect(input).toHaveValue('')
+    })
+
+    it('assigns a task', async () => {
+        await renderSession()
+        await act(async () => { fireEvent.change(within(taskRow('Report')).getByRole('combobox'), { target: { value: '2' } }) })
+        expect(calls.at(-1)).toMatchObject({ url: '/api/shared-sessions/5/tasks/10', method: 'PATCH', body: { assigneeId: 2 } })
+        // "assigned to me" filter: ben has both now, ann (me) none
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Mir zugewiesen/ })) })
+        expect(screen.getByText('Keine offenen Aufgaben in diesem Filter.')).toBeInTheDocument()
+    })
+
+    it('still works with a backend that sends no feed or assignments yet', async () => {
+        delete current.events
+        current.tasks.forEach(task => { delete task.assignee })
+        await renderSession()
+        expect(within(card('Aktivität & Chat')).getByText('Noch nichts passiert.')).toBeInTheDocument()
+        expect(within(taskRow('Slides')).getByRole('combobox')).toHaveValue('')
     })
 
     it('shows a message when the session is not available', async () => {

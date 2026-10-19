@@ -549,3 +549,726 @@ a.primaryBtn{
         font-size: 1.25rem;
     }
 }
+
+/* ================= collaboration workspace ================= */
+
+/* Wider column for the session room (two columns on desktop) */
+.pageWide{
+    composes: page from './ui.module.css';
+    width: min(1180px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding-bottom: 3rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: left;
+}
+
+.titleBlock{
+    min-width: 0;
+}
+
+/* The owner can click the title to rename */
+.renamable{
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    text-align: left;
+    background: none;
+    border: none;
+    box-shadow: none;
+    cursor: text;
+}
+
+.renamable:hover{
+    background: none;
+    transform: none;
+}
+
+.editHint{
+    font-size: 0.6em;
+    color: var(--text-muted);
+    opacity: 0;
+    transition: opacity var(--ease);
+}
+
+.renamable:hover .editHint,
+.renamable:focus-visible .editHint{
+    opacity: 1;
+}
+
+.titleInput{
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.25rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.roomGrid{
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.roomMain,
+.roomSide{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
+/* sticks while the task list scrolls by */
+.roomSide{
+    position: sticky;
+    top: calc(var(--header-h) + 1rem);
+}
+
+/* ---------- card heads with controls ---------- */
+
+.cardHead{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.cardHead > .cardTitle{
+    margin: 0;
+}
+
+.cardHeadActions{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.cardHeadActions .quietBtn{
+    font-size: 0.8rem;
+    padding: 0.2rem 0.6rem;
+}
+
+.filters{
+    composes: segmented from './ui.module.css';
+}
+
+.filter,
+.filterOn{
+    font-size: 0.78rem;
+    padding: 0.2rem 0.65rem !important;
+    gap: 0.3rem;
+}
+
+.filterOn{
+    composes: segmentActive from './ui.module.css';
+}
+
+.filterCount{
+    opacity: 0.65;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- my work ---------- */
+
+.workLarge .clock{
+    font-size: 2.4rem;
+}
+
+.workTask{
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+}
+
+.workButtons{
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.workButtons .acceptBtn,
+.workButtons .secondaryBtn{
+    font-size: 0.85rem;
+    padding: 0.3rem 0.8rem;
+}
+
+.suggestions{
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.suggestion{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+}
+
+.suggestion:hover .playIcon{
+    color: var(--primary-fg);
+}
+
+.playIcon{
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.suggestionName{
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.assignedChip,
+.ownerTag,
+.sharedTag{
+    flex-shrink: 0;
+    display: inline-block;
+    padding: 0.05rem 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--primary-fg);
+    background-color: color-mix(in srgb, var(--primary) 14%, transparent);
+    border-radius: 999px;
+}
+
+.ownerTag{
+    margin-left: 0.4rem;
+    color: var(--text-muted);
+    background-color: var(--surface-inset);
+}
+
+.sharedTag{
+    font-weight: 500;
+}
+
+/* ---------- task rows ---------- */
+
+.taskMeta{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.6rem;
+    margin-top: 0.2rem;
+}
+
+/* Assignment as a quiet pill; filled when somebody is assigned */
+.assigneeSelect,
+.assigneeSelectSet{
+    max-width: 11rem;
+    height: auto;
+    padding: 0.05rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background-color: transparent;
+    border: 1px dashed var(--btn-border);
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.assigneeSelectSet{
+    color: var(--primary-fg);
+    font-weight: 600;
+    background-color: color-mix(in srgb, var(--primary) 14%, transparent);
+    border-style: solid;
+    border-color: transparent;
+}
+
+.doneToggle{
+    margin-top: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.doneToggle:hover{
+    color: var(--text-h);
+    background: transparent;
+    border-color: transparent;
+}
+
+/* ---------- team ---------- */
+
+.avatarLive{
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary);
+}
+
+.liveText{
+    font-size: 0.8rem;
+    color: var(--primary-fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.timeSmall{
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.row > .quietBtn{
+    flex-shrink: 0;
+    padding: 0.2rem 0.5rem;
+}
+
+.addPersonBtn{
+    margin-top: 0.5rem;
+    width: 100%;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px dashed var(--btn-border);
+    box-shadow: none;
+}
+
+.addPersonBtn:hover{
+    color: var(--text-h);
+    border-color: var(--btn-border-hover);
+}
+
+/* ---------- activity & chat ---------- */
+
+.feedCard{
+    display: flex;
+    flex-direction: column;
+}
+
+.feed{
+    list-style: none;
+    margin: 0;
+    padding: 0 0.25rem 0 0;
+    max-height: 22rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    overscroll-behavior: contain;
+}
+
+.feedTall .feed{
+    max-height: min(32rem, calc(100vh - 26rem));
+    min-height: 12rem;
+}
+
+.feedEvent{
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.feedDot{
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background-color: var(--btn-border);
+    transform: translateY(-0.1rem);
+}
+
+.feedDot[data-type='task_done']{ background-color: var(--primary); }
+.feedDot[data-type='started']{ background-color: var(--primary-fg); }
+.feedDot[data-type='joined'],
+.feedDot[data-type='created']{ background-color: var(--text-h); }
+.feedDot[data-type='left'],
+.feedDot[data-type='removed'],
+.feedDot[data-type='ended']{ background-color: var(--danger); }
+
+.feedText{
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.feedTime{
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.message,
+.messageMine{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 0.4rem;
+}
+
+.messageMine{
+    justify-content: flex-end;
+}
+
+.bubble{
+    max-width: 85%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.4rem 0.7rem;
+    background-color: var(--surface-inset);
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius) var(--radius) var(--radius) var(--radius-sm);
+}
+
+.messageMine .bubble{
+    background-color: color-mix(in srgb, var(--primary) 16%, var(--surface));
+    border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+    border-radius: var(--radius) var(--radius) var(--radius-sm) var(--radius);
+}
+
+.bubbleName{
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-h);
+}
+
+.bubbleText{
+    font-size: 0.9rem;
+    color: var(--text-h);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.bubble .feedTime{
+    align-self: flex-end;
+}
+
+.chatForm{
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.chatForm input{
+    flex: 1;
+    min-width: 0;
+}
+
+.chatForm .primaryBtn{
+    min-width: 0;
+}
+
+/* ---------- summary ---------- */
+
+.share{
+    flex-shrink: 0;
+    min-width: 2.5rem;
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Four distinguishable colors for people within one task */
+.stackBar{
+    display: flex;
+    height: 0.5rem;
+    gap: 2px;
+    border-radius: 999px;
+    overflow: hidden;
+    background-color: var(--surface-inset);
+}
+
+.stackBar > div,
+.legendDot{
+    background-color: var(--primary);
+}
+
+.stackBar > [data-slot='1'],
+.legendDot[data-slot='1']{ background-color: color-mix(in srgb, var(--primary) 55%, var(--text-h)); }
+.stackBar > [data-slot='2'],
+.legendDot[data-slot='2']{ background-color: color-mix(in srgb, var(--primary) 35%, var(--surface-strong)); }
+.stackBar > [data-slot='3'],
+.legendDot[data-slot='3']{ background-color: var(--text-muted); }
+
+.legendDot{
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-right: 0.4rem;
+    border-radius: 50%;
+}
+
+/* ---------- list page ---------- */
+
+.inviteCard{
+    border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+
+/* the start form, when opened from "New session" */
+.highlight{
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent), var(--shadow-sm);
+}
+
+/* ---------- Solo | Team ---------- */
+
+.layoutSwitch{
+    composes: segmented from './ui.module.css';
+    flex-shrink: 0;
+}
+
+.layoutSwitch > button{
+    font-size: 0.82rem;
+    padding: 0.25rem 0.85rem;
+}
+
+.layoutOn{
+    composes: segmentActive from './ui.module.css';
+}
+
+/* top of the solo home page */
+.soloStrip{
+    width: min(1200px, calc(100% - 2rem));
+    margin: 1rem auto 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.soloHint{
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.85rem;
+    color: var(--primary-fg);
+    text-decoration: none;
+    background-color: color-mix(in srgb, var(--primary) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+    border-radius: 999px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---------- team home ---------- */
+
+.teamPage{
+    composes: page from './ui.module.css';
+    width: min(1440px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding-bottom: 3rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: left;
+}
+
+.teamBar{
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+}
+
+.sessionTabs{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: row;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding: 2px;
+    scrollbar-width: thin;
+}
+
+.sessionTab,
+.sessionTabOn{
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    max-width: 16rem;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.88rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: 999px;
+}
+
+.sessionTab{
+    color: var(--text-muted);
+    background: transparent;
+    box-shadow: none;
+}
+
+.sessionTabOn{
+    composes: btnLight from './ui.module.css';
+}
+
+.sessionTabOn .playIcon{
+    color: inherit;
+}
+
+.inviteBanner{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.inviteBanner > li{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    background-color: color-mix(in srgb, var(--primary) 10%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--primary) 40%, var(--border));
+    border-radius: var(--radius-lg);
+}
+
+.inviteBanner strong{
+    color: var(--text-h);
+}
+
+.onboarding{
+    width: min(640px, 100%);
+    margin: 1rem auto 0;
+    box-sizing: border-box;
+}
+
+.onboardingTitle{
+    composes: pageTitle from './ui.module.css';
+    margin-top: 0;
+}
+
+/* tasks | focus | team; the outer columns stick while the middle one scrolls */
+.teamGrid{
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.95fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.teamColTasks,
+.teamColFocus,
+.teamColTeam{
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.teamColTeam{
+    position: sticky;
+    top: calc(var(--header-h) + 1rem);
+}
+
+.teamSessionHead{
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.teamSessionTitle{
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quietLink{
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.quietLink:hover{
+    color: var(--text-h);
+}
+
+/* ---------- smaller screens ---------- */
+
+@media (max-width: 1100px) {
+    /* focus first, then tasks, then the team below both */
+    .teamGrid{
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .teamColFocus{
+        order: -1;
+    }
+
+    .teamColTeam{
+        grid-column: 1 / -1;
+        position: static;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: start;
+    }
+}
+
+@media (max-width: 860px) {
+    .roomGrid,
+    .teamGrid,
+    .teamColTeam{
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .roomSide{
+        position: static;
+    }
+
+    .teamBar{
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .teamBar > .layoutSwitch{
+        align-self: flex-start;
+    }
+
+    .workRow{
+        flex-wrap: wrap;
+    }
+
+    .workButtons{
+        flex-direction: row;
+    }
+}

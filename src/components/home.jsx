@@ -8,6 +8,7 @@ import WeekDaysContainer from './WeekDaysContainer.jsx';
 import GroupBtnContainer from './GroupBtnContainer.jsx';
 import WorkingContainer from './WorkingContainer.jsx';
 import TimerContainer from './TimerContainer.jsx';
+import SoloTogetherStrip from './together/SoloTogetherStrip.jsx';
 import { updateCurrentSessionData, addWorkedTask } from '../features/session/sessionAction.js'
 
 import {useSelector, useDispatch} from 'react-redux';
@@ -106,6 +107,7 @@ export default function Home(props){
 
     return (
         <div className={styles.div}>
+            <SoloTogetherStrip />
             <WeekDaysContainer t={t} tasks={tasks} />
             {(createTask || createGroup) && <div className={styles.formsDiv}>
                 {createTask && <TaskForm setCreateTask={setCreateTask}/>}

@@ -1,4 +1,8 @@
 import { SET_SESSION_PARAMS, SAVE_SESSION_DATA, UPDATE_CURRENT_SESSION_DATA, SET_TIMER, ADD_WORKED_TASK, ADD_TASK_TIME, SET_WORKED_SESSIONS } from "./sessionActionTypes";
+import { readStoredSessionMinutes } from "../settings/preferences";
+
+// The default session length from the settings (30 minutes unless changed)
+const DEFAULT_SESSION_MS = readStoredSessionMinutes() * 60 * 1000;
 
 const initialState = {
     workedSessionData: [],
@@ -8,9 +12,9 @@ const initialState = {
         group: 'all', 
         date: new Date().toISOString(),
     },
-    timer: {time: 30 * 60 * 1000, active: false}, // 30 minutes in milliseconds
+    timer: {time: DEFAULT_SESSION_MS, active: false}, // milliseconds
     sessionParams: {
-        time: 30 * 60 * 1000, // 30 minutes in milliseconds
+        time: DEFAULT_SESSION_MS, // milliseconds
     }
 }
 

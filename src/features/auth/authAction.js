@@ -70,6 +70,28 @@ export const setUser = () => {
     }
 }
 
+// Saves display name and email; the store gets the row the API returns.
+// Rejects with the API error (error.code: INVALID_DISPLAY_NAME, INVALID_EMAIL, EMAIL_TAKEN).
+export const updateProfile = (display_name, email) => {
+    return async (dispatch) => {
+        const user = await apiFetch('/api/users', {
+            method: 'PUT',
+            body: JSON.stringify({ display_name, email }),
+        });
+        dispatch({ type: SET_USER, payload: [user] });
+    };
+}
+
+// Rejects with the API error (error.code: WRONG_PASSWORD, WEAK_PASSWORD)
+export const changePassword = (currentPassword, newPassword) => {
+    return async () => {
+        await apiFetch('/api/users/password', {
+            method: 'PUT',
+            body: JSON.stringify({ currentPassword, newPassword }),
+        });
+    };
+}
+
 export const register = (username, display_name, email, birth_date, password) => {
     return async (dispatch) => {
         await apiFetch("/api/register", {

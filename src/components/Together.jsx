@@ -1,36 +1,15 @@
 import styles from './Together.module.css';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
-import { formatDate, formatDuration, getInitials, displayName } from '../features/helperFunction';
-import { setCustomError } from '../features/settings/settingsAction';
-import { fetchFriends } from '../features/friends/friendsAction';
+import { formatDate, formatDuration, displayName } from '../features/helperFunction';
 import {
-    fetchSharedSessions, createSharedSession, joinSharedSession, removeSharedMember, togetherErrorText,
+    fetchSharedSessions, joinSharedSession, removeSharedMember,
 } from '../features/together/togetherAction';
-
-// Friends as toggle chips, for choosing who to invite
-export function FriendPicker({ friends, selected, onChange }) {
-    const toggle = (id) => onChange(selected.includes(id) ? selected.filter(x => x !== id) : [...selected, id]);
-    return (
-        <ul className={styles.chips}>
-            {friends.map(friend => (
-                <li key={friend.id}>
-                    <button
-                        type="button"
-                        className={selected.includes(friend.id) ? styles.chipOn : styles.chip}
-                        aria-pressed={selected.includes(friend.id)}
-                        onClick={() => toggle(friend.id)}
-                    >
-                        <span className={styles.chipAvatar} aria-hidden="true">{getInitials(displayName(friend))}</span>
-                        {displayName(friend)}
-                    </button>
-                </li>
-            ))}
-        </ul>
-    );
-}
+import { useTogetherRun } from '../features/together/hooks';
+import Avatar from './together/Avatar';
+import QuickStart from './together/QuickStart';
 
 function SessionRow({ session, t }) {
     return (
@@ -60,59 +39,34 @@ export default function Together() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const run = useTogetherRun();
     const { sessions, invites } = useSelector(state => state.together);
-    const friends = useSelector(state => state.friends.friends);
+    const [searchParams] = useSearchParams();
 
     useEffect(() => {
         dispatch(fetchSharedSessions()).catch(() => {});
-        dispatch(fetchFriends()).catch(() => {});
     }, [dispatch]);
 
-    const showError = (err) => dispatch(setCustomError({ bool: true, message: togetherErrorText(t, err) }));
+    // "New session" from the header jumps straight to the form
+    const wantsNew = searchParams.get('new') === '1';
+    useEffect(() => {
+        if (wantsNew) document.getElementById('sharedSessionName')?.focus();
+    }, [wantsNew]);
 
-    // ---------- start ----------
-    const [name, setName] = useState('');
-    const [invitees, setInvitees] = useState([]);
-    const [creating, setCreating] = useState(false);
-
-    const handleCreate = async (e) => {
-        e.preventDefault();
-        if (!name.trim()) return;
-        setCreating(true);
-        try {
-            const session = await dispatch(createSharedSession(name.trim(), invitees));
-            navigate(`/together/${session.id}`);
-        } catch (err) {
-            showError(err);
-            setCreating(false);
-        }
-    };
-
-    // ---------- invites ----------
     const [busyId, setBusyId] = useState(null);
 
     const handleJoin = async (id) => {
         setBusyId(id);
-        try {
-            await dispatch(joinSharedSession(id));
-            navigate(`/together/${id}`);
-        } catch (err) {
-            showError(err);
-            dispatch(fetchSharedSessions()).catch(() => {});
-            setBusyId(null);
-        }
+        if (await run(joinSharedSession(id), 'toast_joined')) navigate(`/together/${id}`);
+        else dispatch(fetchSharedSessions()).catch(() => {});
+        setBusyId(null);
     };
 
     const handleDecline = async (invite) => {
         setBusyId(invite.id);
-        try {
-            // my id isn't known here; declining is "remove me", which the server reads from the token
-            await dispatch(removeSharedMember(invite.id, 'me', 'me'));
-        } catch (err) {
-            showError(err);
-        } finally {
-            setBusyId(null);
-        }
+        // "me": the server takes my id from the login
+        await run(removeSharedMember(invite.id, 'me', 'me'));
+        setBusyId(null);
     };
 
     const open = sessions.filter(s => !s.endedAt);
@@ -124,16 +78,17 @@ export default function Together() {
             <p className={styles.intro}>{t('togetherIntro')}</p>
 
             {invites.length > 0 && (
-                <section className={styles.card}>
+                <section className={`${styles.card} ${styles.inviteCard}`}>
                     <h2 className={styles.cardTitle}>{t('sessionInvites')}</h2>
                     <ul className={styles.list}>
                         {invites.map(invite => (
                             <li key={invite.id} className={styles.row}>
-                                <div className={styles.avatar} aria-hidden="true">{getInitials(displayName(invite.invitedBy ?? invite.owner))}</div>
+                                <Avatar user={invite.invitedBy ?? invite.owner} />
                                 <div className={styles.who}>
                                     <span className={styles.name}>{invite.name}</span>
                                     <span className={styles.meta}>
                                         {t('invitedBy')} {displayName(invite.invitedBy ?? invite.owner)} · {invite.memberCount} {t(invite.memberCount === 1 ? 'member' : 'members')}
+                                        {invite.workingCount > 0 && ` · ${invite.workingCount} ${t('workingNow')}`}
                                     </span>
                                 </div>
                                 <div className={styles.actions}>
@@ -151,34 +106,15 @@ export default function Together() {
             )}
 
             <section className={styles.card}>
-                <h2 className={styles.cardTitle}>{t('startSharedSession')}</h2>
-                <form className={styles.form} onSubmit={handleCreate}>
-                    <label htmlFor="sharedSessionName" className={styles.label}>{t('sessionName')}</label>
-                    <input
-                        id="sharedSessionName"
-                        value={name}
-                        maxLength={100}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder={t('sessionNamePlaceholder')}
-                        autoComplete="off"
-                    />
-                    <span className={styles.label}>{t('inviteFriends')}</span>
-                    {friends.length > 0
-                        ? <FriendPicker friends={friends} selected={invitees} onChange={setInvitees} />
-                        : <p className={styles.hint}>{t('noFriendsToInvite')} <Link to="/social?tab=add">{t('addFriend')}</Link></p>}
-                    <div className={styles.formActions}>
-                        <button type="submit" className={styles.primaryBtn} disabled={creating || !name.trim()}>
-                            {t('startSession')}
-                        </button>
-                    </div>
-                </form>
-            </section>
-
-            <section className={styles.card}>
                 <h2 className={styles.cardTitle}>{t('openSessions')}</h2>
                 {open.length === 0
                     ? <p className={styles.emptyLine}>{t('noOpenSessions')}</p>
                     : <ul className={styles.list}>{open.map(s => <SessionRow key={s.id} session={s} t={t} />)}</ul>}
+            </section>
+
+            <section className={`${styles.card} ${wantsNew ? styles.highlight : ''}`}>
+                <h2 className={styles.cardTitle}>{t('startSharedSession')}</h2>
+                <QuickStart onStarted={(session) => navigate(`/together/${session.id}`)} />
             </section>
 
             {past.length > 0 && (

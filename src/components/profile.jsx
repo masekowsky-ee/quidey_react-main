@@ -3,16 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess, logout, register } from "../features/auth/authAction";
 import { useState } from "react";
 import CustomError from './CustomError.jsx'
+import ProfileView from './ProfileView.jsx'
 import {useTranslation} from '../i18n/useTranslation'
-import { formatDate, getInitials } from '../features/helperFunction'
 
 export default function Profile(){
     const { t } = useTranslation();
 
     const token = useSelector((state) => state.auth.token);
     const signedIn = Boolean(token);
-
-    const user = useSelector(state => state.auth.user)
 
     const dispatch = useDispatch();
 
@@ -87,39 +85,11 @@ export default function Profile(){
 
     const [customError, setCustomError] = useState({ bool: false, message: '' });
 
-    const name = user?.display_name || user?.username;
-
     return (
         <div className={styles.page}>
             <CustomError customError={customError} setCustomError={setCustomError}></CustomError>
             {signedIn ?
-                <>
-                    <h1 className={styles.title}>{t('profile')}</h1>
-
-                    <section className={`${styles.card} ${styles.identity}`}>
-                        <div className={styles.avatar} aria-hidden="true">{getInitials(name)}</div>
-                        <div className={styles.identityText}>
-                            <h2 className={styles.name}>{name}</h2>
-                            {user?.username && <p className={styles.handle}>@{user.username}</p>}
-                        </div>
-                    </section>
-
-                    <section className={styles.card}>
-                        <h2 className={styles.cardTitle}>{t('account')}</h2>
-                        <dl className={styles.details}>
-                            <div className={styles.detailRow}>
-                                <dt>{t('email')}</dt>
-                                <dd>{user?.email || '–'}</dd>
-                            </div>
-                            <div className={styles.detailRow}>
-                                <dt>{t('birthDate')}</dt>
-                                <dd>{user?.birth_date ? formatDate(user.birth_date) : '–'}</dd>
-                            </div>
-                        </dl>
-                    </section>
-
-                    <button className={styles.signOutBtn} onClick={() => handleSignOut()}>{t('signOut')}</button>
-                </>
+                <ProfileView onSignOut={handleSignOut} />
                 :
                 <section className={`${styles.card} ${styles.authCard}`}>
                     <div className={styles.tabs} role="tablist">

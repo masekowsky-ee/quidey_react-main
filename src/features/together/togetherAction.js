@@ -7,11 +7,22 @@ const base = (id) => `/api/shared-sessions/${id}`;
 // only the newest one (see currentSeq), so slow polls can't undo a change.
 let requestSeq = 0;
 
+// Fills in lists an older backend doesn't send yet (e.g. events, assignee), so the pages
+// never crash on a missing field; they just show less.
+export function normalizeSession(session) {
+    return {
+        ...session,
+        people: session.people ?? [],
+        events: session.events ?? [],
+        tasks: (session.tasks ?? []).map(task => ({ ...task, assignee: task.assignee ?? null, time: task.time ?? [] })),
+    };
+}
+
 // Runs a request that answers with the whole session and stores it. Resolves to the session.
 // beforeStore runs between the answer and the store update.
 const sessionRequest = (url, options, beforeStore) => async (dispatch) => {
     const seq = ++requestSeq;
-    const session = await apiFetch(url, options);
+    const session = normalizeSession(await apiFetch(url, options));
     beforeStore?.();
     dispatch({ type: SET_SHARED_SESSION, payload: { session, seq } });
     return session;
@@ -48,8 +59,18 @@ export const inviteToSharedSession = (id, userIds) => sessionRequest(`${base(id)
 // task: { taskId } to share one of my tasks, or { name, description } for a new one
 export const addSharedTask = (id, task) => sessionRequest(`${base(id)}/tasks`, post(task));
 
-export const setSharedTaskDone = (id, taskId, done) =>
-    sessionRequest(`${base(id)}/tasks/${taskId}`, { method: 'PATCH', body: JSON.stringify({ done }) });
+// changes: { done?, assigneeId? (null = nobody) }
+export const updateSharedTask = (id, taskId, changes) =>
+    sessionRequest(`${base(id)}/tasks/${taskId}`, { method: 'PATCH', body: JSON.stringify(changes) });
+
+export const setSharedTaskDone = (id, taskId, done) => updateSharedTask(id, taskId, { done });
+
+export const assignSharedTask = (id, taskId, assigneeId) => updateSharedTask(id, taskId, { assigneeId });
+
+export const postSharedMessage = (id, text) => sessionRequest(`${base(id)}/messages`, post({ text }));
+
+export const renameSharedSession = (id, name) =>
+    sessionRequest(base(id), { method: 'PATCH', body: JSON.stringify({ name }) });
 
 export const removeSharedTask = (id, taskId) =>
     sessionRequest(`${base(id)}/tasks/${taskId}`, { method: 'DELETE' });

@@ -36,6 +36,7 @@ const authReducer = (state = initialState, action) => {
                     display_name: action.payload[0].display_name,
                     email: action.payload[0].email,
                     birth_date: action.payload[0].birth_date,
+                    created_at: action.payload[0].created_at,
                 },
             };
         default:

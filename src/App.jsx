@@ -17,6 +17,9 @@ import Social from './components/Social.jsx';
 import Together from './components/Together.jsx';
 import SharedSession from './components/SharedSession.jsx';
 import { fetchSharedSessions } from './features/together/togetherAction.js'
+import { useWorkReporter } from './features/together/work.js'
+import TeamHome from './components/TeamHome.jsx';
+import Toaster from './components/Toaster.jsx';
 import { useApplyTheme } from './features/settings/theme.js';
 
 const REQUEST_REFRESH_MS = 60 * 1000;
@@ -24,6 +27,9 @@ const REQUEST_REFRESH_MS = 60 * 1000;
 function App(){
   const dispatch = useDispatch();
   useApplyTheme();
+  // the team stopwatch keeps running on every page
+  useWorkReporter();
+  const homeLayout = useSelector((state) => state.settings.homeLayout);
 
   useEffect(() => {
     dispatch(checkAuth());
@@ -68,8 +74,9 @@ function App(){
         {signedIn && <section>
         <Menu/>
         <CustomError/>
+        <Toaster/>
         <Routes>
-          <Route path="/" element={<Home setActiveTimer={setActiveTimer}/>} />
+          <Route path="/" element={homeLayout === 'team' ? <TeamHome/> : <Home setActiveTimer={setActiveTimer}/>} />
           <Route path="/calendar" element={<Calendar/>} />
           <Route path="/history" element={<History  />} />
           <Route path="/profile" element={<Profile/>} />

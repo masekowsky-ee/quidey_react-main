@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
-import togetherReducer from '../features/together/togetherReducer'
+import togetherReducer, { idleWork } from '../features/together/togetherReducer'
 import { apiFetch, formatDuration } from '../features/helperFunction'
 import {
     fetchSharedSessions, fetchSharedSession, createSharedSession, joinSharedSession,
@@ -25,7 +25,7 @@ beforeEach(() => { apiFetch.mockReset() })
 
 describe('togetherReducer', () => {
     it('starts empty', () => {
-        expect(initial).toEqual({ sessions: [], invites: [], current: null, currentSeq: 0 })
+        expect(initial).toEqual({ sessions: [], invites: [], current: null, currentSeq: 0, work: idleWork })
     })
 
     it('ignores a session that comes from an older request than the one shown', () => {

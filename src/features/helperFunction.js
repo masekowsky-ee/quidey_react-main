@@ -41,6 +41,45 @@ export function getInitials(name) {
     return initials || '?';
 }
 
+// "vor 3 Minuten" / "3 minutes ago"; "jetzt" / "now" for the last minute
+export function formatRelative(value, now, locale) {
+    const seconds = Math.round((new Date(value).getTime() - now) / 1000);
+    const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+    const abs = Math.abs(seconds);
+    if (abs < 60) return rtf.format(0, 'second');
+    if (abs < 3600) return rtf.format(Math.round(seconds / 60), 'minute');
+    if (abs < 86400) return rtf.format(Math.round(seconds / 3600), 'hour');
+    return rtf.format(Math.round(seconds / 86400), 'day');
+}
+
+// Fills {placeholders} in a translated text: fill('{user} joined', { user: 'Ann' }) -> 'Ann joined'
+export function fill(template, values) {
+    return template.replace(/\{(\w+)\}/g, (match, key) => values[key] ?? match);
+}
+
+// Rows as CSV text (comma separated, quoted where needed), e.g. for a download
+export function toCsv(rows) {
+    const cell = (value) => {
+        const text = String(value ?? '');
+        return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    };
+    return rows.map(row => row.map(cell).join(',')).join('\r\n');
+}
+
+// Offers text as a file download
+export function downloadFile(filename, text, type = 'text/csv') {
+    // the BOM makes Excel read umlauts correctly
+    const blob = new Blob(['﻿', text], { type: `${type};charset=utf-8` });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 // Name to show for a user from the api ({ username, displayName })
 export function displayName(user) {
     return user?.displayName || user?.username || '?';

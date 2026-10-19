@@ -131,6 +131,21 @@
   color-scheme: light; /* native date pickers, checkboxes, etc. */
 }
 
+/* Accent color palettes, chosen in the settings (<html data-accent>). Green is the default above.
+   --primary: buttons, progress, badges | --primary-text: text on --primary | --primary-fg: accent-colored text.
+   Light mode gets a deeper button color and a much darker text tone so it stays readable on white. */
+:root[data-accent="ocean"]  { --primary: #38bdf8; --primary-text: #082f49; --primary-fg: #38bdf8; }
+:root[data-accent="violet"] { --primary: #a78bfa; --primary-text: #1e1238; --primary-fg: #a78bfa; }
+:root[data-accent="sunset"] { --primary: #fb923c; --primary-text: #2a1305; --primary-fg: #fb923c; }
+:root[data-accent="rose"]   { --primary: #fb7185; --primary-text: #2b0a12; --primary-fg: #fb7185; }
+:root[data-accent="gold"]   { --primary: #facc15; --primary-text: #2a2100; --primary-fg: #facc15; }
+
+:root[data-theme="light"][data-accent="ocean"]  { --primary: #0ea5e9; --primary-text: #082f49; --primary-fg: #0369a1; }
+:root[data-theme="light"][data-accent="violet"] { --primary: #8b5cf6; --primary-text: #ffffff; --primary-fg: #6d28d9; }
+:root[data-theme="light"][data-accent="sunset"] { --primary: #f97316; --primary-text: #1c0a00; --primary-fg: #c2410c; }
+:root[data-theme="light"][data-accent="rose"]   { --primary: #f43f5e; --primary-text: #ffffff; --primary-fg: #be123c; }
+:root[data-theme="light"][data-accent="gold"]   { --primary: #eab308; --primary-text: #1f1700; --primary-fg: #a16207; }
+
 body {
   margin: 0;
   background: var(--bg);

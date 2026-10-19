@@ -40,4 +40,10 @@ export function useApplyTheme() {
         media.addEventListener('change', apply);
         return () => media.removeEventListener('change', apply);
     }, [theme]);
+
+    // Accent color palette (green, ocean, ...): <html data-accent>, colors in index.css
+    const accent = useSelector(state => state.settings.accent);
+    useEffect(() => {
+        document.documentElement.dataset.accent = accent;
+    }, [accent]);
 }

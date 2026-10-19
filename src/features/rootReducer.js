@@ -5,6 +5,7 @@ import authReducer from "./auth/authReducer";
 import settingsReducer from "./settings/settingsReducer";
 import friendsReducer from "./friends/friendsReducer";
 import togetherReducer from "./together/togetherReducer";
+import toastReducer from "./toast/toast";
 
 const rootReducer = combineReducers({
     task: taskReducer,
@@ -13,6 +14,7 @@ const rootReducer = combineReducers({
     settings: settingsReducer,
     friends: friendsReducer,
     together: togetherReducer,
+    toast: toastReducer,
 });
 
 export default rootReducer;

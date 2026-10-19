@@ -1,9 +1,11 @@
 import styles from './Social.module.css';
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
-import { formatDate, getInitials } from '../features/helperFunction';
+import { formatDate, getInitials, displayName, fill } from '../features/helperFunction';
+import { createSharedSession } from '../features/together/togetherAction';
+import { useTogetherRun } from '../features/together/hooks';
 import { setCustomError } from '../features/settings/settingsAction';
 import {
     fetchFriends, fetchFriendRequests, sendFriendRequest,
@@ -36,6 +38,28 @@ export default function Social() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const { friends, incoming, outgoing } = useSelector(state => state.friends);
+    const me = useSelector(state => state.auth.user);
+    const homeLayout = useSelector(state => state.settings.homeLayout);
+    const navigate = useNavigate();
+    const runTogether = useTogetherRun();
+
+    // one click from a friend to a shared session with them ("Ann & Ben")
+    const workTogether = async (friend) => {
+        setBusyId(friend.id);
+        const myName = me?.display_name || me?.username || t('you');
+        let created = null;
+        const ok = await runTogether(async (dispatch) => {
+            created = await dispatch(createSharedSession(fill(t('sessionWithFriend'), { me: myName, friend: displayName(friend) }), [friend.id]));
+        }, 'toast_sessionStarted');
+        setBusyId(null);
+        if (!ok) return;
+        if (homeLayout === 'team') {
+            try { localStorage.setItem('teamSessionId', String(created.id)); } catch { /* opens the newest instead */ }
+            navigate('/');
+        } else {
+            navigate(`/together/${created.id}`);
+        }
+    };
 
     const [searchParams, setSearchParams] = useSearchParams();
     const tab = TABS.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'friends';
@@ -126,7 +150,12 @@ export default function Social() {
                                             <button onClick={() => setConfirmRemoveId(null)}>{t('cancel')}</button>
                                         </>
                                     ) : (
-                                        <button className={styles.quietBtn} onClick={() => setConfirmRemoveId(friend.id)}>{t('removeFriend')}</button>
+                                        <>
+                                            <button className={styles.acceptBtn} disabled={busyId === friend.id} onClick={() => workTogether(friend)}>
+                                                {t('workTogether')}
+                                            </button>
+                                            <button className={styles.quietBtn} onClick={() => setConfirmRemoveId(friend.id)}>{t('removeFriend')}</button>
+                                        </>
                                     )}
                                 </UserRow>
                             ))}

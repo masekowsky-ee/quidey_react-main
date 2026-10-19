@@ -43,3 +43,68 @@
 .segmentActive{
     composes: segmentActive from './ui.module.css';
 }
+
+/* Label with a short explanation under it */
+.rowText{
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.rowHint{
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ---------- accent color swatches ---------- */
+
+.swatches{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+    gap: 0.6rem;
+}
+
+/* Overrides the global button look: a flat tile with a color dot and a name */
+.swatches > .swatch{
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.8rem 0.5rem 0.65rem;
+    background: var(--surface-inset);
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius);
+    box-shadow: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.swatches > .swatch:hover{
+    color: var(--text-h);
+    border-color: var(--btn-border-hover);
+    box-shadow: 0 0 16px -8px var(--swatch);
+}
+
+.swatches > .swatchActive,
+.swatches > .swatchActive:hover{
+    color: var(--text-h);
+    border-color: var(--swatch);
+    box-shadow: 0 0 0 1px var(--swatch), 0 0 18px -6px var(--swatch);
+}
+
+.swatchDot{
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    corner-shape: round;
+    background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--swatch) 55%, white), var(--swatch) 60%);
+    box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.25), 0 2px 8px -2px var(--swatch);
+}
+
+.swatchLabel{
+    font-weight: 500;
+}
+
+@media (max-width: 520px) {
+    .row .segmented{
+        width: 100%;
+    }
+}

@@ -1,13 +1,18 @@
-import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME } from "./settingsActionTypes";
+import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES } from "./settingsActionTypes";
 import { THEMES, readStoredTheme } from "./theme";
+import { HOME_LAYOUTS, readStoredHomeLayout } from "./homeLayout";
+import { LANGUAGES, readStoredLanguage, ACCENTS, readStoredAccent, SESSION_LENGTHS, readStoredSessionMinutes } from "./preferences";
 
 const intitialState = {
     showMenu: false,
     showDoneTasks: false,
     showForms: false,
     customError: { bool: false, message: '' },
-    language: 'de',
+    language: readStoredLanguage(), // 'de' | 'en', remembered in localStorage
     theme: readStoredTheme(), // 'dark' | 'light' | 'system', remembered in localStorage
+    homeLayout: readStoredHomeLayout(), // 'solo' | 'team', remembered in localStorage
+    accent: readStoredAccent(), // accent color palette, remembered in localStorage
+    defaultSessionMinutes: readStoredSessionMinutes(), // length of new sessions, remembered in localStorage
 }
 
 const settingsReducer = (state = intitialState, action) => {
@@ -17,13 +22,19 @@ const settingsReducer = (state = intitialState, action) => {
         case SET_SHOW_DONE_TASKS:
             return { ...state, showDoneTasks: !state.showDoneTasks };
         case SET_LANGUAGE:
-            return { ...state, language: action.payload };
+            return LANGUAGES.includes(action.payload) ? { ...state, language: action.payload } : state;
         case SET_CUSTOM_ERROR:
             return { ...state, customError: action.payload };
         case SET_SHOW_FORMS:
             return { ...state, showForms: !state.showForms };
         case SET_THEME:
             return THEMES.includes(action.payload) ? { ...state, theme: action.payload } : state;
+        case SET_HOME_LAYOUT:
+            return HOME_LAYOUTS.includes(action.payload) ? { ...state, homeLayout: action.payload } : state;
+        case SET_ACCENT:
+            return ACCENTS.includes(action.payload) ? { ...state, accent: action.payload } : state;
+        case SET_DEFAULT_SESSION_MINUTES:
+            return SESSION_LENGTHS.includes(action.payload) ? { ...state, defaultSessionMinutes: action.payload } : state;
         default:
             return state;
     }
