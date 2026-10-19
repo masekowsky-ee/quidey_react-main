@@ -1,0 +1,11 @@
+/* Covers the whole app while the logo plays */
+.intro{
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    cursor: pointer;
+}

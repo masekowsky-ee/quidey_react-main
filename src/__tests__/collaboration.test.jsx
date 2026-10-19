@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, act, within } from '@testing-library/react'
+import { render, screen, fireEvent, act, within, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
@@ -131,7 +131,7 @@ describe('toasts', () => {
     beforeEach(() => { vi.useFakeTimers() })
     afterEach(() => { vi.useRealTimers() })
 
-    it('show up and go away by themselves', () => {
+    it('show up and go away by themselves', async () => {
         const store = makeStore()
         store.dispatch(showToast('Saved', 'success'))
         store.dispatch(showToast('Saved', 'success'))
@@ -141,7 +141,9 @@ describe('toasts', () => {
         })
         expect(screen.getByText('Saved')).toBeInTheDocument()
         act(() => { vi.advanceTimersByTime(TOAST_MS) })
-        expect(screen.queryByText('Saved')).not.toBeInTheDocument()
+        // the leaving toast needs a real frame to finish its (skipped) exit animation
+        vi.useRealTimers()
+        await waitFor(() => expect(screen.queryByText('Saved')).not.toBeInTheDocument())
     })
 
     it('keeps at most three', () => {

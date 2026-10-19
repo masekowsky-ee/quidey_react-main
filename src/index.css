@@ -61,7 +61,7 @@
   /* Fixed header: the button row plus the daily line strip below it.
      The running timer sits inline, so it never grows */
   --header-bar-h: 3.5rem;
-  --ticker-h: 2rem;
+  --ticker-h: 1.5rem;
   /* plus the iPhone status bar / notch when the app runs full screen (0 everywhere else) */
   --header-h: calc(var(--header-bar-h) + var(--ticker-h) + env(safe-area-inset-top, 0px));
 

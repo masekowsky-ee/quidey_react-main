@@ -7,6 +7,7 @@ import { LEVELS, readLevel, storeLevel } from '../../features/fun/games';
 import WordGuess from './WordGuess';
 import Scramble from './Scramble';
 import Sequence from './Sequence';
+import { motion } from 'motion/react';
 
 const GAMES = [
     { id: 'guess', title: 'gameGuess', desc: 'gameGuessDesc', glyph: 'Aa', Component: WordGuess },
@@ -83,7 +84,11 @@ export default function FunPage() {
                 </div>
                 <p className={styles.levelHint}>{t(`levelHint_${gameId}_${level}`)}</p>
                 {/* a new language or difficulty starts a fresh game */}
-                <Game key={`${gameId}-${language}-${level}`} level={level} />
+                <motion.div key={`${gameId}-${language}-${level}`}
+                    initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}>
+                    <Game level={level} />
+                </motion.div>
             </section>
 
             <Link to="/" className={styles.backLink}>{t('funBack')}</Link>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { MotionConfig, motion } from 'motion/react'
 import Header from './components/Header.jsx';
 import Home from './components/home.jsx'
 import Menu from './components/menu.jsx'
@@ -116,6 +117,7 @@ function App(){
   useTaskReminders(allowed);
 
   const [activeTimer, setActiveTimer] = useState(false);
+  const location = useLocation();
 
   if (signedIn && !access.checked) return <AccessPending />;
   if (signedIn && !access.isPro) {
@@ -129,6 +131,8 @@ function App(){
 
 
   return (
+    // animations are left out for people who asked their system for less motion
+    <MotionConfig reducedMotion="user">
     <div>
       {!signedIn && <Profile/>}
         <div>
@@ -139,7 +143,9 @@ function App(){
         <CustomError/>
         <Toaster/>
         <Tutorial/>
-        <Routes>
+        {/* each page fades in; opacity only, a transform here would trap the pages' fixed parts */}
+        <motion.div key={location.pathname} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25, ease: 'easeOut' }}>
+        <Routes location={location}>
           <Route path="/" element={homeLayout === 'team' ? <TeamHome/> : <Home setActiveTimer={setActiveTimer}/>} />
           <Route path="/calendar" element={<Calendar/>} />
           <Route path="/history" element={<History  />} />
@@ -153,9 +159,11 @@ function App(){
           <Route path="/fun" element={<FunPage/>} />
           <Route path="/beta" element={<Navigate to="/" replace />} />
         </Routes>
+        </motion.div>
       </section>
       }
     </div>
+    </MotionConfig>
   );
 }
 

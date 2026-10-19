@@ -374,6 +374,14 @@
     font-weight: 700;
 }
 
+.key.absent.absent,
+.key.absent.absent:hover{
+    color: var(--text-muted);
+    background: transparent;
+    border-color: transparent;
+    opacity: 0.35;
+}
+
 .keyWide{
     max-width: 4.2rem;
     flex-grow: 1.6;
