@@ -23,10 +23,8 @@
 .badge{
     align-self: flex-start;
     padding: 0.15rem 0.7rem;
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--primary-fg);
     background-color: color-mix(in srgb, var(--primary) 14%, transparent);
     border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);

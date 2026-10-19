@@ -20,7 +20,7 @@
     grid-template-columns: auto minmax(8rem, 3fr) auto auto auto minmax(8rem, 7fr) auto;
     grid-auto-flow: column;
     grid-auto-columns: auto;
-    gap: 0.5rem;
+    gap: 0.75rem;
     border-bottom: 1px solid var(--border);
     padding: 0;
     position: relative;
@@ -54,8 +54,8 @@
     width: 3.5rem;
 }
 
-.taskLi + .taskLi{
-    margin-top: 1rem;
+.taskLi:last-child{
+    border-bottom: none;
 }
 
 .taskLi input:not([type='checkbox']) {
@@ -91,14 +91,12 @@
     width: fit-content;
 }
 
-/* Small uppercase label at the top of the To Do / Done panels */
+/* Quiet title at the top of the To Do / Done panels */
 .ulH3{
     align-self: flex-start;
-    margin: 1rem 0 0.5rem;
-    font-size: 0.75rem;
+    margin: 1.25rem 0 0.25rem;
+    font-size: 0.875rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--text-muted);
 }
 
@@ -150,12 +148,14 @@
     gap: 0.5rem;
 }
 
-/* Compact single-line button that fits the 3rem task row */
+/* Compact single-line button that fits the 3rem task row: quiet until hovered */
 .assignBtn{
     height: 2rem;
-    padding: 0 0.7rem;
-    font-size: 0.8rem;
+    padding: 0 0.85rem;
+    font-size: 0.8125rem;
     white-space: nowrap;
+    color: var(--text);
+    background: transparent;
 }
 
 /* the time after a task's date */
@@ -182,16 +182,24 @@
     margin: 0;
     font-size: 1.5rem;
     font-weight: 600;
+    letter-spacing: -0.02em;
 }
 
-/* Nested so the size beats the global icon-button rule */
+/* Nested so the size beats the global icon-button rule. The one inverted control on the
+   screen: adding a task is the main job here. */
 .sectionHead > .addBtn{
     width: 2.25rem;
     height: 2.25rem;
     border-radius: 50%;
     corner-shape: round;
-    background-color: var(--surface);
-    border: 1px solid var(--btn-border);
+    color: var(--contrast-text);
+    background-color: var(--contrast-top);
+    border: none;
+}
+
+.sectionHead > .addBtn:hover{
+    background-color: color-mix(in srgb, var(--contrast-top) 86%, var(--bg));
+    box-shadow: none;
 }
 
 /* Shows/hides the Done list; count in a small badge */
@@ -205,7 +213,7 @@
 
 .doneToggleOn{
     color: var(--text-h);
-    border-color: color-mix(in srgb, var(--primary) 50%, transparent);
+    background-color: var(--surface-strong);
 }
 
 .doneCount{
@@ -213,23 +221,23 @@
     padding: 0 0.35rem;
     box-sizing: border-box;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.4rem;
     text-align: center;
-    color: var(--contrast-text); /* light text on dark, dark text on light, like the other "selected" elements */
-    background-color: var(--border-strong);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-h);
+    background-color: var(--surface-strong);
     border-radius: 999px;
 }
 
 .doneToggleOn .doneCount{
-    color: var(--primary-text);
-    background-color: var(--primary);
+    background-color: var(--surface-hover);
 }
 
 .dragSvg{
-    width: 2rem;
-    height: 2rem;
-    color: var(--text);
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--text-muted);
     pointer-events: auto;
     cursor: grab;
 }
@@ -267,7 +275,7 @@
     text-decoration: none;
     color: var(--text);
     border: 1px solid var(--btn-border);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-pill);
 }
 
 .btnDiv a.assignBtn:hover{

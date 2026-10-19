@@ -1,0 +1,472 @@
+{
+ "url": "http://localhost:5174/e2e-login.html?t=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoibGVuYS5rIiwidHYiOjAsImlhdCI6MTc5MjQ0NTM2OSwiZXhwIjoxNzkzMDUwMTY5fQ.QD-_GRGjW0nUYYWZm1A4mAW9-bZY1VTu_SvRzMUVNQM&theme=light&to=/calendar",
+ "at": "2026-10-19T21:47:13.022Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 2,
+   "filled": [
+    0.66,
+    0.74
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 1078,
+     "screens": 1.2,
+     "words": 420,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 16,
+     "sections": 1,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Oktober 2026",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 28,
+     "vw": 1.9,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.01,
+     "leading": 1.2,
+     "top": 121,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Oktober 2026",
+     "words": 2,
+     "lines": 1,
+     "size": 28,
+     "font": "Inter Variable"
+    },
+    "headings": [
+     {
+      "text": "Oktober 2026",
+      "words": 2,
+      "chars": 12,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Inter Variable",
+      "weight": 600,
+      "tracking": -0.01,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.13,
+      "top": 121,
+      "tag": "h1",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 1,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter Variable",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      21,
+      28
+     ],
+     "sizeCount": 10,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter Variable",
+      "size": 13,
+      "leading": 1.5,
+      "weight": 400,
+      "tracking": -0.007,
+      "contrast": 5.3
+     },
+     "measureChars": 189,
+     "max": {
+      "size": 28,
+      "vw": 1.9,
+      "font": "Inter Variable",
+      "text": "Oktober 2026"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.41,
+     "smallText": 9
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#f6f5f3",
+     "bodyBgHsl": {
+      "h": 40,
+      "s": 0.14,
+      "l": 0.96
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#ffffff",
+       "top": 227,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#2e2b28",
+       "share": 0.41
+      },
+      {
+       "color": "#6b6560",
+       "share": 0.38
+      },
+      {
+       "color": "#151413",
+       "share": 0.16
+      },
+      {
+       "color": "#c2410c",
+       "share": 0.05
+      },
+      {
+       "color": "#1c0a00",
+       "share": 0
+      }
+     ],
+     "button": {
+      "bg": "#f3f1ee",
+      "hsl": {
+       "h": 36,
+       "s": 0.17,
+       "l": 0.94
+      },
+      "fg": "#151413"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 14,
+     "inHero": 14,
+     "radius": 8,
+     "height": 41,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Home",
+      "Kalender",
+      "Profil",
+      "Verlauf",
+      "Social"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 2,
+     "hairlineSamples": [
+      "div._header_jsx83_1 1440px",
+      "div._menuDiv_4updc_1 260px"
+     ],
+     "outlinedBoxes": 2,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 43,
+     "boxRadius": 8,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 7,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 287
+      },
+      {
+       "count": 7,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 402
+      },
+      {
+       "count": 7,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 516
+      },
+      {
+       "count": 7,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 630
+      },
+      {
+       "count": 7,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 750
+      },
+      {
+       "count": 7,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 865
+      }
+     ]
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 2,
+     "fixed": true,
+     "height": 900,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "inter variable"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 1078,
+    "margins": {
+     "left": 152,
+     "right": 145
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Oktober 2026",
+      "size": 28,
+      "top": 121,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 130,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 1,
+    "bodySize": 12,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0.11,
+    "voidBox": {
+     "x": 240,
+     "y": 780,
+     "w": 1200,
+     "h": 120
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": false,
+    "ground": "#f6f5f3",
+    "sidebar": {
+     "w": 260,
+     "tag": "div",
+     "links": 8,
+     "share": 0.18
+    },
+    "topbar": {
+     "h": 88
+    },
+    "canvas": {
+     "left": 55,
+     "right": -32
+    },
+    "hero": {
+     "text": "Oktober 2026",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 28,
+     "vw": 1.9,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.01,
+     "leading": 1.2,
+     "top": 121,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 2,
+     "firstScreen": 2,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 34,
+     "radii": [
+      [
+       8,
+       31
+      ],
+      [
+       0,
+       2
+      ],
+      [
+       18,
+       1
+      ]
+     ],
+     "heavyBorders": 1,
+     "borderSamples": [
+      "#f87316 on #f3f1ee (2.5:1)"
+     ],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 38,
+     "tabularShare": 1,
+     "kpiMax": 13.6
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.16,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      21,
+      28
+     ]
+    },
+    "title": {
+     "text": "Oktober 2026",
+     "size": 28,
+     "top": 121
+    },
+    "colourShare": 0.002
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "WARN",
+   "id": "palette-cream",
+   "width": 1440,
+   "message": "Yellow-cream background (button #f3f1ee).",
+   "fix": "Use the drawn palette. If you want warmth, take a low-chroma stone or bone, not a yellow cream."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\after\\light-calendar\\desktop-fold.jpg",
+   "pages": [
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\after\\light-calendar\\desktop-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

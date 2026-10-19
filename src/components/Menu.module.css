@@ -3,11 +3,11 @@
   top: 0;
   left: 0;
   height: 100vh;
-  width: 250px;
-  background: var(--bg);
+  width: 260px;
+  background: var(--surface);
   border-right: 1px solid var(--border);
   transform: translateX(-100%);
-  transition: transform 0.3s ease-out;
+  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
   z-index: var(--z-menu);
   display: flex;
   flex-direction: column;
@@ -22,8 +22,10 @@
   text-align: left;
 }
 
+/* only while open, so no shadow peeks in from the edge */
 .menuDiv.open {
   transform: translateX(0);
+  box-shadow: var(--shadow-float);
 }
 
 .menuTitle {
@@ -42,7 +44,7 @@
 .menuBottom {
   margin-top: auto;
   padding-top: 12px;
-  border-top: 1px solid var(--btn-border);
+  border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -53,14 +55,14 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: var(--text-h);
+  color: var(--text);
   text-decoration: none;
+  font-size: 0.9375rem;
   font-weight: 500;
-  letter-spacing: 0.01em;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  padding: 9px 12px;
-  transition: transform var(--ease-out), box-shadow var(--ease-out), border-color var(--ease-out), background-color var(--ease-out);
+  padding: 8px 12px;
+  transition: transform var(--ease-out), color var(--ease-out), background-color var(--ease-out);
 }
 
 .menuIcon {
@@ -80,26 +82,29 @@
   color: var(--text-h);
 }
 
-/* The page you are on */
+/* The page you are on: a neutral pill, the label in full ink */
 .active {
-  background-color: var(--surface);
-  border-color: var(--btn-border);
-  box-shadow: inset 3px 0 0 var(--primary);
+  color: var(--text-h);
+  background-color: var(--surface-strong);
 }
 
 .active .menuIcon {
-  color: var(--primary-fg);
+  color: var(--text-h);
 }
 
 .menuItem:hover {
-  background: linear-gradient(180deg, var(--surface-hover), var(--surface));
-  border-color: var(--btn-border);
-  box-shadow: var(--btn-shadow);
+  color: var(--text-h);
+  background: var(--surface-hover);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.active:hover {
+  background-color: var(--surface-strong);
 }
 
 .menuItem:active {
-  box-shadow: var(--btn-shadow-active);
-  transform: translateX(3px) scale(0.98);
+  transform: scale(0.98);
 }
 
 /* Menu entry that opens something instead of navigating (the tour): looks like the links */
@@ -113,10 +118,11 @@
   border-color: transparent;
 }
 
-/* not the grow-and-glow of the global icon buttons */
+/* not the round wash of the global icon buttons */
 .menuButton:hover {
   transform: none;
   filter: none;
+  box-shadow: none;
 }
 
 /* Number of open friend requests next to "Social" */

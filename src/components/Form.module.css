@@ -10,7 +10,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-modal);
     position: relative;
 }
 
@@ -90,10 +90,8 @@
 }
 
 .shareLabel{
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
     color: var(--text-muted);
 }
 

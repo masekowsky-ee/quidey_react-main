@@ -1,0 +1,1348 @@
+{
+ "url": "http://localhost:5174/e2e-login.html?t=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoibGVuYS5rIiwidHYiOjAsImlhdCI6MTc5MjQ0NTM2OSwiZXhwIjoxNzkzMDUwMTY5fQ.QD-_GRGjW0nUYYWZm1A4mAW9-bZY1VTu_SvRzMUVNQM&to=/together",
+ "at": "2026-10-19T21:31:39.985Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.34
+   ],
+   "motion": {
+    "elements": 2,
+    "css": 2,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 900,
+     "screens": 1,
+     "words": 64,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 12,
+     "sections": 3,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Zusammen",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 32,
+     "vw": 2.2,
+     "font": "system-ui",
+     "weight": 600,
+     "tracking": -0.01,
+     "leading": 0.83,
+     "top": 140,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Zusammen",
+     "words": 1,
+     "lines": 1,
+     "size": 31.5,
+     "font": "system-ui"
+    },
+    "headings": [
+     {
+      "text": "Quidey",
+      "words": 1,
+      "chars": 6,
+      "lines": 1,
+      "size": 29.7,
+      "vw": 2.1,
+      "font": "system-ui",
+      "weight": 800,
+      "tracking": -0.045,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "center",
+      "position": "left",
+      "widthRatio": 0.11,
+      "top": 13,
+      "gradientText": true,
+      "tag": "a",
+      "kind": "heading"
+     },
+     {
+      "text": "Zusammen",
+      "words": 1,
+      "chars": 8,
+      "lines": 1,
+      "size": 31.5,
+      "vw": 2.2,
+      "font": "system-ui",
+      "weight": 600,
+      "tracking": -0.01,
+      "leading": 0.83,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.44,
+      "top": 140,
+      "tag": "h1",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 1,
+     "medianWords": 1,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "system-ui",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      11,
+      12,
+      14,
+      15,
+      18,
+      24,
+      30,
+      32
+     ],
+     "sizeCount": 8,
+     "notLoaded": [],
+     "body": {
+      "font": "system-ui",
+      "size": 14.4,
+      "leading": 1.81,
+      "weight": 400,
+      "tracking": 0.012,
+      "contrast": null
+     },
+     "measureChars": 71,
+     "max": {
+      "size": 31.5,
+      "vw": 2.2,
+      "font": "system-ui",
+      "text": "Zusammen"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 2,
+     "microLabelShare": 0.099,
+     "microSamples": [
+      "Laufende Sitzungen",
+      "Gemeinsame Sitzung starten"
+     ],
+     "upperShare": 0.13,
+     "centerShare": 0.42,
+     "smallText": 1
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#1a1a1a",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 0.1
+     },
+     "dark": true,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#979797",
+       "share": 0.74
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.2
+      },
+      {
+       "color": "#2a1305",
+       "share": 0.05
+      }
+     ],
+     "button": {
+      "bg": "#313131",
+      "hsl": {
+       "h": 0,
+       "s": 0,
+       "l": 0.19
+      },
+      "fg": "#ffffff"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 10,
+     "inHero": 10,
+     "radius": 6,
+     "height": 46,
+     "withShadow": 3,
+     "withGradient": 2,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Home",
+      "Kalender",
+      "Profil",
+      "Verlauf",
+      "Social"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 4,
+     "shadowOverlay": 0,
+     "shadowSamples": [
+      "section._card_1scmh_11._card_2x37w_61 → rgba(0, 0, 0, 0.6) 0px 2px 5px 0px",
+      "section._card_1scmh_11._card_2x37w_61 → rgba(0, 0, 0, 0.6) 0px 2px 5px 0px",
+      "button._chip_1scmh_123 → rgba(255, 255, 255, 0.08) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.5) 0px 1px 2px ",
+      "button._primaryBtn_1scmh_444._btnPrimary_2x37w_271 → rgba(255, 255, 255, 0.35) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.5) 0px 1px 2px "
+     ],
+     "gradients": 1,
+     "scrims": 0,
+     "gradientSamples": [
+      "a._ticker_6dukx_492 → linear-gradient(90deg, color(srgb 0.200784 0.159608 0.125882), rgb(29, 29, 29) 30%)"
+     ],
+     "gradientText": 1,
+     "hairlines": 3,
+     "hairlineSamples": [
+      "div._header_6dukx_1 1440px",
+      "a._ticker_6dukx_492 1440px",
+      "div._menuDiv_1azyn_1 250px"
+     ],
+     "outlinedBoxes": 2,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 2,
+     "boxRadius": 16,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 2,
+     "fixed": true,
+     "height": 900,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": []
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 900,
+    "margins": {
+     "left": 400,
+     "right": 428
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Zusammen",
+      "size": 32,
+      "top": 140,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 400,
+      "n": 2
+     }
+    ],
+    "leftBlocks": 2,
+    "bodySize": 18,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0.27,
+    "voidBox": {
+     "x": 0,
+     "y": 660,
+     "w": 1440,
+     "h": 240
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": true,
+    "ground": "#1a1a1a",
+    "sidebar": {
+     "w": 250,
+     "tag": "div",
+     "links": 8,
+     "share": 0.17
+    },
+    "topbar": {
+     "h": 70
+    },
+    "canvas": {
+     "left": 148,
+     "right": -909
+    },
+    "hero": {
+     "text": "Zusammen",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 32,
+     "vw": 2.2,
+     "font": "system-ui",
+     "weight": 600,
+     "tracking": -0.01,
+     "leading": 0.83,
+     "top": 140,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 3,
+     "firstScreen": 3,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 3,
+     "radii": [
+      [
+       16,
+       2
+      ],
+      [
+       0,
+       1
+      ]
+     ],
+     "heavyBorders": 3,
+     "borderSamples": [
+      "#ffffff on #1a1a1a (17.4:1)",
+      "#979797 on #313131 (4.45:1)",
+      "#979797 on #313131 (4.45:1)"
+     ],
+     "heavyShadows": 2,
+     "softShadows": 0,
+     "shadowSamples": [
+      "rgba(0, 0, 0, 0.6) 0px 2px 5px 0px",
+      "rgba(0, 0, 0, 0.6) 0px 2px 5px 0px"
+     ],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.04,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      11,
+      12,
+      14,
+      15,
+      18,
+      24,
+      30,
+      32
+     ]
+    },
+    "title": {
+     "text": "Zusammen",
+     "size": 32,
+     "top": 140
+    },
+    "colourShare": 0.007
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.4
+   ],
+   "motion": {
+    "elements": 2,
+    "css": 2,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 1024,
+     "screens": 1,
+     "words": 64,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 12,
+     "sections": 3,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Zusammen",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 28,
+     "vw": 3.6,
+     "font": "system-ui",
+     "weight": 600,
+     "tracking": -0.01,
+     "leading": 0.83,
+     "top": 124,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Zusammen",
+     "words": 1,
+     "lines": 1,
+     "size": 28,
+     "font": "system-ui"
+    },
+    "headings": [
+     {
+      "text": "Quidey",
+      "words": 1,
+      "chars": 6,
+      "lines": 1,
+      "size": 26.4,
+      "vw": 3.4,
+      "font": "system-ui",
+      "weight": 800,
+      "tracking": -0.045,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "center",
+      "position": "left",
+      "widthRatio": 0.18,
+      "top": 12,
+      "gradientText": true,
+      "tag": "a",
+      "kind": "heading"
+     },
+     {
+      "text": "Zusammen",
+      "words": 1,
+      "chars": 8,
+      "lines": 1,
+      "size": 28,
+      "vw": 3.6,
+      "font": "system-ui",
+      "weight": 600,
+      "tracking": -0.01,
+      "leading": 0.83,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.83,
+      "top": 124,
+      "tag": "h1",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 1,
+     "medianWords": 1,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "system-ui",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      10,
+      12,
+      13,
+      14,
+      16,
+      20,
+      26,
+      28
+     ],
+     "sizeCount": 8,
+     "notLoaded": [],
+     "body": {
+      "font": "system-ui",
+      "size": 12.8,
+      "leading": 1.81,
+      "weight": 400,
+      "tracking": 0.014,
+      "contrast": null
+     },
+     "measureChars": 80,
+     "max": {
+      "size": 28,
+      "vw": 3.6,
+      "font": "system-ui",
+      "text": "Zusammen"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 2,
+     "microLabelShare": 0.099,
+     "microSamples": [
+      "Laufende Sitzungen",
+      "Gemeinsame Sitzung starten"
+     ],
+     "upperShare": 0.13,
+     "centerShare": 0.42,
+     "smallText": 7
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#1a1a1a",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 0.1
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#1a1a1a",
+       "top": 0,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 0.1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#979797",
+       "share": 0.74
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.2
+      },
+      {
+       "color": "#2a1305",
+       "share": 0.05
+      }
+     ],
+     "button": {
+      "bg": "#313131",
+      "hsl": {
+       "h": 0,
+       "s": 0,
+       "l": 0.19
+      },
+      "fg": "#ffffff"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 10,
+     "inHero": 10,
+     "radius": 6,
+     "height": 43,
+     "withShadow": 3,
+     "withGradient": 2,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Home",
+      "Kalender",
+      "Profil",
+      "Verlauf",
+      "Social"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 4,
+     "shadowOverlay": 0,
+     "shadowSamples": [
+      "section._card_1scmh_11._card_2x37w_61 → rgba(0, 0, 0, 0.6) 0px 2px 5px 0px",
+      "section._card_1scmh_11._card_2x37w_61 → rgba(0, 0, 0, 0.6) 0px 2px 5px 0px",
+      "button._chip_1scmh_123 → rgba(255, 255, 255, 0.08) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.5) 0px 1px 2px ",
+      "button._primaryBtn_1scmh_444._btnPrimary_2x37w_271 → rgba(255, 255, 255, 0.35) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.5) 0px 1px 2px "
+     ],
+     "gradients": 1,
+     "scrims": 0,
+     "gradientSamples": [
+      "a._ticker_6dukx_492 → linear-gradient(90deg, color(srgb 0.200784 0.159608 0.125882), rgb(29, 29, 29) 30%)"
+     ],
+     "gradientText": 1,
+     "hairlines": 3,
+     "hairlineSamples": [
+      "div._header_6dukx_1 768px",
+      "a._ticker_6dukx_492 768px",
+      "div._menuDiv_1azyn_1 250px"
+     ],
+     "outlinedBoxes": 2,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 2,
+     "boxRadius": 16,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 2,
+     "fixed": true,
+     "height": 1024,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": []
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 1024,
+    "margins": {
+     "left": 64,
+     "right": 70
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Zusammen",
+      "size": 28,
+      "top": 124,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 64,
+      "n": 2
+     }
+    ],
+    "leftBlocks": 2,
+    "bodySize": 16,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": true,
+    "ground": "#1a1a1a",
+    "sidebar": {
+     "w": 250,
+     "tag": "div",
+     "links": 8,
+     "share": 0.33
+    },
+    "topbar": {
+     "h": 92
+    },
+    "canvas": {
+     "left": 317,
+     "right": -623
+    },
+    "hero": {
+     "text": "Zusammen",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 28,
+     "vw": 3.6,
+     "font": "system-ui",
+     "weight": 600,
+     "tracking": -0.01,
+     "leading": 0.83,
+     "top": 124,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 3,
+     "firstScreen": 3,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 3,
+     "radii": [
+      [
+       16,
+       2
+      ],
+      [
+       0,
+       1
+      ]
+     ],
+     "heavyBorders": 3,
+     "borderSamples": [
+      "#ffffff on #1a1a1a (17.4:1)",
+      "#979797 on #313131 (4.45:1)",
+      "#979797 on #313131 (4.45:1)"
+     ],
+     "heavyShadows": 2,
+     "softShadows": 0,
+     "shadowSamples": [
+      "rgba(0, 0, 0, 0.6) 0px 2px 5px 0px",
+      "rgba(0, 0, 0, 0.6) 0px 2px 5px 0px"
+     ],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.21,
+     "tiny": 1,
+     "tinySamples": [
+      "Fakt des Tages 10px"
+     ],
+     "sizes": [
+      10,
+      12,
+      13,
+      14,
+      16,
+      20,
+      26,
+      28
+     ]
+    },
+    "title": {
+     "text": "Zusammen",
+     "size": 28,
+     "top": 124
+    },
+    "colourShare": 0.011
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.64
+   ],
+   "motion": {
+    "elements": 2,
+    "css": 2,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 844,
+     "screens": 1,
+     "words": 64,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 12,
+     "sections": 3,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Zusammen",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 28,
+     "vw": 7.2,
+     "font": "system-ui",
+     "weight": 600,
+     "tracking": -0.01,
+     "leading": 0.83,
+     "top": 124,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Zusammen",
+     "words": 1,
+     "lines": 1,
+     "size": 28,
+     "font": "system-ui"
+    },
+    "headings": [
+     {
+      "text": "Zusammen",
+      "words": 1,
+      "chars": 8,
+      "lines": 1,
+      "size": 28,
+      "vw": 7.2,
+      "font": "system-ui",
+      "weight": 600,
+      "tracking": -0.01,
+      "leading": 0.83,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 124,
+      "tag": "h1",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 1,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "system-ui",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      10,
+      12,
+      13,
+      14,
+      16,
+      20,
+      21,
+      28
+     ],
+     "sizeCount": 8,
+     "notLoaded": [],
+     "body": {
+      "font": "system-ui",
+      "size": 12.8,
+      "leading": 1.81,
+      "weight": 400,
+      "tracking": 0.014,
+      "contrast": null
+     },
+     "measureChars": 45,
+     "max": {
+      "size": 28,
+      "vw": 7.2,
+      "font": "system-ui",
+      "text": "Zusammen"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 2,
+     "microLabelShare": 0.099,
+     "microSamples": [
+      "Laufende Sitzungen",
+      "Gemeinsame Sitzung starten"
+     ],
+     "upperShare": 0.13,
+     "centerShare": 0.42,
+     "smallText": 7
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#1a1a1a",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 0.1
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#1a1a1a",
+       "top": 0,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 0.1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#979797",
+       "share": 0.74
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.2
+      },
+      {
+       "color": "#2a1305",
+       "share": 0.05
+      }
+     ],
+     "button": {
+      "bg": "#313131",
+      "hsl": {
+       "h": 0,
+       "s": 0,
+       "l": 0.19
+      },
+      "fg": "#ffffff"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 10,
+     "inHero": 10,
+     "radius": 6,
+     "height": 43,
+     "withShadow": 3,
+     "withGradient": 2,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Home",
+      "Kalender",
+      "Profil",
+      "Verlauf",
+      "Social"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 4,
+     "shadowOverlay": 0,
+     "shadowSamples": [
+      "section._card_1scmh_11._card_2x37w_61 → rgba(0, 0, 0, 0.6) 0px 2px 5px 0px",
+      "section._card_1scmh_11._card_2x37w_61 → rgba(0, 0, 0, 0.6) 0px 2px 5px 0px",
+      "button._chip_1scmh_123 → rgba(255, 255, 255, 0.08) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.5) 0px 1px 2px ",
+      "button._primaryBtn_1scmh_444._btnPrimary_2x37w_271 → rgba(255, 255, 255, 0.35) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.5) 0px 1px 2px "
+     ],
+     "gradients": 1,
+     "scrims": 0,
+     "gradientSamples": [
+      "a._ticker_6dukx_492 → linear-gradient(90deg, color(srgb 0.200784 0.159608 0.125882), rgb(29, 29, 29) 30%)"
+     ],
+     "gradientText": 0,
+     "hairlines": 3,
+     "hairlineSamples": [
+      "div._header_6dukx_1 390px",
+      "a._ticker_6dukx_492 390px",
+      "div._menuDiv_1azyn_1 250px"
+     ],
+     "outlinedBoxes": 2,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 2,
+     "boxRadius": 16,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 2,
+     "fixed": true,
+     "height": 844,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": []
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 844,
+    "margins": {
+     "left": 16,
+     "right": 41
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Zusammen",
+      "size": 28,
+      "top": 124,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 16,
+      "n": 2
+     }
+    ],
+    "leftBlocks": 2,
+    "bodySize": 16,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": true,
+    "ground": "#1a1a1a",
+    "sidebar": null,
+    "topbar": {
+     "h": 92
+    },
+    "canvas": {
+     "left": 8,
+     "right": -682
+    },
+    "hero": {
+     "text": "Zusammen",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 28,
+     "vw": 7.2,
+     "font": "system-ui",
+     "weight": 600,
+     "tracking": -0.01,
+     "leading": 0.83,
+     "top": 124,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 3,
+     "firstScreen": 3,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 3,
+     "radii": [
+      [
+       16,
+       2
+      ],
+      [
+       0,
+       1
+      ]
+     ],
+     "heavyBorders": 3,
+     "borderSamples": [
+      "#ffffff on #1a1a1a (17.4:1)",
+      "#979797 on #313131 (4.45:1)",
+      "#979797 on #313131 (4.45:1)"
+     ],
+     "heavyShadows": 2,
+     "softShadows": 0,
+     "shadowSamples": [
+      "rgba(0, 0, 0, 0.6) 0px 2px 5px 0px",
+      "rgba(0, 0, 0, 0.6) 0px 2px 5px 0px"
+     ],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.21,
+     "tiny": 1,
+     "tinySamples": [
+      "Fakt des Tages 10px"
+     ],
+     "sizes": [
+      10,
+      12,
+      13,
+      14,
+      16,
+      20,
+      21,
+      28
+     ]
+    },
+    "title": {
+     "text": "Zusammen",
+     "size": 28,
+     "top": 124
+    },
+    "colourShare": 0.024
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "WARN",
+   "id": "micro-label",
+   "width": 1440,
+   "message": "2 tiny uppercase letter-spaced label(s): \"Laufende Sitzungen\", \"Gemeinsame Sitzung starten\"",
+   "fix": "Prefer sentence case at body size.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "width": 1440,
+   "message": "1 gradient fill(s): a._ticker_6dukx_492 → linear-gradient(90deg, color(srgb 0.200784 0.159608 0.125882), rgb(29, 29, 29) 30%)",
+   "fix": "Use a flat colour or a real image. The only gradient allowed by default is a neutral scrim over a photo for legibility.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient-text",
+   "width": 1440,
+   "message": "1 gradient-filled text element(s).",
+   "fix": "Solid colour text.",
+   "alsoAt": [
+    768
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "button-fx",
+   "width": 1440,
+   "message": "Buttons with gradient fill and shadow/glow.",
+   "fix": "Flat fill, one colour.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "font-not-dealt",
+   "width": 1440,
+   "message": "The sheet dealt Inter, but the page renders system-ui.",
+   "fix": "Load the dealt face (the link on the sheet) and put it first in font-family. A build that falls back to a default face lands on the default look."
+  },
+  {
+   "level": "FAIL",
+   "id": "heavy-shadow",
+   "width": 1440,
+   "message": "2 panel shadow(s) heavy enough to read as floating: rgba(0, 0, 0, 0.6) 0px 2px 5px 0px | rgba(0, 0, 0, 0.6) 0px 2px 5px 0px",
+   "fix": "Panels sit on the ground: separate them with a fill one step from the ground or a quiet 1px border. A shadow, if any, is under 8% black with a small blur. Real overlays (menus, dialogs, popovers) may float.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "heavy-borders",
+   "width": 1440,
+   "message": "3 panel borders are dark against their ground: #ffffff on #1a1a1a (17.4:1) | #979797 on #313131 (4.45:1) | #979797 on #313131 (4.45:1)",
+   "fix": "A panel border is a whisper: about 1.1–1.3:1 against its ground on a light screen (#e5e7eb–#ededed on white), and about 1.2–1.5:1 on a dark one (#1a1a1a on #000, #2e2e2e on #111). Darker lines turn the screen into a grid of boxes; keep the stronger line for controls.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\before\\together\\desktop-fold.jpg",
+   "pages": [
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\before\\together\\desktop-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\before\\together\\tablet-fold.jpg",
+   "pages": [
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\before\\together\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\before\\together\\mobile-fold.jpg",
+   "pages": [
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\before\\together\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

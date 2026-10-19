@@ -2,6 +2,7 @@ import styles from '../Calendar.module.css';
 import { prioLevel, taskTimeText } from '../../features/calendar/calendar';
 import { isOverdue } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
+import Icon from './icons';
 
 const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
 
@@ -37,7 +38,7 @@ export default function TaskChip({ task, today, onOpen, startDrag, dragging, sho
             <span className={styles.chipName}>
                 {time && <span className={styles.chipTime}>{time}</span>}
                 {task.name}
-                {shared && <span className={styles.chipShared} title={t('sharedWithLabel')} aria-label={t('sharedWithLabel')}>👥</span>}
+                {shared && <span className={styles.chipShared} title={t('sharedWithLabel')} role="img" aria-label={t('sharedWithLabel')}><Icon name="team" size={12} /></span>}
             </span>
             {showDescription && task.location && <span className={styles.chipMeta}>⌖ {task.location}</span>}
             {showDescription && task.description && <span className={styles.chipDesc}>{task.description}</span>}

@@ -13,12 +13,12 @@
     max-width: calc(100vw - 2rem);
     box-sizing: border-box;
     padding: 0.5rem 0.6rem 0.5rem 1.25rem;
-    background-color: color-mix(in srgb, var(--surface) 82%, transparent);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--btn-border);
+    background-color: var(--surface-hover);
+    border: 1px solid var(--control-border);
     border-radius: 999px;
-    box-shadow: var(--btn-highlight), var(--shadow-float);
-    animation: timerDockIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    /* it truly floats over the list, so it is the one thing on the screen with a shadow */
+    box-shadow: var(--shadow-float);
+    animation: timerDockIn 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @keyframes timerDockIn {
@@ -52,7 +52,9 @@
 }
 
 .timerH2{
-    font-size: 1.3rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
     margin: 0;
     cursor: pointer;
@@ -61,9 +63,9 @@
 /* Thin progress line, takes the remaining width of the pill */
 .progress{
     flex: 1;
-    height: 5px;
+    height: 4px;
     min-width: 3rem;
-    background-color: var(--surface-inset);
+    background-color: var(--surface-strong);
     border-radius: 999px;
     overflow: hidden;
 }
@@ -94,6 +96,17 @@
     composes: btn glowPrimary from './ui.module.css';
 }
 
+/* start is the one filled control in the dock (nested so it beats the size rule above) */
+.timerNav > .btnGo{
+    color: var(--contrast-text);
+    background-color: var(--contrast-top);
+}
+
+.timerNav > .btnGo:hover{
+    color: var(--contrast-text);
+    background-color: color-mix(in srgb, var(--contrast-top) 86%, var(--bg));
+}
+
 .btnStop{
     composes: btn glowDanger from './ui.module.css';
 }
@@ -117,7 +130,8 @@
 }
 
 .setTimerH2{
-    font-size: 1.3rem;
+    font-size: 1.25rem;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
     margin: 0;
 }

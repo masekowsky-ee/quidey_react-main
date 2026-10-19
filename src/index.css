@@ -1,61 +1,67 @@
 :root {
-  /* Surfaces, from darkest to lightest */
-  --bg: #1a1a1a;
-  --surface-inset: #1d1d1d;
-  --surface-bar: #2b2b2b;
-  --surface: #313131;
-  --surface-hover: #3d3d3d;
-  --surface-strong: #535353;
+  /* Calm, warm near-black. Surfaces rise by lightness alone, from darkest to lightest;
+     lines are a whisper and nothing at rest casts a shadow. */
+  --bg: #0e0d0c;
+  --surface-inset: #0a0909;   /* sunken wells: tracks, fields */
+  --surface-bar: #0e0d0c;     /* the header sits on the page ground */
+  --surface: #181716;
+  --surface-hover: #211f1e;
+  --surface-strong: #2c2a28;
 
-  --border: #979797;
-  --border-strong: #d3d3d3;
+  --border: #262422;          /* panel edges, barely there */
+  --border-strong: #5a5550;   /* controls, hover outlines */
+  --control-border: #34312e;  /* resting field and button edges */
 
-  --text: #d3d3d3;
-  --text-h: #fff;
-  --text-muted: #979797;
+  --text: #d9d4cf;
+  --text-h: #f4f3f1;
+  --text-muted: #9b958f;      /* 4.5:1 on every surface up to --surface-strong */
 
   /* accent: "Abendrot" (sunset) by default, the other palettes are below */
   --primary: #fb923c;
   --primary-text: #2a1305;   /* text on an accent background */
   --primary-fg: var(--primary); /* accent used as text or outline on the page background */
-  --danger: #ff4d4d;
-  --glow: color-mix(in srgb, var(--text-h) 45%, transparent);
+  --danger: #f0605a;
+  --glow: transparent;        /* kept for old references; nothing glows */
+  /* soft wash behind a hovered icon or row */
+  --hover-wash: color-mix(in srgb, var(--text-h) 7%, transparent);
 
-  /* High-contrast "selected" look (active tab, sign-in switch): light on dark, dark on light */
-  --contrast-top: #fff;
-  --contrast-bottom: #d3d3d3;
-  --contrast-text: #313131;
-  --contrast-border: rgba(255, 255, 255, 0.6);
-  --contrast-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 2px rgba(0, 0, 0, 0.5),
-    0 6px 14px -8px rgba(255, 255, 255, 0.35);
+  /* "Selected" look (active tab, primary action): inverted, flat. Light on dark, dark on light */
+  --contrast-top: #f4f3f1;
+  --contrast-bottom: #f4f3f1;
+  --contrast-text: #0e0d0c;
+  --contrast-border: transparent;
+  --contrast-shadow: none;
 
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 16px;
+  /* soft and fully round, decided once: panels 18, inner blocks 14, small parts 8, controls pills */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 18px;
   --radius-xl: 2rem;
+  --radius-pill: 999px;
 
-  --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.6);
-  --shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
-  --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.4);       /* sunken wells: tabs, timer chip */
-  --shadow-float: 0 8px 24px -8px rgba(0, 0, 0, 0.7);       /* things hovering over the page */
-  --shadow-modal: 0 20px 50px -20px rgba(0, 0, 0, 0.8);     /* dialogs */
-  --overlay: rgba(0, 0, 0, 0.5);
-  --ease: 0.2s ease;
-  --ease-out: 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* Only what truly floats casts a shadow (menus, popovers, dialogs) */
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-inset: none;
+  --shadow-float: 0 16px 40px -16px rgba(0, 0, 0, 0.7);
+  --shadow-modal: 0 24px 64px -24px rgba(0, 0, 0, 0.8);
+  --overlay: rgba(6, 5, 4, 0.6);
+  /* a spring-like ease-out: quick start, long gentle settle */
+  --ease: 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out: 0.22s cubic-bezier(0.32, 0.72, 0, 1);
 
-  /* Button depth: hairline border, inner top highlight, soft drop shadow */
-  --btn-border: rgba(255, 255, 255, 0.12);
-  --btn-border-hover: rgba(255, 255, 255, 0.26);
-  --btn-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --btn-shadow: var(--btn-highlight), 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 10px -4px rgba(0, 0, 0, 0.6);
-  --btn-shadow-hover: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 2px 4px rgba(0, 0, 0, 0.5),
-    0 10px 22px -8px rgba(0, 0, 0, 0.75), 0 0 18px -6px var(--glow);
-  --btn-shadow-active: inset 0 1px 3px rgba(0, 0, 0, 0.55);
+  /* Buttons are flat: one fill, a quiet edge */
+  --btn-border: var(--control-border);
+  --btn-border-hover: var(--border-strong);
+  --btn-highlight: none;
+  --btn-shadow: none;
+  --btn-shadow-hover: none;
+  --btn-shadow-active: none;
 
   /* Fixed header: the button row plus the daily line strip below it.
      The running timer sits inline, so it never grows */
-  --header-bar-h: 4rem;
-  --ticker-h: 1.75rem;
+  --header-bar-h: 3.5rem;
+  --ticker-h: 2rem;
   /* plus the iPhone status bar / notch when the app runs full screen (0 everywhere else) */
   --header-h: calc(var(--header-bar-h) + var(--ticker-h) + env(safe-area-inset-top, 0px));
 
@@ -67,11 +73,11 @@
   --z-menu-overlay: 400;
   --z-menu: 410;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: 'Inter Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
+  font: 16px/1.5 var(--sans);
+  letter-spacing: -0.006em;
   color-scheme: dark;
   color: var(--text);
   background: var(--bg);
@@ -79,59 +85,48 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
 /* Light theme: same tokens, light values. Set on <html> by the theme setting
    (and before the first paint by the script in index.html). */
 :root[data-theme="light"] {
-  --bg: #f2f3f5;
-  --surface-inset: #eceef1;
-  --surface-bar: #ffffff;
+  /* warm paper white; white cards on it, a whisper of an edge */
+  --bg: #f5f5f3;
+  --surface-inset: #eeedeb;
+  --surface-bar: #f5f5f3;
   --surface: #ffffff;
-  --surface-hover: #f4f5f7;
-  --surface-strong: #dfe2e7;
+  --surface-hover: #f1f0ee;
+  --surface-strong: #e6e5e2;
 
-  --border: #c4c9d1;
-  --border-strong: #4b5563;
+  --border: #e9e8e5;
+  --border-strong: #57524d;
+  --control-border: #d5d3cf;
 
-  --text: #374151;
-  --text-h: #111827;
-  --text-muted: #6b7280;
+  --text: #2e2b28;
+  --text-h: #151413;
+  --text-muted: #6b6560;
 
   --primary: #f97316;
   --primary-text: #1c0a00;
   --primary-fg: #c2410c;   /* darker orange, readable as text on white */
-  --danger: #dc2626;
-  --glow: rgba(17, 24, 39, 0.22);
+  --danger: #c4242a;
+  --glow: transparent;
 
-  --contrast-top: #374151;
-  --contrast-bottom: #111827;
+  --contrast-top: #151413;
+  --contrast-bottom: #151413;
   --contrast-text: #ffffff;
-  --contrast-border: rgba(0, 0, 0, 0.6);
-  --contrast-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 2px rgba(0, 0, 0, 0.25),
-    0 6px 14px -8px rgba(0, 0, 0, 0.35);
+  --contrast-border: transparent;
+  --contrast-shadow: none;
 
-  --shadow-sm: 0 1px 3px rgba(17, 24, 39, 0.12);
-  --shadow: 0 4px 12px rgba(17, 24, 39, 0.12);
-  --shadow-inset: inset 0 1px 2px rgba(17, 24, 39, 0.08);
-  --shadow-float: 0 10px 28px -10px rgba(17, 24, 39, 0.3);
-  --shadow-modal: 0 24px 60px -24px rgba(17, 24, 39, 0.35);
-  --overlay: rgba(17, 24, 39, 0.35);
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-inset: none;
+  --shadow-float: 0 16px 40px -16px rgba(30, 24, 18, 0.22);
+  --shadow-modal: 0 24px 64px -24px rgba(30, 24, 18, 0.3);
+  --overlay: rgba(30, 24, 18, 0.28);
 
-  --btn-border: rgba(17, 24, 39, 0.14);
-  --btn-border-hover: rgba(17, 24, 39, 0.28);
-  --btn-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  --btn-shadow: var(--btn-highlight), 0 1px 2px rgba(17, 24, 39, 0.1), 0 4px 10px -6px rgba(17, 24, 39, 0.18);
-  --btn-shadow-hover: var(--btn-highlight), 0 2px 4px rgba(17, 24, 39, 0.12),
-    0 10px 22px -10px rgba(17, 24, 39, 0.25), 0 0 16px -8px var(--glow);
-  --btn-shadow-active: inset 0 1px 3px rgba(17, 24, 39, 0.18);
-
-  --scrollbar-thumb: rgba(17, 24, 39, 0.18);
-  --scrollbar-thumb-hover: rgba(17, 24, 39, 0.32);
+  --scrollbar-thumb: rgba(30, 24, 18, 0.16);
+  --scrollbar-thumb-hover: rgba(30, 24, 18, 0.3);
 
   color-scheme: light; /* native date pickers, checkboxes, etc. */
 }
@@ -183,23 +178,33 @@ h1,
 h2,
 h3 {
   font-family: var(--sans);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-h);
+  text-wrap: balance;
 }
 
 h1 {
-  font-size: 2rem;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
   margin: 1.5rem 0;
 }
 
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
+  font-size: 1.125rem;
+  line-height: 1.3;
+  letter-spacing: -0.012em;
   margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+}
+
+h3 {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+/* figures that line up and don't jitter while they count */
+time, data, output {
+  font-variant-numeric: tabular-nums;
 }
 
 p {
@@ -223,61 +228,62 @@ code {
    :where() keeps specificity at zero so any component class overrides them. */
 :where(button) {
   font: inherit;
+  font-size: 0.9375rem;
   font-weight: 500;
-  letter-spacing: 0.01em;
   color: var(--text-h);
-  background: linear-gradient(180deg, var(--surface-hover), var(--surface));
+  background: var(--surface-hover);
   border: 1px solid var(--btn-border);
-  border-radius: var(--radius-sm);
-  padding: 0.3rem 0.75rem;
-  box-shadow: var(--btn-shadow);
+  border-radius: var(--radius-pill);
+  padding: 0.375rem 0.95rem;
+  box-shadow: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
+  gap: 0.375rem;
   cursor: pointer;
-  transition: transform var(--ease-out), box-shadow var(--ease-out), border-color var(--ease-out), filter var(--ease-out);
+  transition: transform var(--ease-out), background-color var(--ease-out), border-color var(--ease-out),
+    color var(--ease-out), box-shadow var(--ease-out);
 }
 
 /* Hover effects only where there is a real hover (mouse, trackpad): on touch screens the
-   hover state sticks after a tap and the button would stay lifted */
+   hover state sticks after a tap */
 @media (hover: hover) {
   :where(button:hover) {
+    background: var(--surface-strong);
     border-color: var(--btn-border-hover);
-    box-shadow: var(--btn-shadow-hover);
-    filter: brightness(1.08);
-    transform: translateY(-1px);
   }
 }
 
+/* a press settles the button slightly into the page */
 :where(button:active) {
-  box-shadow: var(--btn-shadow-active);
-  filter: brightness(0.96);
-  transform: translateY(0) scale(0.98);
+  transform: scale(0.98);
 }
 
-/* Icon buttons (any button holding an svg) are just the bare icon:
-   no box, they grow and glow on hover. Set --glow to recolor the glow. */
+:where(button:disabled) {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* Icon buttons (any button holding an svg) are just the bare icon, no box. On hover a soft
+   round wash appears behind them (a spread shadow, so the layout never moves). */
 :where(button:has(svg)) {
   background: none;
   border: none;
   padding: 0;
+  border-radius: var(--radius-pill);
   box-shadow: none;
-  transition: transform var(--ease-out), filter var(--ease-out);
+  transition: transform var(--ease-out), background-color var(--ease-out), box-shadow var(--ease-out);
 }
 
 @media (hover: hover) {
   :where(button:has(svg):hover) {
-    box-shadow: none;
-    transform: scale(1.12);
-    filter: drop-shadow(0 0 4px var(--glow));
+    background: var(--hover-wash);
+    box-shadow: 0 0 0 6px var(--hover-wash);
   }
 }
 
 :where(button:has(svg):active) {
-  box-shadow: none;
-  filter: none;
-  transform: scale(0.95);
+  transform: scale(0.94);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -286,25 +292,35 @@ code {
   }
 }
 
-:where(button, input, select):focus-visible {
-  outline: 2px solid var(--border-strong);
+:where(button, input, select, textarea, a):focus-visible {
+  outline: 2px solid var(--text-h);
   outline-offset: 2px;
 }
 
-:where(input:not([type='checkbox'], [type='range']), select) {
+:where(input:not([type='checkbox'], [type='radio'], [type='range']), select, textarea) {
   font: inherit;
-  font-size: 0.9rem;
-  color: var(--text);
+  font-size: 0.9375rem;
+  color: var(--text-h);
   background: var(--surface-inset);
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius-sm);
-  padding: 0.3rem 0.5rem;
+  padding: 0.45rem 0.7rem;
   box-sizing: border-box;
-  transition: border-color var(--ease);
+  transition: border-color var(--ease), background-color var(--ease);
 }
 
-:where(input:not([type='checkbox'], [type='range']):hover, select:hover) {
+:where(input, textarea)::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+:where(input:not([type='checkbox'], [type='radio'], [type='range']):hover, select:hover, textarea:hover) {
   border-color: var(--border-strong);
+}
+
+:where(input:not([type='checkbox'], [type='radio'], [type='range']):focus, select:focus, textarea:focus) {
+  border-color: var(--border-strong);
+  background: var(--surface);
 }
 
 :where(input[type='checkbox'], input[type='range']) {
@@ -319,9 +335,12 @@ code {
    Chromium/Safari use the ::-webkit-scrollbar parts (they allow rounded,
    inset thumbs); Firefox gets the standard properties instead. Chromium
    ignores the -webkit- parts once scrollbar-color is set, hence @supports. */
+:root:not([data-theme="light"]) {
+  --scrollbar-thumb: rgba(255, 255, 255, 0.12);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.24);
+}
+
 :root {
-  --scrollbar-thumb: rgba(255, 255, 255, 0.16);
-  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
   --scrollbar-thumb-active: color-mix(in srgb, var(--primary) 70%, transparent);
 }
 

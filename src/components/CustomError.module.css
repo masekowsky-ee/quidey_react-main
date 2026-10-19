@@ -14,27 +14,19 @@
 .innerDiv{
     composes: panel from './ui.module.css';
     padding: 2rem;
-    border-color: var(--border-strong);
-    box-shadow: var(--shadow);
+    max-width: min(28rem, calc(100vw - 2rem));
+    box-sizing: border-box;
+    border-color: var(--control-border);
+    box-shadow: var(--shadow-modal);
 }
 
 .okBtn{
-    composes: glowDanger from './ui.module.css';
+    composes: btnPrimary from './ui.module.css';
     min-width: 6rem;
     height: 2.5rem;
-    background: linear-gradient(180deg,
-        color-mix(in srgb, var(--danger) 22%, var(--surface-hover)),
-        color-mix(in srgb, var(--danger) 10%, var(--surface)));
-    border-color: color-mix(in srgb, var(--danger) 55%, transparent);
-    border-radius: var(--radius);
-    font-weight: 700;
-}
-
-.okBtn:hover{
-    border-color: var(--danger);
 }
 
 .h2{
-    font-weight: 800;
-    margin-bottom: 2rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
 }

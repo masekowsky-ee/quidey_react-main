@@ -49,6 +49,15 @@ export default function History(){
         ...sharedHistory.map(entry => ({ kind: 'shared', key: `shared-${entry.id}`, date: new Date(entry.lastWorkedAt), data: entry })),
     ].sort((a, b) => b.date - a.date);
 
+    // each row's length bar is measured against the longest entry in the list
+    const entryMinutes = (entry) => entry.kind === 'shared'
+        ? Math.max(1, Math.round(entry.data.myMs / 60000))
+        : Math.ceil((entry.data.totalTime ?? 0) / 60);
+    const longest = Math.max(1, ...timeline.map(entryMinutes));
+    const lengthBar = (entry) => (
+        <span className={styles.lengthBar} style={{ '--share': entryMinutes(entry) / longest }} aria-hidden="true" />
+    );
+
     const dateText = (date) => date.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
     const timeText = (date) => date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', timeZone: browserTZ });
 
@@ -66,17 +75,18 @@ export default function History(){
                             <span className={styles.statValue}>{formatMinutes(totalMinutes)}</span>
                             <span className={styles.statLabel}>{t('focusTime')}</span>
                         </div>
-                        <div className={`${styles.stat} ${styles.sharedStat}`}>
+                        <div className={styles.stat}>
                             <span className={styles.statValue}>{formatMinutes(sharedMinutes)}</span>
                             <span className={styles.statLabel}>{t('togetherTime')}</span>
                         </div>
                     </div>
 
                     <ul className={styles.list}>
-                        {timeline.map(({ kind, key, date, data }) => {
+                        {timeline.map((entry) => {
+                            const { kind, key, date, data } = entry;
                             if (kind === 'shared') {
                                 return (
-                                    <li key={key} className={`${styles.session} ${styles.sharedSession}`}>
+                                    <li key={key} className={styles.session}>
                                         <div className={styles.sessionHead}>
                                             <div>
                                                 <span className={styles.sharedLabel}><TeamIcon />{t('sharedSessionLabel')}</span>
@@ -90,6 +100,7 @@ export default function History(){
                                             </div>
                                             <span className={styles.duration}>{formatMinutes(Math.max(1, Math.round(data.myMs / 60000)))}</span>
                                         </div>
+                                        {lengthBar(entry)}
                                         <ul className={styles.tags}>
                                             {data.tasks.map(task => (
                                                 <li key={task.id} className={styles.tag}>
@@ -116,6 +127,7 @@ export default function History(){
                                         </div>
                                         <span className={styles.duration}>{`${Math.ceil(ws.totalTime / 60)} min`}</span>
                                     </div>
+                                    {lengthBar(entry)}
                                     {ws.workedTasks.length > 0 &&
                                         <ul className={styles.tags}>
                                             {[...ws.workedTasks]

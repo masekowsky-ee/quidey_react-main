@@ -10,9 +10,9 @@
 /* Centered reading column for simple pages (settings, profile, history) */
 .pageColumn {
     composes: page;
-    width: min(640px, calc(100% - 2rem));
+    width: min(680px, calc(100% - 2rem));
     margin: 0 auto;
-    padding-bottom: 3rem;
+    padding-bottom: 4rem;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -21,20 +21,19 @@
 }
 
 .pageTitle {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 600;
-    letter-spacing: -0.01em;
-    margin: 2rem 0 0.25rem;
+    letter-spacing: -0.02em;
+    margin: 2.5rem 0 0.5rem;
 }
 
-/* Small uppercase label above a card's content */
+/* Quiet sentence-case title at the top of a card */
 .cardTitle {
     margin: 0 0 1rem;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    letter-spacing: 0;
+    color: var(--text-h);
 }
 
 /* Pill-shaped group of options where exactly one is active */
@@ -42,21 +41,21 @@
     display: inline-flex;
     max-width: 100%; /* never wider than the screen (narrow phones) */
     box-sizing: border-box;
-    gap: 3px;
+    gap: 2px;
     padding: 3px;
     background-color: var(--surface-inset);
-    border: 1px solid var(--btn-border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
 }
 
 .segmented > button {
     flex: 1;
     min-width: 0;
-    padding: 0.35rem 0.9rem;
+    padding: 0.3rem 0.95rem;
+    font-size: 0.875rem;
     background: none;
     border-color: transparent;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-pill);
     box-shadow: none;
     color: var(--text-muted);
     filter: none;
@@ -64,6 +63,7 @@
 }
 
 .segmented > button:hover {
+    background: none;
     color: var(--text-h);
     border-color: transparent;
     box-shadow: none;
@@ -80,12 +80,12 @@
 /* Two classes so it beats the plain option above */
 .segmented > .segmentActive,
 .segmented > .segmentActive:hover {
-    background: linear-gradient(180deg, var(--contrast-top), var(--contrast-bottom));
-    color: var(--contrast-text);
-    box-shadow: var(--contrast-shadow);
+    background: var(--surface-strong);
+    color: var(--text-h);
+    box-shadow: none;
 }
 
-/* Rounded dark box */
+/* Rounded box one lightness step above the page */
 .panel {
     background-color: var(--surface);
     border: 1px solid var(--border);
@@ -95,8 +95,8 @@
 /* Panel with comfortable padding, the basic block of the simple pages */
 .card {
     composes: panel;
-    padding: 1.25rem 1.5rem;
-    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+    box-shadow: none;
 }
 
 /* Box that hangs from the header: no top border, rounded bottom corners */
@@ -132,37 +132,32 @@
     --glow: color-mix(in srgb, var(--danger) 70%, transparent);
 }
 
-/* Green call-to-action button; hover/press motion comes from the base button */
+/* The one primary action: inverted and flat (light pill on dark, dark pill on light).
+   The accent colour stays on the data, never on buttons. */
 .btnPrimary {
-    composes: glowPrimary;
     min-width: 7rem;
     height: 2.25rem;
     padding: 0 1.25rem;
-    background: linear-gradient(180deg,
-        color-mix(in srgb, var(--primary) 80%, white),
-        var(--primary) 50%,
-        color-mix(in srgb, var(--primary) 82%, black));
-    color: var(--primary-text);
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    border: 1px solid color-mix(in srgb, var(--primary) 55%, black);
-    border-radius: var(--radius-sm);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 1px 2px rgba(0, 0, 0, 0.5),
-        0 6px 16px -8px var(--glow);
+    background: var(--contrast-top);
+    color: var(--contrast-text);
+    font-weight: 600;
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    box-shadow: none;
 }
 
 .btnPrimary:hover {
-    border-color: color-mix(in srgb, var(--primary) 55%, black);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.5),
-        0 10px 24px -8px var(--glow);
+    background: color-mix(in srgb, var(--contrast-top) 86%, var(--bg));
+    border-color: transparent;
+    box-shadow: none;
 }
 
-/* High-contrast button (selected tab, secondary switch): light in dark mode, dark in light mode */
+/* Selected tab or filter: a neutral raised pill with the label in full ink */
 .btnLight {
-    background: linear-gradient(180deg, var(--contrast-top), var(--contrast-bottom));
-    color: var(--contrast-text);
-    border-color: var(--contrast-border);
-    box-shadow: var(--contrast-shadow);
+    background: var(--surface-strong);
+    color: var(--text-h);
+    border-color: transparent;
+    box-shadow: none;
 }
 
 /* Bare icon button with a fixed hit area. Self-contained so it also works on links. */
@@ -177,17 +172,18 @@
     color: var(--text);
     background: none;
     border: none;
-    transition: transform var(--ease), filter var(--ease);
+    border-radius: var(--radius-pill);
+    transition: transform var(--ease), background-color var(--ease), color var(--ease);
 }
 
 .iconBtn:hover {
-    background: none;
-    transform: scale(1.12);
-    filter: drop-shadow(0 0 4px var(--glow));
+    background: var(--hover-wash);
+    box-shadow: none;
+    color: var(--text-h);
 }
 
 .iconBtn:active {
-    transform: scale(0.95);
+    transform: scale(0.94);
 }
 
 /* Round variant */
@@ -208,22 +204,27 @@
     border-color: transparent;
 }
 
-/* Bare clickable svg: same grow-and-glow hover as icon buttons */
+/* Bare clickable svg: it brightens on hover, settles on press */
 .iconHover {
     cursor: pointer;
-    transition: transform var(--ease), filter var(--ease);
+    opacity: 0.8;
+    transition: transform var(--ease), opacity var(--ease), color var(--ease);
 }
 
 .iconHover:hover {
-    transform: scale(1.12);
-    filter: drop-shadow(0 0 4px var(--glow));
+    opacity: 1;
+    color: var(--text-h);
 }
 
 .iconHover:active {
-    transform: scale(0.95);
+    transform: scale(0.94);
 }
 
-/* Delete control (button or bare svg): same hover, red glow */
+/* Delete control (button or bare svg): turns red on hover */
 .deleteBtn {
     composes: iconHover glowDanger;
+}
+
+.deleteBtn:hover {
+    color: var(--danger);
 }

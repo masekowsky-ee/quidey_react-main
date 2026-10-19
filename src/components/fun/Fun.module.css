@@ -8,8 +8,8 @@
     --res-correct-text: #ffffff;
     --res-present: #d9a520;
     --res-present-text: #1f1600;
-    --res-absent: #4a4e55;
-    --res-absent-text: #e5e7eb;
+    --res-absent: #3d3a37;
+    --res-absent-text: #ebe7e3;
     width: min(760px, calc(100% - 2rem));
     margin: 0 auto;
     padding-bottom: 3rem;
@@ -22,7 +22,7 @@
 :global(:root[data-theme="light"]) .page{
     --res-correct: #1f9d47;
     --res-present: #e3ac1c;
-    --res-absent: #8b9099;
+    --res-absent: #8f8a85;
     --res-absent-text: #ffffff;
 }
 
@@ -38,10 +38,8 @@
 
 .secret{
     padding: 0.2rem 0.75rem;
-    font-size: 0.7rem;
+    font-size: 0.8125rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
     color: var(--primary-fg);
     border: 1px dashed color-mix(in srgb, var(--primary) 60%, transparent);
     border-radius: 999px;
@@ -49,21 +47,11 @@
 
 .title{
     margin: 0;
-    font-size: clamp(2rem, 6vw, 2.75rem);
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    line-height: 1.1;
-    background: linear-gradient(100deg, var(--text-h) 20%, var(--primary) 50%, var(--text-h) 80%);
-    background-size: 250% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: titleShimmer 6s ease-in-out infinite alternate;
-}
-
-@keyframes titleShimmer{
-    from { background-position: 100% 0; }
-    to { background-position: 0% 0; }
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: var(--text-h);
 }
 
 .intro{
@@ -96,10 +84,8 @@
 
 .lineLabel{
     margin-bottom: 0.4rem;
-    font-size: 0.7rem;
+    font-size: 0.8125rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--primary-fg);
 }
 
@@ -129,16 +115,14 @@
     gap: 0.3rem;
     text-align: center;
     background: var(--surface);
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
 }
 
 .pickActive,
 .pickActive:hover{
-    border-color: var(--primary);
-    background:
-        radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 70%),
-        var(--surface);
-    box-shadow: 0 0 0 1px var(--primary), 0 10px 26px -12px color-mix(in srgb, var(--primary) 70%, transparent);
+    border-color: var(--text-h);
+    background: var(--surface-hover);
+    box-shadow: none;
 }
 
 .pickGlyph{
@@ -182,17 +166,14 @@
 .stat{
     min-width: 4.5rem;
     padding: 0.35rem 0.75rem;
-    background-color: var(--surface-inset);
-    border: 1px solid var(--btn-border);
+    background-color: var(--surface-hover);
+    border: none;
     border-radius: var(--radius);
-    box-shadow: var(--shadow-inset);
 }
 
 .stat dt{
-    font-size: 0.65rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--text-muted);
 }
 
@@ -282,10 +263,8 @@
 }
 
 .levelLabel{
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--text-muted);
 }
 

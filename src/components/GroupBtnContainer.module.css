@@ -22,7 +22,7 @@
 .inner > .addGroupBtn{
     height: 2.1rem;
     padding: 0 0.7rem;
-    border: 1px dashed var(--border);
+    border: 1px dashed var(--control-border);
     border-radius: 999px;
     color: var(--text-muted);
 }
@@ -43,7 +43,10 @@
     height: 2.1rem;
     padding: 0 1rem;
     border-radius: 999px;
-    font-weight: 600;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text);
+    background: transparent;
 }
 
 .activeGroup{
@@ -62,7 +65,7 @@
     box-sizing: border-box;
     color: var(--text);
     background-color: var(--surface-strong);
-    border: 1px solid var(--btn-border);
+    border: none;
     border-radius: 50%;
     corner-shape: round;
     opacity: 0;
@@ -99,7 +102,7 @@
 }
 
 .sharedGroupBtn.activeGroup{
-    color: var(--contrast-text);
+    color: var(--text-h);
 }
 
 /* open tasks in it */

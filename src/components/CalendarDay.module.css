@@ -9,7 +9,6 @@
     padding: 1rem;
     box-sizing: border-box;
     text-align: left;
-    backdrop-filter: blur(3px);
     animation: fadeIn 0.2s ease;
 }
 
@@ -23,7 +22,7 @@
     flex-direction: column;
     gap: 0.9rem;
     outline: none;
-    box-shadow: var(--shadow), var(--shadow-modal);
+    box-shadow: var(--shadow-modal);
     animation: panelIn 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -83,10 +82,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--text-muted);
 }
 
@@ -319,9 +316,7 @@
 }
 
 .overduePill{
-    font-size: 0.64rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    font-size: 0.8125rem;
     color: var(--danger);
     background-color: color-mix(in srgb, var(--danger) 12%, transparent);
 }
@@ -385,7 +380,6 @@
     flex-direction: row;
     align-items: baseline;
     justify-content: space-between;
-    text-transform: uppercase;
 }
 
 .field input:not([type='range']),
@@ -596,10 +590,8 @@
     align-items: baseline;
     justify-content: space-between;
     margin: 0 0 0.5rem;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--text-muted);
 }
 

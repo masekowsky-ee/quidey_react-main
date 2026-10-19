@@ -102,7 +102,8 @@
 
 .overdueBtn:hover{
     border-color: var(--danger);
-    box-shadow: 0 0 14px -6px var(--danger);
+    background-color: color-mix(in srgb, var(--danger) 10%, transparent);
+    box-shadow: none;
 }
 
 .segmented{
@@ -190,16 +191,16 @@
     padding: 0 0.85rem 0 0.6rem;
     font-size: 0.85rem;
     color: var(--text-h);
-    background: linear-gradient(180deg, var(--surface-hover), var(--surface));
+    background: var(--surface-hover);
     border: 1px solid var(--btn-border);
-    box-shadow: var(--btn-shadow);
+    border-radius: var(--radius-pill);
+    box-shadow: none;
 }
 
 .exportBtn:hover{
+    background: var(--surface-strong);
     border-color: var(--btn-border-hover);
-    box-shadow: var(--btn-shadow-hover);
-    filter: brightness(1.08);
-    transform: translateY(-1px);
+    box-shadow: none;
 }
 
 .exportBtn:active{
@@ -240,8 +241,10 @@
 }
 
 .chipShared{
-    margin-left: 0.25rem;
-    color: var(--primary-fg);
+    display: inline-flex;
+    vertical-align: -0.1em;
+    margin-left: 0.3rem;
+    color: var(--text-muted);
 }
 
 .hint{
@@ -279,10 +282,8 @@
 
 .weekdayHead{
     padding: 0.25rem 0 0.35rem 0.6rem;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--text-muted);
 }
 
@@ -343,7 +344,6 @@
     background: var(--surface-hover);
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
     cursor: pointer;
     outline: none;
     transition: border-color var(--ease-out), background-color var(--ease-out);
@@ -383,7 +383,6 @@
 .todayCell .dayNum{
     color: var(--primary-text);
     background-color: var(--primary);
-    box-shadow: 0 0 10px -2px var(--primary);
 }
 
 /* The day a dragged task would land on */
@@ -619,10 +618,8 @@
 }
 
 .weekDayName{
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--text-muted);
 }
 
@@ -703,7 +700,7 @@
 
 .agendaToday{
     border-color: color-mix(in srgb, var(--primary) 50%, transparent);
-    box-shadow: inset 3px 0 0 var(--primary), var(--shadow-sm);
+    box-shadow: inset 3px 0 0 var(--primary);
 }
 
 .agendaOverdue{
@@ -756,10 +753,8 @@ button.agendaHeadDate:hover{
 
 .todayTag{
     padding: 0.05rem 0.5rem;
-    font-size: 0.66rem;
+    font-size: 0.8125rem;
     font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
     color: var(--primary-text);
     background-color: var(--primary);
     border-radius: 999px;

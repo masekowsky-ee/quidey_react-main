@@ -28,7 +28,6 @@
 }
 
 .field > span{
-    text-transform: uppercase;
 }
 
 .field input,
@@ -98,10 +97,8 @@
 }
 
 .sectionLabel{
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
     color: var(--text-muted);
 }
 
@@ -250,10 +247,8 @@
     align-items: center;
     gap: 0.5rem;
     margin: 0 0 0.6rem;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--primary-fg);
 }
 

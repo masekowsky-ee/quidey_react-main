@@ -27,6 +27,7 @@
     align-items: center;
     justify-content: center;
     border-style: dashed;
+    border-color: var(--control-border);
     background-color: transparent;
     box-shadow: none;
 }

@@ -8,7 +8,6 @@
     justify-content: center;
     padding: 1rem;
     box-sizing: border-box;
-    backdrop-filter: blur(4px);
     animation: fadeIn 0.25s ease-out;
 }
 
@@ -23,13 +22,11 @@
     flex-direction: column;
     gap: 1.25rem;
     color: var(--text);
-    background:
-        radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 70%),
-        var(--surface);
-    border: 1px solid var(--btn-border);
+    background: var(--surface);
+    border: 1px solid var(--control-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-modal);
-    animation: popIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    animation: popIn 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .top{
@@ -40,9 +37,8 @@
 }
 
 .counter{
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
+    font-size: 0.8125rem;
+    font-weight: 500;
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
 }
@@ -71,41 +67,35 @@
     animation: slideFromLeft 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Glowing badge around the step's icon */
+/* Calm disc behind the step's icon, a pale wash of the accent */
 .iconWrap{
-    width: 5rem;
-    height: 5rem;
+    width: 4.5rem;
+    height: 4.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     corner-shape: round;
     color: var(--primary-fg);
-    background: radial-gradient(circle at 30% 25%,
-        color-mix(in srgb, var(--primary) 30%, var(--surface)),
-        color-mix(in srgb, var(--primary) 8%, var(--surface)) 70%);
-    border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
-    box-shadow: 0 0 0 6px color-mix(in srgb, var(--primary) 8%, transparent),
-        0 10px 30px -10px color-mix(in srgb, var(--primary) 70%, transparent);
+    background: color-mix(in srgb, var(--primary) 12%, var(--surface));
 }
 
 .icon{
-    width: 2.6rem;
-    height: 2.6rem;
+    width: 2.25rem;
+    height: 2.25rem;
 }
 
 /* The welcome card shows the logo itself, a bit larger than the step icons */
 .logo{
-    width: 5.5rem;
-    height: 5.5rem;
-    filter: drop-shadow(0 6px 18px color-mix(in srgb, var(--primary) 40%, transparent));
+    width: 4.5rem;
+    height: 4.5rem;
 }
 
 .title{
     margin: 0.5rem 0 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-size: 1.375rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
 }
 
 .text{
