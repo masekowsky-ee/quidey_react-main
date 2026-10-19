@@ -12,15 +12,8 @@ import { showToast } from '../features/toast/toast'
 import GroupPicker from './GroupPicker.jsx'
 import TaskLabels from './TaskLabels.jsx'
 import { AnimatePresence, motion } from 'motion/react'
+import { MOTION, useMotionLevel, burstFrom } from '../features/settings/motion'
 
-// rows fade in, fade out and slide to their new place when the order changes
-const rowMotion = {
-    layout: 'position',
-    initial: { opacity: 0, y: -4 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, transition: { duration: 0.15 } },
-    transition: { duration: 0.25, ease: [0.32, 0.72, 0, 1] },
-};
 
 export default function TaskContainer(props){
     const { working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask } = props;
@@ -30,6 +23,19 @@ export default function TaskContainer(props){
     
     const {t} = useTranslation();
     const dispatch = useDispatch();
+    const motionLevel = useMotionLevel();
+    const extreme = motionLevel === 'extreme';
+    // rows animate in, out and to a new place, and cascade in one after another when the list
+    // appears (gently on "normal", wildly on "extreme")
+    const cascade = motionLevel !== 'minimal';
+    const rowMotion = (index = 0) => {
+        const preset = MOTION.row[motionLevel];
+        if (!cascade) return preset;
+        const step = extreme ? 0.045 : 0.025;
+        return { ...preset, transition: { ...preset.transition, delay: Math.min(index, 12) * step } };
+    };
+    // a finished task earns confetti on "extreme"
+    const celebrate = (e) => { if (extreme) burstFrom(e.currentTarget); };
 
     const tasks = useSelector(state => state.task.tasks);
     const groups = useSelector(state => state.task.groups);
@@ -161,9 +167,9 @@ export default function TaskContainer(props){
                 <div className={styles.ulDiv}>
                     <ul className={styles.ul}>
                         <h3 className={styles.ulH3}>{t('toDo')}</h3>
-                    <AnimatePresence initial={false}>
+                    <AnimatePresence initial={cascade}>
                     {listTasks.find(task => task.done !== true) && listTasks
-                            .map((task) => {
+                            .map((task, index) => {
                                 // Check if this specific task is the one currently being dragged
                                 const isBeingDragged = draggedTask?.id === task.id;
 
@@ -171,7 +177,7 @@ export default function TaskContainer(props){
                                     // from a shared session: same cells as an own task, but read-only
                                     return (
                                         <motion.li
-                                            {...rowMotion}
+                                            {...rowMotion(index)}
                                             key={`${task.id}li`}
                                             className={`${styles.taskLi} ${styles.sharedLi}`}
                                             style={isBeingDragged ? { visibility: 'hidden' } : undefined}
@@ -181,7 +187,7 @@ export default function TaskContainer(props){
                                                 <p>{task.name}</p>
                                                 <TaskLabels task={task} onOpenGroup={openGroup} />
                                             </div>
-                                            <button onClick={() => toggleSharedDone(task)} title={t('markDone')} aria-label={`${t('markDone')}: ${task.name}`}>
+                                            <button onClick={(e) => { celebrate(e); toggleSharedDone(task); }} title={t('markDone')} aria-label={`${t('markDone')}: ${task.name}`}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
                                             </button>
                                             <p className={styles.sharedTime} title={t('myTimeInSession')}>{task.myMs > 0 ? formatDuration(task.myMs) : ''}</p>
@@ -196,7 +202,7 @@ export default function TaskContainer(props){
                                 if(!task.done && task.id !== activeTask?.id){
                                     return (
                                         <motion.li
-                                            {...rowMotion}
+                                            {...rowMotion(index)}
                                             key={`${task.id}li`}
                                             className={styles.taskLi}
                                             style={isBeingDragged ? { visibility: 'hidden' } : undefined}
@@ -211,7 +217,7 @@ export default function TaskContainer(props){
                                                 <TaskMeta task={task} showTime={false} />
                                                 <TaskLabels task={task} onOpenGroup={openGroup} />
                                             </div>
-                                            <button onClick={()=>{setTaskPropHandler(!task.done, 'done', task)}}>
+                                            <button onClick={(e)=>{celebrate(e); setTaskPropHandler(!task.done, 'done', task)}}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
                                             </button>
                                             { taskToEdit && taskPropToEdit === 'due' && taskToEdit.id === task.id
@@ -252,11 +258,11 @@ export default function TaskContainer(props){
                 <div className={styles.ulDiv}>
                     <ul className={styles.ul}>
                         <h3 className={styles.ulH3}>{t('done')}</h3>
-                    <AnimatePresence initial={false}>
+                    <AnimatePresence initial={cascade}>
                     {listTasks
-                        .map((task) => {
+                        .map((task, index) => {
                             if(task.done && task.shared){
-                                return (<motion.li {...rowMotion} key={task.id} className={`${styles.taskLi} ${styles.doneLi}`}>
+                                return (<motion.li {...rowMotion(index)} key={task.id} className={`${styles.taskLi} ${styles.doneLi}`}>
                                     <div className={styles.taskHeader}>
                                         <div className={styles.doneHeadDiv}>
                                             <p style={{textDecoration: 'line-through'}}>{task.name}</p>
@@ -267,7 +273,7 @@ export default function TaskContainer(props){
                                 </motion.li>)
                             }
                             if(task.done && task.id !== activeTask?.id){
-                                return (<motion.li {...rowMotion} key={task.id} className={`${styles.taskLi} ${styles.doneLi}`}>
+                                return (<motion.li {...rowMotion(index)} key={task.id} className={`${styles.taskLi} ${styles.doneLi}`}>
                                     <div className={styles.taskHeader}>
                                         <div className={styles.doneHeadDiv}>
                                             <p style={{textDecoration: 'line-through'}} onClick={(e) => changePropHandler(e, 'name', task.id)}>{task['name']}</p>

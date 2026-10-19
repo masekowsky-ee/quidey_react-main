@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { Player } from '@remotion/player';
 import LogoIntro, { INTRO_FPS, INTRO_FRAMES } from './LogoIntro';
+import ExtremeIntro, { EXTREME_FRAMES } from './ExtremeIntro';
 
-// Plays the logo composition once and reports when it is over
-export default function IntroPlayer({ onEnded }) {
+// Plays the logo composition once (the big one on "extreme") and reports when it is over
+export default function IntroPlayer({ extreme, onEnded }) {
     const ref = useRef(null);
 
     useEffect(() => {
@@ -16,12 +17,12 @@ export default function IntroPlayer({ onEnded }) {
     return (
         <Player
             ref={ref}
-            component={LogoIntro}
-            durationInFrames={INTRO_FRAMES}
+            component={extreme ? ExtremeIntro : LogoIntro}
+            durationInFrames={extreme ? EXTREME_FRAMES : INTRO_FRAMES}
             fps={INTRO_FPS}
-            compositionWidth={640}
-            compositionHeight={360}
-            style={{ width: 'min(640px, 100vw)', aspectRatio: '16 / 9' }}
+            compositionWidth={extreme ? 1280 : 640}
+            compositionHeight={extreme ? 720 : 360}
+            style={extreme ? { width: '100vw', height: '100vh' } : { width: 'min(640px, 100vw)', aspectRatio: '16 / 9' }}
             // silent, so browsers let it start on their own
             autoPlay
             initiallyMuted

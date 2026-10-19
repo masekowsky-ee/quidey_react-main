@@ -146,3 +146,56 @@
   composes: overlay from './ui.module.css';
   z-index: var(--z-menu-overlay);
 }
+
+/* ---------- "extreme" motion: the panel swings in past its place, the entries follow ---------- */
+:global(:root[data-motion="extreme"]) .menuDiv{
+  transition: transform 0.7s cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+
+:global(:root[data-motion="extreme"]) .menuDiv.open .menuItem{
+  animation: menuItemIn 0.6s cubic-bezier(0.34, 1.7, 0.64, 1) both;
+}
+
+:global(:root[data-motion="extreme"]) .menuDiv.open .menuList > :nth-child(2){ animation-delay: 0.04s; }
+:global(:root[data-motion="extreme"]) .menuDiv.open .menuList > :nth-child(3){ animation-delay: 0.08s; }
+:global(:root[data-motion="extreme"]) .menuDiv.open .menuList > :nth-child(4){ animation-delay: 0.12s; }
+:global(:root[data-motion="extreme"]) .menuDiv.open .menuList > :nth-child(5){ animation-delay: 0.16s; }
+:global(:root[data-motion="extreme"]) .menuDiv.open .menuList > :nth-child(6){ animation-delay: 0.2s; }
+:global(:root[data-motion="extreme"]) .menuDiv.open .menuBottom > *{ animation-delay: 0.26s; }
+
+:global(:root[data-motion="extreme"]) .menuItem:hover{
+  translate: 8px 0;
+}
+
+:global(:root[data-motion="extreme"]) .menuItem:hover .menuIcon{
+  scale: 1.25;
+  rotate: -12deg;
+  transition: scale 0.4s cubic-bezier(0.34, 1.7, 0.64, 1), rotate 0.4s cubic-bezier(0.34, 1.7, 0.64, 1);
+}
+
+@keyframes menuItemIn{
+  from{
+    opacity: 0;
+    translate: -60px 0;
+    scale: 0.8;
+  }
+}
+
+/* "normal" motion: the entries slide in shortly after the panel */
+:global(:root[data-motion="normal"]) .menuDiv.open .menuItem{
+  animation: menuItemSoft 0.4s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(2){ animation-delay: 0.02s; }
+:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(3){ animation-delay: 0.04s; }
+:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(4){ animation-delay: 0.06s; }
+:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(5){ animation-delay: 0.08s; }
+:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(6){ animation-delay: 0.1s; }
+:global(:root[data-motion="normal"]) .menuDiv.open .menuBottom > *{ animation-delay: 0.12s; }
+
+@keyframes menuItemSoft{
+  from{
+    opacity: 0;
+    translate: -16px 0;
+  }
+}

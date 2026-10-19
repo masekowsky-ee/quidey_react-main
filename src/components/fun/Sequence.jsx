@@ -3,6 +3,7 @@ import styles from './Fun.module.css';
 import { useTranslation } from '../../i18n/useTranslation';
 import { fill } from '../../features/helperFunction';
 import { makeSequence, sequenceIsTyped, readBest, saveBest } from '../../features/fun/games';
+import { useCelebrate } from '../../features/settings/motion';
 import Stats from './Stats';
 
 // "What comes next?": spot the rule behind five numbers and name the sixth.
@@ -16,6 +17,7 @@ export default function Sequence({ level = 'normal' }) {
     const [score, setScore] = useState(0);
     const [streak, setStreak] = useState(0);
     const [best, setBest] = useState(() => readBest('sequence', level));
+    const celebrate = useCelebrate(0);
 
     const answered = chosen !== null;
     const right = chosen === puzzle.answer;
@@ -29,6 +31,7 @@ export default function Sequence({ level = 'normal' }) {
             const nextStreak = streak + 1;
             setStreak(nextStreak);
             setBest(saveBest('sequence', level, nextStreak));
+            celebrate();
         } else {
             setStreak(0);
         }

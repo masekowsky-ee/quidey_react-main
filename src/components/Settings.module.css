@@ -116,3 +116,18 @@
         width: 100%;
     }
 }
+
+/* ---------- "extreme" motion: swatches hop, their dot spins ---------- */
+:global(:root[data-motion="extreme"]) .swatches > .swatch:hover{
+    translate: 0 -5px;
+    scale: 1.05;
+}
+
+:global(:root[data-motion="extreme"]) .swatchDot{
+    transition: scale 0.5s cubic-bezier(0.34, 1.7, 0.64, 1);
+}
+
+:global(:root[data-motion="extreme"]) .swatch:hover .swatchDot,
+:global(:root[data-motion="extreme"]) .swatchActive .swatchDot{
+    scale: 1.35;
+}

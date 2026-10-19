@@ -1,5 +1,6 @@
-import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL } from "./settingsActionTypes";
+import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION } from "./settingsActionTypes";
 import { HOME_LAYOUTS, storeHomeLayout } from "./homeLayout";
+import { MOTION_LEVELS, storeMotion } from "./motion";
 import { LANGUAGES, storeLanguage, ACCENTS, storeAccent, SESSION_LENGTHS, storeSessionMinutes } from "./preferences";
 
 export const setShowMenu = () => ({
@@ -66,3 +67,12 @@ export const setShowTutorial = (show) => ({
     type: SET_SHOW_TUTORIAL,
     payload: show
 });
+
+// 'minimal' | 'normal' | 'extreme'; remembered for the next visit
+export const setMotion = (level) => {
+    if (MOTION_LEVELS.includes(level)) storeMotion(level);
+    return {
+        type: SET_MOTION,
+        payload: level
+    };
+};

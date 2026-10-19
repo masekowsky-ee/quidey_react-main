@@ -9,8 +9,9 @@ import { WORK_SWITCHED, WORK_SETTLED, WORK_RESTORED, WORK_STOPPED, SHARED_SESSIO
 import { startWork, stopWork, tickWork, localMs, workTotalMs, MAX_REPORT_MS } from '../features/together/work'
 import { describeEvent, summaryRows } from '../features/together/format'
 import toastReducer, { showToast, TOAST_MS } from '../features/toast/toast'
-import { setHomeLayout } from '../features/settings/settingsAction'
+import { setHomeLayout, setMotion } from '../features/settings/settingsAction'
 import { readStoredHomeLayout } from '../features/settings/homeLayout'
+import { readStoredMotion } from '../features/settings/motion'
 import { apiFetch, fill, toCsv, formatRelative } from '../features/helperFunction'
 import { translate } from '../i18n/useTranslation'
 import TeamHome from '../components/TeamHome'
@@ -161,6 +162,21 @@ describe('home layout setting', () => {
         expect(readStoredHomeLayout()).toBe('team')
         store.dispatch(setHomeLayout('nonsense'))
         expect(store.getState().settings.homeLayout).toBe('team')
+    })
+})
+
+describe('motion setting', () => {
+    it('defaults to normal, takes the three levels and is remembered', () => {
+        expect(readStoredMotion()).toBe('normal')
+        const store = makeStore()
+        expect(store.getState().settings.motion).toBe('normal')
+        store.dispatch(setMotion('extreme'))
+        expect(store.getState().settings.motion).toBe('extreme')
+        expect(readStoredMotion()).toBe('extreme')
+        store.dispatch(setMotion('wild'))
+        expect(store.getState().settings.motion).toBe('extreme')
+        store.dispatch(setMotion('minimal'))
+        expect(readStoredMotion()).toBe('minimal')
     })
 })
 

@@ -8,6 +8,7 @@ import WordGuess from './WordGuess';
 import Scramble from './Scramble';
 import Sequence from './Sequence';
 import { motion } from 'motion/react';
+import { MOTION, useMotionLevel } from '../../features/settings/motion';
 
 const GAMES = [
     { id: 'guess', title: 'gameGuess', desc: 'gameGuessDesc', glyph: 'Aa', Component: WordGuess },
@@ -21,6 +22,7 @@ export default function FunPage() {
     const { t, language } = useTranslation();
     const location = useLocation();
     const [gameId, setGameId] = useState('guess');
+    const gameMotion = MOTION.game[useMotionLevel()];
     // difficulty per game, remembered in the browser
     const [levels, setLevels] = useState(() => Object.fromEntries(GAMES.map((g) => [g.id, readLevel(g.id)])));
 
@@ -84,9 +86,7 @@ export default function FunPage() {
                 </div>
                 <p className={styles.levelHint}>{t(`levelHint_${gameId}_${level}`)}</p>
                 {/* a new language or difficulty starts a fresh game */}
-                <motion.div key={`${gameId}-${language}-${level}`}
-                    initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}>
+                <motion.div key={`${gameId}-${language}-${level}`} {...gameMotion} style={{ perspective: 800 }}>
                     <Game level={level} />
                 </motion.div>
             </section>

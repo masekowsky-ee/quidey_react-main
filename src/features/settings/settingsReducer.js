@@ -1,6 +1,7 @@
-import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL } from "./settingsActionTypes";
+import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION } from "./settingsActionTypes";
 import { THEMES, readStoredTheme } from "./theme";
 import { HOME_LAYOUTS, readStoredHomeLayout } from "./homeLayout";
+import { MOTION_LEVELS, readStoredMotion } from "./motion";
 import { LANGUAGES, readStoredLanguage, ACCENTS, readStoredAccent, SESSION_LENGTHS, readStoredSessionMinutes } from "./preferences";
 
 const intitialState = {
@@ -14,6 +15,7 @@ const intitialState = {
     homeLayout: readStoredHomeLayout(), // 'solo' | 'team', remembered in localStorage
     accent: readStoredAccent(), // accent color palette, remembered in localStorage
     defaultSessionMinutes: readStoredSessionMinutes(), // length of new sessions, remembered in localStorage
+    motion: readStoredMotion(), // 'minimal' | 'normal' | 'extreme', remembered in localStorage
 }
 
 const settingsReducer = (state = intitialState, action) => {
@@ -36,6 +38,8 @@ const settingsReducer = (state = intitialState, action) => {
             return ACCENTS.includes(action.payload) ? { ...state, accent: action.payload } : state;
         case SET_DEFAULT_SESSION_MINUTES:
             return SESSION_LENGTHS.includes(action.payload) ? { ...state, defaultSessionMinutes: action.payload } : state;
+        case SET_MOTION:
+            return MOTION_LEVELS.includes(action.payload) ? { ...state, motion: action.payload } : state;
         case SET_SHOW_TUTORIAL:
             return { ...state, showTutorial: Boolean(action.payload) };
         default:

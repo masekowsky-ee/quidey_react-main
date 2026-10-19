@@ -382,3 +382,97 @@ code {
 ::-webkit-scrollbar-button {
   display: none;
 }
+
+/* ---------- Motion setting (Settings → Animations), <html data-motion> ----------
+   minimal: nothing moves. normal: the calm defaults above. extreme: springs everywhere.
+   Extreme uses the separate scale / translate / rotate properties, so it never fights a
+   component's own transform (centering, slide-ins). */
+:root[data-motion="minimal"] *,
+:root[data-motion="minimal"] *::before,
+:root[data-motion="minimal"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0s !important;
+  scroll-behavior: auto !important;
+}
+
+:root[data-motion="extreme"] {
+  /* every transition built on the shared easing overshoots and springs back */
+  --spring: cubic-bezier(0.34, 1.7, 0.64, 1);
+  --ease: 0.5s var(--spring);
+  --ease-out: 0.5s var(--spring);
+  scroll-behavior: smooth;
+}
+
+:root[data-motion="extreme"] :where(button, a) {
+  transition: transform var(--ease), scale var(--ease), translate var(--ease), rotate var(--ease),
+    background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.3s ease, opacity 0.25s ease;
+}
+
+@media (hover: hover) {
+  :root[data-motion="extreme"] :where(button:not(:disabled)):hover {
+    scale: 1.06;
+    translate: 0 -2px;
+  }
+
+  /* icon buttons tilt and grow */
+  :root[data-motion="extreme"] :where(button:has(svg):not(:disabled)):hover {
+    scale: 1.2;
+    rotate: -8deg;
+    translate: none;
+  }
+}
+
+/* a press squashes the button hard, it springs back on release */
+:root[data-motion="extreme"] :where(button:not(:disabled)):active {
+  scale: 0.86;
+  transition-duration: 0.08s;
+}
+
+:root[data-motion="extreme"] :where(input, select, textarea):focus {
+  scale: 1.02;
+  transition: scale var(--ease), border-color 0.2s ease, background-color 0.2s ease;
+}
+
+/* dialogs bounce up out of the page */
+:root[data-motion="extreme"] [role="dialog"] {
+  animation: extremeDialogIn 0.65s var(--spring) both;
+}
+
+@keyframes extremeDialogIn {
+  from {
+    opacity: 0;
+    scale: 0.6;
+    rotate: -4deg;
+    translate: 0 60px;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+/* normal: a few quiet extras on top of the defaults */
+@media (hover: hover) {
+  :root[data-motion="normal"] :where(button:not(:disabled, :has(svg))):hover {
+    translate: 0 -1px;
+  }
+}
+
+:root[data-motion="normal"] :where(button, a) {
+  transition: transform var(--ease), translate var(--ease), background-color var(--ease), border-color var(--ease),
+    color var(--ease), box-shadow var(--ease), opacity var(--ease);
+}
+
+:root[data-motion="normal"] [role="dialog"] {
+  animation: normalDialogIn 0.35s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+@keyframes normalDialogIn {
+  from {
+    opacity: 0;
+    scale: 0.95;
+    translate: 0 12px;
+  }
+}

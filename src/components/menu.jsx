@@ -9,6 +9,7 @@ import { selectInviteCount } from '../features/together/togetherAction';
 import { selectTaskInviteCount } from '../features/tasks/taskAction';
 import { selectIsAdmin, selectAdminPendingCount } from '../features/admin/adminAction';
 import { AnimatePresence, motion } from 'motion/react';
+import { MOTION, useMotionLevel } from '../features/settings/motion';
 
 // One entry: icon, label and an optional count badge; the current page is highlighted
 function MenuLink({ to, end, icon, label, onClick, count = 0, countLabel }) {
@@ -32,6 +33,7 @@ export default function Menu(){
     const { t } = useTranslation();
 
     const dispatch = useDispatch();
+    const overlayMotion = MOTION.overlay[useMotionLevel()];
 
     const onClose = () => {
         dispatch(setShowMenu());
@@ -45,8 +47,7 @@ export default function Menu(){
     return (
         <>
             <AnimatePresence>
-                {isOpen && <motion.div className={styles.overlay} onClick={onClose}
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} />}
+                {isOpen && <motion.div className={styles.overlay} onClick={onClose} {...overlayMotion} />}
             </AnimatePresence>
             <div className={`${styles.menuDiv} ${isOpen ? styles.open : ''}`}>
                 <h2 className={styles.menuTitle}>{t('menu')}</h2>

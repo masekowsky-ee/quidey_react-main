@@ -4,6 +4,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { fill } from '../../features/helperFunction';
 import { SCRAMBLE_WORDS } from '../../features/fun/words';
 import { SCRAMBLE_LEVELS, scrambleWordsFor, pick, scramble, shuffle, readBest, saveBest } from '../../features/fun/games';
+import { useCelebrate } from '../../features/settings/motion';
 import Stats from './Stats';
 
 function newRound(language, level, previous) {
@@ -24,6 +25,7 @@ export default function Scramble({ level = 'normal' }) {
     const [score, setScore] = useState(0);
     const [streak, setStreak] = useState(0);
     const [best, setBest] = useState(() => readBest('scramble', level));
+    const celebrate = useCelebrate(0);
     const [shake, setShake] = useState(0);
 
     const { word, hint, letters, picked, revealed, result } = round;
@@ -42,6 +44,7 @@ export default function Scramble({ level = 'normal' }) {
             const nextStreak = streak + 1;
             setStreak(nextStreak);
             setBest(saveBest('scramble', level, nextStreak));
+            celebrate();
             setRound((r) => ({ ...r, picked: nextPicked, result: 'right' }));
         } else {
             setShake((n) => n + 1);

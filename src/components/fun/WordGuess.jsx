@@ -4,6 +4,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { fill } from '../../features/helperFunction';
 import { GUESS_WORDS } from '../../features/fun/words';
 import { GUESS_LEVELS, scoreGuess, keyStates, pick, readBest, saveBest } from '../../features/fun/games';
+import { useCelebrate } from '../../features/settings/motion';
 import Stats from './Stats';
 
 const KEY_ROWS = {
@@ -27,6 +28,7 @@ export default function WordGuess({ level = 'normal' }) {
     const [shake, setShake] = useState(0);
     const [streak, setStreak] = useState(0);
     const [best, setBest] = useState(() => readBest('guess', level));
+    const celebrate = useCelebrate(700);
 
     const won = guesses.at(-1) === answer;
     const over = won || guesses.length === tries;
@@ -48,6 +50,7 @@ export default function WordGuess({ level = 'normal' }) {
                 const nextStreak = streak + 1;
                 setStreak(nextStreak);
                 setBest(saveBest('guess', level, nextStreak));
+                celebrate();
             } else if (next.length === tries) {
                 setStreak(0);
             }

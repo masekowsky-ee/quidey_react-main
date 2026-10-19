@@ -29,12 +29,15 @@ import Admin from './components/Admin.jsx';
 import Tutorial from './components/Tutorial.jsx';
 import FunPage from './components/fun/FunPage.jsx';
 import { useApplyTheme } from './features/settings/theme.js';
+import { MOTION, useApplyMotion, useMotionLevel } from './features/settings/motion.js';
 
 const REQUEST_REFRESH_MS = 60 * 1000;
 
 function App(){
   const dispatch = useDispatch();
   useApplyTheme();
+  useApplyMotion();
+  const motionLevel = useMotionLevel();
   // the team stopwatch keeps running on every page
   useWorkReporter();
   const homeLayout = useSelector((state) => state.settings.homeLayout);
@@ -131,8 +134,9 @@ function App(){
 
 
   return (
-    // animations are left out for people who asked their system for less motion
-    <MotionConfig reducedMotion="user">
+    // the amount of motion is chosen in the settings ("minimal" turns it off), so the
+    // system setting is only the default there, not applied a second time here
+    <MotionConfig reducedMotion="never">
     <div>
       {!signedIn && <Profile/>}
         <div>
@@ -143,8 +147,8 @@ function App(){
         <CustomError/>
         <Toaster/>
         <Tutorial/>
-        {/* each page fades in; opacity only, a transform here would trap the pages' fixed parts */}
-        <motion.div key={location.pathname} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25, ease: 'easeOut' }}>
+        {/* each page comes in as the motion setting says */}
+        <motion.div key={location.pathname} {...MOTION.page[motionLevel]}>
         <Routes location={location}>
           <Route path="/" element={homeLayout === 'team' ? <TeamHome/> : <Home setActiveTimer={setActiveTimer}/>} />
           <Route path="/calendar" element={<Calendar/>} />

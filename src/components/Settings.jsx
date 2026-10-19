@@ -1,7 +1,8 @@
 import styles from './Settings.module.css';
 import {useTranslation} from '../i18n/useTranslation'
 import {useSelector, useDispatch} from 'react-redux';
-import {setLanguage, setTheme, setAccent, setDefaultSessionMinutes} from '../features/settings/settingsAction';
+import {setLanguage, setTheme, setAccent, setDefaultSessionMinutes, setMotion} from '../features/settings/settingsAction';
+import {MOTION_LEVELS} from '../features/settings/motion';
 import {setSessionParams} from '../features/session/sessionAction';
 import {SESSION_LENGTHS} from '../features/settings/preferences';
 import HomeLayoutSwitch from './together/HomeLayoutSwitch';
@@ -33,6 +34,7 @@ export default function Settings(){
     const theme = useSelector((state) => state.settings.theme);
     const homeLayout = useSelector((state) => state.settings.homeLayout);
     const accent = useSelector((state) => state.settings.accent);
+    const motionLevel = useSelector((state) => state.settings.motion);
     const defaultSessionMinutes = useSelector((state) => state.settings.defaultSessionMinutes);
     const dispatch = useDispatch();
 
@@ -78,6 +80,24 @@ export default function Settings(){
                                 onClick={() => dispatch(setTheme(value))}
                             >
                                 {t(label)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className={styles.row}>
+                    <div className={styles.rowText}>
+                        <span className={styles.rowLabel}>{t('motionSetting')}</span>
+                        <span className={styles.rowHint}>{t(`motionHint_${motionLevel}`)}</span>
+                    </div>
+                    <div className={styles.segmented} role="group" aria-label={t('motionSetting')}>
+                        {MOTION_LEVELS.map((level) => (
+                            <button
+                                key={level}
+                                className={motionLevel === level ? styles.segmentActive : undefined}
+                                aria-pressed={motionLevel === level}
+                                onClick={() => dispatch(setMotion(level))}
+                            >
+                                {t(`motion_${level}`)}
                             </button>
                         ))}
                     </div>

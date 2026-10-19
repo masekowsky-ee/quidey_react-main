@@ -1,34 +1,21 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import styles from './AppIntro.module.css';
+import { readStoredMotion } from '../../features/settings/motion';
 
 // Remotion only loads for the intro, not with the app
 const IntroPlayer = lazy(() => import('./IntroPlayer'));
 
-const SEEN_KEY = 'introSeen';
-
-// Once per browser session, not in tests and not for people who asked for less motion
-function shouldPlay() {
-    if (import.meta.env.MODE === 'test') return false;
-    try {
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
-        if (sessionStorage.getItem(SEEN_KEY)) return false;
-    } catch {
-        // storage blocked: play it, it's short
-    }
-    return true;
-}
+// Every time the app loads, except on "minimal" motion (and in tests).
+// Read once at start: changing the setting later doesn't replay it.
+const startLevel = () => (import.meta.env.MODE === 'test' ? 'minimal' : readStoredMotion());
 
 // The opening animation: the logo draws itself over the app, then the cover fades away.
 // A click or any key skips it.
 export default function AppIntro() {
-    const [show, setShow] = useState(shouldPlay);
+    const [level] = useState(startLevel);
+    const [show, setShow] = useState(level !== 'minimal');
     const close = useCallback(() => setShow(false), []);
-
-    // remembered here, not while deciding: StrictMode decides twice
-    useEffect(() => {
-        try { sessionStorage.setItem(SEEN_KEY, '1'); } catch { /* blocked */ }
-    }, []);
 
     useEffect(() => {
         if (!show) return;
@@ -44,10 +31,10 @@ export default function AppIntro() {
                     onClick={close}
                     aria-hidden="true"
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+                    transition={{ duration: level === 'extreme' ? 0.6 : 0.35, ease: [0.32, 0.72, 0, 1] }}
                 >
                     <Suspense fallback={null}>
-                        <IntroPlayer onEnded={close} />
+                        <IntroPlayer extreme={level === 'extreme'} onEnded={close} />
                     </Suspense>
                 </motion.div>
             )}
