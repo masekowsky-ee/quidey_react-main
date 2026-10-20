@@ -7,11 +7,13 @@ import { LEGAL_PATHS } from '../../legal/paths';
 // Remotion only loads for the intro, not with the app
 const IntroPlayer = lazy(() => import('./IntroPlayer'));
 
-// Every time the app loads, except on "minimal" motion, on the legal pages and the mail link
-// (those are opened to read something right away), and in tests.
+// Every time the app loads for someone signed in, except on "minimal" motion, on the legal pages
+// and the mail link (those are opened to read something right away), and in tests. Visitors who
+// aren't signed in land on the landing page and see it at once.
 // Read once at start: changing the setting later doesn't replay it.
 const NO_INTRO_PATHS = [...LEGAL_PATHS, '/verify-email'];
-const startLevel = () => (import.meta.env.MODE === 'test' || NO_INTRO_PATHS.includes(window.location.pathname)
+const signedIn = () => { try { return Boolean(localStorage.getItem('token')); } catch { return false; } };
+const startLevel = () => (import.meta.env.MODE === 'test' || !signedIn() || NO_INTRO_PATHS.includes(window.location.pathname)
     ? 'minimal'
     : readStoredMotion());
 

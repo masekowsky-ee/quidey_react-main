@@ -1,0 +1,2430 @@
+{
+ "url": "http://localhost:5174/",
+ "at": "2026-10-20T16:03:08.243Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 7,
+   "filled": [
+    0.63,
+    0.75,
+    0.84,
+    0.92,
+    0.71,
+    0.64,
+    0.96
+   ],
+   "motion": {
+    "elements": 31,
+    "css": 1,
+    "transitions": 2,
+    "scripted": 28,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 5741,
+     "screens": 6.4,
+     "words": 261,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 8,
+     "sections": 9,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 4,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 4,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Eine Sache Fertig",
+     "words": 3,
+     "chars": 17,
+     "lines": 1,
+     "size": 144,
+     "vw": 10,
+     "font": "Inter Variable",
+     "weight": 800,
+     "tracking": -0.045,
+     "leading": 0.95,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "center",
+     "widthRatio": 0.95,
+     "top": 300,
+     "tag": "span",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Eine Sache Fertig nach der anderen.",
+     "words": 6,
+     "lines": 2,
+     "size": 144,
+     "font": "Inter Variable"
+    },
+    "headings": [
+     {
+      "text": "Eine Sache Fertig",
+      "words": 3,
+      "chars": 17,
+      "lines": 1,
+      "size": 144,
+      "vw": 10,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.045,
+      "leading": 0.95,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.95,
+      "top": 300,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "nach der anderen.",
+      "words": 3,
+      "chars": 17,
+      "lines": 1,
+      "size": 144,
+      "vw": 10,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.045,
+      "leading": 0.95,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.95,
+      "top": 462,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "Eine Aufgabe im Fokus.",
+      "words": 4,
+      "chars": 22,
+      "lines": 2,
+      "size": 66.2,
+      "vw": 4.6,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.33,
+      "top": 1045,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Die Woche auf einen Blick.",
+      "words": 5,
+      "chars": 26,
+      "lines": 2,
+      "size": 66.2,
+      "vw": 4.6,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.33,
+      "top": 1552,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Zusammen lernen, live.",
+      "words": 3,
+      "chars": 22,
+      "lines": 2,
+      "size": 66.2,
+      "vw": 4.6,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.33,
+      "top": 2043,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Ganz nach deinem Stil.",
+      "words": 4,
+      "chars": 22,
+      "lines": 2,
+      "size": 66.2,
+      "vw": 4.6,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.33,
+      "top": 2587,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Was du noch wissen willst",
+      "words": 5,
+      "chars": 25,
+      "lines": 2,
+      "size": 66.2,
+      "vw": 4.6,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.38,
+      "top": 3188,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Neu hier?",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 66.2,
+      "vw": 4.6,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.95,
+      "top": 3810,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Los",
+      "words": 1,
+      "chars": 3,
+      "lines": 1,
+      "size": 86.4,
+      "vw": 6,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "center",
+      "position": "right",
+      "widthRatio": 0.14,
+      "top": 3903,
+      "tag": "button",
+      "kind": "heading"
+     },
+     {
+      "text": "Dein Konto",
+      "words": 2,
+      "chars": 10,
+      "lines": 1,
+      "size": 66.2,
+      "vw": 4.6,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.39,
+      "top": 4386,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Fang mit einer Sache an.",
+      "words": 5,
+      "chars": 24,
+      "lines": 2,
+      "size": 66.2,
+      "vw": 4.6,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.35,
+      "top": 5058,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Quidey",
+      "words": 1,
+      "chars": 6,
+      "lines": 1,
+      "size": 403.2,
+      "vw": 28,
+      "font": "Inter Variable",
+      "weight": 850,
+      "tracking": -0.06,
+      "leading": 0.8,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.96,
+      "top": 5503,
+      "tag": "div",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 12,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 1,
+     "medianWords": 3,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter Variable",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      19,
+      21,
+      22,
+      23,
+      52,
+      66,
+      86,
+      144,
+      403
+     ],
+     "sizeCount": 15,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter Variable",
+      "size": 17,
+      "leading": 1.55,
+      "weight": 400,
+      "tracking": -0.006,
+      "contrast": 16.9
+     },
+     "measureChars": 66,
+     "max": {
+      "size": 403.2,
+      "vw": 28,
+      "font": "Inter Variable",
+      "text": "Quidey"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.07,
+     "smallText": 1
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#0e0d0c",
+     "bodyBgHsl": {
+      "h": 30,
+      "s": 0.08,
+      "l": 0.05
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#0e0d0c",
+       "top": 0,
+       "hsl": {
+        "h": 30,
+        "s": 0.08,
+        "l": 0.05
+       }
+      },
+      {
+       "color": "#fb923c",
+       "top": 450,
+       "hsl": {
+        "h": 27,
+        "s": 0.96,
+        "l": 0.61
+       }
+      },
+      {
+       "color": "#f5f5f3",
+       "top": 900,
+       "hsl": {
+        "h": 60,
+        "s": 0.09,
+        "l": 0.96
+       }
+      },
+      {
+       "color": "#181716",
+       "top": 2412,
+       "hsl": {
+        "h": 30,
+        "s": 0.04,
+        "l": 0.09
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#151413",
+       "share": 0.46
+      },
+      {
+       "color": "#f4f3f1",
+       "share": 0.21
+      },
+      {
+       "color": "#2a1305",
+       "share": 0.18
+      },
+      {
+       "color": "#9b958f",
+       "share": 0.11
+      },
+      {
+       "color": "#fb923c",
+       "share": 0.02
+      }
+     ],
+     "button": {
+      "bg": "#0e0d0c",
+      "hsl": {
+       "h": 30,
+       "s": 0.08,
+       "l": 0.05
+      },
+      "fg": "#9b958f"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 10,
+     "inHero": 1,
+     "radius": 14,
+     "height": 80,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Beta-Platz sichern"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 1,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 9,
+     "boxRadius": 22,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 5,
+     "fixed": true,
+     "height": 64,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "inter variable"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 5741,
+    "margins": {
+     "left": 35,
+     "right": 46
+    },
+    "sections": [
+     {
+      "sel": "section._hero_1voil_179",
+      "tag": "section",
+      "top": 0,
+      "height": 900,
+      "words": 27,
+      "media": 0,
+      "middle": 35,
+      "heading": {
+       "text": "Eine Sache",
+       "size": 144,
+       "tag": "h1"
+      },
+      "left": 35,
+      "right": 35,
+      "textLeft": 35,
+      "textRight": 46,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#fokus._feature_1voil_243._feature_light_1voil_251",
+      "tag": "section",
+      "top": 900,
+      "height": 530,
+      "words": 41,
+      "media": 0,
+      "middle": 398,
+      "heading": {
+       "text": "Eine Aufgabe im Fokus.",
+       "size": 66,
+       "tag": "h2"
+      },
+      "left": 35,
+      "right": 166,
+      "textLeft": 35,
+      "textRight": 166,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#planen._feature_1voil_243._feature_dark_1voil_252",
+      "tag": "section",
+      "top": 1430,
+      "height": 484,
+      "words": 46,
+      "media": 0,
+      "middle": 340,
+      "heading": {
+       "text": "Die Woche auf einen Blick.",
+       "size": 66,
+       "tag": "h2"
+      },
+      "left": 75,
+      "right": 76,
+      "textLeft": 75,
+      "textRight": 76,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#zusammen._feature_1voil_243._feature_accent_1voil_25",
+      "tag": "section",
+      "top": 1914,
+      "height": 498,
+      "words": 35,
+      "media": 0,
+      "middle": 398,
+      "heading": {
+       "text": "Zusammen lernen, live.",
+       "size": 66,
+       "tag": "h2"
+      },
+      "left": 35,
+      "right": 59,
+      "textLeft": 35,
+      "textRight": 59,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#stil._feature_1voil_243._feature_deep_1voil_255",
+      "tag": "section",
+      "top": 2412,
+      "height": 589,
+      "words": 36,
+      "media": 0,
+      "middle": 395,
+      "heading": {
+       "text": "Ganz nach deinem Stil.",
+       "size": 66,
+       "tag": "h2"
+      },
+      "left": 59,
+      "right": 49,
+      "textLeft": 59,
+      "textRight": 49,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#fragen._faq_1voil_644",
+      "tag": "section",
+      "top": 3001,
+      "height": 665,
+      "words": 137,
+      "media": 0,
+      "middle": 198,
+      "heading": {
+       "text": "Was du noch wissen willst",
+       "size": 66,
+       "tag": "h2"
+      },
+      "left": 35,
+      "right": 259,
+      "textLeft": 35,
+      "textRight": 259,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section._cta_1voil_717",
+      "tag": "section",
+      "top": 3666,
+      "height": 533,
+      "words": 13,
+      "media": 0,
+      "middle": 17,
+      "heading": {
+       "text": "Los",
+       "size": 86,
+       "tag": "button"
+      },
+      "left": 35,
+      "right": 236,
+      "textLeft": 35,
+      "textRight": 266,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#start._start_1voil_795",
+      "tag": "section",
+      "top": 4199,
+      "height": 715,
+      "words": 9,
+      "media": 0,
+      "middle": 504,
+      "heading": {
+       "text": "Dein Konto",
+       "size": 66,
+       "tag": "h2"
+      },
+      "left": 35,
+      "right": 60,
+      "textLeft": 35,
+      "textRight": 148,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "footer._footer_1voil_825",
+      "tag": "footer",
+      "top": 4914,
+      "height": 827,
+      "words": 13,
+      "media": 0,
+      "middle": 774,
+      "heading": {
+       "text": "Fang mit einer Sache an.",
+       "size": 66,
+       "tag": "h2"
+      },
+      "left": 35,
+      "right": 35,
+      "textLeft": 35,
+      "textRight": 35,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [
+     {
+      "top": 2280,
+      "height": 276
+     },
+     {
+      "top": 2836,
+      "height": 344
+     },
+     {
+      "top": 4056,
+      "height": 320
+     },
+     {
+      "top": 4704,
+      "height": 344
+     }
+    ],
+    "h1s": [
+     {
+      "text": "Eine Sache Fertig nach der anderen.",
+      "size": 144,
+      "top": 300,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 35,
+      "n": 10
+     },
+     {
+      "x": 925,
+      "n": 5
+     },
+     {
+      "x": 624,
+      "n": 4
+     }
+    ],
+    "leftBlocks": 19,
+    "bodySize": 17,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0.13,
+    "voidBox": {
+     "x": 0,
+     "y": 120,
+     "w": 1440,
+     "h": 120
+    }
+   },
+   "app": null,
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 6,
+   "filled": [
+    0.72,
+    0.78,
+    0.74,
+    0.93,
+    0.64,
+    0.79
+   ],
+   "motion": {
+    "elements": 29,
+    "css": 1,
+    "transitions": 2,
+    "scripted": 26,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 5382,
+     "screens": 5.3,
+     "words": 257,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 8,
+     "sections": 9,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 4,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 4,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Eine Sache Fertig",
+     "words": 3,
+     "chars": 17,
+     "lines": 1,
+     "size": 76.8,
+     "vw": 10,
+     "font": "Inter Variable",
+     "weight": 800,
+     "tracking": -0.045,
+     "leading": 0.95,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "center",
+     "widthRatio": 0.95,
+     "top": 319,
+     "tag": "span",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Eine Sache Fertig nach der anderen.",
+     "words": 6,
+     "lines": 2,
+     "size": 76.8,
+     "font": "Inter Variable"
+    },
+    "headings": [
+     {
+      "text": "Eine Sache Fertig",
+      "words": 3,
+      "chars": 17,
+      "lines": 1,
+      "size": 76.8,
+      "vw": 10,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.045,
+      "leading": 0.95,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.95,
+      "top": 319,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "nach der anderen.",
+      "words": 3,
+      "chars": 17,
+      "lines": 1,
+      "size": 76.8,
+      "vw": 10,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.045,
+      "leading": 0.95,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.95,
+      "top": 405,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "Eine Aufgabe im Fokus.",
+      "words": 4,
+      "chars": 22,
+      "lines": 1,
+      "size": 36,
+      "vw": 4.7,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.95,
+      "top": 903,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Deine Aufgabe",
+      "words": 2,
+      "chars": 13,
+      "lines": 1,
+      "size": 26,
+      "vw": 3.4,
+      "font": "Inter Variable",
+      "weight": 700,
+      "tracking": -0.02,
+      "leading": 1.4,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.24,
+      "top": 1102,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "Die Woche auf einen Blick.",
+      "words": 5,
+      "chars": 26,
+      "lines": 1,
+      "size": 36,
+      "vw": 4.7,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.95,
+      "top": 1465,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Zusammen lernen, live.",
+      "words": 3,
+      "chars": 22,
+      "lines": 1,
+      "size": 36,
+      "vw": 4.7,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.95,
+      "top": 1989,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Ganz nach deinem Stil.",
+      "words": 4,
+      "chars": 22,
+      "lines": 1,
+      "size": 36,
+      "vw": 4.7,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.95,
+      "top": 2543,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Was du noch wissen willst",
+      "words": 5,
+      "chars": 25,
+      "lines": 2,
+      "size": 36,
+      "vw": 4.7,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.39,
+      "top": 3227,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Neu hier?",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 36,
+      "vw": 4.7,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.95,
+      "top": 3813,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Los",
+      "words": 1,
+      "chars": 3,
+      "lines": 1,
+      "size": 46.1,
+      "vw": 6,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "center",
+      "position": "right",
+      "widthRatio": 0.14,
+      "top": 3863,
+      "tag": "button",
+      "kind": "heading"
+     },
+     {
+      "text": "Dein Konto",
+      "words": 2,
+      "chars": 10,
+      "lines": 1,
+      "size": 36,
+      "vw": 4.7,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.95,
+      "top": 4183,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Fang mit einer Sache an.",
+      "words": 5,
+      "chars": 24,
+      "lines": 2,
+      "size": 36,
+      "vw": 4.7,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.36,
+      "top": 4807,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Quidey",
+      "words": 1,
+      "chars": 6,
+      "lines": 1,
+      "size": 215,
+      "vw": 28,
+      "font": "Inter Variable",
+      "weight": 850,
+      "tracking": -0.06,
+      "leading": 0.8,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.96,
+      "top": 5255,
+      "tag": "div",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 13,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 1,
+     "medianWords": 3,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter Variable",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      21,
+      36,
+      46,
+      52,
+      77,
+      215
+     ],
+     "sizeCount": 14,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter Variable",
+      "size": 17,
+      "leading": 1.55,
+      "weight": 400,
+      "tracking": -0.006,
+      "contrast": 16.9
+     },
+     "measureChars": 66,
+     "max": {
+      "size": 215,
+      "vw": 28,
+      "font": "Inter Variable",
+      "text": "Quidey"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.07,
+     "smallText": 1
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#0e0d0c",
+     "bodyBgHsl": {
+      "h": 30,
+      "s": 0.08,
+      "l": 0.05
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#0e0d0c",
+       "top": 0,
+       "hsl": {
+        "h": 30,
+        "s": 0.08,
+        "l": 0.05
+       }
+      },
+      {
+       "color": "#fb923c",
+       "top": 399,
+       "hsl": {
+        "h": 27,
+        "s": 0.96,
+        "l": 0.61
+       }
+      },
+      {
+       "color": "#f5f5f3",
+       "top": 799,
+       "hsl": {
+        "h": 60,
+        "s": 0.09,
+        "l": 0.96
+       }
+      },
+      {
+       "color": "#181716",
+       "top": 2463,
+       "hsl": {
+        "h": 30,
+        "s": 0.04,
+        "l": 0.09
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#151413",
+       "share": 0.47
+      },
+      {
+       "color": "#f4f3f1",
+       "share": 0.2
+      },
+      {
+       "color": "#2a1305",
+       "share": 0.18
+      },
+      {
+       "color": "#9b958f",
+       "share": 0.11
+      },
+      {
+       "color": "#fb923c",
+       "share": 0.02
+      }
+     ],
+     "button": {
+      "bg": "#0e0d0c",
+      "hsl": {
+       "h": 30,
+       "s": 0.08,
+       "l": 0.05
+      },
+      "fg": "#9b958f"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 11,
+     "inHero": 1,
+     "radius": 14,
+     "height": 80,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Beta-Platz sichern"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 1,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 5,
+     "boxRadius": 22,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 1,
+     "fixed": true,
+     "height": 64,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "inter variable"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 5382,
+    "margins": {
+     "left": 18,
+     "right": 27
+    },
+    "sections": [
+     {
+      "sel": "section._hero_1voil_179",
+      "tag": "section",
+      "top": 0,
+      "height": 799,
+      "words": 27,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Eine Sache",
+       "size": 77,
+       "tag": "h1"
+      },
+      "left": 18,
+      "right": 18,
+      "textLeft": 18,
+      "textRight": 30,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#fokus._feature_1voil_243._feature_light_1voil_251",
+      "tag": "section",
+      "top": 799,
+      "height": 586,
+      "words": 16,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Deine Aufgabe",
+       "size": 26,
+       "tag": "span"
+      },
+      "left": 42,
+      "right": 361,
+      "textLeft": 42,
+      "textRight": 361,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#planen._feature_1voil_243._feature_dark_1voil_252",
+      "tag": "section",
+      "top": 1385,
+      "height": 524,
+      "words": 46,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Die Woche auf einen Blick.",
+       "size": 36,
+       "tag": "h2"
+      },
+      "left": 18,
+      "right": 27,
+      "textLeft": 18,
+      "textRight": 27,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#zusammen._feature_1voil_243._feature_accent_1voil_25",
+      "tag": "section",
+      "top": 1909,
+      "height": 554,
+      "words": 35,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Zusammen lernen, live.",
+       "size": 36,
+       "tag": "h2"
+      },
+      "left": 18,
+      "right": 21,
+      "textLeft": 18,
+      "textRight": 21,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#stil._feature_1voil_243._feature_deep_1voil_255",
+      "tag": "section",
+      "top": 2463,
+      "height": 645,
+      "words": 36,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Ganz nach deinem Stil.",
+       "size": 36,
+       "tag": "h2"
+      },
+      "left": 18,
+      "right": 42,
+      "textLeft": 18,
+      "textRight": 73,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#fragen._faq_1voil_644",
+      "tag": "section",
+      "top": 3107,
+      "height": 610,
+      "words": 137,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Was du noch wissen willst",
+       "size": 36,
+       "tag": "h2"
+      },
+      "left": 18,
+      "right": 193,
+      "textLeft": 18,
+      "textRight": 193,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section._cta_1voil_717",
+      "tag": "section",
+      "top": 3717,
+      "height": 346,
+      "words": 13,
+      "media": 0,
+      "middle": 9,
+      "heading": {
+       "text": "Los",
+       "size": 46,
+       "tag": "button"
+      },
+      "left": 18,
+      "right": 126,
+      "textLeft": 18,
+      "textRight": 142,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#start._start_1voil_795",
+      "tag": "section",
+      "top": 4063,
+      "height": 648,
+      "words": 9,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Dein Konto",
+       "size": 36,
+       "tag": "h2"
+      },
+      "left": 18,
+      "right": 215,
+      "textLeft": 18,
+      "textRight": 303,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "footer._footer_1voil_825",
+      "tag": "footer",
+      "top": 4711,
+      "height": 671,
+      "words": 13,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Fang mit einer Sache an.",
+       "size": 36,
+       "tag": "h2"
+      },
+      "left": 18,
+      "right": 518,
+      "textLeft": 18,
+      "textRight": 518,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Eine Sache Fertig nach der anderen.",
+      "size": 77,
+      "top": 319,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 18,
+      "n": 16
+     },
+     {
+      "x": 493,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 17,
+    "bodySize": 17,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": null,
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 7,
+   "filled": [
+    0.71,
+    0.68,
+    0.85,
+    0.56,
+    1,
+    0.56,
+    0.84
+   ],
+   "motion": {
+    "elements": 30,
+    "css": 1,
+    "transitions": 2,
+    "scripted": 27,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 5668,
+     "screens": 6.7,
+     "words": 247,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 8,
+     "sections": 9,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 4,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 3,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Eine Sache Fertig nach der anderen.",
+     "words": 6,
+     "chars": 35,
+     "lines": 2,
+     "size": 52,
+     "vw": 13.3,
+     "font": "Inter Variable",
+     "weight": 700,
+     "tracking": -0.03,
+     "leading": 1,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "center",
+     "widthRatio": 0.92,
+     "top": 261,
+     "tag": "h1",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Eine Sache Fertig nach der anderen.",
+     "words": 6,
+     "lines": 2,
+     "size": 40.6,
+     "font": "Inter Variable"
+    },
+    "headings": [
+     {
+      "text": "Eine Sache Fertig nach der anderen.",
+      "words": 6,
+      "chars": 35,
+      "lines": 2,
+      "size": 52,
+      "vw": 13.3,
+      "font": "Inter Variable",
+      "weight": 700,
+      "tracking": -0.03,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 261,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "Eine Aufgabe im Fokus.",
+      "words": 4,
+      "chars": 22,
+      "lines": 2,
+      "size": 36,
+      "vw": 9.2,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 754,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Die Woche auf einen Blick.",
+      "words": 5,
+      "chars": 26,
+      "lines": 2,
+      "size": 36,
+      "vw": 9.2,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 1420,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Zusammen lernen, live.",
+      "words": 3,
+      "chars": 22,
+      "lines": 2,
+      "size": 36,
+      "vw": 9.2,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 2041,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Ganz nach deinem Stil.",
+      "words": 4,
+      "chars": 22,
+      "lines": 2,
+      "size": 36,
+      "vw": 9.2,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 2677,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Was du noch wissen willst",
+      "words": 5,
+      "chars": 25,
+      "lines": 2,
+      "size": 36,
+      "vw": 9.2,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.77,
+      "top": 3516,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Neu hier?",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 36,
+      "vw": 9.2,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 4126,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Los",
+      "words": 1,
+      "chars": 3,
+      "lines": 1,
+      "size": 36,
+      "vw": 9.2,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "center",
+      "position": "left",
+      "widthRatio": 0.22,
+      "top": 4201,
+      "tag": "button",
+      "kind": "heading"
+     },
+     {
+      "text": "Dein Konto",
+      "words": 2,
+      "chars": 10,
+      "lines": 1,
+      "size": 36,
+      "vw": 9.2,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 4535,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Fang mit einer Sache an.",
+      "words": 5,
+      "chars": 24,
+      "lines": 2,
+      "size": 36,
+      "vw": 9.2,
+      "font": "Inter Variable",
+      "weight": 800,
+      "tracking": -0.04,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.7,
+      "top": 5159,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Quidey",
+      "words": 1,
+      "chars": 6,
+      "lines": 1,
+      "size": 132.6,
+      "vw": 34,
+      "font": "Inter Variable",
+      "weight": 850,
+      "tracking": -0.06,
+      "leading": 0.8,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.93,
+      "top": 5589,
+      "tag": "div",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 11,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 1,
+     "medianWords": 4,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter Variable",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      36,
+      41,
+      52,
+      133
+     ],
+     "sizeCount": 12,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter Variable",
+      "size": 17,
+      "leading": 1.55,
+      "weight": 400,
+      "tracking": -0.006,
+      "contrast": 16.9
+     },
+     "measureChars": 42,
+     "max": {
+      "size": 132.6,
+      "vw": 34,
+      "font": "Inter Variable",
+      "text": "Quidey"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.07,
+     "smallText": 1
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#0e0d0c",
+     "bodyBgHsl": {
+      "h": 30,
+      "s": 0.08,
+      "l": 0.05
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#0e0d0c",
+       "top": 0,
+       "hsl": {
+        "h": 30,
+        "s": 0.08,
+        "l": 0.05
+       }
+      },
+      {
+       "color": "#fb923c",
+       "top": 303,
+       "hsl": {
+        "h": 27,
+        "s": 0.96,
+        "l": 0.61
+       }
+      },
+      {
+       "color": "#f5f5f3",
+       "top": 658,
+       "hsl": {
+        "h": 60,
+        "s": 0.09,
+        "l": 0.96
+       }
+      },
+      {
+       "color": "#181716",
+       "top": 2581,
+       "hsl": {
+        "h": 30,
+        "s": 0.04,
+        "l": 0.09
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#151413",
+       "share": 0.48
+      },
+      {
+       "color": "#f4f3f1",
+       "share": 0.19
+      },
+      {
+       "color": "#2a1305",
+       "share": 0.18
+      },
+      {
+       "color": "#9b958f",
+       "share": 0.11
+      },
+      {
+       "color": "#fb923c",
+       "share": 0.02
+      }
+     ],
+     "button": {
+      "bg": "#0e0d0c",
+      "hsl": {
+       "h": 30,
+       "s": 0.08,
+       "l": 0.05
+      },
+      "fg": "#9b958f"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 11,
+     "inHero": 1,
+     "radius": 14,
+     "height": 80,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Beta-Platz sichern"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 1,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 5,
+     "boxRadius": 22,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 1,
+     "fixed": true,
+     "height": 56,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "inter variable"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 5668,
+    "margins": {
+     "left": 16,
+     "right": 22
+    },
+    "sections": [
+     {
+      "sel": "section._hero_1voil_179",
+      "tag": "section",
+      "top": 0,
+      "height": 658,
+      "words": 27,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Fertig",
+       "size": 52,
+       "tag": "h1"
+      },
+      "left": 16,
+      "right": 16,
+      "textLeft": 16,
+      "textRight": 27,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#fokus._feature_1voil_243._feature_light_1voil_251",
+      "tag": "section",
+      "top": 658,
+      "height": 665,
+      "words": 41,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Eine Aufgabe im Fokus.",
+       "size": 36,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 35,
+      "textLeft": 16,
+      "textRight": 35,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#planen._feature_1voil_243._feature_dark_1voil_252",
+      "tag": "section",
+      "top": 1324,
+      "height": 621,
+      "words": 38,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Die Woche auf einen Blick.",
+       "size": 36,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 39,
+      "textLeft": 16,
+      "textRight": 39,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#zusammen._feature_1voil_243._feature_accent_1voil_25",
+      "tag": "section",
+      "top": 1945,
+      "height": 636,
+      "words": 35,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Zusammen lernen, live.",
+       "size": 36,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 22,
+      "textLeft": 16,
+      "textRight": 22,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#stil._feature_1voil_243._feature_deep_1voil_255",
+      "tag": "section",
+      "top": 2581,
+      "height": 815,
+      "words": 36,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Ganz nach deinem Stil.",
+       "size": 36,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 29,
+      "textLeft": 16,
+      "textRight": 29,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#fragen._faq_1voil_644",
+      "tag": "section",
+      "top": 3396,
+      "height": 610,
+      "words": 137,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Was du noch wissen willst",
+       "size": 36,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 23,
+      "textLeft": 16,
+      "textRight": 23,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section._cta_1voil_717",
+      "tag": "section",
+      "top": 4006,
+      "height": 409,
+      "words": 11,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Los",
+       "size": 36,
+       "tag": "button"
+      },
+      "left": 16,
+      "right": 16,
+      "textLeft": 16,
+      "textRight": 58,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#start._start_1voil_795",
+      "tag": "section",
+      "top": 4415,
+      "height": 648,
+      "words": 9,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Dein Konto",
+       "size": 36,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 73,
+      "textLeft": 16,
+      "textRight": 103,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "footer._footer_1voil_825",
+      "tag": "footer",
+      "top": 5063,
+      "height": 605,
+      "words": 13,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Fang mit einer Sache an.",
+       "size": 36,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 142,
+      "textLeft": 16,
+      "textRight": 142,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Eine Sache Fertig nach der anderen.",
+      "size": 41,
+      "top": 261,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 16,
+      "n": 17
+     },
+     {
+      "x": 267,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 18,
+    "bodySize": 17,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": null,
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "WARN",
+   "id": "outlined-box",
+   "width": 1440,
+   "message": "1 box(es) drawn with a 1px outline.",
+   "fix": "Prefer a filled surface or no box.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "size-count",
+   "width": 1440,
+   "message": "15 different font sizes (12, 13, 14, 15, 16, 17, 19, 21, 22, 23, 52, 66, 86, 144, 403).",
+   "fix": "A page needs about five: display, heading, lead, body, small.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "no-real-pictures",
+   "width": 1440,
+   "message": "Only 0 real photograph(s) or clip(s); the rest are interface fragments.",
+   "fix": "Add two or more real pictures of the customer's world from scripts/assets.mjs, not stock of people at laptops."
+  },
+  {
+   "level": "WARN",
+   "id": "no-footage",
+   "width": 1440,
+   "message": "No video anywhere on the page.",
+   "fix": "Look for one honest clip with scripts/assets.mjs --video (the place, the material, the process) and use it as a muted loop with a poster frame. Defend its absence only if no clip fits the subject."
+  },
+  {
+   "level": "WARN",
+   "id": "small-text",
+   "width": 1440,
+   "message": "1 text block(s) under 13px.",
+   "fix": "Nothing meant to be read goes below 13px.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "lopsided",
+   "width": 768,
+   "message": "A section keeps its content on one side and leaves 361px of the width empty: \"Deine Aufgabe\".",
+   "fix": "Fill the other side with what the section has (its picture, a second column, the figure), or defend the void in one sentence."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\landing\\desktop-fold.jpg",
+   "pages": [
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\landing\\desktop-page-01.jpg",
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\landing\\desktop-page-02.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\landing\\tablet-fold.jpg",
+   "pages": [
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\landing\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\landing\\mobile-fold.jpg",
+   "pages": [
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\landing\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

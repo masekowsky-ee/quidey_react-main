@@ -11,7 +11,8 @@ import {useTranslation} from '../i18n/useTranslation'
 // Same rule as the server: 3-30 letters, digits, _ . or -
 const USERNAME_PATTERN = /^[A-Za-z0-9_.-]{3,30}$/;
 
-export default function Profile(){
+// initialSignState / initialEmail: the landing page opens it on "sign up" with the address typed there
+export default function Profile({ initialSignState = 0, initialEmail = '' } = {}){
     const { t } = useTranslation();
 
     const token = useSelector((state) => state.auth.token);
@@ -24,7 +25,7 @@ export default function Profile(){
 
     const [passwordValidate, setPasswordValidate] = useState("");
     const [birthDate, setBirthDate] = useState("");
-    const [email, setEmail] = useState("");
+    const [email, setEmail] = useState(initialEmail);
     const [displayName, setDisplayName] = useState("");
     // the three things to agree to before signing up, all required
     const [consents, setConsents] = useState({ terms: false, privacy: false, age: false });
@@ -117,7 +118,7 @@ export default function Profile(){
     }
 
     // 0 = sign in, 1 = sign up
-    const [signState, setSignState] = useState(0);
+    const [signState, setSignState] = useState(initialSignState);
 
     const signArr = ['signIn', 'signUp'];
 

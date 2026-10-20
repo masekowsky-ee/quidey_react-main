@@ -5,6 +5,7 @@ import Header from './components/Header.jsx';
 import Home from './components/home.jsx'
 import Menu from './components/menu.jsx'
 import Profile from './components/profile.jsx'
+import Landing from './components/landing/Landing.jsx'
 import Settings from './components/Settings.jsx'
 import CustomError from './components/CustomError.jsx';
 import History from './components/History.jsx';
@@ -134,6 +135,14 @@ function App(){
   if (location.pathname === '/verify-email') return <VerifyEmail />;
   // Impressum, Datenschutz and terms must open for everybody, signed in or not
   if (LEGAL_PATHS.includes(location.pathname)) return <LegalPage />;
+  // signed out: the landing page, with the way in (sign in / sign up) on it
+  if (!signedIn) {
+    return (
+      <MotionConfig reducedMotion="never">
+        <Landing />
+      </MotionConfig>
+    );
+  }
   if (signedIn && !access.checked) return <AccessPending />;
   if (signedIn && !access.isPro) {
     return (
@@ -153,7 +162,6 @@ function App(){
     // system setting is only the default there, not applied a second time here
     <MotionConfig reducedMotion="never">
     <div>
-      {!signedIn && <Profile/>}
         <div>
           <Header activeTimer={activeTimer}/>
         </div>
