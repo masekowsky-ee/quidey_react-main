@@ -1,6 +1,6 @@
 import styles from '../Calendar.module.css';
 import { useTranslation } from '../../i18n/useTranslation';
-import { fill, sameDay } from '../../features/helperFunction';
+import { fill, sameDay, parseDate } from '../../features/helperFunction';
 import { dateKey, weekDates, formatFocus } from '../../features/calendar/calendar';
 import { useDayGridKeys } from '../../features/calendar/useDayGridKeys';
 import TaskChip from './TaskChip.jsx';
@@ -48,9 +48,9 @@ export default function WeekView({ focusedDate, today, tasksByDay, focusByDay, d
                                 ? <ul className={styles.weekList}>
                                     {dayTasks.map(task => (
                                         <li key={task.id}>
-                                            <TaskChip task={task} today={today} startDrag={startDrag} showDescription
+                                            <TaskChip task={task} today={today} startDrag={task.projected ? undefined : startDrag} showDescription
                                                 dragging={drag?.task.id === task.id}
-                                                onOpen={() => onOpenDate(date, task.id)} />
+                                                onOpen={() => task.projected ? onOpenDate(parseDate(dateKey(task.repeatOf.due)), task.repeatOf.id) : onOpenDate(date, task.id)} />
                                         </li>
                                     ))}
                                 </ul>

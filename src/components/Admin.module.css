@@ -396,3 +396,45 @@
         flex-basis: 100%;
     }
 }
+
+/* ---------- broadcast ---------- */
+
+.broadcastForm{
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.field{
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    text-align: left;
+}
+
+.field > span{
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.field textarea{
+    resize: vertical;
+    font: inherit;
+}
+
+.broadcast{
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.75rem 0;
+    text-align: left;
+}
+
+.broadcastBody{
+    margin: 0.25rem 0 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: var(--text);
+}

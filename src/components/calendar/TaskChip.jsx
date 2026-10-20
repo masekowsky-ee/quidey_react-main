@@ -21,6 +21,7 @@ export default function TaskChip({ task, today, onOpen, startDrag, dragging, sho
         task.done && styles.chipDone,
         isOverdue(task, today) && styles.chipOverdue,
         dragging && styles.chipDragging,
+        task.projected && styles.chipProjected,
     ].filter(Boolean).join(' ');
     // the month view only has room for the start
     const time = showDescription ? taskTimeText(task) : (task.due_time ?? '');
@@ -31,12 +32,14 @@ export default function TaskChip({ task, today, onOpen, startDrag, dragging, sho
             type="button"
             className={classes}
             tabIndex={tabIndex}
-            title={[time, task.name, task.location].filter(Boolean).join(' · ')}
+            title={[time, task.name, task.location, task.repeat && t(`repeat_${task.repeat}`)].filter(Boolean).join(' · ')}
             onPointerDown={startDrag ? (e) => startDrag(e, task) : undefined}
             onClick={(e) => { e.stopPropagation(); onOpen(task); }}
         >
             <span className={styles.chipName}>
                 {time && <span className={styles.chipTime}>{time}</span>}
+                {/* before the name: a long name is cut off at the end */}
+                {task.repeat && <span className={styles.chipRepeat} role="img" aria-label={t(`repeat_${task.repeat}`)}>↻</span>}
                 {task.name}
                 {shared && <span className={styles.chipShared} title={t('sharedWithLabel')} role="img" aria-label={t('sharedWithLabel')}><Icon name="team" size={12} /></span>}
             </span>

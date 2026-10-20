@@ -16,7 +16,7 @@ import { MOTION, useMotionLevel, burstFrom } from '../features/settings/motion'
 
 
 export default function TaskContainer(props){
-    const { working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask } = props;
+    const { working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask, releasedIds = [] } = props;
 
     // whether the Done list is shown; only this component uses it
     const [showDone, setShowDone] = useState(false);
@@ -50,9 +50,15 @@ export default function TaskContainer(props){
     const sharedTasks = useSelector(selectSharedSoloTasks);
     const shownGroup = groupToDisplay.group;
     const showingAll = !shownGroup?.id || shownGroup.name === 'all';
-    const listTasks = shownGroup?.shared
+    const groupTasks = shownGroup?.shared
         ? (sharedGroups.find(group => group.sessionId === shownGroup.sessionId)?.tasks ?? [])
         : showingAll ? [...groupToDisplay.tasks, ...sharedTasks] : groupToDisplay.tasks;
+    // tasks put back from the work area go to the end, in the order they were put back
+    const releasedRank = (task) => releasedIds.indexOf(task.id);
+    const listTasks = releasedIds.length === 0 ? groupTasks : [
+        ...groupTasks.filter(task => releasedRank(task) === -1),
+        ...groupTasks.filter(task => releasedRank(task) !== -1).sort((a, b) => releasedRank(a) - releasedRank(b)),
+    ];
 
     // a click on a task's label opens that group (or the session's group)
     const openGroup = (group) => {

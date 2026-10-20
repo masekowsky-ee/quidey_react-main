@@ -44,6 +44,16 @@ describe('loginSuccess', () => {
         expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ username: 'jo', password: 'secret' })
     })
 
+    it('keeps the real username after signing in with the email address', async () => {
+        const store = makeStore()
+        respond(true, { token: 'abc', username: 'jo' })
+
+        await store.dispatch(loginSuccess('jo@example.com', 'secret'))
+
+        expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ username: 'jo@example.com', password: 'secret' })
+        expect(store.getState().auth.user.username).toBe('jo')
+    })
+
     it('stays signed out and rethrows on wrong credentials', async () => {
         const store = makeStore()
         respond(false, { error: 'Invalid sign in' })

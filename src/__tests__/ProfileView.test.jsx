@@ -132,4 +132,41 @@ describe('ProfileView', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Abmelden' }))
         expect(onSignOut).toHaveBeenCalled()
     })
+
+    describe('deleting the account', () => {
+        it('needs the password, then deletes and signs out', async () => {
+            localStorage.setItem('token', 't')
+            const { store } = await renderProfile()
+            fireEvent.click(screen.getByRole('button', { name: 'Konto löschen' }))
+            const confirm = screen.getByRole('button', { name: 'Endgültig löschen' })
+            expect(confirm).toBeDisabled()
+
+            type('Zur Bestätigung dein Passwort', 'secret123')
+            apiFetch.mockResolvedValueOnce({ message: 'Account deleted' })
+            await act(async () => { fireEvent.click(confirm) })
+
+            expect(apiFetch).toHaveBeenLastCalledWith('/api/users', expect.objectContaining({ method: 'DELETE' }))
+            expect(JSON.parse(apiFetch.mock.calls.at(-1)[1].body)).toEqual({ password: 'secret123' })
+            expect(store.getState().auth.token).toBeNull()
+            expect(localStorage.getItem('token')).toBeNull()
+        })
+
+        it('keeps the account and says why on a wrong password or as the last admin', async () => {
+            const { store } = await renderProfile()
+            store.dispatch({ type: 'LOGIN_SUCCESS', payload: { token: 't', username: 'jo' } })
+            fireEvent.click(screen.getByRole('button', { name: 'Konto löschen' }))
+
+            type('Zur Bestätigung dein Passwort', 'wrong')
+            apiFetch.mockRejectedValueOnce(apiError(401, 'WRONG_PASSWORD'))
+            await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Endgültig löschen' })) })
+            expect(screen.getByText('Das aktuelle Passwort ist falsch.')).toBeInTheDocument()
+            expect(screen.getByLabelText('Zur Bestätigung dein Passwort')).toHaveValue('')
+
+            type('Zur Bestätigung dein Passwort', 'secret123')
+            apiFetch.mockRejectedValueOnce(apiError(409, 'LAST_ADMIN'))
+            await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Endgültig löschen' })) })
+            expect(screen.getByText(/einzige Admin/)).toBeInTheDocument()
+            expect(store.getState().auth.token).toBe('t')
+        })
+    })
 })

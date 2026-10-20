@@ -1,4 +1,5 @@
 import styles from './Admin.module.css';
+import { fetchBroadcasts, sendBroadcast } from '../features/inbox/inbox';
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,7 +11,7 @@ import {
     decideBetaRequest, resetBetaRequest, updateAdminUser,
 } from '../features/admin/adminAction';
 
-const TABS = ['requests', 'users', 'overview'];
+const TABS = ['requests', 'users', 'broadcast', 'overview'];
 const SEARCH_DELAY_MS = 300;
 
 // Translated message for an admin API error
@@ -306,6 +307,91 @@ function OverviewTab() {
     );
 }
 
+// A notice to every account: it lands in everybody's inbox under "Notices". Written, then
+// confirmed in a second step, because it can't be taken back.
+function BroadcastTab() {
+    const { t, language } = useTranslation();
+    const dispatch = useDispatch();
+    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const [title, setTitle] = useState('');
+    const [body, setBody] = useState('');
+    const [confirming, setConfirming] = useState(false);
+    const [sending, setSending] = useState(false);
+    const [sent, setSent] = useState(null);
+
+    useEffect(() => {
+        fetchBroadcasts().then(setSent).catch(err => dispatch(showToast(adminErrorText(t, err), 'error')));
+    // t only changes with the language
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dispatch]);
+
+    const ready = title.trim() && body.trim();
+    const send = async () => {
+        setSending(true);
+        try {
+            const result = await sendBroadcast(title.trim(), body.trim());
+            dispatch(showToast(fill(t('adminBroadcastSent'), { count: result.recipientCount }), 'success'));
+            setSent(prev => [{ id: result.id, title: title.trim(), body: body.trim(), recipientCount: result.recipientCount, createdAt: result.createdAt }, ...(prev ?? [])]);
+            setTitle('');
+            setBody('');
+            setConfirming(false);
+        } catch (err) {
+            dispatch(showToast(adminErrorText(t, err), 'error'));
+        } finally {
+            setSending(false);
+        }
+    };
+
+    return (
+        <>
+            <section className={styles.card} role="tabpanel" aria-label={t('adminBroadcast')}>
+                <h2 className={styles.cardTitle}>{t('adminBroadcast')}</h2>
+                <p className={styles.meta}>{t('adminBroadcastHint')}</p>
+                <form className={styles.broadcastForm} onSubmit={(e) => { e.preventDefault(); if (ready) setConfirming(true); }}>
+                    <label className={styles.field}>
+                        <span>{t('adminBroadcastTitle')}</span>
+                        <input value={title} maxLength={120} onChange={(e) => { setTitle(e.target.value); setConfirming(false); }} />
+                    </label>
+                    <label className={styles.field}>
+                        <span>{t('adminBroadcastBody')}</span>
+                        <textarea rows={5} value={body} maxLength={2000} onChange={(e) => { setBody(e.target.value); setConfirming(false); }} />
+                    </label>
+                    {confirming ? (
+                        <div className={styles.actions}>
+                            <span className={styles.confirmText}>{t('adminBroadcastConfirm')}</span>
+                            <button type="button" className={styles.primaryBtn} disabled={sending} onClick={send}>{t('adminBroadcastSendNow')}</button>
+                            <button type="button" className={styles.quietBtn} onClick={() => setConfirming(false)}>{t('cancel')}</button>
+                        </div>
+                    ) : (
+                        <div className={styles.actions}>
+                            <button type="submit" className={styles.primaryBtn} disabled={!ready}>{t('adminBroadcastSend')}</button>
+                        </div>
+                    )}
+                </form>
+            </section>
+            <section className={styles.card}>
+                <h2 className={styles.cardTitle}>{t('adminBroadcastsSent')}</h2>
+                {!sent ? <p className={styles.empty} aria-busy="true">{t('adminLoading')}</p>
+                    : sent.length === 0 ? <p className={styles.empty}>{t('adminNoBroadcasts')}</p> : (
+                        <ul className={styles.list}>
+                            {sent.map(item => (
+                                <li key={item.id} className={styles.broadcast}>
+                                    <span className={styles.name}>{item.title}</span>
+                                    <span className={styles.meta}>
+                                        {new Date(item.createdAt).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' })}
+                                        {' · '}{fill(t('adminBroadcastReach'), { count: item.recipientCount })}
+                                        {item.admin && ` · ${item.admin}`}
+                                    </span>
+                                    <p className={styles.broadcastBody}>{item.body}</p>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+            </section>
+        </>
+    );
+}
+
 // Admins only (the route checks isAdmin; the server checks it again on every request)
 export default function Admin() {
     const { t } = useTranslation();
@@ -320,13 +406,14 @@ export default function Admin() {
             <div className={styles.tabs} role="tablist" aria-label={t('admin')}>
                 {TABS.map(key => (
                     <button key={key} role="tab" aria-selected={tab === key} className={tab === key ? styles.tabActive : undefined} onClick={() => setTab(key)}>
-                        {t({ requests: 'adminRequests', users: 'adminUsers', overview: 'adminOverview' }[key])}
+                        {t({ requests: 'adminRequests', users: 'adminUsers', broadcast: 'adminBroadcast', overview: 'adminOverview' }[key])}
                         {key === 'requests' && pendingCount > 0 && <span className={styles.badge}>{pendingCount}</span>}
                     </button>
                 ))}
             </div>
             {tab === 'requests' && <RequestsTab />}
             {tab === 'users' && <UsersTab />}
+            {tab === 'broadcast' && <BroadcastTab />}
             {tab === 'overview' && <OverviewTab />}
         </div>
     );

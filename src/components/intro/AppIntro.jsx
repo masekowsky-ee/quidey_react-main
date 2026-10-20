@@ -2,13 +2,18 @@ import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import styles from './AppIntro.module.css';
 import { readStoredMotion } from '../../features/settings/motion';
+import { LEGAL_PATHS } from '../../legal/paths';
 
 // Remotion only loads for the intro, not with the app
 const IntroPlayer = lazy(() => import('./IntroPlayer'));
 
-// Every time the app loads, except on "minimal" motion (and in tests).
+// Every time the app loads, except on "minimal" motion, on the legal pages and the mail link
+// (those are opened to read something right away), and in tests.
 // Read once at start: changing the setting later doesn't replay it.
-const startLevel = () => (import.meta.env.MODE === 'test' ? 'minimal' : readStoredMotion());
+const NO_INTRO_PATHS = [...LEGAL_PATHS, '/verify-email'];
+const startLevel = () => (import.meta.env.MODE === 'test' || NO_INTRO_PATHS.includes(window.location.pathname)
+    ? 'minimal'
+    : readStoredMotion());
 
 // The opening animation: the logo draws itself over the app, then the cover fades away.
 // A click or any key skips it.

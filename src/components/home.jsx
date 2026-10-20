@@ -39,6 +39,8 @@ export default function Home(props){
     // --- Gehobener State für Drag & Drop + aktive Task/Worked Tasks ---
     const starterTask = tasks[0] || null;
     const [chosenTask, setActiveTask] = useState(starterTask);
+    // tasks put back from the work area (not done): shown at the end of the list, latest last
+    const [releasedIds, setReleasedIds] = useState([]);
     // a task from a shared session is read live, so done/assignee changes show up; it's gone
     // (nothing active) when I left the session or it ended
     const activeTask = chosenTask?.shared
@@ -55,6 +57,12 @@ export default function Home(props){
 
     // time on a shared task goes to its session
     useSoloSharedWork(activeTask);
+
+    const releaseActiveTask = () => {
+        if (!activeTask) return;
+        setReleasedIds(prev => [...prev.filter(id => id !== activeTask.id), activeTask.id]);
+        setActiveTask(null);
+    };
 
     const [draggedTask, setDraggedTask] = useState(null);
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -143,6 +151,7 @@ export default function Home(props){
                 activeTask={activeTask}
                 setTasks={props.setTasks}
                 setActiveTask={setActiveTask}
+                onRelease={releaseActiveTask}
             />
             <GroupBtnContainer 
                 setCreateGroup={setCreateGroup} 
@@ -153,6 +162,7 @@ export default function Home(props){
             <div className={styles.tcc}>
                 <TaskContainer
                     activeTask={activeTask}
+                    releasedIds={releasedIds}
                     setCreateTask={setCreateTask}
                     working={false}
                     tasks={props.tasks}

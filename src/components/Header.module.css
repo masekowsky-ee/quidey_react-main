@@ -269,6 +269,8 @@
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-float);
     animation: chipIn 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+    /* above everything else in the header (the daily line comes later in the page) */
+    z-index: 20;
 }
 
 .quickSection{
@@ -452,77 +454,71 @@
     color: var(--text-h);
 }
 
-/* ---------- daily line ---------- */
+/* ---------- daily line: a small bulb, the line only on a tap ---------- */
 
-/* A quiet line under the buttons; the whole line is the link to the fun page. It stands still:
-   a moving line pulls the eye away from the work. */
-.ticker{
-    flex-shrink: 0;
-    width: 100%;
-    height: var(--ticker-h);
+.lineWrap{
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    overflow: hidden;
-    padding: 0 1rem;
-    box-sizing: border-box;
-    font-size: 0.6875rem;
+}
+
+/* small and dim on purpose: whoever finds it, finds it */
+.lineBtn{
+    width: 2rem;
+    height: 2rem;
+    margin-right: 0.25rem;
     color: var(--text-muted);
-    text-decoration: none;
-    background: transparent;
-    /* tucked away: barely there until you go looking */
-    opacity: 0.55;
-    transition: opacity var(--ease), color var(--ease), background-color var(--ease);
-    cursor: pointer;
-    transition: color var(--ease), background-color var(--ease);
+    opacity: 0.45;
+    transition: opacity var(--ease), color var(--ease);
 }
 
-.ticker:hover,
-.ticker:focus-visible{
+.lineBtn svg{
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.lineBtn:hover,
+.lineBtn:focus-visible,
+.lineBtnOpen{
     opacity: 1;
-    color: var(--text);
+    color: var(--primary-fg);
 }
 
-.ticker:focus-visible{
-    outline: 2px solid var(--text-h);
-    outline-offset: -2px;
-}
-
-/* "Fact of the day" etc., before the line */
-.tickerLabel{
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    font-weight: 500;
-}
-
-.tickerLabel::after{
-    content: '·';
-    margin-left: 0.4rem;
-}
-
-.tickerWindow{
-    flex: 0 1 auto;
-    min-width: 0;
-    overflow: hidden;
-}
-
-.tickerTrack{
+.linePopover{
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: -3rem;
+    z-index: 20;
+    width: min(20rem, calc(100vw - 1.5rem));
+    padding: 0.75rem 0.9rem;
+    box-sizing: border-box;
     display: flex;
-    width: 100%;
+    flex-direction: column;
+    gap: 0.3rem;
+    text-align: left;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--text);
+    text-decoration: none;
+    background-color: var(--surface);
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-float);
+    animation: chipIn 0.22s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.tickerItem{
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.linePopover:hover{
+    border-color: var(--border-strong);
 }
 
-/* the line is shown once */
-.tickerItem + .tickerItem{
-    display: none;
+.lineLabel{
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary-fg);
+}
+
+.lineText{
+    color: var(--text-h);
 }
 
 @media (max-width: 640px){
@@ -533,10 +529,6 @@
 
     .brandText{
         font-size: 1.15rem;
-    }
-
-    .ticker{
-        justify-content: flex-start;
     }
 }
 

@@ -11,7 +11,7 @@ import { linkIsValid } from '../features/tasks/taskFields';
 import { useFriends } from '../features/friends/useFriends';
 import FriendPicker from './together/FriendPicker.jsx';
 
-const EMPTY_EXTRAS = { duration_minutes: null, reminder_minutes: null, location: '', link: '', details: '' };
+const EMPTY_EXTRAS = { duration_minutes: null, reminder_minutes: null, location: '', link: '', details: '', repeat: null };
 
 // New task: name and day, optionally a time (otherwise for the whole day), description and
 // priority. "More options" adds duration, reminder, location, link, extra info and friends
@@ -59,6 +59,8 @@ export default function TaskForm(props){
                 location: extras.location.trim(),
                 link: extras.link.trim(),
                 details: extras.details.trim(),
+                // repeating needs a day
+                repeat: due ? extras.repeat : null,
             }));
             if (shareWith.length > 0) {
                 await dispatch(shareTask(task.id, shareWith));
@@ -100,7 +102,7 @@ export default function TaskForm(props){
                 </button>
                 {showMore &&
                     <div className={styles.more}>
-                        <TaskOptionsFields value={extras} hasTime={Boolean(time)} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
+                        <TaskOptionsFields value={extras} hasTime={Boolean(time)} hasDate={Boolean(due)} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
                         <div className={styles.shareBlock}>
                             <span className={styles.shareLabel}>{t('shareWithFriends')}</span>
                             {friends.length > 0

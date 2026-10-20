@@ -6,6 +6,7 @@ import settingsReducer from "./settings/settingsReducer";
 import friendsReducer from "./friends/friendsReducer";
 import togetherReducer from "./together/togetherReducer";
 import toastReducer from "./toast/toast";
+import inboxReducer from "./inbox/inbox";
 
 const rootReducer = combineReducers({
     task: taskReducer,
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
     friends: friendsReducer,
     together: togetherReducer,
     toast: toastReducer,
+    inbox: inboxReducer,
 });
 
 export default rootReducer;

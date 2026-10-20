@@ -2,7 +2,7 @@ import styles from './TaskOptions.module.css';
 import { useId } from 'react';
 import { useTranslation } from '../../i18n/useTranslation';
 import { fill } from '../../features/helperFunction';
-import { durationText } from '../../features/calendar/calendar';
+import { durationText, REPEATS } from '../../features/calendar/calendar';
 import { askForReminderPermission } from '../../features/tasks/reminders';
 import { linkIsValid } from '../../features/tasks/taskFields';
 
@@ -18,7 +18,8 @@ const toNumberOrNull = (value) => (value === '' ? null : Number(value));
 // The optional details of a task: duration, reminder, location, link and extra info.
 // value: { duration_minutes, reminder_minutes, location, link, details }; onChange gets the changed fields.
 // hasTime: reminders count from the start time, so without one they are off.
-export default function TaskOptionsFields({ value, onChange, hasTime }) {
+// hasDate: repeating counts from the day, so without one it is off too.
+export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = true }) {
     const { t } = useTranslation();
     const id = useId();
     const linkOk = linkIsValid(value.link);
@@ -53,6 +54,16 @@ export default function TaskOptionsFields({ value, onChange, hasTime }) {
                 </label>
             </div>
             {!hasTime && <p id={`${id}-reminder-hint`} className={styles.hint}>{t('reminderNeedsTime')}</p>}
+            <label className={styles.field}>
+                <span>{t('repeat')}</span>
+                <select value={hasDate ? (value.repeat ?? '') : ''} disabled={!hasDate}
+                    aria-describedby={hasDate ? undefined : `${id}-repeat-hint`}
+                    onChange={(e) => onChange({ repeat: e.target.value || null })}>
+                    <option value="">{t('repeatNone')}</option>
+                    {REPEATS.map(repeat => <option key={repeat} value={repeat}>{t(`repeat_${repeat}`)}</option>)}
+                </select>
+            </label>
+            {!hasDate && <p id={`${id}-repeat-hint`} className={styles.hint}>{t('repeatNeedsDate')}</p>}
             <div className={styles.row}>
                 <label className={styles.field}>
                     <span>{t('location')}</span>

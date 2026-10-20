@@ -1,9 +1,11 @@
 import styles from './Profile.module.css';
 import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess, logout, register } from "../features/auth/authAction";
+import { setCustomError as showError } from "../features/settings/settingsAction";
 import { useState } from "react";
 import CustomError from './CustomError.jsx'
 import ProfileView from './ProfileView.jsx'
+import ResendVerification from './ResendVerification.jsx'
 import {useTranslation} from '../i18n/useTranslation'
 
 // Same rule as the server: 3-30 letters, digits, _ . or -
@@ -24,10 +26,20 @@ export default function Profile(){
     const [birthDate, setBirthDate] = useState("");
     const [email, setEmail] = useState("");
     const [displayName, setDisplayName] = useState("");
+    // the three things to agree to before signing up, all required
+    const [consents, setConsents] = useState({ terms: false, privacy: false, age: false });
+    const toggleConsent = (key) => (e) => setConsents(prev => ({ ...prev, [key]: e.target.checked }));
+
+    // after signing up, or when sign-in is refused for an unconfirmed address:
+    // { kind: 'registered' | 'unverified', email }
+    const [verifyNotice, setVerifyNotice] = useState(null);
 
     const handleSignOut = () => {
         dispatch(logout());
     }
+
+    // the error box (CustomError) reads its message from the store
+    const setCustomError = (error) => dispatch(showError(error));
 
     // The server's reason as a translated message (error.code, or the HTTP status for sign-in)
     const authErrorText = (err) => {
@@ -41,9 +53,12 @@ export default function Profile(){
         if (!username || !password) {
             setCustomError({bool: true, message: `${t('missingFieldsError')}`});
         } else {
+            setVerifyNotice(null);
             dispatch(loginSuccess(username, password))
                 .catch(err => {
-                    setCustomError({bool: true, message: authErrorText(err)});
+                    // signed in with the address: it goes straight into the new-link form
+                    if (err?.code === 'EMAIL_NOT_VERIFIED') setVerifyNotice({ kind: 'unverified', email: username.includes('@') ? username.trim() : '' });
+                    else setCustomError({bool: true, message: authErrorText(err)});
                     setPassword("");
                 });
         }
@@ -81,9 +96,22 @@ export default function Profile(){
             setCustomError({bool: true, message: t('authError_INVALID_USERNAME')});
         } else if (password.length < 8 || new TextEncoder().encode(password).length > 72) {
             setCustomError({bool: true, message: t('authError_WEAK_PASSWORD')});
+        } else if (!consents.terms) {
+            setCustomError({bool: true, message: t('authError_TERMS_REQUIRED')});
+        } else if (!consents.privacy) {
+            setCustomError({bool: true, message: t('authError_PRIVACY_REQUIRED')});
+        } else if (!consents.age) {
+            setCustomError({bool: true, message: t('authError_AGE_CONFIRMATION_REQUIRED')});
         } else {
             // on failure everything stays filled in, so only the wrong field needs fixing
             dispatch(register(username.trim(), displayName, email, birthDate, password))
+                .then(() => {
+                    // on to sign in, which works once the link in the mail is opened
+                    setVerifyNotice({ kind: 'registered', email: email.trim() });
+                    setSignState(0);
+                    setPassword("");
+                    setPasswordValidate("");
+                })
                 .catch(err => setCustomError({bool: true, message: authErrorText(err)}));
         }
     }
@@ -93,11 +121,11 @@ export default function Profile(){
 
     const signArr = ['signIn', 'signUp'];
 
-    const [customError, setCustomError] = useState({ bool: false, message: '' });
 
     return (
         <div className={styles.page}>
-            <CustomError customError={customError} setCustomError={setCustomError}></CustomError>
+            {/* signed in, App.jsx already shows the error box */}
+            {!signedIn && <CustomError />}
             {signedIn ?
                 <ProfileView onSignOut={handleSignOut} />
                 :
@@ -109,18 +137,30 @@ export default function Profile(){
                                 role="tab"
                                 aria-selected={signState === i}
                                 className={signState === i ? styles.tabActive : undefined}
-                                onClick={() => setSignState(i)}
+                                onClick={() => { setSignState(i); setVerifyNotice(null); }}
                             >
                                 {t(key)}
                             </button>
                         ))}
                     </div>
 
+                    {verifyNotice && (
+                        <div className={styles.verifyNotice} role="status">
+                            <p className={styles.verifyNoticeTitle}>
+                                {t(verifyNotice.kind === 'registered' ? 'verifyRegisteredTitle' : 'authError_EMAIL_NOT_VERIFIED')}
+                            </p>
+                            <p>{verifyNotice.kind === 'registered'
+                                ? `${t('verifyRegisteredText')} ${verifyNotice.email}`
+                                : t('verifyUnverifiedText')}</p>
+                            <ResendVerification key={verifyNotice.kind} initialEmail={verifyNotice.email} />
+                        </div>
+                    )}
+
                     {signState === 0 ?
                         <form className={styles.form} onSubmit={(e) => handleSignIn(e, username, password)} >
                             <div className={styles.field}>
-                                <label htmlFor="userNameInput">{t('userName')}</label>
-                                <input placeholder={t('userName')} value={username} onChange={(e) => setUsername(e.target.value)} id="userNameInput" type="text" autoComplete="username" />
+                                <label htmlFor="userNameInput">{t('userNameOrEmail')}</label>
+                                <input placeholder={t('userNameOrEmail')} value={username} onChange={(e) => setUsername(e.target.value)} id="userNameInput" type="text" autoComplete="username" />
                             </div>
                             <div className={styles.field}>
                                 <label htmlFor="passwordInput">{t('password')}</label>
@@ -157,6 +197,29 @@ export default function Profile(){
                                     <label htmlFor="passwordValidateInput">{t('passwordValidate')}</label>
                                     <input placeholder={t('passwordValidate')} value={passwordValidate} onChange={(e) => setPasswordValidate(e.target.value)} id="passwordValidateInput" type="password" autoComplete="new-password" />
                                 </div>
+                            </div>
+                            {/* the legal pages open in a new tab, so the form stays filled in */}
+                            <div className={styles.consents}>
+                                <label className={styles.consent}>
+                                    <input type="checkbox" checked={consents.terms} onChange={toggleConsent('terms')} />
+                                    <span>
+                                        {t('acceptTermsBefore')}
+                                        <a href="/nutzungsbedingungen" target="_blank" rel="noopener">{t('termsLink')}</a>
+                                        {t('acceptTermsAfter')}
+                                    </span>
+                                </label>
+                                <label className={styles.consent}>
+                                    <input type="checkbox" checked={consents.privacy} onChange={toggleConsent('privacy')} />
+                                    <span>
+                                        {t('acceptPrivacyBefore')}
+                                        <a href="/datenschutz" target="_blank" rel="noopener">{t('privacyLink')}</a>
+                                        {t('acceptPrivacyAfter')}
+                                    </span>
+                                </label>
+                                <label className={styles.consent}>
+                                    <input type="checkbox" checked={consents.age} onChange={toggleConsent('age')} />
+                                    <span>{t('confirmAge')}</span>
+                                </label>
                             </div>
                             <button className={styles.submitBtn} type="submit">{t('signUp')}</button>
                         </form>

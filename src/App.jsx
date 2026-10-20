@@ -28,6 +28,12 @@ import Toaster from './components/Toaster.jsx';
 import Admin from './components/Admin.jsx';
 import Tutorial from './components/Tutorial.jsx';
 import FunPage from './components/fun/FunPage.jsx';
+import Inbox from './components/Inbox.jsx';
+import Feedback from './components/Feedback.jsx';
+import { fetchInboxUnread } from './features/inbox/inbox.js';
+import VerifyEmail from './components/VerifyEmail.jsx';
+import LegalPage, { LegalFooter } from './legal/LegalPage.jsx';
+import { LEGAL_PATHS } from './legal/paths.js';
 import { useApplyTheme } from './features/settings/theme.js';
 import { MOTION, useApplyMotion, useMotionLevel } from './features/settings/motion.js';
 
@@ -93,6 +99,8 @@ function App(){
       dispatch(fetchMySharedTasks()).catch(() => {});
       // tasks friends sent me
       dispatch(fetchTaskInvites()).catch(() => {});
+      // unread messages and notices for the inbox badge
+      dispatch(fetchInboxUnread()).catch(() => {});
     };
     refresh();
     window.addEventListener('focus', refresh);
@@ -122,13 +130,20 @@ function App(){
   const [activeTimer, setActiveTimer] = useState(false);
   const location = useLocation();
 
+  // the link from the verification mail works signed in or not, and before beta access
+  if (location.pathname === '/verify-email') return <VerifyEmail />;
+  // Impressum, Datenschutz and terms must open for everybody, signed in or not
+  if (LEGAL_PATHS.includes(location.pathname)) return <LegalPage />;
   if (signedIn && !access.checked) return <AccessPending />;
   if (signedIn && !access.isPro) {
     return (
-      <Routes>
-        <Route path="/beta" element={<BetaGate />} />
-        <Route path="*" element={<Navigate to="/beta" replace />} />
-      </Routes>
+      <>
+        <Routes>
+          <Route path="/beta" element={<BetaGate />} />
+          <Route path="*" element={<Navigate to="/beta" replace />} />
+        </Routes>
+        <LegalFooter />
+      </>
     );
   }
 
@@ -156,6 +171,8 @@ function App(){
           <Route path="/profile" element={<Profile/>} />
           <Route path="/settings" element={<Settings/>} />
           <Route path="/social" element={<Social/>} />
+          <Route path="/inbox" element={<Inbox/>} />
+          <Route path="/feedback" element={<Feedback/>} />
           <Route path="/together" element={<Together/>} />
           <Route path="/together/:id" element={<SharedSession/>} />
           <Route path="/admin" element={access.isAdmin ? <Admin/> : <Navigate to="/" replace />} />
@@ -166,6 +183,7 @@ function App(){
         </motion.div>
       </section>
       }
+      <LegalFooter />
     </div>
     </MotionConfig>
   );

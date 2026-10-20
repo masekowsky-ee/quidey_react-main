@@ -51,6 +51,7 @@ const authReducer = (state = initialState, action) => {
                     username: action.payload[0].username,
                     display_name: action.payload[0].display_name,
                     email: action.payload[0].email,
+                    email_verified: action.payload[0].email_verified,
                     birth_date: action.payload[0].birth_date,
                     created_at: action.payload[0].created_at,
                 },

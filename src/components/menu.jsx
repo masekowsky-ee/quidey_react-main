@@ -8,6 +8,7 @@ import { selectIncomingCount } from '../features/friends/friendsAction';
 import { selectInviteCount } from '../features/together/togetherAction';
 import { selectTaskInviteCount } from '../features/tasks/taskAction';
 import { selectIsAdmin, selectAdminPendingCount } from '../features/admin/adminAction';
+import { selectInboxCount } from '../features/inbox/inbox';
 import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, useMotionLevel } from '../features/settings/motion';
 
@@ -30,6 +31,7 @@ export default function Menu(){
     const taskInviteCount = useSelector(selectTaskInviteCount);
     const isAdmin = useSelector(selectIsAdmin);
     const adminPendingCount = useSelector(selectAdminPendingCount);
+    const inboxCount = useSelector(selectInboxCount);
     const { t } = useTranslation();
 
     const dispatch = useDispatch();
@@ -53,6 +55,8 @@ export default function Menu(){
                 <h2 className={styles.menuTitle}>{t('menu')}</h2>
                 <nav className={styles.menuList}>
                     <MenuLink to="/" end icon="home" label={t('home')} onClick={onClose} />
+                    <MenuLink to="/inbox" icon="inbox" label={t('inbox')} onClick={onClose}
+                        count={inboxCount} countLabel={t('inboxUnread')} />
                     <MenuLink to="/calendar" icon="calendar" label={t('calendar')} onClick={onClose}
                         count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
                     <MenuLink to="/profile" icon="profile" label={t('profile')} onClick={onClose} />
@@ -71,6 +75,7 @@ export default function Menu(){
                             count={adminPendingCount} countLabel={t('adminOpenRequests')} />
                     )}
                     <MenuLink to="/settings" icon="settings" label={t('settings')} onClick={onClose} />
+                    <MenuLink to="/feedback" icon="feedback" label={t('feedback')} onClick={onClose} />
                     <button type="button" className={`${styles.menuItem} ${styles.menuButton}`} onClick={openTutorial}>
                         <Icon name="tutorial" className={styles.menuIcon} />
                         <span className={styles.menuLabel}>{t('tutorial')}</span>

@@ -1,6 +1,7 @@
 import { LOGIN_SUCCESS, LOGOUT, SET_USER, SET_ACCESS } from "./authActionTypes";
 import { apiFetch, apiUrl } from '../helperFunction';
 
+// Signs in with the username or the email address (the server tells them apart by the "@")
 export const loginSuccess = (username, password) => {
     return async (dispatch) => {
         const data = await apiFetch("/api/login", {
@@ -12,7 +13,8 @@ export const loginSuccess = (username, password) => {
 
         dispatch({
             type: LOGIN_SUCCESS,
-            payload: { token: data.token, username },
+            // the server sends the real username, also after signing in with the email address
+            payload: { token: data.token, username: data.username ?? username },
         });
         // right after login/registration: pro users go to the app, everybody else to the beta screen
         await dispatch(fetchAccess()).catch(() => {});
@@ -94,7 +96,8 @@ export const setUser = () => {
     }
 }
 
-// Saves display name and email; the store gets the row the API returns.
+// Saves display name and email; the store gets the row the API returns, which is also returned
+// (email_verified is false again after a new address: the server sent a link to it).
 // Rejects with the API error (error.code: INVALID_DISPLAY_NAME, INVALID_EMAIL, EMAIL_TAKEN).
 export const updateProfile = (display_name, email) => {
     return async (dispatch) => {
@@ -103,7 +106,33 @@ export const updateProfile = (display_name, email) => {
             body: JSON.stringify({ display_name, email }),
         });
         dispatch({ type: SET_USER, payload: [user] });
+        return user;
     };
+}
+
+// Confirms my email address with the token from the verification link (works signed out too).
+// Rejects with the API error (error.code: INVALID_TOKEN, TOKEN_EXPIRED).
+export function verifyEmail(token) {
+    return apiFetch('/api/verify-email', {
+        method: 'POST',
+        body: JSON.stringify({ token }),
+    });
+}
+
+// Sends me a new verification link; older links stop working.
+// Rejects with the API error (error.code: ALREADY_VERIFIED, RATE_LIMITED).
+export function resendVerificationMail() {
+    return apiFetch('/api/verify-email/resend', { method: 'POST' });
+}
+
+// Same, signed out (sign-in is refused until the address is confirmed): a link to this address,
+// if an unconfirmed account has it. The server answers the same either way.
+// Rejects with the API error (error.code: INVALID_EMAIL, RATE_LIMITED).
+export function requestVerificationMail(email) {
+    return apiFetch('/api/resend-verification', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+    });
 }
 
 // Rejects with the API error (error.code: WRONG_PASSWORD, WEAK_PASSWORD).
@@ -129,14 +158,27 @@ export const logoutEverywhere = () => {
     };
 }
 
-export const register = (username, display_name, email, birth_date, password) => {
+// Deletes the account for good (needs the password again), then signs out here.
+// Rejects with the API error (error.code: WRONG_PASSWORD, LAST_ADMIN, RATE_LIMITED).
+export const deleteAccount = (password) => {
     return async (dispatch) => {
+        await apiFetch('/api/users', {
+            method: 'DELETE',
+            body: JSON.stringify({ password }),
+        });
+        dispatch(logout());
+    };
+}
+
+// Creates the account; the server mails a confirmation link. Signing in only works after
+// the address is confirmed, so there is no sign-in here.
+// The terms, the privacy policy and the age were all confirmed in the form (the server refuses
+// without them and stores when the terms and the privacy policy were accepted)
+export const register = (username, display_name, email, birth_date, password) => {
+    return async () => {
         await apiFetch("/api/register", {
             method: "POST",
-            body: JSON.stringify({ username, display_name, email, birth_date, password }),
+            body: JSON.stringify({ username, display_name, email, birth_date, password, accept_terms: true, accept_privacy: true, confirm_age: true }),
         });
-
-        // The register endpoint returns no token, so sign in right away
-        await dispatch(loginSuccess(username, password));
     };
 }

@@ -1,6 +1,6 @@
 import styles from '../Calendar.module.css';
 import { useTranslation } from '../../i18n/useTranslation';
-import { fill, monthGrid, sameDay } from '../../features/helperFunction';
+import { fill, monthGrid, sameDay, parseDate } from '../../features/helperFunction';
 import { dateKey, isoWeek, startOfMonth, formatFocus } from '../../features/calendar/calendar';
 import { useDayGridKeys } from '../../features/calendar/useDayGridKeys';
 import TaskChip from './TaskChip.jsx';
@@ -71,9 +71,9 @@ export default function MonthView({ focusedDate, today, tasksByDay, focusByDay, 
                                             <ul className={styles.chips}>
                                                 {dayTasks.slice(0, MAX_VISIBLE_TASKS).map(task => (
                                                     <li key={task.id}>
-                                                        <TaskChip task={task} today={today} startDrag={startDrag}
+                                                        <TaskChip task={task} today={today} startDrag={task.projected ? undefined : startDrag}
                                                             dragging={drag?.task.id === task.id}
-                                                            onOpen={() => onOpenDate(date, task.id)} />
+                                                            onOpen={() => task.projected ? onOpenDate(parseDate(dateKey(task.repeatOf.due)), task.repeatOf.id) : onOpenDate(date, task.id)} />
                                                     </li>
                                                 ))}
                                                 {dayTasks.length > MAX_VISIBLE_TASKS &&

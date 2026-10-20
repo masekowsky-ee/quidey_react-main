@@ -145,8 +145,75 @@
     color: var(--primary-fg);
 }
 
-.cardHead .quietBtn:hover{
+.cardHead .quietBtn:hover,
+.verifyRow .quietBtn:hover{
     border-color: var(--btn-border);
+}
+
+/* Sign-in screen after signing up / when the address isn't confirmed: what to do next */
+.verifyNotice{
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius);
+    background-color: color-mix(in srgb, var(--primary) 9%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+    text-align: left;
+}
+
+.verifyNotice p{
+    margin: 0;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.verifyNoticeTitle{
+    font-weight: 700;
+    color: var(--text-h);
+}
+
+/* email field + "send new link" (also on the /verify-email page) */
+.resendForm{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+    text-align: left;
+}
+
+.resendForm button{
+    align-self: flex-end;
+}
+
+/* Under an email address that isn't confirmed yet: a small badge and "send new link" */
+.verifyRow{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.35rem;
+}
+
+.unverified{
+    padding: 0.1rem 0.55rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--danger);
+    background-color: color-mix(in srgb, var(--danger) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+    border-radius: 999px;
+}
+
+.verifyRow .quietBtn{
+    padding: 0.15rem 0.6rem;
+    font-size: 0.8rem;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--primary-fg);
 }
 
 .hint{
@@ -247,6 +314,19 @@
     color: var(--text-muted);
 }
 
+/* Deleting the account: the only thing here that can't be undone, so it gets a red edge */
+.dangerCard{
+    border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+}
+
+.dangerCard .formActions{
+    justify-content: flex-start;
+}
+
+.dangerCard .hint{
+    margin-bottom: 1rem;
+}
+
 /* ---------- Signed out ---------- */
 
 .authCard{
@@ -308,4 +388,32 @@
     composes: btnPrimary from './ui.module.css';
     width: 100%;
     margin-top: 0.4rem;
+}
+
+/* the consent checkboxes under the sign-up form */
+.consents{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+/* one consent: checkbox and text */
+.consent{
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    text-align: left;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.consent input{
+    flex-shrink: 0;
+    margin: 0.15rem 0 0;
+}
+
+.consent a{
+    color: var(--primary-fg);
 }

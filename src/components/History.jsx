@@ -1,9 +1,10 @@
 import styles from './History.module.css';
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {useTranslation} from '../i18n/useTranslation'
 import { fetchSharedHistory } from '../features/together/togetherAction';
+import CompletedTasks from './CompletedTasks.jsx';
 
 // 95 -> "1 h 35 min", 40 -> "40 min"
 function formatMinutes(totalMinutes) {
@@ -28,6 +29,10 @@ function TeamIcon() {
 export default function History(){
     const { t } = useTranslation();
     const dispatch = useDispatch();
+    // two folders: the work sessions, and every completed task (?tab=done)
+    const [searchParams, setSearchParams] = useSearchParams();
+    const folder = searchParams.get('tab') === 'done' ? 'done' : 'sessions';
+    const doneCount = useSelector(state => state.task.tasks.filter(task => task.done).length);
 
     // my work in shared sessions; shown between the solo sessions, by when I last worked on it
     const sharedHistory = useSelector(state => state.together.history) ?? [];
@@ -64,7 +69,17 @@ export default function History(){
     return (
         <div className={styles.page}>
             <h1 className={styles.title}>{t('history')}</h1>
-            {timeline.length > 0 ?
+            <div className={styles.folders} role="tablist" aria-label={t('history')}>
+                <button role="tab" aria-selected={folder === 'sessions'} className={folder === 'sessions' ? styles.folderActive : undefined}
+                    onClick={() => setSearchParams({}, { replace: true })}>
+                    {t('sessions')}
+                </button>
+                <button role="tab" aria-selected={folder === 'done'} className={folder === 'done' ? styles.folderActive : undefined}
+                    onClick={() => setSearchParams({ tab: 'done' }, { replace: true })}>
+                    {t('completedTasks')} {doneCount > 0 && <span className={styles.folderBadge}>{doneCount}</span>}
+                </button>
+            </div>
+            {folder === 'done' ? <CompletedTasks /> : timeline.length > 0 ?
                 <>
                     <div className={styles.stats}>
                         <div className={styles.stat}>

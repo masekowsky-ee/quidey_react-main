@@ -38,9 +38,10 @@ export default function WeekDaysContainer(){
                                 ? <span className={styles.empty}>–</span>
                                 : <ul className={styles.dayList}>
                                     {dayTasks.slice(0, MAX_VISIBLE_TASKS).map(task => (
-                                        <li key={task.id} className={[PRIO_CLASS[prioLevel(task.prio)], task.done && styles.done].filter(Boolean).join(' ') || undefined} title={[task.due_time, task.name].filter(Boolean).join(' ')}>
-                                            {task.due_time && <span className={styles.time}>{task.due_time} </span>}
-                                            {task.name}
+                                        <li key={task.id} className={[PRIO_CLASS[prioLevel(task.prio)], task.done && styles.done].filter(Boolean).join(' ') || undefined} title={[task.name, task.due_time].filter(Boolean).join(' ')}>
+                                            {/* name first; a long one is cut, the time stays visible */}
+                                            <span className={styles.name}>{task.name}</span>
+                                            {task.due_time && <span className={styles.time}>{task.due_time}</span>}
                                         </li>
                                     ))}
                                     {dayTasks.length > MAX_VISIBLE_TASKS &&

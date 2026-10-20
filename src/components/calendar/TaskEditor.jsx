@@ -16,6 +16,7 @@ function optionsSummary(t, extras, hasTime, task) {
         : '';
     const people = (task.sharedWith ?? []).map(share => displayName(share.user));
     return [
+        extras.repeat ? t(`repeat_${extras.repeat}`) : '',
         extras.duration_minutes ? durationText(extras.duration_minutes) : '',
         reminder,
         extras.location.trim(),
@@ -45,6 +46,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
         location: task.location ?? '',
         link: task.link ?? '',
         details: task.details ?? '',
+        repeat: task.repeat ?? null,
     });
     // closed at first (the editor stays short); the toggle says what is set in it
     const [showMore, setShowMore] = useState(false);
@@ -80,6 +82,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             location: extras.location.trim(),
             link: extras.link.trim(),
             details: extras.details.trim(),
+            repeat: extras.repeat ?? null,
         });
         // still open when saving failed; otherwise the editor is gone already
         if (!saved) setBusy(false);
@@ -136,7 +139,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             </button>
             {showMore &&
                 <div className={styles.more}>
-                    <TaskOptionsFields value={extras} hasTime={Boolean(time)} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
+                    <TaskOptionsFields value={extras} hasTime={Boolean(time)} hasDate={Boolean(due)} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
                     <TaskSharing task={task} />
                 </div>}
 

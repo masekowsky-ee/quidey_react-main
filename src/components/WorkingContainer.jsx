@@ -9,14 +9,27 @@ import { setSharedTaskDone, togetherErrorText } from '../features/together/toget
 import { showToast } from '../features/toast/toast'
 import { Link } from 'react-router-dom'
 import TaskLabels from './TaskLabels.jsx'
+import { motion, useDragControls } from 'motion/react'
+import { useMotionLevel, burstFrom } from '../features/settings/motion'
+
+// how far (px) or how fast (px/s) the card has to be swiped to put the task back
+const SWIPE_DISTANCE = 110;
+const SWIPE_SPEED = 600;
 
 
 export default function WorkingContainer (props) {
-    const {dropZoneRef, activeTask, setActiveTask } = props;
+    const {dropZoneRef, activeTask, setActiveTask, onRelease } = props;
 
         const dispatch = useDispatch();
 
         const {t} = useTranslation();
+        const extreme = useMotionLevel() === 'extreme';
+        // the card can be swiped sideways by its head (not by the fields inside it)
+        const dragControls = useDragControls();
+        const startSwipe = (e) => { if (!e.target.closest('button, input, textarea')) dragControls.start(e); };
+        const onSwipeEnd = (_, info) => {
+            if (Math.abs(info.offset.x) > SWIPE_DISTANCE || Math.abs(info.velocity.x) > SWIPE_SPEED) onRelease?.();
+        };
 
         const notes = useSelector(state => state.task.notes);
         const taskSeconds = useSelector(state => activeTask ? selectTaskTime(state, activeTask.id) : 0);
@@ -60,7 +73,13 @@ export default function WorkingContainer (props) {
             dispatch(updateTaskProps({description}, activeTask));
         }
 
-        const setActiveDoneHandler = () => {
+        const setActiveDoneHandler = (e) => {
+            // finishing the task in focus is worth a big burst on "extreme"
+            if (extreme && e?.currentTarget) {
+                burstFrom(e.currentTarget, 60);
+                const target = e.currentTarget;
+                setTimeout(() => burstFrom(target, 40), 180);
+            }
             if (activeTask.shared) {
                 dispatch(setSharedTaskDone(activeTask.shared.sessionId, activeTask.shared.taskId, true))
                     .catch(err => dispatch(showToast(togetherErrorText(t, err), 'error')));
@@ -74,10 +93,15 @@ export default function WorkingContainer (props) {
         if (activeTask?.shared) {
             return (
                 <div className={styles.div}>
-                    <div ref={dropZoneRef} className={styles.currentTaskDiv}>
-                        <div className={`${styles.taskCard} ${styles.sharedCard}`}>
-                            <div className={styles.taskCardHead}>
+                    {/* the panel itself carries the team stripe, so the content keeps its normal spacing */}
+                    <div ref={dropZoneRef} className={`${styles.currentTaskDiv} ${styles.sharedPanel}`}>
+                        <motion.div key={activeTask.id} className={styles.taskCard}
+                            drag="x" dragListener={false} dragControls={dragControls} dragSnapToOrigin dragElastic={0.6} onDragEnd={onSwipeEnd}>
+                            <div className={`${styles.taskCardHead} ${styles.swipeHandle}`} onPointerDown={startSwipe}>
                                 <h2 className={styles.taskTitle}>{activeTask.name}</h2>
+                                <button className={styles.releaseBtn} onClick={onRelease} title={t('releaseTask')} aria-label={t('releaseTask')}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-200v-80h284q63 0 109.5-40T720-420q0-60-46.5-100T564-560H312l104 104-56 56-200-200 200-200 56 56-104 104h252q97 0 166.5 63T800-420q0 94-69.5 157T564-200H280Z"/></svg>
+                                </button>
                                 <button className={styles.doneBtn} onClick={setActiveDoneHandler} title={t('markDone')} aria-label={t('markDone')}>
                                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
                                 </button>
@@ -90,7 +114,7 @@ export default function WorkingContainer (props) {
                             <p className={styles.sharedNote}>
                                 {t('sharedTaskWorkHint')} <Link to={`/together/${activeTask.shared.sessionId}`}>{t('openSession')} →</Link>
                             </p>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             );
@@ -99,11 +123,15 @@ export default function WorkingContainer (props) {
         return(
             <div className={styles.div}>
                 <div ref={dropZoneRef} className={`${styles.currentTaskDiv} ${activeTask ? '' : styles.dropZoneEmpty}`}>
-                    {activeTask ? <div className={styles.taskCard}>
-                        <div className={styles.taskCardHead}>
+                    {activeTask ? <motion.div key={activeTask.id} className={styles.taskCard}
+                        drag="x" dragListener={false} dragControls={dragControls} dragSnapToOrigin dragElastic={0.6} onDragEnd={onSwipeEnd}>
+                        <div className={`${styles.taskCardHead} ${styles.swipeHandle}`} onPointerDown={startSwipe}>
                             <h2 className={styles.taskTitle}>{activeTask.name}</h2>
                             {activeTask.due && <span className={styles.dueChip}>{formatDate(activeTask.due)}</span>}
-                            <button className={styles.doneBtn} onClick={()=>{setActiveDoneHandler()}} title={t('markDone')} aria-label={t('markDone')}>
+                            <button className={styles.releaseBtn} onClick={onRelease} title={t('releaseTask')} aria-label={t('releaseTask')}>
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-200v-80h284q63 0 109.5-40T720-420q0-60-46.5-100T564-560H312l104 104-56 56-200-200 200-200 56 56-104 104h252q97 0 166.5 63T800-420q0 94-69.5 157T564-200H280Z"/></svg>
+                            </button>
+                            <button className={styles.doneBtn} onClick={setActiveDoneHandler} title={t('markDone')} aria-label={t('markDone')}>
                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
                             </button>
                         </div>
@@ -135,7 +163,8 @@ export default function WorkingContainer (props) {
                                 <svg className={styles.noteDelete} onClick={()=>{handleDeleteNote(n.id)}} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>
                             </li> : null)}
                         </ul>
-                    </div> : <p className={styles.dropHint}>{t('dragATask')}</p>}
+                        <p className={styles.swipeHint}>{t('releaseTaskHint')}</p>
+                    </motion.div> : <p className={styles.dropHint}>{t('dragATask')}</p>}
                 </div>
             </div>
         )

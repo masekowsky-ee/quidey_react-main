@@ -258,7 +258,11 @@ describe('fun page', () => {
 
     it('opens through the daily line', () => {
         renderAt('/')
-        fireEvent.click(screen.getByRole('link', { name: new RegExp(`^${translations.de[`lineOf_${lineOfDay().type}`]}`) }))
+        const label = translations.de[`lineOf_${lineOfDay().type}`]
+        // hidden behind the bulb until it is tapped
+        expect(screen.queryByRole('link', { name: new RegExp(`^${label}`) })).not.toBeInTheDocument()
+        fireEvent.click(screen.getByRole('button', { name: label }))
+        fireEvent.click(screen.getByRole('link', { name: new RegExp(`^${label}`) }))
         expect(screen.getByRole('heading', { name: 'Quidey-Spielwiese' })).toBeInTheDocument()
     })
 

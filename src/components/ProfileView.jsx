@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
 import { formatDate, formatDuration, getInitials } from '../features/helperFunction';
-import { updateProfile, changePassword, logoutEverywhere } from '../features/auth/authAction';
+import { updateProfile, changePassword, logoutEverywhere, resendVerificationMail, deleteAccount } from '../features/auth/authAction';
 import { fetchFriends } from '../features/friends/friendsAction';
 
 // Translated message for a profile API error, using the error code the backend sends
@@ -46,13 +46,30 @@ export default function ProfileView({ onSignOut }) {
         setSaving(true);
         setAccountMessage(null);
         try {
-            await dispatch(updateProfile(form.displayName.trim(), form.email.trim()));
+            const saved = await dispatch(updateProfile(form.displayName.trim(), form.email.trim()));
             setEditing(false);
-            setAccountMessage({ ok: true, text: t('profileSaved') });
+            const newEmail = saved?.email?.toLowerCase() !== user?.email?.toLowerCase();
+            setAccountMessage({ ok: true, text: t(newEmail && saved?.email_verified === false ? 'profileSavedVerify' : 'profileSaved') });
         } catch (err) {
             setAccountMessage({ ok: false, text: errorText(t, err) });
         } finally {
             setSaving(false);
+        }
+    };
+
+    // ---------- email verification ----------
+    const unverified = Boolean(user?.email) && user?.email_verified === false;
+    const [sendingMail, setSendingMail] = useState(false);
+    const sendVerificationMail = async () => {
+        setSendingMail(true);
+        try {
+            await resendVerificationMail();
+            setAccountMessage({ ok: true, text: t('verifyMailSent') });
+        } catch (err) {
+            const key = `verifyError_${err?.code}`;
+            setAccountMessage({ ok: false, text: t(key) === key ? t('verifyMailFailed') : t(key) });
+        } finally {
+            setSendingMail(false);
         }
     };
 
@@ -100,6 +117,31 @@ export default function ProfileView({ onSignOut }) {
             setPasswordMessage({ ok: false, text: errorText(t, err) });
             setSigningOutEverywhere(false);
             setConfirmEverywhere(false);
+        }
+    };
+
+    // ---------- delete account: opened on purpose, confirmed with the password ----------
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [deletePassword, setDeletePassword] = useState('');
+    const [deleting, setDeleting] = useState(false);
+    const [deleteMessage, setDeleteMessage] = useState(null); // { ok, text }
+
+    const closeDelete = () => {
+        setDeleteOpen(false);
+        setDeletePassword('');
+        setDeleteMessage(null);
+    };
+
+    const submitDelete = async (e) => {
+        e.preventDefault();
+        setDeleting(true);
+        try {
+            // signs out on success; this view is gone then
+            await dispatch(deleteAccount(deletePassword));
+        } catch (err) {
+            setDeleteMessage({ ok: false, text: errorText(t, err) });
+            setDeletePassword('');
+            setDeleting(false);
         }
     };
 
@@ -172,7 +214,17 @@ export default function ProfileView({ onSignOut }) {
                             </div>
                             <div className={styles.detailRow}>
                                 <dt>{t('email')}</dt>
-                                <dd>{user?.email || '–'}</dd>
+                                <dd>
+                                    {user?.email || '–'}
+                                    {unverified && (
+                                        <span className={styles.verifyRow}>
+                                            <span className={styles.unverified}>{t('emailUnverified')}</span>
+                                            <button className={styles.quietBtn} onClick={sendVerificationMail} disabled={sendingMail}>
+                                                {t('verifySendNew')}
+                                            </button>
+                                        </span>
+                                    )}
+                                </dd>
                             </div>
                             <div className={styles.detailRow}>
                                 <dt>{t('birthDate')}</dt>
@@ -228,6 +280,32 @@ export default function ProfileView({ onSignOut }) {
                     </button>
                 )}
             </div>
+
+            <section className={`${styles.card} ${styles.dangerCard}`}>
+                <h2 className={styles.cardTitle}>{t('deleteAccount')}</h2>
+                <p className={styles.hint}>{t('deleteAccountHint')}</p>
+                {deleteOpen ? (
+                    <form className={styles.form} onSubmit={submitDelete}>
+                        <input type="text" name="username" value={user?.username ?? ''} autoComplete="username" readOnly hidden />
+                        <div className={styles.field}>
+                            <label htmlFor="deletePassword">{t('deleteAccountPassword')}</label>
+                            <input id="deletePassword" type="password" value={deletePassword} autoComplete="current-password" autoFocus
+                                onChange={(e) => { setDeletePassword(e.target.value); setDeleteMessage(null); }} />
+                        </div>
+                        {message(deleteMessage)}
+                        <div className={styles.formActions}>
+                            <button type="button" onClick={closeDelete}>{t('cancel')}</button>
+                            <button type="submit" className={styles.signOutBtn} disabled={deleting || !deletePassword}>
+                                {deleting ? t('deleteAccountDeleting') : t('deleteAccountConfirm')}
+                            </button>
+                        </div>
+                    </form>
+                ) : (
+                    <div className={styles.formActions}>
+                        <button className={styles.signOutBtn} onClick={() => setDeleteOpen(true)}>{t('deleteAccount')}</button>
+                    </div>
+                )}
+            </section>
         </>
     );
 }

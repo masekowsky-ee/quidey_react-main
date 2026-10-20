@@ -1105,3 +1105,18 @@ button.agendaName:hover{
         margin-left: 2.25rem;
     }
 }
+
+/* ---------- repeating tasks ---------- */
+
+.chipRepeat{
+    margin-right: 0.25rem;
+    font-size: 0.85em;
+    color: var(--text-muted);
+}
+
+/* a coming repeat: only a preview, it becomes a real task when the one before is done */
+.chipProjected{
+    opacity: 0.55;
+    border-style: dashed;
+    background: transparent;
+}

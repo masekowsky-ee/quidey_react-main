@@ -14,7 +14,7 @@ export const fetchTaskState = () => {
 
 // The optional task fields (see the api): time of day, duration and reminder in minutes,
 // location, link and extra details
-export const TASK_EXTRA_FIELDS = ['due_time', 'duration_minutes', 'reminder_minutes', 'location', 'link', 'details'];
+export const TASK_EXTRA_FIELDS = ['due_time', 'duration_minutes', 'reminder_minutes', 'location', 'link', 'details', 'repeat'];
 const extrasOf = (source) => Object.fromEntries(TASK_EXTRA_FIELDS
     .filter(field => source?.[field] !== undefined)
     .map(field => [field, source[field] === '' ? null : source[field]]));
@@ -71,13 +71,16 @@ export const updateTaskProps = (taskPropObject, task) => {
         const data = await apiFetch(`/api/tasks/${params.id}`, {
             method: "PUT",
             // the optional fields too; without a day there is no time of day
-            body: JSON.stringify({name, due, description, prio, done, id, ...extrasOf(params), ...(due ? {} : { due_time: null })})
+            body: JSON.stringify({name, due, description, prio, done, id, ...extrasOf(params), ...(due ? {} : { due_time: null, repeat: null })})
         });
 
+        const { nextTask, ...task } = data;
         dispatch({
             type: UPDATE_TASK_PROPS,
-            payload: data,
+            payload: task,
         })
+        // a repeating task that was just done: the server made the next one
+        if (nextTask) dispatch({ type: ADD_TASK, payload: nextTask });
     };
 }
 

@@ -194,3 +194,88 @@
         padding: 0.25rem 1rem;
     }
 }
+
+/* ---------- folders: sessions | completed tasks ---------- */
+
+.folders{
+    composes: segmented from './ui.module.css';
+    display: flex;
+    width: 100%;
+    max-width: 26rem;
+    align-self: flex-start;
+}
+
+.folderActive{
+    composes: segmentActive from './ui.module.css';
+}
+
+.folders > button{
+    white-space: nowrap;
+}
+
+.folderBadge{
+    margin-left: 0.25rem;
+    padding: 0 0.4rem;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    border-radius: 999px;
+    background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.folderCount{
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.doneList{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.doneRow{
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    text-align: left;
+}
+
+.doneCheck{
+    flex-shrink: 0;
+    width: 1.4rem;
+    height: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary-text);
+    background: var(--primary);
+    border-radius: 50%;
+    corner-shape: round;
+}
+
+.doneText{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.doneName{
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+}
+
+.reopenBtn{
+    flex-shrink: 0;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: transparent;
+}

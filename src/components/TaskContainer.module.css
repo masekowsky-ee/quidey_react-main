@@ -2,7 +2,9 @@
     composes: panel from './ui.module.css';
     width: fit-content;
     max-width: 1000px;
-    min-height: 15rem; /* keeps a sensible size when empty or nearly empty */
+    /* keeps a sensible size when empty or nearly empty */
+    min-width: min(24rem, calc(100vw - 2rem));
+    min-height: 15rem;
     max-height: 70vh; /* grows with its tasks, scrolls only for very long lists */
     box-sizing: border-box;
     justify-self: center;

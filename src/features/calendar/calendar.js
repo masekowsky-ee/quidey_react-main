@@ -106,6 +106,37 @@ export function compareTasks(a, b) {
     return String(a.name).localeCompare(String(b.name));
 }
 
+export const REPEATS = ['daily', 'weekly', 'monthly', 'yearly'];
+
+// The day of the n-th repeat after `start` (n steps from the day itself, like the server,
+// so the 31st stays the 31st where the month has one)
+export function repeatDate(start, repeat, n) {
+    if (repeat === 'daily') return addDays(start, n);
+    if (repeat === 'weekly') return addDays(start, 7 * n);
+    if (repeat === 'monthly') return addMonths(start, n);
+    if (repeat === 'yearly') return addMonths(start, 12 * n);
+    return null;
+}
+
+// Previews of the coming repeats of open repeating tasks, up to `until` (a Date): copies with
+// projected: true, the day as due and repeatOf: the real task (the one to open). They are not
+// stored anywhere; the server creates each one when the one before it is done.
+const MAX_PREVIEWS = 400;
+export function projectRepeats(tasks, until) {
+    const previews = [];
+    for (const task of tasks) {
+        if (task.done || !REPEATS.includes(task.repeat) || !task.due) continue;
+        const start = parseDate(dateKey(task.due));
+        for (let n = 1; n <= MAX_PREVIEWS; n++) {
+            const date = repeatDate(start, task.repeat, n);
+            if (date > until) break;
+            const key = dateKey(date);
+            previews.push({ ...task, id: `${task.id}@${key}`, due: key, projected: true, repeatOf: task });
+        }
+    }
+    return previews;
+}
+
 // { "2026-10-20": [tasks sorted], ... } for the tasks that have a day
 export function groupByDay(tasks) {
     const days = {};

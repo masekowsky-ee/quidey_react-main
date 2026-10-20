@@ -11,7 +11,7 @@ import { showToast } from '../features/toast/toast';
 import { downloadFile, fill, isOverdue, sameDay, toDateOnly } from '../features/helperFunction';
 import {
     CALENDAR_VIEWS, addDays, addMonths, dateKey, filterTasks, focusByDay as toFocusByDay, fromKey,
-    groupByDay, isoWeek, readStoredCalendarView, startOfWeek, storeCalendarView, toIcs,
+    groupByDay, projectRepeats, isoWeek, readStoredCalendarView, startOfWeek, storeCalendarView, toIcs,
 } from '../features/calendar/calendar';
 import { useTaskDrag } from '../features/calendar/useTaskDrag';
 import MonthView from './calendar/MonthView.jsx';
@@ -60,6 +60,12 @@ export default function Calendar() {
 
     const shown = useMemo(() => filterTasks(tasks, { groupId, showDone, query }), [tasks, groupId, showDone, query]);
     const tasksByDay = useMemo(() => groupByDay(shown), [shown]);
+    // the month and week grids also show the coming repeats of repeating tasks (a year ahead of
+    // the shown day), as previews; the agenda and the day panel list only real tasks
+    const gridTasksByDay = useMemo(
+        () => groupByDay([...shown, ...projectRepeats(shown, addDays(focusedDate, 400))]),
+        [shown, focusedDate]
+    );
     // the day panel shows every task of its day in the chosen group, done ones too
     const panelTasksByDay = useMemo(() => groupByDay(filterTasks(tasks, { groupId })), [tasks, groupId]);
     const focusByDay = useMemo(() => toFocusByDay(sessions), [sessions]);
@@ -270,8 +276,8 @@ export default function Calendar() {
 
             <div className={styles.invites}><TaskInvites /></div>
 
-            {view === 'month' && <MonthView {...viewProps} drag={drag} startDrag={startDrag} onOpenWeek={(date) => setView('week', date)} />}
-            {view === 'week' && <WeekView {...viewProps} drag={drag} startDrag={startDrag} />}
+            {view === 'month' && <MonthView {...viewProps} tasksByDay={gridTasksByDay} drag={drag} startDrag={startDrag} onOpenWeek={(date) => setView('week', date)} />}
+            {view === 'week' && <WeekView {...viewProps} tasksByDay={gridTasksByDay} drag={drag} startDrag={startDrag} />}
             {view === 'agenda' &&
                 <AgendaView {...viewProps} tasks={shown} onToggleDone={toggleDone} onSchedule={moveTask}
                     onOpenGroup={openGroup} filtersActive={filtersActive} onClearFilters={clearFilters} />}
