@@ -52,6 +52,8 @@ export default function TaskContainer(props){
     const sharedTasks = useSelector(selectSharedSoloTasks);
     const shownGroup = groupToDisplay.group;
     const showingAll = !shownGroup?.id || shownGroup.name === 'all';
+    // the shown group as stored (one of my own, not "all" or a session's), or undefined
+    const shownGroupRow = showingAll || shownGroup?.shared ? undefined : groups.find(g => g.id === shownGroup.id);
     const groupTasks = shownGroup?.shared
         ? (sharedGroups.find(group => group.sessionId === shownGroup.sessionId)?.tasks ?? [])
         : showingAll ? [...groupToDisplay.tasks, ...sharedTasks] : groupToDisplay.tasks;
@@ -144,6 +146,11 @@ export default function TaskContainer(props){
                 <button className={styles.addBtn} onClick={()=>{setCreateTask(true)}} title={t('createTaskH2')} aria-label={t('createTaskH2')}>
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M440-440H240q-17 0-28.5-11.5T200-480q0-17 11.5-28.5T240-520h200v-200q0-17 11.5-28.5T480-760q17 0 28.5 11.5T520-720v200h200q17 0 28.5 11.5T760-480q0 17-11.5 28.5T720-440H520v200q0 17-11.5 28.5T480-200q-17 0-28.5-11.5T440-240v-200Z"/></svg>
                 </button>
+                {/* the shown group's colour (one of my own groups) */}
+                {shownGroupRow &&
+                    <TaskColorButton task={shownGroupRow} label={t('groupColor')}
+                        onChange={(color) => dispatch(editGroup(shownGroupRow.id, { color }, shownGroupRow))
+                            .catch(() => dispatch(showToast(t('friendError_generic'), 'error')))} />}
                 {doneCount > 0 &&
                     <button
                         className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}

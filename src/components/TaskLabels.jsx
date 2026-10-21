@@ -2,9 +2,11 @@ import styles from './TaskLabels.module.css';
 import { useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
 import { displayName, fill } from '../features/helperFunction';
+import { groupColorAttr } from '../features/tasks/taskColors';
 
 // Small labels under a task's name: the groups it is in, or for a task from a shared
 // session that session (and who it's assigned to). A click on a label opens that group.
+// A group with a colour shows a flag in it.
 export default function TaskLabels({ task, onOpenGroup }) {
     const { t } = useTranslation();
     const groups = useSelector(state => state.task.groups);
@@ -39,7 +41,8 @@ export default function TaskLabels({ task, onOpenGroup }) {
                     {task.owner ? sharedText : <><span className={styles.srOnly}>{t('sharedWithLabel')}: </span>{sharedText}</>}
                 </span>}
             {names.map(group => (
-                <button key={group.id} className={styles.label} onClick={() => onOpenGroup?.(group)} title={t('openGroup')}>
+                <button key={group.id} className={styles.label} data-task-color={groupColorAttr(group)} onClick={() => onOpenGroup?.(group)} title={t('openGroup')}>
+                    {groupColorAttr(group) && <svg className={styles.flag} xmlns="http://www.w3.org/2000/svg" height="12px" viewBox="0 -960 960 960" width="12px" fill="currentColor" aria-hidden="true"><path d="M200-120v-680h360l16 80h224v400H520l-16-80H280v280h-80Z"/></svg>}
                     {group.name}
                 </button>
             ))}

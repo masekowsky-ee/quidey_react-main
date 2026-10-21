@@ -49,6 +49,18 @@
     background: transparent;
 }
 
+/* its colour's flag before the name */
+.groupBtn[data-task-color]{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.flag{
+    flex-shrink: 0;
+    color: var(--task-color);
+}
+
 .activeGroup{
     composes: btnLight from './ui.module.css';
 }

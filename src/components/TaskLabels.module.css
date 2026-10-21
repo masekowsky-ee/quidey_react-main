@@ -35,6 +35,12 @@
     transform: none;
 }
 
+/* the group's colour (data-task-color sets --task-color) */
+.flag{
+    flex-shrink: 0;
+    color: var(--task-color);
+}
+
 /* tasks from a shared session: the team color */
 .sessionLabel{
     color: var(--primary-fg);

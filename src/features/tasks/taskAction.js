@@ -151,10 +151,11 @@ export const selectTaskInviteCount = (state) => state.task.invites.length;
 // Someone else's task shared with me (as opposed to my own)
 export const isSharedWithMe = (task) => Boolean(task?.owner);
 
-export const addGroup = (name, description) => {
+// color: one of TASK_COLORS or null
+export const addGroup = (name, description, color = null) => {
     return async (dispatch) => {
         const data = await apiFetch("/api/groups", {
-            method: "POST", body: JSON.stringify({name, description})
+            method: "POST", body: JSON.stringify({name, description, color})
         });
 
     

@@ -1,5 +1,7 @@
 import styles from './Form.module.css';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import TaskColorPicker from './task/TaskColorPicker.jsx';
 import { addGroup } from '../features/tasks/taskAction';
 import {useTranslation} from '../i18n/useTranslation';
 import {setCustomError} from '../features/settings/settingsAction';
@@ -12,13 +14,15 @@ export default function GroupForm(props){
     const { t } = useTranslation();
 
     const groups = useSelector(state => state.task.groups);
+    // the group's colour: its tasks get a flag in it
+    const [color, setColor] = useState(null);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const name = e.target[0].value;
         const description = e.target[1].value;
         if(name && name !== 'all' && !groups.some(g => g.name === name)){
-            dispatch(addGroup(name, description));
+            dispatch(addGroup(name, description, color));
             e.target[0].value = '';
             e.target[1].value = '';
             setCreateGroup(false);
@@ -35,6 +39,7 @@ export default function GroupForm(props){
             <form className={`${styles.form}`} onSubmit={(e)=>{handleSubmit(e)}}>
                 <input type="text" className={styles.input} placeholder={t('groupName')} />
                 <input type="text" className={styles.input} placeholder={t('description')} />
+                <TaskColorPicker value={color} onChange={setColor} />
                 <button type="submit" className={styles.createBtn}>{t('createBtn')}</button>
             </form>
         </div>

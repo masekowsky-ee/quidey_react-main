@@ -6,7 +6,8 @@ import TaskColorPicker from './TaskColorPicker.jsx';
 
 // A small dot in the task's colour; a click opens the swatches right next to it.
 // Picking one (or Escape, or a click elsewhere) closes them again.
-export default function TaskColorButton({ task, onChange }) {
+// Works for anything with a .color (a group too); label: what the colour is of (default "Colour").
+export default function TaskColorButton({ task, onChange, label }) {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
@@ -33,7 +34,7 @@ export default function TaskColorButton({ task, onChange }) {
     return (
         <span className={styles.colorButtonWrap} ref={ref}>
             <button type="button" className={styles.colorButton} aria-expanded={open} aria-controls={open ? popId : undefined}
-                title={t('taskColor')} aria-label={`${t('taskColor')}: ${t(color ? `taskColor_${color}` : 'taskColorNone')}`}
+                title={label ?? t('taskColor')} aria-label={`${label ?? t('taskColor')}: ${t(color ? `taskColor_${color}` : 'taskColorNone')}`}
                 onClick={() => setOpen(!open)}>
                 <span className={color ? styles.swatchDot : `${styles.swatchDot} ${styles.swatchNone}`} data-task-color={color ?? undefined} aria-hidden="true" />
             </button>
