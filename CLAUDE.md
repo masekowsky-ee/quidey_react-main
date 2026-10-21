@@ -77,7 +77,19 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
 - Task colours: `tasks.color` (8 names, `src/features/tasks/taskColors.js`); rows and chips set
   `data-task-color`, the tones live in `index.css` as `--task-color` per theme.
 
-Client-side storage: only `localStorage` (no cookies): `token` (JWT), `language`, `accent`,
+PWA: installable app. `public/manifest.webmanifest` + icons in `public/icons/` (logo on the dark
+background, incl. a maskable one and the apple-touch-icon). `pwa.js` is a Vite plugin that writes
+`dist/sw.js` at build time: it precaches every built file plus `PUBLIC_FILES`, one cache per build
+(`quidey-<hash>`), navigations network-first with the cached index.html as offline fallback,
+`/assets/*` cache-first, never `/api`, `/socket.io` or other origins (no personal data in the
+cache). No `skipWaiting` — an update must not reload a running timer. Registered only in the
+production build (`src/features/pwa/registerServiceWorker.js`); `_headers` sends `/sw.js` with
+`no-cache`. Settings → "Als App": `src/features/pwa/install.js` catches `beforeinstallprompt` at
+startup and offers it as a button (Chrome/Edge/Android), explains the share menu on iOS Safari,
+says "installed" when running standalone, and hides the row everywhere else.
+
+Client-side storage: only `localStorage` (no cookies), plus the service worker's Cache Storage
+for the app's own files: `token` (JWT), `language`, `accent`,
 `theme`, `motion`, `homeLayout`, `calendarView`, `teamSessionId`. `public/theme-init.js` applies
 the theme before React loads.
 

@@ -107,3 +107,39 @@ describe('privacy policy', () => {
         }
     })
 })
+
+describe('editing a task on Home', () => {
+    const home = (store) => wrap(store, <TaskContainer working={false} handlePointerDown={vi.fn()} setCreateTask={vi.fn()} />)
+
+    it('opens the full editor and saves every field with it', async () => {
+        const store = makeStore()
+        apiFetch.mockResolvedValue({ ...tasks[0], name: 'Erste neu' })
+        home(store)
+        fireEvent.click(screen.getByRole('button', { name: 'Bearbeiten: Erste' }))
+        const dialog = screen.getByRole('dialog', { name: 'Bearbeiten' })
+        // the same editor as in the calendar, with its extra options
+        expect(within(dialog).getByRole('button', { name: /Weitere Optionen/ })).toBeTruthy()
+        const name = within(dialog).getByLabelText('Name')
+        fireEvent.change(name, { target: { value: 'Erste neu' } })
+        fireEvent.change(dialog.querySelector('input[type="date"]'), { target: { value: '2026-10-22' } })
+        await act(async () => { fireEvent.click(within(dialog).getByRole('button', { name: 'Speichern' })) })
+        expect(apiFetch).toHaveBeenCalledWith('/api/tasks/1', expect.objectContaining({ method: 'PUT' }))
+        expect(screen.queryByRole('dialog')).toBeNull()
+    })
+
+    it('closes with Escape without saving', () => {
+        home(makeStore())
+        fireEvent.click(screen.getByRole('button', { name: 'Bearbeiten: Zweite' }))
+        fireEvent.keyDown(screen.getByRole('dialog').querySelector('input'), { key: 'Escape' })
+        expect(screen.queryByRole('dialog')).toBeNull()
+        expect(apiFetch).not.toHaveBeenCalled()
+    })
+
+    it('the colour swatches float in the page, not inside the row (phones cut them off)', () => {
+        home(makeStore())
+        const [button] = screen.getAllByRole('button', { name: /^Farbe:/ })
+        fireEvent.click(button)
+        const swatch = screen.getByRole('radio', { name: 'Türkis' })
+        expect(swatch.closest('li')).toBeNull()
+    })
+})

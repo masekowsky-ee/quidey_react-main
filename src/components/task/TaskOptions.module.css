@@ -200,11 +200,11 @@
     height: 0.95rem;
 }
 
+/* placed by TaskColorButton (fixed, kept inside the window) */
 .colorPopover{
-    position: absolute;
-    top: calc(100% + 0.35rem);
-    right: 0;
-    z-index: var(--z-drag);
+    position: fixed;
+    z-index: calc(var(--z-modal) + 1); /* also above a dialog */
+    box-sizing: border-box;
     width: max-content;
     max-width: min(16.5rem, calc(100vw - 2rem));
     padding: 0.5rem;

@@ -189,6 +189,11 @@
     composes: deleteBtn from './ui.module.css';
 }
 
+/* opens the full editor with all options */
+.editBtn{
+    composes: iconHover glowPrimary from './ui.module.css';
+}
+
 /* "Tasks" title with its actions on one line */
 .sectionHead{
     display: flex;

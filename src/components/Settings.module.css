@@ -40,6 +40,10 @@
     composes: segmented from './ui.module.css';
 }
 
+.installButton{
+    composes: btnPrimary from './ui.module.css';
+}
+
 .segmentActive{
     composes: segmentActive from './ui.module.css';
 }

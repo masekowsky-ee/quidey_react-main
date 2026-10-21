@@ -40,8 +40,11 @@ export function headersFile(apiUrl) {
     const block = (path, entries) => `${path}\n` + Object.entries(entries).map(([name, value]) => `  ${name}: ${value}`).join('\n') + '\n';
     // Built files carry a hash of their content in the name, so a changed file gets a new name:
     // browsers can keep them for a year without asking again. index.html (no hash) is left to
-    // the default, so a deploy is seen right away.
-    return block('/*', headers) + block('/assets/*', { 'Cache-Control': 'public, max-age=31536000, immutable' });
+    // the default, so a deploy is seen right away. The service worker (pwa.js) is always asked
+    // for again, so an update of the installed app isn't held back by a cached copy.
+    return block('/*', headers)
+        + block('/assets/*', { 'Cache-Control': 'public, max-age=31536000, immutable' })
+        + block('/sw.js', { 'Cache-Control': 'no-cache' });
 }
 
 // Vite plugin: adds _headers to the build output

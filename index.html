@@ -3,7 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/quidey-logo.svg" />
-    <link rel="apple-touch-icon" href="/favicon_io//android-chrome-512x512.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <!-- installable app (PWA): manifest here, service worker from pwa.js -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Quidey" />
+    <!-- not black-translucent: its white status text would be unreadable in the light theme -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="description" content="Der ruhige Planer für dein Studium: Aufgaben, Fokus-Timer, Kalender und gemeinsames Lernen." />
     <!-- viewport-fit=cover: the page reaches under an iPhone's notch and home indicator, and
          env(safe-area-inset-*) in the CSS keeps the content clear of them -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />

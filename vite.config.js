@@ -1,12 +1,14 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { securityHeaders } from './security-headers.js'
+import { pwa } from './pwa.js'
 
 // https://vite.dev/config/
 // The build also writes dist/_headers (security headers, see security-headers.js) for the
-// API address in VITE_API_URL, e.g. from .env.production.local.
+// API address in VITE_API_URL, e.g. from .env.production.local, and dist/sw.js (the PWA's
+// service worker, see pwa.js).
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), securityHeaders(loadEnv(mode, '.', 'VITE_').VITE_API_URL)],
+  plugins: [react(), securityHeaders(loadEnv(mode, '.', 'VITE_').VITE_API_URL), pwa()],
   build: {
     rolldownOptions: {
       output: {

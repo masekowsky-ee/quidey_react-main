@@ -6,6 +6,7 @@ import {MOTION_LEVELS} from '../features/settings/motion';
 import {setSessionParams} from '../features/session/sessionAction';
 import {SESSION_LENGTHS} from '../features/settings/preferences';
 import HomeLayoutSwitch from './together/HomeLayoutSwitch';
+import {useInstallState, promptInstall} from '../features/pwa/install';
 
 // Swatch color shown for each palette (its dark-mode accent)
 const ACCENT_OPTIONS = [
@@ -36,6 +37,7 @@ export default function Settings(){
     const accent = useSelector((state) => state.settings.accent);
     const motionLevel = useSelector((state) => state.settings.motion);
     const defaultSessionMinutes = useSelector((state) => state.settings.defaultSessionMinutes);
+    const installState = useInstallState();
     const dispatch = useDispatch();
 
     // New default length; also applied to the timer right away if it is idle and untouched.
@@ -109,6 +111,19 @@ export default function Settings(){
                     </div>
                     <HomeLayoutSwitch />
                 </div>
+                {installState !== 'unavailable' && (
+                    <div className={styles.row}>
+                        <div className={styles.rowText}>
+                            <span className={styles.rowLabel}>{t('installApp')}</span>
+                            <span className={styles.rowHint}>
+                                {t({ installed: 'installAppDone', ios: 'installAppIos', prompt: 'installAppHint' }[installState])}
+                            </span>
+                        </div>
+                        {installState === 'prompt' && (
+                            <button className={styles.installButton} onClick={promptInstall}>{t('installAppButton')}</button>
+                        )}
+                    </div>
+                )}
             </section>
 
             <section className={styles.card}>

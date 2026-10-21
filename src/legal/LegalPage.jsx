@@ -266,6 +266,13 @@ function Privacy() {
                 <li>Schwierigkeit und Bestwerte der Spiele.</li>
             </ul>
             <p>
+                Damit Quidey sich als App installieren lässt, schnell startet und auch ohne Verbindung öffnet, legt ein
+                Service Worker die Programmdateien der App (Seite, Skripte, Stylesheets, Schrift, Icons) im Cache-Speicher
+                deines Browsers ab. Darin liegen keine personenbezogenen Daten: Deine Aufgaben, Nachrichten und
+                Kontodaten werden immer direkt vom Server geladen und nicht zwischengespeichert. Bei jeder neuen
+                Version werden die alten Dateien ersetzt.
+            </p>
+            <p>
                 Das ist für die von dir gewünschten Funktionen unbedingt erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG);
                 eine Einwilligung und ein Cookie-Banner sind dafür nicht nötig. Diese Daten verlassen dein Gerät nicht
                 (außer dem Token bei Anfragen an Quidey und der Sprache, siehe Abschnitt 4). Du kannst sie jederzeit in deinem Browser löschen.

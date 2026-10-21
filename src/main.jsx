@@ -8,6 +8,11 @@ import App from './App.jsx'
 import AppIntro from './components/intro/AppIntro.jsx'
 import {Provider} from "react-redux";
 import store from "./features/store";
+import { registerServiceWorker } from './features/pwa/registerServiceWorker'
+import { listenForInstallPrompt } from './features/pwa/install'
+
+registerServiceWorker()
+listenForInstallPrompt()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

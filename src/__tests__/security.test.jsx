@@ -101,5 +101,7 @@ describe('security headers of the site', () => {
         // hashed build files are cached for good, index.html isn't
         expect(file).toContain('/assets/*\n  Cache-Control: public, max-age=31536000, immutable')
         expect(file.split('/assets/*')[0]).not.toContain('immutable')
+        // the service worker is always checked for updates
+        expect(file).toContain('/sw.js\n  Cache-Control: no-cache')
     })
 })
