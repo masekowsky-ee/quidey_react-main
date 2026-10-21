@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
-import { LOGIN_SUCCESS } from '../features/auth/authActionTypes'
+import { LOGIN_SUCCESS, SET_ACCESS } from '../features/auth/authActionTypes'
 import { DAILY_LINES, LINE_TYPES, lineOfDay, dayNumber } from '../features/fun/dailyLines'
 import { GUESS_WORDS, SCRAMBLE_WORDS } from '../features/fun/words'
 import {
@@ -226,6 +226,59 @@ describe('tutorial', () => {
         fireEvent.click(screen.getByRole('button', { name: "Los geht's" }))
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
         expect(store.getState().settings.showTutorial).toBe(false)
+    })
+
+    it('greets by name, shows tips and opens the page a step is about', () => {
+        const store = makeStore()
+        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        render(
+            <Provider store={store}>
+                <MemoryRouter>
+                    <Tutorial />
+                    <Routes>
+                        <Route path="/" element={null} />
+                        <Route path="/calendar" element={<p>calendar page</p>} />
+                    </Routes>
+                </MemoryRouter>
+            </Provider>
+        )
+        expect(screen.getByText('Hallo ann!')).toBeInTheDocument()
+
+        fireEvent.keyDown(window, { key: 'ArrowRight' })
+        fireEvent.keyDown(window, { key: 'ArrowRight' })
+        fireEvent.keyDown(window, { key: 'ArrowRight' })
+        expect(screen.getByRole('heading', { name: 'Plane im Kalender' })).toBeInTheDocument()
+        expect(screen.getAllByRole('listitem').length).toBeGreaterThan(0)
+
+        fireEvent.click(screen.getByRole('button', { name: /Kalender öffnen/ }))
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+        expect(screen.getByText('calendar page')).toBeInTheDocument()
+        expect(localStorage.getItem('tutorialSeen:ann')).toBe('1')
+    })
+
+    it('has the family step only for testers', () => {
+        const store = makeStore()
+        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        const { unmount } = renderTutorial(store)
+        const regular = screen.getAllByRole('tab').length
+        expect(screen.queryByRole('tab', { name: 'Quidey Family' })).not.toBeInTheDocument()
+        unmount()
+
+        store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isTester: true } })
+        store.dispatch({ type: 'SET_SHOW_TUTORIAL', payload: true })
+        renderTutorial(store)
+        expect(screen.getAllByRole('tab')).toHaveLength(regular + 1)
+        expect(screen.getByRole('tab', { name: 'Quidey Family' })).toBeInTheDocument()
+    })
+
+    it('every step has its texts in both languages', () => {
+        for (const lang of ['de', 'en']) {
+            for (const id of ['welcome', 'tasks', 'focus', 'calendar', 'friends', 'together', 'family', 'inbox', 'history', 'settings', 'menu']) {
+                expect(translations[lang][`tut_${id}_title`]).toBeTruthy()
+                expect(translations[lang][`tut_${id}_text`]).toBeTruthy()
+                expect(Array.isArray(translations[lang][`tut_${id}_tips`])).toBe(true)
+            }
+        }
     })
 
     it('closes with Escape', () => {

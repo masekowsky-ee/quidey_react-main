@@ -128,6 +128,42 @@ export const MOTION = {
             transition: { duration: 0.4 },
         },
     },
+    // the tutorial card when it opens
+    tourCard: {
+        minimal: {
+            initial: { opacity: 0, y: 12, scale: 0.98 },
+            animate: { opacity: 1, y: 0, scale: 1 },
+            transition: { duration: 0.3, ease: EASE },
+        },
+        normal: {
+            initial: { opacity: 0, y: 40, scale: 0.92 },
+            animate: { opacity: 1, y: 0, scale: 1 },
+            transition: { type: 'spring', stiffness: 300, damping: 22 },
+        },
+        extreme: {
+            initial: { opacity: 0, y: 90, scale: 0.75, rotate: -4 },
+            animate: { opacity: 1, y: 0, scale: 1, rotate: 0 },
+            transition: { type: 'spring', stiffness: 260, damping: 15 },
+        },
+    },
+    // one step of the tutorial coming in; dir is 1 (next) or -1 (back)
+    tourStep: {
+        minimal: (dir) => ({
+            initial: { opacity: 0, x: 16 * dir },
+            animate: { opacity: 1, x: 0 },
+            transition: { duration: 0.25, ease: EASE },
+        }),
+        normal: (dir) => ({
+            initial: { opacity: 0, x: 48 * dir, scale: 0.97 },
+            animate: { opacity: 1, x: 0, scale: 1 },
+            transition: { ...LIVELY_SPRING, opacity: { duration: 0.2 } },
+        }),
+        extreme: (dir) => ({
+            initial: { opacity: 0, x: 110 * dir, rotate: 6 * dir, scale: 0.9, filter: 'blur(6px)' },
+            animate: { opacity: 1, x: 0, rotate: 0, scale: 1, filter: 'blur(0px)', transitionEnd: { filter: 'none' } },
+            transition: { ...BOUNCY, opacity: { duration: 0.2 }, filter: { duration: 0.3 } },
+        }),
+    },
     // a game on the fun page when it starts
     game: {
         minimal: {
