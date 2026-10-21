@@ -112,7 +112,7 @@ const taskReducer = (state = initialState, action) => {
         case ADD_GROUP:
             return {
                 ...state,
-                groups: [...state.groups, {id: action.payload.id, name: action.payload.name, description: action.payload.description}],
+                groups: [...state.groups, {id: action.payload.id, name: action.payload.name, description: action.payload.description, color: action.payload.color ?? null}],
             }
         case DELETE_GROUP:
             return {
@@ -131,17 +131,13 @@ const taskReducer = (state = initialState, action) => {
 
         case ADD_GROUP_TASKS: {
             const { taskId, groupId } = action.payload;
-            const task = state.tasks.find(t => t.id === taskId);
             const showing = state.groupToDisplay.group?.id === groupId;
-            return {
-                ...state,
-                tasks: state.tasks.map(t => t.id === taskId
-                    ? withGroupIds(t, ids => (ids.includes(groupId) ? ids : [...ids, groupId]))
-                    : t),
-                groupToDisplay: showing && task && !state.groupToDisplay.tasks.some(t => t.id === taskId)
-                    ? { ...state.groupToDisplay, tasks: [...state.groupToDisplay.tasks, task] }
-                    : state.groupToDisplay,
-            };
+            // the label (and its colour dot) shows at once, also in the list on screen
+            const next = mapTask(state, taskId, t => withGroupIds(t, ids => (ids.includes(groupId) ? ids : [...ids, groupId])));
+            const task = next.tasks.find(t => t.id === taskId);
+            return showing && task && !next.groupToDisplay.tasks.some(t => t.id === taskId)
+                ? { ...next, groupToDisplay: { ...next.groupToDisplay, tasks: [...next.groupToDisplay.tasks, task] } }
+                : next;
         }
         case DELETE_GROUP_TASKS: {
             // payload: { taskId, groupId }, or just the task id for the group that is shown
@@ -149,13 +145,10 @@ const taskReducer = (state = initialState, action) => {
                 ? action.payload
                 : { taskId: action.payload, groupId: state.groupToDisplay.group?.id };
             const showing = state.groupToDisplay.group?.id === groupId;
-            return {
-                ...state,
-                tasks: state.tasks.map(t => t.id === taskId ? withGroupIds(t, ids => ids.filter(id => id !== groupId)) : t),
-                groupToDisplay: showing
-                    ? { ...state.groupToDisplay, tasks: state.groupToDisplay.tasks.filter(t => t.id !== taskId) }
-                    : state.groupToDisplay,
-            };
+            const next = mapTask(state, taskId, t => withGroupIds(t, ids => ids.filter(id => id !== groupId)));
+            return showing
+                ? { ...next, groupToDisplay: { ...next.groupToDisplay, tasks: next.groupToDisplay.tasks.filter(t => t.id !== taskId) } }
+                : next;
         }
         case EDIT_GROUP:
             return {

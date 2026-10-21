@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import taskReducer from '../features/tasks/taskReducer'
 import {
     SET_TASK_STATE, ADD_TASK, DELETE_TASK, UPDATE_TASK_PROPS, ADD_GROUP, DELETE_GROUP,
-    EDIT_DISPLAYGROUP, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, EDIT_NOTE,
+    EDIT_DISPLAYGROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, EDIT_NOTE,
 } from '../features/tasks/taskActionTypes'
 
 const initial = taskReducer(undefined, { type: '@@INIT' })
@@ -81,9 +81,11 @@ describe('taskReducer', () => {
     })
 
     describe('groups', () => {
-        it('ADD_GROUP stores id, name and description', () => {
-            const state = taskReducer(loaded, { type: ADD_GROUP, payload: { id: 11, name: 'home', description: 'chores', user_id: 3 } })
-            expect(state.groups.at(-1)).toEqual({ id: 11, name: 'home', description: 'chores' })
+        it('ADD_GROUP stores id, name, description and colour', () => {
+            const state = taskReducer(loaded, { type: ADD_GROUP, payload: { id: 11, name: 'home', description: 'chores', user_id: 3, color: 'green' } })
+            expect(state.groups.at(-1)).toEqual({ id: 11, name: 'home', description: 'chores', color: 'green' })
+            const plain = taskReducer(loaded, { type: ADD_GROUP, payload: { id: 12, name: 'work', description: '' } })
+            expect(plain.groups.at(-1).color).toBeNull()
         })
 
         it('EDIT_DISPLAYGROUP shows the given group and its tasks', () => {
@@ -111,6 +113,16 @@ describe('taskReducer', () => {
             const state = taskReducer(showing, { type: DELETE_GROUP_TASKS, payload: 1 })
             expect(state.groupToDisplay.tasks.map(t => t.id)).toEqual([2])
             expect(state.tasks.map(t => t.id)).toEqual([1, 2]) // the task itself still exists
+        })
+
+        it('ADD_GROUP_TASKS / DELETE_GROUP_TASKS update the labels of the list on screen too', () => {
+            const showingAll = taskReducer(loaded, { type: EDIT_DISPLAYGROUP, payload: { group: {}, tasks: [task(1), task(2)] } })
+            const added = taskReducer(showingAll, { type: ADD_GROUP_TASKS, payload: { taskId: 1, groupId: 10 } })
+            expect(added.groupToDisplay.tasks[0].group_ids).toEqual([10])
+            expect(added.tasks[0].group_ids).toEqual([10])
+            const removed = taskReducer(added, { type: DELETE_GROUP_TASKS, payload: { taskId: 1, groupId: 10 } })
+            expect(removed.groupToDisplay.tasks[0].group_ids).toEqual([])
+            expect(removed.tasks[0].group_ids).toEqual([])
         })
 
         it('EDIT_GROUP replaces the group and updates the shown group', () => {

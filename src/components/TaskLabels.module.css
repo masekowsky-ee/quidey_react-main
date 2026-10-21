@@ -36,9 +36,12 @@
 }
 
 /* the group's colour (data-task-color sets --task-color) */
-.flag{
+.dot{
     flex-shrink: 0;
-    color: var(--task-color);
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: var(--task-color);
 }
 
 /* tasks from a shared session: the team color */

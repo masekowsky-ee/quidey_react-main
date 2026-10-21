@@ -14,7 +14,7 @@ export default function GroupForm(props){
     const { t } = useTranslation();
 
     const groups = useSelector(state => state.task.groups);
-    // the group's colour: its tasks get a flag in it
+    // the group's colour: its tasks get a dot in it
     const [color, setColor] = useState(null);
 
     const handleSubmit = (e) => {

@@ -49,20 +49,29 @@
     background: transparent;
 }
 
-/* its colour's flag before the name */
-.groupBtn[data-task-color]{
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-}
-
-.flag{
-    flex-shrink: 0;
-    color: var(--task-color);
-}
-
 .activeGroup{
     composes: btnLight from './ui.module.css';
+}
+
+/* A group with a colour: a border in it and a faint tint; open, the border is solid and
+   thicker (an inset ring, so the tab doesn't grow) and the tint stronger.
+   Nested selectors so they beat .activeGroup's btnLight. */
+.inner .groupBtn[data-task-color]{
+    border: 1.5px solid color-mix(in srgb, var(--task-color) 65%, transparent);
+    background: color-mix(in srgb, var(--task-color) 8%, transparent);
+    transition: border-color var(--ease), background-color var(--ease), box-shadow var(--ease);
+}
+
+.inner .groupBtn[data-task-color]:hover{
+    border-color: var(--task-color);
+    background: color-mix(in srgb, var(--task-color) 14%, transparent);
+}
+
+.inner .groupBtn.activeGroup[data-task-color]{
+    color: var(--text-h);
+    border-color: var(--task-color);
+    background: color-mix(in srgb, var(--task-color) 20%, transparent);
+    box-shadow: inset 0 0 0 1px var(--task-color);
 }
 
 /* Small round badge on the tab's corner, shown on hover/focus */
