@@ -1,9 +1,10 @@
 import styles from './Social.module.css';
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
-import { formatDate, getInitials, displayName, fill } from '../features/helperFunction';
+import { formatDate, displayName, fill } from '../features/helperFunction';
+import ProfileAvatar from './profile/ProfileAvatar.jsx';
 import { createSharedSession } from '../features/together/togetherAction';
 import { useTogetherRun } from '../features/together/hooks';
 import { setCustomError } from '../features/settings/settingsAction';
@@ -21,13 +22,15 @@ function errorText(t, err) {
     return text === key ? t('friendError_generic') : text;
 }
 
+// A person with a link to their profile (friends see all of it, others only the names)
 function UserRow({ user, meta, children }) {
     return (
         <li className={styles.row}>
-            <div className={styles.avatar} aria-hidden="true">{getInitials(user.displayName || user.username)}</div>
+            <ProfileAvatar user={user} />
             <div className={styles.who}>
-                <span className={styles.name}>{user.displayName || user.username}</span>
+                <Link className={styles.name} to={`/u/${user.username}`}>{displayName(user)}</Link>
                 <span className={styles.meta}>@{user.username}{meta && ` · ${meta}`}</span>
+                {user.status && <span className={styles.status}>{user.status}</span>}
             </div>
             <div className={styles.actions}>{children}</div>
         </li>
@@ -180,6 +183,10 @@ export default function Social() {
                             />
                             <button type="submit" className={styles.primaryBtn} disabled={sending || !username.trim()}>
                                 {t('sendRequest')}
+                            </button>
+                            <button type="button" className={styles.quietBtn} disabled={!username.trim()}
+                                onClick={() => navigate(`/u/${encodeURIComponent(username.trim().replace(/^@/, ''))}`)}>
+                                {t('profileView')}
                             </button>
                         </div>
                         <p className={styles.hint}>{t('addFriendHint')}</p>

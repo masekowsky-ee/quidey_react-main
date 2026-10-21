@@ -16,49 +16,6 @@
 
 /* ---------- Signed in ---------- */
 
-.identity{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 1.25rem;
-}
-
-/* Initials in a circle instead of a placeholder photo */
-.avatar{
-    flex-shrink: 0;
-    width: 4.5rem;
-    height: 4.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.6rem;
-    font-weight: 600;
-    color: var(--primary-fg);
-    background: color-mix(in srgb, var(--primary) 16%, var(--surface));
-    border-radius: 50%;
-    corner-shape: round;
-    user-select: none;
-}
-
-.identityText{
-    min-width: 0;
-}
-
-.name{
-    margin: 0;
-    overflow-wrap: break-word;
-}
-
-.handle{
-    color: var(--text-muted);
-}
-
-.since{
-    margin-top: 0.2rem;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-}
-
 /* Card title with an action on the right ("Edit profile") */
 .cardHead{
     display: flex;

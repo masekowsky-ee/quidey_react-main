@@ -44,6 +44,7 @@ const PAGES = {
   Profile: () => import('./components/profile.jsx'),
   Settings: () => import('./components/Settings.jsx'),
   Social: () => import('./components/Social.jsx'),
+  UserProfile: () => import('./components/UserProfile.jsx'),
   Inbox: () => import('./components/Inbox.jsx'),
   Feedback: () => import('./components/Feedback.jsx'),
   Together: () => import('./components/Together.jsx'),
@@ -60,6 +61,7 @@ const History = lazy(PAGES.History);
 const Profile = lazy(PAGES.Profile);
 const Settings = lazy(PAGES.Settings);
 const Social = lazy(PAGES.Social);
+const UserProfile = lazy(PAGES.UserProfile);
 const Inbox = lazy(PAGES.Inbox);
 const Feedback = lazy(PAGES.Feedback);
 const Together = lazy(PAGES.Together);
@@ -218,6 +220,7 @@ function App(){
           <Route path="/profile" element={<Profile/>} />
           <Route path="/settings" element={<Settings/>} />
           <Route path="/social" element={<Social/>} />
+          <Route path="/u/:username" element={<UserProfile/>} />
           <Route path="/inbox" element={<Inbox/>} />
           <Route path="/feedback" element={<Feedback/>} />
           <Route path="/together" element={<Together/>} />

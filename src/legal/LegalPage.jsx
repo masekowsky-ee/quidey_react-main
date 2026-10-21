@@ -222,6 +222,19 @@ function Privacy() {
                 ohne Bezug zu deinem Konto.
             </p>
             <p>
+                <strong>Profil:</strong> Angemeldete Nutzer können dein Profil über deinen Benutzernamen aufrufen,
+                sehen dort aber nur Benutzernamen und Anzeigenamen. Freiwillig kannst du dein Profil gestalten:
+                Avatar (ein Emoji), Profilfarbe, Banner, Status, „Über mich“, Schule/Studium und bis zu sechs
+                Interessen. Diese Angaben sehen nur deine Freunde – zusammen mit deinem Registrierungsdatum, dem Datum
+                eurer Freundschaft und euren gemeinsamen Freunden. Aus deinen Sitzungen und Aufgaben berechnet Quidey
+                Statistiken (z. B. Fokuszeit, Serien, Fokuszeit pro Tag und Wochentag, liebste Tageszeit, deine
+                meistgenutzten Gruppen, Anzahl erledigter Aufgaben und gemeinsamer Sitzungen sowie daraus folgende
+                Abzeichen). Sie werden nicht zusätzlich gespeichert, sondern bei jedem Aufruf berechnet; deine Freunde
+                sehen sie, solange du das im Profil nicht ausschaltest. Alle freiwilligen Angaben kannst du jederzeit
+                ändern oder löschen; bitte trage dort keine besonders sensiblen Daten ein. Rechtsgrundlage ist
+                Art. 6 Abs. 1 lit. b DSGVO.
+            </p>
+            <p>
                 <strong>Nachrichten im Postfach:</strong> Du kannst deinen Freunden direkt schreiben. Gespeichert werden
                 Absender, Empfänger, Text, Zeitpunkt und ob die Nachricht gelesen wurde. Eine Nachricht sehen nur ihr
                 beide; ich lese sie nicht, außer es ist zur Abwehr von Missbrauch oder wegen einer gesetzlichen Pflicht
@@ -308,7 +321,7 @@ function Privacy() {
             <p>Du hast das Recht auf</p>
             <ul>
                 <li>Auskunft über deine gespeicherten Daten (Art. 15 DSGVO),</li>
-                <li>Berichtigung (Art. 16 DSGVO) – Anzeigename und E-Mail-Adresse kannst du im Profil selbst ändern,</li>
+                <li>Berichtigung (Art. 16 DSGVO) – Anzeigename, E-Mail-Adresse und alle Profilangaben kannst du im Profil selbst ändern,</li>
                 <li>Löschung (Art. 17 DSGVO) – im Profil unter „Konto löschen“,</li>
                 <li>Einschränkung der Verarbeitung (Art. 18 DSGVO),</li>
                 <li>Datenübertragbarkeit (Art. 20 DSGVO),</li>

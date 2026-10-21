@@ -2,9 +2,13 @@ import styles from './Profile.module.css';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
-import { formatDate, formatDuration, getInitials } from '../features/helperFunction';
+import { formatDate, formatDuration } from '../features/helperFunction';
 import { updateProfile, changePassword, logoutEverywhere, resendVerificationMail, deleteAccount } from '../features/auth/authAction';
 import { fetchFriends } from '../features/friends/friendsAction';
+import { fetchOwnProfile, profileColorAttr } from '../features/profile/profileOptions';
+import ProfileCard from './profile/ProfileCard.jsx';
+import ProfileStats from './profile/ProfileStats.jsx';
+import ProfileEditor from './profile/ProfileEditor.jsx';
 
 // Translated message for a profile API error, using the error code the backend sends
 function errorText(t, err) {
@@ -26,8 +30,34 @@ export default function ProfileView({ onSignOut }) {
     // the friends list is otherwise only loaded on the Social page
     useEffect(() => { dispatch(fetchFriends()).catch(() => {}); }, [dispatch]);
 
-    const name = user?.display_name || user?.username;
     const focusMs = sessions.reduce((sum, ws) => sum + (ws.totalTime ?? 0) * 1000, 0);
+
+    // ---------- the profile friends see, and my statistics ----------
+    const [profile, setProfile] = useState(null);
+    const [customizing, setCustomizing] = useState(false);
+    const [draft, setDraft] = useState(null); // live preview while customizing
+    const [customMessage, setCustomMessage] = useState(null);
+
+    // fresh numbers whenever my sessions change (a finished session shows up right away)
+    useEffect(() => {
+        let current = true;
+        fetchOwnProfile().then(data => { if (current) setProfile(data); }).catch(() => {});
+        return () => { current = false; };
+    }, [sessions.length]);
+
+    const closeCustomize = () => {
+        setCustomizing(false);
+        setDraft(null);
+    };
+
+    // name, handle and member-since come from my account (they change in "Account" below)
+    const shown = {
+        ...profile,
+        ...draft,
+        username: user?.username ?? profile?.username,
+        displayName: user?.display_name || profile?.displayName,
+        memberSince: user?.created_at ?? profile?.memberSince,
+    };
 
     // ---------- account details ----------
     const [editing, setEditing] = useState(false);
@@ -155,32 +185,49 @@ export default function ProfileView({ onSignOut }) {
         <>
             <h1 className={styles.title}>{t('profile')}</h1>
 
-            <section className={`${styles.card} ${styles.identity}`}>
-                <div className={styles.avatar} aria-hidden="true">{getInitials(name)}</div>
-                <div className={styles.identityText}>
-                    <h2 className={styles.name}>{name}</h2>
-                    {user?.username && <p className={styles.handle}>@{user.username}</p>}
-                    {user?.created_at && <p className={styles.since}>{t('memberSince')} {formatDate(user.created_at)}</p>}
-                </div>
-            </section>
+            <ProfileCard profile={shown}>
+                {!customizing && (
+                    <button className={styles.quietBtn} onClick={() => { setCustomMessage(null); setCustomizing(true); }}>
+                        {t('profileCustomize')}
+                    </button>
+                )}
+            </ProfileCard>
+            {customMessage && <p className={styles.success} role="status">{customMessage}</p>}
 
-            <section className={styles.card}>
-                <h2 className={styles.cardTitle}>{t('stats')}</h2>
-                <div className={styles.stats}>
-                    <div className={styles.stat}>
-                        <span className={styles.statValue}>{sessions.length}</span>
-                        <span className={styles.statLabel}>{t('sessions')}</span>
+            {customizing && profile && (
+                <ProfileEditor
+                    profile={profile}
+                    onChange={setDraft}
+                    onClose={closeCustomize}
+                    onSaved={(saved) => {
+                        setProfile(saved);
+                        closeCustomize();
+                        setCustomMessage(t('profileCustomSaved'));
+                    }}
+                />
+            )}
+
+            {profile?.stats ? (
+                <ProfileStats stats={profile.stats} title={t('stats')} colorAttr={profileColorAttr(shown)} />
+            ) : (
+                <section className={styles.card}>
+                    <h2 className={styles.cardTitle}>{t('stats')}</h2>
+                    <div className={styles.stats}>
+                        <div className={styles.stat}>
+                            <span className={styles.statValue}>{sessions.length}</span>
+                            <span className={styles.statLabel}>{t('sessions')}</span>
+                        </div>
+                        <div className={styles.stat}>
+                            <span className={styles.statValue}>{formatDuration(focusMs)}</span>
+                            <span className={styles.statLabel}>{t('focusTime')}</span>
+                        </div>
+                        <div className={styles.stat}>
+                            <span className={styles.statValue}>{friendCount}</span>
+                            <span className={styles.statLabel}>{t('friends')}</span>
+                        </div>
                     </div>
-                    <div className={styles.stat}>
-                        <span className={styles.statValue}>{formatDuration(focusMs)}</span>
-                        <span className={styles.statLabel}>{t('focusTime')}</span>
-                    </div>
-                    <div className={styles.stat}>
-                        <span className={styles.statValue}>{friendCount}</span>
-                        <span className={styles.statLabel}>{t('friends')}</span>
-                    </div>
-                </div>
-            </section>
+                </section>
+            )}
 
             <section className={styles.card}>
                 <div className={styles.cardHead}>

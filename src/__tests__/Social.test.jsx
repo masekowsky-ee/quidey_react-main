@@ -48,6 +48,7 @@ describe('Social page', () => {
         expect(apiFetch).toHaveBeenCalledWith('/api/friends/requests')
         expect(screen.getByText('Anna Berg')).toBeInTheDocument()
         expect(screen.getByText(/@anna · Freunde seit/)).toBeInTheDocument()
+        expect(screen.getByRole('link', { name: 'Anna Berg' })).toHaveAttribute('href', '/u/anna')
     })
 
     it('shows how many requests are waiting on the Requests tab', async () => {

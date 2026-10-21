@@ -1,0 +1,852 @@
+/* The pieces of a profile: card with banner, avatar, statistics, editor.
+   A profile's colour comes from data-task-color on the card (--task-color, index.css);
+   without one it uses the viewer's accent colour. */
+
+.card{
+    composes: panel from '../ui.module.css';
+    --tint: var(--task-color, var(--primary));
+    overflow: hidden;
+    padding: 0;
+    box-shadow: none;
+}
+
+/* ---------- banner ---------- */
+
+.banner{
+    height: 7.5rem;
+    background: color-mix(in srgb, var(--tint) 14%, var(--surface));
+}
+
+.banner[data-banner="gradient"]{
+    background: linear-gradient(135deg,
+        color-mix(in srgb, var(--tint) 85%, var(--surface)),
+        color-mix(in srgb, var(--tint) 22%, var(--surface)));
+}
+
+.banner[data-banner="aurora"]{
+    background:
+        radial-gradient(70% 140% at 15% 0%, color-mix(in srgb, var(--tint) 80%, transparent), transparent 70%),
+        radial-gradient(60% 120% at 85% 100%, color-mix(in srgb, var(--tint) 45%, var(--text-h)), transparent 70%),
+        color-mix(in srgb, var(--tint) 18%, var(--surface));
+}
+
+.banner[data-banner="dots"]{
+    background:
+        radial-gradient(circle, color-mix(in srgb, var(--tint) 70%, transparent) 1.6px, transparent 2px) 0 0 / 14px 14px,
+        color-mix(in srgb, var(--tint) 16%, var(--surface));
+}
+
+.banner[data-banner="stripes"]{
+    background: repeating-linear-gradient(-45deg,
+        color-mix(in srgb, var(--tint) 45%, var(--surface)) 0 12px,
+        color-mix(in srgb, var(--tint) 22%, var(--surface)) 12px 24px);
+}
+
+.banner[data-banner="grid"]{
+    background:
+        linear-gradient(color-mix(in srgb, var(--tint) 45%, transparent) 1px, transparent 1px) 0 0 / 20px 20px,
+        linear-gradient(90deg, color-mix(in srgb, var(--tint) 45%, transparent) 1px, transparent 1px) 0 0 / 20px 20px,
+        color-mix(in srgb, var(--tint) 12%, var(--surface));
+}
+
+.banner[data-banner="glow"]{
+    background:
+        radial-gradient(60% 130% at 50% 120%, color-mix(in srgb, var(--tint) 90%, transparent), transparent 75%),
+        var(--surface-inset);
+}
+
+/* Nothing to show to non-friends: a quiet strip */
+.banner[data-banner="none"]{
+    height: 4.5rem;
+    background: var(--surface-inset);
+}
+
+/* ---------- body ---------- */
+
+.body{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 0 1.5rem 1.5rem;
+}
+
+/* avatar hanging over the banner's edge, actions on the right */
+.top{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: -2.75rem;
+}
+
+.actions{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.name{
+    margin: 0.25rem 0 0;
+    font-size: 1.375rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+}
+
+.handle{
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.status{
+    align-self: flex-start;
+    max-width: 100%;
+    margin: 0;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-h);
+    background: color-mix(in srgb, var(--tint) 12%, var(--surface-inset));
+    border: 1px solid color-mix(in srgb, var(--tint) 30%, var(--border));
+    border-radius: var(--radius-pill);
+    overflow-wrap: anywhere;
+}
+
+.bio{
+    margin: 0;
+    line-height: 1.5;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.meta{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.chips{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.chip{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.8125rem;
+    color: var(--text);
+    background: var(--surface-strong);
+    border-radius: var(--radius-pill);
+}
+
+.chip button{
+    width: 1.25rem;
+    height: 1.25rem;
+    min-width: 0;
+    padding: 0;
+    font-size: 0.8rem;
+    line-height: 1;
+    background: none;
+    border: none;
+    box-shadow: none;
+    color: var(--text-muted);
+}
+
+.chip button:hover{
+    color: var(--danger);
+    background: none;
+}
+
+/* ---------- avatar: emoji or initials on the profile's colour ---------- */
+
+.avatar{
+    --tint: var(--task-color, var(--primary));
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-h);
+    background: color-mix(in srgb, var(--tint) 24%, var(--surface));
+    border-radius: 50%;
+    corner-shape: round;
+    user-select: none;
+}
+
+.avatarEmoji{
+    font-size: 1.15rem;
+    line-height: 1;
+}
+
+.avatarLarge{
+    width: 5.5rem;
+    height: 5.5rem;
+    font-size: 1.9rem;
+    /* a ring in the card colour sets it off the banner */
+    box-shadow: 0 0 0 4px var(--surface);
+}
+
+.avatarLarge.avatarEmoji{
+    font-size: 2.6rem;
+}
+
+/* ---------- locked part for non-friends ---------- */
+
+.locked{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0.8rem 1rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    background: var(--surface-inset);
+    border-radius: var(--radius);
+}
+
+/* ---------- statistics ---------- */
+
+.statsCard{
+    composes: card from '../ui.module.css';
+    --tint: var(--task-color, var(--primary));
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.statsHead{
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.statsHead h2{
+    /* same look as ui.module.css cardTitle (composes only works on a single class) */
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--text-h);
+}
+
+.section{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.sectionTitle{
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+/* value over label, separated by hairlines rather than boxes */
+.tiles{
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    margin: 0;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.tile{
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 0.2rem;
+    min-width: 0;
+    padding: 0.85rem 1rem;
+    background: var(--surface);
+}
+
+.tile dt{
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.tile dd{
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text-h);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tileNote{
+    display: block;
+    white-space: normal;
+    margin-top: 0.1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--text-muted);
+}
+
+@media (max-width: 560px) {
+    .tiles{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* heat map: one column per week, Monday on top; one hue from light to strong */
+.heatWrap{
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.4rem;
+}
+
+.heatDays{
+    display: grid;
+    grid-template-rows: repeat(7, 1fr);
+    gap: 3px;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    line-height: 1;
+}
+
+.heatDays span{
+    display: flex;
+    align-items: center;
+}
+
+.heat{
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(7, auto);
+    gap: 3px;
+}
+
+.cell{
+    aspect-ratio: 1;
+    min-width: 0;
+    border-radius: 3px;
+    background: var(--surface-inset);
+}
+
+.cell[data-level="1"]{ background: color-mix(in srgb, var(--tint) 28%, var(--surface)); }
+.cell[data-level="2"]{ background: color-mix(in srgb, var(--tint) 50%, var(--surface)); }
+.cell[data-level="3"]{ background: color-mix(in srgb, var(--tint) 74%, var(--surface)); }
+.cell[data-level="4"]{ background: var(--tint); }
+.cell[data-future]{ visibility: hidden; }
+
+.cell:hover,
+.bar:hover .barFill{
+    outline: 2px solid var(--text-h);
+    outline-offset: 1px;
+}
+
+/* what the pointer is on, in words (the cells are too small for labels) */
+.readout{
+    min-height: 1.2rem;
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.legend{
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+}
+
+.legend .cell{
+    width: 10px;
+}
+
+.legend span:first-child{
+    margin-right: 0.25rem;
+}
+
+.legend span:last-child{
+    margin-left: 0.25rem;
+}
+
+/* bars for the last 14 days, from a shared baseline */
+.bars{
+    display: grid;
+    grid-template-columns: repeat(14, minmax(0, 1fr));
+    align-items: end;
+    gap: 4px;
+    height: 7rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--border-strong);
+}
+
+.bar{
+    display: flex;
+    align-items: flex-end;
+    height: 100%;
+    cursor: default;
+}
+
+.barFill{
+    width: 100%;
+    min-height: 0;
+    border-radius: 4px 4px 0 0;
+    background: var(--tint);
+}
+
+.bar[data-empty] .barFill{
+    height: 2px !important;
+    background: var(--border-strong);
+}
+
+.barLabels{
+    display: grid;
+    grid-template-columns: repeat(14, minmax(0, 1fr));
+    gap: 4px;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* horizontal bars: weekdays, top groups */
+.rows{
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.row{
+    display: grid;
+    grid-template-columns: minmax(2rem, 7rem) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.8125rem;
+}
+
+.rowLabel{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rowTrack{
+    height: 0.5rem;
+    background: var(--surface-inset);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.rowFill{
+    display: block;
+    height: 100%;
+    border-radius: 4px;
+    background: var(--tint);
+}
+
+.rowValue{
+    min-width: 4.5rem;
+    text-align: right;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.dot{
+    flex-shrink: 0;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--task-color, var(--text-muted));
+}
+
+.twoCols{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+@media (max-width: 560px) {
+    .twoCols{
+        grid-template-columns: 1fr;
+    }
+}
+
+.facts{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.facts strong{
+    color: var(--text-h);
+    font-weight: 600;
+}
+
+/* badges: earned ones in full colour, the rest faded */
+.badges{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.badge{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.8125rem;
+    line-height: 1.25;
+    color: var(--text-h);
+    background: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.badge[data-earned="false"]{
+    color: var(--text-muted);
+}
+
+.badge[data-earned="false"] .badgeIcon{
+    filter: grayscale(1);
+    opacity: 0.4;
+}
+
+.badgeIcon{
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.badgeText{
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.badgeText small{
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+}
+
+.emptyStats{
+    margin: 0;
+    color: var(--text-muted);
+}
+
+/* ---------- editor ---------- */
+
+.editor{
+    composes: card from '../ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.editorHead{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.hint{
+    margin: -0.6rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.editorHead h2{
+    /* same look as ui.module.css cardTitle (composes only works on a single class) */
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--text-h);
+}
+
+.field{
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.field > label,
+.field > legend{
+    padding: 0;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.field input[type="text"],
+.field textarea{
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.field textarea{
+    min-height: 5rem;
+    resize: vertical;
+    font: inherit;
+}
+
+.counter{
+    align-self: flex-end;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* rows of choices (emoji, colour, banner): radio buttons drawn as tiles */
+.choices{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.choice{
+    position: relative;
+    display: inline-flex;
+    cursor: pointer;
+}
+
+.choice input{
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.choiceFace{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    font-size: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-inset);
+    transition: border-color var(--ease), background-color var(--ease);
+}
+
+.choice:hover .choiceFace{
+    border-color: var(--border-strong);
+}
+
+.choice input:checked + .choiceFace{
+    border-color: var(--text-h);
+    box-shadow: 0 0 0 1px var(--text-h);
+    background: var(--surface-strong);
+}
+
+.choice input:focus-visible + .choiceFace{
+    outline: 2px solid var(--text-h);
+    outline-offset: 2px;
+}
+
+.choiceText{
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.swatch{
+    --tint: var(--task-color, var(--primary));
+    border-radius: 50%;
+    corner-shape: round;
+    background: var(--tint);
+}
+
+/* the accent option: half accent, half page, so it reads as "follows the accent" */
+.swatchAccent{
+    background: linear-gradient(135deg, var(--primary) 50%, var(--surface-strong) 50%);
+}
+
+.bannerChoice{
+    --tint: var(--task-color, var(--primary));
+    width: 5.5rem;
+    height: 2.4rem;
+    padding: 0;
+    overflow: hidden;
+}
+
+.bannerChoice .banner{
+    width: 100%;
+    height: 100%;
+}
+
+.tagRow{
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+}
+
+.tagRow input{
+    flex: 1;
+    min-width: 0;
+}
+
+.toggle{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.toggle input{
+    margin-top: 0.2rem;
+}
+
+.toggle small{
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.formActions{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.saveBtn{
+    composes: btnPrimary from '../ui.module.css';
+}
+
+.message{
+    margin: 0 auto 0 0;
+    font-size: 0.875rem;
+}
+
+.messageError{
+    composes: message;
+    color: var(--danger);
+}
+
+.messageOk{
+    composes: message;
+    color: var(--primary-fg);
+}
+
+/* ---------- other people's profile page ---------- */
+
+.page{
+    composes: pageColumn from '../ui.module.css';
+}
+
+.pageTop{
+    margin-top: 2rem;
+}
+
+.primaryBtn{
+    composes: btnPrimary from '../ui.module.css';
+    min-width: 0;
+}
+
+.mutual{
+    composes: card from '../ui.module.css';
+}
+
+.mutual h2{
+    margin: 0 0 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--text-h);
+}
+
+.people{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.person{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem 0.25rem 0.25rem;
+    font-size: 0.875rem;
+    color: var(--text);
+    text-decoration: none;
+    background: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+}
+
+.person:hover{
+    border-color: var(--border-strong);
+    color: var(--text-h);
+}
+
+.notice{
+    composes: card from '../ui.module.css';
+    color: var(--text-muted);
+}
+
+@media (max-width: 520px) {
+    .body{
+        padding: 0 1rem 1.25rem;
+    }
+
+    .avatarLarge{
+        width: 4.75rem;
+        height: 4.75rem;
+    }
+}

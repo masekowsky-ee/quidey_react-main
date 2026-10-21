@@ -219,6 +219,16 @@ a.rowTitle:hover{
     font-size: 1.05rem;
 }
 
+.threadName a{
+    color: inherit;
+    text-decoration: none;
+}
+
+.threadName a:hover{
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 .messages{
     list-style: none;
     margin: 0;

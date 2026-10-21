@@ -70,23 +70,6 @@
     border-top: 1px solid var(--btn-border);
 }
 
-.avatar{
-    flex-shrink: 0;
-    width: 2.5rem;
-    height: 2.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--text-h);
-    background: var(--surface-strong);
-    border: none;
-    border-radius: 50%;
-    corner-shape: round;
-    user-select: none;
-}
-
 .who{
     flex: 1;
     min-width: 0;
@@ -95,8 +78,26 @@
 }
 
 .name{
+    align-self: flex-start;
+    max-width: 100%;
     color: var(--text-h);
     font-weight: 600;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* the name opens the profile */
+.name:hover{
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* what a friend is working on (their profile status) */
+.status{
+    font-size: 0.8rem;
+    color: var(--text);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

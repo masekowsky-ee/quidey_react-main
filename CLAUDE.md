@@ -64,7 +64,16 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
 - `/profile`, `/settings` — profile, password, "sign out everywhere", delete account; language,
   theme (dark/light/system), accent colour (green, ocean, violet, sunset (default), rose, gold —
   also recolours the favicon), motion level, home layout.
-- `/social` — friends and friend requests.
+- `/social` — friends and friend requests; names link to `/u/:username`, the Add tab can open a
+  profile before sending a request.
+- Profiles: `/profile` shows my profile card (banner, avatar, status, bio, study, interests),
+  "Profil gestalten" (`components/profile/ProfileEditor.jsx`, live preview) and my statistics.
+  `/u/:username` (`UserProfile.jsx`) shows somebody else: non-friends only see display name and
+  username (plus add / accept / withdraw), friends see the whole profile, mutual friends and the
+  statistics unless `showStats` is off. Pieces in `src/components/profile/` (`ProfileCard`,
+  `ProfileAvatar`, `ProfileStats` — tiles, 26-week heat map, last 14 days, weekdays, top groups,
+  badges). Option lists in `src/features/profile/profileOptions.js` (same lists as the API),
+  badges are derived from the numbers (`badges.js`, nothing stored).
 - `/together`, `/together/:id` — shared live study sessions: members, shared task list, a
   stopwatch counting for everyone, activity feed, session chat (realtime). Session tasks can carry
   the same details as own tasks — day, time, prio, duration, location, link, details, colour — all
@@ -111,7 +120,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.
@@ -139,6 +148,11 @@ the theme before React loads.
   with `reminder_email`, computes the start in `users.timezone` (sent by the app via
   `PUT /api/users/locale`, default Europe/Berlin) and mails the owner once per reminder time
   (`reminder_mailed_at`). Only the owner can switch it on.
+- Profiles: `GET /api/profile` (mine), `PUT /api/profile` (only the fields sent: bio, status,
+  study, interests, color, banner, emoji, showStats), `GET /api/profiles/:username` (rate limited
+  per account; `relation` self/friend/incoming/outgoing/none decides what is in it). Statistics
+  are computed per request (`loadStats`/`summarizeStats`, days in `users.timezone`), never stored.
+  `/api/friends` also returns each friend's emoji, colour and status.
 - CLI: `npm run pro -- list|requests|grant|revoke|decline|admin|unadmin|tester|untester <username>`.
 - Tests: `npm test` (`test/api.test.mjs`, node:test, creates/drops its own DB). Extend for every new route.
 - Config via `.env` (see `.env.example`): `NODE_ENV`, `DB_*`, `JWT_SECRET` (≥32 chars), `PORT`,

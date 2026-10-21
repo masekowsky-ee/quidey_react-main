@@ -161,7 +161,7 @@ function Thread({ userId, onBack }) {
         <div className={styles.thread}>
             <div className={styles.threadHead}>
                 <button className={styles.backBtn} onClick={onBack} aria-label={t('back')}>←</button>
-                {thread && <><Avatar user={thread.user} /><h2 className={styles.threadName}>{displayName(thread.user)}</h2></>}
+                {thread && <><Avatar user={thread.user} /><h2 className={styles.threadName}><Link to={`/u/${thread.user.username}`}>{displayName(thread.user)}</Link></h2></>}
             </div>
             {!thread && !error && <p className={styles.empty} aria-busy="true">{t('loading')}</p>}
             {thread && (
