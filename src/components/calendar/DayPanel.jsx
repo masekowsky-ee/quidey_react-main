@@ -10,6 +10,7 @@ import GroupPicker from '../GroupPicker.jsx';
 import TaskEditor from './TaskEditor.jsx';
 import TaskMeta from '../task/TaskMeta.jsx';
 import Icon from './icons.jsx';
+import { taskColorAttr } from '../../features/tasks/taskColors';
 
 const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
 const PRIO_TEXT = { high: 'prioHigh', medium: 'prioMedium', low: 'prioLow' };
@@ -21,7 +22,7 @@ function TaskRow({ task, today, editing, onEdit, onCloseEdit, onToggleDone, onSa
     const level = prioLevel(task.prio);
     const classes = [styles.row, PRIO_CLASS[level], task.done && styles.rowDone, editing && styles.rowEditing].filter(Boolean).join(' ');
     return (
-        <li className={classes}>
+        <li className={classes} data-task-color={taskColorAttr(task)}>
             <div className={styles.rowMain}>
                 <button type="button" className={styles.check} aria-pressed={Boolean(task.done)} onClick={() => onToggleDone(task)}
                     aria-label={`${t(task.done ? 'reopen' : 'markDone')}: ${task.name}`} title={t(task.done ? 'reopen' : 'markDone')}>

@@ -39,6 +39,12 @@
     min-width: 0;
 }
 
+/* a task with its own colour: a stripe on the left and a soft wash fading out from it */
+.taskLi[data-task-color]{
+    box-shadow: inset 3px 0 0 var(--task-color);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--task-color) 12%, transparent), transparent 45%);
+}
+
 .taskLi p{
     white-space: normal;
     overflow-wrap: break-word;

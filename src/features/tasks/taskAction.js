@@ -13,8 +13,8 @@ export const fetchTaskState = () => {
 }
 
 // The optional task fields (see the api): time of day, duration and reminder in minutes,
-// location, link and extra details
-export const TASK_EXTRA_FIELDS = ['due_time', 'duration_minutes', 'reminder_minutes', 'location', 'link', 'details', 'repeat'];
+// location, link and extra details, colour, and whether the reminder also comes by mail
+export const TASK_EXTRA_FIELDS = ['due_time', 'duration_minutes', 'reminder_minutes', 'location', 'link', 'details', 'repeat', 'color', 'reminder_email'];
 const extrasOf = (source) => Object.fromEntries(TASK_EXTRA_FIELDS
     .filter(field => source?.[field] !== undefined)
     .map(field => [field, source[field] === '' ? null : source[field]]));

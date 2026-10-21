@@ -12,14 +12,16 @@ import { selectInboxCount } from '../features/inbox/inbox';
 import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, useMotionLevel } from '../features/settings/motion';
 
-// One entry: icon, label and an optional count badge; the current page is highlighted
-function MenuLink({ to, end, icon, label, onClick, count = 0, countLabel }) {
+// One entry: icon, label and an optional count badge (or a dot: something changed there);
+// the current page is highlighted
+function MenuLink({ to, end, icon, label, onClick, count = 0, countLabel, news = false, newsLabel }) {
     return (
         <NavLink to={to} end={end} onClick={onClick}
             className={({ isActive }) => `${styles.menuItem} ${isActive ? styles.active : ''}`}>
             <Icon name={icon} className={styles.menuIcon} />
             <span className={styles.menuLabel}>{label}</span>
             {count > 0 && <span className={styles.badge} aria-label={`${count} ${countLabel}`}>{count}</span>}
+            {count === 0 && news && <span className={styles.dot} role="img" aria-label={newsLabel} />}
         </NavLink>
     );
 }
@@ -32,6 +34,7 @@ export default function Menu(){
     const isAdmin = useSelector(selectIsAdmin);
     const adminPendingCount = useSelector(selectAdminPendingCount);
     const inboxCount = useSelector(selectInboxCount);
+    const news = useSelector(state => state.news);
     const { t } = useTranslation();
 
     const dispatch = useDispatch();
@@ -63,9 +66,9 @@ export default function Menu(){
                     <MenuLink to="/history" icon="history" label={t('history')} onClick={onClose} />
                     {/* with open requests, go straight to the inbox */}
                     <MenuLink to={incomingCount > 0 ? '/social?tab=requests' : '/social'} icon="social" label={t('social')} onClick={onClose}
-                        count={incomingCount} countLabel={t('friendRequests')} />
+                        count={incomingCount} countLabel={t('friendRequests')} news={news.social} newsLabel={t('menuNews')} />
                     <MenuLink to="/together" icon="together" label={t('together')} onClick={onClose}
-                        count={inviteCount} countLabel={t('sessionInvites')} />
+                        count={inviteCount} countLabel={t('sessionInvites')} news={news.together} newsLabel={t('menuNews')} />
                 </nav>
 
                 {/* settings, help and admin sit at the bottom */}

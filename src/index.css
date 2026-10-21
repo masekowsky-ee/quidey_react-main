@@ -148,6 +148,27 @@
 :root[data-theme="light"][data-accent="rose"]   { --primary: #f43f5e; --primary-text: #ffffff; --primary-fg: #be123c; }
 :root[data-theme="light"][data-accent="gold"]   { --primary: #eab308; --primary-text: #1f1700; --primary-fg: #a16207; }
 
+/* Task colours (src/features/tasks/taskColors.js), chosen per task: a row or chip with
+   data-task-color gets --task-color, which its left edge (and a soft tint) uses instead of the
+   priority colour. Light mode gets deeper tones so they still read on white. */
+[data-task-color="red"]    { --task-color: #f87171; }
+[data-task-color="orange"] { --task-color: #fb923c; }
+[data-task-color="yellow"] { --task-color: #facc15; }
+[data-task-color="green"]  { --task-color: #4ade80; }
+[data-task-color="teal"]   { --task-color: #2dd4bf; }
+[data-task-color="blue"]   { --task-color: #60a5fa; }
+[data-task-color="violet"] { --task-color: #a78bfa; }
+[data-task-color="pink"]   { --task-color: #f472b6; }
+
+:root[data-theme="light"] [data-task-color="red"]    { --task-color: #dc2626; }
+:root[data-theme="light"] [data-task-color="orange"] { --task-color: #ea580c; }
+:root[data-theme="light"] [data-task-color="yellow"] { --task-color: #ca8a04; }
+:root[data-theme="light"] [data-task-color="green"]  { --task-color: #16a34a; }
+:root[data-theme="light"] [data-task-color="teal"]   { --task-color: #0d9488; }
+:root[data-theme="light"] [data-task-color="blue"]   { --task-color: #2563eb; }
+:root[data-theme="light"] [data-task-color="violet"] { --task-color: #7c3aed; }
+:root[data-theme="light"] [data-task-color="pink"]   { --task-color: #db2777; }
+
 body {
   margin: 0;
   background: var(--bg);

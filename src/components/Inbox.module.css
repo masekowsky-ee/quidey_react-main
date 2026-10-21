@@ -17,9 +17,7 @@
 }
 
 .tabs{
-    composes: segmented from './ui.module.css';
-    display: flex;
-    overflow-x: auto;
+    composes: tabBar from './ui.module.css';
 }
 
 .tabActive{
@@ -328,12 +326,4 @@ a.rowTitle:hover{
     box-sizing: border-box;
     resize: vertical;
     font: inherit;
-}
-
-/* Phones: four tabs side by side, a little tighter */
-@media (max-width: 640px){
-    .tabs > button{
-        padding: 0.35rem 0.55rem;
-        font-size: 0.8125rem;
-    }
 }

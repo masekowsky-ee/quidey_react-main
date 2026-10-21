@@ -129,10 +129,10 @@ describe('Shared session page', () => {
         expect(activity().at(-1).body).toEqual({ currentTaskId: 10 })
         expect(screen.getByText('Du arbeitest gerade daran')).toBeInTheDocument()
 
-        // after 10 s the time goes to the server; the clock doesn't count it twice
-        await act(async () => { await vi.advanceTimersByTimeAsync(10000) })
-        expect(activity().at(-1).body).toEqual({ currentTaskId: 10, time: { taskId: 10, ms: 10000 } })
-        expect(within(card('Meine Arbeit')).getByText('00:01:10')).toBeInTheDocument()
+        // after 30 s the time goes to the server; the clock doesn't count it twice
+        await act(async () => { await vi.advanceTimersByTimeAsync(30000) })
+        expect(activity().at(-1).body).toEqual({ currentTaskId: 10, time: { taskId: 10, ms: 30000 } })
+        expect(within(card('Meine Arbeit')).getByText('00:01:30')).toBeInTheDocument()
 
         // switching books the rest on the old task, pause books on the new one
         await act(async () => { await vi.advanceTimersByTimeAsync(3000) })

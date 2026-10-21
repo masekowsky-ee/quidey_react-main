@@ -4,6 +4,7 @@ import { useSelector } from "react-redux"
 import {useTranslation} from '../i18n/useTranslation'
 import { fill, isOverdue, toDateOnly } from '../features/helperFunction'
 import { addDays, dateKey, groupByDay, prioLevel } from '../features/calendar/calendar'
+import { taskColorAttr } from '../features/tasks/taskColors'
 
 const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const MAX_VISIBLE_TASKS = 3;
@@ -38,7 +39,7 @@ export default function WeekDaysContainer(){
                                 ? <span className={styles.empty}>–</span>
                                 : <ul className={styles.dayList}>
                                     {dayTasks.slice(0, MAX_VISIBLE_TASKS).map(task => (
-                                        <li key={task.id} className={[PRIO_CLASS[prioLevel(task.prio)], task.done && styles.done].filter(Boolean).join(' ') || undefined} title={[task.name, task.due_time].filter(Boolean).join(' ')}>
+                                        <li key={task.id} data-task-color={taskColorAttr(task)} className={[PRIO_CLASS[prioLevel(task.prio)], task.done && styles.done].filter(Boolean).join(' ') || undefined} title={[task.name, task.due_time].filter(Boolean).join(' ')}>
                                             {/* name first; a long one is cut, the time stays visible */}
                                             <span className={styles.name}>{task.name}</span>
                                             {task.due_time && <span className={styles.time}>{task.due_time}</span>}

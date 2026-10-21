@@ -6,8 +6,9 @@ import { useTranslation } from '../i18n/useTranslation';
 import { displayName, fill, formatDate, getInitials } from '../features/helperFunction';
 import {
     fetchConversations, fetchConversation, sendMessage, fetchNotifications, markNotificationsRead,
-    deleteNotification, fetchInboxUnread,
+    deleteNotification, fetchInboxUnread, markConversationRead, noticeView,
 } from '../features/inbox/inbox';
+import { REALTIME_RECONNECT, useRealtime } from '../features/realtime/socket';
 import { acceptFriendRequest, removeFriendRequest, fetchFriends } from '../features/friends/friendsAction';
 import { joinSharedSession, removeSharedMember } from '../features/together/togetherAction';
 import { reminderAt } from '../features/tasks/reminders';
@@ -16,7 +17,7 @@ import { showToast } from '../features/toast/toast';
 import TaskInvites from './task/TaskInvites.jsx';
 
 const TABS = ['messages', 'requests', 'notices', 'reminders'];
-const THREAD_REFRESH_MS = 8000;
+const SEEN_DELAY_MS = 1500;
 const REMINDER_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 const errorText = (t, err) => {
@@ -50,9 +51,12 @@ function Conversations({ onOpen }) {
     // the error itself; translated while rendering, so the effect doesn't depend on t
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        fetchConversations().then(setConversations).catch(setError);
-    }, []);
+    const load = useCallback(() => fetchConversations().then(setConversations).catch(setError), []);
+    useEffect(() => { load(); }, [load]);
+    // new messages move their conversation to the top, read ones lose their count
+    useRealtime('message:new', load);
+    useRealtime('inbox:read', load);
+    useRealtime(REALTIME_RECONNECT, load);
 
     // friends I haven't written with yet, to start a conversation
     const talkedTo = new Set((conversations ?? []).map(c => c.user.id));
@@ -118,12 +122,21 @@ function Thread({ userId, onBack }) {
         .then(data => { setThread(data); dispatch(fetchInboxUnread()).catch(() => {}); })
         .catch(setError), [userId, dispatch]);
 
-    // new messages show up while the conversation is open
-    useEffect(() => {
-        load();
-        const interval = setInterval(() => { if (!document.hidden) load(); }, THREAD_REFRESH_MS);
-        return () => clearInterval(interval);
-    }, [load]);
+    useEffect(() => { load(); }, [load]);
+
+    // the same message can come back from sending and over the socket: keep it once
+    const addMessage = (message) => setThread(prev => (
+        !prev || prev.messages.some(m => m.id === message.id) ? prev : { ...prev, messages: [...prev.messages, message] }
+    ));
+
+    // new messages show up live while the conversation is open, and count as read
+    useRealtime('message:new', ({ user, message } = {}) => {
+        if (user?.id !== userId || !message) return;
+        addMessage(message);
+        if (!message.fromMe) markConversationRead(userId).catch(() => {});
+    });
+    // whatever came while the connection was down
+    useRealtime(REALTIME_RECONNECT, load);
 
     const count = thread?.messages.length ?? 0;
     useEffect(() => { endRef.current?.scrollIntoView?.({ block: 'end' }); }, [count]);
@@ -135,8 +148,7 @@ function Thread({ userId, onBack }) {
         setSending(true);
         setError(null);
         try {
-            const message = await sendMessage(userId, body);
-            setThread(prev => ({ ...prev, messages: [...prev.messages, message] }));
+            addMessage(await sendMessage(userId, body));
             setText('');
         } catch (err) {
             setError(err);
@@ -263,22 +275,35 @@ function Notices() {
     const when = useWhen();
     const [notices, setNotices] = useState(null);
     const [error, setError] = useState(null);
+    const seenTimer = useRef(null);
+
+    // seen once the tab is open for a moment
+    const markSeenSoon = useCallback(() => {
+        clearTimeout(seenTimer.current);
+        seenTimer.current = setTimeout(() => markNotificationsRead()
+            .then(() => dispatch(fetchInboxUnread()))
+            .catch(() => {}), SEEN_DELAY_MS);
+    }, [dispatch]);
+
+    const load = useCallback(() => fetchNotifications()
+        .then(list => {
+            setNotices(list);
+            if (list.some(n => !n.readAt)) markSeenSoon();
+        })
+        .catch(setError), [markSeenSoon]);
 
     useEffect(() => {
-        let timer;
-        fetchNotifications()
-            .then(list => {
-                setNotices(list);
-                // seen once the tab is open for a moment
-                if (list.some(n => !n.readAt)) {
-                    timer = setTimeout(() => markNotificationsRead()
-                        .then(() => dispatch(fetchInboxUnread()))
-                        .catch(() => {}), 1500);
-                }
-            })
-            .catch(setError);
-        return () => clearTimeout(timer);
-    }, [dispatch]);
+        load();
+        return () => clearTimeout(seenTimer.current);
+    }, [load]);
+
+    // a new notice from the team shows up on top right away
+    useRealtime('notification:new', (notice) => {
+        if (!notice?.id) return;
+        setNotices(prev => (!prev || prev.some(n => n.id === notice.id) ? prev : [notice, ...prev]));
+        markSeenSoon();
+    });
+    useRealtime(REALTIME_RECONNECT, load);
 
     const remove = async (id) => {
         try {
@@ -296,16 +321,21 @@ function Notices() {
 
     return (
         <ul className={styles.list}>
-            {notices.map(notice => (
-                <li key={notice.id} className={`${styles.notice} ${notice.readAt ? '' : styles.noticeNew}`}>
-                    <div className={styles.noticeHead}>
-                        <span className={styles.rowTitle}>{notice.title}</span>
-                        <span className={styles.rowMeta}>{notice.kind === 'broadcast' ? t('inboxFromTeam') : ''} {when(notice.createdAt)}</span>
-                        <button className={styles.deleteBtn} onClick={() => remove(notice.id)} aria-label={`${t('delete')}: ${notice.title}`}>✕</button>
-                    </div>
-                    <p className={styles.noticeBody}>{notice.body}</p>
-                </li>
-            ))}
+            {notices.map(notice => {
+                const view = noticeView(t, notice);
+                return (
+                    <li key={notice.id} className={`${styles.notice} ${notice.readAt ? '' : styles.noticeNew}`}>
+                        <div className={styles.noticeHead}>
+                            {view.to
+                                ? <Link to={view.to} className={styles.rowTitle}>{view.title}</Link>
+                                : <span className={styles.rowTitle}>{view.title}</span>}
+                            <span className={styles.rowMeta}>{notice.kind === 'broadcast' ? t('inboxFromTeam') : ''} {when(notice.createdAt)}</span>
+                            <button className={styles.deleteBtn} onClick={() => remove(notice.id)} aria-label={`${t('delete')}: ${view.title}`}>✕</button>
+                        </div>
+                        <p className={styles.noticeBody}>{view.body}</p>
+                    </li>
+                );
+            })}
         </ul>
     );
 }

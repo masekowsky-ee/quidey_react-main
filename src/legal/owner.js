@@ -28,7 +28,7 @@ export const PROCESSORS = {
 };
 
 // Date of the current version of the legal texts
-export const LEGAL_VERSION_DATE = '20.10.2026 (Postfach, Feedback, Wiederholungen)';
+export const LEGAL_VERSION_DATE = '21.10.2026 (Erinnerungen per E-Mail, Zeitzone)';
 
 export const COPYRIGHT_YEAR = 2026;
 

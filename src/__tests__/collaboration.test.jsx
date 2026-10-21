@@ -6,7 +6,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
 import togetherReducer, { idleWork } from '../features/together/togetherReducer'
 import { WORK_SWITCHED, WORK_SETTLED, WORK_RESTORED, WORK_STOPPED, SHARED_SESSION_GONE } from '../features/together/togetherActionTypes'
-import { startWork, stopWork, tickWork, localMs, workTotalMs, MAX_REPORT_MS } from '../features/together/work'
+import { startWork, stopWork, tickWork, localMs, workTotalMs, MAX_REPORT_MS, REPORT_EVERY_MS } from '../features/together/work'
 import { describeEvent, summaryRows } from '../features/together/format'
 import toastReducer, { showToast, TOAST_MS } from '../features/toast/toast'
 import { setHomeLayout, setMotion } from '../features/settings/settingsAction'
@@ -105,11 +105,11 @@ describe('work thunks', () => {
         expect(store.getState().together.work).toMatchObject({ sessionId: 6, taskId: 20 })
     })
 
-    it('reports every 10 s, and stops when the session has ended', async () => {
+    it('reports every REPORT_EVERY_MS, and stops when the session has ended', async () => {
         const store = makeStore()
         apiFetch.mockResolvedValueOnce(session())
         await store.dispatch(startWork(session(), session().tasks[0]))
-        vi.advanceTimersByTime(9000)
+        vi.advanceTimersByTime(REPORT_EVERY_MS - 1000)
         await store.dispatch(tickWork())
         expect(apiFetch).toHaveBeenCalledTimes(1)
 

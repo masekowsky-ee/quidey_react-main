@@ -9,8 +9,11 @@ import { formatClock } from '../helperFunction';
 // and runs app-wide; useWorkReporter (mounted once in App) sends the reports.
 // Time is measured with Date.now(), so throttled timers in background tabs don't lose seconds.
 
-// How often the time worked is sent while running; also the others' view of "working now"
-export const REPORT_EVERY_MS = 10 * 1000;
+// How often the time worked is sent while running; also the others' view of "working now".
+// Their screens count my time on by themselves in between (othersRunningMs), and starting,
+// stopping or switching is sent right away, so this only keeps the totals in step. Every report
+// costs the server about ten queries, hence not more often.
+export const REPORT_EVERY_MS = 30 * 1000;
 // The server takes at most this much per report. Anything longer means the computer slept,
 // and that time shouldn't count as work.
 export const MAX_REPORT_MS = 5 * 60 * 1000;
@@ -91,6 +94,23 @@ export const selectWork = (state) => state.together.work;
 export function localMs(work, taskId, now) {
     return (work.inFlight[taskId] ?? 0) + (work.taskId === taskId ? runningMs(work, now) : 0);
 }
+
+// The others' time since the session was loaded. Their reports reach the server every few
+// seconds, but the page only loads again when something changes (or on the slow safety poll),
+// so somebody working right now has their clock counted on here. Capped, in case they quit
+// without the server being able to say so; the next load sets it straight.
+// a report interval plus a safety-net load, and some room
+export const OTHERS_MAX_MS = 90 * 1000;
+export function othersRunningMs(session, userId, taskId, now) {
+    if (session.endedAt || userId === session.me || !session.receivedAt) return 0;
+    const person = session.people.find(p => p.user.id === userId);
+    if (!person?.workingOn || (taskId !== undefined && person.workingOn !== taskId)) return 0;
+    return Math.min(Math.max(0, now - session.receivedAt), OTHERS_MAX_MS);
+}
+
+// Whether anybody else is working in the session (then the clocks on the page keep ticking)
+export const othersWorking = (session) =>
+    !session.endedAt && session.people.some(p => p.user.id !== session.me && p.workingOn);
 
 // My total on the task I'm working on (for the header, which may not have the session loaded)
 export function workTotalMs(work, now) {

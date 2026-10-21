@@ -185,7 +185,7 @@
 .row{
     --chip-color: var(--primary);
     padding: 0.55rem 0.6rem 0.55rem 0.75rem;
-    border-left: 2px solid var(--chip-color);
+    border-left: 2px solid var(--task-color, var(--chip-color));
     border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
     transition: background-color var(--ease-out);
 }

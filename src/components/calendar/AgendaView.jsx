@@ -6,6 +6,7 @@ import { compareTasks, dateKey, monthDates, prioLevel } from '../../features/cal
 import TaskLabels from '../TaskLabels.jsx';
 import TaskMeta from '../task/TaskMeta.jsx';
 import Icon from './icons.jsx';
+import { taskColorAttr } from '../../features/tasks/taskColors';
 
 const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
 const PRIO_TEXT = { high: 'prioHigh', medium: 'prioMedium', low: 'prioLow' };
@@ -27,7 +28,7 @@ function AgendaRow({ task, today, showDate, onOpenTask, onToggleDone, onSchedule
     const level = prioLevel(task.prio);
     const classes = [styles.agendaRow, PRIO_CLASS[level], task.done && styles.agendaDone].filter(Boolean).join(' ');
     return (
-        <li className={classes}>
+        <li className={classes} data-task-color={taskColorAttr(task)}>
             <button type="button" className={styles.check} aria-pressed={Boolean(task.done)} onClick={() => onToggleDone(task)}
                 aria-label={`${t(task.done ? 'reopen' : 'markDone')}: ${task.name}`} title={t(task.done ? 'reopen' : 'markDone')}>
                 <Icon name="check" size={16} />

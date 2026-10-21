@@ -9,10 +9,12 @@ const base = (id) => `/api/shared-sessions/${id}`;
 let requestSeq = 0;
 
 // Fills in lists an older backend doesn't send yet (e.g. events, assignee), so the pages
-// never crash on a missing field; they just show less.
+// never crash on a missing field; they just show less. receivedAt: when it came, so the
+// others' running time can be counted on from there (othersRunningMs in work.js).
 export function normalizeSession(session) {
     return {
         ...session,
+        receivedAt: Date.now(),
         people: session.people ?? [],
         events: session.events ?? [],
         tasks: (session.tasks ?? []).map(task => ({ ...task, assignee: task.assignee ?? null, time: task.time ?? [] })),

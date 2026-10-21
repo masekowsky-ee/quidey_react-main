@@ -548,3 +548,40 @@
     rotate: 360deg;
     scale: 1.2;
 }
+
+/* Something unread somewhere (messages, requests, invites): a count on the menu button */
+.menuBtn{
+    position: relative;
+}
+
+.menuBadge{
+    position: absolute;
+    top: 0.1rem;
+    right: 0.05rem;
+    min-width: 1.1rem;
+    padding: 0 0.3rem;
+    box-sizing: border-box;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1.1rem;
+    text-align: center;
+    color: var(--primary-text);
+    background-color: var(--primary);
+    border: 2px solid var(--surface-bar);
+    border-radius: 999px;
+    pointer-events: none;
+}
+
+/* Only news without a count (a friend accepted, something changed in a session): a dot */
+.menuDot{
+    position: absolute;
+    top: 0.45rem;
+    right: 0.4rem;
+    width: 0.6rem;
+    height: 0.6rem;
+    box-sizing: content-box;
+    background-color: var(--primary);
+    border: 2px solid var(--surface-bar);
+    border-radius: 999px;
+    pointer-events: none;
+}

@@ -1,5 +1,5 @@
 import {
-    SET_SHARED_SESSIONS, SET_SHARED_SESSION, SHARED_SESSION_GONE,
+    SET_SHARED_SESSIONS, SET_SHARED_SESSION, SHARED_SESSION_GONE, SHARED_SESSION_EVENT,
     WORK_SWITCHED, WORK_SETTLED, WORK_RESTORED, WORK_STOPPED,
     SET_MY_SHARED_TASKS, SET_SHARED_HISTORY,
 } from './togetherActionTypes';
@@ -57,7 +57,16 @@ const initialState = {
     history: null,
 };
 
-const addInFlight = (inFlight, taskId, ms) => ({ ...inFlight, [taskId]: (inFlight[taskId] ?? 0) + ms });
+// Events only grow and their ids go up. A poll that left the server just before a live chat
+// message came in mustn't make that message vanish again until the next poll.
+function keepLiveEvents(session, previous) {
+    if (previous?.id !== session.id) return session;
+    const lastId = session.events.at(-1)?.id ?? 0;
+    const newer = previous.events.filter(e => e.id > lastId);
+    return newer.length > 0 ? { ...session, events: [...session.events, ...newer] } : session;
+}
+
+const addInFlight =(inFlight, taskId, ms) => ({ ...inFlight, [taskId]: (inFlight[taskId] ?? 0) + ms });
 
 const togetherReducer = (state = initialState, action) => {
     switch (action.type) {
@@ -68,7 +77,7 @@ const togetherReducer = (state = initialState, action) => {
             if (seq < state.currentSeq) return state;
             return {
                 ...state,
-                current: session,
+                current: keepLiveEvents(session, state.current),
                 currentSeq: seq,
                 // the invite (if any) was just accepted
                 invites: state.invites.filter(invite => invite.id !== session.id),
@@ -87,6 +96,12 @@ const togetherReducer = (state = initialState, action) => {
                 work: state.work.sessionId === action.payload ? { ...idleWork, inFlight: state.work.inFlight } : state.work,
                 mine: state.mine.filter(s => s.id !== action.payload),
             };
+        case SHARED_SESSION_EVENT: {
+            const { sessionId, event } = action.payload;
+            const current = state.current;
+            if (current?.id !== sessionId || current.events.some(e => e.id === event.id)) return state;
+            return { ...state, current: { ...current, events: [...current.events, event] } };
+        }
         case SET_MY_SHARED_TASKS:
             return { ...state, mine: action.payload };
         case SET_SHARED_HISTORY:

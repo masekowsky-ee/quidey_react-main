@@ -6,6 +6,7 @@ import { durationText } from '../../features/calendar/calendar';
 import TaskOptionsFields from '../task/TaskOptionsFields.jsx';
 import { linkIsValid } from '../../features/tasks/taskFields';
 import TaskSharing from '../task/TaskSharing.jsx';
+import TaskColorPicker from '../task/TaskColorPicker.jsx';
 import Icon from './icons.jsx';
 
 // What is set under "More options", for the line next to the (closed) toggle:
@@ -13,6 +14,7 @@ import Icon from './icons.jsx';
 function optionsSummary(t, extras, hasTime, task) {
     const reminder = hasTime && extras.reminder_minutes !== null && extras.reminder_minutes !== undefined
         ? (extras.reminder_minutes === 0 ? t('reminderAtStart') : fill(t('reminderBefore'), { time: durationText(extras.reminder_minutes) }))
+            + (extras.reminder_email ? ` (${t('reminderEmailShort')})` : '')
         : '';
     const people = (task.sharedWith ?? []).map(share => displayName(share.user));
     return [
@@ -40,9 +42,11 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
     const [prio, setPrio] = useState(task.prio ?? null);
     const sliderValue = Math.min(100, Math.max(0, Number(prio ?? 50)));
     const [description, setDescription] = useState(task.description ?? '');
+    const [color, setColor] = useState(task.color ?? null);
     const [extras, setExtras] = useState({
         duration_minutes: task.duration_minutes ?? null,
         reminder_minutes: task.reminder_minutes ?? null,
+        reminder_email: Boolean(task.reminder_email),
         location: task.location ?? '',
         link: task.link ?? '',
         details: task.details ?? '',
@@ -79,6 +83,9 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             duration_minutes: extras.duration_minutes,
             // a reminder counts from the start time
             reminder_minutes: time ? extras.reminder_minutes : null,
+            // only the owner's mails (the server ignores it from others)
+            ...(isOwner ? { reminder_email: Boolean(time && extras.reminder_minutes !== null && extras.reminder_email) } : {}),
+            color,
             location: extras.location.trim(),
             link: extras.link.trim(),
             details: extras.details.trim(),
@@ -129,6 +136,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
                 <span>{t('description')}</span>
                 <textarea rows={2} value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)} />
             </label>
+            <TaskColorPicker value={color} onChange={setColor} />
 
             {!isOwner && task.owner && !showMore &&
                 <p className={styles.sharedNote}>{fill(t('sharedTaskHint'), { name: displayName(task.owner) })}</p>}
@@ -139,7 +147,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             </button>
             {showMore &&
                 <div className={styles.more}>
-                    <TaskOptionsFields value={extras} hasTime={Boolean(time)} hasDate={Boolean(due)} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
+                    <TaskOptionsFields value={extras} hasTime={Boolean(time)} hasDate={Boolean(due)} canMail={isOwner} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
                     <TaskSharing task={task} />
                 </div>}
 

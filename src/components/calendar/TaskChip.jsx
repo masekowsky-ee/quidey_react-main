@@ -3,6 +3,7 @@ import { prioLevel, taskTimeText } from '../../features/calendar/calendar';
 import { isOverdue } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import Icon from './icons';
+import { taskColorAttr } from '../../features/tasks/taskColors';
 
 const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
 
@@ -31,6 +32,7 @@ export default function TaskChip({ task, today, onOpen, startDrag, dragging, sho
         <button
             type="button"
             className={classes}
+            data-task-color={taskColorAttr(task)}
             tabIndex={tabIndex}
             title={[time, task.name, task.location, task.repeat && t(`repeat_${task.repeat}`)].filter(Boolean).join(' · ')}
             onPointerDown={startDrag ? (e) => startDrag(e, task) : undefined}

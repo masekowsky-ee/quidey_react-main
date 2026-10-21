@@ -15,6 +15,8 @@ import {
 } from '../features/calendar/calendar'
 import { reminderAt, dueReminders, reminderKey } from '../features/tasks/reminders'
 import { linkIsValid } from '../features/tasks/taskFields'
+import { taskColorAttr } from '../features/tasks/taskColors'
+import { useAccountLocale } from '../features/settings/accountLocale'
 import Calendar from '../components/Calendar'
 import TaskForm from '../components/TaskForm'
 import TaskInvites from '../components/task/TaskInvites'
@@ -344,5 +346,71 @@ describe('create task form', () => {
         expect(screen.getByRole('combobox', { name: 'Reminder' })).toBeDisabled()
         fireEvent.change(screen.getByLabelText(/^Time/), { target: { value: '09:00' } })
         expect(screen.getByRole('combobox', { name: 'Reminder' })).toBeEnabled()
+    })
+})
+
+describe('task colours and reminders by mail', () => {
+    beforeEach(() => {
+        vi.useFakeTimers({ toFake: ['Date'] })
+        vi.setSystemTime(new Date(2026, 9, 19, 10, 0))
+    })
+    afterEach(() => vi.useRealTimers())
+
+    const lunch = { id: 5, name: 'Lunch', due: apiDate(2026, 10, 22), due_time: '12:30', reminder_minutes: 15, prio: 50, done: false, isOwner: true, sharedWith: [], group_ids: [] }
+    const renderCalendar = (path, store) => render(
+        <Provider store={store}><MemoryRouter initialEntries={[path]}><Calendar /></MemoryRouter></Provider>
+    )
+
+    it('only open tasks with a known colour get one', () => {
+        expect(taskColorAttr({ color: 'teal', done: false })).toBe('teal')
+        expect(taskColorAttr({ color: 'teal', done: true })).toBeUndefined()
+        expect(taskColorAttr({ color: 'chartreuse' })).toBeUndefined()
+        expect(taskColorAttr({ color: null })).toBeUndefined()
+    })
+
+    it('the calendar chip carries the colour', () => {
+        renderCalendar('/calendar?date=2026-10-22', makeStore([{ ...lunch, color: 'violet' }]))
+        const chip = within(document.querySelector('[data-date="2026-10-22"]')).getByRole('button', { name: /Lunch/ })
+        expect(chip).toHaveAttribute('data-task-color', 'violet')
+    })
+
+    it('the editor changes the colour and turns on the mail reminder', async () => {
+        renderCalendar('/calendar?date=2026-10-22&day=2026-10-22&task=5', makeStore([lunch]))
+        fireEvent.click(screen.getByRole('radio', { name: 'Blue' }))
+        fireEvent.click(screen.getByRole('button', { name: /More options/ }))
+        fireEvent.click(screen.getByRole('checkbox', { name: 'Also remind me by email' }))
+        apiFetch.mockResolvedValueOnce({ ...lunch, color: 'blue', reminder_email: true })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
+        expect(bodyOf('/api/tasks/5', 'PUT')).toMatchObject({ color: 'blue', reminder_email: true, reminder_minutes: 15 })
+    })
+
+    it('the mail switch needs a reminder and is only for the owner', () => {
+        const { unmount } = renderCalendar('/calendar?date=2026-10-22&day=2026-10-22&task=5', makeStore([{ ...lunch, reminder_minutes: null }]))
+        fireEvent.click(screen.getByRole('button', { name: /More options/ }))
+        expect(screen.queryByRole('checkbox', { name: 'Also remind me by email' })).not.toBeInTheDocument()
+        fireEvent.change(screen.getByRole('combobox', { name: 'Reminder' }), { target: { value: '30' } })
+        expect(screen.getByRole('checkbox', { name: 'Also remind me by email' })).not.toBeChecked()
+        unmount()
+
+        renderCalendar('/calendar?date=2026-10-22&day=2026-10-22&task=5', makeStore([{ ...lunch, isOwner: false, owner: ALICE, shareId: 3 }]))
+        fireEvent.click(screen.getByRole('button', { name: /More options/ }))
+        expect(screen.queryByRole('checkbox', { name: 'Also remind me by email' })).not.toBeInTheDocument()
+    })
+
+    it('a new task gets its colour, and the mail reminder only with a reminder', async () => {
+        render(<Provider store={makeStore()}><MemoryRouter><TaskForm setCreateTask={() => {}} /></MemoryRouter></Provider>)
+        fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Gym' } })
+        fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: '2026-10-22' } })
+        fireEvent.click(screen.getByRole('radio', { name: 'Green' }))
+        apiFetch.mockResolvedValueOnce({ id: 31, name: 'Gym' })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Create' })) })
+        expect(bodyOf('/api/tasks')).toMatchObject({ name: 'Gym', color: 'green', reminder_email: false })
+    })
+
+    it('the app tells the server its time zone and language', async () => {
+        const store = makeStore()
+        function Probe() { useAccountLocale(true); return null }
+        await act(async () => { render(<Provider store={store}><Probe /></Provider>) })
+        expect(bodyOf('/api/users/locale', 'PUT')).toEqual({ timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, language: 'en' })
     })
 })

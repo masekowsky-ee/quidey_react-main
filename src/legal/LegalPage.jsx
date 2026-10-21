@@ -1,8 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Legal.module.css';
-import { OWNER, PROCESSORS, LEGAL_VERSION_DATE, COPYRIGHT_YEAR, isPlaceholder } from './owner';
+import { OWNER, PROCESSORS, LEGAL_VERSION_DATE, isPlaceholder } from './owner';
 import { useTranslation } from '../i18n/useTranslation';
 import ContactForm from './ContactForm';
+import { LegalFooter } from './LegalFooter';
 
 // The legal pages. German law, so the texts are German; English readers get a short note.
 // Reachable signed in and signed out (App.jsx renders them before any sign-in check);
@@ -80,19 +81,8 @@ export default function LegalPage() {
 }
 
 // Small links at the bottom of every screen
-export function LegalFooter() {
-    return (
-        <footer className={styles.footer}>
-            <span>© {COPYRIGHT_YEAR} <V>{OWNER.name}</V></span>
-            <nav className={styles.footerLinks} aria-label="Rechtliches">
-                <Link to="/impressum">Impressum</Link>
-                <Link to="/datenschutz">Datenschutz</Link>
-                <Link to="/nutzungsbedingungen">Nutzungsbedingungen</Link>
-                <Link to="/kontakt">Kontakt</Link>
-            </nav>
-        </footer>
-    );
-}
+// the footer lives in its own file (loaded with the app); still importable from here
+export { LegalFooter };
 
 function Imprint() {
     return (
@@ -170,6 +160,14 @@ function Privacy() {
                 werden sie nach spätestens 14 Tagen gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
                 (Sicherheit des Dienstes).
             </p>
+            <p>
+                <strong>Live-Verbindung:</strong> Solange du angemeldet bist und die App geöffnet hast, hält dein Browser
+                eine dauerhafte Verbindung (WebSocket) zum Server, damit Nachrichten, Sitzungs-Chats und Meldungen sofort
+                ankommen. Dafür prüft der Server dein Anmelde-Token und merkt sich nur im Arbeitsspeicher, welche
+                Verbindung zu welchem Konto und welcher gemeinsamen Sitzung gehört. Über die Verbindung wird nur
+                übertragen, was ohnehin gespeichert ist; zusätzlich gespeichert wird nichts. Mit dem Schließen der App
+                oder der Abmeldung endet sie. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+            </p>
 
             <h2>4. Dein Konto</h2>
             <p>Für die Registrierung verarbeite ich:</p>
@@ -178,7 +176,9 @@ function Privacy() {
                 <li><strong>E-Mail-Adresse</strong> – zur Anmeldung, zur Bestätigung deines Kontos und für wichtige Nachrichten zum Konto;</li>
                 <li><strong>Geburtsdatum</strong> – um zu prüfen, dass du mindestens 14 Jahre alt bist;</li>
                 <li><strong>Passwort</strong> – nur als sicherer Hash (bcrypt) gespeichert, nie im Klartext;</li>
-                <li>Zeitpunkt der Registrierung, Bestätigungsstatus der E-Mail-Adresse und Zugangsstatus (Beta).</li>
+                <li>Zeitpunkt der Registrierung, Bestätigungsstatus der E-Mail-Adresse und Zugangsstatus (Beta);</li>
+                <li><strong>Sprache und Zeitzone</strong> deines Geräts (z. B. „Europe/Berlin“) – die App meldet sie beim
+                    Öffnen, damit Mails in deiner Sprache kommen und Erinnerungen zur richtigen Uhrzeit.</li>
             </ul>
             <p>
                 Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Bereitstellung der App, die du nutzen möchtest).
@@ -201,7 +201,7 @@ function Privacy() {
             <h2>5. Deine Inhalte</h2>
             <p>
                 Gespeichert wird, was du in Quidey anlegst: Aufgaben (mit Fälligkeit, Uhrzeit, Dauer, Erinnerung,
-                Wiederholung, Ort, Link, Beschreibung und Notizen sowie dem Zeitpunkt, zu dem du sie erledigt hast –
+                Wiederholung, Farbe, Ort, Link, Beschreibung und Notizen sowie dem Zeitpunkt, zu dem du sie erledigt hast –
                 für den Ordner „Erledigte Aufgaben“ im Verlauf), Gruppen, Arbeitssitzungen und die gemessene Fokuszeit.
                 Bei wiederkehrenden Aufgaben legt Quidey beim Erledigen automatisch die nächste an. Diese Inhalte
                 sieht nur du – außer du teilst sie bewusst (Abschnitt 6). Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
@@ -227,7 +227,19 @@ function Privacy() {
                 <strong>Meldungen:</strong> Hinweise vom Quidey-Team (z. B. zu Neuerungen oder Wartungen) werden für
                 jedes Konto gespeichert, mit dem Zeitpunkt, zu dem du sie gelesen hast. Du kannst sie im Postfach
                 löschen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b und f DSGVO (Information über den Dienst).
+                Weist dir jemand in einer gemeinsamen Sitzung eine Aufgabe zu, bekommst du dazu eine Meldung; gespeichert
+                werden der Name der Aufgabe und der Sitzung, wer sie dir zugewiesen hat und wann. Sie bleibt, bis du sie
+                löschst oder dein Konto löschst (Art. 6 Abs. 1 lit. b DSGVO).
                 Erinnerungen im Postfach werden nur auf deinem Gerät aus deinen Aufgaben berechnet.
+            </p>
+            <p>
+                <strong>Erinnerungen per E-Mail:</strong> Schaltest du bei einer Aufgabe „Auch per E-Mail erinnern“ ein,
+                schickt dir Quidey zur eingestellten Zeit eine Mail an deine E-Mail-Adresse. Sie enthält den Namen der
+                Aufgabe, Tag und Uhrzeit sowie – falls angegeben – Ort, Link und Beschreibung. Der Versand erfolgt über
+                {' '}<V>{PROCESSORS.mailProvider}</V> als Auftragsverarbeiter (siehe Abschnitt 4). Gespeichert wird nur,
+                für welchen Zeitpunkt die Erinnerung schon verschickt wurde, damit sie nicht doppelt kommt. Bei geteilten
+                Aufgaben bekommt nur die Person die Mail, der die Aufgabe gehört. Du kannst die Mail-Erinnerung jederzeit
+                in der Aufgabe wieder ausschalten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
             </p>
 
             <h2>7. Kontaktformular, Feedback und E-Mail</h2>
@@ -256,7 +268,7 @@ function Privacy() {
             <p>
                 Das ist für die von dir gewünschten Funktionen unbedingt erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG);
                 eine Einwilligung und ein Cookie-Banner sind dafür nicht nötig. Diese Daten verlassen dein Gerät nicht
-                (außer dem Token bei Anfragen an Quidey). Du kannst sie jederzeit in deinem Browser löschen.
+                (außer dem Token bei Anfragen an Quidey und der Sprache, siehe Abschnitt 4). Du kannst sie jederzeit in deinem Browser löschen.
                 Setzt Cloudflare zur Abwehr von Bots im Einzelfall ein technisch notwendiges Sicherheits-Cookie,
                 dient es allein der Sicherheit des Dienstes (§ 25 Abs. 2 Nr. 2 TDDDG, Art. 6 Abs. 1 lit. f DSGVO).
             </p>

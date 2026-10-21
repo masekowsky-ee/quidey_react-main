@@ -17,7 +17,6 @@ import ActivityFeed from './together/ActivityFeed';
 import WorkSummary from './together/WorkSummary';
 import ShareMyTasks from './together/ShareMyTasks';
 
-const LIST_REFRESH_MS = 30 * 1000;
 const STORAGE_KEY = 'teamSessionId';
 
 function readStoredSessionId() {
@@ -40,11 +39,9 @@ export default function TeamHome() {
     const creating = searchParams.get('new') === '1';
     const setCreating = (on) => setSearchParams(on ? { new: '1' } : {}, { replace: true });
 
+    // my sessions; new ones and invites arrive live afterwards (useLiveLists in App)
     useEffect(() => {
-        const load = () => dispatch(fetchSharedSessions()).catch(() => {}).finally(() => setLoaded(true));
-        load();
-        const interval = setInterval(load, LIST_REFRESH_MS);
-        return () => clearInterval(interval);
+        dispatch(fetchSharedSessions()).catch(() => {}).finally(() => setLoaded(true));
     }, [dispatch]);
 
     const open = sessions.filter(s => !s.endedAt);

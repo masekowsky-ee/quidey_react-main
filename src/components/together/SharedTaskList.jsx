@@ -7,7 +7,7 @@ import { fetchTaskState } from '../../features/tasks/taskAction';
 import {
     addSharedTask, setSharedTaskDone, removeSharedTask, assignSharedTask,
 } from '../../features/together/togetherAction';
-import { selectWork, startWork, stopWork, localMs, useNow } from '../../features/together/work';
+import { selectWork, startWork, stopWork, localMs, othersRunningMs, othersWorking, useNow } from '../../features/together/work';
 import { useTogetherRun } from '../../features/together/hooks';
 import Avatar from './Avatar';
 
@@ -20,7 +20,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
     const run = useTogetherRun();
     const work = useSelector(selectWork);
     const myTasks = useSelector(state => state.task.tasks);
-    const now = useNow(Boolean(work.taskId));
+    const now = useNow(Boolean(work.taskId) || othersWorking(session));
 
     const [newTask, setNewTask] = useState('');
     const [filter, setFilter] = useState('all');
@@ -32,7 +32,8 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
     const members = session.people.filter(p => p.status === 'joined');
     const workingOn = work.sessionId === id ? work.taskId : null;
 
-    const totalOn = (task) => task.totalMs + localMs(work, task.id, now);
+    const totalOn = (task) => task.totalMs + localMs(work, task.id, now)
+        + session.people.reduce((sum, p) => sum + othersRunningMs(session, p.user.id, task.id, now), 0);
     // who works on a task right now: me from my own stopwatch, the others from the server
     const workersOn = (taskId) => session.people.filter(p =>
         p.user.id === me ? workingOn === taskId : p.workingOn === taskId);

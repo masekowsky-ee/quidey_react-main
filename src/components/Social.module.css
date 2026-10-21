@@ -16,8 +16,7 @@
 
 /* Friends | Add | Requests */
 .tabs{
-    composes: segmented from './ui.module.css';
-    display: flex;
+    composes: tabBar from './ui.module.css';
 }
 
 .tabActive{
@@ -225,6 +224,18 @@
 
 .emptyLine{
     color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+    /* the friend count stays next to its label, only the badge moves to the corner */
+    .tabs > button > .count{
+        position: static;
+        min-width: 0;
+        padding: 0;
+        font-size: 0.7rem;
+        line-height: inherit;
+        box-shadow: none;
+    }
 }
 
 @media (max-width: 520px) {

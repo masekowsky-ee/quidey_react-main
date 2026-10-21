@@ -337,8 +337,7 @@
 }
 
 .tabs{
-    composes: segmented from './ui.module.css';
-    display: flex;
+    composes: tabBar from './ui.module.css';
 }
 
 .tabActive{

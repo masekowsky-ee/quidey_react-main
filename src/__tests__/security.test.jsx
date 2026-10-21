@@ -83,7 +83,9 @@ describe('password change and sign out everywhere', () => {
 
 describe('security headers of the site', () => {
     it('allow the API server and nothing else to be called', () => {
-        expect(contentSecurityPolicy('https://api.quidey.com/some/path')).toContain("connect-src 'self' https://api.quidey.com;")
+        // the live connection (WebSocket) to the same host is allowed too
+        expect(contentSecurityPolicy('https://api.quidey.com/some/path')).toContain("connect-src 'self' https://api.quidey.com wss://api.quidey.com;")
+        expect(contentSecurityPolicy('http://localhost:3000')).toContain("connect-src 'self' http://localhost:3000 ws://localhost:3000;")
         expect(contentSecurityPolicy('')).toContain("connect-src 'self';")
         expect(contentSecurityPolicy()).toContain("script-src 'self';")
         expect(contentSecurityPolicy()).toContain("frame-ancestors 'none'")
@@ -96,5 +98,8 @@ describe('security headers of the site', () => {
         for (const header of ['Content-Security-Policy', 'X-Content-Type-Options: nosniff', 'X-Frame-Options: DENY', 'Strict-Transport-Security', 'Referrer-Policy']) {
             expect(file).toContain(header)
         }
+        // hashed build files are cached for good, index.html isn't
+        expect(file).toContain('/assets/*\n  Cache-Control: public, max-age=31536000, immutable')
+        expect(file.split('/assets/*')[0]).not.toContain('immutable')
     })
 })

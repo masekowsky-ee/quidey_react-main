@@ -9,15 +9,17 @@
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
-    width: min(28rem, calc(100% - 2rem));
+    width: min(22rem, calc(100% - 2rem));
     pointer-events: none;
 }
 
 .toast{
     pointer-events: auto;
     max-width: 100%;
-    padding: 0.6rem 1.1rem;
-    font-size: 0.9rem;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.82rem;
+    touch-action: none;
+    cursor: pointer;
     font-weight: 500;
     text-align: left;
     color: var(--text-h);
@@ -47,3 +49,70 @@
     font-weight: 700;
 }
 
+
+/* A message or notice that came in: a compact card, the text opens it, × closes it */
+.link{
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    width: min(20rem, 100%);
+    padding: 0;
+    border-left: 3px solid var(--primary);
+    touch-action: none;
+}
+
+.linkOpen{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+    padding: 0.45rem 0 0.45rem 0.75rem;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    background: none;
+    border: none;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+.linkOpen:hover{
+    background: none;
+    box-shadow: none;
+    transform: none;
+}
+
+.linkTitle{
+    font-weight: 600;
+}
+
+.linkDetail{
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.close{
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-right: 0.3rem;
+    padding: 0;
+    font-size: 1.1rem;
+    line-height: 1;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-radius: 999px;
+    box-shadow: none;
+}
+
+.close:hover{
+    color: var(--text-h);
+    background: var(--hover-wash);
+    box-shadow: none;
+}

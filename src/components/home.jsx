@@ -16,9 +16,6 @@ import { useSoloSharedWork } from '../features/together/useSoloSharedWork.js'
 
 import {useSelector, useDispatch} from 'react-redux';
 
-// how often the shared sessions' tasks are fetched again while the page is open
-const SHARED_REFRESH_MS = 30 * 1000;
-
 export default function Home(props){
     const {t, setCustomError, setActiveTimer} = props;
 
@@ -47,12 +44,9 @@ export default function Home(props){
         ? sharedTasks.find(task => task.id === chosenTask.id) ?? null
         : chosenTask;
 
-    // the shared sessions' tasks, kept fresh while the page is open
+    // the shared sessions' tasks; changes arrive live afterwards (useLiveLists in App)
     useEffect(() => {
-        const load = () => dispatch(fetchMySharedTasks()).catch(() => {});
-        load();
-        const interval = setInterval(() => { if (!document.hidden) load(); }, SHARED_REFRESH_MS);
-        return () => clearInterval(interval);
+        dispatch(fetchMySharedTasks()).catch(() => {});
     }, [dispatch]);
 
     // time on a shared task goes to its session

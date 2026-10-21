@@ -10,8 +10,9 @@ import TaskOptionsFields from './task/TaskOptionsFields.jsx';
 import { linkIsValid } from '../features/tasks/taskFields';
 import { useFriends } from '../features/friends/useFriends';
 import FriendPicker from './together/FriendPicker.jsx';
+import TaskColorPicker from './task/TaskColorPicker.jsx';
 
-const EMPTY_EXTRAS = { duration_minutes: null, reminder_minutes: null, location: '', link: '', details: '', repeat: null };
+const EMPTY_EXTRAS = { duration_minutes: null, reminder_minutes: null, reminder_email: false, location: '', link: '', details: '', repeat: null };
 
 // New task: name and day, optionally a time (otherwise for the whole day), description and
 // priority. "More options" adds duration, reminder, location, link, extra info and friends
@@ -30,6 +31,7 @@ export default function TaskForm(props){
     const [time, setTime] = useState('');
     const [description, setDescription] = useState('');
     const [prio, setPrio] = useState(50);
+    const [color, setColor] = useState(null);
     const [showMore, setShowMore] = useState(false);
     const [extras, setExtras] = useState(EMPTY_EXTRAS);
     const [shareWith, setShareWith] = useState([]);
@@ -56,6 +58,9 @@ export default function TaskForm(props){
                 due_time: time || null,
                 duration_minutes: extras.duration_minutes,
                 reminder_minutes: time ? extras.reminder_minutes : null,
+                // only a reminder can come by mail
+                reminder_email: Boolean(time && extras.reminder_minutes !== null && extras.reminder_email),
+                color,
                 location: extras.location.trim(),
                 link: extras.link.trim(),
                 details: extras.details.trim(),
@@ -96,6 +101,7 @@ export default function TaskForm(props){
                     <input type="range" id="prioritise" min="0" max="100" step="1" value={prio} onChange={(e) => setPrio(Number(e.target.value))} />
                     <p>{t('high')}</p>
                 </div>
+                <TaskColorPicker value={color} onChange={setColor} />
 
                 <button type="button" className={styles.moreToggle} aria-expanded={showMore} onClick={() => setShowMore(!showMore)}>
                     <span aria-hidden="true">{showMore ? '▾' : '▸'}</span> {showMore ? t('fewerOptions') : t('moreOptions')}

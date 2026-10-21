@@ -175,10 +175,12 @@ export const deleteAccount = (password) => {
 // The terms, the privacy policy and the age were all confirmed in the form (the server refuses
 // without them and stores when the terms and the privacy policy were accepted)
 export const register = (username, display_name, email, birth_date, password) => {
-    return async () => {
+    return async (dispatch, getState) => {
+        // the confirmation mail comes in the app's language
+        const language = getState().settings?.language;
         await apiFetch("/api/register", {
             method: "POST",
-            body: JSON.stringify({ username, display_name, email, birth_date, password, accept_terms: true, accept_privacy: true, confirm_age: true }),
+            body: JSON.stringify({ username, display_name, email, birth_date, password, language, accept_terms: true, accept_privacy: true, confirm_age: true }),
         });
     };
 }

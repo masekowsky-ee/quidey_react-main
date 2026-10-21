@@ -462,7 +462,7 @@
     color: var(--text);
     background: var(--surface-inset);
     border: none;
-    border-left: 2px solid var(--chip-color);
+    border-left: 2px solid var(--task-color, var(--chip-color));
     border-radius: 4px;
     box-shadow: none;
     cursor: grab;
@@ -470,9 +470,14 @@
     transition: background-color var(--ease-out), opacity var(--ease-out);
 }
 
+/* a task with its own colour: a soft tint of it (overdue still wins, it comes later) */
+.chip:where([data-task-color]){
+    background: color-mix(in srgb, var(--task-color) 12%, var(--surface-inset));
+}
+
 .chip:hover{
-    background: color-mix(in srgb, var(--chip-color) 16%, var(--surface-inset));
-    border-color: var(--chip-color);
+    background: color-mix(in srgb, var(--task-color, var(--chip-color)) 18%, var(--surface-inset));
+    border-color: var(--task-color, var(--chip-color));
     box-shadow: none;
     filter: none;
     transform: none;
@@ -776,7 +781,7 @@ button.agendaHeadDate:hover{
     align-items: flex-start;
     gap: 0.75rem;
     padding: 0.5rem 0 0.5rem 0.7rem;
-    border-left: 2px solid var(--chip-color);
+    border-left: 2px solid var(--task-color, var(--chip-color));
 }
 
 /* .agendaRow comes after the priority classes above, so they are repeated with it */
@@ -1064,7 +1069,7 @@ button.agendaName:hover{
         width: 6px;
         height: 6px;
         padding: 0;
-        background: var(--chip-color);
+        background: var(--task-color, var(--chip-color));
         border: none;
         border-radius: 50%;
         corner-shape: round;

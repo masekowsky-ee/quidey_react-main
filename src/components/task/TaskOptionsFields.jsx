@@ -16,13 +16,16 @@ const withCurrent = (list, current) =>
 const toNumberOrNull = (value) => (value === '' ? null : Number(value));
 
 // The optional details of a task: duration, reminder, location, link and extra info.
-// value: { duration_minutes, reminder_minutes, location, link, details }; onChange gets the changed fields.
+// value: { duration_minutes, reminder_minutes, reminder_email, location, link, details, repeat };
+// onChange gets the changed fields.
 // hasTime: reminders count from the start time, so without one they are off.
 // hasDate: repeating counts from the day, so without one it is off too.
-export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = true }) {
+// canMail: "also by mail" (value.reminder_email) is offered, only to the task's owner.
+export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = true, canMail = true }) {
     const { t } = useTranslation();
     const id = useId();
     const linkOk = linkIsValid(value.link);
+    const hasReminder = hasTime && value.reminder_minutes !== null && value.reminder_minutes !== undefined;
 
     const reminderLabel = (minutes) => minutes === 0 ? t('reminderAtStart') : fill(t('reminderBefore'), { time: durationText(minutes) });
 
@@ -54,6 +57,13 @@ export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = 
                 </label>
             </div>
             {!hasTime && <p id={`${id}-reminder-hint`} className={styles.hint}>{t('reminderNeedsTime')}</p>}
+            {/* mails go to the task's owner, so only they see the switch */}
+            {canMail && hasReminder &&
+                <label className={styles.checkRow}>
+                    <input type="checkbox" checked={Boolean(value.reminder_email)}
+                        onChange={(e) => onChange({ reminder_email: e.target.checked })} />
+                    <span>{t('reminderByEmail')}</span>
+                </label>}
             <label className={styles.field}>
                 <span>{t('repeat')}</span>
                 <select value={hasDate ? (value.repeat ?? '') : ''} disabled={!hasDate}

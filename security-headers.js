@@ -6,7 +6,11 @@ export function contentSecurityPolicy(apiUrl) {
     let apiOrigin = '';
     if (apiUrl) {
         // an invalid address must not end up in the policy (it would block nothing or everything)
-        apiOrigin = new URL(apiUrl).origin;
+        const url = new URL(apiUrl);
+        // the live connection (Socket.IO) upgrades to a WebSocket on the same host, which
+        // connect-src only allows when its ws(s): address is listed too
+        const socketOrigin = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}`;
+        apiOrigin = `${url.origin} ${socketOrigin}`;
     }
     return [
         "default-src 'self'",
@@ -33,7 +37,11 @@ export function headersFile(apiUrl) {
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
         'Cross-Origin-Opener-Policy': 'same-origin',
     };
-    return '/*\n' + Object.entries(headers).map(([name, value]) => `  ${name}: ${value}`).join('\n') + '\n';
+    const block = (path, entries) => `${path}\n` + Object.entries(entries).map(([name, value]) => `  ${name}: ${value}`).join('\n') + '\n';
+    // Built files carry a hash of their content in the name, so a changed file gets a new name:
+    // browsers can keep them for a year without asking again. index.html (no hash) is left to
+    // the default, so a deploy is seen right away.
+    return block('/*', headers) + block('/assets/*', { 'Cache-Control': 'public, max-age=31536000, immutable' });
 }
 
 // Vite plugin: adds _headers to the build output

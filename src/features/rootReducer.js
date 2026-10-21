@@ -7,6 +7,7 @@ import friendsReducer from "./friends/friendsReducer";
 import togetherReducer from "./together/togetherReducer";
 import toastReducer from "./toast/toast";
 import inboxReducer from "./inbox/inbox";
+import newsReducer from "./realtime/news";
 
 const rootReducer = combineReducers({
     task: taskReducer,
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
     together: togetherReducer,
     toast: toastReducer,
     inbox: inboxReducer,
+    news: newsReducer,
 });
 
 export default rootReducer;

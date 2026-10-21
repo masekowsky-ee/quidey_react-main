@@ -5,7 +5,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { displayName, formatDuration } from '../../features/helperFunction';
 import { fetchFriends } from '../../features/friends/friendsAction';
 import { inviteToSharedSession, removeSharedMember } from '../../features/together/togetherAction';
-import { selectWork, localMs, useNow } from '../../features/together/work';
+import { selectWork, localMs, othersRunningMs, othersWorking, useNow } from '../../features/together/work';
 import { useTogetherRun } from '../../features/together/hooks';
 import Avatar from './Avatar';
 import FriendPicker from './FriendPicker';
@@ -17,7 +17,7 @@ export default function TeamPresence({ session }) {
     const run = useTogetherRun();
     const friends = useSelector(state => state.friends.friends);
     const work = useSelector(selectWork);
-    const now = useNow(Boolean(work.taskId));
+    const now = useNow(Boolean(work.taskId) || othersWorking(session));
 
     const [showInvite, setShowInvite] = useState(false);
     const [invitees, setInvitees] = useState([]);
@@ -36,7 +36,7 @@ export default function TeamPresence({ session }) {
         return {
             ...person,
             task: taskById.get(taskId) ?? null,
-            total: person.totalMs + (person.user.id === me ? myExtra : 0),
+            total: person.totalMs + (person.user.id === me ? myExtra : othersRunningMs(session, person.user.id, undefined, now)),
         };
     });
     // working people first, then the others, invited last

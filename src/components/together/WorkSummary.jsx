@@ -5,19 +5,20 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { displayName, formatDuration, toCsv, downloadFile } from '../../features/helperFunction';
 import { summaryRows } from '../../features/together/format';
 import { timeOf } from '../../features/together/togetherAction';
-import { selectWork, localMs, useNow } from '../../features/together/work';
+import { selectWork, localMs, othersRunningMs, othersWorking, useNow } from '../../features/together/work';
 import Avatar from './Avatar';
 
 // Who worked on what and for how long, by person or by task, with a CSV download
 export default function WorkSummary({ session }) {
     const { t } = useTranslation();
     const work = useSelector(selectWork);
-    const now = useNow(Boolean(work.taskId));
+    const now = useNow(Boolean(work.taskId) || othersWorking(session));
     const [view, setView] = useState('people');
 
     const me = session.me;
-    // my numbers include what the stopwatch hasn't delivered yet
-    const timeFor = (task, userId) => timeOf(task, userId) + (userId === me ? localMs(work, task.id, now) : 0);
+    // my numbers include what the stopwatch hasn't delivered yet, the others' their running time
+    const timeFor = (task, userId) => timeOf(task, userId)
+        + (userId === me ? localMs(work, task.id, now) : othersRunningMs(session, userId, task.id, now));
 
     const people = session.people
         .map(person => ({ ...person, total: session.tasks.reduce((sum, task) => sum + timeFor(task, person.user.id), 0) }))

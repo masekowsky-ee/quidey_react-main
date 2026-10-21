@@ -7,6 +7,9 @@ import TeamWorkPill from './together/TeamWorkPill'
 import TeamQuickPanel from './together/TeamQuickPanel'
 import DailyTicker from './DailyTicker'
 import Logo from './Logo'
+import { selectMenuBadgeCount } from '../features/inbox/inbox'
+import { selectHasNews } from '../features/realtime/news'
+import { useTranslation } from '../i18n/useTranslation'
 
 function formatTime(ms) {
     const h = Math.floor(ms / 3600000);
@@ -24,13 +27,19 @@ export default function Header(props){
         dispatch(setShowMenu());
     }
     const token = useSelector((state) => state.auth.token);
+    const badgeCount = useSelector(selectMenuBadgeCount);
+    const hasNews = useSelector(selectHasNews);
+    const { t } = useTranslation();
     const timer = useSelector((state) => state.session.timer);
     return (
         <div className={styles.header}>
             {token && <>
                 <div className={styles.div}>
-                    <button onClick={()=>showMenu()} className={styles.btn}>
+                    <button onClick={()=>showMenu()} className={`${styles.btn} ${styles.menuBtn}`}
+                        aria-label={badgeCount > 0 ? `${t('menu')}, ${badgeCount} ${t('inboxUnread')}` : hasNews ? `${t('menu')}, ${t('menuNews')}` : t('menu')}>
                         <svg className={styles.svg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M160-240q-17 0-28.5-11.5T120-280q0-17 11.5-28.5T160-320h640q17 0 28.5 11.5T840-280q0 17-11.5 28.5T800-240H160Zm0-200q-17 0-28.5-11.5T120-480q0-17 11.5-28.5T160-520h640q17 0 28.5 11.5T840-480q0 17-11.5 28.5T800-440H160Zm0-200q-17 0-28.5-11.5T120-680q0-17 11.5-28.5T160-720h640q17 0 28.5 11.5T840-680q0 17-11.5 28.5T800-640H160Z"/></svg>
+                        {badgeCount > 0 && <span className={styles.menuBadge} aria-hidden="true">{badgeCount > 9 ? '9+' : badgeCount}</span>}
+                        {badgeCount === 0 && hasNews && <span className={styles.menuDot} aria-hidden="true" />}
                     </button>
                     <Link to="/" className={styles.brand} aria-label="Quidey">
                         <Logo className={styles.brandMark} />
