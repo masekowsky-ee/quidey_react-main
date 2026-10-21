@@ -135,3 +135,18 @@
 :global(:root[data-motion="extreme"]) .swatchActive .swatchDot{
     scale: 1.35;
 }
+
+/* "normal" motion: swatches lift, their dot grows a little */
+:global(:root[data-motion="normal"]) .swatches > .swatch:hover{
+    translate: 0 -3px;
+    scale: 1.03;
+}
+
+:global(:root[data-motion="normal"]) .swatchDot{
+    transition: scale 0.4s cubic-bezier(0.34, 1.35, 0.64, 1);
+}
+
+:global(:root[data-motion="normal"]) .swatch:hover .swatchDot,
+:global(:root[data-motion="normal"]) .swatchActive .swatchDot{
+    scale: 1.18;
+}

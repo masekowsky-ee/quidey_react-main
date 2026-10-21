@@ -23,7 +23,7 @@ export default function WorkingContainer (props) {
         const dispatch = useDispatch();
 
         const {t} = useTranslation();
-        const extreme = useMotionLevel() === 'extreme';
+        const motionLevel = useMotionLevel();
         // the card can be swiped sideways by its head (not by the fields inside it)
         const dragControls = useDragControls();
         const startSwipe = (e) => { if (!e.target.closest('button, input, textarea')) dragControls.start(e); };
@@ -74,11 +74,13 @@ export default function WorkingContainer (props) {
         }
 
         const setActiveDoneHandler = (e) => {
-            // finishing the task in focus is worth a big burst on "extreme"
-            if (extreme && e?.currentTarget) {
+            // finishing the task in focus is worth a burst on "normal", a big one on "extreme"
+            if (motionLevel === 'extreme' && e?.currentTarget) {
                 burstFrom(e.currentTarget, 60);
                 const target = e.currentTarget;
                 setTimeout(() => burstFrom(target, 40), 180);
+            } else if (motionLevel === 'normal' && e?.currentTarget) {
+                burstFrom(e.currentTarget, 30);
             }
             if (activeTask.shared) {
                 dispatch(setSharedTaskDone(activeTask.shared.sessionId, activeTask.shared.taskId, true))

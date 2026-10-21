@@ -17,6 +17,9 @@ import TaskLabels from './TaskLabels.jsx'
 import { AnimatePresence, motion } from 'motion/react'
 import { MOTION, useMotionLevel, burstFrom } from '../features/settings/motion'
 
+// seconds between two rows when the list cascades in
+const CASCADE_STEP = { minimal: 0.025, normal: 0.035, extreme: 0.045 };
+
 
 export default function TaskContainer(props){
     const { working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask, releasedIds = [] } = props;
@@ -29,16 +32,16 @@ export default function TaskContainer(props){
     const motionLevel = useMotionLevel();
     const extreme = motionLevel === 'extreme';
     // rows animate in, out and to a new place, and cascade in one after another when the list
-    // appears (gently on "normal", wildly on "extreme")
-    const cascade = motionLevel !== 'minimal';
+    // appears (gently on "minimal", livelier on "normal", wildly on "extreme")
     const rowMotion = (index = 0) => {
         const preset = MOTION.row[motionLevel];
-        if (!cascade) return preset;
-        const step = extreme ? 0.045 : 0.025;
+        const step = CASCADE_STEP[motionLevel];
         return { ...preset, transition: { ...preset.transition, delay: Math.min(index, 12) * step } };
     };
-    // a finished task earns confetti on "extreme"
-    const celebrate = (e) => { if (extreme) burstFrom(e.currentTarget); };
+    // a finished task earns confetti on "normal" (a little) and "extreme"
+    const celebrate = (e) => {
+        if (motionLevel !== 'minimal') burstFrom(e.currentTarget, extreme ? undefined : 12);
+    };
 
     const tasks = useSelector(state => state.task.tasks);
     const groups = useSelector(state => state.task.groups);
@@ -188,7 +191,7 @@ export default function TaskContainer(props){
                 <div className={styles.ulDiv}>
                     <ul className={styles.ul}>
                         <h3 className={styles.ulH3}>{t('toDo')}</h3>
-                    <AnimatePresence initial={cascade}>
+                    <AnimatePresence>
                     {listTasks.find(task => task.done !== true) && listTasks
                             .map((task, index) => {
                                 // Check if this specific task is the one currently being dragged
@@ -284,7 +287,7 @@ export default function TaskContainer(props){
                 <div className={styles.ulDiv}>
                     <ul className={styles.ul}>
                         <h3 className={styles.ulH3}>{t('done')}</h3>
-                    <AnimatePresence initial={cascade}>
+                    <AnimatePresence>
                     {listTasks
                         .map((task, index) => {
                             if(task.done && task.shared){

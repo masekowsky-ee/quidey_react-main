@@ -192,17 +192,51 @@
   }
 }
 
-/* "normal" motion: the entries slide in shortly after the panel */
+/* "normal" motion: the panel swings in a little, the entries follow with a soft spring */
+:global(:root[data-motion="normal"]) .menuDiv{
+  transition: transform 0.55s cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+
 :global(:root[data-motion="normal"]) .menuDiv.open .menuItem{
+  animation: menuItemMid 0.5s cubic-bezier(0.34, 1.35, 0.64, 1) both;
+}
+
+:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(2){ animation-delay: 0.03s; }
+:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(3){ animation-delay: 0.06s; }
+:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(4){ animation-delay: 0.09s; }
+:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(5){ animation-delay: 0.12s; }
+:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(6){ animation-delay: 0.15s; }
+:global(:root[data-motion="normal"]) .menuDiv.open .menuBottom > *{ animation-delay: 0.19s; }
+
+:global(:root[data-motion="normal"]) .menuItem:hover{
+  translate: 4px 0;
+}
+
+:global(:root[data-motion="normal"]) .menuItem:hover .menuIcon{
+  scale: 1.12;
+  rotate: -6deg;
+  transition: scale 0.35s cubic-bezier(0.34, 1.35, 0.64, 1), rotate 0.35s cubic-bezier(0.34, 1.35, 0.64, 1);
+}
+
+@keyframes menuItemMid{
+  from{
+    opacity: 0;
+    translate: -36px 0;
+    scale: 0.9;
+  }
+}
+
+/* "minimal" motion: the entries slide in shortly after the panel */
+:global(:root[data-motion="minimal"]) .menuDiv.open .menuItem{
   animation: menuItemSoft 0.4s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
-:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(2){ animation-delay: 0.02s; }
-:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(3){ animation-delay: 0.04s; }
-:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(4){ animation-delay: 0.06s; }
-:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(5){ animation-delay: 0.08s; }
-:global(:root[data-motion="normal"]) .menuDiv.open .menuList > :nth-child(6){ animation-delay: 0.1s; }
-:global(:root[data-motion="normal"]) .menuDiv.open .menuBottom > *{ animation-delay: 0.12s; }
+:global(:root[data-motion="minimal"]) .menuDiv.open .menuList > :nth-child(2){ animation-delay: 0.02s; }
+:global(:root[data-motion="minimal"]) .menuDiv.open .menuList > :nth-child(3){ animation-delay: 0.04s; }
+:global(:root[data-motion="minimal"]) .menuDiv.open .menuList > :nth-child(4){ animation-delay: 0.06s; }
+:global(:root[data-motion="minimal"]) .menuDiv.open .menuList > :nth-child(5){ animation-delay: 0.08s; }
+:global(:root[data-motion="minimal"]) .menuDiv.open .menuList > :nth-child(6){ animation-delay: 0.1s; }
+:global(:root[data-motion="minimal"]) .menuDiv.open .menuBottom > *{ animation-delay: 0.12s; }
 
 @keyframes menuItemSoft{
   from{

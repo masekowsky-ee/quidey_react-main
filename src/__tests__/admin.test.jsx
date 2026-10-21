@@ -9,18 +9,19 @@ import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import Admin from '../components/Admin'
 import Menu from '../components/menu'
 import App from '../App'
+import TesterOnly from '../components/TesterOnly'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))
 
-const adminUser = { id: 4, username: 'testUser1', displayName: 'test User 1', email: 'a@x.de', createdAt: '2026-10-01T10:00:00Z', isPro: true, isAdmin: true, request: null }
+const adminUser = { id: 4, username: 'testUser1', displayName: 'test User 1', email: 'a@x.de', createdAt: '2026-10-01T10:00:00Z', isPro: true, isAdmin: true, isTester: false, request: null }
 const asker = {
-    id: 7, username: 'newbie', displayName: 'New Bie', email: 'n@x.de', createdAt: '2026-10-18T10:00:00Z', isPro: false, isAdmin: false,
+    id: 7, username: 'newbie', displayName: 'New Bie', email: 'n@x.de', createdAt: '2026-10-18T10:00:00Z', isPro: false, isAdmin: false, isTester: false,
     request: { status: 'pending', reason: 'I want to plan my study group', createdAt: '2026-10-19T08:00:00Z', decidedAt: null },
 }
-const proUser = { id: 3, username: 'testUser2', displayName: 'test_name', email: 'b@x.de', createdAt: '2026-10-02T10:00:00Z', isPro: true, isAdmin: false, request: null }
+const proUser = { id: 3, username: 'testUser2', displayName: 'test_name', email: 'b@x.de', createdAt: '2026-10-02T10:00:00Z', isPro: true, isAdmin: false, isTester: false, request: null }
 
 function makeStore({ isAdmin = true, pending = 1 } = {}) {
     const store = configureStore({ reducer: rootReducer })
@@ -47,7 +48,7 @@ function mockApi() {
             return state.pro
         }
         if (url === '/api/admin/overview') return {
-            users: 3, withAccess: 2, admins: 1, pendingRequests: 1, newThisWeek: 1, openSharedSessions: 0,
+            users: 3, withAccess: 2, admins: 1, testers: 0, pendingRequests: 1, newThisWeek: 1, openSharedSessions: 0,
             actions: [{ id: 1, admin: 'testUser1', target: 'testUser2', action: 'grant_pro', createdAt: new Date().toISOString() }],
         }
         throw new Error(`unexpected call ${options.method ?? 'GET'} ${url}`)
@@ -135,6 +136,17 @@ describe('admin panel', () => {
         expect(calls.some(c => c.url === '/api/admin/users/3' && c.body?.isAdmin === true)).toBe(true)
     })
 
+    it('makes someone a tester without asking', async () => {
+        await renderAdmin('/admin?tab=users')
+        const row = (await screen.findByText('test_name')).closest('li')
+        const tester = within(row).getByRole('switch', { name: /Tester/ })
+        expect(tester).toHaveAttribute('aria-checked', 'false')
+        await act(async () => { fireEvent.click(tester) })
+        expect(calls.at(-2)).toMatchObject({ url: '/api/admin/users/3', method: 'PATCH', body: { isTester: true } })
+        expect(within(row).getByRole('switch', { name: /Tester/ })).toHaveAttribute('aria-checked', 'true')
+        expect(within(row).getAllByText('Tester').length).toBeGreaterThan(0)
+    })
+
     it('has no switches on my own row', async () => {
         await renderAdmin('/admin?tab=users')
         const me = (await screen.findByText('test User 1')).closest('li')
@@ -146,5 +158,25 @@ describe('admin panel', () => {
         await renderAdmin('/admin?tab=overview')
         expect(screen.getByText('Mit Zugang').previousSibling).toHaveTextContent('2')
         expect(screen.getByText('testUser1 hat testUser2 Pro gegeben')).toBeInTheDocument()
+    })
+})
+
+describe('tester-only content', () => {
+    const renderWith = (isTester) => {
+        const store = configureStore({ reducer: rootReducer })
+        store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isTester } })
+        render(<Provider store={store}><TesterOnly fallback={<p>Alt</p>}><p>Neu</p></TesterOnly></Provider>)
+    }
+
+    it('shows the new thing to testers', () => {
+        renderWith(true)
+        expect(screen.getByText('Neu')).toBeInTheDocument()
+        expect(screen.queryByText('Alt')).not.toBeInTheDocument()
+    })
+
+    it('shows the fallback to everybody else', () => {
+        renderWith(false)
+        expect(screen.getByText('Alt')).toBeInTheDocument()
+        expect(screen.queryByText('Neu')).not.toBeInTheDocument()
     })
 })

@@ -2,7 +2,7 @@
 
 Quidey is a calm planner for students: tasks, a focus timer, a calendar, and friends you study
 with live. German-first (de default, en available), currently a **closed beta** — only users
-with `is_pro` get into the app. Public site: **quidey.com**.
+with `is_pro` or `is_tester` (admins always) get into the app. Public site: **quidey.com**.
 
 Two repositories, side by side on this machine:
 
@@ -66,7 +66,11 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   also recolours the favicon), motion level, home layout.
 - `/social` — friends and friend requests.
 - `/together`, `/together/:id` — shared live study sessions: members, shared task list, a
-  stopwatch counting for everyone, activity feed, session chat (realtime).
+  stopwatch counting for everyone, activity feed, session chat (realtime). Session tasks can carry
+  the same details as own tasks — day, time, prio, duration, location, link, details, colour — all
+  optional (only the name is required), edited by any member via `TaskEditDialog shared={…}`
+  (`TaskEditor personal={false}`). Reminders, repeating, groups and sharing stay personal; adding
+  an own task copies its details, later edits don't sync back (only `done` does).
 - `/inbox` — direct messages between friends + notifications/admin broadcasts (realtime).
 - `/feedback` — feedback form (mailed to the owner).
 - `/admin` — only for `isAdmin`: overview, beta requests (approve/decline), users (pro/admin
@@ -106,15 +110,21 @@ the theme before React loads.
   `realtime.js` (Socket.IO server), `db.js` (pg pool), `utils/mailer.js` (nodemailer),
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
-  memory), incremental `migrations/001…016` (015: performance indexes, 016: task colour +
-  reminder mails). Tables: users, tasks, groups, task_groups, notes,
+  memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.
 - Auth: bcrypt passwords, JWT with `token_version` (revocable: password change / sign out
   everywhere bumps it), email verification required, terms acceptance stored,
-  express-rate-limit on auth routes. `is_pro` gates all app routes; `is_admin` the admin routes;
+  express-rate-limit on auth routes. `is_pro` OR `is_tester` gates all app routes (`requirePro`,
+  helpers in `utils/access.js`, also used by the socket and reminder mails); `is_admin` the admin routes;
   `is_owner` (migration 014) can only be set by a DB superuser and forces admin on.
+  `is_tester` (migration 019, set in the admin panel): gets into the app and sees unreleased
+  features; admins always count as testers (`/api/me` → `isTester`). Tester-only API routes go
+  under `/api/tester/...` (closed by `requireTester`, 403 `TESTER_REQUIRED`). Frontend:
+  `<TesterOnly fallback?>` / `useIsTester()` (`src/features/auth/tester.js`), also as a route guard.
+  Broadcasts take `audience: 'all' | 'testers'` (testers = `is_tester OR is_admin`).
   The account row behind each request is cached for 15 s (`loadAccount`); every in-app change
   of token version / pro / admin / account calls `forgetAccount`, so only CLI/psql changes wait.
 - Socket.IO: authenticates with the same JWT; rooms `user:<id>` and `session:<id>`; events
@@ -129,7 +139,7 @@ the theme before React loads.
   with `reminder_email`, computes the start in `users.timezone` (sent by the app via
   `PUT /api/users/locale`, default Europe/Berlin) and mails the owner once per reminder time
   (`reminder_mailed_at`). Only the owner can switch it on.
-- CLI: `npm run pro -- list|requests|grant|revoke|decline|admin|unadmin <username>`.
+- CLI: `npm run pro -- list|requests|grant|revoke|decline|admin|unadmin|tester|untester <username>`.
 - Tests: `npm test` (`test/api.test.mjs`, node:test, creates/drops its own DB). Extend for every new route.
 - Config via `.env` (see `.env.example`): `NODE_ENV`, `DB_*`, `JWT_SECRET` (≥32 chars), `PORT`,
   `CORS_ORIGINS`, `TRUST_PROXY`, `SMTP_*`, `MAIL_FROM`, `CONTACT_TO`, `FRONTEND_URL`.

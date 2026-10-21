@@ -11,7 +11,8 @@ const initialState = {
     // closed beta: may I use the app? checked = the server answered (until then nothing is shown)
     // betaRequest: my request for access, { status: 'pending' | 'approved' | 'declined', reason, createdAt } or null
     // isAdmin: sees the admin panel; adminPendingCount: open beta requests (admins only)
-    access: { checked: false, isPro: false, isAdmin: false, adminPendingCount: 0, betaRequest: null },
+    // isTester: sees features not released to everyone yet (see features/auth/tester.js)
+    access: { checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null },
 };
 
 const authReducer = (state = initialState, action) => {
@@ -39,6 +40,7 @@ const authReducer = (state = initialState, action) => {
                     checked: true,
                     isPro: Boolean(action.payload.isPro),
                     isAdmin: Boolean(action.payload.isAdmin),
+                    isTester: Boolean(action.payload.isTester),
                     adminPendingCount: action.payload.adminPendingCount ?? 0,
                     betaRequest: action.payload.betaRequest ?? null,
                 },

@@ -5,8 +5,10 @@ export function apiUrl(path) {
     return base + path;
 }
 
-// Fired when the server says the app is only for pro users (closed beta)
+// Fired when the server says the app is only for pro users and testers (closed beta),
+// or that something is only for testers
 export const PRO_REQUIRED_EVENT = 'quidey:pro-required';
+const ACCESS_CODES = ['PRO_REQUIRED', 'TESTER_REQUIRED'];
 
 // Fired when the server no longer accepts my login (expired, password changed elsewhere,
 // "sign out everywhere"): App signs out
@@ -31,8 +33,9 @@ export async function apiFetch(url, options = {}) {
         // status and the API's error code let the UI show a translated message
         error.status = response.status;
         error.code = errorData.code;
-        // pro was taken away while the app is open: App checks access again and shows the beta screen
-        if (errorData.code === 'PRO_REQUIRED') window.dispatchEvent(new Event(PRO_REQUIRED_EVENT));
+        // pro / tester was taken away while the app is open: App checks access again
+        // (and shows the beta screen, or hides what only testers see)
+        if (ACCESS_CODES.includes(errorData.code)) window.dispatchEvent(new Event(PRO_REQUIRED_EVENT));
         if (token && SIGNED_OUT_CODES.includes(errorData.code)) window.dispatchEvent(new Event(SIGNED_OUT_EVENT));
         throw error;
     }

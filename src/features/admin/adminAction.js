@@ -29,7 +29,7 @@ export const decideBetaRequest = (userId, decision) =>
 export const resetBetaRequest = (userId) =>
     adminChange(`/api/admin/requests/${userId}`, { method: 'DELETE' });
 
-// changes: { isPro?, isAdmin? }. Not for myself (the server refuses with code SELF),
+// changes: { isPro?, isAdmin?, isTester? }. Not for myself (the server refuses with code SELF),
 // and an owner's admin can't be taken away (code OWNER).
 export const updateAdminUser = (userId, changes) =>
     adminChange(`/api/admin/users/${userId}`, { method: 'PATCH', body: JSON.stringify(changes) });

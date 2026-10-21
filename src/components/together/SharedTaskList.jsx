@@ -2,18 +2,23 @@ import styles from '../Together.module.css';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
-import { formatDuration, displayName } from '../../features/helperFunction';
+import { formatDuration, displayName, formatDate } from '../../features/helperFunction';
 import { fetchTaskState } from '../../features/tasks/taskAction';
 import {
     addSharedTask, setSharedTaskDone, removeSharedTask, assignSharedTask,
 } from '../../features/together/togetherAction';
 import { selectWork, startWork, stopWork, localMs, othersRunningMs, othersWorking, useNow } from '../../features/together/work';
 import { useTogetherRun } from '../../features/together/hooks';
+import { taskColorAttr } from '../../features/tasks/taskColors';
 import Avatar from './Avatar';
+import TaskMeta from '../task/TaskMeta.jsx';
+import TaskEditDialog from '../task/TaskEditDialog.jsx';
+import Icon from '../calendar/icons.jsx';
 
 const FILTERS = ['all', 'mine', 'free'];
 
-// The session's tasks: add new ones or my own, mark done, assign, and work on them
+// The session's tasks: add new ones or my own, mark done, assign, edit their details
+// (day, time, priority, colour, ... all optional) and work on them
 export default function SharedTaskList({ session, showShareSelect = true }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
@@ -25,6 +30,8 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
     const [newTask, setNewTask] = useState('');
     const [filter, setFilter] = useState('all');
     const [showDone, setShowDone] = useState(false);
+    // the dialog shows the task as the session has it now (it may change while open)
+    const [editTaskId, setEditTaskId] = useState(null);
 
     const id = session.id;
     const me = session.me;
@@ -71,13 +78,16 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
         free: session.tasks.filter(task => !task.done && !task.assignee).length,
     };
 
+    const canRemove = (task) => isOpen && totalOn(task) === 0 && (session.isOwner || task.addedBy?.id === me);
+    const taskInEditor = isOpen && editTaskId !== null ? session.tasks.find(task => task.id === editTaskId) : null;
+
     const row = (task) => {
         const workers = workersOn(task.id);
         const mine = workingOn === task.id;
         const total = totalOn(task);
-        const canRemove = isOpen && total === 0 && (session.isOwner || task.addedBy?.id === me);
         return (
-            <li key={task.id} className={`${styles.taskRow} ${task.done ? styles.taskDone : ''} ${mine ? styles.taskMine : ''}`}>
+            <li key={task.id} className={`${styles.taskRow} ${task.done ? styles.taskDone : ''} ${mine ? styles.taskMine : ''}`}
+                data-task-color={taskColorAttr(task)}>
                 <input
                     type="checkbox"
                     className={styles.check}
@@ -89,6 +99,12 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                 <div className={styles.who}>
                     <span className={styles.name}>{task.name}</span>
                     {task.description && <span className={styles.desc}>{task.description}</span>}
+                    {(task.due || task.duration_minutes || task.location || task.link) && (
+                        <span className={styles.taskMeta}>
+                            {task.due && <span className={styles.meta}>{formatDate(task.due)}</span>}
+                            <TaskMeta task={task} />
+                        </span>
+                    )}
                     <span className={styles.taskMeta}>
                         {isOpen && !task.done ? (
                             <select
@@ -120,7 +136,10 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                         {mine
                             ? <button className={styles.secondaryBtn} onClick={() => dispatch(stopWork())}>{t('pause')}</button>
                             : <button className={styles.acceptBtn} onClick={() => dispatch(startWork(session, task))}>{t('workOnThis')}</button>}
-                        {canRemove && (
+                        <button className={styles.quietBtn} onClick={() => setEditTaskId(task.id)} aria-label={`${t('editTask')}: ${task.name}`} title={t('editTask')}>
+                            <Icon name="edit" size={18} />
+                        </button>
+                        {canRemove(task) && (
                             <button className={styles.quietBtn} onClick={() => run(removeSharedTask(id, task.id))} aria-label={`${t('taskDeleteBtn')}: ${task.name}`} title={t('taskDeleteBtn')}>✕</button>
                         )}
                     </div>
@@ -184,6 +203,13 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                         </>
                     )}
                 </>
+            )}
+            {taskInEditor && (
+                <TaskEditDialog
+                    task={taskInEditor}
+                    shared={{ sessionId: id, canRemove: canRemove(taskInEditor) }}
+                    onClose={() => setEditTaskId(null)}
+                />
             )}
         </section>
     );

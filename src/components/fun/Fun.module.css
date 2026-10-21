@@ -634,6 +634,21 @@
     animation: shakeExtreme 0.5s ease-in-out;
 }
 
+/* "normal" motion: cards and letters hop a little */
+:global(:root[data-motion="normal"]) .pick:hover{
+    translate: 0 -3px;
+    rotate: -1deg;
+}
+
+:global(:root[data-motion="normal"]) .pick:nth-child(even):hover{
+    rotate: 1deg;
+}
+
+:global(:root[data-motion="normal"]) .letter:not(:disabled):hover{
+    rotate: -5deg;
+    scale: 1.1;
+}
+
 @keyframes flipExtreme{
     0% {
         transform: rotateX(-180deg) scale(0.6);

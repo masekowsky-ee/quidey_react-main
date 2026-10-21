@@ -308,6 +308,13 @@
     color: var(--primary-fg);
 }
 
+/* a task's colour (see index.css): a stripe on the left and a soft tint, as in my own list */
+.taskRow[data-task-color]{
+    padding-left: 0.65rem;
+    box-shadow: inset 3px 0 0 var(--task-color);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--task-color) 12%, transparent), transparent 45%);
+}
+
 /* ---------- who worked on what ---------- */
 
 .summary{

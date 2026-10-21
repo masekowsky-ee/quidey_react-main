@@ -269,21 +269,55 @@
     }
 }
 
-/* "normal" motion: the cards fade up in a short wave and lift a little on hover */
+/* "normal" motion: the cards drop in with a soft bounce and tilt a little on hover */
 :global(:root[data-motion="normal"]) .day{
+    animation: dayDropMid 0.55s cubic-bezier(0.34, 1.35, 0.64, 1) both;
+    transition: translate 0.4s cubic-bezier(0.34, 1.35, 0.64, 1), rotate 0.4s cubic-bezier(0.34, 1.35, 0.64, 1),
+        box-shadow 0.3s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+:global(:root[data-motion="normal"]) .day:nth-child(2){ animation-delay: 0.04s; }
+:global(:root[data-motion="normal"]) .day:nth-child(3){ animation-delay: 0.08s; }
+:global(:root[data-motion="normal"]) .day:nth-child(4){ animation-delay: 0.12s; }
+:global(:root[data-motion="normal"]) .day:nth-child(5){ animation-delay: 0.16s; }
+:global(:root[data-motion="normal"]) .day:nth-child(6){ animation-delay: 0.2s; }
+:global(:root[data-motion="normal"]) .day:nth-child(7){ animation-delay: 0.24s; }
+:global(:root[data-motion="normal"]) .day:nth-child(8){ animation-delay: 0.28s; }
+
+:global(:root[data-motion="normal"]) .day:hover{
+    translate: 0 -4px;
+    rotate: -0.75deg;
+    box-shadow: 0 12px 26px -16px color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
+:global(:root[data-motion="normal"]) .day:nth-child(even):hover{
+    rotate: 0.75deg;
+}
+
+@keyframes dayDropMid{
+    from{
+        opacity: 0;
+        translate: 0 -20px;
+        rotate: -3deg;
+        scale: 0.88;
+    }
+}
+
+/* "minimal" motion: the cards fade up in a short wave and lift a little on hover */
+:global(:root[data-motion="minimal"]) .day{
     animation: dayRise 0.45s cubic-bezier(0.32, 0.72, 0, 1) both;
     transition: translate var(--ease), box-shadow var(--ease), background-color var(--ease), border-color var(--ease);
 }
 
-:global(:root[data-motion="normal"]) .day:nth-child(2){ animation-delay: 0.03s; }
-:global(:root[data-motion="normal"]) .day:nth-child(3){ animation-delay: 0.06s; }
-:global(:root[data-motion="normal"]) .day:nth-child(4){ animation-delay: 0.09s; }
-:global(:root[data-motion="normal"]) .day:nth-child(5){ animation-delay: 0.12s; }
-:global(:root[data-motion="normal"]) .day:nth-child(6){ animation-delay: 0.15s; }
-:global(:root[data-motion="normal"]) .day:nth-child(7){ animation-delay: 0.18s; }
-:global(:root[data-motion="normal"]) .day:nth-child(8){ animation-delay: 0.21s; }
+:global(:root[data-motion="minimal"]) .day:nth-child(2){ animation-delay: 0.03s; }
+:global(:root[data-motion="minimal"]) .day:nth-child(3){ animation-delay: 0.06s; }
+:global(:root[data-motion="minimal"]) .day:nth-child(4){ animation-delay: 0.09s; }
+:global(:root[data-motion="minimal"]) .day:nth-child(5){ animation-delay: 0.12s; }
+:global(:root[data-motion="minimal"]) .day:nth-child(6){ animation-delay: 0.15s; }
+:global(:root[data-motion="minimal"]) .day:nth-child(7){ animation-delay: 0.18s; }
+:global(:root[data-motion="minimal"]) .day:nth-child(8){ animation-delay: 0.21s; }
 
-:global(:root[data-motion="normal"]) .day:hover{
+:global(:root[data-motion="minimal"]) .day:hover{
     translate: 0 -2px;
 }
 

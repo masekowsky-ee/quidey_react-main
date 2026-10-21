@@ -200,6 +200,7 @@ function UsersTab() {
                                         <Person user={user} />
                                         <div className={styles.userInfo}>
                                             {user.isAdmin && <span className={styles.chip_admin}>{t('adminRoleAdmin')}</span>}
+                                            {user.isTester && <span className={styles.chip_tester}>{t('adminRoleTester')}</span>}
                                             {user.request && <StatusChip status={user.request.status} t={t} />}
                                             <span className={styles.meta}>{t('adminJoined')} {formatDate(user.createdAt)}</span>
                                         </div>
@@ -222,6 +223,15 @@ function UsersTab() {
                                                     onClick={() => change(user, { isPro: !user.isPro }, user.isPro ? 'adminToastProRevoked' : 'adminToastProGranted')}
                                                 >
                                                     <span className={styles.toggleKnob} aria-hidden="true" /> Pro
+                                                </button>
+                                                <button
+                                                    role="switch"
+                                                    aria-checked={user.isTester}
+                                                    className={user.isTester ? styles.toggleOn : styles.toggle}
+                                                    disabled={busy}
+                                                    onClick={() => change(user, { isTester: !user.isTester }, user.isTester ? 'adminToastTesterRevoked' : 'adminToastTesterGranted')}
+                                                >
+                                                    <span className={styles.toggleKnob} aria-hidden="true" /> Tester
                                                 </button>
                                                 <button
                                                     role="switch"
@@ -278,7 +288,8 @@ function OverviewTab() {
 
     const stats = [
         ['users', data.users], ['adminStatAccess', data.withAccess], ['adminStatPending', data.pendingRequests],
-        ['adminStatNew', data.newThisWeek], ['adminStatAdmins', data.admins], ['adminStatSessions', data.openSharedSessions],
+        ['adminStatNew', data.newThisWeek], ['adminStatAdmins', data.admins], ['adminStatTesters', data.testers],
+        ['adminStatSessions', data.openSharedSessions],
     ];
     return (
         <>
@@ -307,14 +318,21 @@ function OverviewTab() {
     );
 }
 
-// A notice to every account: it lands in everybody's inbox under "Notices". Written, then
-// confirmed in a second step, because it can't be taken back.
+// A notice to every account, or only to the testers (and admins): it lands in their inbox under
+// "Notices". Written, then confirmed in a second step, because it can't be taken back.
+const AUDIENCES = ['all', 'testers'];
+const AUDIENCE_KEYS = {
+    all: { label: 'adminAudienceAll', hint: 'adminBroadcastHint', send: 'adminBroadcastSend', confirm: 'adminBroadcastConfirm' },
+    testers: { label: 'adminAudienceTesters', hint: 'adminBroadcastHintTesters', send: 'adminBroadcastSendTesters', confirm: 'adminBroadcastConfirmTesters' },
+};
+
 function BroadcastTab() {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
     const locale = language === 'de' ? 'de-DE' : 'en-GB';
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
+    const [audience, setAudience] = useState('all');
     const [confirming, setConfirming] = useState(false);
     const [sending, setSending] = useState(false);
     const [sent, setSent] = useState(null);
@@ -329,9 +347,9 @@ function BroadcastTab() {
     const send = async () => {
         setSending(true);
         try {
-            const result = await sendBroadcast(title.trim(), body.trim());
+            const result = await sendBroadcast(title.trim(), body.trim(), audience);
             dispatch(showToast(fill(t('adminBroadcastSent'), { count: result.recipientCount }), 'success'));
-            setSent(prev => [{ id: result.id, title: title.trim(), body: body.trim(), recipientCount: result.recipientCount, createdAt: result.createdAt }, ...(prev ?? [])]);
+            setSent(prev => [{ id: result.id, title: title.trim(), body: body.trim(), audience, recipientCount: result.recipientCount, createdAt: result.createdAt }, ...(prev ?? [])]);
             setTitle('');
             setBody('');
             setConfirming(false);
@@ -346,8 +364,19 @@ function BroadcastTab() {
         <>
             <section className={styles.card} role="tabpanel" aria-label={t('adminBroadcast')}>
                 <h2 className={styles.cardTitle}>{t('adminBroadcast')}</h2>
-                <p className={styles.meta}>{t('adminBroadcastHint')}</p>
+                <p className={styles.meta}>{t(AUDIENCE_KEYS[audience].hint)}</p>
                 <form className={styles.broadcastForm} onSubmit={(e) => { e.preventDefault(); if (ready) setConfirming(true); }}>
+                    <div className={styles.field}>
+                        <span id="broadcast-audience">{t('adminBroadcastTo')}</span>
+                        <div className={styles.segmented} role="group" aria-labelledby="broadcast-audience">
+                            {AUDIENCES.map(key => (
+                                <button key={key} type="button" className={audience === key ? styles.segmentActive : undefined} aria-pressed={audience === key}
+                                    onClick={() => { setAudience(key); setConfirming(false); }}>
+                                    {t(AUDIENCE_KEYS[key].label)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                     <label className={styles.field}>
                         <span>{t('adminBroadcastTitle')}</span>
                         <input value={title} maxLength={120} onChange={(e) => { setTitle(e.target.value); setConfirming(false); }} />
@@ -358,13 +387,13 @@ function BroadcastTab() {
                     </label>
                     {confirming ? (
                         <div className={styles.actions}>
-                            <span className={styles.confirmText}>{t('adminBroadcastConfirm')}</span>
+                            <span className={styles.confirmText}>{t(AUDIENCE_KEYS[audience].confirm)}</span>
                             <button type="button" className={styles.primaryBtn} disabled={sending} onClick={send}>{t('adminBroadcastSendNow')}</button>
                             <button type="button" className={styles.quietBtn} onClick={() => setConfirming(false)}>{t('cancel')}</button>
                         </div>
                     ) : (
                         <div className={styles.actions}>
-                            <button type="submit" className={styles.primaryBtn} disabled={!ready}>{t('adminBroadcastSend')}</button>
+                            <button type="submit" className={styles.primaryBtn} disabled={!ready}>{t(AUDIENCE_KEYS[audience].send)}</button>
                         </div>
                     )}
                 </form>
@@ -376,7 +405,10 @@ function BroadcastTab() {
                         <ul className={styles.list}>
                             {sent.map(item => (
                                 <li key={item.id} className={styles.broadcast}>
-                                    <span className={styles.name}>{item.title}</span>
+                                    <span className={styles.broadcastHead}>
+                                        <span className={styles.name}>{item.title}</span>
+                                        {item.audience === 'testers' && <span className={styles.chip_tester}>{t('adminAudienceTesters')}</span>}
+                                    </span>
                                     <span className={styles.meta}>
                                         {new Date(item.createdAt).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' })}
                                         {' · '}{fill(t('adminBroadcastReach'), { count: item.recipientCount })}

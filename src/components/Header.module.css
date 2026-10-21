@@ -549,6 +549,16 @@
     scale: 1.2;
 }
 
+/* "normal" motion: the logo tilts and grows a little */
+:global(:root[data-motion="normal"]) .brandMark{
+    transition: rotate 0.5s cubic-bezier(0.34, 1.35, 0.64, 1), scale 0.4s cubic-bezier(0.34, 1.35, 0.64, 1);
+}
+
+:global(:root[data-motion="normal"]) .brand:hover .brandMark{
+    rotate: -15deg;
+    scale: 1.1;
+}
+
 /* Something unread somewhere (messages, requests, invites): a count on the menu button */
 .menuBtn{
     position: relative;

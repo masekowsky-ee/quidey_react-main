@@ -34,15 +34,18 @@ export default function Home(props){
     const [workedTime, setWorkedTime] = useState(0);
 
     // --- Gehobener State für Drag & Drop + aktive Task/Worked Tasks ---
-    const starterTask = tasks[0] || null;
+    // an open task to start with, never one that's already done
+    const starterTask = tasks.find(task => !task.done) || null;
     const [chosenTask, setActiveTask] = useState(starterTask);
     // tasks put back from the work area (not done): shown at the end of the list, latest last
     const [releasedIds, setReleasedIds] = useState([]);
     // a task from a shared session is read live, so done/assignee changes show up; it's gone
-    // (nothing active) when I left the session or it ended
+    // (nothing active) when I left the session or it ended. One of my own leaves the work area
+    // as soon as the list says it's done or gone (finished in the calendar, on another device).
+    const ownTask = chosenTask && !chosenTask.shared ? tasks.find(task => task.id === chosenTask.id) : null;
     const activeTask = chosenTask?.shared
         ? sharedTasks.find(task => task.id === chosenTask.id) ?? null
-        : chosenTask;
+        : (ownTask && !ownTask.done ? chosenTask : null);
 
     // the shared sessions' tasks; changes arrive live afterwards (useLiveLists in App)
     useEffect(() => {

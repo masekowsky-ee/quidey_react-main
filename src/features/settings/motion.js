@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
-// How much the app moves: 'minimal' (nothing), 'normal' (quiet fades) or 'extreme' (springs,
-// blur, confetti). Remembered in localStorage like the theme; without a saved choice it follows
+// How much the app moves: 'minimal' (quiet fades), 'normal' (livelier springs, a little
+// confetti) or 'extreme' (big springs, blur, lots of confetti). The opening animation plays on
+// every level. Remembered in localStorage like the theme; without a saved choice it follows
 // the operating system's "reduce motion" setting.
 export const MOTION_LEVELS = ['minimal', 'normal', 'extreme'];
 const STORAGE_KEY = 'motion';
@@ -22,7 +23,7 @@ export function storeMotion(level) {
 
 export const useMotionLevel = () => useSelector((state) => state.settings.motion);
 
-// <html data-motion>: the CSS turns transitions off (minimal) or makes them bouncy (extreme)
+// <html data-motion>: the CSS keeps transitions calm (minimal) or makes them bouncy (normal, extreme)
 export function useApplyMotion() {
     const level = useMotionLevel();
     useEffect(() => {
@@ -34,19 +35,23 @@ const EASE = [0.32, 0.72, 0, 1];
 const BOUNCY = { type: 'spring', stiffness: 380, damping: 18, mass: 0.9 };
 const SOFT_SPRING = { type: 'spring', stiffness: 220, damping: 22 };
 
-// No animation at all: elements simply appear and disappear
-const STILL = { initial: false, exit: undefined, transition: { duration: 0 } };
+const LIVELY_SPRING = { type: 'spring', stiffness: 340, damping: 22 };
 
 // The motion props per level for each animated part of the app
 export const MOTION = {
-    // whole page on navigation: normal rises a little, extreme out of a blur. The filter is removed
-    // at the end, a transform or filter left on the wrapper would trap the pages' fixed parts
+    // whole page on navigation: minimal rises a little, normal springs up, extreme out of a blur.
+    // The filter is removed at the end, a transform or filter left on the wrapper would trap the
+    // pages' fixed parts
     page: {
-        minimal: STILL,
-        normal: {
+        minimal: {
             initial: { opacity: 0, y: 12 },
             animate: { opacity: 1, y: 0 },
             transition: { duration: 0.35, ease: EASE },
+        },
+        normal: {
+            initial: { opacity: 0, y: 28, scale: 0.97 },
+            animate: { opacity: 1, y: 0, scale: 1 },
+            transition: { type: 'spring', stiffness: 260, damping: 24, opacity: { duration: 0.3 } },
         },
         extreme: {
             initial: { opacity: 0, y: 48, scale: 0.94, filter: 'blur(10px)' },
@@ -56,13 +61,20 @@ export const MOTION = {
     },
     // task rows: in, out, and sliding to a new place
     row: {
-        minimal: STILL,
-        normal: {
+        minimal: {
             layout: 'position',
             initial: { opacity: 0, y: 10, scale: 0.98 },
             animate: { opacity: 1, y: 0, scale: 1 },
             exit: { opacity: 0, x: 24, transition: { duration: 0.2 } },
             transition: { type: 'spring', stiffness: 320, damping: 28 },
+        },
+        normal: {
+            layout: true,
+            initial: { opacity: 0, x: -36, scale: 0.93, rotate: -1 },
+            animate: { opacity: 1, x: 0, scale: 1, rotate: 0 },
+            exit: { opacity: 0, x: 90, scale: 0.86, rotate: 3, transition: { duration: 0.28, ease: 'backIn' } },
+            whileHover: { x: 3, transition: LIVELY_SPRING },
+            transition: LIVELY_SPRING,
         },
         extreme: {
             layout: true,
@@ -74,13 +86,19 @@ export const MOTION = {
         },
     },
     toast: {
-        minimal: STILL,
-        normal: {
+        minimal: {
             layout: true,
             initial: { opacity: 0, y: 24, scale: 0.92 },
             animate: { opacity: 1, y: 0, scale: 1 },
             exit: { opacity: 0, scale: 0.95, transition: { duration: 0.18 } },
             transition: { type: 'spring', stiffness: 420, damping: 26 },
+        },
+        normal: {
+            layout: true,
+            initial: { opacity: 0, y: 50, scale: 0.7, rotate: -4 },
+            animate: { opacity: 1, y: 0, scale: 1, rotate: 0 },
+            exit: { opacity: 0, y: 14, scale: 0.75, rotate: 3, transition: { duration: 0.22 } },
+            transition: { type: 'spring', stiffness: 460, damping: 20 },
         },
         extreme: {
             layout: true,
@@ -91,12 +109,17 @@ export const MOTION = {
         },
     },
     overlay: {
-        minimal: STILL,
-        normal: {
+        minimal: {
             initial: { opacity: 0 },
             animate: { opacity: 1 },
             exit: { opacity: 0 },
             transition: { duration: 0.25 },
+        },
+        normal: {
+            initial: { opacity: 0, backdropFilter: 'blur(0px)' },
+            animate: { opacity: 1, backdropFilter: 'blur(3px)' },
+            exit: { opacity: 0, backdropFilter: 'blur(0px)' },
+            transition: { duration: 0.32 },
         },
         extreme: {
             initial: { opacity: 0, backdropFilter: 'blur(0px)' },
@@ -107,11 +130,15 @@ export const MOTION = {
     },
     // a game on the fun page when it starts
     game: {
-        minimal: STILL,
-        normal: {
+        minimal: {
             initial: { opacity: 0, y: 16, scale: 0.97 },
             animate: { opacity: 1, y: 0, scale: 1 },
             transition: { type: 'spring', stiffness: 260, damping: 24 },
+        },
+        normal: {
+            initial: { opacity: 0, y: 36, scale: 0.9, rotateX: -22 },
+            animate: { opacity: 1, y: 0, scale: 1, rotateX: 0 },
+            transition: { type: 'spring', stiffness: 230, damping: 19 },
         },
         extreme: {
             initial: { opacity: 0, y: 60, scale: 0.8, rotateX: -50 },
@@ -121,7 +148,7 @@ export const MOTION = {
     },
 };
 
-// Confetti from a point on the screen (extreme only). Plain DOM and the Web Animations API,
+// Confetti from a point on the screen (a little on normal, lots on extreme). Plain DOM and the Web Animations API,
 // so it costs React nothing and cleans up after itself.
 const CONFETTI_COLORS = ['var(--primary)', '#facc15', '#38bdf8', '#fb7185', '#a78bfa', '#4ade80'];
 
@@ -161,15 +188,16 @@ export function burstFrom(element, count) {
     if (rect) burst(rect.left + rect.width / 2, rect.top + rect.height / 2, count);
 }
 
-// A win in a game: on "extreme" a big burst in the middle and two from the sides.
-// delay lets the game's own reveal (flipping tiles) finish first.
+// A win in a game: on "extreme" a big burst in the middle and two from the sides, on "normal"
+// just the one in the middle. delay lets the game's own reveal (flipping tiles) finish first.
 export function useCelebrate(delay = 0) {
     const level = useMotionLevel();
     return () => {
-        if (level !== 'extreme') return;
+        if (level === 'minimal') return;
         setTimeout(() => {
             const w = window.innerWidth;
             const h = window.innerHeight;
+            if (level === 'normal') { burst(w / 2, h * 0.45, 36); return; }
             burst(w / 2, h * 0.45, 70);
             setTimeout(() => { burst(w * 0.2, h * 0.6, 35); burst(w * 0.8, h * 0.6, 35); }, 200);
         }, delay);

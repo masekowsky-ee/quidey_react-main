@@ -1037,10 +1037,6 @@
     }
 }
 
-:global(:root[data-motion="minimal"]) .liveDot{
-    animation: none;
-}
-
 /* jumps from the bar land below it, not under it */
 .page section{
     scroll-margin-top: 64px;

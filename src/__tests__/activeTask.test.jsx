@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, act, within } from '@testing-library/react'
+import { render, screen, fireEvent, act, within, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
@@ -10,6 +10,7 @@ import { setMotion } from '../features/settings/settingsAction'
 import WorkingContainer from '../components/WorkingContainer'
 import TaskContainer from '../components/TaskContainer'
 import CompletedTasks from '../components/CompletedTasks'
+import Home from '../components/home'
 import LegalPage from '../legal/LegalPage'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
@@ -49,6 +50,31 @@ describe('the task in focus', () => {
         expect(names).toEqual(['Zweite', 'Dritte', 'Erste'])
     })
 
+    describe('on the home page', () => {
+        const list = [
+            { ...tasks[0], name: 'Fertig', done: true },
+            { ...tasks[1], name: 'Offen' },
+        ]
+        const renderHome = (store) => wrap(store, <Home t={(key) => key} setCustomError={vi.fn()} setActiveTimer={vi.fn()} />)
+
+        it('never starts with a task that is already done', () => {
+            apiFetch.mockResolvedValue([])
+            renderHome(makeStore(list))
+            expect(screen.queryByText('Fertig')).toBeNull()
+            expect(screen.getByRole('button', { name: 'Als erledigt markieren' })).toBeInTheDocument()
+        })
+
+        it('lets go of the task once the list says it is done', () => {
+            apiFetch.mockResolvedValue([])
+            const store = makeStore([list[1]])
+            renderHome(store)
+            expect(screen.getByRole('button', { name: 'Als erledigt markieren' })).toBeInTheDocument()
+            // finished somewhere else (calendar, another device)
+            act(() => { store.dispatch({ type: SET_TASK_STATE, payload: { tasks: [{ ...list[1], done: true }], groups: [], notes: [] } }) })
+            expect(screen.queryByRole('button', { name: 'Als erledigt markieren' })).toBeNull()
+        })
+    })
+
     describe('confetti when it is done', () => {
         let animate
         beforeEach(() => {
@@ -72,11 +98,18 @@ describe('the task in focus', () => {
         it('bursts on "extreme"', async () => {
             await finish('extreme')
             expect(animate.mock.calls.length).toBeGreaterThanOrEqual(60)
+            // the second burst follows a moment later
+            await waitFor(() => expect(animate).toHaveBeenCalledTimes(100))
             expect(apiFetch).toHaveBeenCalledWith('/api/tasks/1', expect.objectContaining({ method: 'PUT' }))
         })
 
-        it('stays calm on "normal"', async () => {
+        it('bursts a little on "normal"', async () => {
             await finish('normal')
+            expect(animate).toHaveBeenCalledTimes(30)
+        })
+
+        it('stays calm on "minimal"', async () => {
+            await finish('minimal')
             expect(animate).not.toHaveBeenCalled()
         })
     })

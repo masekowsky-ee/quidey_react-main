@@ -25,15 +25,17 @@ const ACCENTS = {
 };
 
 // Parts of a section come in one after another as it scrolls into view: heading, text, picture.
-// On "minimal" motion everything is simply there.
+// How far and how long per motion level
+const REVEAL = { minimal: [24, 0.55], normal: [36, 0.68], extreme: [48, 0.8] };
+
 function useReveal() {
-    const level = useMotionLevel();
-    return (order = 0) => level === 'minimal' ? {} : {
-        initial: { opacity: 0, y: level === 'extreme' ? 48 : 24 },
+    const [distance, duration] = REVEAL[useMotionLevel()];
+    return (order = 0) => ({
+        initial: { opacity: 0, y: distance },
         whileInView: { opacity: 1, y: 0 },
         viewport: { once: true, margin: '0px 0px -12% 0px' },
-        transition: { duration: level === 'extreme' ? 0.8 : 0.55, ease: EASE, delay: order * 0.075 },
-    };
+        transition: { duration, ease: EASE, delay: order * 0.075 },
+    });
 }
 
 // a live countdown for the pieces of the app, looping
@@ -50,11 +52,11 @@ const clock = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s 
 
 // ---------- hero: the sentence with the timer in it ----------
 
-function Hero({ c, still }) {
+function Hero({ c }) {
     const reveal = useReveal();
     // the loop runs on and on, so it can be stopped (WCAG 2.2.2)
     const [paused, setPaused] = useState(false);
-    const stopped = still || paused;
+    const stopped = paused;
     return (
         <section className={styles.hero} data-tone="dark" aria-labelledby="landing-title">
             <div className={styles.heroLower} aria-hidden="true" />
@@ -69,11 +71,9 @@ function Hero({ c, still }) {
                 <span className={`${styles.line} ${styles.lineBottom}`}>{c.hero.after}</span>
             </motion.h1>
             <motion.p className={styles.heroSub} {...reveal(2)}>{c.hero.sub}</motion.p>
-            {!still && (
-                <button type="button" className={styles.pauseBtn} aria-pressed={paused} onClick={() => setPaused(p => !p)}>
-                    {paused ? c.hero.play : c.hero.pause}
-                </button>
-            )}
+            <button type="button" className={styles.pauseBtn} aria-pressed={paused} onClick={() => setPaused(p => !p)}>
+                {paused ? c.hero.play : c.hero.pause}
+            </button>
         </section>
     );
 }
@@ -301,7 +301,6 @@ export default function Landing() {
     const dispatch = useDispatch();
     const language = useSelector(state => state.settings.language);
     const c = LANDING_COPY[language] ?? LANDING_COPY.de;
-    const level = useMotionLevel();
     const [startWith, setStartWith] = useState({ key: 0, signUp: false, email: '' });
     const [tone, setTone] = useState('dark');
     // the colour picked in the last feature recolours every piece of the app on the page
@@ -309,7 +308,7 @@ export default function Landing() {
     const pageRef = useRef(null);
 
     const goToStart = () => requestAnimationFrame(() =>
-        document.getElementById('start')?.scrollIntoView({ behavior: level === 'minimal' ? 'auto' : 'smooth' }));
+        document.getElementById('start')?.scrollIntoView({ behavior: 'smooth' }));
     const start = (email) => { setStartWith(prev => ({ key: prev.key + 1, signUp: true, email })); goToStart(); };
     const signIn = () => { setStartWith(prev => ({ key: prev.key + 1, signUp: false, email: '' })); goToStart(); };
 
@@ -325,7 +324,7 @@ export default function Landing() {
     // the bar's links scroll to their section without putting an #anchor into the address
     const scrollTo = (e, id) => {
         e.preventDefault();
-        document.getElementById(id)?.scrollIntoView({ behavior: level === 'minimal' ? 'auto' : 'smooth' });
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     };
 
     // the bar takes the colours of the chapter under it
@@ -347,7 +346,7 @@ export default function Landing() {
         <div className={styles.page} ref={pageRef} style={{ '--ui-accent': uiAccent, '--ui-accent-ink': uiAccentInk }}>
             <header className={`${styles.bar} ${styles[`bar_${tone}`] ?? ''}`}>
                 <a href="/" className={styles.wordmarkSmall} aria-label="Quidey"
-                    onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: level === 'minimal' ? 'auto' : 'smooth' }); }}>
+                    onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
                     <Logo className={styles.barLogo} /> <span translate="no">Quidey</span>
                 </a>
                 <nav className={styles.barLinks} aria-label="Quidey">
@@ -361,7 +360,7 @@ export default function Landing() {
                 </div>
             </header>
             <main>
-                <Hero c={c} still={level === 'minimal'} />
+                <Hero c={c} />
                 <Features c={c} accent={accent} onAccent={setAccent} />
                 <Faq c={c} />
                 <Cta c={c} onStart={start} />

@@ -139,9 +139,28 @@ describe('admin broadcast', () => {
         expect(apiFetch).not.toHaveBeenCalledWith('/api/admin/broadcasts', expect.anything())
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Ja, senden' })) })
         expect(apiFetch).toHaveBeenCalledWith('/api/admin/broadcasts', expect.objectContaining({
-            method: 'POST', body: JSON.stringify({ title: 'Wartung', body: 'Heute Abend kurz offline.' }),
+            method: 'POST', body: JSON.stringify({ title: 'Wartung', body: 'Heute Abend kurz offline.', audience: 'all' }),
         }))
         expect(within(screen.getAllByRole('list').at(-1)).getByText('Wartung')).toBeInTheDocument()
+    })
+
+    it('can go to the testers only', async () => {
+        api({
+            'GET /api/admin/broadcasts': [],
+            'POST /api/admin/broadcasts': { id: 2, audience: 'testers', recipientCount: 3, createdAt: new Date().toISOString() },
+        })
+        await act(async () => { renderAt(makeStore(), '/admin?tab=broadcast', <Admin />) })
+        fireEvent.click(screen.getByRole('button', { name: 'Nur Tester' }))
+        expect(screen.getByRole('button', { name: 'Nur Tester' })).toHaveAttribute('aria-pressed', 'true')
+        fireEvent.change(screen.getByLabelText('Titel'), { target: { value: 'Neu: Statistik' } })
+        fireEvent.change(screen.getByLabelText('Text'), { target: { value: 'Bitte ausprobieren.' } })
+        fireEvent.click(screen.getByRole('button', { name: 'An Tester senden…' }))
+        expect(screen.getByText(/Wirklich an alle Tester senden/)).toBeInTheDocument()
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Ja, senden' })) })
+        expect(apiFetch).toHaveBeenCalledWith('/api/admin/broadcasts', expect.objectContaining({
+            method: 'POST', body: JSON.stringify({ title: 'Neu: Statistik', body: 'Bitte ausprobieren.', audience: 'testers' }),
+        }))
+        expect(within(screen.getAllByRole('list').at(-1)).getByText('Nur Tester')).toBeInTheDocument()
     })
 })
 

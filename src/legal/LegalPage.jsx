@@ -176,7 +176,8 @@ function Privacy() {
                 <li><strong>E-Mail-Adresse</strong> – zur Anmeldung, zur Bestätigung deines Kontos und für wichtige Nachrichten zum Konto;</li>
                 <li><strong>Geburtsdatum</strong> – um zu prüfen, dass du mindestens 14 Jahre alt bist;</li>
                 <li><strong>Passwort</strong> – nur als sicherer Hash (bcrypt) gespeichert, nie im Klartext;</li>
-                <li>Zeitpunkt der Registrierung, Bestätigungsstatus der E-Mail-Adresse und Zugangsstatus (Beta);</li>
+                <li>Zeitpunkt der Registrierung, Bestätigungsstatus der E-Mail-Adresse und Zugangsstatus (Beta,
+                    Tester – Tester sehen neue Funktionen vor allen anderen und erhalten eigene Meldungen);</li>
                 <li><strong>Sprache und Zeitzone</strong> deines Geräts (z. B. „Europe/Berlin“) – die App meldet sie beim
                     Öffnen, damit Mails in deiner Sprache kommen und Erinnerungen zur richtigen Uhrzeit.</li>
             </ul>
@@ -211,8 +212,11 @@ function Privacy() {
             <h2>6. Freunde und gemeinsame Funktionen</h2>
             <p>
                 Wenn du Freundschaftsanfragen sendest oder annimmst, sehen deine Freunde deinen Benutzernamen und
-                Anzeigenamen. In gemeinsamen Sitzungen sehen alle Mitglieder deinen Namen, die Aufgaben der Sitzung,
-                Nachrichten, wer woran wie lange gearbeitet hat und den Verlauf der Sitzung. Aufgaben, die du mit
+                Anzeigenamen. In gemeinsamen Sitzungen sehen alle Mitglieder deinen Namen, die Aufgaben der Sitzung
+                mit allem, was ihr dazu eintragt (z. B. Tag, Uhrzeit, Priorität, Dauer, Ort, Link, Beschreibung, weitere
+                Infos, Farbe), Nachrichten, wer woran wie lange gearbeitet hat und den Verlauf der Sitzung. Fügst du
+                eine eigene Aufgabe zu einer Sitzung hinzu, werden diese Angaben in die Sitzung übernommen; deine
+                Erinnerungen, Wiederholungen und Gruppen bleiben privat. Aufgaben, die du mit
                 Freunden teilst, sehen diese Freunde. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
                 Verlässt du eine Sitzung oder löschst du dein Konto, bleibt im Verlauf der Sitzung nur ein Eintrag
                 ohne Bezug zu deinem Konto.

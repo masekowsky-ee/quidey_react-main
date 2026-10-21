@@ -31,7 +31,10 @@ function optionsSummary(t, extras, hasTime, task) {
 // Edits one task in the day panel: name, day and optional time, priority, description, and
 // under "More options" duration, reminder, location, link, extra info and sharing.
 // Enter saves (Ctrl+Enter in the text fields), Escape cancels without closing the panel.
-export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, onPickGroups }) {
+// personal: false for a task in a shared session: the day is optional, and reminders,
+// repeating, sharing and groups (all personal) are left out. Without onDelete / onLeave /
+// onPickGroups their buttons are left out.
+export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, onPickGroups, personal = true }) {
     const { t } = useTranslation();
     const id = useId();
     const nameRef = useRef(null);
@@ -71,10 +74,22 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
     const submit = async (e) => {
         e?.preventDefault();
         if (!name.trim()) { setError(t('nameRequired')); nameRef.current?.focus(); return; }
-        if (!due) { setError(t('dateNameTaskError')); return; }
+        if (!due && personal) { setError(t('dateNameTaskError')); return; }
         if (!linkIsValid(extras.link)) { setShowMore(true); return; }
         setBusy(true);
-        const saved = await onSave({
+        const saved = await onSave(!personal ? {
+            name: name.trim(),
+            due: due || null,
+            prio,
+            description: description.trim(),
+            // a time of day needs a day
+            due_time: due ? time || null : null,
+            duration_minutes: extras.duration_minutes,
+            color,
+            location: extras.location.trim(),
+            link: extras.link.trim(),
+            details: extras.details.trim(),
+        } : {
             name: name.trim(),
             due,
             prio,
@@ -147,18 +162,18 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             </button>
             {showMore &&
                 <div className={styles.more}>
-                    <TaskOptionsFields value={extras} hasTime={Boolean(time)} hasDate={Boolean(due)} canMail={isOwner} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
-                    <TaskSharing task={task} />
+                    <TaskOptionsFields value={extras} hasTime={Boolean(time)} hasDate={Boolean(due)} canMail={isOwner} personal={personal} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
+                    {personal && <TaskSharing task={task} />}
                 </div>}
 
             {error && <p className={styles.error} role="alert">{error}</p>}
             <div className={styles.editorActions}>
-                <button type="button" className={styles.groupsBtn} onClick={() => onPickGroups(task)}>{t('assignGroup')}</button>
+                {onPickGroups && <button type="button" className={styles.groupsBtn} onClick={() => onPickGroups(task)}>{t('assignGroup')}</button>}
                 {isOwner
-                    ? <button type="button" className={styles.deleteBtn} onClick={() => onDelete(task)} aria-label={`${t('deleteTask')}: ${task.name}`} title={t('deleteTask')}>
+                    ? onDelete && <button type="button" className={styles.deleteBtn} onClick={() => onDelete(task)} aria-label={`${t('deleteTask')}: ${task.name}`} title={t('deleteTask')}>
                         <Icon name="delete" size={20} />
                     </button>
-                    : <button type="button" className={styles.leaveBtn} onClick={() => onLeave(task)}>{t('leaveTask')}</button>}
+                    : onLeave && <button type="button" className={styles.leaveBtn} onClick={() => onLeave(task)}>{t('leaveTask')}</button>}
                 <span className={styles.spacer} />
                 <button type="button" className={styles.cancelBtn} onClick={onCancel}>{t('cancel')}</button>
                 <button type="submit" className={styles.saveBtn} disabled={busy}>{t('save')}</button>

@@ -81,6 +81,7 @@ export const sendFeedback = (category, message) =>
 
 export const fetchBroadcasts = () => apiFetch('/api/admin/broadcasts');
 
-// A notice to every account; { id, recipientCount, createdAt }
-export const sendBroadcast = (title, body) =>
-    apiFetch('/api/admin/broadcasts', { method: 'POST', body: JSON.stringify({ title, body }) });
+// A notice to every account (audience 'all') or only to testers and admins ('testers');
+// { id, audience, recipientCount, createdAt }
+export const sendBroadcast = (title, body, audience = 'all') =>
+    apiFetch('/api/admin/broadcasts', { method: 'POST', body: JSON.stringify({ title, body, audience }) });

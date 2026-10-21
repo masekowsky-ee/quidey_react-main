@@ -196,8 +196,8 @@ function App(){
 
 
   return (
-    // the amount of motion is chosen in the settings ("minimal" turns it off), so the
-    // system setting is only the default there, not applied a second time here
+    // the amount of motion is chosen in the settings (the system's "reduce motion" picks
+    // "minimal" as the default there), so it isn't applied a second time here
     <MotionConfig reducedMotion="never">
     <div>
         <div>

@@ -65,7 +65,9 @@ function mockApi() {
         }
         if (url.startsWith('/api/shared-sessions/5/tasks/') && options.method === 'PATCH') {
             const task = current.tasks.find(t => t.id === Number(url.split('/').pop()))
-            if ('assigneeId' in body) task.assignee = [ann, ben].find(u => u.id === body.assigneeId) ?? null
+            const { assigneeId, ...fields } = body
+            if ('assigneeId' in body) task.assignee = [ann, ben].find(u => u.id === assigneeId) ?? null
+            Object.assign(task, fields)
             return structuredClone(current)
         }
         throw new Error(`unexpected call ${options.method ?? 'GET'} ${url}`)
@@ -174,6 +176,34 @@ describe('Shared session page', () => {
         // "assigned to me" filter: ben has both now, ann (me) none
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Für mich/ })) })
         expect(screen.getByText('Keine offenen Aufgaben in diesem Filter.')).toBeInTheDocument()
+    })
+
+    it("edits a task's details; the day and everything else is optional, personal options are left out", async () => {
+        await renderSession()
+        await act(async () => { fireEvent.click(within(taskRow('Report')).getByRole('button', { name: 'Bearbeiten: Report' })) })
+        const dialog = screen.getByRole('dialog')
+        // no day is fine for a session task
+        await act(async () => { fireEvent.click(within(dialog).getByRole('button', { name: 'Speichern' })) })
+        expect(calls.at(-1)).toMatchObject({
+            url: '/api/shared-sessions/5/tasks/10', method: 'PATCH',
+            body: { name: 'Report', due: null, due_time: null, description: '', location: '', link: '', details: '' },
+        })
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+        await act(async () => { fireEvent.click(within(taskRow('Report')).getByRole('button', { name: 'Bearbeiten: Report' })) })
+        const again = screen.getByRole('dialog')
+        fireEvent.change(within(again).getByLabelText('Fälligkeitsdatum'), { target: { value: '2026-10-25' } })
+        fireEvent.click(within(again).getByRole('button', { name: /Weitere Optionen/ }))
+        // reminders, repeating, sharing and groups belong to one's own tasks
+        expect(within(again).queryByLabelText('Wiederholen')).not.toBeInTheDocument()
+        expect(within(again).queryByLabelText('Erinnerung')).not.toBeInTheDocument()
+        expect(within(again).queryByRole('button', { name: 'Zu Gruppe hinzufügen' })).not.toBeInTheDocument()
+        fireEvent.change(within(again).getByLabelText('Ort'), { target: { value: 'Bib' } })
+        await act(async () => { fireEvent.click(within(again).getByRole('button', { name: 'Speichern' })) })
+        expect(calls.at(-1).body).toMatchObject({ due: '2026-10-25', location: 'Bib' })
+        expect(calls.at(-1).body).not.toHaveProperty('repeat')
+        expect(calls.at(-1).body).not.toHaveProperty('reminder_minutes')
+        expect(within(taskRow('Report')).getByText('Bib')).toBeInTheDocument()
     })
 
     it('still works with a backend that sends no feed or assignments yet', async () => {
