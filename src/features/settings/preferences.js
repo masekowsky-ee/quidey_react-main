@@ -32,6 +32,11 @@ export const readStoredSessionMinutes = () =>
     Number(readStored('sessionMinutes', SESSION_LENGTHS.map(String), '30'));
 export const storeSessionMinutes = (minutes) => store('sessionMinutes', String(minutes));
 
+// How the focus time is measured: a countdown ("timer") or counting up from zero ("stopwatch")
+export const TIMER_MODES = ['timer', 'stopwatch'];
+export const readStoredTimerMode = () => readStored('timerMode', TIMER_MODES, 'timer');
+export const storeTimerMode = (mode) => store('timerMode', mode);
+
 // Whether this account has seen the intro tour on this device (shown once to new users)
 const tutorialKey = (username) => `tutorialSeen:${username}`;
 export const hasSeenTutorial = (username) => readStored(tutorialKey(username), ['1'], null) === '1';

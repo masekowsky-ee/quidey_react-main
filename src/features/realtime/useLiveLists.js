@@ -8,8 +8,11 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { markNews } from './news';
 import { useRealtime, useRealtimeRefresh } from './socket';
 
-// what's in `after` but wasn't in `before` (by id)
-const added = (before = [], after = []) => {
+// what's in `after` but wasn't in `before` (by id). Nothing when `before` was never loaded:
+// after a reconnect (e.g. the server restarted) the first load would otherwise announce every
+// friend and request as new.
+const added = (before = [], after = [], loadedBefore = true) => {
+    if (!loadedBefore) return [];
     const known = new Set(before.map(item => item.id));
     return after.filter(item => !known.has(item.id));
 };
@@ -30,12 +33,12 @@ export function useLiveLists() {
         const before = store.getState().friends;
         await Promise.all([quietly(fetchFriendRequests()), quietly(fetchFriends())]);
         const after = store.getState().friends;
-        for (const request of added(before.incoming, after.incoming)) {
+        for (const request of added(before.incoming, after.incoming, before.requestsLoaded)) {
             popup(fill(t('liveFriendRequest'), { name: displayName(request.user) }), '/social?tab=requests');
         }
-        const newFriends = added(before.friends, after.friends);
+        const newFriends = added(before.friends, after.friends, before.friendsLoaded);
         for (const friend of newFriends) popup(fill(t('liveNewFriend'), { name: displayName(friend) }), '/social');
-        if (newFriends.length > 0 || (after.friends?.length ?? 0) < (before.friends?.length ?? 0)) dispatch(markNews('social'));
+        if (newFriends.length > 0 || (before.friendsLoaded && after.friends.length < before.friends.length)) dispatch(markNews('social'));
     });
     useRealtimeRefresh(['invites:changed', 'session:changed'], async () => {
         const before = store.getState().together;
@@ -43,16 +46,16 @@ export function useLiveLists() {
             // the running sessions' tasks in the solo view
             quietly(fetchMySharedTasks())]);
         const after = store.getState().together;
-        for (const invite of added(before.invites, after.invites)) {
+        for (const invite of added(before.invites, after.invites, before.listLoaded)) {
             popup(fill(t('liveSessionInvite'), { name: displayName(invite.invitedBy ?? invite.owner) }), '/together', invite.name);
         }
     });
     // something happened in one of my sessions (tasks, members, who works on what)
     useRealtime('session:changed', () => dispatch(markNews('together')));
     useRealtimeRefresh(['tasks:changed'], async () => {
-        const before = store.getState().task.invites;
+        const { invites: before, invitesLoaded } = store.getState().task;
         await Promise.all([quietly(refreshTasks()), quietly(fetchTaskInvites())]);
-        for (const invite of added(before, store.getState().task.invites)) {
+        for (const invite of added(before, store.getState().task.invites, invitesLoaded)) {
             popup(fill(t('liveTaskInvite'), { name: displayName(invite.from) }), '/calendar', invite.task?.name);
         }
     });

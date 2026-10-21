@@ -28,7 +28,7 @@ export const PROCESSORS = {
 };
 
 // Date of the current version of the legal texts
-export const LEGAL_VERSION_DATE = '21.10.2026 (Profile und Statistiken für Freunde)';
+export const LEGAL_VERSION_DATE = '21.10.2026 (gemeinsame Kalender, Quidey Family)';
 
 export const COPYRIGHT_YEAR = 2026;
 

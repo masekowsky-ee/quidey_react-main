@@ -1,8 +1,9 @@
-import { SET_SESSION_PARAMS, SAVE_SESSION_DATA, UPDATE_CURRENT_SESSION_DATA, SET_TIMER, ADD_WORKED_TASK, ADD_TASK_TIME, SET_WORKED_SESSIONS } from "./sessionActionTypes";
-import { readStoredSessionMinutes } from "../settings/preferences";
+import { SET_SESSION_PARAMS, SAVE_SESSION_DATA, UPDATE_CURRENT_SESSION_DATA, SET_TIMER, ADD_WORKED_TASK, ADD_TASK_TIME, SET_WORKED_SESSIONS, SET_TIMER_MODE } from "./sessionActionTypes";
+import { readStoredSessionMinutes, readStoredTimerMode } from "../settings/preferences";
 
 // The default session length from the settings (30 minutes unless changed)
 const DEFAULT_SESSION_MS = readStoredSessionMinutes() * 60 * 1000;
+const START_MODE = readStoredTimerMode();
 
 const initialState = {
     workedSessionData: [],
@@ -12,7 +13,9 @@ const initialState = {
         group: 'all', 
         date: new Date().toISOString(),
     },
-    timer: {time: DEFAULT_SESSION_MS, active: false}, // milliseconds
+    // 'timer' counts the session length down, 'stopwatch' counts up from zero
+    timerMode: START_MODE,
+    timer: {time: START_MODE === 'stopwatch' ? 0 : DEFAULT_SESSION_MS, active: false}, // milliseconds
     sessionParams: {
         time: DEFAULT_SESSION_MS, // milliseconds
     }
@@ -41,11 +44,19 @@ const sessionReducer = (state = initialState, action) => {
                 ...state,
                 timer: action.payload,
             }
+        case SET_TIMER_MODE:
+            // a fresh start in the new mode
+            return {
+                ...state,
+                timerMode: action.payload,
+                timer: {time: action.payload === 'stopwatch' ? 0 : state.sessionParams.time, active: false},
+            }
         case SET_SESSION_PARAMS:
             return {
                 ...state,
                 sessionParams: action.payload,
-                timer: {time: action.payload.time, active: false},
+                // a stopwatch doesn't use the session length
+                timer: state.timerMode === 'stopwatch' ? state.timer : {time: action.payload.time, active: false},
             }
         case ADD_WORKED_TASK: {
             const tasks = state.currentSessionData.workedTasks;

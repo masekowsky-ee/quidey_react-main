@@ -59,7 +59,7 @@ export default function TeamPresence({ session }) {
                 <h2 className={styles.cardTitle}>{t('team')}</h2>
                 {workingCount > 0 && <span className={styles.live}><span className={styles.liveDot} />{workingCount} {t('workingNow')}</span>}
             </div>
-            <ul className={styles.list}>
+            <ul className={styles.scrollList}>
                 {people.map(person => (
                     <li key={person.user.id} className={styles.row}>
                         <Avatar user={person.user} live={Boolean(person.task)} />

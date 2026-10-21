@@ -31,7 +31,8 @@ function optionsSummary(t, extras, hasTime, task) {
 // Edits one task in the day panel: name, day and optional time, priority, description, and
 // under "More options" duration, reminder, location, link, extra info and sharing.
 // Enter saves (Ctrl+Enter in the text fields), Escape cancels without closing the panel.
-// personal: false for a task in a shared session: the day is optional, and reminders,
+// The day is optional (then no time, reminder or repeating either).
+// personal: false for a task in a shared session: reminders,
 // repeating, sharing and groups (all personal) are left out. Without onDelete / onLeave /
 // onPickGroups their buttons are left out.
 export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, onPickGroups, personal = true }) {
@@ -74,7 +75,6 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
     const submit = async (e) => {
         e?.preventDefault();
         if (!name.trim()) { setError(t('nameRequired')); nameRef.current?.focus(); return; }
-        if (!due && personal) { setError(t('dateNameTaskError')); return; }
         if (!linkIsValid(extras.link)) { setShowMore(true); return; }
         setBusy(true);
         const saved = await onSave(!personal ? {
@@ -91,20 +91,21 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             details: extras.details.trim(),
         } : {
             name: name.trim(),
-            due,
+            // the day is optional; a time of day, a reminder and repeating need one
+            due: due || null,
             prio,
             description: description.trim(),
-            due_time: time || null,
+            due_time: due ? time || null : null,
             duration_minutes: extras.duration_minutes,
             // a reminder counts from the start time
-            reminder_minutes: time ? extras.reminder_minutes : null,
+            reminder_minutes: due && time ? extras.reminder_minutes : null,
             // only the owner's mails (the server ignores it from others)
-            ...(isOwner ? { reminder_email: Boolean(time && extras.reminder_minutes !== null && extras.reminder_email) } : {}),
+            ...(isOwner ? { reminder_email: Boolean(due && time && extras.reminder_minutes !== null && extras.reminder_email) } : {}),
             color,
             location: extras.location.trim(),
             link: extras.link.trim(),
             details: extras.details.trim(),
-            repeat: extras.repeat ?? null,
+            repeat: due ? extras.repeat ?? null : null,
         });
         // still open when saving failed; otherwise the editor is gone already
         if (!saved) setBusy(false);

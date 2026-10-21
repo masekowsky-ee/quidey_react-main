@@ -1,0 +1,147 @@
+/* Quidey Family: the list page and a family's page. Most of the look comes from the shared
+   sessions (Together.module.css); these are the parts only families have. */
+
+.familyItem{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+}
+
+.familyLink{
+    composes: sessionLink from '../Together.module.css';
+    flex: 1;
+    min-width: 0;
+}
+
+.headLinks{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin-top: 0.35rem;
+}
+
+.calendarLink{
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary-text);
+    text-decoration: none;
+}
+
+.calendarLink:hover{
+    text-decoration: underline;
+}
+
+/* ---------- coming up: the next entries of the family calendar ---------- */
+
+.upcoming{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.upcoming > li + li{
+    border-top: 1px solid var(--btn-border);
+}
+
+.entry{
+    display: grid;
+    grid-template-columns: auto 6.5rem minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: baseline;
+    padding: 0.6rem 0;
+}
+
+/* a small round tick, like the calendar's */
+.entryCheck{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    padding: 0;
+    color: transparent;
+    background: transparent;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 50%;
+    box-shadow: none;
+}
+
+.entryCheck:hover{
+    color: var(--primary-text);
+    border-color: var(--primary);
+    background: transparent;
+}
+
+.entryEdit{
+    composes: iconBtnRound from '../ui.module.css';
+    align-self: center;
+    color: var(--text-muted);
+}
+
+.entryWhen{
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.entryToday{
+    color: var(--primary-text);
+}
+
+.entryName{
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.entryMeta{
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.quickAdd{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+}
+
+/* ---------- members ---------- */
+
+.memberActions{
+    margin-left: auto;
+}
+
+.inviteBox{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.85rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--btn-border);
+}
+
+.loadOlder{
+    align-self: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 600px){
+    .quickAdd{
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .quickAdd > :first-child{
+        grid-column: 1 / -1;
+    }
+
+    .entry{
+        grid-template-columns: auto 5.5rem minmax(0, 1fr) auto;
+    }
+}

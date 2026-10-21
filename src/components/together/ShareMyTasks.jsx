@@ -19,7 +19,7 @@ export default function ShareMyTasks({ session }) {
         <section className={styles.card}>
             <h2 className={styles.cardTitle}>{t('myOwnTasks')}</h2>
             {open.length === 0 ? <p className={styles.emptyLine}>{t('noOwnTasks')}</p> : (
-                <ul className={styles.list}>
+                <ul className={styles.scrollList}>
                     {open.map(task => (
                         <li key={task.id} className={styles.row}>
                             <div className={styles.who}>

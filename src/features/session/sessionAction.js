@@ -1,6 +1,7 @@
-import { SET_SESSION_PARAMS, SAVE_SESSION_DATA, UPDATE_CURRENT_SESSION_DATA, SET_TIMER, ADD_WORKED_TASK, ADD_TASK_TIME, SET_WORKED_SESSIONS } from "./sessionActionTypes";
+import { SET_SESSION_PARAMS, SAVE_SESSION_DATA, UPDATE_CURRENT_SESSION_DATA, SET_TIMER, ADD_WORKED_TASK, ADD_TASK_TIME, SET_WORKED_SESSIONS, SET_TIMER_MODE } from "./sessionActionTypes";
 import { apiFetch } from '../helperFunction';
 import { isSharedTaskId, sharedTaskIdOf } from '../together/togetherAction';
+import { storeTimerMode } from '../settings/preferences';
 
 export const setTimer = (time, active) => {
     return {
@@ -17,10 +18,17 @@ export const setSessionParams = (paramsObj) => {
     }
 }
 
+// 'timer' (countdown) or 'stopwatch' (up from zero); remembered for the next visit
+export const setTimerMode = (mode) => {
+    storeTimerMode(mode);
+    return { type: SET_TIMER_MODE, payload: mode };
+}
+
 export const selectCurrentSessionData = (state) => state.session.currentSessionData;
 
-// How much of the session has elapsed, as a percentage from 0 to 100
+// How much of the session has elapsed, as a percentage from 0 to 100 (a stopwatch has no end: 0)
 export const selectTimerProgress = (state) => {
+    if (state.session.timerMode === 'stopwatch') return 0;
     const total = state.session.sessionParams.time;
     if (!total) return 0;
     const elapsed = (total - state.session.timer.time) / total * 100;

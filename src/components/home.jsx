@@ -61,6 +61,13 @@ export default function Home(props){
         setActiveTask(null);
     };
 
+    // the button on a task row: the same as dropping it into the work area, which then comes
+    // into view (on a phone it is far above the list)
+    const activateTask = useCallback((task) => {
+        setActiveTask(task);
+        requestAnimationFrame(() => dropZoneRef.current?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }));
+    }, []);
+
     const [draggedTask, setDraggedTask] = useState(null);
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -160,6 +167,7 @@ export default function Home(props){
                 <TaskContainer
                     activeTask={activeTask}
                     releasedIds={releasedIds}
+                    onActivate={activateTask}
                     setCreateTask={setCreateTask}
                     working={false}
                     tasks={props.tasks}

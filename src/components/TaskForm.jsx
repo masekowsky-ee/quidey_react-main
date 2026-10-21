@@ -14,8 +14,8 @@ import TaskColorPicker from './task/TaskColorPicker.jsx';
 
 const EMPTY_EXTRAS = { duration_minutes: null, reminder_minutes: null, reminder_email: false, location: '', link: '', details: '', repeat: null };
 
-// New task: name and day, optionally a time (otherwise for the whole day), description and
-// priority. "More options" adds duration, reminder, location, link, extra info and friends
+// New task: only the name is needed; optionally a day and time (no time: the whole day, no day:
+// whenever), description and priority (none until the slider is touched). "More options" adds duration, reminder, location, link, extra info and friends
 // to share it with (they get an invite once it's created).
 export default function TaskForm(props){
     const {setCreateTask} = props;
@@ -30,7 +30,7 @@ export default function TaskForm(props){
     const [due, setDue] = useState('');
     const [time, setTime] = useState('');
     const [description, setDescription] = useState('');
-    const [prio, setPrio] = useState(50);
+    const [prio, setPrio] = useState(null);
     const [color, setColor] = useState(null);
     const [showMore, setShowMore] = useState(false);
     const [extras, setExtras] = useState(EMPTY_EXTRAS);
@@ -41,8 +41,8 @@ export default function TaskForm(props){
 
     async function handleSubmit(e){
         e.preventDefault();
-        if (!name.trim() || !due) {
-            dispatch( setCustomError({bool: true, message: t('dateNameTaskError') }) );
+        if (!name.trim()) {
+            dispatch( setCustomError({bool: true, message: t('nameTaskError') }) );
             return;
         }
         if (!linkIsValid(extras.link)) {
@@ -55,11 +55,12 @@ export default function TaskForm(props){
         setBusy(true);
         try {
             const task = await dispatch(addTask(name.trim(), due, description.trim(), prio, activeGroupId, undefined, {
-                due_time: time || null,
+                // a time of day needs a day
+                due_time: due && time ? time : null,
                 duration_minutes: extras.duration_minutes,
-                reminder_minutes: time ? extras.reminder_minutes : null,
+                reminder_minutes: due && time ? extras.reminder_minutes : null,
                 // only a reminder can come by mail
-                reminder_email: Boolean(time && extras.reminder_minutes !== null && extras.reminder_email),
+                reminder_email: Boolean(due && time && extras.reminder_minutes !== null && extras.reminder_email),
                 color,
                 location: extras.location.trim(),
                 link: extras.link.trim(),
@@ -91,14 +92,18 @@ export default function TaskForm(props){
                     <input className={`${styles.input} ${styles.grow}`} type="date" aria-label={t('dueDate')}
                         value={due} onChange={(e) => setDue(e.target.value)} />
                     <input className={styles.input} type="time" aria-label={`${t('taskTime')} (${t('allDay')}: –)`} title={t('taskTime')}
-                        value={time} onChange={(e) => setTime(e.target.value)} />
+                        value={time} disabled={!due} onChange={(e) => setTime(e.target.value)} />
                 </div>
                 <input className={styles.input} type="text" placeholder={t('description')} aria-label={t('description')}
                     value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)} />
-                <label htmlFor="prioritise">{t('prioritise')}</label>
-                <div className={styles.rowDiv}>
+                <div className={styles.prioHead}>
+                    <label htmlFor="prioritise">{t('prioritise')} <output htmlFor="prioritise">{prio ?? '–'}</output></label>
+                    {prio !== null &&
+                        <button type="button" className={styles.prioClear} onClick={() => setPrio(null)}>{t('noPrio')}</button>}
+                </div>
+                <div className={`${styles.rowDiv} ${prio === null ? styles.prioUnset : ''}`}>
                     <p>{t('low')}</p>
-                    <input type="range" id="prioritise" min="0" max="100" step="1" value={prio} onChange={(e) => setPrio(Number(e.target.value))} />
+                    <input type="range" id="prioritise" min="0" max="100" step="1" value={prio ?? 50} onChange={(e) => setPrio(Number(e.target.value))} />
                     <p>{t('high')}</p>
                 </div>
                 <TaskColorPicker value={color} onChange={setColor} />
@@ -108,7 +113,7 @@ export default function TaskForm(props){
                 </button>
                 {showMore &&
                     <div className={styles.more}>
-                        <TaskOptionsFields value={extras} hasTime={Boolean(time)} hasDate={Boolean(due)} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
+                        <TaskOptionsFields value={extras} hasTime={Boolean(due && time)} hasDate={Boolean(due)} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
                         <div className={styles.shareBlock}>
                             <span className={styles.shareLabel}>{t('shareWithFriends')}</span>
                             {friends.length > 0

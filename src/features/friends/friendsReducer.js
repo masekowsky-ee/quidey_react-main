@@ -6,6 +6,10 @@ const initialState = {
     friends: [],
     incoming: [],
     outgoing: [],
+    // whether the lists came from the server yet: until then an empty list means "not loaded",
+    // not "nobody", so nothing in the first load counts as new (see useLiveLists)
+    friendsLoaded: false,
+    requestsLoaded: false,
 };
 
 const byName = (a, b) =>
@@ -14,9 +18,9 @@ const byName = (a, b) =>
 const friendsReducer = (state = initialState, action) => {
     switch (action.type) {
         case SET_FRIENDS:
-            return { ...state, friends: action.payload };
+            return { ...state, friends: action.payload, friendsLoaded: true };
         case SET_FRIEND_REQUESTS:
-            return { ...state, incoming: action.payload.incoming, outgoing: action.payload.outgoing };
+            return { ...state, incoming: action.payload.incoming, outgoing: action.payload.outgoing, requestsLoaded: true };
         case FRIEND_REQUEST_SENT:
             return { ...state, outgoing: [action.payload, ...state.outgoing] };
         case FRIEND_ADDED: {

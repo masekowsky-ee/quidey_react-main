@@ -14,7 +14,9 @@ import Icon from '../calendar/icons.jsx';
 // list on Home: every option (time, reminder, repeat, colour, sharing, groups) in one place.
 // Escape, the close button or a click next to it closes without saving.
 // shared: { sessionId, canRemove } for a task in a shared session (its own fields, no groups).
-export default function TaskEditDialog({ task, onClose, shared }) {
+// handlers: { save(changes), remove? } (promises) for a task kept somewhere else, e.g. a family's
+// calendar: the same fields as a shared session's task; without remove there is no delete button.
+export default function TaskEditDialog({ task, onClose, shared, handlers }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const titleId = useId();
@@ -43,7 +45,8 @@ export default function TaskEditDialog({ task, onClose, shared }) {
 
     const run = async (action, doneText) => {
         try {
-            await dispatch(action);
+            // a thunk for the store, or a promise from handlers
+            await (typeof action === 'function' ? dispatch(action) : action);
             if (doneText) toast(doneText, 'info');
             onClose();
             return true;
@@ -64,7 +67,15 @@ export default function TaskEditDialog({ task, onClose, shared }) {
                         <Icon name="close" size={22} />
                     </button>
                 </div>
-                {shared
+                {handlers
+                    ? <TaskEditor
+                        task={task}
+                        personal={false}
+                        onSave={(changes) => run(handlers.save(changes))}
+                        onCancel={onClose}
+                        onDelete={handlers.remove ? () => run(handlers.remove(), t('taskDeleted')) : undefined}
+                    />
+                    : shared
                     ? <TaskEditor
                         task={task}
                         personal={false}

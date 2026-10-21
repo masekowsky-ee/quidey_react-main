@@ -162,7 +162,7 @@ function Privacy() {
             </p>
             <p>
                 <strong>Live-Verbindung:</strong> Solange du angemeldet bist und die App geöffnet hast, hält dein Browser
-                eine dauerhafte Verbindung (WebSocket) zum Server, damit Nachrichten, Sitzungs-Chats und Meldungen sofort
+                eine dauerhafte Verbindung (WebSocket) zum Server, damit Nachrichten, Sitzungs- und Family-Chats und Meldungen sofort
                 ankommen. Dafür prüft der Server dein Anmelde-Token und merkt sich nur im Arbeitsspeicher, welche
                 Verbindung zu welchem Konto und welcher gemeinsamen Sitzung gehört. Über die Verbindung wird nur
                 übertragen, was ohnehin gespeichert ist; zusätzlich gespeichert wird nichts. Mit dem Schließen der App
@@ -219,7 +219,19 @@ function Privacy() {
                 Erinnerungen, Wiederholungen und Gruppen bleiben privat. Aufgaben, die du mit
                 Freunden teilst, sehen diese Freunde. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
                 Verlässt du eine Sitzung oder löschst du dein Konto, bleibt im Verlauf der Sitzung nur ein Eintrag
-                ohne Bezug zu deinem Konto.
+                ohne Bezug zu deinem Konto. Jede Sitzung hat einen gemeinsamen Kalender: Er zeigt die Aufgaben der
+                Sitzung an ihren Tagen, alle Mitglieder können dort planen; zusätzliche Daten entstehen dabei nicht.
+            </p>
+            <p>
+                <strong>Quidey Family</strong> (zurzeit nur für Tester): Eine Family ist eine feste Gruppe, zu der du
+                Freunde einlädst. Gespeichert werden Name der Family, wer sie gegründet hat, wer eingeladen wurde
+                (von wem, wann) und wer beigetreten ist. Alle Mitglieder sehen die Namen der anderen Mitglieder, den
+                gemeinsamen Kalender mit allem, was ihr eintragt (z. B. Tag, Uhrzeit, Priorität, Dauer, Ort, Link,
+                Beschreibung, weitere Infos, Farbe, erledigt, wer den Eintrag angelegt hat), und den Chat der Family
+                (Text, Absender, Zeitpunkt). Eingeladene sehen nur Name, Gründer und Mitgliederzahl, bis sie
+                beitreten. Verlässt du eine Family, bleiben deine Einträge und Nachrichten für die anderen sichtbar.
+                Löscht die gründende Person die Family, werden Kalender und Chat für alle gelöscht. Rechtsgrundlage ist
+                Art. 6 Abs. 1 lit. b DSGVO.
             </p>
             <p>
                 <strong>Profil:</strong> Angemeldete Nutzer können dein Profil über deinen Benutzernamen aufrufen,
@@ -278,7 +290,7 @@ function Privacy() {
             </p>
             <ul>
                 <li>dein Anmelde-Token (7 Tage gültig, wird beim Abmelden gelöscht);</li>
-                <li>deine Einstellungen: Sprache, Design, Farbe, Animationen, Startseite, Sitzungsdauer, Kalenderansicht;</li>
+                <li>deine Einstellungen: Sprache, Design, Farbe, Animationen, Startseite, Sitzungsdauer, Timer oder Stoppuhr, Kalenderansicht;</li>
                 <li>ob du die Einführung gesehen hast, welche Erinnerungen schon angezeigt wurden und welche gemeinsame Sitzung gerade gestoppt wird;</li>
                 <li>Schwierigkeit und Bestwerte der Spiele.</li>
             </ul>
@@ -301,8 +313,11 @@ function Privacy() {
             <p>
                 Deine Konto- und Inhaltsdaten speichere ich, solange dein Konto besteht. Löschst du dein Konto, werden
                 Konto, Aufgaben, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen und alle
-                Nachrichten, die du geschrieben oder bekommen hast, sofort gelöscht – auch beim Gegenüber. Einträge in
-                Protokollen (Verlauf gemeinsamer Sitzungen, Admin-Protokoll) verlieren den Bezug zu deinem Konto.
+                Nachrichten, die du geschrieben oder bekommen hast, sofort gelöscht – auch beim Gegenüber, auch deine
+                Nachrichten in Family-Chats. Einträge in Protokollen (Verlauf gemeinsamer Sitzungen, Admin-Protokoll)
+                und von dir angelegte Einträge in Family-Kalendern verlieren den Bezug zu deinem Konto. Hast du eine
+                Family gegründet, übernimmt das am längsten beigetretene Mitglied sie; ist niemand sonst darin, wird
+                sie mit Kalender und Chat gelöscht.
                 Wie lange Feedback und Kontaktanfragen aufbewahrt werden, steht in Abschnitt 7.
                 In Datensicherungen können Daten bis zu deren turnusmäßiger Überschreibung (höchstens 30 Tage)
                 erhalten bleiben. Gesetzliche Aufbewahrungspflichten bleiben unberührt.
@@ -312,7 +327,7 @@ function Privacy() {
             <p>
                 Daten erhalten nur die oben genannten Auftragsverarbeiter (Hosting, E-Mail-Versand) sowie – soweit du
                 es veranlasst – deine Freunde (auch als Empfänger deiner Nachrichten) und Mitglieder gemeinsamer
-                Sitzungen. Ich verkaufe keine Daten und gebe
+                Sitzungen und Families. Ich verkaufe keine Daten und gebe
                 sie nicht für Werbung weiter. Eine automatisierte Entscheidungsfindung oder Profilbildung
                 (Art. 22 DSGVO) findet nicht statt.
             </p>

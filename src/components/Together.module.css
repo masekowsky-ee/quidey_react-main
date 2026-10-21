@@ -92,6 +92,21 @@
     flex-direction: column;
 }
 
+/* a list in a card that can get long (tasks, people): grows up to a limit, then scrolls inside,
+   so one card never pushes everything else off the screen */
+.scrollList{
+    composes: list;
+    max-height: min(26rem, 60vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* room for the scrollbar */
+    padding-right: 0.25rem;
+}
+
+.scrollList > li{
+    flex-shrink: 0;
+}
+
 .list > li + li{
     border-top: 1px solid var(--btn-border);
 }

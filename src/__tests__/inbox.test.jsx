@@ -101,14 +101,19 @@ describe('inbox', () => {
     })
 
     it('lists due and coming reminders from the tasks', async () => {
-        const soon = new Date(Date.now() + 2 * 60 * 60 * 1000)
-        const day = soon.toISOString().slice(0, 10)
-        const time = `${String(soon.getHours()).padStart(2, '0')}:${String(soon.getMinutes()).padStart(2, '0')}`
-        const tasks = [{ id: 1, name: 'Zahnarzt', done: false, due: day, due_time: time, reminder_minutes: 30, prio: 50 }]
-        api({})
-        await act(async () => { renderAt(makeStore(tasks), '/inbox?tab=reminders', <Inbox />) })
-        expect(screen.getByText('Kommende 7 Tage')).toBeInTheDocument()
-        expect(screen.getByRole('link', { name: 'Zahnarzt' })).toBeInTheDocument()
+        // a fixed local time: "in two hours" around midnight used to land on the wrong day
+        // (the day was taken in UTC, the time of day locally)
+        vi.useFakeTimers({ toFake: ['Date'] })
+        vi.setSystemTime(new Date(2026, 9, 21, 10, 0))
+        try {
+            const tasks = [{ id: 1, name: 'Zahnarzt', done: false, due: '2026-10-21', due_time: '12:00', reminder_minutes: 30, prio: 50 }]
+            api({})
+            await act(async () => { renderAt(makeStore(tasks), '/inbox?tab=reminders', <Inbox />) })
+            expect(screen.getByText('Kommende 7 Tage')).toBeInTheDocument()
+            expect(screen.getByRole('link', { name: 'Zahnarzt' })).toBeInTheDocument()
+        } finally {
+            vi.useRealTimers()
+        }
     })
 })
 

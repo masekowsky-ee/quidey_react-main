@@ -287,6 +287,107 @@ describe('drag and drop', () => {
     })
 })
 
+describe('shared calendars', () => {
+    const SESSION = {
+        id: 5, name: 'Exam prep', me: 1, isOwner: false, endedAt: null, people: [], events: [],
+        tasks: [
+            { id: 70, name: 'Mock exam', due: apiDate(2026, 10, 22), due_time: '09:00', done: false, addedBy: { id: 2, username: 'bo', displayName: 'Bo' } },
+            { id: 71, name: 'Flashcards', due: apiDate(2026, 10, 20), done: false, addedBy: { id: 1, username: 'me', displayName: 'Me' } },
+        ],
+    }
+    const FAMILY = {
+        id: 3, name: 'The Bergs', me: 1, isOwner: true, people: [],
+        tasks: [{ id: 90, name: 'Grandma visits', due: apiDate(2026, 10, 24), done: false, addedBy: { id: 2, username: 'bo', displayName: 'Bo' } }],
+    }
+
+    const answer = (routes) => apiFetch.mockImplementation(async (url, options) => {
+        const route = routes[`${options?.method ?? 'GET'} ${url}`];
+        if (route) return typeof route === 'function' ? route(options) : route;
+        return [];
+    });
+
+    const withAccess = (store, isTester) => act(() => {
+        store.dispatch({ type: 'SET_ACCESS', payload: { isPro: true, isTester } });
+        store.dispatch({ type: 'SET_SHARED_SESSIONS', payload: { sessions: [{ id: 5, name: 'Exam prep', endedAt: null }], invites: [] } });
+    });
+
+    it("shows a session's tasks instead of mine, and adds to the session", async () => {
+        answer({
+            'GET /api/shared-sessions/5': SESSION,
+            'POST /api/shared-sessions/5/tasks': (options) => ({ ...SESSION, tasks: [...SESSION.tasks, { id: 72, name: JSON.parse(options.body).name, due: apiDate(2026, 10, 22), done: false, addedBy: { id: 1 } }] }),
+        })
+        await act(async () => { setup('/calendar?date=2026-10-19&cal=session-5') })
+        expect(within(cell('2026-10-22')).getByText('Mock exam')).toBeInTheDocument()
+        expect(screen.queryByText('Dentist')).not.toBeInTheDocument()
+        expect(screen.getByRole('combobox', { name: 'Calendar' })).toHaveValue('session-5')
+        expect(screen.getByRole('link', { name: 'Open session →' })).toHaveAttribute('href', '/together/5')
+
+        fireEvent.click(cell('2026-10-22'))
+        const dialog = screen.getByRole('dialog')
+        expect(within(dialog).getByText('by Bo')).toBeInTheDocument()
+        fireEvent.change(within(dialog).getByRole('textbox', { name: 'New task for this day…' }), { target: { value: 'Group call' } })
+        await act(async () => { fireEvent.click(within(dialog).getByRole('button', { name: 'Add' })) })
+        const call = apiFetch.mock.calls.find(([url, options]) => url === '/api/shared-sessions/5/tasks' && options?.method === 'POST')
+        expect(JSON.parse(call[1].body)).toEqual({ name: 'Group call', due: '2026-10-22' })
+        expect(within(cell('2026-10-22')).getByText('Group call')).toBeInTheDocument()
+        expect(apiFetch.mock.calls.some(([url]) => url === '/api/tasks')).toBe(false)
+    })
+
+    it('only who added a task (or the owner) gets the delete button; edits go to the session', async () => {
+        answer({
+            'GET /api/shared-sessions/5': SESSION,
+            'PATCH /api/shared-sessions/5/tasks/70': { ...SESSION, tasks: [{ ...SESSION.tasks[0], due: apiDate(2026, 10, 23) }, SESSION.tasks[1]] },
+        })
+        await act(async () => { setup('/calendar?date=2026-10-19&day=2026-10-22&cal=session-5') })
+        fireEvent.click(screen.getByRole('button', { name: 'Edit: Mock exam' }))
+        expect(screen.queryByRole('button', { name: 'Delete: Mock exam' })).not.toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Assign group' })).not.toBeInTheDocument()
+        fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: '2026-10-23' } })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
+        const call = apiFetch.mock.calls.find(([url]) => url === '/api/shared-sessions/5/tasks/70')
+        expect(call[1].method).toBe('PATCH')
+        expect(JSON.parse(call[1].body)).toMatchObject({ due: '2026-10-23', due_time: '09:00' })
+        expect(within(cell('2026-10-23')).getByText('Mock exam')).toBeInTheDocument()
+
+        fireEvent.click(cell('2026-10-20'))
+        fireEvent.click(screen.getByRole('button', { name: 'Edit: Flashcards' }))
+        expect(screen.getByRole('button', { name: 'Delete: Flashcards' })).toBeInTheDocument()
+    })
+
+    it("family calendars are for testers; the picker switches between calendars", async () => {
+        answer({ 'GET /api/tester/families/3': FAMILY })
+        let store
+        await act(async () => { store = setup('/calendar?date=2026-10-19&cal=family-3') })
+        // not a tester: my own calendar, nothing asked from the tester API
+        expect(within(cell('2026-10-19')).getByText('Dentist')).toBeInTheDocument()
+        expect(apiFetch.mock.calls.some(([url]) => url.startsWith('/api/tester'))).toBe(false)
+
+        withAccess(store, true)
+        act(() => { store.dispatch({ type: 'SET_FAMILIES', payload: { families: [{ id: 3, name: 'The Bergs' }], invites: [] } }) })
+        await act(async () => {})
+        expect(within(cell('2026-10-24')).getByText('Grandma visits')).toBeInTheDocument()
+        expect(screen.queryByText('Dentist')).not.toBeInTheDocument()
+
+        const picker = screen.getByRole('combobox', { name: 'Calendar' })
+        expect(within(picker).getByRole('option', { name: 'Exam prep' })).toBeInTheDocument()
+        fireEvent.change(picker, { target: { value: 'mine' } })
+        expect(params().get('cal')).toBeNull()
+        expect(within(cell('2026-10-19')).getByText('Dentist')).toBeInTheDocument()
+    })
+
+    it("a calendar I'm not in leads back to my own", async () => {
+        apiFetch.mockImplementation(async (url) => {
+            if (url === '/api/shared-sessions/8') throw Object.assign(new Error('Session not found'), { status: 404 })
+            return []
+        })
+        let store
+        await act(async () => { store = setup('/calendar?date=2026-10-19&cal=session-8') })
+        expect(params().get('cal')).toBeNull()
+        expect(within(cell('2026-10-19')).getByText('Dentist')).toBeInTheDocument()
+        expect(store.getState().toast[0].text).toContain("isn't available")
+    })
+})
+
 describe('week strip on the home page', () => {
     it('opens a day in the calendar and points to overdue tasks', () => {
         setup('/')

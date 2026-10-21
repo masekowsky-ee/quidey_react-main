@@ -288,6 +288,12 @@
     white-space: pre-line;
 }
 
+/* in a shared calendar: who put the task in */
+.addedBy{
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
 .rowMeta{
     display: flex;
     flex-direction: row;

@@ -60,6 +60,15 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   `WorkingContainer`, `WeekDaysContainer`) or `team` (`TeamHome`), switchable in settings.
 - `/calendar` — month / week / agenda views, drag tasks between days, keyboard grid,
   `TaskEditor` (times, reminders, repeat weekly/monthly/yearly, notes, groups/labels, sharing).
+  Several calendars: `?cal=session-<id>` shows a shared session's tasks, `?cal=family-<id>` a
+  family's calendar (testers); picker in the toolbar. `src/features/calendar/sources.js`
+  (`useSharedCalendar`) loads them and routes add/move/edit/delete to their API; DayPanel gets
+  `personal={false}` (no groups/reminders/sharing, "von X", delete only with `canRemove`).
+- `/family`, `/family/:id` — **Quidey Family, tester only** (`TesterOnly` route + menu entry):
+  a fixed group of friends with a shared calendar (entries editable on the page via
+  `TaskEditDialog handlers={…}` and in the calendar) and its own chat. Slice `family` in
+  `src/features/family/family.js` (list + invites, `useFamilyList` in App), pages in
+  `src/components/family/`. API under `/api/tester/families` (backend migration 022).
 - `/history` — past focus sessions and completed tasks, CSV export.
 - `/profile`, `/settings` — profile, password, "sign out everywhere", delete account; language,
   theme (dark/light/system), accent colour (green, ocean, violet, sunset (default), rose, gold —
@@ -103,7 +112,7 @@ says "installed" when running standalone, and hides the row everywhere else.
 
 Client-side storage: only `localStorage` (no cookies), plus the service worker's Cache Storage
 for the app's own files: `token` (JWT), `language`, `accent`,
-`theme`, `motion`, `homeLayout`, `calendarView`, `teamSessionId`. `public/theme-init.js` applies
+`theme`, `motion`, `homeLayout`, `calendarView`, `timerMode`, `teamSessionId`. `public/theme-init.js` applies
 the theme before React loads.
 
 ## API access
@@ -120,7 +129,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.
@@ -139,7 +148,8 @@ the theme before React loads.
 - Socket.IO: authenticates with the same JWT; rooms `user:<id>` and `session:<id>`; events
   `message:new`, `inbox:read`, `notification:new`, `session:event` (chat, with data) and the
   data-less "load again" signals `session:changed`, `invites:changed`, `friends:changed`,
-  `tasks:changed`. Plain time reports (`/activity` every 30 s, online window 75 s) send nothing unless what the
+  `tasks:changed`, plus for families `family:changed` { familyId } and `family:message`
+  { familyId, message } (to testers' user rooms only). Plain time reports (`/activity` every 30 s, online window 75 s) send nothing unless what the
   others see changed (started / stopped / switched task).
 - Mail via SMTP (Resend, `smtp.resend.com`): verification links, task reminders, contact form and
   feedback to `CONTACT_TO`. Without `SMTP_HOST` mails are only logged. All mails share one HTML

@@ -335,8 +335,18 @@ describe('create task form', () => {
             .mockResolvedValueOnce({ id: 30, name: 'Lunch' })
             .mockResolvedValueOnce({ id: 30, name: 'Lunch', sharedWith: [{ shareId: 1, status: 'pending', user: BOB }] })
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Create' })) })
-        expect(bodyOf('/api/tasks')).toMatchObject({ name: 'Lunch', due: '2026-10-22', due_time: '12:30', duration_minutes: 90, location: 'Luigi', prio: 50 })
+        expect(bodyOf('/api/tasks')).toMatchObject({ name: 'Lunch', due: '2026-10-22', due_time: '12:30', duration_minutes: 90, location: 'Luigi', prio: null })
         expect(bodyOf('/api/tasks/30/shares')).toEqual({ userIds: [2] })
+        expect(setCreateTask).toHaveBeenCalledWith(false)
+    })
+
+    it('only the name is needed: no day, no priority', async () => {
+        const setCreateTask = vi.fn()
+        render(<Provider store={makeStore()}><MemoryRouter><TaskForm setCreateTask={setCreateTask} /></MemoryRouter></Provider>)
+        fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Read' } })
+        apiFetch.mockResolvedValueOnce({ id: 31, name: 'Read' })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Create' })) })
+        expect(bodyOf('/api/tasks')).toMatchObject({ name: 'Read', due: null, prio: null, due_time: null })
         expect(setCreateTask).toHaveBeenCalledWith(false)
     })
 
@@ -344,6 +354,9 @@ describe('create task form', () => {
         render(<Provider store={makeStore()}><MemoryRouter><TaskForm setCreateTask={() => {}} /></MemoryRouter></Provider>)
         fireEvent.click(screen.getByRole('button', { name: /More options/ }))
         expect(screen.getByRole('combobox', { name: 'Reminder' })).toBeDisabled()
+        // a time needs a day first
+        expect(screen.getByLabelText(/^Time/)).toBeDisabled()
+        fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: '2026-10-22' } })
         fireEvent.change(screen.getByLabelText(/^Time/), { target: { value: '09:00' } })
         expect(screen.getByRole('combobox', { name: 'Reminder' })).toBeEnabled()
     })

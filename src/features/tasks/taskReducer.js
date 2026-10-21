@@ -36,6 +36,8 @@ const initialState = {
     groupToDisplay: {group: {}, tasks: []},
     // tasks friends sent me, not answered yet: [{ id, createdAt, from, task }]
     invites: [],
+    // whether the invites came from the server yet (see useLiveLists)
+    invitesLoaded: false,
 };
 
 const taskReducer = (state = initialState, action) => {
@@ -57,7 +59,7 @@ const taskReducer = (state = initialState, action) => {
         case TASK_REPLACED:
             return mapTask(state, action.payload.id, task => applyUpdate(task, action.payload));
         case SET_TASK_INVITES:
-            return { ...state, invites: action.payload };
+            return { ...state, invites: action.payload, invitesLoaded: true };
         case TASK_INVITE_REMOVED:
             return { ...state, invites: state.invites.filter(invite => invite.id !== action.payload) };
         case TASK_INVITE_ACCEPTED: {

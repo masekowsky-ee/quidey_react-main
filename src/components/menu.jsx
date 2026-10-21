@@ -9,6 +9,8 @@ import { selectInviteCount } from '../features/together/togetherAction';
 import { selectTaskInviteCount } from '../features/tasks/taskAction';
 import { selectIsAdmin, selectAdminPendingCount } from '../features/admin/adminAction';
 import { selectInboxCount } from '../features/inbox/inbox';
+import { selectFamilyInviteCount } from '../features/family/family';
+import TesterOnly from './TesterOnly';
 import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, useMotionLevel } from '../features/settings/motion';
 
@@ -34,6 +36,7 @@ export default function Menu(){
     const isAdmin = useSelector(selectIsAdmin);
     const adminPendingCount = useSelector(selectAdminPendingCount);
     const inboxCount = useSelector(selectInboxCount);
+    const familyInviteCount = useSelector(selectFamilyInviteCount);
     const news = useSelector(state => state.news);
     const { t } = useTranslation();
 
@@ -69,6 +72,10 @@ export default function Menu(){
                         count={incomingCount} countLabel={t('friendRequests')} news={news.social} newsLabel={t('menuNews')} />
                     <MenuLink to="/together" icon="together" label={t('together')} onClick={onClose}
                         count={inviteCount} countLabel={t('sessionInvites')} news={news.together} newsLabel={t('menuNews')} />
+                    <TesterOnly>
+                        <MenuLink to="/family" icon="family" label={t('family')} onClick={onClose}
+                            count={familyInviteCount} countLabel={t('familyInvites')} />
+                    </TesterOnly>
                 </nav>
 
                 {/* settings, help and admin sit at the bottom */}

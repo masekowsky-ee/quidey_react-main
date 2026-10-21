@@ -1,4 +1,5 @@
 import { apiFetch, displayName, fill } from '../helperFunction';
+import { selectFamilyInviteCount } from '../family/family';
 
 // The inbox: direct messages between friends, notifications (e.g. an admin's broadcast),
 // requests (friendships, session and task invites, kept in their own slices) and reminders
@@ -29,10 +30,11 @@ export const selectInboxCount = (state) =>
     state.inbox.messages + state.inbox.notifications
     + state.friends.incoming.length + state.together.invites.length + state.task.invites.length;
 
-// Everything any menu entry has a badge for (the inbox, and for admins the open beta requests):
-// shown on the menu button, so it's visible with the menu closed
+// Everything any menu entry has a badge for (the inbox, family invites for testers, and for
+// admins the open beta requests): shown on the menu button, so it's visible with the menu closed
 export const selectMenuBadgeCount = (state) =>
-    selectInboxCount(state) + (state.auth.access.isAdmin ? state.auth.access.adminPendingCount ?? 0 : 0);
+    selectInboxCount(state) + selectFamilyInviteCount(state)
+    + (state.auth.access.isAdmin ? state.auth.access.adminPendingCount ?? 0 : 0);
 
 // ---------- messages ----------
 

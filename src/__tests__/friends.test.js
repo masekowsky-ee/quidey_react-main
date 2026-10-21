@@ -36,13 +36,14 @@ beforeEach(() => { apiFetch.mockReset() })
 
 describe('friendsReducer', () => {
     it('starts empty', () => {
-        expect(initial).toEqual({ friends: [], incoming: [], outgoing: [] })
+        expect(initial).toEqual({ friends: [], incoming: [], outgoing: [], friendsLoaded: false, requestsLoaded: false })
     })
 
     it('loads friends and both request lists', () => {
         expect(loaded.friends).toEqual([anna])
         expect(loaded.incoming).toHaveLength(1)
         expect(loaded.outgoing).toHaveLength(1)
+        expect(loaded.friendsLoaded && loaded.requestsLoaded).toBe(true)
     })
 
     it('forgets everything on logout', () => {

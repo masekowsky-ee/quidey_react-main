@@ -193,13 +193,13 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                 <>
                     {open.length === 0
                         ? <p className={styles.emptyLine}>{t(filter === 'all' ? 'allTasksDone' : 'noTasksInFilter')}</p>
-                        : <ul className={styles.list}>{open.map(row)}</ul>}
+                        : <ul className={styles.scrollList}>{open.map(row)}</ul>}
                     {done.length > 0 && (
                         <>
                             <button className={styles.doneToggle} aria-expanded={showDone} onClick={() => setShowDone(v => !v)}>
                                 {showDone ? '▾' : '▸'} {t('done')} ({done.length})
                             </button>
-                            {showDone && <ul className={styles.list}>{done.map(row)}</ul>}
+                            {showDone && <ul className={styles.scrollList}>{done.map(row)}</ul>}
                         </>
                     )}
                 </>

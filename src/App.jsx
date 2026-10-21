@@ -24,6 +24,8 @@ import { useInboxRealtime } from './features/inbox/useInboxRealtime.js';
 import { connectRealtime, disconnectRealtime, useRealtime, useSafetyPoll, REALTIME_REJECTED } from './features/realtime/socket.js';
 import { useLiveLists } from './features/realtime/useLiveLists.js';
 import { useClearNews } from './features/realtime/useClearNews.js';
+import { useFamilyList } from './features/family/family.js';
+import TesterOnly from './components/TesterOnly.jsx';
 import { LegalFooter } from './legal/LegalFooter.jsx';
 import { LEGAL_PATHS } from './legal/paths.js';
 import { useApplyTheme } from './features/settings/theme.js';
@@ -50,6 +52,8 @@ const PAGES = {
   Together: () => import('./components/Together.jsx'),
   SharedSession: () => import('./components/SharedSession.jsx'),
   Admin: () => import('./components/Admin.jsx'),
+  Family: () => import('./components/family/Family.jsx'),
+  FamilyPage: () => import('./components/family/FamilyPage.jsx'),
   FunPage: () => import('./components/fun/FunPage.jsx'),
 };
 const Landing = lazy(PAGES.Landing);
@@ -67,6 +71,8 @@ const Feedback = lazy(PAGES.Feedback);
 const Together = lazy(PAGES.Together);
 const SharedSession = lazy(PAGES.SharedSession);
 const Admin = lazy(PAGES.Admin);
+const Family = lazy(PAGES.Family);
+const FamilyPage = lazy(PAGES.FamilyPage);
 const FunPage = lazy(PAGES.FunPage);
 
 // the app's pages (not the landing page or legal texts) in the background, when nothing else runs
@@ -155,6 +161,8 @@ function App(){
   useInboxRealtime();
   useLiveLists();
   useClearNews();
+  // Quidey Family (testers): my families and invites
+  useFamilyList(allowed);
 
   // tasks shared with friends change on their side (announced live, see useLiveLists), my own
   // ones maybe on another device: read again as a safety net (not right at the start,
@@ -225,6 +233,8 @@ function App(){
           <Route path="/feedback" element={<Feedback/>} />
           <Route path="/together" element={<Together/>} />
           <Route path="/together/:id" element={<SharedSession/>} />
+          <Route path="/family" element={<TesterOnly fallback={<Navigate to="/" replace />}><Family/></TesterOnly>} />
+          <Route path="/family/:id" element={<TesterOnly fallback={<Navigate to="/" replace />}><FamilyPage/></TesterOnly>} />
           <Route path="/admin" element={access.isAdmin ? <Admin/> : <Navigate to="/" replace />} />
           {/* hidden: only reachable through the daily line in the header */}
           <Route path="/fun" element={<FunPage/>} />

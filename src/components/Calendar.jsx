@@ -1,12 +1,15 @@
 import styles from './Calendar.module.css';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
 import { addTask, deleteTask, leaveTask, updateTaskProps } from '../features/tasks/taskAction';
 import TaskInvites from './task/TaskInvites.jsx';
-import { fetchSharedHistory } from '../features/together/togetherAction';
+import { fetchSharedHistory, togetherErrorText } from '../features/together/togetherAction';
+import { familyErrorText, selectFamilies } from '../features/family/family';
+import { useIsTester } from '../features/auth/tester';
+import { calendarSourceKey, parseCalendarSource, useSharedCalendar } from '../features/calendar/sources';
 import { showToast } from '../features/toast/toast';
 import { downloadFile, fill, isOverdue, sameDay, toDateOnly } from '../features/helperFunction';
 import {
@@ -29,17 +32,30 @@ const isTyping = (el) => el?.closest?.('input, textarea, select, [contenteditabl
 // The calendar: month, week and agenda view of my tasks by their day. Tasks can be added,
 // edited, done and moved (drag them onto another day) right here. View, day and open day
 // are in the address (?view=week&date=2026-10-20&day=2026-10-20), so links and reloads keep them.
+// ?cal=session-5 / ?cal=family-3 shows a shared calendar instead (see features/calendar/sources.js):
+// the tasks of a shared session or a family's calendar, which every member plans in.
 export default function Calendar() {
     const { t, language } = useTranslation();
     const locale = language === 'de' ? 'de-DE' : 'en-GB';
     const dispatch = useDispatch();
 
-    const tasks = useSelector(state => state.task.tasks);
+    const ownTasks = useSelector(state => state.task.tasks);
     const allGroups = useSelector(state => state.task.groups);
-    const sessions = useSelector(state => state.session.workedSessionData);
+    const ownSessions = useSelector(state => state.session.workedSessionData);
     const sharedHistory = useSelector(state => state.together.history);
+    const sharedSessions = useSelector(state => state.together.sessions);
+    const isTester = useIsTester();
+    const families = useSelector(selectFamilies);
 
     const [params, setParams] = useSearchParams();
+    // which calendar: mine, a shared session's or a family's (families are for testers only, for now)
+    const requestedSource = parseCalendarSource(params.get('cal'));
+    const source = requestedSource.kind === 'family' && !isTester ? parseCalendarSource(null) : requestedSource;
+    const shared = useSharedCalendar(source);
+    const isShared = source.kind !== 'mine';
+    const tasks = isShared ? shared.tasks : ownTasks;
+    // my focus sessions belong to my own calendar only
+    const sessions = isShared ? null : ownSessions;
     const [storedView] = useState(readStoredCalendarView);
     const view = CALENDAR_VIEWS.includes(params.get('view')) ? params.get('view') : storedView;
     const today = toDateOnly(new Date());
@@ -50,7 +66,7 @@ export default function Calendar() {
     const [openTaskId, setOpenTaskId] = useState(() => (openDay && Number(params.get('task'))) || null);
 
     // filters
-    const groups = allGroups.filter(group => group.name !== 'all');
+    const groups = isShared ? [] : allGroups.filter(group => group.name !== 'all');
     const [groupFilter, setGroupFilter] = useState('all');
     const groupId = groups.some(group => group.id === groupFilter) ? groupFilter : 'all';
     const [showDone, setShowDone] = useState(true);
@@ -75,6 +91,17 @@ export default function Calendar() {
     useEffect(() => {
         dispatch(fetchSharedHistory()).catch(() => {});
     }, [dispatch]);
+
+    // not (or no longer) in that session / family: back to my own calendar
+    useEffect(() => {
+        if (!shared.gone) return;
+        dispatch(showToast(t('calendarGone'), 'info'));
+        setParams(prev => {
+            const next = new URLSearchParams(prev);
+            for (const name of ['cal', 'day', 'task']) next.delete(name);
+            return next;
+        }, { replace: true });
+    }, [shared.gone, dispatch, setParams, t]);
 
     // ---------- address ----------
 
@@ -128,49 +155,55 @@ export default function Calendar() {
     // ---------- changing tasks ----------
 
     const toast = (text, tone = 'success') => dispatch(showToast(text, tone));
-    const reportError = () => toast(t('friendError_generic'), 'error');
+    const errorText = { session: togetherErrorText, family: familyErrorText }[source.kind];
+    const reportError = (err) => toast(errorText ? errorText(t, err) : t('friendError_generic'), 'error');
     const movedText = (key) => fill(t('taskMovedTo'), { date: longDate(fromKey(key), true) });
     const newTaskGroup = groupId === 'all' ? null : groups.find(group => group.id === groupId);
 
+    // a change to a task: in my own list, or in the shared calendar shown
+    const changeTask = (task, changes) => (isShared ? shared.update(task.id, changes) : dispatch(updateTaskProps(changes, task)));
+
     const addTaskOn = async (name, key, time = null) => {
         try {
-            await dispatch(addTask(name, key, '', NEW_TASK_PRIO, newTaskGroup?.id ?? null, undefined, time ? { due_time: time } : {}));
+            if (isShared) await shared.add({ name, due: key, ...(time ? { due_time: time } : {}) });
+            else await dispatch(addTask(name, key, '', NEW_TASK_PRIO, newTaskGroup?.id ?? null, undefined, time ? { due_time: time } : {}));
             return true;
-        } catch {
-            reportError();
+        } catch (err) {
+            reportError(err);
             return false;
         }
     };
 
     const toggleDone = (task) => {
-        dispatch(updateTaskProps({ done: !task.done }, task)).catch(reportError);
+        changeTask(task, { done: !task.done }).catch(reportError);
     };
 
     const moveTask = (task, key) => {
         if (!fromKey(key) || dateKey(task.due) === key) return;
-        dispatch(updateTaskProps({ due: key }, task))
+        changeTask(task, { due: key })
             .then(() => toast(movedText(key)))
             .catch(reportError);
     };
 
     const saveTask = async (task, changes) => {
         try {
-            await dispatch(updateTaskProps(changes, task));
+            await changeTask(task, changes);
             if (changes.due && changes.due !== dateKey(task.due)) toast(movedText(changes.due));
             return true;
-        } catch {
-            reportError();
+        } catch (err) {
+            reportError(err);
             return false;
         }
     };
 
     const removeTask = async (task) => {
         try {
-            await dispatch(deleteTask(task.id));
+            if (isShared) await shared.remove(task.id);
+            else await dispatch(deleteTask(task.id));
             toast(t('taskDeleted'), 'info');
             return true;
-        } catch {
-            reportError();
+        } catch (err) {
+            reportError(err);
             return false;
         }
     };
@@ -181,8 +214,8 @@ export default function Calendar() {
             await dispatch(leaveTask(task));
             toast(t('taskLeft'), 'info');
             return true;
-        } catch {
-            reportError();
+        } catch (err) {
+            reportError(err);
             return false;
         }
     };
@@ -197,8 +230,19 @@ export default function Calendar() {
             .map(id => groups.find(group => group.id === id)?.name)
             .filter(Boolean)
             .join(', ');
-        downloadFile('quidey-tasks.ics', toIcs(withDay, { groupName }), 'text/calendar');
+        downloadFile(isShared ? `quidey-${source.kind}-${source.id}.ics` : 'quidey-tasks.ics', toIcs(withDay, { groupName }), 'text/calendar');
     };
+
+    // ---------- choosing the calendar ----------
+
+    const openSessions = sharedSessions.filter(session => !session.endedAt);
+    const sourceValue = calendarSourceKey(source) ?? 'mine';
+    // the one shown also when it isn't in the lists (an ended session, lists not loaded yet)
+    const sourceListed = sourceValue === 'mine'
+        || (source.kind === 'session' && openSessions.some(s => s.id === source.id))
+        || (source.kind === 'family' && families.some(f => f.id === source.id));
+    const chooseSource = (value) => update({ cal: value === 'mine' ? null : value, day: null, task: null });
+    const sharedPage = source.kind === 'session' ? `/together/${source.id}` : `/family/${source.id}`;
 
     const { drag, startDrag, onClickCapture } = useTaskDrag(moveTask);
 
@@ -221,6 +265,29 @@ export default function Calendar() {
     return (
         <div className={styles.page} onClickCapture={onClickCapture}>
             <header className={styles.toolbar}>
+                {(openSessions.length > 0 || (isTester && families.length > 0) || isShared) &&
+                    <div className={styles.sourceRow}>
+                        <label className={styles.sourceLabel}>
+                            <span>{t('calendarOf')}</span>
+                            <select className={styles.sourceSelect} value={sourceValue} onChange={(e) => chooseSource(e.target.value)}>
+                                <option value="mine">{t('calendarMine')}</option>
+                                {!sourceListed && <option value={sourceValue}>{shared.data?.name ?? '…'}</option>}
+                                {openSessions.length > 0 &&
+                                    <optgroup label={t('calendarSessions')}>
+                                        {openSessions.map(s => <option key={s.id} value={`session-${s.id}`}>{s.name}</option>)}
+                                    </optgroup>}
+                                {isTester && families.length > 0 &&
+                                    <optgroup label={t('calendarFamilies')}>
+                                        {families.map(f => <option key={f.id} value={`family-${f.id}`}>{f.name}</option>)}
+                                    </optgroup>}
+                            </select>
+                        </label>
+                        {isShared && shared.data &&
+                            <Link to={sharedPage} className={styles.sourceLink}>
+                                {t(source.kind === 'session' ? 'calendarOpenSession' : 'calendarOpenFamily')} →
+                            </Link>}
+                        {shared.readOnly && <span className={styles.sourceNote}>{t('calendarSessionEnded')}</span>}
+                    </div>}
                 <div className={styles.titleRow}>
                     <h1 className={styles.title} aria-live="polite">
                         {title}
@@ -274,7 +341,7 @@ export default function Calendar() {
                 </div>
             </header>
 
-            <div className={styles.invites}><TaskInvites /></div>
+            {!isShared && <div className={styles.invites}><TaskInvites /></div>}
 
             {view === 'month' && <MonthView {...viewProps} tasksByDay={gridTasksByDay} drag={drag} startDrag={startDrag} onOpenWeek={(date) => setView('week', date)} />}
             {view === 'week' && <WeekView {...viewProps} tasksByDay={gridTasksByDay} drag={drag} startDrag={startDrag} />}
@@ -290,7 +357,8 @@ export default function Calendar() {
                     today={today}
                     tasks={panelTasksByDay[openKey] ?? []}
                     focus={focusByDay[openKey]}
-                    sharedEntries={(sharedHistory ?? []).filter(entry => entry.lastWorkedAt && sameDay(new Date(entry.lastWorkedAt), openDay))}
+                    sharedEntries={isShared ? [] : (sharedHistory ?? []).filter(entry => entry.lastWorkedAt && sameDay(new Date(entry.lastWorkedAt), openDay))}
+                    personal={!isShared}
                     initialTaskId={openTaskId}
                     newTaskGroup={newTaskGroup}
                     locale={locale}
@@ -301,7 +369,7 @@ export default function Calendar() {
                     onToggleDone={toggleDone}
                     onSaveTask={saveTask}
                     onDeleteTask={removeTask}
-                    onLeaveTask={leaveSharedTask}
+                    onLeaveTask={isShared ? undefined : leaveSharedTask}
                     onOpenGroup={openGroup}
                 />}
 

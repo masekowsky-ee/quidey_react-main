@@ -48,6 +48,8 @@ function updateMine(mine, session) {
 const initialState = {
     sessions: [],
     invites: [],
+    // whether sessions/invites came from the server yet (see useLiveLists)
+    listLoaded: false,
     current: null,
     currentSeq: 0,
     work: idleWork,
@@ -71,7 +73,7 @@ const addInFlight =(inFlight, taskId, ms) => ({ ...inFlight, [taskId]: (inFlight
 const togetherReducer = (state = initialState, action) => {
     switch (action.type) {
         case SET_SHARED_SESSIONS:
-            return { ...state, sessions: action.payload.sessions, invites: action.payload.invites };
+            return { ...state, sessions: action.payload.sessions, invites: action.payload.invites, listLoaded: true };
         case SET_SHARED_SESSION: {
             const { session, seq } = action.payload;
             if (seq < state.currentSeq) return state;

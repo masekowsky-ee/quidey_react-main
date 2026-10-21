@@ -1125,3 +1125,50 @@ button.agendaName:hover{
     border-style: dashed;
     background: transparent;
 }
+
+/* ---------- Which calendar: mine, a shared session's or a family's ---------- */
+
+.sourceRow{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-bottom: -0.25rem;
+    font-size: 0.85rem;
+}
+
+.sourceLabel{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+}
+
+.sourceSelect{
+    height: 2.15rem;
+    max-width: 16rem;
+    font-weight: 600;
+}
+
+.sourceLink{
+    font-weight: 600;
+    color: var(--primary-text);
+    text-decoration: none;
+}
+
+.sourceLink:hover{
+    text-decoration: underline;
+}
+
+.sourceNote{
+    color: var(--text-muted);
+}
+
+@media (max-width: 600px){
+    .sourceLabel,
+    .sourceSelect{
+        flex: 1;
+        max-width: none;
+    }
+}

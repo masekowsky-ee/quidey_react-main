@@ -8,7 +8,7 @@ import TaskColorButton from './task/TaskColorButton.jsx'
 import { taskColorAttr } from '../features/tasks/taskColors'
 import { createPortal } from 'react-dom';
 import {useTranslation} from '../i18n/useTranslation'
-import { formatDate, toInputDate, formatDuration, isOverdue } from '../features/helperFunction'
+import { formatDate, toInputDate, formatDuration, isOverdue, fill } from '../features/helperFunction'
 import { selectSharedGroups, selectSharedSoloTasks, setSharedTaskDone, togetherErrorText } from '../features/together/togetherAction'
 import { showToast } from '../features/toast/toast'
 import GroupPicker from './GroupPicker.jsx'
@@ -17,15 +17,27 @@ import TaskLabels from './TaskLabels.jsx'
 import { AnimatePresence, motion } from 'motion/react'
 import { MOTION, useMotionLevel, burstFrom } from '../features/settings/motion'
 
+// a focus target: puts a task into the work area (the same as dragging it there)
+function FocusButton({ task, onActivate, label }) {
+    if (!onActivate) return null;
+    return (
+        <button className={styles.focusBtn} onClick={() => onActivate(task)} title={label} aria-label={`${label}: ${task.name}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="7.5" /><circle cx="12" cy="12" r="3" /><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" /></svg>
+        </button>
+    );
+}
+
 // seconds between two rows when the list cascades in
 const CASCADE_STEP = { minimal: 0.025, normal: 0.035, extreme: 0.045 };
 
 
 export default function TaskContainer(props){
-    const { working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask, releasedIds = [] } = props;
+    const { working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask, releasedIds = [], onActivate } = props;
 
     // whether the Done list is shown; only this component uses it
     const [showDone, setShowDone] = useState(false);
+    // the whole list folded away (the title stays, with the number of open tasks)
+    const [collapsed, setCollapsed] = useState(false);
     
     const {t} = useTranslation();
     const dispatch = useDispatch();
@@ -141,6 +153,7 @@ export default function TaskContainer(props){
     }
 
     const doneCount = listTasks.filter(task => task.done === true).length;
+    const openCount = listTasks.filter(task => !task.done && task.id !== activeTask?.id).length;
 
     const handleTaskRemove = (taskId) => {
         dispatch(deleteGroupTasks(taskId, groupToDisplay.group.id))
@@ -151,7 +164,12 @@ export default function TaskContainer(props){
             {taskToAssign && <GroupPicker task={taskToAssign} onClose={() => setTaskToAssign(null)} />}
             {taskInEditor && <TaskEditDialog task={taskInEditor} onClose={closeEditor} />}
             <div className={styles.sectionHead}>
+                <button className={styles.collapseBtn} onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed}
+                    title={t(collapsed ? 'expandTasks' : 'collapseTasks')} aria-label={t(collapsed ? 'expandTasks' : 'collapseTasks')}>
+                    <svg className={collapsed ? styles.chevronClosed : styles.chevron} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-361q-8 0-15-2.5t-13-8.5L268-556q-11-11-11-28t11-28q11-11 28-11t28 11l156 156 156-156q11-11 28-11t28 11q11 11 11 28t-11 28L508-372q-6 6-13 8.5t-15 2.5Z"/></svg>
+                </button>
                 <h1 className={styles.sectionTitle}>{t('taskContainer')}</h1>
+                {collapsed && <span className={styles.openCount}>{fill(t('openTasksCount'), { count: openCount })}</span>}
                 <button className={styles.addBtn} onClick={()=>{setCreateTask(true)}} title={t('createTaskH2')} aria-label={t('createTaskH2')}>
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M440-440H240q-17 0-28.5-11.5T200-480q0-17 11.5-28.5T240-520h200v-200q0-17 11.5-28.5T480-760q17 0 28.5 11.5T520-720v200h200q17 0 28.5 11.5T760-480q0 17-11.5 28.5T720-440H520v200q0 17-11.5 28.5T480-200q-17 0-28.5-11.5T440-240v-200Z"/></svg>
                 </button>
@@ -160,7 +178,7 @@ export default function TaskContainer(props){
                     <TaskColorButton task={shownGroupRow} label={t('groupColor')}
                         onChange={(color) => dispatch(editGroup(shownGroupRow.id, { color }, shownGroupRow))
                             .catch(() => dispatch(showToast(t('friendError_generic'), 'error')))} />}
-                {doneCount > 0 &&
+                {doneCount > 0 && !collapsed &&
                     <button
                         className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}
                         onClick={handleShowDone}
@@ -187,6 +205,7 @@ export default function TaskContainer(props){
                 }
             </div>
             }
+            {!collapsed &&
             <div className={styles.outerUlDiv}>
                 <div className={styles.ulDiv}>
                     <ul className={styles.ul}>
@@ -218,6 +237,7 @@ export default function TaskContainer(props){
                                             <div className={styles.prioDiv} />
                                             <p className={styles.sharedDesc}>{task.description || ''}</p>
                                             <div className={styles.btnDiv}>
+                                                <FocusButton task={task} onActivate={onActivate} label={t('makeActive')} />
                                                 <Link to={`/together/${task.shared.sessionId}`} className={styles.assignBtn}>{t('openSession')}</Link>
                                             </div>
                                         </motion.li>
@@ -247,8 +267,8 @@ export default function TaskContainer(props){
                                             </button>
                                             { taskToEdit && taskPropToEdit === 'due' && taskToEdit.id === task.id
                                                 ? <input autoFocus type="date" defaultValue={toInputDate(task.due)} onBlur={(e) => {setTaskPropHandler(e.target.value, 'due', task);}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'due', task)}}}/>
-                                                : <p style={isOverdue(task) ? { color: 'var(--danger)' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>
-                                                    {formatDate(task.due)}{task.due_time && <span className={styles.dueTime}> {task.due_time}</span>}
+                                                : <p className={task.due ? undefined : styles.noDue} style={isOverdue(task) ? { color: 'var(--danger)' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>
+                                                    {task.due ? formatDate(task.due) : t('noDate')}{task.due && task.due_time && <span className={styles.dueTime}> {task.due_time}</span>}
                                                 </p>
                                             }
                                             <div className={styles.prioDiv}>
@@ -261,6 +281,7 @@ export default function TaskContainer(props){
                                                 : <p style={{textAlign: 'left', marginLeft: '0.5rem',}} onClick={(e) => changePropHandler(e, 'description', task.id)}>{task.description || t('description')}</p>
                                             }
                                             <div className={styles.btnDiv}>
+                                                <FocusButton task={task} onActivate={onActivate} label={t('makeActive')} />
                                                 <button className={styles.editBtn} onClick={() => setEditTaskId(task.id)} title={t('editTask')} aria-label={`${t('editTask')}: ${task.name}`}>
                                                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-40 80q-17 0-28.5-11.5T120-160v-97q0-16 6-30.5t17-25.5l505-504q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L313-143q-11 11-25.5 17t-30.5 6h-97Zm600-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
                                                 </button>
@@ -323,7 +344,7 @@ export default function TaskContainer(props){
                     </ul>
                 </div>
                 }
-            </div>
+            </div>}
 
             {/* Ghost-Klon: schwebt per Portal direkt in document.body, unabhängig
                 von transform/filter-Vorfahren, damit position:fixed wirklich

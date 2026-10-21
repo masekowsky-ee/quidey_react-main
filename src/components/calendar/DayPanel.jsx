@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
-import { isOverdue, mondayIndex, sameDay } from '../../features/helperFunction';
+import { displayName, fill, isOverdue, mondayIndex, sameDay } from '../../features/helperFunction';
 import { dateKey, formatFocus, prioLevel } from '../../features/calendar/calendar';
 import TaskLabels from '../TaskLabels.jsx';
 import GroupPicker from '../GroupPicker.jsx';
@@ -17,7 +17,7 @@ const PRIO_TEXT = { high: 'prioHigh', medium: 'prioMedium', low: 'prioLow' };
 
 const isTyping = (el) => el?.closest?.('input, textarea, select, [contenteditable="true"]');
 
-function TaskRow({ task, today, editing, onEdit, onCloseEdit, onToggleDone, onSave, onDelete, onLeave, onPickGroups, onOpenGroup }) {
+function TaskRow({ task, today, personal, editing, onEdit, onCloseEdit, onToggleDone, onSave, onDelete, onLeave, onPickGroups, onOpenGroup }) {
     const { t } = useTranslation();
     const level = prioLevel(task.prio);
     const classes = [styles.row, PRIO_CLASS[level], task.done && styles.rowDone, editing && styles.rowEditing].filter(Boolean).join(' ');
@@ -34,7 +34,9 @@ function TaskRow({ task, today, editing, onEdit, onCloseEdit, onToggleDone, onSa
                     </button>
                     {!editing && <TaskMeta task={task} />}
                     {!editing && task.description && <p className={styles.rowDesc}>{task.description}</p>}
-                    <TaskLabels task={task} onOpenGroup={onOpenGroup} />
+                    {personal
+                        ? <TaskLabels task={task} onOpenGroup={onOpenGroup} />
+                        : task.addedBy && <span className={styles.addedBy}>{fill(t('addedByName'), { name: displayName(task.addedBy) })}</span>}
                 </div>
                 <div className={styles.rowMeta}>
                     {isOverdue(task, today) && <span className={styles.overduePill}>{t('overdue')}</span>}
@@ -45,7 +47,9 @@ function TaskRow({ task, today, editing, onEdit, onCloseEdit, onToggleDone, onSa
                         </button>}
                 </div>
             </div>
-            {editing && <TaskEditor task={task} onSave={onSave} onCancel={onCloseEdit} onDelete={onDelete} onLeave={onLeave} onPickGroups={onPickGroups} />}
+            {editing && (personal
+                ? <TaskEditor task={task} onSave={onSave} onCancel={onCloseEdit} onDelete={onDelete} onLeave={onLeave} onPickGroups={onPickGroups} />
+                : <TaskEditor task={task} personal={false} onSave={onSave} onCancel={onCloseEdit} onDelete={task.canRemove ? onDelete : undefined} />)}
         </li>
     );
 }
@@ -53,8 +57,10 @@ function TaskRow({ task, today, editing, onEdit, onCloseEdit, onToggleDone, onSa
 // Everything about one day: its tasks (done, edit, delete, groups), a field to add one,
 // and the focus sessions of that day. Arrows (outside a field) or the buttons go to the
 // day before/after; Escape or a click next to it closes.
+// personal: false in a shared calendar (session or family): no groups, reminders or sharing,
+// each task says who added it, and only who added it (or the owner) can delete it (canRemove).
 export default function DayPanel({
-    date, today, tasks, focus, sharedEntries, initialTaskId, newTaskGroup, locale, longDate,
+    date, today, tasks, focus, sharedEntries, initialTaskId, newTaskGroup, locale, longDate, personal = true,
     onClose, onShiftDay, onAddTask, onToggleDone, onSaveTask, onDeleteTask, onLeaveTask, onOpenGroup,
 }) {
     const { t } = useTranslation();
@@ -168,6 +174,7 @@ export default function DayPanel({
                                 key={task.id}
                                 task={task}
                                 today={today}
+                                personal={personal}
                                 editing={editingId === task.id}
                                 onEdit={() => setEditing({ day: key, id: task.id })}
                                 onCloseEdit={() => setEditing({ day: key, id: null })}

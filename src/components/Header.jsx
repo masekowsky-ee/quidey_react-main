@@ -31,6 +31,7 @@ export default function Header(props){
     const hasNews = useSelector(selectHasNews);
     const { t } = useTranslation();
     const timer = useSelector((state) => state.session.timer);
+    const timerMode = useSelector((state) => state.session.timerMode);
     return (
         <div className={styles.header}>
             {token && <>
@@ -50,9 +51,10 @@ export default function Header(props){
                             <div className={styles.timerChip} title={timer.active ? 'running' : 'paused'}>
                                 <span className={`${styles.timerDot} ${timer.active ? styles.timerDotLive : ''}`}></span>
                                 <span className={styles.timerTime}>{formatTime(timer.time)}</span>
-                                <div className={styles.timerTrack}>
+                                {/* a stopwatch has no end to measure against */}
+                                {timerMode !== 'stopwatch' && <div className={styles.timerTrack}>
                                     <div className={styles.timerFill} style={{width: `${percentWidth}%`}}></div>
-                                </div>
+                                </div>}
                             </div>}
                         <TeamWorkPill />
                     </div>

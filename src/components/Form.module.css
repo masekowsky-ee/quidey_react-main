@@ -45,6 +45,48 @@
     min-width: 0;
 }
 
+/* priority: optional, shows "–" until the slider is touched */
+.prioHead{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 1.75rem;
+}
+
+.prioHead output{
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.prioClear{
+    padding: 0.2rem 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.prioClear:hover{
+    color: var(--text-h);
+    text-decoration: underline;
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+/* no priority yet: the slider waits, dimmed, in the middle */
+.prioUnset input[type='range']{
+    opacity: 0.45;
+}
+
+.prioUnset input[type='range']:hover,
+.prioUnset input[type='range']:focus-visible{
+    opacity: 1;
+}
+
 /* "More options": duration, reminder, location, link, extra info, friends */
 .moreToggle{
     align-self: flex-start;

@@ -14,6 +14,7 @@ import SharedTaskList from './together/SharedTaskList';
 import TeamPresence from './together/TeamPresence';
 import ActivityFeed from './together/ActivityFeed';
 import WorkSummary from './together/WorkSummary';
+import { calendarLink } from '../features/calendar/sources';
 
 // Title of a session; the owner can click it to rename the session
 export function SessionTitle({ session, className }) {
@@ -126,6 +127,7 @@ export default function SharedSession() {
                     <p className={styles.meta}>
                         {t('startedBy')} {displayName(session.owner)} · {formatDate(session.createdAt)}
                         {session.endedAt && ` · ${t('endedOn')} ${formatDate(session.endedAt)}`}
+                        {' · '}<Link to={calendarLink('session', session.id)}>{t('calendarOpenCalendar')}</Link>
                     </p>
                 </div>
                 {session.endedAt && <span className={styles.endedBadge}>{t('ended')}</span>}

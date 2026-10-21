@@ -17,6 +17,8 @@ function renderTimer(activeTask = null) {
     const props = { setActiveTimer: vi.fn(), setWorkedTime: vi.fn(), activeTask }
     const ui = (task) => <Provider store={store}><TimerContainer {...props} activeTask={task} /></Provider>
     const view = render(ui(activeTask))
+    // folded into the corner button at first
+    fireEvent.click(screen.getByRole('button', { name: 'Timer öffnen' }))
     // dropping another task into the work area while the timer runs
     const switchTask = (task) => view.rerender(ui(task))
     return { store, props, switchTask }
@@ -35,7 +37,52 @@ const advance = async (ms) => {
 
 describe('TimerContainer', () => {
     beforeEach(() => vi.useFakeTimers())
-    afterEach(() => vi.useRealTimers())
+    afterEach(() => { vi.useRealTimers(); localStorage.clear() })
+
+    it('starts folded into a button and keeps running while folded', async () => {
+        const store = configureStore({ reducer: rootReducer })
+        const props = { setActiveTimer: vi.fn(), setWorkedTime: vi.fn(), activeTask: null }
+        render(<Provider store={store}><TimerContainer {...props} /></Provider>)
+        expect(screen.queryByRole('button', { name: 'start timer' })).not.toBeInTheDocument()
+
+        fireEvent.click(screen.getByRole('button', { name: 'Timer öffnen' }))
+        fireEvent.click(screen.getByRole('button', { name: 'start timer' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Timer einklappen' }))
+        await advance(2000)
+
+        expect(store.getState().session.timer.time).toBe(30 * 60 * 1000 - 2000)
+        expect(screen.getByRole('button', { name: 'Timer öffnen, 00:29:58' })).toBeInTheDocument()
+    })
+
+    describe('stopwatch', () => {
+        it('counts up from zero and books the time on the task', async () => {
+            const { store } = renderTimer(taskA)
+            fireEvent.click(screen.getByRole('button', { name: 'Stoppuhr' }))
+            expect(screen.getByText('00:00:00')).toBeInTheDocument()
+
+            fireEvent.click(screen.getByRole('button', { name: 'start timer' }))
+            await advance(3000)
+
+            expect(screen.getByText('00:00:03')).toBeInTheDocument()
+            expect(workedTasks(store)).toEqual([{ ...taskA, time: 3 }])
+            expect(localStorage.getItem('timerMode')).toBe('stopwatch')
+        })
+
+        it("can't switch the mode while running; stop saves and starts from zero again", async () => {
+            renderTimer()
+            fireEvent.click(screen.getByRole('button', { name: 'Stoppuhr' }))
+            fireEvent.click(screen.getByRole('button', { name: 'start timer' }))
+            await advance(2000)
+            expect(screen.getByRole('button', { name: 'Timer' })).toBeDisabled()
+
+            fireEvent.click(screen.getByRole('button', { name: 'pause timer' }))
+            await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'stop timer' })) })
+
+            expect(screen.getByText('00:00:00')).toBeInTheDocument()
+            expect(apiFetch).toHaveBeenCalledWith('/api/sessions', expect.objectContaining({ method: 'POST' }))
+            expect(screen.getByRole('button', { name: 'Timer' })).toBeEnabled()
+        })
+    })
 
     it('shows the full session length before starting', () => {
         renderTimer()

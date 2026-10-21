@@ -6,6 +6,8 @@ import rootReducer from '../features/rootReducer'
 import { apiFetch } from '../features/helperFunction'
 import { connectRealtime, disconnectRealtime, useRealtimeRefresh, useSafetyPoll, REFRESH_DELAY_MS, REALTIME_RECONNECT } from '../features/realtime/socket'
 import { useLiveLists } from '../features/realtime/useLiveLists'
+import { SET_FRIENDS, SET_FRIEND_REQUESTS } from '../features/friends/friendsActionTypes'
+import { SET_SHARED_SESSIONS } from '../features/together/togetherActionTypes'
 import { othersRunningMs, othersWorking, OTHERS_MAX_MS } from '../features/together/work'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
@@ -105,8 +107,17 @@ describe('news from the live lists', () => {
     function Lists() { useLiveLists(); return null }
     const routes = (map) => apiFetch.mockImplementation(async (url) => map[url] ?? [])
 
-    it('pops up a new friend request and a new session invite, and marks the changes', async () => {
+    // the lists as App loads them at the start, all empty
+    const loadedStore = () => {
         const store = configureStore({ reducer: rootReducer })
+        store.dispatch({ type: SET_FRIENDS, payload: [] })
+        store.dispatch({ type: SET_FRIEND_REQUESTS, payload: { incoming: [], outgoing: [] } })
+        store.dispatch({ type: SET_SHARED_SESSIONS, payload: { sessions: [], invites: [] } })
+        return store
+    }
+
+    it('pops up a new friend request and a new session invite, and marks the changes', async () => {
+        const store = loadedStore()
         render(<Provider store={store}><Lists /></Provider>)
         routes({ '/api/friends/requests': { incoming: [{ id: 1, user: ben, createdAt: '' }], outgoing: [] }, '/api/friends': [] })
         await serverSends('friends:changed', {})
@@ -129,6 +140,33 @@ describe('news from the live lists', () => {
         expect(store.getState().news.together).toBe(false)
         await serverSends('session:changed', { sessionId: 5 })
         expect(store.getState().news.together).toBe(true)
+    })
+
+    it('announces nothing from a first load, e.g. after the server restarted', async () => {
+        // the friends list was never loaded on this page (only the social page loads it)
+        const store = configureStore({ reducer: rootReducer })
+        store.dispatch({ type: SET_FRIEND_REQUESTS, payload: { incoming: [], outgoing: [] } })
+        render(<Provider store={store}><Lists /></Provider>)
+        routes({ '/api/friends': [ben], '/api/friends/requests': { incoming: [], outgoing: [] } })
+
+        await serverSends(REALTIME_RECONNECT)
+        await wait(REFRESH_DELAY_MS)
+        await act(async () => {})
+
+        expect(store.getState().friends.friends).toEqual([ben])
+        expect(store.getState().toast).toEqual([])
+        expect(store.getState().news.social).toBe(false)
+    })
+
+    it('still announces a friend who is new since the last load', async () => {
+        const store = loadedStore()
+        render(<Provider store={store}><Lists /></Provider>)
+        routes({ '/api/friends': [ben], '/api/friends/requests': { incoming: [], outgoing: [] } })
+        await serverSends('friends:changed', {})
+        await wait(REFRESH_DELAY_MS)
+        await act(async () => {})
+        expect(store.getState().toast).toHaveLength(1)
+        expect(store.getState().news.social).toBe(true)
     })
 })
 
