@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
     apiFetch, apiUrl, formatDate, toInputDate, formatClock, getInitials,
-    toDateOnly, sameDay, mondayIndex, monthGrid,
+    toDateOnly, sameDay, mondayIndex, monthGrid, dueText,
 } from '../features/helperFunction'
+import { translate } from '../i18n/useTranslation'
 
 // The API sends a date column as "local midnight, written in UTC".
 // Building it from local parts keeps these tests correct in every time zone.
@@ -30,6 +31,31 @@ describe('toInputDate', () => {
 
     it('returns an empty string for missing dates', () => {
         expect(toInputDate(null)).toBe('')
+    })
+})
+
+describe('dueText', () => {
+    // Thursday, 22 October 2026
+    const now = new Date(2026, 9, 22, 15, 30)
+    const t = (key, index) => translate('de', key, index)
+
+    it('says the near days as words', () => {
+        expect(dueText(apiDate(2026, 10, 22), t, now)).toBe('Heute')
+        expect(dueText(apiDate(2026, 10, 23), t, now)).toBe('Morgen')
+        expect(dueText(apiDate(2026, 10, 21), t, now)).toBe('Gestern')
+        expect(dueText('2026-10-26', t, now)).toBe('Montag')
+    })
+
+    it('counts a day with a clock change as one day', () => {
+        // the clocks go back on 25 October 2026 in Germany
+        expect(dueText('2026-10-27', t, now)).toBe('Dienstag')
+    })
+
+    it('shows the date further away, with the year only when it is another one', () => {
+        expect(dueText('2026-10-29', t, now)).toBe('29.10.')
+        expect(dueText('2026-10-10', t, now)).toBe('10.10.')
+        expect(dueText('2027-01-04', t, now)).toBe('4.1.2027')
+        expect(dueText(null, t, now)).toBe('')
     })
 })
 

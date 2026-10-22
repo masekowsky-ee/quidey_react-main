@@ -160,7 +160,7 @@ describe('customizing my profile', () => {
         const store = configureStore({ reducer: rootReducer })
         store.dispatch({ type: SET_USER, payload: [me] })
         await act(async () => {
-            render(<Provider store={store}><ProfileView onSignOut={() => {}} /></Provider>)
+            render(<Provider store={store}><MemoryRouter><ProfileView onSignOut={() => {}} /></MemoryRouter></Provider>)
         })
     }
 
@@ -173,11 +173,12 @@ describe('customizing my profile', () => {
         })
     })
 
-    it('shows my statistics from the api', async () => {
+    it('shows my numbers in short and links to the statistics page', async () => {
         await renderOwn()
         expect(apiFetch).toHaveBeenCalledWith('/api/profile')
-        expect(screen.getByText(/Noch keine Fokuszeit/)).toBeInTheDocument()
-        expect(screen.getByText('Abzeichen (0 von 10)')).toBeInTheDocument()
+        expect(screen.getByRole('link', { name: /Alle Statistiken/ })).toHaveAttribute('href', '/stats')
+        // heat map and badges moved to the statistics page
+        expect(screen.queryByText('Abzeichen (0 von 10)')).not.toBeInTheDocument()
     })
 
     it('previews the changes live and saves them', async () => {

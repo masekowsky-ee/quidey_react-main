@@ -13,7 +13,8 @@ export default function ShareMyTasks({ session }) {
 
     if (session.endedAt) return null;
     const shared = new Set(session.tasks.map(task => task.sourceTaskId).filter(Boolean));
-    const open = myTasks.filter(task => !task.done);
+    // events aren't work to share, only tasks
+    const open = myTasks.filter(task => !task.done && task.kind !== 'event');
 
     return (
         <section className={styles.card}>

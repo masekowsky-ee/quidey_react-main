@@ -163,10 +163,12 @@ export default function Calendar() {
     // a change to a task: in my own list, or in the shared calendar shown
     const changeTask = (task, changes) => (isShared ? shared.update(task.id, changes) : dispatch(updateTaskProps(changes, task)));
 
-    const addTaskOn = async (name, key, time = null) => {
+    // kind: 'task' or 'event' (only in my own calendar; an event has no priority)
+    const addTaskOn = async (name, key, time = null, kind = 'task') => {
         try {
             if (isShared) await shared.add({ name, due: key, ...(time ? { due_time: time } : {}) });
-            else await dispatch(addTask(name, key, '', NEW_TASK_PRIO, newTaskGroup?.id ?? null, undefined, time ? { due_time: time } : {}));
+            else await dispatch(addTask(name, key, '', kind === 'event' ? null : NEW_TASK_PRIO, newTaskGroup?.id ?? null, undefined,
+                { ...(time ? { due_time: time } : {}), ...(kind === 'event' ? { kind } : {}) }));
             return true;
         } catch (err) {
             reportError(err);
@@ -174,7 +176,9 @@ export default function Calendar() {
         }
     };
 
+    // an event is done once it's over, not by hand
     const toggleDone = (task) => {
+        if (task.kind === 'event') return;
         changeTask(task, { done: !task.done }).catch(reportError);
     };
 

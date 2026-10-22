@@ -1,4 +1,5 @@
 import styles from './Inbox.module.css';
+import { DESKTOP_QUERY, useMediaQuery } from '../features/layout/breakpoints';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -43,7 +44,8 @@ function useWhen() {
 
 // ---------- messages ----------
 
-function Conversations({ onOpen }) {
+// selected: the conversation open beside the list (wide screens), marked in it
+function Conversations({ onOpen, selected = null }) {
     const { t } = useTranslation();
     const when = useWhen();
     const friends = useSelector(state => state.friends.friends);
@@ -73,7 +75,8 @@ function Conversations({ onOpen }) {
                     <ul className={styles.list}>
                         {conversations.map(({ user, lastMessage, unread }) => (
                             <li key={user.id}>
-                                <button className={styles.row} onClick={() => onOpen(user.id)}>
+                                <button className={`${styles.row} ${selected === user.id ? styles.rowSelected : ''}`}
+                                    onClick={() => onOpen(user.id)} aria-current={selected === user.id ? 'true' : undefined}>
                                     <Avatar user={user} />
                                     <span className={styles.rowText}>
                                         <span className={styles.rowTitle}>{displayName(user)}</span>
@@ -108,6 +111,7 @@ function Conversations({ onOpen }) {
     );
 }
 
+// onBack: the way back to the list (not there when the list is beside it)
 function Thread({ userId, onBack }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
@@ -160,7 +164,7 @@ function Thread({ userId, onBack }) {
     return (
         <div className={styles.thread}>
             <div className={styles.threadHead}>
-                <button className={styles.backBtn} onClick={onBack} aria-label={t('back')}>←</button>
+                {onBack && <button className={styles.backBtn} onClick={onBack} aria-label={t('back')}>←</button>}
                 {thread && <><Avatar user={thread.user} /><h2 className={styles.threadName}><Link to={`/u/${thread.user.username}`}>{displayName(thread.user)}</Link></h2></>}
             </div>
             {!thread && !error && <p className={styles.empty} aria-busy="true">{t('loading')}</p>}
@@ -407,9 +411,12 @@ export default function Inbox() {
 
     const go = (next, extra = {}) => setSearchParams(next === 'messages' && !extra.with ? {} : { tab: next, ...extra }, { replace: !extra.with });
     const counts = { messages: unread.messages, requests: requestCount, notices: unread.notifications, reminders: 0 };
+    // wide screens: the conversations stay beside the open one
+    const split = useMediaQuery(DESKTOP_QUERY) && tab === 'messages';
+    const openConversation = (id) => go('messages', { with: String(id) });
 
     return (
-        <div className={styles.page}>
+        <div className={split ? styles.pageWide : styles.page}>
             <h1 className={styles.title}>{t('inbox')}</h1>
             <div className={styles.tabs} role="tablist" aria-label={t('inbox')}>
                 {TABS.map(key => (
@@ -420,14 +427,26 @@ export default function Inbox() {
                     </button>
                 ))}
             </div>
+            {split
+                ? <div className={styles.split} role="tabpanel" aria-label={t('inboxTab_messages')}>
+                    <section className={`${styles.card} ${styles.splitList}`}>
+                        <Conversations onOpen={openConversation} selected={openWith} />
+                    </section>
+                    <section className={`${styles.card} ${styles.splitThread}`}>
+                        {openWith
+                            ? <Thread key={openWith} userId={openWith} />
+                            : <p className={styles.pickHint}>{t('inboxPickConversation')}</p>}
+                    </section>
+                </div>
+                :
             <section className={styles.card} role="tabpanel" aria-label={t(`inboxTab_${tab}`)}>
                 {tab === 'messages' && (openWith
                     ? <Thread key={openWith} userId={openWith} onBack={() => go('messages')} />
-                    : <Conversations onOpen={(id) => go('messages', { with: String(id) })} />)}
+                    : <Conversations onOpen={openConversation} />)}
                 {tab === 'requests' && <Requests />}
                 {tab === 'notices' && <Notices />}
                 {tab === 'reminders' && <Reminders />}
-            </section>
+            </section>}
         </div>
     );
 }

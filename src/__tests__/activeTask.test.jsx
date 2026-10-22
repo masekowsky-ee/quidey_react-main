@@ -10,7 +10,7 @@ import { setMotion } from '../features/settings/settingsAction'
 import WorkingContainer from '../components/WorkingContainer'
 import TaskContainer from '../components/TaskContainer'
 import CompletedTasks from '../components/CompletedTasks'
-import Home from '../components/home'
+import Home from '../components/Home'
 import LegalPage from '../legal/LegalPage'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
@@ -128,14 +128,15 @@ describe('completed tasks folder', () => {
 })
 
 describe('privacy policy', () => {
-    it('covers messages, notices, feedback and the completion time', () => {
+    it('covers messages, notices, feedback, the completion time, events and their types', () => {
         render(
             <Provider store={makeStore()}>
                 <MemoryRouter initialEntries={['/datenschutz']}><LegalPage /></MemoryRouter>
             </Provider>
         )
-        const text = document.body.textContent
-        for (const part of ['Nachrichten im Postfach', 'Meldungen:', 'Sendest du in der App Feedback', 'Zeitpunkt, zu dem du sie erledigt hast', 'auch beim Gegenüber']) {
+        const text = document.body.textContent.replace(/\s+/g, ' ')
+        for (const part of ['Nachrichten im Postfach', 'Meldungen:', 'Sendest du in der App Feedback', 'Zeitpunkt, zu dem sie erledigt bzw. vorbei waren',
+            'deine Event-Typen', 'Die Event-Zeit pro Typ siehst nur du', 'auch beim Gegenüber']) {
             expect(text).toContain(part)
         }
     })
@@ -168,11 +169,27 @@ describe('editing a task on Home', () => {
         expect(apiFetch).not.toHaveBeenCalled()
     })
 
-    it('the colour swatches float in the page, not inside the row (phones cut them off)', () => {
+    it('a row stays short: colour, groups and description are set in the editor', () => {
         home(makeStore())
-        const [button] = screen.getAllByRole('button', { name: /^Farbe:/ })
-        fireEvent.click(button)
-        const swatch = screen.getByRole('radio', { name: 'Türkis' })
-        expect(swatch.closest('li')).toBeNull()
+        const row = screen.getByText('Erste').closest('li')
+        expect(within(row).queryByRole('button', { name: /^Farbe/ })).toBeNull()
+        expect(within(row).queryByText('Zu Gruppe hinzufügen')).toBeNull()
+        expect(within(row).queryByRole('spinbutton')).toBeNull()
+        fireEvent.click(within(row).getByRole('button', { name: 'Bearbeiten: Erste' }))
+        const dialog = screen.getByRole('dialog', { name: 'Bearbeiten' })
+        expect(within(dialog).getByRole('radio', { name: 'Türkis' })).toBeInTheDocument()
+        expect(within(dialog).getByText('Zu Gruppe hinzufügen')).toBeInTheDocument()
+    })
+
+    it('deletes a task only on the second click', async () => {
+        const store = makeStore()
+        apiFetch.mockResolvedValue({})
+        home(store)
+        const remove = screen.getByRole('button', { name: 'Löschen: Zweite' })
+        fireEvent.click(remove)
+        expect(apiFetch).not.toHaveBeenCalled()
+        expect(remove).toHaveTextContent('Wirklich löschen?')
+        await act(async () => { fireEvent.click(remove) })
+        expect(apiFetch).toHaveBeenCalledWith('/api/tasks/2', { method: 'DELETE' })
     })
 })

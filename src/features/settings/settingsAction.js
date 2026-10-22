@@ -1,10 +1,12 @@
-import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION } from "./settingsActionTypes";
+import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS } from "./settingsActionTypes";
 import { HOME_LAYOUTS, storeHomeLayout } from "./homeLayout";
 import { MOTION_LEVELS, storeMotion } from "./motion";
-import { LANGUAGES, storeLanguage, ACCENTS, storeAccent, SESSION_LENGTHS, storeSessionMinutes } from "./preferences";
+import { LANGUAGES, storeLanguage, ACCENTS, storeAccent, SESSION_LENGTHS, storeSessionMinutes, storeShowSharedTasks } from "./preferences";
 
-export const setShowMenu = () => ({
+// open: true / false; without it the menu toggles
+export const setShowMenu = (open) => ({
     type: SET_SHOW_MENU,
+    payload: open,
 });
 
 export const setShowDoneTasks = () => ({
@@ -75,4 +77,10 @@ export const setMotion = (level) => {
         type: SET_MOTION,
         payload: level
     };
+};
+
+// Whether the tasks of my shared sessions are listed among my own on Home; remembered
+export const setShowSharedTasks = (show) => {
+    storeShowSharedTasks(Boolean(show));
+    return { type: SET_SHOW_SHARED_TASKS, payload: Boolean(show) };
 };

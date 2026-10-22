@@ -53,7 +53,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
     };
 
     const sharedMine = new Set(session.tasks.map(task => task.sourceTaskId).filter(Boolean));
-    const shareable = myTasks.filter(task => !task.done && !sharedMine.has(task.id));
+    const shareable = myTasks.filter(task => !task.done && task.kind !== 'event' && !sharedMine.has(task.id));
     const handleShareOwn = (e) => {
         const taskId = Number(e.target.value);
         e.target.value = '';

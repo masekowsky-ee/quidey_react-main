@@ -22,7 +22,7 @@ const newStore = () => configureStore({ reducer: rootReducer })
 async function renderSignedOut() {
     localStorage.removeItem('token')
     const store = newStore()
-    await act(async () => { render(<Provider store={store}><Profile /></Provider>) })
+    await act(async () => { render(<Provider store={store}><MemoryRouter><Profile /></MemoryRouter></Provider>) })
     return store
 }
 
@@ -128,7 +128,7 @@ describe('email verification', () => {
         const store = newStore()
         store.dispatch({ type: SET_USER, payload: [{ username: 'jo', email: 'jo@example.com', email_verified: false }] })
         apiFetch.mockImplementation(async (url) => url === '/api/friends' ? [] : { sent: true })
-        await act(async () => { render(<Provider store={store}><ProfileView onSignOut={() => {}} /></Provider>) })
+        await act(async () => { render(<Provider store={store}><MemoryRouter><ProfileView onSignOut={() => {}} /></MemoryRouter></Provider>) })
 
         expect(screen.getByText('Nicht bestätigt')).toBeInTheDocument()
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Neuen Link senden' })) })

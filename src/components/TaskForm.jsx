@@ -11,12 +11,18 @@ import { linkIsValid } from '../features/tasks/taskFields';
 import { useFriends } from '../features/friends/useFriends';
 import FriendPicker from './together/FriendPicker.jsx';
 import TaskColorPicker from './task/TaskColorPicker.jsx';
+import DurationField from './task/DurationWheel.jsx';
+import { EventTypePicker, KindSwitch } from './task/KindFields.jsx';
+import { fill } from '../features/helperFunction';
+import { minutesOfDay, timeText } from '../features/calendar/calendar';
 
-const EMPTY_EXTRAS = { duration_minutes: null, reminder_minutes: null, reminder_email: false, location: '', link: '', details: '', repeat: null };
+const EMPTY_EXTRAS = { reminder_minutes: null, reminder_email: false, location: '', link: '', details: '', repeat: null };
 
-// New task: only the name is needed; optionally a day and time (no time: the whole day, no day:
-// whenever), description and priority (none until the slider is touched). "More options" adds duration, reminder, location, link, extra info and friends
-// to share it with (they get an invite once it's created).
+// New task or event. A task needs only its name; optionally a day and time (no time: the whole
+// day, no day: whenever), the time planned for it, description and priority (none until the
+// slider is touched). An event needs a day; it has a length and a type instead of a priority.
+// "More options" adds reminder, repeating, location, link, extra info and friends to share it
+// with (they get an invite once it's created).
 export default function TaskForm(props){
     const {setCreateTask} = props;
 
@@ -26,6 +32,11 @@ export default function TaskForm(props){
 
     const groupToDisplay = useSelector((state)=>state.task.groupToDisplay)
 
+    const [kind, setKind] = useState('task');
+    const event = kind === 'event';
+    const [eventTypeId, setEventTypeId] = useState(null);
+    // a task's planned time, an event's length (minutes)
+    const [duration, setDuration] = useState(null);
     const [name, setName] = useState('');
     const [due, setDue] = useState('');
     const [time, setTime] = useState('');
@@ -45,6 +56,10 @@ export default function TaskForm(props){
             dispatch( setCustomError({bool: true, message: t('nameTaskError') }) );
             return;
         }
+        if (event && !due) {
+            dispatch(setCustomError({ bool: true, message: t('eventNeedsDay') }));
+            return;
+        }
         if (!linkIsValid(extras.link)) {
             setShowMore(true);
             return;
@@ -54,10 +69,12 @@ export default function TaskForm(props){
         const activeGroupId = typeof groupId === 'number' && groupToDisplay.group.name !== 'all' ? groupId : null;
         setBusy(true);
         try {
-            const task = await dispatch(addTask(name.trim(), due, description.trim(), prio, activeGroupId, undefined, {
+            const task = await dispatch(addTask(name.trim(), due, description.trim(), event ? null : prio, activeGroupId, undefined, {
+                kind,
+                event_type_id: event ? eventTypeId : null,
                 // a time of day needs a day
                 due_time: due && time ? time : null,
-                duration_minutes: extras.duration_minutes,
+                duration_minutes: duration,
                 reminder_minutes: due && time ? extras.reminder_minutes : null,
                 // only a reminder can come by mail
                 reminder_email: Boolean(due && time && extras.reminder_minutes !== null && extras.reminder_email),
@@ -84,28 +101,35 @@ export default function TaskForm(props){
             <button className={styles.closeBtn} onClick={()=>{setCreateTask(false)}} aria-label={t('close')}>
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
             </button>
-            <h2>{t('createTaskH2')}</h2>
+            <h2>{t(event ? 'createEventH2' : 'createTaskH2')}</h2>
             <form className={`${styles.form}`} onSubmit={handleSubmit} noValidate>
-                <input className={styles.input} type="text" placeholder={t('taskName')} aria-label={t('taskName')}
+                <KindSwitch value={kind} onChange={setKind} />
+                <input className={styles.input} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}
                     value={name} maxLength={200} onChange={(e) => setName(e.target.value)} />
                 <div className={styles.rowDiv}>
-                    <input className={`${styles.input} ${styles.grow}`} type="date" aria-label={t('dueDate')}
-                        value={due} onChange={(e) => setDue(e.target.value)} />
-                    <input className={styles.input} type="time" aria-label={`${t('taskTime')} (${t('allDay')}: –)`} title={t('taskTime')}
+                    <input className={`${styles.input} ${styles.grow}`} type="date" aria-label={t(event ? 'eventDay' : 'dueDate')}
+                        required={event} value={due} onChange={(e) => setDue(e.target.value)} />
+                    <input className={styles.input} type="time" aria-label={`${t(event ? 'eventStart' : 'taskTime')} (${t('allDay')}: –)`} title={t(event ? 'eventStart' : 'taskTime')}
                         value={time} disabled={!due} onChange={(e) => setTime(e.target.value)} />
                 </div>
+                <DurationField label={t(event ? 'eventDuration' : 'plannedTime')} value={duration} onChange={setDuration}
+                    maxHours={event ? 168 : 99}
+                    hint={event && duration && due && time ? fill(t('eventUntil'), { time: timeText(minutesOfDay(time) + duration) }) : t(event ? 'eventDurationHint' : 'plannedTimeHint')} />
+                {event && <EventTypePicker value={eventTypeId} onChange={setEventTypeId} />}
                 <input className={styles.input} type="text" placeholder={t('description')} aria-label={t('description')}
                     value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)} />
-                <div className={styles.prioHead}>
-                    <label htmlFor="prioritise">{t('prioritise')} <output htmlFor="prioritise">{prio ?? '–'}</output></label>
-                    {prio !== null &&
-                        <button type="button" className={styles.prioClear} onClick={() => setPrio(null)}>{t('noPrio')}</button>}
-                </div>
-                <div className={`${styles.rowDiv} ${prio === null ? styles.prioUnset : ''}`}>
-                    <p>{t('low')}</p>
-                    <input type="range" id="prioritise" min="0" max="100" step="1" value={prio ?? 50} onChange={(e) => setPrio(Number(e.target.value))} />
-                    <p>{t('high')}</p>
-                </div>
+                {!event && <>
+                    <div className={styles.prioHead}>
+                        <label htmlFor="prioritise">{t('prioritise')} <output htmlFor="prioritise">{prio ?? '–'}</output></label>
+                        {prio !== null &&
+                            <button type="button" className={styles.prioClear} onClick={() => setPrio(null)}>{t('noPrio')}</button>}
+                    </div>
+                    <div className={`${styles.rowDiv} ${prio === null ? styles.prioUnset : ''}`}>
+                        <p>{t('low')}</p>
+                        <input type="range" id="prioritise" min="0" max="100" step="1" value={prio ?? 50} onChange={(e) => setPrio(Number(e.target.value))} />
+                        <p>{t('high')}</p>
+                    </div>
+                </>}
                 <TaskColorPicker value={color} onChange={setColor} />
 
                 <button type="button" className={styles.moreToggle} aria-expanded={showMore} onClick={() => setShowMore(!showMore)}>

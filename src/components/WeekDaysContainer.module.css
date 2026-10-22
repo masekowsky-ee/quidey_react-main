@@ -4,8 +4,7 @@
     flex-direction: row;
     align-items: stretch;
     gap: 0.5rem;
-    width: min(1200px, calc(100% - 2rem));
-    margin: 1rem auto 0;
+    width: 100%; /* the page sets the width */
     box-sizing: border-box;
 }
 
@@ -135,10 +134,20 @@
     --chip-color: color-mix(in srgb, var(--primary) 40%, var(--text-muted));
 }
 
+/* An event: tinted in its (type's) colour instead of a priority edge */
+.dayList li.event{
+    --chip-color: var(--task-color, var(--primary));
+    background-color: color-mix(in srgb, var(--chip-color) 16%, var(--surface));
+}
+
 .dayList li.done{
     --chip-color: var(--text-muted);
     text-decoration: line-through;
     color: var(--text-muted);
+}
+
+.dayList li.event.done{
+    background-color: var(--surface-hover);
 }
 
 .dayList li.more{
@@ -207,12 +216,15 @@
     height: 1.375rem;
 }
 
-@media (max-width: 640px) {
-    .weekStrip{
-        width: calc(100% - 2rem);
-        margin-top: 0.75rem;
+/* Phones (the tab bar's width, PHONE_QUERY): the calendar is in the tab bar at the bottom,
+   so the strip gives its room to the days */
+@media (max-width: 720px) {
+    .calendarLink{
+        display: none;
     }
+}
 
+@media (max-width: 640px) {
     /* about 3.5 days visible, the rest scrolls sideways */
     .days{
         grid-template-columns: repeat(8, minmax(5.75rem, 1fr));

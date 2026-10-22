@@ -6,7 +6,6 @@ import { durationText, REPEATS } from '../../features/calendar/calendar';
 import { askForReminderPermission } from '../../features/tasks/reminders';
 import { linkIsValid } from '../../features/tasks/taskFields';
 
-const DURATIONS = [15, 30, 45, 60, 90, 120, 180, 240, 480];
 const REMINDERS = [0, 5, 10, 15, 30, 60, 120, 1440];
 
 // The value of a select: '' for none, otherwise the number; keeps an unusual value as an option
@@ -15,8 +14,9 @@ const withCurrent = (list, current) =>
 
 const toNumberOrNull = (value) => (value === '' ? null : Number(value));
 
-// The optional details of a task: duration, reminder, location, link and extra info.
-// value: { duration_minutes, reminder_minutes, reminder_email, location, link, details, repeat };
+// The optional details of a task: reminder, repeating, location, link and extra info (a task's
+// planned time and an event's length are on the wheels, see DurationWheel).
+// value: { reminder_minutes, reminder_email, location, link, details, repeat };
 // onChange gets the changed fields.
 // hasTime: reminders count from the start time, so without one they are off.
 // hasDate: repeating counts from the day, so without one it is off too.
@@ -32,17 +32,8 @@ export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = 
 
     return (
         <div className={styles.options}>
+            {personal &&
             <div className={styles.row}>
-                <label className={styles.field}>
-                    <span>{t('duration')}</span>
-                    <select value={value.duration_minutes ?? ''} onChange={(e) => onChange({ duration_minutes: toNumberOrNull(e.target.value) })}>
-                        <option value="">{t('durationNone')}</option>
-                        {withCurrent(DURATIONS, value.duration_minutes).map(minutes => (
-                            <option key={minutes} value={minutes}>{durationText(minutes)}</option>
-                        ))}
-                    </select>
-                </label>
-                {personal &&
                 <label className={styles.field}>
                     <span>{t('reminder')}</span>
                     <select value={hasTime ? (value.reminder_minutes ?? '') : ''} disabled={!hasTime}
@@ -56,8 +47,8 @@ export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = 
                             <option key={minutes} value={minutes}>{reminderLabel(minutes)}</option>
                         ))}
                     </select>
-                </label>}
-            </div>
+                </label>
+            </div>}
             {personal && !hasTime && <p id={`${id}-reminder-hint`} className={styles.hint}>{t('reminderNeedsTime')}</p>}
             {/* mails go to the task's owner, so only they see the switch */}
             {personal && canMail && hasReminder &&

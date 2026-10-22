@@ -1,0 +1,36 @@
+/* Quiet bin until hovered; asked, it widens into a red question in words */
+.btn {
+  flex: none;
+  height: 2rem;
+  min-width: 2rem;
+  padding: 0;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  transition: color var(--ease-out), background-color var(--ease-out), border-color var(--ease-out);
+}
+
+.btn:hover {
+  color: var(--danger);
+}
+
+.icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.armed,
+.armed:hover {
+  padding: 0 0.75rem;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+  box-shadow: none;
+}
+
+.question {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}

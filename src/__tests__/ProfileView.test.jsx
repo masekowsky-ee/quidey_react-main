@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
+import { MemoryRouter } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
 import { apiFetch } from '../features/helperFunction'
@@ -22,7 +23,7 @@ async function renderProfile() {
     store.dispatch({ type: SET_WORKED_SESSIONS, payload: [{ id: 1, totalTime: 1500 }, { id: 2, totalTime: 2100 }] })
     const onSignOut = vi.fn()
     await act(async () => {
-        render(<Provider store={store}><ProfileView onSignOut={onSignOut} /></Provider>)
+        render(<Provider store={store}><MemoryRouter><ProfileView onSignOut={onSignOut} /></MemoryRouter></Provider>)
     })
     return { store, onSignOut }
 }

@@ -1,0 +1,40 @@
+/* The signed-in app's frame. Its parts read these sizes from here:
+   --sidebar-w: the menu as a sidebar that is always there (desktop), 0 otherwise
+   --tabbar-h:  the tab bar at the bottom (phones), 0 otherwise (without the iPhone's home
+                indicator, which each fixed part adds itself)
+   --page-gutter: the space between a page and the window's (or sidebar's) edge, the same on
+                every page
+   Same widths as src/features/layout/breakpoints.js. */
+.shell {
+  --sidebar-w: 0px;
+  --tabbar-h: 0px;
+  --page-gutter: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-left: var(--sidebar-w);
+  box-sizing: border-box;
+}
+
+/* the pages and the footer under them */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+@media (min-width: 1100px) {
+  .shell {
+    --sidebar-w: 15rem;
+    --page-gutter: 2.5rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .shell {
+    --tabbar-h: 3.75rem;
+    --page-gutter: 1rem;
+    padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+  }
+}

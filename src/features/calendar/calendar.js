@@ -76,11 +76,12 @@ export function taskStart(task) {
     return new Date(day.getFullYear(), day.getMonth(), day.getDate(), Math.floor(minutes / 60), minutes % 60);
 }
 
-// "12:30", or with a duration "12:30–14:00"; '' for a task without a time
+// "12:30", for an event with a length "12:30–14:00"; '' without a time. A task's duration is
+// only the time planned for it, so a task shows its start alone.
 export function taskTimeText(task) {
     const start = minutesOfDay(task?.due_time);
     if (start === null) return '';
-    const duration = Number(task.duration_minutes) || 0;
+    const duration = task.kind === 'event' ? Number(task.duration_minutes) || 0 : 0;
     return duration > 0 ? `${timeText(start)}–${timeText(start + duration)}` : timeText(start);
 }
 

@@ -170,8 +170,23 @@ export function toInputDate(value) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
-// Open task whose day is before today
+// Open task whose day is before today (an event is never overdue: it's done once it's over)
 export function isOverdue(task, today = new Date()) {
     const due = parseDate(task?.due);
-    return Boolean(due && !task.done && toDateOnly(due) < toDateOnly(today));
+    return Boolean(due && !task.done && task.kind !== 'event' && toDateOnly(due) < toDateOnly(today));
+}
+
+// A task's day as it is said: "Today", "Tomorrow", "Yesterday", the weekday within the next
+// week, otherwise the date (with the year only when it isn't this year). t: the translator.
+export function dueText(value, t, now = new Date()) {
+    const due = parseDate(value);
+    if (!due) return '';
+    const today = toDateOnly(now);
+    // rounded, so a day with a clock change (23 or 25 hours) still counts as one
+    const days = Math.round((toDateOnly(due) - today) / 86400000);
+    if (days === 0) return t('today');
+    if (days === 1) return t('tomorrow');
+    if (days === -1) return t('yesterday');
+    if (days > 1 && days < 7) return t('weekDaysFull', mondayIndex(due));
+    return due.getFullYear() === today.getFullYear() ? `${due.getDate()}.${due.getMonth() + 1}.` : formatDate(due);
 }

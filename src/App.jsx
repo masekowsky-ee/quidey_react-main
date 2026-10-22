@@ -2,8 +2,10 @@ import { useState, useEffect, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { MotionConfig, motion } from 'motion/react'
 import Header from './components/Header.jsx';
-import Home from './components/home.jsx'
-import Menu from './components/menu.jsx'
+import Home from './components/Home.jsx'
+import Menu from './components/Menu.jsx'
+import TabBar from './components/TabBar.jsx'
+import shell from './components/AppShell.module.css'
 import CustomError from './components/CustomError.jsx';
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth, setUser, fetchAccess } from "./features/auth/authAction";
@@ -12,6 +14,7 @@ import { logout } from "./features/auth/authAction";
 import BetaGate, { AccessPending } from "./components/BetaGate.jsx";
 import { fetchTaskState, fetchTaskInvites, refreshTasks } from "./features/tasks/taskAction.js"
 import { useTaskReminders } from "./features/tasks/reminders.js"
+import { useEventEnds } from "./features/tasks/kinds.js"
 import { useAccountLocale } from "./features/settings/accountLocale.js"
 import { fetchSessions } from "./features/session/sessionAction.js"
 import { fetchFriendRequests } from "./features/friends/friendsAction.js"
@@ -42,8 +45,8 @@ const PAGES = {
   VerifyEmail: () => import('./components/VerifyEmail.jsx'),
   TeamHome: () => import('./components/TeamHome.jsx'),
   Calendar: () => import('./components/Calendar.jsx'),
-  History: () => import('./components/History.jsx'),
-  Profile: () => import('./components/profile.jsx'),
+  Stats: () => import('./components/Stats.jsx'),
+  Profile: () => import('./components/Profile.jsx'),
   Settings: () => import('./components/Settings.jsx'),
   Social: () => import('./components/Social.jsx'),
   UserProfile: () => import('./components/UserProfile.jsx'),
@@ -61,7 +64,7 @@ const LegalPage = lazy(PAGES.LegalPage);
 const VerifyEmail = lazy(PAGES.VerifyEmail);
 const TeamHome = lazy(PAGES.TeamHome);
 const Calendar = lazy(PAGES.Calendar);
-const History = lazy(PAGES.History);
+const Stats = lazy(PAGES.Stats);
 const Profile = lazy(PAGES.Profile);
 const Settings = lazy(PAGES.Settings);
 const Social = lazy(PAGES.Social);
@@ -173,6 +176,8 @@ function App(){
   useTaskReminders(allowed);
   // ...and by mail when a task asks for it: the server needs my time zone and language
   useAccountLocale(allowed);
+  // an event that ends while the app is open shows as done right then
+  useEventEnds(allowed);
 
   useEffect(() => { if (allowed) return preloadPages(); }, [allowed]);
 
@@ -209,22 +214,24 @@ function App(){
     // the amount of motion is chosen in the settings (the system's "reduce motion" picks
     // "minimal" as the default there), so it isn't applied a second time here
     <MotionConfig reducedMotion="never">
-    <div>
-        <div>
-          <Header activeTimer={activeTimer}/>
-        </div>
-        {signedIn && <section>
+    {/* the frame: sidebar (desktop) or drawer, header, tab bar (phones); see AppShell.module.css */}
+    <div className={shell.shell}>
+        <Header activeTimer={activeTimer}/>
         <Menu/>
+        <TabBar/>
         <CustomError/>
         <Toaster/>
         <Tutorial/>
+        <main className={shell.main}>
         {/* each page comes in as the motion setting says */}
         <motion.div key={location.pathname} {...MOTION.page[motionLevel]}>
         <Suspense fallback={pageLoading}>
         <Routes location={location}>
           <Route path="/" element={homeLayout === 'team' ? <TeamHome/> : <Home setActiveTimer={setActiveTimer}/>} />
           <Route path="/calendar" element={<Calendar/>} />
-          <Route path="/history" element={<History  />} />
+          <Route path="/stats" element={<Stats />} />
+          {/* the old address of the statistics (bookmarks, ?tab=done links) */}
+          <Route path="/history" element={<Navigate to={{ pathname: '/stats', search: location.search }} replace />} />
           <Route path="/profile" element={<Profile/>} />
           <Route path="/settings" element={<Settings/>} />
           <Route path="/social" element={<Social/>} />
@@ -242,9 +249,8 @@ function App(){
         </Routes>
         </Suspense>
         </motion.div>
-      </section>
-      }
-      <LegalFooter />
+        <LegalFooter />
+        </main>
     </div>
     </MotionConfig>
   );

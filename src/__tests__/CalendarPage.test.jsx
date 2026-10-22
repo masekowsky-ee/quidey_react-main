@@ -246,7 +246,7 @@ describe('day panel', () => {
         const dialog = screen.getByRole('dialog')
         expect(within(dialog).getByText('Focus time')).toBeInTheDocument()
         expect(within(dialog).getAllByText('30 min').length).toBeGreaterThan(0)
-        expect(within(dialog).getByRole('link', { name: /Open history/ })).toHaveAttribute('href', '/history')
+        expect(within(dialog).getByRole('link', { name: /All sessions/ })).toHaveAttribute('href', '/stats?tab=sessions')
     })
 })
 

@@ -1,18 +1,18 @@
 .page{
-    composes: pageColumn from './ui.module.css';
+    composes: pageColumn from '../ui.module.css';
 }
 
 .title{
-    composes: pageTitle from './ui.module.css';
+    composes: pageTitle from '../ui.module.css';
 }
 
 .card{
-    composes: card from './ui.module.css';
+    composes: card from '../ui.module.css';
 }
 
 /* Summary numbers above the list: one panel split into equal columns */
 .stats{
-    composes: panel from './ui.module.css';
+    composes: panel from '../ui.module.css';
     display: grid;
     grid-template-columns: repeat(3, 1fr);
 }
@@ -46,7 +46,7 @@
 
 /* The sessions as one calm list in one panel */
 .list{
-    composes: panel from './ui.module.css';
+    composes: panel from '../ui.module.css';
     list-style: none;
     margin: 0;
     padding: 0.25rem 1.5rem;
@@ -198,14 +198,14 @@
 /* ---------- folders: sessions | completed tasks ---------- */
 
 .folders{
-    composes: tabBar from './ui.module.css';
+    composes: tabBar from '../ui.module.css';
     width: 100%;
     max-width: 26rem;
     align-self: flex-start;
 }
 
 .folderActive{
-    composes: segmentActive from './ui.module.css';
+    composes: segmentActive from '../ui.module.css';
 }
 
 .folders > button{

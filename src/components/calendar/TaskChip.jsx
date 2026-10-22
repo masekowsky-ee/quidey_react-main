@@ -16,9 +16,10 @@ const isShared = (task) => Boolean(task.owner) || (task.sharedWith ?? []).some(s
 // the tab order unless asked for.
 export default function TaskChip({ task, today, onOpen, startDrag, dragging, showDescription = false, tabIndex = -1 }) {
     const { t } = useTranslation();
+    const event = task.kind === 'event';
     const classes = [
         styles.chip,
-        PRIO_CLASS[prioLevel(task.prio)],
+        event ? styles.chipEvent : PRIO_CLASS[prioLevel(task.prio)],
         task.done && styles.chipDone,
         isOverdue(task, today) && styles.chipOverdue,
         dragging && styles.chipDragging,
@@ -34,7 +35,7 @@ export default function TaskChip({ task, today, onOpen, startDrag, dragging, sho
             className={classes}
             data-task-color={taskColorAttr(task)}
             tabIndex={tabIndex}
-            title={[time, task.name, task.location, task.repeat && t(`repeat_${task.repeat}`)].filter(Boolean).join(' · ')}
+            title={[taskTimeText(task), task.name, event && task.event_type?.name, task.location, task.repeat && t(`repeat_${task.repeat}`)].filter(Boolean).join(' · ')}
             onPointerDown={startDrag ? (e) => startDrag(e, task) : undefined}
             onClick={(e) => { e.stopPropagation(); onOpen(task); }}
         >
@@ -45,6 +46,7 @@ export default function TaskChip({ task, today, onOpen, startDrag, dragging, sho
                 {task.name}
                 {shared && <span className={styles.chipShared} title={t('sharedWithLabel')} role="img" aria-label={t('sharedWithLabel')}><Icon name="team" size={12} /></span>}
             </span>
+            {showDescription && event && task.event_type && <span className={styles.chipType}>{task.event_type.name}</span>}
             {showDescription && task.location && <span className={styles.chipMeta}>⌖ {task.location}</span>}
             {showDescription && task.description && <span className={styles.chipDesc}>{task.description}</span>}
         </button>

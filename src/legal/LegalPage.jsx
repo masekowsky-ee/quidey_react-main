@@ -201,12 +201,18 @@ function Privacy() {
 
             <h2>5. Deine Inhalte</h2>
             <p>
-                Gespeichert wird, was du in Quidey anlegst: Aufgaben (mit Fälligkeit, Uhrzeit, Dauer, Erinnerung,
-                Wiederholung, Farbe, Ort, Link, Beschreibung und Notizen sowie dem Zeitpunkt, zu dem du sie erledigt hast –
-                für den Ordner „Erledigte Aufgaben“ im Verlauf), Gruppen, Arbeitssitzungen und die gemessene Fokuszeit.
-                Bei wiederkehrenden Aufgaben legt Quidey beim Erledigen automatisch die nächste an. Diese Inhalte
-                sieht nur du – außer du teilst sie bewusst (Abschnitt 6). Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
-                Bitte gib in Aufgaben keine besonders sensiblen Daten ein (z. B. Gesundheitsdaten), die die App nicht braucht.
+                Gespeichert wird, was du in Quidey anlegst: Aufgaben und Events (mit Tag, Uhrzeit, geplanter Zeit bzw.
+                Dauer, Erinnerung, Wiederholung, Farbe, Ort, Link, Beschreibung und Notizen sowie dem Zeitpunkt, zu dem
+                sie erledigt bzw. vorbei waren – für die Statistiken und den Ordner „Erledigt“), deine Event-Typen
+                (Name, Farbe, Reihenfolge, z. B. „Arbeit“), Gruppen, Arbeitssitzungen und die gemessene Fokuszeit.
+                Ein Event gilt als erledigt, sobald es vorbei ist; der Server prüft das dazu regelmäßig anhand deiner
+                Zeitzone. Bei wiederkehrenden Aufgaben und Events legt Quidey dann automatisch das nächste an. Aus
+                diesen Daten berechnet Quidey deine Statistiken für Woche, Monat, Jahr oder insgesamt (Fokuszeit,
+                Event-Zeit pro Typ, Fokuszeit pro Gruppe, erledigte Aufgaben); sie werden bei jedem Aufruf berechnet
+                und nicht zusätzlich gespeichert. Die Event-Zeit pro Typ siehst nur du, auch deine Freunde nicht.
+                Diese Inhalte sieht nur du – außer du teilst sie bewusst (Abschnitt 6). Rechtsgrundlage ist Art. 6
+                Abs. 1 lit. b DSGVO. Bitte gib in Aufgaben, Events und Event-Typen keine besonders sensiblen Daten ein
+                (z. B. Gesundheitsdaten), die die App nicht braucht.
             </p>
 
             <h2>6. Freunde und gemeinsame Funktionen</h2>
@@ -290,7 +296,7 @@ function Privacy() {
             </p>
             <ul>
                 <li>dein Anmelde-Token (7 Tage gültig, wird beim Abmelden gelöscht);</li>
-                <li>deine Einstellungen: Sprache, Design, Farbe, Animationen, Startseite, Sitzungsdauer, Timer oder Stoppuhr, Kalenderansicht;</li>
+                <li>deine Einstellungen: Sprache, Design, Farbe, Animationen, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer oder Stoppuhr, Kalenderansicht;</li>
                 <li>ob du die Einführung gesehen hast, welche Erinnerungen schon angezeigt wurden und welche gemeinsame Sitzung gerade gestoppt wird;</li>
                 <li>Schwierigkeit und Bestwerte der Spiele.</li>
             </ul>
@@ -312,7 +318,7 @@ function Privacy() {
             <h2>9. Speicherdauer</h2>
             <p>
                 Deine Konto- und Inhaltsdaten speichere ich, solange dein Konto besteht. Löschst du dein Konto, werden
-                Konto, Aufgaben, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen und alle
+                Konto, Aufgaben, Events, Event-Typen, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen und alle
                 Nachrichten, die du geschrieben oder bekommen hast, sofort gelöscht – auch beim Gegenüber, auch deine
                 Nachrichten in Family-Chats. Einträge in Protokollen (Verlauf gemeinsamer Sitzungen, Admin-Protokoll)
                 und von dir angelegte Einträge in Family-Kalendern verlieren den Bezug zu deinem Konto. Hast du eine

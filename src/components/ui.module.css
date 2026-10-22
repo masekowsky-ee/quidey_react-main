@@ -10,7 +10,7 @@
 /* Centered reading column for simple pages (settings, profile, history) */
 .pageColumn {
     composes: page;
-    width: min(680px, calc(100% - 2rem));
+    width: min(680px, calc(100% - 2 * var(--page-gutter, 1rem)));
     margin: 0 auto;
     padding-bottom: 4rem;
     box-sizing: border-box;

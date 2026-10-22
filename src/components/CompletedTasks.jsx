@@ -1,4 +1,4 @@
-import styles from './History.module.css';
+import styles from './stats/SessionList.module.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
 import { updateTaskProps } from '../features/tasks/taskAction';
@@ -17,8 +17,9 @@ export default function CompletedTasks() {
     const language = useSelector(state => state.settings.language);
     const locale = language === 'de' ? 'de-DE' : 'en-GB';
 
+    // past events aren't ticked off: their time is in the statistics instead
     const done = tasks
-        .filter(task => task.done)
+        .filter(task => task.done && task.kind !== 'event')
         .sort((a, b) => (b.completed_at ? Date.parse(b.completed_at) : 0) - (a.completed_at ? Date.parse(a.completed_at) : 0));
 
     if (done.length === 0) return <div className={`${styles.card} ${styles.empty}`}>{t('noCompletedTasks')}</div>;

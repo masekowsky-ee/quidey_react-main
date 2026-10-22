@@ -5,9 +5,9 @@ import { useTranslation } from '../i18n/useTranslation';
 import { formatDate, formatDuration } from '../features/helperFunction';
 import { updateProfile, changePassword, logoutEverywhere, resendVerificationMail, deleteAccount } from '../features/auth/authAction';
 import { fetchFriends } from '../features/friends/friendsAction';
-import { fetchOwnProfile, profileColorAttr } from '../features/profile/profileOptions';
+import { Link } from 'react-router-dom';
+import { fetchOwnProfile } from '../features/profile/profileOptions';
 import ProfileCard from './profile/ProfileCard.jsx';
-import ProfileStats from './profile/ProfileStats.jsx';
 import ProfileEditor from './profile/ProfileEditor.jsx';
 
 // Translated message for a profile API error, using the error code the backend sends
@@ -207,27 +207,27 @@ export default function ProfileView({ onSignOut }) {
                 />
             )}
 
-            {profile?.stats ? (
-                <ProfileStats stats={profile.stats} title={t('stats')} colorAttr={profileColorAttr(shown)} />
-            ) : (
-                <section className={styles.card}>
+            {/* the numbers in short; heat map, badges and the periods are on the statistics page */}
+            <section className={styles.card}>
+                <div className={styles.cardHead}>
                     <h2 className={styles.cardTitle}>{t('stats')}</h2>
-                    <div className={styles.stats}>
-                        <div className={styles.stat}>
-                            <span className={styles.statValue}>{sessions.length}</span>
-                            <span className={styles.statLabel}>{t('sessions')}</span>
-                        </div>
-                        <div className={styles.stat}>
-                            <span className={styles.statValue}>{formatDuration(focusMs)}</span>
-                            <span className={styles.statLabel}>{t('focusTime')}</span>
-                        </div>
-                        <div className={styles.stat}>
-                            <span className={styles.statValue}>{friendCount}</span>
-                            <span className={styles.statLabel}>{t('friends')}</span>
-                        </div>
+                    <Link to="/stats" className={styles.quietBtn}>{t('statsOpen')} →</Link>
+                </div>
+                <div className={styles.stats}>
+                    <div className={styles.stat}>
+                        <span className={styles.statValue}>{profile?.stats?.sessions ?? sessions.length}</span>
+                        <span className={styles.statLabel}>{t('sessions')}</span>
                     </div>
-                </section>
-            )}
+                    <div className={styles.stat}>
+                        <span className={styles.statValue}>{formatDuration(profile?.stats?.totalMs ?? focusMs)}</span>
+                        <span className={styles.statLabel}>{t('focusTime')}</span>
+                    </div>
+                    <div className={styles.stat}>
+                        <span className={styles.statValue}>{friendCount}</span>
+                        <span className={styles.statLabel}>{t('friends')}</span>
+                    </div>
+                </div>
+            </section>
 
             <section className={styles.card}>
                 <div className={styles.cardHead}>

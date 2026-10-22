@@ -1,0 +1,190 @@
+/* Task or event, and the event's type */
+
+.srOnly{
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ---------- task | event: two cards side by side ---------- */
+
+.kind{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    border: none;
+    min-width: 0;
+}
+
+.kindOption,
+.kindOn{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+    background-color: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: border-color var(--ease), background-color var(--ease);
+}
+
+.kindOption:hover{
+    border-color: var(--border-strong);
+}
+
+.kindOn{
+    background-color: color-mix(in srgb, var(--primary) 10%, var(--surface-inset));
+    border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+}
+
+.kindOption input,
+.kindOn input{
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.kindOption:has(input:focus-visible),
+.kindOn:has(input:focus-visible){
+    outline: 2px solid var(--border-strong);
+    outline-offset: 2px;
+}
+
+.kindName{
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.kindHint{
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: var(--text-muted);
+}
+
+/* ---------- event types as chips ---------- */
+
+.types{
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    border: none;
+    min-width: 0;
+}
+
+.typesLegend{
+    padding: 0;
+    margin-bottom: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.chips{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.chip,
+.chipOn,
+.suggestion,
+.newBtn{
+    --chip-tone: var(--task-color, var(--primary));
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    box-shadow: none;
+    transform: none;
+    filter: none;
+    transition: border-color var(--ease), background-color var(--ease), color var(--ease);
+}
+
+.chip:hover,
+.suggestion:hover,
+.newBtn:hover{
+    color: var(--text-h);
+    border-color: var(--border-strong);
+    box-shadow: none;
+}
+
+.chipOn{
+    color: var(--text-h);
+    background-color: color-mix(in srgb, var(--chip-tone) 16%, var(--surface));
+    border-color: color-mix(in srgb, var(--chip-tone) 60%, transparent);
+}
+
+.chip input,
+.chipOn input{
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.chip:has(input:focus-visible),
+.chipOn:has(input:focus-visible){
+    outline: 2px solid var(--border-strong);
+    outline-offset: 2px;
+}
+
+.dot{
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background-color: var(--chip-tone);
+}
+
+.suggestion,
+.newBtn{
+    color: var(--text-muted);
+    background: none;
+    border-style: dashed;
+}
+
+.addRow{
+    display: inline-flex;
+    gap: 0.35rem;
+    align-items: center;
+}
+
+.addInput{
+    width: 10rem;
+    height: 1.9rem;
+    font-size: 0.85rem;
+}
+
+.addBtn{
+    height: 1.9rem;
+    padding: 0 0.75rem;
+    font-size: 0.8125rem;
+}
+
+.manage{
+    align-self: flex-start;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.manage:hover{
+    color: var(--primary-fg);
+}

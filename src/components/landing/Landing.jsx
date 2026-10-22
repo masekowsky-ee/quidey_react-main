@@ -8,7 +8,7 @@ import { setLanguage } from '../../features/settings/settingsAction';
 import { useMotionLevel } from '../../features/settings/motion';
 import { COPYRIGHT_YEAR } from '../../legal/owner';
 import Logo from '../Logo';
-import Profile from '../profile';
+import Profile from '../Profile';
 
 // The Remotion player only loads with the page's first screen, not with the app
 const FocusLoopPlayer = lazy(() => import('./FocusLoopPlayer'));

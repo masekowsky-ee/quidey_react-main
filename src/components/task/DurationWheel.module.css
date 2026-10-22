@@ -1,0 +1,240 @@
+/* A length of time: a field that opens two wheels (hours, minutes) and quick picks */
+
+.field{
+    flex: 1;
+    min-width: 10rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: left;
+}
+
+.label{
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.row{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* Looks like the other inputs: a box with the value and a small chevron */
+.value{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    height: 2.15rem;
+    padding: 0 0.6rem;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-h);
+    text-align: left;
+    background-color: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+    transform: none;
+    filter: none;
+}
+
+.value:hover{
+    border-color: var(--border-strong);
+    background-color: var(--surface-inset);
+    box-shadow: none;
+}
+
+.value[aria-expanded="true"]{
+    border-color: var(--primary);
+}
+
+.none{
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.chevron{
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.clear{
+    flex-shrink: 0;
+    width: 2.15rem;
+    height: 2.15rem;
+    padding: 0;
+    font-size: 1.1rem;
+    line-height: 1;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+}
+
+.clear:hover{
+    color: var(--text-h);
+    background-color: var(--surface-hover);
+    box-shadow: none;
+}
+
+.hint{
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.popout{
+    margin-top: 0.35rem;
+    padding: 0.75rem;
+    background-color: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+/* ---------- the wheels ---------- */
+
+.picker{
+    --wheel-item: 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.wheels{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1.25rem;
+}
+
+/* the band in the middle that holds the chosen numbers */
+.wheels::before{
+    content: '';
+    position: absolute;
+    inset: calc(50% - var(--wheel-item) / 2) 0 auto;
+    height: var(--wheel-item);
+    background-color: var(--surface-strong);
+    border-radius: var(--radius-sm);
+    pointer-events: none;
+}
+
+.column{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.wheel{
+    position: relative;
+    width: 3.25rem;
+    height: calc(var(--wheel-item) * 5);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+    /* numbers fade out towards the top and bottom */
+    mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent);
+    border-radius: var(--radius-sm);
+}
+
+.wheel::-webkit-scrollbar{
+    display: none;
+}
+
+.wheel:focus-visible{
+    outline: 2px solid var(--border-strong);
+    outline-offset: 2px;
+}
+
+.items{
+    list-style: none;
+    margin: 0;
+    /* room above the first and below the last number, so both reach the band */
+    padding: calc(var(--wheel-item) * 2) 0;
+}
+
+.item,
+.itemOn{
+    height: var(--wheel-item);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    scroll-snap-align: center;
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+    transition: color var(--ease), font-weight var(--ease);
+}
+
+.itemOn{
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.unit{
+    min-width: 1.6rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* ---------- quick picks ---------- */
+
+.quick{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.quickBtn,
+.quickOn{
+    padding: 0.2rem 0.65rem;
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    box-shadow: none;
+    transform: none;
+    filter: none;
+}
+
+.quickBtn:hover{
+    color: var(--text-h);
+    border-color: var(--border-strong);
+    box-shadow: none;
+}
+
+.quickOn,
+.quickOn:hover{
+    color: var(--primary-fg);
+    background-color: color-mix(in srgb, var(--primary) 14%, transparent);
+    border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+    box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce){
+    .item,
+    .itemOn{
+        transition: none;
+    }
+}

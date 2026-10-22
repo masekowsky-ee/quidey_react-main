@@ -2,10 +2,13 @@
 // index.css ([data-task-color], one tone per theme); components only set the attribute.
 export const TASK_COLORS = ['red', 'orange', 'yellow', 'green', 'teal', 'blue', 'violet', 'pink'];
 
+// The colour a task shows: its own; an event without one takes its type's
+const shownColor = (task) => task?.color ?? (task?.kind === 'event' ? task.event_type?.color : null);
+
 // The data-task-color attribute of a task's row or chip: its colour while it's open, nothing
 // when it has none or is done (done tasks are greyed out like before)
 export const taskColorAttr = (task) =>
-    !task?.done && TASK_COLORS.includes(task?.color) ? task.color : undefined;
+    !task?.done && TASK_COLORS.includes(shownColor(task)) ? shownColor(task) : undefined;
 
 // The same attribute for a group (its tasks show a dot in that colour): its colour or nothing
 export const groupColorAttr = (group) =>

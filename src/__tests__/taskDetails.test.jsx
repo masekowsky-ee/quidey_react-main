@@ -56,7 +56,9 @@ describe('time of day', () => {
     it('reads and shows times and durations', () => {
         expect(minutesOfDay('09:05')).toBe(545)
         expect(minutesOfDay(null)).toBeNull()
-        expect(taskTimeText(task)).toBe('23:30–01:00')
+        // a task's duration is only its planned time: it shows its start; an event its range
+        expect(taskTimeText(task)).toBe('23:30')
+        expect(taskTimeText({ ...task, kind: 'event' })).toBe('23:30–01:00')
         expect(taskTimeText({ due_time: '08:00' })).toBe('08:00')
         expect(taskTimeText({ due_time: null })).toBe('')
         expect(durationText(90)).toBe('1 h 30 min')
@@ -232,10 +234,11 @@ describe('calendar with times and sharing', () => {
         expect(chips[1]).toContain('Lunch')
     })
 
-    it('the day panel shows time range, location and who it is shared with', () => {
+    it('the day panel shows time, planned time, location and who it is shared with', () => {
         renderCalendar('/calendar?date=2026-10-22&day=2026-10-22', makeStore([lunch, fromAlice]))
         const dialog = screen.getByRole('dialog')
-        expect(within(dialog).getByText('12:30–14:00')).toBeInTheDocument()
+        expect(within(dialog).getByText('12:30')).toBeInTheDocument()
+        expect(within(dialog).getByText('1 h 30 min planned')).toBeInTheDocument()
         expect(within(dialog).getByText('Luigi')).toBeInTheDocument()
         expect(within(dialog).getByText('Bob')).toBeInTheDocument()
         expect(within(dialog).getByText('From Alice')).toBeInTheDocument()
@@ -251,18 +254,20 @@ describe('calendar with times and sharing', () => {
         expect(bodyOf('/api/tasks', 'POST')).toMatchObject({ name: 'Gym', due: '2026-10-22', due_time: '18:00' })
     })
 
-    it('edits time, duration, location and reminder', async () => {
+    it('edits time, planned time, location and reminder', async () => {
         const store = makeStore([{ ...lunch, sharedWith: [] }])
         renderCalendar('/calendar?date=2026-10-22&day=2026-10-22&task=5', store)
         // opened from the address straight into the editor; the options start closed, with a summary
         expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue('Lunch')
         const toggle = screen.getByRole('button', { name: /More options/ })
         expect(toggle).toHaveAttribute('aria-expanded', 'false')
-        expect(toggle).toHaveTextContent('1 h 30 min · Luigi')
-        expect(screen.queryByRole('combobox', { name: 'Duration' })).not.toBeInTheDocument()
+        expect(toggle).toHaveTextContent('Luigi')
+        // the planned time sits on wheels that open from its field
+        expect(screen.queryByRole('spinbutton', { name: 'Planned time: Hours' })).not.toBeInTheDocument()
+        fireEvent.click(screen.getByRole('button', { name: '1 h 30 min' }))
+        fireEvent.click(screen.getByRole('button', { name: '1 h', pressed: false }))
         fireEvent.click(toggle)
         fireEvent.change(screen.getByLabelText('Time'), { target: { value: '13:00' } })
-        fireEvent.change(screen.getByRole('combobox', { name: 'Duration' }), { target: { value: '60' } })
         fireEvent.change(screen.getByRole('combobox', { name: 'Reminder' }), { target: { value: '15' } })
         fireEvent.change(screen.getByRole('textbox', { name: 'Location' }), { target: { value: 'Pizza place' } })
         apiFetch.mockResolvedValueOnce({ ...lunch, due_time: '13:00', duration_minutes: 60, reminder_minutes: 15, location: 'Pizza place' })
@@ -329,7 +334,12 @@ describe('create task form', () => {
         fireEvent.change(screen.getByLabelText(/^Time/), { target: { value: '12:30' } })
         fireEvent.click(screen.getByRole('button', { name: /More options/ }))
         fireEvent.change(screen.getByRole('textbox', { name: 'Location' }), { target: { value: 'Luigi' } })
-        fireEvent.change(screen.getByRole('combobox', { name: 'Duration' }), { target: { value: '90' } })
+        // 1 h 30 min on the wheels, by keyboard: one hour down, six steps of five minutes
+        fireEvent.click(screen.getByRole('button', { name: 'None' }))
+        fireEvent.keyDown(screen.getByRole('spinbutton', { name: 'Planned time: Hours' }), { key: 'ArrowDown' })
+        const minutes = screen.getByRole('spinbutton', { name: 'Planned time: Minutes' })
+        for (let i = 0; i < 6; i++) fireEvent.keyDown(minutes, { key: 'PageDown' })
+        expect(minutes).toHaveAttribute('aria-valuenow', '30')
         fireEvent.click(screen.getByRole('button', { name: /Bob/ }))
         apiFetch
             .mockResolvedValueOnce({ id: 30, name: 'Lunch' })

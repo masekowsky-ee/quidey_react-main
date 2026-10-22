@@ -92,6 +92,56 @@ button.row:hover{
     background: var(--hover-wash);
 }
 
+/* the conversation open beside the list: the same neutral pill as the current page in the menu */
+button.rowSelected,
+button.rowSelected:hover{
+    background: var(--surface-strong);
+}
+
+/* ---------- wide screens: conversations beside the open one ---------- */
+.pageWide{
+    composes: page from './ui.module.css';
+    width: min(1100px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    margin: 0 auto;
+    padding-bottom: 4rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: left;
+}
+
+.split{
+    display: grid;
+    grid-template-columns: 22rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.splitList{
+    padding: 1rem;
+}
+
+.splitThread{
+    min-height: 24rem;
+}
+
+/* the messages fill the panel, the box to write in sits at its foot */
+.splitThread > .thread{
+    flex: 1;
+}
+
+.splitThread .messages{
+    flex: 1;
+    max-height: min(60vh, 40rem);
+}
+
+.pickHint{
+    margin: auto;
+    color: var(--text-muted);
+    text-align: center;
+}
+
 .avatar{
     flex-shrink: 0;
     width: 2.25rem;

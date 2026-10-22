@@ -1,4 +1,4 @@
-import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, GET_NOTES, REFRESH_TASKS, TASK_REPLACED, SET_TASK_INVITES, TASK_INVITE_ACCEPTED, TASK_INVITE_REMOVED, TASK_SHARE_REMOVED } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, GET_NOTES, REFRESH_TASKS, TASK_REPLACED, SET_TASK_INVITES, TASK_INVITE_ACCEPTED, TASK_INVITE_REMOVED, TASK_SHARE_REMOVED, SET_EVENT_TYPES, EVENT_TYPE_SAVED, EVENT_TYPE_REMOVED } from './taskActionTypes';
 import { apiFetch, toInputDate } from '../helperFunction';
 
 
@@ -8,13 +8,16 @@ export const fetchTaskState = () => {
         const tasks = await apiFetch("/api/tasks");
         const groups = await apiFetch("/api/groups");
         const notes = await apiFetch("/api/notes");
-        dispatch({ type: SET_TASK_STATE, payload: {tasks, groups, notes} });
+        // the types are only extra: the list works without them
+        const eventTypes = await apiFetch("/api/event-types").catch(() => undefined);
+        dispatch({ type: SET_TASK_STATE, payload: {tasks, groups, notes, eventTypes} });
     }
 }
 
-// The optional task fields (see the api): time of day, duration and reminder in minutes,
-// location, link and extra details, colour, and whether the reminder also comes by mail
-export const TASK_EXTRA_FIELDS = ['due_time', 'duration_minutes', 'reminder_minutes', 'location', 'link', 'details', 'repeat', 'color', 'reminder_email'];
+// The optional task fields (see the api): time of day, duration (an event's length, a task's
+// planned time) and reminder in minutes, location, link and extra details, colour, whether the
+// reminder also comes by mail, and task or event (kind) with the event's type
+export const TASK_EXTRA_FIELDS = ['due_time', 'duration_minutes', 'reminder_minutes', 'location', 'link', 'details', 'repeat', 'color', 'reminder_email', 'kind', 'event_type_id'];
 const extrasOf = (source) => Object.fromEntries(TASK_EXTRA_FIELDS
     .filter(field => source?.[field] !== undefined)
     .map(field => [field, source[field] === '' ? null : source[field]]));
@@ -30,7 +33,9 @@ export const addTask = (name, due, description, prio, activeGroupId = null, user
             }
         );
 
-        const { id } = data;
+        // an event entered afterwards is over at once; a repeating one comes with its next one
+        const { nextTask, ...created } = data;
+        const { id } = created;
 
         if (activeGroupId) {
             await apiFetch(`/api/tasks/${id}/groups/${activeGroupId}`, {method: "POST"}
@@ -38,12 +43,13 @@ export const addTask = (name, due, description, prio, activeGroupId = null, user
         }
 
 
-        const task = { ...data, group_ids: activeGroupId ? [activeGroupId] : [] };
+        const task = { ...created, group_ids: activeGroupId ? [activeGroupId] : [] };
         dispatch({
             type: ADD_TASK,
             // the groups it's in, for its labels (it was created before it went into the group)
             payload: task,
         });
+        if (nextTask) dispatch({ type: ADD_TASK, payload: { ...nextTask, group_ids: task.group_ids } });
         return task;
     };
 }
@@ -87,10 +93,36 @@ export const updateTaskProps = (taskPropObject, task) => {
 // The task list again, e.g. when the app gets focus: friends may have changed shared tasks
 export const refreshTasks = () => {
     return async (dispatch) => {
-        const tasks = await apiFetch("/api/tasks");
+        const [tasks, eventTypes] = await Promise.all([
+            apiFetch("/api/tasks"),
+            apiFetch("/api/event-types").catch(() => null),
+        ]);
         dispatch({ type: REFRESH_TASKS, payload: tasks });
+        if (eventTypes) dispatch({ type: SET_EVENT_TYPES, payload: eventTypes });
     };
 }
+
+// ---------- event types ----------
+
+// { name, color? } -> the new type (at the end of my list)
+export const addEventType = (name, color = null) => async (dispatch) => {
+    const type = await apiFetch("/api/event-types", { method: "POST", body: JSON.stringify({ name, color }) });
+    dispatch({ type: EVENT_TYPE_SAVED, payload: type });
+    return type;
+};
+
+// changes: { name?, color?, position? }
+export const updateEventType = (id, changes) => async (dispatch) => {
+    const type = await apiFetch(`/api/event-types/${id}`, { method: "PUT", body: JSON.stringify(changes) });
+    dispatch({ type: EVENT_TYPE_SAVED, payload: type });
+    return type;
+};
+
+// The type goes, its events stay (without a type)
+export const deleteEventType = (id) => async (dispatch) => {
+    await apiFetch(`/api/event-types/${id}`, { method: "DELETE" });
+    dispatch({ type: EVENT_TYPE_REMOVED, payload: id });
+};
 
 // ---------- tasks shared with friends ----------
 

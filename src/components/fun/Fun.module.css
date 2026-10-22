@@ -10,7 +10,7 @@
     --res-present-text: #1f1600;
     --res-absent: #3d3a37;
     --res-absent-text: #ebe7e3;
-    width: min(760px, calc(100% - 2rem));
+    width: min(760px, calc(100% - 2 * var(--page-gutter, 1rem)));
     margin: 0 auto;
     padding-bottom: 3rem;
     box-sizing: border-box;

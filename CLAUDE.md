@@ -23,9 +23,12 @@ Two repositories, side by side on this machine:
 - Routing: react-router-dom 7 (`BrowserRouter` in `src/main.jsx`).
 - Animation: `motion` (Framer Motion) with three user-chosen levels `minimal | normal | extreme`
   (`src/features/settings/motion.js`, `MOTION` presets, confetti `burst`). Remotion
-  (`@remotion/player`) renders the intro (`src/components/intro/`) and the landing hero loop.
+  (`@remotion/player`) renders the intro (`src/components/intro/`, only when the app is opened
+  fresh on `/`: not on reload, back/forward or a deep link) and the landing hero loop.
 - Realtime: `socket.io-client` (`src/features/realtime/socket.js`, `useRealtime(event, handler)`),
   loaded with a dynamic import only once signed in.
+- Icons: one outline set, `src/components/icons.jsx` (`<Icon name size? />`, 24px grid, 1.7
+  stroke); the calendar keeps its own `calendar/icons.jsx`. No icon files in `src/assets/`.
 - Code splitting: every page except Home is `lazy()` in `App.jsx` (`PAGES`), preloaded when the
   app is idle (`preloadPages`); `LegalFooter` lives in its own file so the legal texts stay
   lazy. `vite.config.js` puts react / router / state / motion in their own long-cached chunks.
@@ -43,7 +46,14 @@ Order of checks on every render:
 3. Not signed in → `Landing` (marketing page with sign-in / sign-up).
 4. Signed in, access not checked yet → `AccessPending`; not pro → `/beta` (`BetaGate`, user can
    request beta access).
-5. Pro → full app: `Header`, `Menu`, `Toaster`, `Tutorial`, animated page routes.
+5. Pro → full app in the frame `AppShell.module.css`: `Header`, `Menu`, `TabBar`, `Toaster`,
+   `Tutorial`, animated page routes in `<main>`. Widths (`src/features/layout/breakpoints.js`,
+   `useMediaQuery`): ≥1100px the `Menu` is a fixed sidebar and the header starts beside it;
+   721–1099px the menu is a drawer behind the header's button; ≤720px a bottom `TabBar` (Start,
+   Kalender, Zusammen, Postfach, Mehr → drawer) replaces the header's button. The shell sets
+   `--sidebar-w`, `--tabbar-h` and `--page-gutter`; fixed parts (toasts, timer button) and every
+   page container use them. The closed drawer is `inert`; `setShowMenu(true|false)` (no argument
+   toggles).
 
 App also: re-checks access on a `PRO_REQUIRED` API error or a refused socket
 (`REALTIME_REJECTED`); signs out on `TOKEN_REVOKED`/`TOKEN_INVALID`; opens the Socket.IO
@@ -56,8 +66,17 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
 
 ## Pages / features
 
-- `/` Home — layout `solo` (task list + focus/timer area: `TaskContainer`, `TimerContainer`,
-  `WorkingContainer`, `WeekDaysContainer`) or `team` (`TeamHome`), switchable in settings.
+- `/` Home — layout `solo` or `team` (`TeamHome`), switchable in settings. Solo (`Home.jsx`):
+  title row (today's date as h1, open / due today / overdue, Solo|Team switch), next 8 days
+  (`WeekDaysContainer`), group filter chips (`GroupBtnContainer`: "Alle", groups, session groups,
+  "+"), the list (`TaskContainer`, one `task/TaskRow` per task: check, name (click renames), one
+  line of details, day as "Heute/Morgen/weekday" (`dueText`), priority as "Hoch/Mittel", focus /
+  edit / two-step delete (`ConfirmDeleteButton`)), and the "Fokus" column (`WorkingContainer` +
+  `TimerContainer inline`) sticky beside the list from 1100px; narrower, the focus card comes
+  first and the timer is the corner button. Colour, groups, description and priority are set in
+  the editor (`TaskEditDialog`); a shown group's colour and deletion sit in the list's title row.
+  Tasks of shared sessions can be taken out of "Alle" (`settings.showSharedTasks`, eye button in
+  the list's title row and in Settings); a session's own group always shows them.
 - `/calendar` — month / week / agenda views, drag tasks between days, keyboard grid,
   `TaskEditor` (times, reminders, repeat weekly/monthly/yearly, notes, groups/labels, sharing).
   Several calendars: `?cal=session-<id>` shows a shared session's tasks, `?cal=family-<id>` a
@@ -69,14 +88,20 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   `TaskEditDialog handlers={…}` and in the calendar) and its own chat. Slice `family` in
   `src/features/family/family.js` (list + invites, `useFamilyList` in App), pages in
   `src/components/family/`. API under `/api/tester/families` (backend migration 022).
-- `/history` — past focus sessions and completed tasks, CSV export.
+- `/stats` — **Statistiken** (formerly `/history`, which redirects): tabs Übersicht | Sitzungen |
+  Erledigt (`?tab=`), period Woche/Monat/Jahr/Gesamt stepped back with arrows (`?range=&offset=`,
+  `src/features/stats/period.js`). Overview from `GET /api/stats?from&to`: tiles, stacked columns
+  focus + event time (`stats/TimeChart.jsx`, fixed validated pair blue/orange, table view), bars per
+  event type and per group, then the all-time `ProfileStats` ("Aktivität"). Sessions list in
+  `stats/SessionList.jsx`, completed tasks in `CompletedTasks.jsx` (events left out).
 - `/profile`, `/settings` — profile, password, "sign out everywhere", delete account; language,
   theme (dark/light/system), accent colour (green, ocean, violet, sunset (default), rose, gold —
   also recolours the favicon), motion level, home layout.
 - `/social` — friends and friend requests; names link to `/u/:username`, the Add tab can open a
   profile before sending a request.
 - Profiles: `/profile` shows my profile card (banner, avatar, status, bio, study, interests),
-  "Profil gestalten" (`components/profile/ProfileEditor.jsx`, live preview) and my statistics.
+  "Profil gestalten" (`components/profile/ProfileEditor.jsx`, live preview) and my numbers in short
+  (the full statistics are on `/stats`).
   `/u/:username` (`UserProfile.jsx`) shows somebody else: non-friends only see display name and
   username (plus add / accept / withdraw), friends see the whole profile, mutual friends and the
   statistics unless `showStats` is off. Pieces in `src/components/profile/` (`ProfileCard`,
@@ -90,6 +115,7 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   (`TaskEditor personal={false}`). Reminders, repeating, groups and sharing stay personal; adding
   an own task copies its details, later edits don't sync back (only `done` does).
 - `/inbox` — direct messages between friends + notifications/admin broadcasts (realtime).
+  From 1100px the messages tab is split: conversations beside the open one (`?with=<userId>`).
 - `/feedback` — feedback form (mailed to the owner).
 - `/admin` — only for `isAdmin`: overview, beta requests (approve/decline), users (pro/admin
   toggles), broadcasts, admin action log.
@@ -97,7 +123,17 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   daily line in the header.
 - Task sharing: send a task to a friend (`task_shares`), accepted shares appear in their list.
 - Task colours: `tasks.color` (8 names, `src/features/tasks/taskColors.js`); rows and chips set
-  `data-task-color`, the tones live in `index.css` as `--task-color` per theme.
+  `data-task-color`, the tones live in `index.css` as `--task-color` per theme. An event without
+  its own colour takes its type's.
+- Tasks vs. events (`tasks.kind`, `src/features/tasks/kinds.js`): a task is ticked off by hand, an
+  event needs a day and is done once it's over — the server ticks it off (every minute, on
+  `GET /api/tasks`, on save; repeating ones get their next one), `useEventEnds` reloads the list
+  when one ends. `duration_minutes` = a task's planned time (shown against focus time,
+  `plannedTime.js`) or an event's length; both set on wheels (`task/DurationWheel.jsx`). Events
+  have a type from my own list (`event_types`, `state.task.eventTypes`, managed in Settings →
+  Event-Typen, `EventTypeSettings.jsx`; picker `task/KindFields.jsx`). Home's list holds tasks
+  only; today's events sit above it (`task/TodayEvents.jsx`). Events can't be focused, shared into
+  sessions or overdue. On phones the week strip has no calendar card (the tab bar has it).
 
 PWA: installable app. `public/manifest.webmanifest` + icons in `public/icons/` (logo on the dark
 background, incl. a maskable one and the apple-touch-icon). `pwa.js` is a Vite plugin that writes
@@ -112,7 +148,7 @@ says "installed" when running standalone, and hides the row everywhere else.
 
 Client-side storage: only `localStorage` (no cookies), plus the service worker's Cache Storage
 for the app's own files: `token` (JWT), `language`, `accent`,
-`theme`, `motion`, `homeLayout`, `calendarView`, `timerMode`, `teamSessionId`. `public/theme-init.js` applies
+`theme`, `motion`, `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`, `teamSessionId`. `public/theme-init.js` applies
 the theme before React loads.
 
 ## API access
@@ -129,7 +165,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.

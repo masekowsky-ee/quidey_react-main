@@ -5,7 +5,8 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // design tooling (skills, review reports), not app code
+  globalIgnores(['dist', '.claude', '.agents', '.taste-skill']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [

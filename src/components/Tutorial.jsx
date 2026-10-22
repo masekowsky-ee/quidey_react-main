@@ -25,7 +25,7 @@ const STEPS = [
     { id: 'together', icon: 'together', to: '/together', page: 'together' },
     { id: 'family', icon: 'family', to: '/family', page: 'family', tester: true },
     { id: 'inbox', icon: 'inbox', to: '/inbox', page: 'inbox' },
-    { id: 'history', icon: 'history', to: '/history', page: 'history' },
+    { id: 'history', icon: 'history', to: '/stats', page: 'history' },
     { id: 'settings', icon: 'settings', to: '/settings', page: 'settings' },
     { id: 'menu', icon: 'menu' },
 ];

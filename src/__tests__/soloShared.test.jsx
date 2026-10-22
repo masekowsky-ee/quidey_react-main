@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, act, within, renderHook } from '@testing-library/react'
+import { render, screen, fireEvent, act, within, renderHook, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
@@ -14,7 +14,7 @@ import { WORKED_SESSIONS_FIXTURE } from './fixtures/history.js'
 import GroupPicker from '../components/GroupPicker'
 import TaskContainer from '../components/TaskContainer'
 import GroupBtnContainer from '../components/GroupBtnContainer'
-import History from '../components/History'
+import Stats from '../components/Stats'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
     ...(await importOriginal()),
@@ -192,6 +192,32 @@ describe('solo task list', () => {
         expect(within(own).getByRole('button', { name: 'Uni' })).toBeInTheDocument()
     })
 
+    it('takes the shared tasks out of "All" and brings them back; the choice is remembered', async () => {
+        localStorage.removeItem('showSharedTasks')
+        const store = makeStore()
+        renderList(store)
+        expect(screen.getByText('Slides')).toBeInTheDocument()
+
+        fireEvent.click(screen.getByRole('button', { name: 'Aufgaben aus gemeinsamen Sitzungen ausblenden' }))
+        // the row leaves with its exit animation
+        await waitFor(() => expect(screen.queryByText('Slides')).not.toBeInTheDocument())
+        expect(screen.getByText('Own task')).toBeInTheDocument()
+        // only the open one counts
+        expect(screen.getByText('1 Aufgaben aus gemeinsamen Sitzungen ausgeblendet')).toBeInTheDocument()
+        expect(localStorage.getItem('showSharedTasks')).toBe('0')
+
+        // the session's own group still shows them
+        apiFetch.mockResolvedValue({ id: 5, name: 'Lerngruppe', me: 1, endedAt: null, people: [], events: [], tasks: [] })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Lerngruppe\s*1/ })) })
+        expect(screen.getByText('Slides')).toBeInTheDocument()
+        apiFetch.mockResolvedValue(ownTasks)
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Alle' })) })
+
+        fireEvent.click(screen.getByRole('button', { name: 'Einblenden' }))
+        expect(screen.getByText('Slides')).toBeInTheDocument()
+        expect(localStorage.getItem('showSharedTasks')).toBe('1')
+    })
+
     it('a session group has no delete button, shows only its tasks, and marks them done in the session', async () => {
         const store = makeStore()
         apiFetch.mockResolvedValue({ id: 5, name: 'Lerngruppe', me: 1, endedAt: null, people: [], events: [], tasks: [] })
@@ -210,14 +236,17 @@ describe('solo task list', () => {
     it('opens the group picker and closes it with Escape', async () => {
         const store = makeStore()
         renderList(store)
-        fireEvent.click(within(screen.getByText('Own task').closest('li')).getByText('Zu Gruppe hinzufügen'))
-        expect(screen.getByRole('dialog')).toBeInTheDocument()
+        // groups are picked from the task's editor
+        fireEvent.click(within(screen.getByText('Own task').closest('li')).getByRole('button', { name: 'Bearbeiten: Own task' }))
+        fireEvent.click(within(screen.getByRole('dialog')).getByText('Zu Gruppe hinzufügen'))
+        expect(screen.getAllByRole('dialog')).toHaveLength(2)
+        // Escape closes the picker, the editor stays
         fireEvent.keyDown(window, { key: 'Escape' })
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+        expect(screen.getAllByRole('dialog')).toHaveLength(1)
     })
 })
 
-describe('history', () => {
+describe('sessions in the statistics', () => {
     it('shows work in shared sessions with a label, and shared tasks inside solo sessions', async () => {
         const store = makeStore()
         store.dispatch({ type: 'SET_WORKED_SESSIONS', payload: WORKED_SESSIONS_FIXTURE })
@@ -225,7 +254,7 @@ describe('history', () => {
             { id: 5, name: 'Lerngruppe', endedAt: null, lastWorkedAt: '2026-10-19T09:00:00Z', myMs: 900000, tasks: [{ id: 12, name: 'Slides', done: false, ms: 900000 }] },
         ])
         await act(async () => {
-            render(<Provider store={store}><MemoryRouter><History /></MemoryRouter></Provider>)
+            render(<Provider store={store}><MemoryRouter initialEntries={['/stats?tab=sessions&range=all']}><Stats /></MemoryRouter></Provider>)
         })
         expect(apiFetch).toHaveBeenCalledWith('/api/shared-sessions/history')
         const entry = screen.getByRole('link', { name: 'Lerngruppe' }).closest('li')

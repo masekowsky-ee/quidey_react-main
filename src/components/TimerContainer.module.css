@@ -2,7 +2,7 @@
 .fab{
     position: fixed;
     right: calc(1rem + env(safe-area-inset-right, 0px));
-    bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); /* above an iPhone's home indicator */
+    bottom: calc(1rem + var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px)); /* above an iPhone's home indicator */
     z-index: var(--z-header);
     display: inline-flex;
     align-items: center;
@@ -57,7 +57,7 @@
 .panel{
     position: fixed;
     right: calc(1rem + env(safe-area-inset-right, 0px));
-    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    bottom: calc(1rem + var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px));
     z-index: var(--z-header);
     display: flex;
     flex-direction: column;
@@ -161,7 +161,7 @@
     .fab,
     .panel{
         right: 0.75rem;
-        bottom: 0.75rem;
+        bottom: calc(0.75rem + var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px));
     }
 
     .div{
@@ -279,4 +279,61 @@
     font-weight: 600;
     font-variant-numeric: tabular-nums;
     margin: 0;
+}
+
+.foldIcon{
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.ctrlIcon{
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* ---------- inline: a panel in Home's focus column (wide screens) ----------
+   Mode switch on top, the time large on its own line, the progress line under it at full
+   width, the controls at the end of that line */
+.inlinePanel{
+    composes: panel from './ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem 1.25rem;
+    text-align: left;
+}
+
+.inlinePanel .div{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "time time"
+        "bar  nav";
+    align-items: center;
+    gap: 0.75rem 1rem;
+}
+
+.inlinePanel .timerH2,
+.inlinePanel .stopwatchH2,
+.inlinePanel .editTimerDiv{
+    grid-area: time;
+}
+
+.inlinePanel .timerH2,
+.inlinePanel .stopwatchH2{
+    font-size: 2.25rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.inlinePanel .setTimerH2{
+    font-size: 1.75rem;
+}
+
+.inlinePanel .progress{
+    grid-area: bar;
+}
+
+.inlinePanel .timerNav{
+    grid-area: nav;
 }

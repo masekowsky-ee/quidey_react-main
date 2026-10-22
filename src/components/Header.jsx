@@ -24,7 +24,7 @@ export default function Header(props){
     const percentWidth = useSelector(selectTimerProgress);
     const dispatch = useDispatch();
     const showMenu = () => {
-        dispatch(setShowMenu());
+        dispatch(setShowMenu(true));
     }
     const token = useSelector((state) => state.auth.token);
     const badgeCount = useSelector(selectMenuBadgeCount);
@@ -36,9 +36,10 @@ export default function Header(props){
         <div className={styles.header}>
             {token && <>
                 <div className={styles.div}>
+                    {/* tablets only: desktop has the sidebar, phones the tab bar's "More" */}
                     <button onClick={()=>showMenu()} className={`${styles.btn} ${styles.menuBtn}`}
                         aria-label={badgeCount > 0 ? `${t('menu')}, ${badgeCount} ${t('inboxUnread')}` : hasNews ? `${t('menu')}, ${t('menuNews')}` : t('menu')}>
-                        <svg className={styles.svg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M160-240q-17 0-28.5-11.5T120-280q0-17 11.5-28.5T160-320h640q17 0 28.5 11.5T840-280q0 17-11.5 28.5T800-240H160Zm0-200q-17 0-28.5-11.5T120-480q0-17 11.5-28.5T160-520h640q17 0 28.5 11.5T840-480q0 17-11.5 28.5T800-440H160Zm0-200q-17 0-28.5-11.5T120-680q0-17 11.5-28.5T160-720h640q17 0 28.5 11.5T840-680q0 17-11.5 28.5T800-640H160Z"/></svg>
+                        <svg className={styles.svg} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
                         {badgeCount > 0 && <span className={styles.menuBadge} aria-hidden="true">{badgeCount > 9 ? '9+' : badgeCount}</span>}
                         {badgeCount === 0 && hasNews && <span className={styles.menuDot} aria-hidden="true" />}
                     </button>
@@ -61,9 +62,6 @@ export default function Header(props){
                     <div className={styles.end}>
                         <DailyTicker />
                         <TeamQuickPanel />
-                        <Link to="/" className={styles.btn}>
-                            <svg className={styles.svg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M240-200h120v-200q0-17 11.5-28.5T400-440h160q17 0 28.5 11.5T600-400v200h120v-360L480-740 240-560v360Zm-80 0v-360q0-19 8.5-36t23.5-28l240-180q21-16 48-16t48 16l240 180q15 11 23.5 28t8.5 36v360q0 33-23.5 56.5T720-120H560q-17 0-28.5-11.5T520-160v-200h-80v200q0 17-11.5 28.5T400-120H240q-33 0-56.5-23.5T160-200Zm320-270Z"/></svg>
-                        </Link>
                     </div>
                 </div>
             </>}

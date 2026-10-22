@@ -14,7 +14,7 @@ import {
 import { fill } from '../features/helperFunction'
 import translations from '../i18n/translations'
 import Tutorial from '../components/Tutorial'
-import Menu from '../components/menu'
+import Menu from '../components/Menu'
 import DailyTicker from '../components/DailyTicker'
 import FunPage from '../components/fun/FunPage'
 

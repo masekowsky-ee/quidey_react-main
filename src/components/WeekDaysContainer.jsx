@@ -3,15 +3,17 @@ import { Link } from  'react-router-dom';
 import { useSelector } from "react-redux"
 import {useTranslation} from '../i18n/useTranslation'
 import { fill, isOverdue, toDateOnly } from '../features/helperFunction'
-import { addDays, dateKey, groupByDay, prioLevel } from '../features/calendar/calendar'
+import { addDays, dateKey, groupByDay, prioLevel, taskTimeText } from '../features/calendar/calendar'
 import { taskColorAttr } from '../features/tasks/taskColors'
+import { isEvent } from '../features/tasks/kinds'
 
 const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const MAX_VISIBLE_TASKS = 3;
 const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
 
-// The next 8 days with their tasks. A day opens in the calendar; the calendar card
-// shows how many tasks are overdue and then goes to the agenda.
+// The next 8 days with their tasks and events. A day opens in the calendar; the calendar card
+// shows how many tasks are overdue and then goes to the agenda. On phones the card is left
+// out: the tab bar at the bottom has the calendar.
 export default function WeekDaysContainer(){
     const {t} = useTranslation();
 
@@ -39,7 +41,9 @@ export default function WeekDaysContainer(){
                                 ? <span className={styles.empty}>–</span>
                                 : <ul className={styles.dayList}>
                                     {dayTasks.slice(0, MAX_VISIBLE_TASKS).map(task => (
-                                        <li key={task.id} data-task-color={taskColorAttr(task)} className={[PRIO_CLASS[prioLevel(task.prio)], task.done && styles.done].filter(Boolean).join(' ') || undefined} title={[task.name, task.due_time].filter(Boolean).join(' ')}>
+                                        <li key={task.id} data-task-color={taskColorAttr(task)}
+                                            className={[isEvent(task) ? styles.event : PRIO_CLASS[prioLevel(task.prio)], task.done && styles.done].filter(Boolean).join(' ') || undefined}
+                                            title={[task.name, taskTimeText(task), task.event_type?.name].filter(Boolean).join(' · ')}>
                                             {/* name first; a long one is cut, the time stays visible */}
                                             <span className={styles.name}>{task.name}</span>
                                             {task.due_time && <span className={styles.time}>{task.due_time}</span>}

@@ -373,6 +373,54 @@
     content: '⌖ ';
 }
 
+/* an event's type: a dot in its colour and the name */
+.metaType{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.metaType::before{
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: var(--task-color, var(--text-muted));
+}
+
+/* a task's planned time; once there is focus time, how much of it with a small bar */
+.metaPlanned{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.metaPlannedBar{
+    position: relative;
+    width: 2.5rem;
+    height: 4px;
+    border-radius: 999px;
+    background-color: var(--surface-strong);
+    overflow: hidden;
+}
+
+.metaPlannedBar::after{
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: calc(var(--share, 0) * 100%);
+    border-radius: inherit;
+    background-color: var(--primary);
+}
+
+/* more focus than planned: the bar is full and turns warm */
+.metaPlannedBar[data-over]::after{
+    background-color: var(--warning, #d97706);
+}
+
 .metaLink{
     color: var(--primary-fg);
     text-decoration: none;

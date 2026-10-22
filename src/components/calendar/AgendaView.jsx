@@ -25,14 +25,18 @@ function ScheduleField({ task, onSchedule }) {
 
 function AgendaRow({ task, today, showDate, onOpenTask, onToggleDone, onSchedule, onOpenGroup }) {
     const { t } = useTranslation();
-    const level = prioLevel(task.prio);
-    const classes = [styles.agendaRow, PRIO_CLASS[level], task.done && styles.agendaDone].filter(Boolean).join(' ');
+    const event = task.kind === 'event';
+    const level = event ? null : prioLevel(task.prio);
+    const classes = [styles.agendaRow, PRIO_CLASS[level], event && styles.agendaEvent, task.done && styles.agendaDone].filter(Boolean).join(' ');
     return (
         <li className={classes} data-task-color={taskColorAttr(task)}>
-            <button type="button" className={styles.check} aria-pressed={Boolean(task.done)} onClick={() => onToggleDone(task)}
-                aria-label={`${t(task.done ? 'reopen' : 'markDone')}: ${task.name}`} title={t(task.done ? 'reopen' : 'markDone')}>
-                <Icon name="check" size={16} />
-            </button>
+            {/* an event isn't ticked off: it's done once it's over */}
+            {event
+                ? <span className={styles.agendaEventMark} title={t(task.done ? 'eventOver' : 'kind_event')}><Icon name="calendar" size={16} /></span>
+                : <button type="button" className={styles.check} aria-pressed={Boolean(task.done)} onClick={() => onToggleDone(task)}
+                    aria-label={`${t(task.done ? 'reopen' : 'markDone')}: ${task.name}`} title={t(task.done ? 'reopen' : 'markDone')}>
+                    <Icon name="check" size={16} />
+                </button>}
             <div className={styles.agendaText}>
                 {task.due
                     ? <button type="button" className={styles.agendaName} onClick={() => onOpenTask(task)}>{task.name}</button>

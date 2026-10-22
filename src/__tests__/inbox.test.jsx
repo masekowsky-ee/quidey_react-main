@@ -13,7 +13,7 @@ import { updateTaskProps } from '../features/tasks/taskAction'
 import Inbox from '../components/Inbox'
 import Feedback from '../components/Feedback'
 import Admin from '../components/Admin'
-import History from '../components/History'
+import Stats from '../components/Stats'
 import WeekDaysContainer from '../components/WeekDaysContainer'
 import TaskOptionsFields from '../components/task/TaskOptionsFields'
 
@@ -169,7 +169,7 @@ describe('admin broadcast', () => {
     })
 })
 
-describe('completed tasks in the history', () => {
+describe('completed tasks in the statistics', () => {
     it('lists done tasks by the day they were completed', async () => {
         const tasks = [
             { id: 1, name: 'Steuer', done: true, completed_at: '2026-10-18T09:30:00Z', due: '2026-10-17', prio: 50 },
@@ -177,8 +177,8 @@ describe('completed tasks in the history', () => {
             { id: 3, name: 'Offen', done: false, due: null, prio: 50 },
         ]
         api({ 'GET /api/shared-sessions/history': [] })
-        await act(async () => { renderAt(makeStore(tasks), '/history?tab=done', <History />) })
-        expect(screen.getByRole('tab', { name: /Erledigte Aufgaben/ })).toHaveAttribute('aria-selected', 'true')
+        await act(async () => { renderAt(makeStore(tasks), '/stats?tab=done', <Stats />) })
+        expect(screen.getByRole('tab', { name: 'Erledigt' })).toHaveAttribute('aria-selected', 'true')
         expect(screen.getByText('Steuer')).toBeInTheDocument()
         expect(screen.getByText(/Früher erledigt/)).toBeInTheDocument()
         expect(screen.queryByText('Offen')).not.toBeInTheDocument()
@@ -232,7 +232,7 @@ describe('week strip', () => {
         const key = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
         const tasks = [{ id: 1, name: 'Meeting', done: false, due: key, due_time: '09:30', prio: 50 }]
         await act(async () => { renderAt(makeStore(tasks), '/', <WeekDaysContainer t={(k) => k} tasks={tasks} />) })
-        const item = screen.getByTitle('Meeting 09:30')
+        const item = screen.getByTitle('Meeting · 09:30')
         expect(item.textContent).toBe('Meeting09:30')
     })
 })

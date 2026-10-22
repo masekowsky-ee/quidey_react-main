@@ -1,6 +1,6 @@
 .page{
     composes: page from './ui.module.css';
-    width: min(1180px, calc(100% - 2rem));
+    width: min(1180px, calc(100% - 2 * var(--page-gutter, 1rem)));
     margin: 0 auto;
     padding-bottom: 3rem;
     box-sizing: border-box;
@@ -518,6 +518,21 @@
     --chip-color: color-mix(in srgb, var(--primary) 40%, var(--text-muted));
 }
 
+/* An event: a stronger tint and a full edge in its (type's) colour, so it reads as a block of
+   time rather than a to-do */
+.chipEvent{
+    border-left-width: 3px;
+    background: color-mix(in srgb, var(--task-color, var(--primary)) 20%, var(--surface-inset));
+}
+
+.chipType{
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* Still open, day is over */
 .chipOverdue{
     color: var(--text-h);
@@ -860,6 +875,29 @@ button.agendaName:hover{
 
 .agendaDone{
     --chip-color: var(--text-muted);
+}
+
+/* An event: tinted in its (type's) colour, a calendar mark instead of the tick */
+.agendaEvent{
+    background-color: color-mix(in srgb, var(--task-color, var(--primary)) 7%, transparent);
+}
+
+.agendaDone.agendaEvent{
+    background-color: transparent;
+}
+
+.agendaEventMark{
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--task-color, var(--primary-fg));
+}
+
+.agendaDone .agendaEventMark{
+    color: var(--text-muted);
 }
 
 .agendaDone .agendaName{

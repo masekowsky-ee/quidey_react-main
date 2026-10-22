@@ -8,12 +8,13 @@ import { formatClock } from '../features/helperFunction';
 import { useTranslation } from '../i18n/useTranslation';
 import Icon from './icons.jsx';
 
-// The focus timer, folded into a round button at the bottom right until it's opened (then a
-// small panel there). Two modes: "timer" counts the session length down, "stopwatch" counts up
+// The focus timer. inline: a panel in the page (Home's focus column on wide screens); otherwise
+// folded into a round button at the bottom right until it's opened (then a small panel there).
+// Two modes: "timer" counts the session length down, "stopwatch" counts up
 // from zero until stopped. Either way every running second is booked on the task in focus.
 
 export default function TimerContainer(props){
-    const { setWorkedTime, setActiveTimer, activeTask } = props;
+    const { setWorkedTime, setActiveTimer, activeTask, inline = false } = props;
 
     const {sessionParams, timer, timerMode} = useSelector(state => state.session);
     const percentWidth = useSelector(selectTimerProgress);
@@ -146,7 +147,7 @@ export default function TimerContainer(props){
         setEditTimer(false);
     }
 
-    if (!open) {
+    if (!open && !inline) {
         // folded: just the icon, with the time next to it while a session is on
         return (
             <button className={`${styles.fab} ${inProgress ? styles.fabBusy : ''}`} onClick={() => setOpen(true)}
@@ -159,7 +160,7 @@ export default function TimerContainer(props){
     }
 
     return(
-        <div className={styles.panel}>
+        <div className={inline ? styles.inlinePanel : styles.panel}>
             <div className={styles.panelHead}>
                 <div className={styles.modeSwitch} role="group" aria-label={t('timerMode')}>
                     {['timer', 'stopwatch'].map(mode =>
@@ -169,9 +170,10 @@ export default function TimerContainer(props){
                             {t(mode === 'timer' ? 'timerModeTimer' : 'timerModeStopwatch')}
                         </button>)}
                 </div>
+                {!inline &&
                 <button className={styles.foldBtn} onClick={() => setOpen(false)} title={t('collapseTimer')} aria-label={t('collapseTimer')}>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-361q-8 0-15-2.5t-13-8.5L268-556q-11-11-11-28t11-28q11-11 28-11t28 11l156 156 156-156q11-11 28-11t28 11q11 11 11 28t-11 28L508-372q-6 6-13 8.5t-15 2.5Z"/></svg>
-                </button>
+                    <Icon name="chevronDown" className={styles.foldIcon} />
+                </button>}
             </div>
             <div className={styles.div}>
                 {!editTimer ? 
@@ -209,17 +211,17 @@ export default function TimerContainer(props){
                 <div className={styles.timerNav}>
                     {!timer.active && (stopwatch || timer.time !== 0) && !editTimer &&
                         <button className={styles.btnGo} onClick={()=>timerAction('start')} aria-label="start timer">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M320-273v-414q0-17 12-28.5t28-11.5q5 0 10.5 1.5T381-721l326 207q9 6 13.5 15t4.5 19q0 10-4.5 19T707-446L381-239q-5 3-10.5 4.5T360-233q-16 0-28-11.5T320-273Zm80-207Zm0 134 210-134-210-134v268Z"/></svg>
+                            <Icon name="play" className={styles.ctrlIcon} strokeWidth={2} />
                         </button>
                     }
                     {timer.active &&
                         <button className={styles.btn} onClick={()=>timerAction('pause')} aria-label="pause timer">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M600-200q-33 0-56.5-23.5T520-280v-400q0-33 23.5-56.5T600-760h80q33 0 56.5 23.5T760-680v400q0 33-23.5 56.5T680-200h-80Zm-320 0q-33 0-56.5-23.5T200-280v-400q0-33 23.5-56.5T280-760h80q33 0 56.5 23.5T440-680v400q0 33-23.5 56.5T360-200h-80Zm320-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z"/></svg>
+                            <Icon name="pause" className={styles.ctrlIcon} strokeWidth={2.2} />
                         </button>
                     }
                     {(timer.active || (stopwatch && timer.time > 0)) &&
                         <button className={styles.btnStop} onClick={()=>timerAction('terminate')} aria-label="stop timer">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M240-320v-320q0-33 23.5-56.5T320-720h320q33 0 56.5 23.5T720-640v320q0 33-23.5 56.5T640-240H320q-33 0-56.5-23.5T240-320Zm80 0h320v-320H320v320Zm160-160Z"/></svg>
+                            <Icon name="stop" className={styles.ctrlIcon} strokeWidth={2} />
                         </button>
                     }
                     {!stopwatch && !timer.active && timer.time === 0 && !editTimer &&
@@ -229,7 +231,7 @@ export default function TimerContainer(props){
                     }
                     {editTimer &&
                         <button className={styles.btnGo} onClick={setTimerFunc} aria-label="confirm time">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
+                            <Icon name="check" className={styles.ctrlIcon} strokeWidth={2.2} />
                         </button>
                     }
                 </div>

@@ -61,7 +61,7 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
             <div className={`${styles.panel} ${styles.panelWide}`} role="dialog" aria-modal="true" aria-labelledby={titleId} ref={panelRef} tabIndex={-1}>
                 <div className={styles.head}>
                     <div className={styles.titles}>
-                        <h2 id={titleId} className={styles.title}>{t('editTask')}</h2>
+                        <h2 id={titleId} className={styles.title}>{t(task.kind === 'event' ? 'editEvent' : 'editTask')}</h2>
                     </div>
                     <button type="button" className={styles.closeBtn} onClick={onClose} aria-label={t('close')} title={`${t('close')} (Esc)`}>
                         <Icon name="close" size={22} />

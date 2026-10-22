@@ -207,8 +207,50 @@
     --chip-color: color-mix(in srgb, var(--primary) 40%, var(--text-muted));
 }
 
+/* An event: a softly tinted row in its (type's) colour */
+.rowEvent{
+    background-color: color-mix(in srgb, var(--task-color, var(--primary)) 7%, transparent);
+}
+
 .rowDone{
     --chip-color: var(--text-muted);
+}
+
+.rowDone.rowEvent{
+    background-color: transparent;
+}
+
+/* Where a task has its tick, an event has a calendar mark (it's done once it's over) */
+.eventMark{
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--task-color, var(--primary-fg));
+}
+
+.rowDone .eventMark{
+    color: var(--text-muted);
+}
+
+/* Task or event for the quick add field */
+.quickKind{
+    composes: segmented from './ui.module.css';
+    align-self: flex-start;
+    margin-bottom: -0.25rem;
+}
+
+.quickKind > button{
+    padding: 0.2rem 0.8rem;
+    font-size: 0.8125rem;
+}
+
+.quickKind > .quickKindOn,
+.quickKind > .quickKindOn:hover{
+    background: var(--surface-strong);
+    color: var(--text-h);
 }
 
 .rowDone .rowName{

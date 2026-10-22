@@ -1,10 +1,10 @@
-import styles from './History.module.css';
+import styles from './SessionList.module.css';
 import { useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import {useTranslation} from '../i18n/useTranslation'
-import { fetchSharedHistory } from '../features/together/togetherAction';
-import CompletedTasks from './CompletedTasks.jsx';
+import {useTranslation} from '../../i18n/useTranslation'
+import { fetchSharedHistory } from '../../features/together/togetherAction';
+import { inPeriod } from '../../features/stats/period';
 
 // 95 -> "1 h 35 min", 40 -> "40 min"
 function formatMinutes(totalMinutes) {
@@ -26,21 +26,22 @@ function TeamIcon() {
     return <svg xmlns="http://www.w3.org/2000/svg" height="13px" viewBox="0 -960 960 960" width="13px" fill="currentColor" aria-hidden="true"><path d="M40-272q0-34 17.5-62.5T104-378q62-31 126-46.5T360-440q66 0 130 15.5T616-378q29 15 46.5 43.5T680-272v32q0 33-23.5 56.5T600-160H120q-33 0-56.5-23.5T40-240v-32Zm320-208q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47Z"/></svg>;
 }
 
-export default function History(){
+// My focus sessions in a period (see features/stats/period.js), newest first: solo sessions
+// with the tasks worked on, and my work in shared sessions between them (by when I last worked
+// on it). Numbers for the period above the list.
+export default function SessionList({ period }){
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    // two folders: the work sessions, and every completed task (?tab=done)
-    const [searchParams, setSearchParams] = useSearchParams();
-    const folder = searchParams.get('tab') === 'done' ? 'done' : 'sessions';
-    const doneCount = useSelector(state => state.task.tasks.filter(task => task.done).length);
 
     // my work in shared sessions; shown between the solo sessions, by when I last worked on it
-    const sharedHistory = useSelector(state => state.together.history) ?? [];
+    const allShared = useSelector(state => state.together.history);
+    const sharedHistory = (allShared ?? []).filter(entry => inPeriod(period, entry.lastWorkedAt));
     useEffect(() => {
         dispatch(fetchSharedHistory()).catch(() => {});
     }, [dispatch]);
 
-    const workedSessionData = useSelector(state => state.session.workedSessionData);
+    const allSessions = useSelector(state => state.session.workedSessionData);
+    const workedSessionData = allSessions.filter(ws => inPeriod(period, ws.date));
     const language = useSelector(state => state.settings.language);
     const locale = language === 'de' ? 'de-DE' : 'en-GB';
 
@@ -66,20 +67,7 @@ export default function History(){
     const dateText = (date) => date.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
     const timeText = (date) => date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', timeZone: browserTZ });
 
-    return (
-        <div className={styles.page}>
-            <h1 className={styles.title}>{t('history')}</h1>
-            <div className={styles.folders} role="tablist" aria-label={t('history')}>
-                <button role="tab" aria-selected={folder === 'sessions'} className={folder === 'sessions' ? styles.folderActive : undefined}
-                    onClick={() => setSearchParams({}, { replace: true })}>
-                    {t('sessions')}
-                </button>
-                <button role="tab" aria-selected={folder === 'done'} className={folder === 'done' ? styles.folderActive : undefined}
-                    onClick={() => setSearchParams({ tab: 'done' }, { replace: true })}>
-                    {t('completedTasks')} {doneCount > 0 && <span className={styles.folderBadge}>{doneCount}</span>}
-                </button>
-            </div>
-            {folder === 'done' ? <CompletedTasks /> : timeline.length > 0 ?
+    return timeline.length > 0 ?
                 <>
                     <div className={styles.stats}>
                         <div className={styles.stat}>
@@ -167,8 +155,6 @@ export default function History(){
                     </ul>
                 </>
                 :
-                <div className={`${styles.card} ${styles.empty}`}>{t('noSessionsYet')}</div>
-            }
-        </div>
-    );
+                <div className={`${styles.card} ${styles.empty}`}>{t(period.from ? 'noSessionsInPeriod' : 'noSessionsYet')}</div>;
 }
+

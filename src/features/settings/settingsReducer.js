@@ -1,8 +1,8 @@
-import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION } from "./settingsActionTypes";
+import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS } from "./settingsActionTypes";
 import { THEMES, readStoredTheme } from "./theme";
 import { HOME_LAYOUTS, readStoredHomeLayout } from "./homeLayout";
 import { MOTION_LEVELS, readStoredMotion } from "./motion";
-import { LANGUAGES, readStoredLanguage, ACCENTS, readStoredAccent, SESSION_LENGTHS, readStoredSessionMinutes } from "./preferences";
+import { LANGUAGES, readStoredLanguage, ACCENTS, readStoredAccent, SESSION_LENGTHS, readStoredSessionMinutes, readStoredShowSharedTasks } from "./preferences";
 
 const intitialState = {
     showMenu: false,
@@ -16,12 +16,13 @@ const intitialState = {
     accent: readStoredAccent(), // accent color palette, remembered in localStorage
     defaultSessionMinutes: readStoredSessionMinutes(), // length of new sessions, remembered in localStorage
     motion: readStoredMotion(), // 'minimal' | 'normal' | 'extreme', remembered in localStorage
+    showSharedTasks: readStoredShowSharedTasks(), // shared sessions' tasks in Home's list, remembered in localStorage
 }
 
 const settingsReducer = (state = intitialState, action) => {
     switch(action.type){
         case SET_SHOW_MENU:
-            return { ...state, showMenu: !state.showMenu };
+            return { ...state, showMenu: typeof action.payload === 'boolean' ? action.payload : !state.showMenu };
         case SET_SHOW_DONE_TASKS:
             return { ...state, showDoneTasks: !state.showDoneTasks };
         case SET_LANGUAGE:
@@ -32,6 +33,8 @@ const settingsReducer = (state = intitialState, action) => {
             return { ...state, showForms: !state.showForms };
         case SET_THEME:
             return THEMES.includes(action.payload) ? { ...state, theme: action.payload } : state;
+        case SET_SHOW_SHARED_TASKS:
+            return { ...state, showSharedTasks: action.payload };
         case SET_HOME_LAYOUT:
             return HOME_LAYOUTS.includes(action.payload) ? { ...state, homeLayout: action.payload } : state;
         case SET_ACCENT:

@@ -1,6 +1,8 @@
-import { NavLink } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import styles from './Menu.module.css';
 import Icon from './icons';
+import Logo from './Logo';
 import {useSelector, useDispatch} from 'react-redux'
 import {useTranslation} from '../i18n/useTranslation'
 import {setShowMenu, setShowTutorial} from '../features/settings/settingsAction';
@@ -10,6 +12,7 @@ import { selectTaskInviteCount } from '../features/tasks/taskAction';
 import { selectIsAdmin, selectAdminPendingCount } from '../features/admin/adminAction';
 import { selectInboxCount } from '../features/inbox/inbox';
 import { selectFamilyInviteCount } from '../features/family/family';
+import { DESKTOP_QUERY, useMediaQuery } from '../features/layout/breakpoints';
 import TesterOnly from './TesterOnly';
 import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, useMotionLevel } from '../features/settings/motion';
@@ -28,8 +31,12 @@ function MenuLink({ to, end, icon, label, onClick, count = 0, countLabel, news =
     );
 }
 
+// The app's navigation. On a wide screen a sidebar that is always there; narrower, a drawer
+// from the left (opened by the header's menu button or the tab bar's "More").
 export default function Menu(){
-    const isOpen = useSelector((state) => state.settings.showMenu);
+    const desktop = useMediaQuery(DESKTOP_QUERY);
+    const showMenu = useSelector((state) => state.settings.showMenu);
+    const isOpen = showMenu && !desktop;
     const incomingCount = useSelector(selectIncomingCount);
     const inviteCount = useSelector(selectInviteCount);
     const taskInviteCount = useSelector(selectTaskInviteCount);
@@ -39,13 +46,27 @@ export default function Menu(){
     const familyInviteCount = useSelector(selectFamilyInviteCount);
     const news = useSelector(state => state.news);
     const { t } = useTranslation();
+    const { pathname } = useLocation();
 
     const dispatch = useDispatch();
     const overlayMotion = MOTION.overlay[useMotionLevel()];
 
     const onClose = () => {
-        dispatch(setShowMenu());
+        dispatch(setShowMenu(false));
     }
+
+    // a new page (also by the browser's back button) closes the drawer
+    useEffect(() => {
+        dispatch(setShowMenu(false));
+    }, [pathname, dispatch]);
+
+    // Escape closes the open drawer
+    useEffect(() => {
+        if (!isOpen) return;
+        const onKey = (e) => { if (e.key === 'Escape') dispatch(setShowMenu(false)); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [isOpen, dispatch]);
 
     const openTutorial = () => {
         onClose();
@@ -57,25 +78,34 @@ export default function Menu(){
             <AnimatePresence>
                 {isOpen && <motion.div className={styles.overlay} onClick={onClose} {...overlayMotion} />}
             </AnimatePresence>
-            <div className={`${styles.menuDiv} ${isOpen ? styles.open : ''}`}>
-                <h2 className={styles.menuTitle}>{t('menu')}</h2>
-                <nav className={styles.menuList}>
+            {/* a closed drawer is off screen: out of the tab order and hidden from screen readers too */}
+            <div className={`${styles.menuDiv} ${isOpen ? styles.open : ''}`} inert={!desktop && !isOpen}>
+                <div className={styles.menuHead}>
+                    <Link to="/" className={styles.brand} onClick={onClose} aria-label={`Quidey, ${t('home')}`}>
+                        <Logo className={styles.brandMark} />
+                        <span>Quidey</span>
+                    </Link>
+                    <button type="button" className={styles.closeBtn} onClick={onClose} aria-label={t('close')}>
+                        <Icon name="close" className={styles.closeIcon} />
+                    </button>
+                </div>
+                <nav className={styles.menuList} aria-label={t('menu')}>
                     <MenuLink to="/" end icon="home" label={t('home')} onClick={onClose} />
-                    <MenuLink to="/inbox" icon="inbox" label={t('inbox')} onClick={onClose}
-                        count={inboxCount} countLabel={t('inboxUnread')} />
                     <MenuLink to="/calendar" icon="calendar" label={t('calendar')} onClick={onClose}
                         count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
-                    <MenuLink to="/profile" icon="profile" label={t('profile')} onClick={onClose} />
-                    <MenuLink to="/history" icon="history" label={t('history')} onClick={onClose} />
-                    {/* with open requests, go straight to the inbox */}
-                    <MenuLink to={incomingCount > 0 ? '/social?tab=requests' : '/social'} icon="social" label={t('social')} onClick={onClose}
-                        count={incomingCount} countLabel={t('friendRequests')} news={news.social} newsLabel={t('menuNews')} />
+                    <MenuLink to="/inbox" icon="inbox" label={t('inbox')} onClick={onClose}
+                        count={inboxCount} countLabel={t('inboxUnread')} />
                     <MenuLink to="/together" icon="together" label={t('together')} onClick={onClose}
                         count={inviteCount} countLabel={t('sessionInvites')} news={news.together} newsLabel={t('menuNews')} />
+                    {/* with open requests, go straight to them */}
+                    <MenuLink to={incomingCount > 0 ? '/social?tab=requests' : '/social'} icon="social" label={t('social')} onClick={onClose}
+                        count={incomingCount} countLabel={t('friendRequests')} news={news.social} newsLabel={t('menuNews')} />
                     <TesterOnly>
                         <MenuLink to="/family" icon="family" label={t('family')} onClick={onClose}
                             count={familyInviteCount} countLabel={t('familyInvites')} />
                     </TesterOnly>
+                    <MenuLink to="/stats" icon="history" label={t('history')} onClick={onClose} />
+                    <MenuLink to="/profile" icon="profile" label={t('profile')} onClick={onClose} />
                 </nav>
 
                 {/* settings, help and admin sit at the bottom */}

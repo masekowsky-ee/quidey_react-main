@@ -3,12 +3,13 @@ import styles from './WorkingPage.module.css'
 import { useSelector, useDispatch } from "react-redux";
 import { createNote, deleteNote, editNote, updateTaskProps } from "../features/tasks/taskAction.js";
 import {useTranslation} from '../i18n/useTranslation'
-import { formatDate, formatClock } from '../features/helperFunction'
+import { dueText, formatClock } from '../features/helperFunction'
 import { selectTaskTime } from '../features/session/sessionAction'
 import { setSharedTaskDone, togetherErrorText } from '../features/together/togetherAction'
 import { showToast } from '../features/toast/toast'
 import { Link } from 'react-router-dom'
 import TaskLabels from './TaskLabels.jsx'
+import Icon from './icons.jsx'
 import { motion, useDragControls } from 'motion/react'
 import { useMotionLevel, burstFrom } from '../features/settings/motion'
 
@@ -16,130 +17,114 @@ import { useMotionLevel, burstFrom } from '../features/settings/motion'
 const SWIPE_DISTANCE = 110;
 const SWIPE_SPEED = 600;
 
-
+// The task being worked on ("Focus"): its name, the time on it in this session, its description
+// and notes; done or put back from here. Empty, it is the place a task is dragged to.
+// dragging: a task is on its way here (the empty zone lights up).
 export default function WorkingContainer (props) {
-    const {dropZoneRef, activeTask, setActiveTask, onRelease } = props;
+    const {dropZoneRef, activeTask, setActiveTask, onRelease, dragging = false } = props;
 
-        const dispatch = useDispatch();
+    const dispatch = useDispatch();
+    const {t} = useTranslation();
+    const motionLevel = useMotionLevel();
+    // the card can be swiped sideways by its head (not by the fields inside it)
+    const dragControls = useDragControls();
+    const startSwipe = (e) => { if (!e.target.closest('button, input, textarea')) dragControls.start(e); };
+    const onSwipeEnd = (_, info) => {
+        if (Math.abs(info.offset.x) > SWIPE_DISTANCE || Math.abs(info.velocity.x) > SWIPE_SPEED) onRelease?.();
+    };
 
-        const {t} = useTranslation();
-        const motionLevel = useMotionLevel();
-        // the card can be swiped sideways by its head (not by the fields inside it)
-        const dragControls = useDragControls();
-        const startSwipe = (e) => { if (!e.target.closest('button, input, textarea')) dragControls.start(e); };
-        const onSwipeEnd = (_, info) => {
-            if (Math.abs(info.offset.x) > SWIPE_DISTANCE || Math.abs(info.velocity.x) > SWIPE_SPEED) onRelease?.();
-        };
+    const notes = useSelector(state => state.task.notes);
+    const taskSeconds = useSelector(state => activeTask ? selectTaskTime(state, activeTask.id) : 0);
 
-        const notes = useSelector(state => state.task.notes);
-        const taskSeconds = useSelector(state => activeTask ? selectTaskTime(state, activeTask.id) : 0);
+    const [addingNote, setAddingNote] = useState(false);
+    const noteInputRef = useRef(null);
+    useEffect(() => {
+        if (addingNote) noteInputRef.current?.focus();
+    }, [addingNote]);
 
-        const [editNoteState, setEditNoteState] = useState(false);
+    const handleCreateNote = (e) => {
+        const text = e.target.value.trim();
+        setAddingNote(false);
+        if (!text) return;
+        dispatch(createNote(activeTask.id, text));
+    }
 
-        const noteInputRef = useRef(null);
-        useEffect(() => {
-            if (editNoteState && noteInputRef.current) {
-                noteInputRef.current.focus();
-            }
-        }, [editNoteState]);
+    const [editActiveDescription, setEditActiveDescription] = useState(false);
 
-        const handleCreateNoteSvg = () => {
-            setEditNoteState(true);
-        };
+    // Saves on blur only (Enter just blurs), and only when the text really changed,
+    // so clicking in and out never sends a request or overwrites the description
+    const saveDescription = (e) => {
+        setEditActiveDescription(false);
+        const description = e.target.value.trim();
+        if (description === (activeTask.description ?? '')) return;
+        setActiveTask(prev => ({...prev, description}));
+        dispatch(updateTaskProps({description}, activeTask));
+    }
 
-        const handleCreateNote = (e) => {
-            if(!e.target.value) return;
-            const newNote = e.target.value;
-            dispatch(createNote(activeTask.id, newNote));
-            setEditNoteState(false);
+    const setActiveDoneHandler = (e) => {
+        // finishing the task in focus is worth a burst on "normal", a big one on "extreme"
+        if (motionLevel === 'extreme' && e?.currentTarget) {
+            burstFrom(e.currentTarget, 60);
+            const target = e.currentTarget;
+            setTimeout(() => burstFrom(target, 40), 180);
+        } else if (motionLevel === 'normal' && e?.currentTarget) {
+            burstFrom(e.currentTarget, 30);
         }
-        const handleDeleteNote = (noteId) => {
-            dispatch(deleteNote(activeTask.id, noteId));
+        if (activeTask.shared) {
+            dispatch(setSharedTaskDone(activeTask.shared.sessionId, activeTask.shared.taskId, true))
+                .catch(err => dispatch(showToast(togetherErrorText(t, err), 'error')));
+        } else {
+            dispatch(updateTaskProps({done: true}, activeTask));
         }
+        setActiveTask(null);
+    }
 
-        const handleEditNote = (e, noteId) => {
-            dispatch(editNote(activeTask.id, noteId, e.target.value));
-        }
+    // name, then "put back" and "done"; the head is where the card is grabbed to swipe it away
+    const head = (
+        <div className={`${styles.taskCardHead} ${styles.swipeHandle}`} onPointerDown={startSwipe}>
+            <h2 className={styles.taskTitle}>{activeTask?.name}</h2>
+            <button className={styles.releaseBtn} onClick={onRelease} title={t('releaseTask')} aria-label={t('releaseTask')}>
+                <Icon name="release" className={styles.headIcon} />
+            </button>
+            <button className={styles.doneBtn} onClick={setActiveDoneHandler} title={t('markDone')} aria-label={t('markDone')}>
+                <Icon name="check" className={styles.headIcon} strokeWidth={2.2} />
+            </button>
+        </div>
+    );
+    const time = (
+        <p className={styles.taskTime}>
+            {t('timeThisSession')} <span>{formatClock(taskSeconds * 1000)}</span>
+            {activeTask?.due && !activeTask.shared && <> · {dueText(activeTask.due, t)}</>}
+        </p>
+    );
 
-        const [editActiveDescription, setEditActiveDescription] = useState(false);
-
-        // Saves on blur only (Enter just blurs), and only when the text really changed,
-        // so clicking in and out never sends a request or overwrites the description
-        const saveDescription = (e) => {
-            setEditActiveDescription(false);
-            const description = e.target.value.trim();
-            if (description === (activeTask.description ?? '')) return;
-            setActiveTask(prev => ({...prev, description}));
-            dispatch(updateTaskProps({description}, activeTask));
-        }
-
-        const setActiveDoneHandler = (e) => {
-            // finishing the task in focus is worth a burst on "normal", a big one on "extreme"
-            if (motionLevel === 'extreme' && e?.currentTarget) {
-                burstFrom(e.currentTarget, 60);
-                const target = e.currentTarget;
-                setTimeout(() => burstFrom(target, 40), 180);
-            } else if (motionLevel === 'normal' && e?.currentTarget) {
-                burstFrom(e.currentTarget, 30);
-            }
-            if (activeTask.shared) {
-                dispatch(setSharedTaskDone(activeTask.shared.sessionId, activeTask.shared.taskId, true))
-                    .catch(err => dispatch(showToast(togetherErrorText(t, err), 'error')));
-            } else {
-                dispatch(updateTaskProps({done: true}, activeTask));
-            }
-            setActiveTask(null);
-        }
-
-        // a task from a shared session: its time goes to the session; notes and editing stay there
-        if (activeTask?.shared) {
-            return (
-                <div className={styles.div}>
-                    {/* the panel itself carries the team stripe, so the content keeps its normal spacing */}
-                    <div ref={dropZoneRef} className={`${styles.currentTaskDiv} ${styles.sharedPanel}`}>
-                        <motion.div key={activeTask.id} className={styles.taskCard}
-                            drag="x" dragListener={false} dragControls={dragControls} dragSnapToOrigin dragElastic={0.6} onDragEnd={onSwipeEnd}>
-                            <div className={`${styles.taskCardHead} ${styles.swipeHandle}`} onPointerDown={startSwipe}>
-                                <h2 className={styles.taskTitle}>{activeTask.name}</h2>
-                                <button className={styles.releaseBtn} onClick={onRelease} title={t('releaseTask')} aria-label={t('releaseTask')}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-200v-80h284q63 0 109.5-40T720-420q0-60-46.5-100T564-560H312l104 104-56 56-200-200 200-200 56 56-104 104h252q97 0 166.5 63T800-420q0 94-69.5 157T564-200H280Z"/></svg>
-                                </button>
-                                <button className={styles.doneBtn} onClick={setActiveDoneHandler} title={t('markDone')} aria-label={t('markDone')}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
-                                </button>
-                            </div>
-                            <TaskLabels task={activeTask} />
-                            <p className={styles.taskTime}>
-                                {t('timeThisSession')}: <span>{formatClock(taskSeconds * 1000)}</span>
-                            </p>
-                            {activeTask.description && <p className={styles.taskDesc}>{activeTask.description}</p>}
-                            <p className={styles.sharedNote}>
-                                {t('sharedTaskWorkHint')} <Link to={`/together/${activeTask.shared.sessionId}`}>{t('openSession')} →</Link>
-                            </p>
-                        </motion.div>
+    return (
+        <section className={styles.focus} aria-labelledby="focus-title">
+            <h2 id="focus-title" className={styles.focusTitle}>{t('focusTitle')}</h2>
+            <div ref={dropZoneRef}
+                className={`${styles.currentTaskDiv} ${activeTask ? '' : styles.dropZoneEmpty} ${dragging ? styles.dropReady : ''} ${activeTask?.shared ? styles.sharedPanel : ''}`}>
+                {!activeTask
+                    ? <div className={styles.dropHint}>
+                        <Icon name="focus" className={styles.dropIcon} />
+                        <p className={styles.dropTitle}>{t('dragATask')}</p>
+                        <p className={styles.dropText}>{t('focusHint')}</p>
                     </div>
-                </div>
-            );
-        }
-
-        return(
-            <div className={styles.div}>
-                <div ref={dropZoneRef} className={`${styles.currentTaskDiv} ${activeTask ? '' : styles.dropZoneEmpty}`}>
-                    {activeTask ? <motion.div key={activeTask.id} className={styles.taskCard}
+                    : activeTask.shared
+                    // a task from a shared session: its time goes to the session; notes and editing stay there
+                    ? <motion.div key={activeTask.id} className={styles.taskCard}
                         drag="x" dragListener={false} dragControls={dragControls} dragSnapToOrigin dragElastic={0.6} onDragEnd={onSwipeEnd}>
-                        <div className={`${styles.taskCardHead} ${styles.swipeHandle}`} onPointerDown={startSwipe}>
-                            <h2 className={styles.taskTitle}>{activeTask.name}</h2>
-                            {activeTask.due && <span className={styles.dueChip}>{formatDate(activeTask.due)}</span>}
-                            <button className={styles.releaseBtn} onClick={onRelease} title={t('releaseTask')} aria-label={t('releaseTask')}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-200v-80h284q63 0 109.5-40T720-420q0-60-46.5-100T564-560H312l104 104-56 56-200-200 200-200 56 56-104 104h252q97 0 166.5 63T800-420q0 94-69.5 157T564-200H280Z"/></svg>
-                            </button>
-                            <button className={styles.doneBtn} onClick={setActiveDoneHandler} title={t('markDone')} aria-label={t('markDone')}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
-                            </button>
-                        </div>
-                        <p className={styles.taskTime}>
-                            {t('timeThisSession')}: <span>{formatClock(taskSeconds * 1000)}</span>
+                        {head}
+                        <TaskLabels task={activeTask} />
+                        {time}
+                        {activeTask.description && <p className={styles.taskDesc}>{activeTask.description}</p>}
+                        <p className={styles.sharedNote}>
+                            {t('sharedTaskWorkHint')} <Link to={`/together/${activeTask.shared.sessionId}`}>{t('openSession')} →</Link>
                         </p>
+                    </motion.div>
+                    : <motion.div key={activeTask.id} className={styles.taskCard}
+                        drag="x" dragListener={false} dragControls={dragControls} dragSnapToOrigin dragElastic={0.6} onDragEnd={onSwipeEnd}>
+                        {head}
+                        {time}
                         {activeTask.description && !editActiveDescription ?
                         <p onClick={()=>setEditActiveDescription(true)} className={styles.taskDesc} title={t('description')}>{activeTask.description}</p> :
                         <input
@@ -153,21 +138,28 @@ export default function WorkingContainer (props) {
                         />}
                         <div className={styles.notesHead}>
                             <h3>{t('taskNotes')}</h3>
-                            <svg className={styles.noteAdd} onClick={handleCreateNoteSvg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M440-440H240q-17 0-28.5-11.5T200-480q0-17 11.5-28.5T240-520h200v-200q0-17 11.5-28.5T480-760q17 0 28.5 11.5T520-720v200h200q17 0 28.5 11.5T760-480q0 17-11.5 28.5T720-440H520v200q0 17-11.5 28.5T480-200q-17 0-28.5-11.5T440-240v-200Z"/></svg>
+                            <button className={styles.noteAdd} onClick={() => setAddingNote(true)} aria-label={t('addNote')} title={t('addNote')}>
+                                <Icon name="plus" className={styles.noteIcon} strokeWidth={2} />
+                            </button>
                         </div>
-                        { editNoteState && <input ref={noteInputRef} id="noteInput" className={styles.newNoteInput} type="text" onBlur={(e)=>{handleCreateNote(e)}} onKeyDown={(e)=>{if(e.key === 'Enter') handleCreateNote(e)}} /> }
+                        {addingNote && <input ref={noteInputRef} className={styles.newNoteInput} type="text" aria-label={t('addNote')}
+                            onBlur={handleCreateNote}
+                            onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); if (e.key === 'Escape') setAddingNote(false); }} />}
                         <ul className={styles.notesList}>
-                            {activeTask && notes?.length > 0 && notes.map(
-                                (n)=> n.task_id === activeTask.id ?
-                                
-                                <li className={styles.noteRow} key={n.id}>
-                                <input type="text" className={styles.noteInput} defaultValue={n.content} onBlur={(e)=>handleEditNote(e, n.id)} onKeyDown={(e)=>{if(e.key === "Enter") handleEditNote(e, n.id)}}/>
-                                <svg className={styles.noteDelete} onClick={()=>{handleDeleteNote(n.id)}} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>
-                            </li> : null)}
+                            {notes?.filter(note => note.task_id === activeTask.id).map(note =>
+                                <li className={styles.noteRow} key={note.id}>
+                                    <input type="text" className={styles.noteInput} defaultValue={note.content} aria-label={t('taskNotes')}
+                                        onBlur={(e) => dispatch(editNote(activeTask.id, note.id, e.target.value))}
+                                        onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }} />
+                                    <button className={styles.noteDelete} onClick={() => dispatch(deleteNote(activeTask.id, note.id))}
+                                        aria-label={`${t('deleteNote')}: ${note.content}`} title={t('deleteNote')}>
+                                        <Icon name="trash" className={styles.noteIcon} />
+                                    </button>
+                                </li>)}
                         </ul>
                         <p className={styles.swipeHint}>{t('releaseTaskHint')}</p>
-                    </motion.div> : <p className={styles.dropHint}>{t('dragATask')}</p>}
-                </div>
+                    </motion.div>}
             </div>
-        )
+        </section>
+    )
 }

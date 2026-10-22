@@ -7,7 +7,7 @@ import rootReducer from '../features/rootReducer'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import Admin from '../components/Admin'
-import Menu from '../components/menu'
+import Menu from '../components/Menu'
 import App from '../App'
 import TesterOnly from '../components/TesterOnly'
 

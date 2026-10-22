@@ -1,12 +1,13 @@
 import styles from './Settings.module.css';
 import {useTranslation} from '../i18n/useTranslation'
 import {useSelector, useDispatch} from 'react-redux';
-import {setLanguage, setTheme, setAccent, setDefaultSessionMinutes, setMotion} from '../features/settings/settingsAction';
+import {setLanguage, setTheme, setAccent, setDefaultSessionMinutes, setMotion, setShowSharedTasks} from '../features/settings/settingsAction';
 import {MOTION_LEVELS} from '../features/settings/motion';
 import {setSessionParams} from '../features/session/sessionAction';
 import {SESSION_LENGTHS} from '../features/settings/preferences';
 import HomeLayoutSwitch from './together/HomeLayoutSwitch';
 import {useInstallState, promptInstall} from '../features/pwa/install';
+import EventTypeSettings from './EventTypeSettings.jsx';
 
 // Swatch color shown for each palette (its dark-mode accent)
 const ACCENT_OPTIONS = [
@@ -37,6 +38,7 @@ export default function Settings(){
     const accent = useSelector((state) => state.settings.accent);
     const motionLevel = useSelector((state) => state.settings.motion);
     const defaultSessionMinutes = useSelector((state) => state.settings.defaultSessionMinutes);
+    const showSharedTasks = useSelector((state) => state.settings.showSharedTasks);
     const installState = useInstallState();
     const dispatch = useDispatch();
 
@@ -111,6 +113,24 @@ export default function Settings(){
                     </div>
                     <HomeLayoutSwitch />
                 </div>
+                <div className={styles.row}>
+                    <div className={styles.rowText}>
+                        <span className={styles.rowLabel}>{t('sharedTasksSetting')}</span>
+                        <span className={styles.rowHint}>{t('sharedTasksSettingHint')}</span>
+                    </div>
+                    <div className={styles.segmented} role="group" aria-label={t('sharedTasksSetting')}>
+                        {[true, false].map((show) => (
+                            <button
+                                key={String(show)}
+                                className={showSharedTasks === show ? styles.segmentActive : undefined}
+                                aria-pressed={showSharedTasks === show}
+                                onClick={() => dispatch(setShowSharedTasks(show))}
+                            >
+                                {t(show ? 'show' : 'hide')}
+                            </button>
+                        ))}
+                    </div>
+                </div>
                 {installState !== 'unavailable' && (
                     <div className={styles.row}>
                         <div className={styles.rowText}>
@@ -165,6 +185,8 @@ export default function Settings(){
                     </div>
                 </div>
             </section>
+
+            <EventTypeSettings />
         </div>
     );
 }

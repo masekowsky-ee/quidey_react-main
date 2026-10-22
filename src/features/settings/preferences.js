@@ -37,6 +37,11 @@ export const TIMER_MODES = ['timer', 'stopwatch'];
 export const readStoredTimerMode = () => readStored('timerMode', TIMER_MODES, 'timer');
 export const storeTimerMode = (mode) => store('timerMode', mode);
 
+// Whether Home's task list shows the tasks of my shared sessions among my own (in "All");
+// a session's own group still shows them
+export const readStoredShowSharedTasks = () => readStored('showSharedTasks', ['0', '1'], '1') === '1';
+export const storeShowSharedTasks = (show) => store('showSharedTasks', show ? '1' : '0');
+
 // Whether this account has seen the intro tour on this device (shown once to new users)
 const tutorialKey = (username) => `tutorialSeen:${username}`;
 export const hasSeenTutorial = (username) => readStored(tutorialKey(username), ['1'], null) === '1';

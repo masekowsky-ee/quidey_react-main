@@ -599,3 +599,36 @@
     border-radius: 999px;
     pointer-events: none;
 }
+
+/* ---------- one frame per width (sizes from AppShell.module.css) ---------- */
+
+/* Desktop: the header starts beside the sidebar, which carries the logo and the whole menu;
+   what stays here is what runs right now (timer, team stopwatch) and the quick panels */
+@media (min-width: 1100px) {
+    .header{
+        left: var(--sidebar-w, 0px);
+        width: auto;
+        right: 0;
+    }
+
+    /* nested: .btn composes iconBtn, which sets display as well */
+    .div > .menuBtn,
+    .div > .brand{
+        display: none;
+    }
+
+    .div{
+        padding-left: 1.5rem;
+    }
+}
+
+/* Phones: the tab bar's "More" opens the menu, so the logo starts the row */
+@media (max-width: 720px) {
+    .div > .menuBtn{
+        display: none;
+    }
+
+    .brand{
+        margin-left: 1rem;
+    }
+}

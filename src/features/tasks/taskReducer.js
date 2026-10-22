@@ -1,4 +1,4 @@
-import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, REFRESH_TASKS, TASK_REPLACED, SET_TASK_INVITES, TASK_INVITE_ACCEPTED, TASK_INVITE_REMOVED, TASK_SHARE_REMOVED } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, REFRESH_TASKS, TASK_REPLACED, SET_TASK_INVITES, TASK_INVITE_ACCEPTED, TASK_INVITE_REMOVED, TASK_SHARE_REMOVED, SET_EVENT_TYPES, EVENT_TYPE_SAVED, EVENT_TYPE_REMOVED } from './taskActionTypes';
 
 // task.group_ids: the groups a task is in (for its labels)
 const withGroupIds = (task, change) => ({ ...task, group_ids: change(task.group_ids ?? []) });
@@ -8,7 +8,7 @@ const withGroupIds = (task, change) => ({ ...task, group_ids: change(task.group_
 const UPDATABLE = [
     'name', 'due', 'description', 'prio', 'done',
     'due_time', 'duration_minutes', 'reminder_minutes', 'location', 'link', 'details',
-    'repeat', 'completed_at', 'color', 'reminder_email',
+    'repeat', 'completed_at', 'color', 'reminder_email', 'kind', 'event_type_id', 'event_type',
     'group_ids', 'isOwner', 'owner', 'shareId', 'sharedWith',
 ];
 const applyUpdate = (task, row) => {
@@ -38,10 +38,38 @@ const initialState = {
     invites: [],
     // whether the invites came from the server yet (see useLiveLists)
     invitesLoaded: false,
+    // my event types in their order: [{ id, name, color, position }]
+    eventTypes: [],
 };
+
+// A type's new name or colour also shows on the events that have it
+const withEventType = (task, type) =>
+    task.event_type_id === type.id ? { ...task, event_type: { id: type.id, name: type.name, color: type.color } } : task;
 
 const taskReducer = (state = initialState, action) => {
     switch (action.type) {
+        case SET_EVENT_TYPES:
+            return { ...state, eventTypes: action.payload };
+        case EVENT_TYPE_SAVED: {
+            const type = action.payload;
+            const known = state.eventTypes.some(t => t.id === type.id);
+            return {
+                ...state,
+                eventTypes: known ? state.eventTypes.map(t => (t.id === type.id ? type : t)) : [...state.eventTypes, type],
+                tasks: state.tasks.map(task => withEventType(task, type)),
+                groupToDisplay: { ...state.groupToDisplay, tasks: state.groupToDisplay.tasks.map(task => withEventType(task, type)) },
+            };
+        }
+        case EVENT_TYPE_REMOVED: {
+            // its events stay, without a type
+            const untyped = (task) => (task.event_type_id === action.payload ? { ...task, event_type_id: null, event_type: null } : task);
+            return {
+                ...state,
+                eventTypes: state.eventTypes.filter(t => t.id !== action.payload),
+                tasks: state.tasks.map(untyped),
+                groupToDisplay: { ...state.groupToDisplay, tasks: state.groupToDisplay.tasks.map(untyped) },
+            };
+        }
         case REFRESH_TASKS: {
             const fresh = new Map(action.payload.map(task => [task.id, task]));
             return {
@@ -84,6 +112,7 @@ const taskReducer = (state = initialState, action) => {
         case SET_TASK_STATE: 
             return {
                 ...state,
+                ...(action.payload.eventTypes ? { eventTypes: action.payload.eventTypes } : {}),
                 tasks: action.payload.tasks,
                 groups:  action.payload.groups,
                 groupToDisplay: {...state.groupToDisplay, tasks: action.payload.tasks},

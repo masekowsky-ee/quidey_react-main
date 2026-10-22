@@ -31,6 +31,13 @@
     margin: 0 clamp(0.75rem, 4vw, 2rem);
     flex-direction: column;
     justify-content: space-around;
+    max-width: 30rem;
+}
+
+/* task or event, the planned time / length and the event's type: the same space as the inputs */
+.form > fieldset,
+.form > div:not(.rowDiv):not(.prioHead):not(.more){
+    margin-bottom: 0.75rem;
 }
 
 .rowDiv{

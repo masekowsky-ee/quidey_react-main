@@ -2,18 +2,26 @@ import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import styles from './AppIntro.module.css';
 import { readStoredMotion } from '../../features/settings/motion';
-import { LEGAL_PATHS } from '../../legal/paths';
 
 // Remotion only loads for the intro, not with the app
 const IntroPlayer = lazy(() => import('./IntroPlayer'));
 
-// Every time the app loads for someone signed in, on every motion level (the big one on
-// "extreme"), except on the legal pages and the mail link (those are opened to read something
-// right away) and in tests. Visitors who aren't signed in land on the landing page and see it
-// at once. Read once at start: changing the setting later doesn't replay it.
-const NO_INTRO_PATHS = [...LEGAL_PATHS, '/verify-email'];
+// When someone signed in opens the app on its start page, on every motion level (the big one on
+// "extreme"). Not on a reload or back/forward (the app is already open, that's a pause they
+// didn't ask for), not on a page opened by a link (a notice, the calendar, a legal page:
+// opened to see something right away) and not in tests. Visitors who aren't signed in land on
+// the landing page and see it at once. Read once at start: changing the setting later doesn't
+// replay it.
 const signedIn = () => { try { return Boolean(localStorage.getItem('token')); } catch { return false; } };
-const startLevel = () => (import.meta.env.MODE === 'test' || !signedIn() || NO_INTRO_PATHS.includes(window.location.pathname)
+const openedFresh = () => {
+    try {
+        const navigation = performance.getEntriesByType?.('navigation')?.[0];
+        return !navigation || navigation.type === 'navigate';
+    } catch {
+        return true;
+    }
+};
+const startLevel = () => (import.meta.env.MODE === 'test' || !signedIn() || window.location.pathname !== '/' || !openedFresh()
     ? null
     : readStoredMotion());
 

@@ -575,7 +575,7 @@ a.primaryBtn{
 /* Wider column for the session room (two columns on desktop) */
 .pageWide{
     composes: page from './ui.module.css';
-    width: min(1180px, calc(100% - 2rem));
+    width: min(1180px, calc(100% - 2 * var(--page-gutter, 1rem)));
     margin: 0 auto;
     padding-bottom: 3rem;
     box-sizing: border-box;
@@ -1095,14 +1095,15 @@ a.primaryBtn{
 }
 
 /* top of the solo home page */
+/* in Home's title row, on its right: the hint (when there is one), then Solo | Team */
 .soloStrip{
-    width: min(1200px, calc(100% - 2rem));
-    margin: 1rem auto 0;
+    min-width: 0;
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    justify-content: flex-end;
+    gap: 0.75rem;
 }
 
 .soloHint{
@@ -1126,7 +1127,7 @@ a.primaryBtn{
 
 .teamPage{
     composes: page from './ui.module.css';
-    width: min(1440px, calc(100% - 2rem));
+    width: min(1440px, calc(100% - 2 * var(--page-gutter, 1rem)));
     margin: 0 auto;
     padding-bottom: 3rem;
     box-sizing: border-box;

@@ -1,8 +1,8 @@
 /* Bottom center, above the docked timer */
 .toaster{
     position: fixed;
-    left: 50%;
-    bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+    left: calc(50% + var(--sidebar-w, 0px) / 2); /* centred over the content, beside a sidebar */
+    bottom: calc(5.5rem + var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px));
     transform: translateX(-50%);
     z-index: var(--z-alert);
     display: flex;

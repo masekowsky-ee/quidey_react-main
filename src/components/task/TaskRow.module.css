@@ -1,0 +1,327 @@
+/* One task: drag | check | name over its details | day + priority | actions.
+   Rows are split by one quiet rule; a task's own colour is a 3px edge on the left. */
+.row {
+  display: grid;
+  grid-template-columns: 1.25rem 2rem minmax(0, 1fr) auto auto;
+  grid-template-areas: "drag check body when actions";
+  align-items: center;
+  column-gap: 0.625rem;
+  min-height: 3.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 0.25rem;
+  box-sizing: border-box;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row[data-task-color] {
+  box-shadow: inset 3px 0 0 var(--task-color);
+}
+
+/* from a shared session: the team's edge */
+.sharedRow {
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--primary) 60%, transparent);
+}
+
+.drag {
+  grid-area: drag;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  color: var(--text-muted);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity var(--ease-out);
+}
+
+.dragIcon {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* the handle shows where a row is being looked at; touch screens always show it */
+.row:hover .drag,
+.row:focus-within .drag {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .drag {
+    opacity: 1;
+  }
+}
+
+/* ---------- check ---------- */
+
+.check {
+  grid-area: check;
+  width: 1.375rem;
+  height: 1.375rem;
+  margin: 0 auto;
+  padding: 0;
+  color: transparent;
+  background: none;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 50%;
+  corner-shape: round;
+}
+
+/* a bigger hit area than the circle */
+.check {
+  position: relative;
+}
+
+.check::after {
+  content: '';
+  position: absolute;
+  inset: -0.6rem;
+}
+
+.check:hover {
+  color: var(--text-muted);
+  background: none;
+  border-color: var(--text-h);
+  box-shadow: none;
+}
+
+.checkIcon {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.checkDone,
+.checkDone:hover {
+  color: var(--contrast-text);
+  background-color: var(--text-muted);
+  border-color: var(--text-muted);
+}
+
+/* ---------- name and details ---------- */
+
+.body {
+  grid-area: body;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.name {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--text-h);
+  overflow-wrap: anywhere;
+}
+
+.renamable {
+  cursor: text;
+}
+
+.nameInput {
+  width: 100%;
+  font-weight: 500;
+}
+
+.doneRow .name {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+/* duration, place, link, description and labels on one quiet line that wraps when it must */
+.details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  min-width: 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.details:empty {
+  display: none;
+}
+
+/* the labels' own top margin is for other places */
+.details > span {
+  margin-top: 0;
+}
+
+.description {
+  min-width: 0;
+  max-width: 28rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- day and priority ---------- */
+
+.when {
+  grid-area: when;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.due {
+  height: 2rem;
+  padding: 0 0.6rem;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+}
+
+.due:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: transparent;
+}
+
+.due:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.dueTime {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.noDue {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.overdue,
+.overdue .dueTime {
+  color: var(--danger);
+}
+
+.dueInput {
+  width: 9.5rem;
+  height: 2rem;
+  padding-block: 0;
+}
+
+.prio {
+  flex: none;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-muted);
+  white-space: nowrap;
+  background-color: var(--surface-hover);
+  border-radius: var(--radius-pill);
+}
+
+.prioHigh {
+  color: var(--danger);
+  background-color: color-mix(in srgb, var(--danger) 14%, transparent);
+}
+
+.myTime {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary-fg);
+  white-space: nowrap;
+}
+
+/* ---------- actions ---------- */
+
+.actions {
+  grid-area: actions;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.125rem;
+}
+
+.action {
+  width: 2rem;
+  height: 2rem;
+  color: var(--text-muted);
+}
+
+.action:hover {
+  color: var(--text-h);
+}
+
+.actionIcon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.sessionLink {
+  display: inline-flex;
+  align-items: center;
+  height: 2rem;
+  padding: 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--text);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  transition: border-color var(--ease-out), color var(--ease-out);
+}
+
+.sessionLink:hover {
+  color: var(--text-h);
+  border-color: var(--border-strong);
+}
+
+/* ---------- phones: name and actions on the first line, day and priority under the name ---------- */
+@media (max-width: 720px) {
+  .row {
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    grid-template-areas:
+      "check body actions"
+      ".     when when";
+    row-gap: 0.15rem;
+    padding: 0.625rem 0.25rem 0.625rem 0.25rem;
+    align-items: start;
+  }
+
+  /* dragging on a phone fights the scrolling: the focus button does the same */
+  .drag {
+    display: none;
+  }
+
+  .check {
+    margin-top: 0.1rem;
+  }
+
+  .when {
+    justify-content: flex-start;
+  }
+
+  .when:empty {
+    display: none;
+  }
+
+  .due {
+    height: 1.75rem;
+    padding: 0 0.4rem;
+    margin-left: -0.4rem;
+  }
+
+  .description {
+    max-width: 100%;
+  }
+}

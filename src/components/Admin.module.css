@@ -1,6 +1,6 @@
 .page{
     composes: pageColumn from './ui.module.css';
-    width: min(820px, calc(100% - 2rem));
+    width: min(820px, calc(100% - 2 * var(--page-gutter, 1rem)));
 }
 
 .title{

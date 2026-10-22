@@ -1,0 +1,102 @@
+/* Today's events on Home: a row of small cards above the task list, scrolling sideways */
+
+.strip{
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+}
+
+.title{
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.list{
+    list-style: none;
+    margin: 0;
+    padding: 0 0 2px;
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+}
+
+.list > li{
+    flex-shrink: 0;
+    scroll-snap-align: start;
+}
+
+.event{
+    --tone: var(--task-color, var(--primary));
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    min-width: 9rem;
+    max-width: 15rem;
+    padding: 0.5rem 0.75rem 0.55rem 0.85rem;
+    text-align: left;
+    color: var(--text);
+    background-color: color-mix(in srgb, var(--tone) 9%, var(--surface));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--tone);
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+    transform: none;
+    filter: none;
+    transition: background-color var(--ease-out), border-color var(--ease-out);
+}
+
+.event:hover{
+    background-color: color-mix(in srgb, var(--tone) 15%, var(--surface));
+    box-shadow: none;
+}
+
+.time{
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-h);
+}
+
+.name{
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.type{
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.over{
+    --tone: var(--text-muted);
+    opacity: 0.65;
+}
+
+.over .name{
+    text-decoration: line-through;
+}
+
+.live{
+    border-color: color-mix(in srgb, var(--tone) 55%, transparent);
+}
+
+.liveTag{
+    margin-top: 0.15rem;
+    padding: 0 0.45rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--bg);
+    background-color: var(--tone);
+    border-radius: 999px;
+}

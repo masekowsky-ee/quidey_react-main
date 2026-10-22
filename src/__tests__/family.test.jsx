@@ -9,7 +9,7 @@ import { setLanguage } from '../features/settings/settingsAction'
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import { connectRealtime, disconnectRealtime, REFRESH_DELAY_MS } from '../features/realtime/socket'
 import { useFamilyList } from '../features/family/family'
-import Menu from '../components/menu'
+import Menu from '../components/Menu'
 import Family from '../components/family/Family'
 import FamilyPage from '../components/family/FamilyPage'
 

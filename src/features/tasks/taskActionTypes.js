@@ -27,3 +27,8 @@ export const SET_TASK_INVITES = "SET_TASK_INVITES";
 export const TASK_INVITE_ACCEPTED = "TASK_INVITE_ACCEPTED";
 export const TASK_INVITE_REMOVED = "TASK_INVITE_REMOVED";
 export const TASK_SHARE_REMOVED = "TASK_SHARE_REMOVED";
+
+// my event types (what an event is, e.g. "Arbeit")
+export const SET_EVENT_TYPES = "SET_EVENT_TYPES";
+export const EVENT_TYPE_SAVED = "EVENT_TYPE_SAVED";
+export const EVENT_TYPE_REMOVED = "EVENT_TYPE_REMOVED";

@@ -11,6 +11,7 @@ import TaskEditor from './TaskEditor.jsx';
 import TaskMeta from '../task/TaskMeta.jsx';
 import Icon from './icons.jsx';
 import { taskColorAttr } from '../../features/tasks/taskColors';
+import { isEvent } from '../../features/tasks/kinds';
 
 const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
 const PRIO_TEXT = { high: 'prioHigh', medium: 'prioMedium', low: 'prioLow' };
@@ -19,15 +20,21 @@ const isTyping = (el) => el?.closest?.('input, textarea, select, [contenteditabl
 
 function TaskRow({ task, today, personal, editing, onEdit, onCloseEdit, onToggleDone, onSave, onDelete, onLeave, onPickGroups, onOpenGroup }) {
     const { t } = useTranslation();
-    const level = prioLevel(task.prio);
-    const classes = [styles.row, PRIO_CLASS[level], task.done && styles.rowDone, editing && styles.rowEditing].filter(Boolean).join(' ');
+    const event = isEvent(task);
+    const level = event ? null : prioLevel(task.prio);
+    const classes = [styles.row, PRIO_CLASS[level], event && styles.rowEvent, task.done && styles.rowDone, editing && styles.rowEditing].filter(Boolean).join(' ');
     return (
         <li className={classes} data-task-color={taskColorAttr(task)}>
             <div className={styles.rowMain}>
-                <button type="button" className={styles.check} aria-pressed={Boolean(task.done)} onClick={() => onToggleDone(task)}
-                    aria-label={`${t(task.done ? 'reopen' : 'markDone')}: ${task.name}`} title={t(task.done ? 'reopen' : 'markDone')}>
-                    <Icon name="check" size={16} />
-                </button>
+                {/* an event isn't ticked off: it's done once it's over */}
+                {event
+                    ? <span className={styles.eventMark} title={t(task.done ? 'eventOver' : 'kind_event')}>
+                        <Icon name="calendar" size={16} />
+                    </span>
+                    : <button type="button" className={styles.check} aria-pressed={Boolean(task.done)} onClick={() => onToggleDone(task)}
+                        aria-label={`${t(task.done ? 'reopen' : 'markDone')}: ${task.name}`} title={t(task.done ? 'reopen' : 'markDone')}>
+                        <Icon name="check" size={16} />
+                    </button>}
                 <div className={styles.rowText}>
                     <button type="button" className={styles.rowName} onClick={editing ? onCloseEdit : onEdit} aria-expanded={editing}>
                         {task.name}
@@ -70,6 +77,8 @@ export default function DayPanel({
     const [draft, setDraft] = useState('');
     // optional time for the new task; empty: the whole day
     const [draftTime, setDraftTime] = useState('');
+    // what the field adds: a task or an event (only in my own calendar)
+    const [draftKind, setDraftKind] = useState('task');
     const [busy, setBusy] = useState(false);
     // the task being edited, remembered with its day so changing the day closes the editor
     const [editing, setEditing] = useState({ day: key, id: initialTaskId === 'new' ? null : initialTaskId });
@@ -108,7 +117,7 @@ export default function DayPanel({
         const name = draft.trim();
         if (!name || busy) return;
         setBusy(true);
-        const ok = await onAddTask(name, key, draftTime || null);
+        const ok = await onAddTask(name, key, draftTime || null, personal ? draftKind : 'task');
         setBusy(false);
         if (ok) {
             setDraft('');
@@ -158,9 +167,20 @@ export default function DayPanel({
                     </button>
                 </div>
 
+                {personal &&
+                    <div className={styles.quickKind} role="radiogroup" aria-label={t('kindLegend')}>
+                        {['task', 'event'].map(kind => (
+                            <button key={kind} type="button" role="radio" aria-checked={draftKind === kind}
+                                className={draftKind === kind ? styles.quickKindOn : undefined}
+                                onClick={() => { setDraftKind(kind); addRef.current?.focus(); }}>
+                                {t(`kind_${kind}`)}
+                            </button>
+                        ))}
+                    </div>}
                 <form className={styles.quickAdd} onSubmit={add}>
                     <input ref={addRef} value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={200}
-                        placeholder={t('addTaskForDay')} aria-label={t('addTaskForDay')} />
+                        placeholder={t(draftKind === 'event' && personal ? 'addEventForDay' : 'addTaskForDay')}
+                        aria-label={t(draftKind === 'event' && personal ? 'addEventForDay' : 'addTaskForDay')} />
                     <input type="time" className={styles.quickTime} value={draftTime} onChange={(e) => setDraftTime(e.target.value)}
                         aria-label={`${t('taskTime')} (${t('allDay')}: –)`} title={t('taskTime')} />
                     <button type="submit" className={styles.addBtn} disabled={!draft.trim() || busy}>{t('add')}</button>
@@ -218,7 +238,7 @@ export default function DayPanel({
                                 </li>
                             ))}
                         </ul>
-                        <Link to="/history" className={styles.historyLink}>{t('openHistory')} →</Link>
+                        <Link to="/stats?tab=sessions" className={styles.historyLink}>{t('openHistory')} →</Link>
                     </section>
                 }
             </div>

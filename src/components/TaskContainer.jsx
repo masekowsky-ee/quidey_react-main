@@ -2,43 +2,37 @@ import { useCallback, useState } from 'react'
 import styles from './TaskContainer.module.css';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import {deleteTask, deleteGroupTasks, editGroup, updateTaskProps, editDisplaygroup, leaveTask, isSharedWithMe} from '../features/tasks/taskAction'
-import TaskMeta from './task/TaskMeta.jsx'
+import {deleteTask, deleteGroup, deleteGroupTasks, editGroup, updateTaskProps, editDisplaygroup, leaveTask, isSharedWithMe} from '../features/tasks/taskAction'
 import TaskColorButton from './task/TaskColorButton.jsx'
-import { taskColorAttr } from '../features/tasks/taskColors'
+import TaskRow from './task/TaskRow.jsx'
+import ConfirmDeleteButton from './ConfirmDeleteButton.jsx'
+import Icon from './icons.jsx'
 import { createPortal } from 'react-dom';
 import {useTranslation} from '../i18n/useTranslation'
-import { formatDate, toInputDate, formatDuration, isOverdue, fill } from '../features/helperFunction'
+import { fill } from '../features/helperFunction'
 import { selectSharedGroups, selectSharedSoloTasks, setSharedTaskDone, togetherErrorText } from '../features/together/togetherAction'
 import { showToast } from '../features/toast/toast'
-import GroupPicker from './GroupPicker.jsx'
 import TaskEditDialog from './task/TaskEditDialog.jsx'
-import TaskLabels from './TaskLabels.jsx'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence } from 'motion/react'
 import { MOTION, useMotionLevel, burstFrom } from '../features/settings/motion'
-
-// a focus target: puts a task into the work area (the same as dragging it there)
-function FocusButton({ task, onActivate, label }) {
-    if (!onActivate) return null;
-    return (
-        <button className={styles.focusBtn} onClick={() => onActivate(task)} title={label} aria-label={`${label}: ${task.name}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="7.5" /><circle cx="12" cy="12" r="3" /><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" /></svg>
-        </button>
-    );
-}
+import { setShowSharedTasks } from '../features/settings/settingsAction'
+import { isEvent } from '../features/tasks/kinds'
+import { dateKey, minutesOfDay } from '../features/calendar/calendar'
+import TodayEvents from './task/TodayEvents.jsx'
 
 // seconds between two rows when the list cascades in
 const CASCADE_STEP = { minimal: 0.025, normal: 0.035, extreme: 0.045 };
 
-
+// The task list on Home: the open tasks of the shown group (or all of them, with the tasks of
+// my shared sessions), then, when asked for, the done ones. The task in focus is left out.
 export default function TaskContainer(props){
-    const { working, handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask, releasedIds = [], onActivate } = props;
+    const { handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask, releasedIds = [], onActivate } = props;
 
     // whether the Done list is shown; only this component uses it
     const [showDone, setShowDone] = useState(false);
     // the whole list folded away (the title stays, with the number of open tasks)
     const [collapsed, setCollapsed] = useState(false);
-    
+
     const {t} = useTranslation();
     const dispatch = useDispatch();
     const motionLevel = useMotionLevel();
@@ -54,13 +48,12 @@ export default function TaskContainer(props){
     const celebrate = (e) => {
         if (motionLevel !== 'minimal') burstFrom(e.currentTarget, extreme ? undefined : 12);
     };
+    const reportError = () => dispatch(showToast(t('friendError_generic'), 'error'));
 
     const tasks = useSelector(state => state.task.tasks);
     const groups = useSelector(state => state.task.groups);
     const groupToDisplay = useSelector(state => state.task.groupToDisplay);
 
-    // the task whose groups are being picked (dialog open), or null
-    const [taskToAssign, setTaskToAssign] = useState(null);
     // the task open in the full editor (all options), or null; looked up live so changes show
     const [editTaskId, setEditTaskId] = useState(null);
     const taskInEditor = editTaskId === null ? null : tasks.find(task => task.id === editTaskId);
@@ -72,17 +65,30 @@ export default function TaskContainer(props){
     const sharedTasks = useSelector(selectSharedSoloTasks);
     const shownGroup = groupToDisplay.group;
     const showingAll = !shownGroup?.id || shownGroup.name === 'all';
+    // they can be taken out of "All" (remembered); the session's own group always shows them
+    const showSharedTasks = useSelector(state => state.settings.showSharedTasks);
+    const sharedInAll = showSharedTasks ? sharedTasks : [];
+    const hiddenSharedCount = showingAll && !showSharedTasks ? sharedTasks.filter(task => !task.done).length : 0;
+    const toggleSharedTasks = () => dispatch(setShowSharedTasks(!showSharedTasks));
     // the shown group as stored (one of my own, not "all" or a session's), or undefined
     const shownGroupRow = showingAll || shownGroup?.shared ? undefined : groups.find(g => g.id === shownGroup.id);
     const groupTasks = shownGroup?.shared
         ? (sharedGroups.find(group => group.sessionId === shownGroup.sessionId)?.tasks ?? [])
-        : showingAll ? [...groupToDisplay.tasks, ...sharedTasks] : groupToDisplay.tasks;
+        : showingAll ? [...groupToDisplay.tasks, ...sharedInAll] : groupToDisplay.tasks;
     // tasks put back from the work area go to the end, in the order they were put back
     const releasedRank = (task) => releasedIds.indexOf(task.id);
     const listTasks = releasedIds.length === 0 ? groupTasks : [
         ...groupTasks.filter(task => releasedRank(task) === -1),
         ...groupTasks.filter(task => releasedRank(task) !== -1).sort((a, b) => releasedRank(a) - releasedRank(b)),
     ];
+    // events aren't to-dos: today's show in their own strip above the list, all of them in the calendar
+    const todoTasks = listTasks.filter(task => !isEvent(task));
+    const openTasks = todoTasks.filter(task => !task.done && task.id !== activeTask?.id);
+    const doneTasks = todoTasks.filter(task => task.done && task.id !== activeTask?.id);
+    const todayKey = dateKey(new Date());
+    const todayEvents = listTasks
+        .filter(task => isEvent(task) && dateKey(task.due) === todayKey)
+        .sort((a, b) => (minutesOfDay(a.due_time) ?? -1) - (minutesOfDay(b.due_time) ?? -1));
 
     // a click on a task's label opens that group (or the session's group)
     const openGroup = (group) => {
@@ -94,285 +100,153 @@ export default function TaskContainer(props){
         dispatch(setSharedTaskDone(task.shared.sessionId, task.shared.taskId, !task.done))
             .catch(err => dispatch(showToast(togetherErrorText(t, err), 'error')));
     };
-    const [taskToEdit, setTaskToEdit] = useState(null);
-    const [editGroupDescription, setEditGroupDescription] = useState(false);
+
+    const update = (task, changes) => dispatch(updateTaskProps(changes, task)).catch(reportError);
 
     // my task is deleted; a task a friend shared with me is only left (it stays theirs)
-    const handleTaskDelete = (taskId) => {
-        const task = tasks.find(t => t.id === taskId);
-        if (task && isSharedWithMe(task)) {
+    const handleTaskDelete = (task) => {
+        if (isSharedWithMe(task)) {
             dispatch(leaveTask(task))
                 .then(() => dispatch(showToast(t('taskLeft'), 'info')))
-                .catch(() => dispatch(showToast(t('friendError_generic'), 'error')));
+                .catch(reportError);
             return;
         }
-        dispatch(deleteTask(taskId));
+        dispatch(deleteTask(task.id))
+            .then(() => dispatch(showToast(t('taskDeleted'), 'info')))
+            .catch(reportError);
     }
 
-    const [taskPropToEdit, setTaskPropToEdit] = useState(null);
-
-    const changePropHandler = (event, taskProp, taskId) => {
-        setTaskToEdit(tasks.find(t => t.id === taskId));
-        setTaskPropToEdit(taskProp);
-    }
-
-    const setTaskPropHandler = (input, propToEdit, task) => {
-        switch(propToEdit){
-            case 'name': 
-                dispatch(updateTaskProps({name: input}, task));
-                break;
-            case 'description':
-                dispatch(updateTaskProps({description: input}, task));
-                break;
-            case 'due':
-                dispatch(updateTaskProps({due: input}, task));
-                break;
-            case 'done':
-                dispatch(updateTaskProps({done: input}, task));
-                break;
-            case 'prio':
-                // An empty field would send "" to the integer column
-                if (input !== '') dispatch(updateTaskProps({prio: Number(input)}, task));
-                break;
-        }
-        setTaskToEdit(null);
-        setTaskPropToEdit(null);
-    }
-
-    const handleAssignGroup = (task) => {
-        setTaskToAssign(task);
-    }
-
+    const [editGroupDescription, setEditGroupDescription] = useState(false);
     const setGroupDescriptionHandler = (description) => {
         dispatch(editGroup(groupToDisplay.group.id, {description: description}, groupToDisplay.group));
         setEditGroupDescription(false);
     }
+    const groupDescription = shownGroupRow?.description;
 
-    const handleShowDone = () => {
-        setShowDone(!showDone);
-    }
+    const inOwnGroup = Boolean(groupToDisplay.group.name) && !showingAll && !shownGroup?.shared;
 
-    const doneCount = listTasks.filter(task => task.done === true).length;
-    const openCount = listTasks.filter(task => !task.done && task.id !== activeTask?.id).length;
-
-    const handleTaskRemove = (taskId) => {
-        dispatch(deleteGroupTasks(taskId, groupToDisplay.group.id))
-    }
+    // the props of a row, by kind of task
+    const rowProps = (task, index) => {
+        const base = { task, motionProps: rowMotion(index), onOpenGroup: openGroup };
+        if (task.shared) {
+            return {
+                ...base,
+                hidden: draggedTask?.id === task.id,
+                onToggleDone: (e) => { if (!task.done) celebrate(e); toggleSharedDone(task); },
+                onFocus: task.done ? undefined : () => onActivate?.(task),
+                onDragStart: (e) => handlePointerDown(e, task),
+            };
+        }
+        const leaving = isSharedWithMe(task);
+        return {
+            ...base,
+            hidden: draggedTask?.id === task.id,
+            onToggleDone: (e) => { if (!task.done) celebrate(e); update(task, { done: !task.done }); },
+            onRename: (name) => update(task, { name }),
+            onChangeDue: (due) => update(task, { due }),
+            onEdit: () => setEditTaskId(task.id),
+            onDelete: () => handleTaskDelete(task),
+            deleteLabel: t(leaving ? 'leaveTask' : 'deleteTask'),
+            onFocus: onActivate ? () => onActivate(task) : undefined,
+            onDragStart: (e) => handlePointerDown(e, task),
+            onRemoveFromGroup: inOwnGroup ? () => dispatch(deleteGroupTasks(task.id, groupToDisplay.group.id)) : undefined,
+        };
+    };
 
     return (
-        <div>
-            {taskToAssign && <GroupPicker task={taskToAssign} onClose={() => setTaskToAssign(null)} />}
+        <section className={styles.section} aria-labelledby="tasks-title">
             {taskInEditor && <TaskEditDialog task={taskInEditor} onClose={closeEditor} />}
             <div className={styles.sectionHead}>
                 <button className={styles.collapseBtn} onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed}
                     title={t(collapsed ? 'expandTasks' : 'collapseTasks')} aria-label={t(collapsed ? 'expandTasks' : 'collapseTasks')}>
-                    <svg className={collapsed ? styles.chevronClosed : styles.chevron} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-361q-8 0-15-2.5t-13-8.5L268-556q-11-11-11-28t11-28q11-11 28-11t28 11l156 156 156-156q11-11 28-11t28 11q11 11 11 28t-11 28L508-372q-6 6-13 8.5t-15 2.5Z"/></svg>
+                    <Icon name="chevronDown" className={collapsed ? styles.chevronClosed : styles.chevron} />
                 </button>
-                <h1 className={styles.sectionTitle}>{t('taskContainer')}</h1>
-                {collapsed && <span className={styles.openCount}>{fill(t('openTasksCount'), { count: openCount })}</span>}
-                <button className={styles.addBtn} onClick={()=>{setCreateTask(true)}} title={t('createTaskH2')} aria-label={t('createTaskH2')}>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M440-440H240q-17 0-28.5-11.5T200-480q0-17 11.5-28.5T240-520h200v-200q0-17 11.5-28.5T480-760q17 0 28.5 11.5T520-720v200h200q17 0 28.5 11.5T760-480q0 17-11.5 28.5T720-440H520v200q0 17-11.5 28.5T480-200q-17 0-28.5-11.5T440-240v-200Z"/></svg>
-                </button>
+                <h2 id="tasks-title" className={styles.sectionTitle}>
+                    {shownGroup?.name && !showingAll ? shownGroup.name : t('taskContainer')}
+                </h2>
+                {/* "All" has its count in the page's title row */}
+                {!showingAll && <span className={styles.openCount}>{fill(t('openTasksCount'), { count: openTasks.length })}</span>}
                 {/* the shown group's colour (one of my own groups) */}
                 {shownGroupRow &&
                     <TaskColorButton task={shownGroupRow} label={t('groupColor')}
-                        onChange={(color) => dispatch(editGroup(shownGroupRow.id, { color }, shownGroupRow))
-                            .catch(() => dispatch(showToast(t('friendError_generic'), 'error')))} />}
-                {doneCount > 0 && !collapsed &&
-                    <button
-                        className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}
-                        onClick={handleShowDone}
-                        aria-pressed={showDone}
-                    >
-                        {t('done')}
-                        <span className={styles.doneCount}>{doneCount}</span>
+                        onChange={(color) => dispatch(editGroup(shownGroupRow.id, { color }, shownGroupRow)).catch(reportError)} />}
+                {/* the group goes, its tasks stay */}
+                {shownGroupRow &&
+                    <ConfirmDeleteButton label={`${t('deleteGroup')}: ${shownGroupRow.name}`} title={t('deleteGroup')}
+                        onConfirm={() => dispatch(deleteGroup(shownGroupRow.id)).catch(reportError)} />}
+                <div className={styles.headActions}>
+                    {showingAll && sharedTasks.length > 0 &&
+                        <button className={`${styles.sharedToggle} ${showSharedTasks ? '' : styles.sharedToggleOff}`}
+                            onClick={toggleSharedTasks} aria-pressed={showSharedTasks}
+                            title={t(showSharedTasks ? 'hideSessionTasks' : 'showSessionTasks')}
+                            aria-label={t(showSharedTasks ? 'hideSessionTasks' : 'showSessionTasks')}>
+                            <Icon name={showSharedTasks ? 'eye' : 'eyeOff'} className={styles.sharedToggleIcon} />
+                            <span className={styles.sharedToggleLabel}>{t('sessionTasks')}</span>
+                        </button>}
+                    {doneTasks.length > 0 && !collapsed &&
+                        <button className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}
+                            onClick={() => setShowDone(!showDone)} aria-pressed={showDone}>
+                            {t('done')}
+                            <span className={styles.doneCount}>{doneTasks.length}</span>
+                        </button>}
+                    <button className={styles.addBtn} onClick={() => setCreateTask(true)}>
+                        <Icon name="plus" className={styles.addIcon} strokeWidth={2} />
+                        {t('createTaskH2')}
                     </button>
-                }
+                </div>
             </div>
+            {hiddenSharedCount > 0 &&
+                <p className={styles.hiddenNote}>
+                    {fill(t('sessionTasksHidden'), { count: hiddenSharedCount })}
+                    <button className={styles.linkBtn} onClick={toggleSharedTasks}>{t('showAgain')}</button>
+                </p>}
             {shownGroup?.shared &&
-            <p className={styles.sharedGroupHint}>
-                {t('sharedGroupHint')} <Link to={`/together/${shownGroup.sessionId}`}>{t('openSession')} →</Link>
-            </p>
-            }
-            {!groupToDisplay ? null : !shownGroup?.shared && groupToDisplay.group?.description &&
-            <div className={styles.groupDescriptionDiv}>
-                {editGroupDescription ?
-                    <input type="text" id="groupDescriptionInput" defaultValue={groups.find(g => g.id === groupToDisplay.group.id).description} onBlur={(e) => {setGroupDescriptionHandler(e.target.value);}} />
-                    :
-                    <p onClick={() => {setEditGroupDescription(true); document.getElementById('groupDescriptionInput')?.focus();}}>
-                        {groups.find(g => g.id === groupToDisplay.group.id).description}
-                    </p>
-                }
-            </div>
-            }
-            {!collapsed &&
-            <div className={styles.outerUlDiv}>
-                <div className={styles.ulDiv}>
-                    <ul className={styles.ul}>
-                        <h3 className={styles.ulH3}>{t('toDo')}</h3>
-                    <AnimatePresence>
-                    {listTasks.find(task => task.done !== true) && listTasks
-                            .map((task, index) => {
-                                // Check if this specific task is the one currently being dragged
-                                const isBeingDragged = draggedTask?.id === task.id;
+                <p className={styles.groupNote}>
+                    {t('sharedGroupHint')} <Link to={`/together/${shownGroup.sessionId}`}>{t('openSession')} →</Link>
+                </p>}
+            {groupDescription && (editGroupDescription
+                ? <input className={styles.groupDescriptionInput} autoFocus defaultValue={groupDescription} aria-label={t('description')}
+                    onBlur={(e) => setGroupDescriptionHandler(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }} />
+                : <p className={styles.groupNote} onClick={() => setEditGroupDescription(true)} title={t('description')}>
+                    {groupDescription}
+                </p>)}
 
-                                if(!task.done && task.id !== activeTask?.id && task.shared){
-                                    // from a shared session: same cells as an own task, but read-only
-                                    return (
-                                        <motion.li
-                                            {...rowMotion(index)}
-                                            key={`${task.id}li`}
-                                            className={`${styles.taskLi} ${styles.sharedLi}`}
-                                            style={isBeingDragged ? { visibility: 'hidden' } : undefined}
-                                        >
-                                            <svg onPointerDown={(e) => handlePointerDown(e, task)} className={styles.dragSvg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor" style={{ touchAction: "none" }}><path d="M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-560q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-560q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z"/></svg>
-                                            <div className={styles.taskHeader}>
-                                                <p>{task.name}</p>
-                                                <TaskLabels task={task} onOpenGroup={openGroup} />
-                                            </div>
-                                            <button onClick={(e) => { celebrate(e); toggleSharedDone(task); }} title={t('markDone')} aria-label={`${t('markDone')}: ${task.name}`}>
-                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
-                                            </button>
-                                            <p className={styles.sharedTime} title={t('myTimeInSession')}>{task.myMs > 0 ? formatDuration(task.myMs) : ''}</p>
-                                            <div className={styles.prioDiv} />
-                                            <p className={styles.sharedDesc}>{task.description || ''}</p>
-                                            <div className={styles.btnDiv}>
-                                                <FocusButton task={task} onActivate={onActivate} label={t('makeActive')} />
-                                                <Link to={`/together/${task.shared.sessionId}`} className={styles.assignBtn}>{t('openSession')}</Link>
-                                            </div>
-                                        </motion.li>
-                                    )
-                                }
-                                if(!task.done && task.id !== activeTask?.id){
-                                    return (
-                                        <motion.li
-                                            {...rowMotion(index)}
-                                            key={`${task.id}li`}
-                                            className={styles.taskLi}
-                                            data-task-color={taskColorAttr(task)}
-                                            style={isBeingDragged ? { visibility: 'hidden' } : undefined}
-                                        >
-                                            <svg onPointerDown={(e) => handlePointerDown(e, task)} className={styles.dragSvg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor" style={{ touchAction: "none" }}><path d="M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-560q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-560q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z"/></svg>
-                                            <div className={styles.taskHeader}>
-                                                {
-                                                taskToEdit && taskPropToEdit === 'name' && taskToEdit.id === task.id
-                                                    ? <input autoFocus type="text" defaultValue={task.name} onBlur={(e) => {setTaskPropHandler(e.target.value, 'name', task);}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'name', task)}}}/>
-                                                    : <p onClick={(e) => changePropHandler(e, 'name', task.id)}>{task.name}</p>
-                                                }
-                                                <TaskMeta task={task} showTime={false} />
-                                                <TaskLabels task={task} onOpenGroup={openGroup} />
-                                            </div>
-                                            <button onClick={(e)=>{celebrate(e); setTaskPropHandler(!task.done, 'done', task)}}>
-                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
-                                            </button>
-                                            { taskToEdit && taskPropToEdit === 'due' && taskToEdit.id === task.id
-                                                ? <input autoFocus type="date" defaultValue={toInputDate(task.due)} onBlur={(e) => {setTaskPropHandler(e.target.value, 'due', task);}} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'due', task)}}}/>
-                                                : <p className={task.due ? undefined : styles.noDue} style={isOverdue(task) ? { color: 'var(--danger)' } : {}} onClick={(e) => changePropHandler(e, 'due', task.id)}>
-                                                    {task.due ? formatDate(task.due) : t('noDate')}{task.due && task.due_time && <span className={styles.dueTime}> {task.due_time}</span>}
-                                                </p>
-                                            }
-                                            <div className={styles.prioDiv}>
-                                                <label>{t('prioritise')}:</label>
-                                                <input type="number" name="prio" placeholder={task.prio} min="0" max="100" onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'prio', task)}}} onBlur={(e)=>setTaskPropHandler(e.target.value, 'prio', task)} />
-                                            </div>
-                                            {
-                                                taskToEdit && taskPropToEdit === 'description' && taskToEdit.id === task.id
-                                                ? <input style={{width: '100%', marginLeft: '0.5rem',}} autoFocus type="text" defaultValue={task.description || null} onKeyDown={(e) => {if(e.key === 'Enter'){setTaskPropHandler(e.target.value, 'description', task)}}} onBlur={(e) => {setTaskPropHandler(e.target.value, 'description', task);}} />
-                                                : <p style={{textAlign: 'left', marginLeft: '0.5rem',}} onClick={(e) => changePropHandler(e, 'description', task.id)}>{task.description || t('description')}</p>
-                                            }
-                                            <div className={styles.btnDiv}>
-                                                <FocusButton task={task} onActivate={onActivate} label={t('makeActive')} />
-                                                <button className={styles.editBtn} onClick={() => setEditTaskId(task.id)} title={t('editTask')} aria-label={`${t('editTask')}: ${task.name}`}>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-40 80q-17 0-28.5-11.5T120-160v-97q0-16 6-30.5t17-25.5l505-504q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L313-143q-11 11-25.5 17t-30.5 6h-97Zm600-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
-                                                </button>
-                                                <TaskColorButton task={task} onChange={(color) => dispatch(updateTaskProps({ color }, task)).catch(() => dispatch(showToast(t('friendError_generic'), 'error')))} />
-                                                <button className={styles.assignBtn} onClick={() => handleAssignGroup(task)}>{t('assignGroup')}</button>
-                                                {groupToDisplay.group.name && !showingAll && !shownGroup?.shared &&
-                                                <button key={`${task.id}btn`} onClick={() => handleTaskRemove(task.id)} title={t('removeFromGroup')} aria-label={t('removeFromGroup')}>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>
-                                                </button>
-                                                }
-                                                <button className={styles.deleteBtn} onClick={() => handleTaskDelete(task.id)}
-                                                    title={t(isSharedWithMe(task) ? 'leaveTask' : 'deleteTask')} aria-label={`${t(isSharedWithMe(task) ? 'leaveTask' : 'deleteTask')}: ${task.name}`}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
-                                            </div>
-                                            {working && (<div className={styles.dragDiv}><svg className={styles.dragSvg} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-560q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-560q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z"/></svg></div>) }
-                                        </motion.li>
-                                    )
-                                }
-                            })
-                    }
-                    </AnimatePresence>
-                    </ul>
+            {!collapsed && <>
+                {todayEvents.length > 0 && <TodayEvents events={todayEvents} onOpen={(task) => setEditTaskId(task.id)} />}
+                <div className={styles.panel}>
+                    {openTasks.length === 0
+                        ? <div className={styles.empty}>
+                            <p className={styles.emptyTitle}>{t('noOpenTasks')}</p>
+                            <p className={styles.emptyText}>{t('noOpenTasksHint')}</p>
+                        </div>
+                        : <ul className={styles.list} aria-label={t('toDo')}>
+                            <AnimatePresence>
+                                {openTasks.map((task, index) => <TaskRow key={task.id} {...rowProps(task, index)} />)}
+                            </AnimatePresence>
+                        </ul>}
                 </div>
-                {showDone && listTasks.find(task => task.done === true) &&
-                <div className={styles.ulDiv}>
-                    <ul className={styles.ul}>
-                        <h3 className={styles.ulH3}>{t('done')}</h3>
-                    <AnimatePresence>
-                    {listTasks
-                        .map((task, index) => {
-                            if(task.done && task.shared){
-                                return (<motion.li {...rowMotion(index)} key={task.id} className={`${styles.taskLi} ${styles.doneLi}`}>
-                                    <div className={styles.taskHeader}>
-                                        <div className={styles.doneHeadDiv}>
-                                            <p style={{textDecoration: 'line-through'}}>{task.name}</p>
-                                            <input type="checkbox" checked onChange={() => toggleSharedDone(task)} aria-label={`${t('reopen')}: ${task.name}`} />
-                                        </div>
-                                        <TaskLabels task={task} onOpenGroup={openGroup} />
-                                    </div>
-                                </motion.li>)
-                            }
-                            if(task.done && task.id !== activeTask?.id){
-                                return (<motion.li {...rowMotion(index)} key={task.id} className={`${styles.taskLi} ${styles.doneLi}`}>
-                                    <div className={styles.taskHeader}>
-                                        <div className={styles.doneHeadDiv}>
-                                            <p style={{textDecoration: 'line-through'}} onClick={(e) => changePropHandler(e, 'name', task.id)}>{task['name']}</p>
-                                            <input type="checkbox" checked onChange={()=>{setTaskPropHandler(!task.done, 'done', task)}} />
-                                        </div>
-                                        <TaskLabels task={task} onOpenGroup={openGroup} />
-                                    </div>
-                                    <button className={styles.editBtn} onClick={() => setEditTaskId(task.id)} title={t('editTask')} aria-label={`${t('editTask')}: ${task.name}`}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-40 80q-17 0-28.5-11.5T120-160v-97q0-16 6-30.5t17-25.5l505-504q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L313-143q-11 11-25.5 17t-30.5 6h-97Zm600-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
-                                    </button>
-                                    <button className={styles.deleteBtn} onClick={() => handleTaskDelete(task.id)}
-                                                    title={t(isSharedWithMe(task) ? 'leaveTask' : 'deleteTask')} aria-label={`${t(isSharedWithMe(task) ? 'leaveTask' : 'deleteTask')}: ${task.name}`}>{<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/></svg>}</button>
-                                </motion.li>)
-                            }
-                        })
-                    }
-                    </AnimatePresence>
-                    </ul>
-                </div>
-                }
-            </div>}
 
-            {/* Ghost-Klon: schwebt per Portal direkt in document.body, unabhängig
-                von transform/filter-Vorfahren, damit position:fixed wirklich
-                relativ zum Viewport wirkt. Rendert nur, wenn gedraggt wird. */}
-            
-                {draggedTask && createPortal(
-                <li
-                    className={styles.taskLi}
-                    style={{
-                        visibility: 'visible',
-                        position: 'fixed',
-                        left: dragPosition.x - dragOffset.x,
-                        top: dragPosition.y - dragOffset.y,
-                        zIndex: 'var(--z-drag)',
-                        pointerEvents: 'none',
-                        margin: 0,
-                        listStyle: 'none',
-                        width: '5rem',
-                        maxWidth: '8rem',
-                        transition: 'none',
-                        display: 'flex',
-                        justifyContent: 'center',
-                    }}
-                >
-                    <p style={{width: '100%', alignSelf: 'center'}}>{draggedTask.name}</p>
-                </li>,
+                {showDone && doneTasks.length > 0 &&
+                    <div className={styles.donePanel}>
+                        <h3 className={styles.listTitle}>{t('done')}</h3>
+                        <ul className={styles.list} aria-label={t('done')}>
+                            <AnimatePresence>
+                                {doneTasks.map((task, index) => <TaskRow key={task.id} {...rowProps(task, index)} />)}
+                            </AnimatePresence>
+                        </ul>
+                    </div>}
+            </>}
+
+            {/* The dragged task follows the pointer. In a portal on document.body, so no
+                transformed ancestor turns position: fixed into something else */}
+            {draggedTask && createPortal(
+                <div className={styles.dragGhost}
+                    style={{ left: dragPosition.x - Math.min(dragOffset.x, 24), top: dragPosition.y - Math.min(dragOffset.y, 20) }}>
+                    {draggedTask.name}
+                </div>,
                 document.body
             )}
-        </div>
+        </section>
     );
 }
