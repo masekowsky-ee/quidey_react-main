@@ -10,10 +10,48 @@ import { showToast } from '../features/toast/toast';
 import TaskColorButton from './task/TaskColorButton.jsx';
 import ConfirmDeleteButton from './ConfirmDeleteButton.jsx';
 
-// My event types, as a list to keep: rename (Enter or leaving the field), colour, order (up /
-// down) and delete (its events stay, without a type); add new ones, or take suggestions.
+// The words that give an event this type by itself (see matchEventType): chips with a remove
+// button, and a field that adds one on Enter or comma.
+function KeywordEditor({ type, onChange }) {
+    const { t } = useTranslation();
+    const [draft, setDraft] = useState('');
+    const keywords = type.keywords ?? [];
+    const add = (text = draft) => {
+        const word = text.replace(/,+$/, '').trim();
+        setDraft('');
+        if (!word || keywords.some(k => k.toLowerCase() === word.toLowerCase())) return;
+        onChange([...keywords, word]);
+    };
+    return (
+        <div className={styles.keywords}>
+            <span className={styles.keywordsLabel}>{t('keywords')}</span>
+            {keywords.map(word => (
+                <span key={word} className={styles.keyword}>
+                    {word}
+                    <button type="button" className={styles.keywordRemove} onClick={() => onChange(keywords.filter(k => k !== word))}
+                        aria-label={fill(t('keywordRemove'), { word })} title={fill(t('keywordRemove'), { word })}>×</button>
+                </span>
+            ))}
+            {keywords.length < 20 &&
+                <input className={styles.keywordInput} value={draft} maxLength={40}
+                    placeholder={keywords.length ? t('keywordAddMore') : t('keywordAdd')}
+                    aria-label={fill(t('keywordAddFor'), { name: type.name })}
+                    // a comma ends a word, like Enter
+                    onChange={(e) => (e.target.value.endsWith(',') ? add(e.target.value) : setDraft(e.target.value))}
+                    onBlur={() => add()}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') { e.preventDefault(); add(); }
+                        if (e.key === 'Backspace' && !draft && keywords.length) onChange(keywords.slice(0, -1));
+                    }} />}
+        </div>
+    );
+}
+
+// My event types, as a list to keep: rename (Enter or leaving the field), colour, keywords, order
+// (up / down) and delete (its events stay, without a type); add new ones, or take suggestions.
 // The statistics add up past events per type. Reached from the editor as /settings#event-types.
-export default function EventTypeSettings() {
+// embedded: inside a settings section that already names it (no card, title or hint of its own)
+export default function EventTypeSettings({ embedded = false }) {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
     const types = useSelector(state => state.task.eventTypes) ?? [];
@@ -69,16 +107,18 @@ export default function EventTypeSettings() {
     const suggestions = (EVENT_TYPE_SUGGESTIONS[language] ?? EVENT_TYPE_SUGGESTIONS.de).filter(s => !known.has(s.name.toLowerCase()));
     // the list in its order (a move updates positions one by one)
     const ordered = [...types].sort((a, b) => a.position - b.position || a.id - b.id);
+    const Wrapper = embedded ? 'div' : 'section';
 
     return (
-        <section className={styles.card} id="event-types" ref={ref} aria-labelledby="event-types-title">
-            <h2 id="event-types-title" className={styles.cardTitle}>{t('eventTypes')}</h2>
-            <p className={styles.rowHint}>{t('eventTypesHint')}</p>
+        <Wrapper {...(embedded ? { className: styles.embedded, ref } : { className: styles.card, id: 'event-types', ref, 'aria-labelledby': 'event-types-title' })}>
+            {!embedded && <h2 id="event-types-title" className={styles.cardTitle}>{t('eventTypes')}</h2>}
+            {!embedded && <p className={styles.rowHint}>{t('eventTypesHint')}</p>}
 
             {ordered.length > 0 &&
                 <ul className={styles.typeList}>
                     {ordered.map((type, index) => (
-                        <li key={type.id} className={styles.typeRow}>
+                        <li key={type.id} className={styles.typeItem}>
+                        <div className={styles.typeRow}>
                             <TaskColorButton task={type} label={fill(t('eventTypeColorOf'), { name: type.name })}
                                 onChange={(color) => dispatch(updateEventType(type.id, { color })).catch(fail)} />
                             <input key={type.name} className={styles.typeName} defaultValue={type.name} maxLength={40}
@@ -97,6 +137,8 @@ export default function EventTypeSettings() {
                             </span>
                             <ConfirmDeleteButton label={`${t('eventTypeDelete')}: ${type.name}`} title={t('eventTypeDelete')}
                                 onConfirm={() => dispatch(deleteEventType(type.id)).catch(fail)} />
+                        </div>
+                        <KeywordEditor type={type} onChange={(keywords) => dispatch(updateEventType(type.id, { keywords })).catch(fail)} />
                         </li>
                     ))}
                 </ul>}
@@ -120,6 +162,6 @@ export default function EventTypeSettings() {
                             {t('eventTypeTakeAll')}
                         </button>}
                 </div>}
-        </section>
+        </Wrapper>
     );
 }

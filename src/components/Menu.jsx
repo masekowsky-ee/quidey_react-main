@@ -14,6 +14,7 @@ import { selectInboxCount } from '../features/inbox/inbox';
 import { selectFamilyInviteCount } from '../features/family/family';
 import { DESKTOP_QUERY, useMediaQuery } from '../features/layout/breakpoints';
 import TesterOnly from './TesterOnly';
+import AccountSwitcher from './AccountSwitcher';
 import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, useMotionLevel } from '../features/settings/motion';
 
@@ -89,26 +90,32 @@ export default function Menu(){
                         <Icon name="close" className={styles.closeIcon} />
                     </button>
                 </div>
-                <nav className={styles.menuList} aria-label={t('menu')}>
-                    <MenuLink to="/" end icon="home" label={t('home')} onClick={onClose} />
-                    <MenuLink to="/calendar" icon="calendar" label={t('calendar')} onClick={onClose}
-                        count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
-                    <MenuLink to="/inbox" icon="inbox" label={t('inbox')} onClick={onClose}
-                        count={inboxCount} countLabel={t('inboxUnread')} />
-                    <MenuLink to="/together" icon="together" label={t('together')} onClick={onClose}
-                        count={inviteCount} countLabel={t('sessionInvites')} news={news.together} newsLabel={t('menuNews')} />
-                    {/* with open requests, go straight to them */}
-                    <MenuLink to={incomingCount > 0 ? '/social?tab=requests' : '/social'} icon="social" label={t('social')} onClick={onClose}
-                        count={incomingCount} countLabel={t('friendRequests')} news={news.social} newsLabel={t('menuNews')} />
-                    <TesterOnly>
-                        <MenuLink to="/family" icon="family" label={t('family')} onClick={onClose}
-                            count={familyInviteCount} countLabel={t('familyInvites')} />
-                    </TesterOnly>
-                    <MenuLink to="/stats" icon="history" label={t('history')} onClick={onClose} />
-                    <MenuLink to="/profile" icon="profile" label={t('profile')} onClick={onClose} />
+                {/* the four places of every day first (the same as the phone's tab bar), then the
+                    rest under "More"; profile and the tour live in the account menu at the foot */}
+                <nav className={styles.menuNav} aria-label={t('menu')}>
+                    <div className={styles.menuList}>
+                        <MenuLink to="/" end icon="home" label={t('home')} onClick={onClose} />
+                        <MenuLink to="/calendar" icon="calendar" label={t('calendar')} onClick={onClose}
+                            count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
+                        <MenuLink to="/together" icon="together" label={t('together')} onClick={onClose}
+                            count={inviteCount} countLabel={t('sessionInvites')} news={news.together} newsLabel={t('menuNews')} />
+                        <MenuLink to="/inbox" icon="inbox" label={t('inbox')} onClick={onClose}
+                            count={inboxCount} countLabel={t('inboxUnread')} />
+                    </div>
+                    <p className={styles.groupLabel}>{t('menuMore')}</p>
+                    <div className={styles.menuList}>
+                        {/* with open requests, go straight to them */}
+                        <MenuLink to={incomingCount > 0 ? '/social?tab=requests' : '/social'} icon="social" label={t('social')} onClick={onClose}
+                            count={incomingCount} countLabel={t('friendRequests')} news={news.social} newsLabel={t('menuNews')} />
+                        <TesterOnly>
+                            <MenuLink to="/family" icon="family" label={t('family')} onClick={onClose}
+                                count={familyInviteCount} countLabel={t('familyInvites')} />
+                        </TesterOnly>
+                        <MenuLink to="/stats" icon="history" label={t('history')} onClick={onClose} />
+                    </div>
                 </nav>
 
-                {/* settings, help and admin sit at the bottom */}
+                {/* settings, feedback and admin sit at the bottom, the account last */}
                 <div className={styles.menuBottom}>
                     {isAdmin && (
                         <MenuLink to="/admin" icon="admin" label={t('admin')} onClick={onClose}
@@ -116,10 +123,10 @@ export default function Menu(){
                     )}
                     <MenuLink to="/settings" icon="settings" label={t('settings')} onClick={onClose} />
                     <MenuLink to="/feedback" icon="feedback" label={t('feedback')} onClick={onClose} />
-                    <button type="button" className={`${styles.menuItem} ${styles.menuButton}`} onClick={openTutorial}>
-                        <Icon name="tutorial" className={styles.menuIcon} />
-                        <span className={styles.menuLabel}>{t('tutorial')}</span>
-                    </button>
+                    {/* who is signed in: profile, the tour, switch accounts, add one, sign out */}
+                    <div className={styles.account}>
+                        <AccountSwitcher onNavigate={onClose} onTutorial={openTutorial} />
+                    </div>
                 </div>
             </div>
         </>

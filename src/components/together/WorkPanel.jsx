@@ -7,6 +7,7 @@ import { timeOf, setSharedTaskDone } from '../../features/together/togetherActio
 import { selectWork, startWork, stopWork, localMs, useNow } from '../../features/together/work';
 import { useTogetherRun } from '../../features/together/hooks';
 
+import Icon from '../icons';
 // "My work" in a session: the task I'm on with my clock, or what I could start with
 // (tasks assigned to me first)
 export default function WorkPanel({ session, large = false }) {
@@ -27,7 +28,8 @@ export default function WorkPanel({ session, large = false }) {
         run(setSharedTaskDone(session.id, current.id, true), 'toast_taskDone');
     };
 
-    const open = session.tasks.filter(task => !task.done);
+    // events happen, nobody works on them with the stopwatch
+    const open = session.tasks.filter(task => !task.done && task.kind !== 'event');
     const suggestions = [
         ...open.filter(task => task.assignee?.id === session.me),
         ...open.filter(task => !task.assignee),
@@ -64,7 +66,7 @@ export default function WorkPanel({ session, large = false }) {
                             {suggestions.map(task => (
                                 <li key={task.id}>
                                     <button className={styles.suggestion} onClick={() => dispatch(startWork(session, task))}>
-                                        <span className={styles.playIcon} aria-hidden="true">▶</span>
+                                        <span className={styles.playIcon} aria-hidden="true"><Icon name="play" size={14} /></span>
                                         <span className={styles.suggestionName}>{task.name}</span>
                                         {task.assignee?.id === session.me && <span className={styles.assignedChip}>{t('forYou')}</span>}
                                     </button>

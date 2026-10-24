@@ -9,9 +9,8 @@ const IntroPlayer = lazy(() => import('./IntroPlayer'));
 // When someone signed in opens the app on its start page, on every motion level (the big one on
 // "extreme"). Not on a reload or back/forward (the app is already open, that's a pause they
 // didn't ask for), not on a page opened by a link (a notice, the calendar, a legal page:
-// opened to see something right away) and not in tests. Visitors who aren't signed in land on
-// the landing page and see it at once. Read once at start: changing the setting later doesn't
-// replay it.
+// opened to see something right away) and not in tests. Visitors who aren't signed in get the
+// sign-in screen at once. Read once at start: changing the setting later doesn't replay it.
 const signedIn = () => { try { return Boolean(localStorage.getItem('token')); } catch { return false; } };
 const openedFresh = () => {
     try {

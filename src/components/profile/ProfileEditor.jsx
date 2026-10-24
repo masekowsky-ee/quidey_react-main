@@ -1,6 +1,7 @@
 import styles from './ProfileParts.module.css';
 import { useState } from 'react';
 import { useTranslation } from '../../i18n/useTranslation';
+import Icon from '../icons';
 import {
     PROFILE_COLORS, PROFILE_BANNERS, PROFILE_EMOJIS, DEFAULT_BANNER,
     BIO_MAX, STATUS_MAX, STUDY_MAX, INTERESTS_MAX, INTEREST_MAX, saveProfile,
@@ -130,7 +131,7 @@ export default function ProfileEditor({ profile, onChange, onSaved, onClose }) {
                             <li key={item} className={styles.chip}>
                                 {item}
                                 <button type="button" aria-label={`${t('profileInterestRemove')}: ${item}`}
-                                    onClick={() => update({ interests: draft.interests.filter(x => x !== item) })}>✕</button>
+                                    onClick={() => update({ interests: draft.interests.filter(x => x !== item) })}><Icon name="close" size={14} /></button>
                             </li>
                         ))}
                     </ul>

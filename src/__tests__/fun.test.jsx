@@ -5,7 +5,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
 import { LOGIN_SUCCESS, SET_ACCESS } from '../features/auth/authActionTypes'
-import { DAILY_LINES, LINE_TYPES, lineOfDay, dayNumber } from '../features/fun/dailyLines'
+import { DAILY_LINES, LINE_TYPES, lineOfDay, dayNumber, yearText } from '../features/fun/dailyLines'
 import { GUESS_WORDS, SCRAMBLE_WORDS } from '../features/fun/words'
 import {
     makeRng, scoreGuess, keyStates, scramble, makeSequence, SEQUENCE_KIND_COUNT, readBest, saveBest,
@@ -32,6 +32,21 @@ describe('daily lines', () => {
             expect(line.en.trim()).not.toBe('')
             expect(line.de.trim()).not.toBe('')
         }
+    })
+
+    it('gives a year only to quotes, written in the language', () => {
+        const franklin = DAILY_LINES.find((l) => l.en.startsWith('"Well done is better'))
+        expect(yearText(franklin, 'de')).toBe('1737')
+        const caesar = DAILY_LINES.find((l) => l.en.startsWith('"Veni, vidi'))
+        expect(yearText(caesar, 'de')).toBe('47 v. Chr.')
+        expect(yearText(caesar, 'en')).toBe('47 BC')
+        const heraclitus = DAILY_LINES.find((l) => l.en.startsWith('"Everything flows'))
+        expect(yearText(heraclitus, 'de')).toBe('um 500 v. Chr.')
+        expect(yearText(heraclitus, 'en')).toBe('c. 500 BC')
+        for (const line of DAILY_LINES) {
+            if (line.type !== 'quote') expect(line.year).toBeNull()
+        }
+        expect(DAILY_LINES.filter((l) => l.year !== null).length).toBeGreaterThan(30)
     })
 
     it('has no duplicates', () => {
@@ -213,7 +228,9 @@ describe('tutorial', () => {
         renderTutorial(store)
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-        fireEvent.click(screen.getByRole('button', { name: 'Einführung' }))
+        // the tour lives in the account menu at the foot of the menu
+        fireEvent.click(screen.getByRole('button', { name: /Konten öffnen/ }))
+        fireEvent.click(screen.getByRole('menuitem', { name: 'Einführung' }))
         expect(screen.getByRole('dialog')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Zurück' })).toBeDisabled()
 

@@ -11,6 +11,7 @@ import TaskSharing from '../task/TaskSharing.jsx';
 import TaskColorPicker from '../task/TaskColorPicker.jsx';
 import DurationField from '../task/DurationWheel.jsx';
 import { EventTypePicker, KindSwitch } from '../task/KindFields.jsx';
+import { matchEventType } from '../../features/tasks/kinds';
 import Icon from './icons.jsx';
 
 // What is set under "More options", for the line next to the (closed) toggle:
@@ -22,7 +23,7 @@ function optionsSummary(t, extras, hasTime, task) {
         : '';
     const people = (task.sharedWith ?? []).map(share => displayName(share.user));
     return [
-        extras.repeat ? t(`repeat_${extras.repeat}`) : '',
+        extras.repeat ? t(`repeat_${extras.repeat}`) + (Number.isInteger(extras.repeat_left) ? ` (${fill(t('repeatLeftShort'), { count: extras.repeat_left })})` : '') : '',
         reminder,
         extras.location.trim(),
         extras.link.trim() ? t('link') : '',
@@ -38,19 +39,39 @@ function optionsSummary(t, extras, hasTime, task) {
 // closing the panel. A task's day is optional (then no time, reminder or repeating either);
 // an event needs one.
 // personal: false for a task in a shared session or a family: reminders, repeating, sharing,
-// groups and events (all personal) are left out. Without onDelete / onLeave / onPickGroups
-// their buttons are left out.
-export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, onPickGroups, personal = true }) {
+// groups and event types (all personal) are left out. allowEvents: it can still be a task or an
+// event (a shared session's). Without onDelete / onLeave / onPickGroups their buttons are left out.
+// An event's type follows its name by the types' keywords (matchEventType) until one is picked by
+// hand, also "none"; a task whose name fits a type offers to become such an event.
+export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, onPickGroups, personal = true, allowEvents = false }) {
     const { t } = useTranslation();
     const id = useId();
     const nameRef = useRef(null);
     const isOwner = task.isOwner !== false;
-    // only the owner makes a task an event or back (and picks its type, from their own list)
-    const canChangeKind = personal && isOwner;
-    const [kind, setKind] = useState(personal && task.kind === 'event' ? 'event' : 'task');
+    // only the owner makes a task an event or back and picks its type, from their own list
+    // (in a shared session everybody can, without types)
+    const canPickType = personal && isOwner;
+    const canChangeKind = canPickType || allowEvents;
+    const [kind, setKind] = useState((personal || allowEvents) && task.kind === 'event' ? 'event' : 'task');
     const event = kind === 'event';
     const [eventTypeId, setEventTypeId] = useState(task.event_type_id ?? null);
+    // 'hand' once a type was picked (an existing event's type counts as picked), 'auto' while
+    // it came from a keyword of the name
+    const [typeSource, setTypeSource] = useState(task.event_type_id ? 'hand' : null);
+    const types = useSelector(state => state.task.eventTypes);
     const [name, setName] = useState(task.name ?? '');
+    const match = canPickType ? matchEventType(name, types) : null;
+    // follows the name (and the switch to an event) until a type is picked by hand
+    const followName = (nextName, nextKind) => {
+        if (!canPickType || typeSource === 'hand' || nextKind !== 'event') return;
+        const found = matchEventType(nextName, types);
+        setEventTypeId(found?.type.id ?? null);
+        setTypeSource(found ? 'auto' : null);
+    };
+    const pickType = (id) => {
+        setEventTypeId(id);
+        setTypeSource('hand');
+    };
     const [due, setDue] = useState(toInputDate(task.due));
     const [time, setTime] = useState(task.due_time ?? '');
     // kept as it is (also empty, or above 100 from older tasks) until the slider is moved
@@ -67,6 +88,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
         link: task.link ?? '',
         details: task.details ?? '',
         repeat: task.repeat ?? null,
+        repeat_left: Number.isInteger(task.repeat_left) ? task.repeat_left : null,
     });
     // closed at first (the editor stays short); the toggle says what is set in it
     const [showMore, setShowMore] = useState(false);
@@ -91,6 +113,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
         if (!linkIsValid(extras.link)) { setShowMore(true); return; }
         setBusy(true);
         const saved = await onSave(!personal ? {
+            ...(allowEvents ? { kind } : {}),
             name: name.trim(),
             due: due || null,
             prio,
@@ -123,6 +146,8 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             link: extras.link.trim(),
             details: extras.details.trim(),
             repeat: due ? extras.repeat ?? null : null,
+            // an end only for something that repeats
+            repeat_left: due && extras.repeat ? extras.repeat_left : null,
         });
         // still open when saving failed; otherwise the editor is gone already
         if (!saved) setBusy(false);
@@ -143,12 +168,19 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
 
     return (
         <form className={styles.editor} onSubmit={submit} onKeyDown={onKeyDown} noValidate>
-            {canChangeKind && <KindSwitch value={kind} onChange={(next) => { setKind(next); setError(''); }} />}
+            {canChangeKind && <KindSwitch value={kind} onChange={(next) => { setKind(next); setError(''); followName(name, next); }} />}
             <label className={styles.field}>
                 <span>{t(event ? 'eventName' : 'taskName')}</span>
                 <input ref={nameRef} value={name} maxLength={200}
-                    onChange={(e) => { setName(e.target.value); setError(''); }} aria-invalid={Boolean(error) && !name.trim()} />
+                    onChange={(e) => { setName(e.target.value); setError(''); followName(e.target.value, kind); }} aria-invalid={Boolean(error) && !name.trim()} />
             </label>
+            {/* a task whose name fits a type: one tap makes it such an event */}
+            {!event && canChangeKind && match &&
+                <button type="button" className={styles.typeHint} data-task-color={match.type.color ?? undefined}
+                    onClick={() => { setKind('event'); setEventTypeId(match.type.id); setTypeSource('auto'); }}>
+                    <span className={styles.typeHintDot} aria-hidden="true" />
+                    {fill(t('keywordSuggestEvent'), { type: match.type.name })}
+                </button>}
             <div className={styles.fieldRow}>
                 <label className={styles.field}>
                     <span>{t(event ? 'eventDay' : 'dueDate')}</span>
@@ -177,8 +209,9 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
                 <DurationField label={t(event ? 'eventDuration' : 'plannedTime')} value={duration} onChange={setDuration}
                     maxHours={event ? 168 : 99} hint={durationHint} />
             </div>
-            {event && canChangeKind && <EventTypePicker value={eventTypeId} onChange={setEventTypeId} />}
-            {event && !canChangeKind && task.event_type &&
+            {event && canPickType && <EventTypePicker value={eventTypeId} onChange={pickType}
+                autoNote={typeSource === 'auto' && match ? fill(t('keywordAutoNote'), { keyword: match.keyword }) : null} />}
+            {event && !canPickType && personal && task.event_type &&
                 <p className={styles.sharedNote}>{t('eventType')}: {task.event_type.name}</p>}
             <label className={styles.field}>
                 <span>{t('description')}</span>
@@ -189,7 +222,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             {!isOwner && task.owner && !showMore &&
                 <p className={styles.sharedNote}>{fill(t('sharedTaskHint'), { name: displayName(task.owner) })}</p>}
             <button type="button" ref={moreRef} className={styles.moreToggle} aria-expanded={showMore} onClick={toggleMore}>
-                <span className={styles.moreChevron} aria-hidden="true">{showMore ? '▾' : '▸'}</span>
+                <span className={`${styles.moreChevron} ${showMore ? styles.moreChevronOpen : ''}`} aria-hidden="true"><Icon name="next" size={18} /></span>
                 <span className={styles.moreLabel}>{showMore ? t('fewerOptions') : t('moreOptions')}</span>
                 {!showMore && <span className={styles.moreSummary}>{optionsSummary(t, extras, Boolean(time), task)}</span>}
             </button>

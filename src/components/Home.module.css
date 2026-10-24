@@ -44,15 +44,27 @@
 }
 
 /* "3 open · 1 due today · 1 overdue": the dots sit between the parts */
-.summary > span + span::before {
+.summary > * + *::before {
   content: '·';
+  display: inline-block;
   margin-right: 0.75rem;
   color: var(--text-muted);
+  font-weight: 400;
+  text-decoration: none;
 }
 
 .overdue {
   color: var(--danger);
   font-weight: 500;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
+/* a link to the agenda: underlined where it is looked at */
+a.overdue:hover,
+a.overdue:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .columns {

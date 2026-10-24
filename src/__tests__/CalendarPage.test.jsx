@@ -113,13 +113,17 @@ describe('month view', () => {
         expect(screen.getByText('Dentist')).toBeInTheDocument()
         fireEvent.change(screen.getByRole('searchbox', { name: 'Search tasks' }), { target: { value: '' } })
         expect(screen.getByText('Finished thing')).toBeInTheDocument()
+        // the rarer filters wait behind "Filters", which then counts them
+        fireEvent.click(screen.getByRole('button', { name: 'Filters' }))
         fireEvent.click(screen.getByRole('button', { name: 'Show done' }))
         expect(screen.queryByText('Finished thing')).not.toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Filters (1)' })).toHaveAttribute('aria-expanded', 'true')
     })
 
     it('filters by group', () => {
         setup()
         // the hidden "all" group is not offered
+        fireEvent.click(screen.getByRole('button', { name: 'Filters' }))
         expect(screen.queryByRole('option', { name: 'all' })).not.toBeInTheDocument()
         fireEvent.change(screen.getByRole('combobox', { name: 'Filter by group' }), { target: { value: '10' } })
         expect(screen.getByText('Dentist')).toBeInTheDocument()
@@ -389,10 +393,10 @@ describe('shared calendars', () => {
 })
 
 describe('week strip on the home page', () => {
-    it('opens a day in the calendar and points to overdue tasks', () => {
+    it('opens a day in the calendar; the calendar itself is in the menu, not a card of its own', () => {
         setup('/')
         const link = screen.getByText('Dentist').closest('a')
         expect(link).toHaveAttribute('href', '/calendar?date=2026-10-19&day=2026-10-19')
-        expect(screen.getByRole('link', { name: 'Calendar: 1 overdue' })).toHaveAttribute('href', '/calendar?view=agenda&date=2026-10-19')
+        expect(screen.queryByRole('link', { name: /^Calendar/ })).not.toBeInTheDocument()
     })
 })

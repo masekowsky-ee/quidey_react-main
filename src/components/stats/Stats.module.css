@@ -19,8 +19,6 @@
 
 .tabs{
     composes: tabBar from '../ui.module.css';
-    width: 100%;
-    max-width: 30rem;
     align-self: flex-start;
 }
 

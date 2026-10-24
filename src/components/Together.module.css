@@ -327,7 +327,6 @@
 .taskRow[data-task-color]{
     padding-left: 0.65rem;
     box-shadow: inset 3px 0 0 var(--task-color);
-    background: linear-gradient(90deg, color-mix(in srgb, var(--task-color) 12%, transparent), transparent 45%);
 }
 
 /* ---------- who worked on what ---------- */
@@ -1352,4 +1351,105 @@ a.primaryBtn{
     .workButtons{
         flex-direction: row;
     }
+}
+
+/* Task or event for the add field */
+.kindToggle{
+    composes: segmented from './ui.module.css';
+    align-self: flex-start;
+}
+
+.kindToggle > button{
+    padding: 0.2rem 0.85rem;
+    font-size: 0.82rem;
+}
+
+.kindToggle > .kindOn,
+.kindToggle > .kindOn:hover{
+    color: var(--text-h);
+    background: var(--surface-strong);
+}
+
+.addRow .dayInput,
+.addRow .timeInput{
+    flex: 0 0 auto;
+    width: auto;
+}
+
+@media (max-width: 560px){
+    .addRow{
+        flex-wrap: wrap;
+    }
+    /* the switch on its own line, the name field under it at full width */
+    .addRow > input:first-of-type{
+        flex: 1 1 100%;
+    }
+}
+
+/* An event: a calendar mark instead of the tick, a soft tint of its colour */
+.taskEvent{
+    background-color: color-mix(in srgb, var(--task-color, var(--primary)) 6%, transparent);
+}
+
+.eventMark{
+    flex-shrink: 0;
+    display: inline-grid;
+    place-items: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--task-color, var(--primary-fg));
+}
+
+.taskDone .eventMark{
+    color: var(--text-muted);
+}
+
+/* "Done (3)": the chevron turns down while the list is open */
+.doneChevron{
+    display: inline-flex;
+    vertical-align: -0.2em;
+    transition: transform var(--ease);
+}
+
+.doneChevronOpen{
+    transform: rotate(90deg);
+}
+
+/* a small tick before a finished task's name */
+.doneMark{
+    margin-right: 0.3rem;
+    vertical-align: -0.1em;
+    color: var(--text-muted);
+}
+
+.playIcon svg,
+.sharedTag svg{
+    vertical-align: -0.15em;
+}
+
+/* a quiet text action under the add row ("Add one of my tasks") */
+.linkAction{
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 2rem;
+    padding: 0 0.6rem 0 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background: none;
+    border: 0;
+    border-radius: var(--radius-pill);
+    box-shadow: none;
+}
+
+.linkAction:hover{
+    color: var(--text-h);
+    background: var(--hover-wash);
+    box-shadow: none;
+}
+
+.addRow .kindToggle{
+    flex: none;
+    align-self: center;
 }

@@ -13,10 +13,12 @@ import FriendPicker from './together/FriendPicker.jsx';
 import TaskColorPicker from './task/TaskColorPicker.jsx';
 import DurationField from './task/DurationWheel.jsx';
 import { EventTypePicker, KindSwitch } from './task/KindFields.jsx';
+import { matchEventType } from '../features/tasks/kinds';
 import { fill } from '../features/helperFunction';
 import { minutesOfDay, timeText } from '../features/calendar/calendar';
 
-const EMPTY_EXTRAS = { reminder_minutes: null, reminder_email: false, location: '', link: '', details: '', repeat: null };
+import Icon from './icons';
+const EMPTY_EXTRAS = { reminder_minutes: null, reminder_email: false, location: '', link: '', details: '', repeat: null, repeat_left: null };
 
 // New task or event. A task needs only its name; optionally a day and time (no time: the whole
 // day, no day: whenever), the time planned for it, description and priority (none until the
@@ -38,6 +40,14 @@ export default function TaskForm(props){
     // a task's planned time, an event's length (minutes)
     const [duration, setDuration] = useState(null);
     const [name, setName] = useState('');
+    // the type follows the name's keywords until one is picked by hand (also "none")
+    const types = useSelector(state => state.task.eventTypes);
+    const [typeByHand, setTypeByHand] = useState(false);
+    const match = matchEventType(name, types);
+    const followName = (nextName, nextKind) => {
+        if (typeByHand || nextKind !== 'event') return;
+        setEventTypeId(matchEventType(nextName, types)?.type.id ?? null);
+    };
     const [due, setDue] = useState('');
     const [time, setTime] = useState('');
     const [description, setDescription] = useState('');
@@ -84,6 +94,7 @@ export default function TaskForm(props){
                 details: extras.details.trim(),
                 // repeating needs a day
                 repeat: due ? extras.repeat : null,
+                repeat_left: due && extras.repeat ? extras.repeat_left : null,
             }));
             if (shareWith.length > 0) {
                 await dispatch(shareTask(task.id, shareWith));
@@ -103,9 +114,16 @@ export default function TaskForm(props){
             </button>
             <h2>{t(event ? 'createEventH2' : 'createTaskH2')}</h2>
             <form className={`${styles.form}`} onSubmit={handleSubmit} noValidate>
-                <KindSwitch value={kind} onChange={setKind} />
+                <KindSwitch value={kind} onChange={(next) => { setKind(next); followName(name, next); }} />
                 <input className={styles.input} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}
-                    value={name} maxLength={200} onChange={(e) => setName(e.target.value)} />
+                    value={name} maxLength={200} onChange={(e) => { setName(e.target.value); followName(e.target.value, kind); }} />
+                {/* a task whose name fits a type: one tap makes it such an event */}
+                {!event && match &&
+                    <button type="button" className={styles.typeHint} data-task-color={match.type.color ?? undefined}
+                        onClick={() => { setKind('event'); setEventTypeId(match.type.id); }}>
+                        <span className={styles.typeHintDot} aria-hidden="true" />
+                        {fill(t('keywordSuggestEvent'), { type: match.type.name })}
+                    </button>}
                 <div className={styles.rowDiv}>
                     <input className={`${styles.input} ${styles.grow}`} type="date" aria-label={t(event ? 'eventDay' : 'dueDate')}
                         required={event} value={due} onChange={(e) => setDue(e.target.value)} />
@@ -115,7 +133,8 @@ export default function TaskForm(props){
                 <DurationField label={t(event ? 'eventDuration' : 'plannedTime')} value={duration} onChange={setDuration}
                     maxHours={event ? 168 : 99}
                     hint={event && duration && due && time ? fill(t('eventUntil'), { time: timeText(minutesOfDay(time) + duration) }) : t(event ? 'eventDurationHint' : 'plannedTimeHint')} />
-                {event && <EventTypePicker value={eventTypeId} onChange={setEventTypeId} />}
+                {event && <EventTypePicker value={eventTypeId} onChange={(id) => { setEventTypeId(id); setTypeByHand(true); }}
+                    autoNote={!typeByHand && match && eventTypeId === match.type.id ? fill(t('keywordAutoNote'), { keyword: match.keyword }) : null} />}
                 <input className={styles.input} type="text" placeholder={t('description')} aria-label={t('description')}
                     value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)} />
                 {!event && <>
@@ -133,7 +152,7 @@ export default function TaskForm(props){
                 <TaskColorPicker value={color} onChange={setColor} />
 
                 <button type="button" className={styles.moreToggle} aria-expanded={showMore} onClick={() => setShowMore(!showMore)}>
-                    <span aria-hidden="true">{showMore ? '▾' : '▸'}</span> {showMore ? t('fewerOptions') : t('moreOptions')}
+                    <Icon name="chevronDown" size={16} className={showMore ? styles.moreIconOpen : styles.moreIcon} /> {showMore ? t('fewerOptions') : t('moreOptions')}
                 </button>
                 {showMore &&
                     <div className={styles.more}>

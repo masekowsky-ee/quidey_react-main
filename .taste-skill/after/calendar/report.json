@@ -1,6 +1,6 @@
 {
- "url": "http://localhost:5174/e2e-login.html?t=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoibGVuYS5rIiwidHYiOjAsImlhdCI6MTc5MjQ0NTM2OSwiZXhwIjoxNzkzMDUwMTY5fQ.QD-_GRGjW0nUYYWZm1A4mAW9-bZY1VTu_SvRzMUVNQM&to=/calendar",
- "at": "2026-10-19T21:51:21.938Z",
+ "url": "http://localhost:5174/calendar",
+ "at": "2026-10-24T21:47:02.706Z",
  "allow": [],
  "viewports": [
   {
@@ -9,14 +9,14 @@
    "load": "load",
    "screens": 2,
    "filled": [
-    0.66,
-    0.74
+    0.65,
+    0.59
    ],
    "motion": {
-    "elements": 0,
+    "elements": 1,
     "css": 0,
     "transitions": 0,
-    "scripted": 0,
+    "scripted": 1,
     "videos": 0,
     "playingVideos": 0
    },
@@ -26,14 +26,14 @@
      "h": 900
     },
     "page": {
-     "height": 1078,
-     "screens": 1.2,
-     "words": 420,
+     "height": 1244,
+     "screens": 1.4,
+     "words": 406,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 16,
-     "sections": 1,
+     "svg": 27,
+     "sections": 0,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
@@ -59,7 +59,7 @@
      "weight": 600,
      "tracking": -0.01,
      "leading": 1.2,
-     "top": 121,
+     "top": 133,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -90,7 +90,7 @@
       "align": "left",
       "position": "left",
       "widthRatio": 0.13,
-      "top": 121,
+      "top": 133,
       "tag": "h1",
       "kind": "heading"
      }
@@ -120,22 +120,20 @@
       13,
       14,
       15,
-      16,
       18,
-      21,
       28
      ],
-     "sizeCount": 10,
+     "sizeCount": 8,
      "notLoaded": [],
      "body": {
       "font": "Inter Variable",
-      "size": 13,
+      "size": 12.5,
       "leading": 1.5,
       "weight": 400,
-      "tracking": -0.007,
+      "tracking": -0.008,
       "contrast": 6.6
      },
-     "measureChars": 189,
+     "measureChars": 179,
      "max": {
       "size": 28,
       "vw": 1.9,
@@ -150,8 +148,8 @@
      "microLabelShare": 0,
      "microSamples": [],
      "upperShare": 0,
-     "centerShare": 0.41,
-     "smallText": 9
+     "centerShare": 0.35,
+     "smallText": 14
     },
     "eyebrows": [],
     "numbered": [],
@@ -166,7 +164,7 @@
      "sectionBgs": [
       {
        "color": "#181716",
-       "top": 227,
+       "top": 239,
        "hsl": {
         "h": 30,
         "s": 0.04,
@@ -176,20 +174,20 @@
      ],
      "textColors": [
       {
-       "color": "#d9d4cf",
-       "share": 0.41
+       "color": "#9b958f",
+       "share": 0.53
       },
       {
-       "color": "#9b958f",
-       "share": 0.38
+       "color": "#d9d4cf",
+       "share": 0.24
       },
       {
        "color": "#f4f3f1",
-       "share": 0.16
+       "share": 0.2
       },
       {
-       "color": "#fb923c",
-       "share": 0.05
+       "color": "#f0605a",
+       "share": 0.02
       },
       {
        "color": "#2a1305",
@@ -203,13 +201,13 @@
        "s": 0.05,
        "l": 0.12
       },
-      "fg": "#f4f3f1"
+      "fg": "#9b958f"
      },
      "lowContrast": []
     },
     "buttons": {
-     "count": 14,
-     "inHero": 14,
+     "count": 18,
+     "inHero": 18,
      "radius": 8,
      "height": 41,
      "withShadow": 0,
@@ -217,11 +215,11 @@
      "mono": 0,
      "upper": 0,
      "heroLabels": [
-      "Home",
+      "Neu",
+      "Start",
       "Kalender",
-      "Profil",
-      "Verlauf",
-      "Social"
+      "Zusammen",
+      "Postfach"
      ]
     },
     "surfaces": {
@@ -234,56 +232,19 @@
      "gradientText": 0,
      "hairlines": 2,
      "hairlineSamples": [
-      "div._header_jsx83_1 1440px",
-      "div._menuDiv_4updc_1 260px"
+      "div._header_dxniv_1 1200px",
+      "div._menuDiv_1rma1_1 240px"
      ],
-     "outlinedBoxes": 2,
+     "outlinedBoxes": 1,
      "dashed": 0,
      "blurred": 0,
-     "roundedBoxes": 43,
-     "boxRadius": 8,
+     "roundedBoxes": 1,
+     "boxRadius": 18,
      "squareMedia": 0,
      "roundedMedia": 0,
      "mediaRadius": 0,
      "textShadow": 0,
-     "cardRows": [
-      {
-       "count": 7,
-       "iconTopped": false,
-       "rounded": true,
-       "top": 287
-      },
-      {
-       "count": 7,
-       "iconTopped": false,
-       "rounded": true,
-       "top": 402
-      },
-      {
-       "count": 7,
-       "iconTopped": false,
-       "rounded": true,
-       "top": 516
-      },
-      {
-       "count": 7,
-       "iconTopped": false,
-       "rounded": true,
-       "top": 630
-      },
-      {
-       "count": 7,
-       "iconTopped": false,
-       "rounded": true,
-       "top": 750
-      },
-      {
-       "count": 7,
-       "iconTopped": false,
-       "rounded": true,
-       "top": 865
-      }
-     ]
+     "cardRows": []
     },
     "heroMedia": [],
     "nav": {
@@ -302,25 +263,68 @@
      "w": 1440,
      "h": 900
     },
-    "pageH": 1078,
+    "pageH": 1244,
     "margins": {
-     "left": 152,
-     "right": 145
+     "left": 284,
+     "right": 40
     },
-    "sections": [],
+    "sections": [
+     {
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 1090,
+      "words": 114,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Oktober 2026",
+       "size": 28,
+       "tag": "h1"
+      },
+      "left": 280,
+      "right": 31,
+      "textLeft": 280,
+      "textRight": 31,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 1090,
+      "height": 154,
+      "words": 7,
+      "media": 0,
+      "middle": 16,
+      "heading": null,
+      "left": 593,
+      "right": 339,
+      "textLeft": 593,
+      "textRight": 339,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
     "gaps": [],
     "h1s": [
      {
       "text": "Oktober 2026",
       "size": 28,
-      "top": 121,
+      "top": 133,
       "firstScreen": true
      }
     ],
     "edgeText": [],
     "edges": [
      {
-      "x": 130,
+      "x": 280,
       "n": 1
      }
     ],
@@ -329,12 +333,12 @@
     "stage": false,
     "explains": false,
     "slivers": [],
-    "voidShare": 0.11,
+    "voidShare": 0.1,
     "voidBox": {
-     "x": 240,
-     "y": 780,
-     "w": 1200,
-     "h": 120
+     "x": 360,
+     "y": 360,
+     "w": 720,
+     "h": 180
     }
    },
    "app": {
@@ -345,17 +349,15 @@
     "dark": true,
     "ground": "#0e0d0c",
     "sidebar": {
-     "w": 260,
+     "w": 240,
      "tag": "div",
-     "links": 8,
-     "share": 0.18
+     "links": 13,
+     "share": 0.17
     },
-    "topbar": {
-     "h": 88
-    },
+    "topbar": null,
     "canvas": {
-     "left": 55,
-     "right": -32
+     "left": 62,
+     "right": -99
     },
     "hero": {
      "text": "Oktober 2026",
@@ -368,7 +370,7 @@
      "weight": 600,
      "tracking": -0.01,
      "leading": 1.2,
-     "top": 121,
+     "top": 133,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -383,7 +385,7 @@
     },
     "tiles": 0,
     "panels": {
-     "count": 34,
+     "count": 33,
      "radii": [
       [
        8,
@@ -391,7 +393,7 @@
       ],
       [
        0,
-       2
+       1
       ],
       [
        18,
@@ -415,7 +417,7 @@
     "numbers": {
      "cells": 0,
      "leftAligned": 0,
-     "figures": 38,
+     "figures": 31,
      "tabularShare": 1,
      "kpiMax": 13.6
     },
@@ -423,7 +425,7 @@
     "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0.16,
+     "under13": 0.2,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
@@ -442,9 +444,9 @@
     "title": {
      "text": "Oktober 2026",
      "size": 28,
-     "top": 121
+     "top": 133
     },
-    "colourShare": 0.003
+    "colourShare": 0.002
    },
    "consoleErrors": []
   },
@@ -454,14 +456,14 @@
    "load": "load",
    "screens": 2,
    "filled": [
-    0.8,
-    0.78
+    0.71,
+    0.76
    ],
    "motion": {
-    "elements": 0,
+    "elements": 1,
     "css": 0,
     "transitions": 0,
-    "scripted": 0,
+    "scripted": 1,
     "videos": 0,
     "playingVideos": 0
    },
@@ -471,14 +473,14 @@
      "h": 1024
     },
     "page": {
-     "height": 1063,
-     "screens": 1,
-     "words": 420,
+     "height": 1183,
+     "screens": 1.2,
+     "words": 407,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 16,
-     "sections": 1,
+     "svg": 27,
+     "sections": 0,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
@@ -504,7 +506,7 @@
      "weight": 600,
      "tracking": -0.01,
      "leading": 1.2,
-     "top": 121,
+     "top": 133,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -535,7 +537,7 @@
       "align": "left",
       "position": "left",
       "widthRatio": 0.24,
-      "top": 121,
+      "top": 133,
       "tag": "h1",
       "kind": "heading"
      }
@@ -565,22 +567,21 @@
       13,
       14,
       15,
-      16,
       18,
       21,
       28
      ],
-     "sizeCount": 10,
+     "sizeCount": 9,
      "notLoaded": [],
      "body": {
       "font": "Inter Variable",
-      "size": 13,
+      "size": 12.5,
       "leading": 1.5,
       "weight": 400,
-      "tracking": -0.007,
+      "tracking": -0.008,
       "contrast": 6.6
      },
-     "measureChars": 118,
+     "measureChars": 115,
      "max": {
       "size": 28,
       "vw": 3.6,
@@ -595,8 +596,8 @@
      "microLabelShare": 0,
      "microSamples": [],
      "upperShare": 0,
-     "centerShare": 0.41,
-     "smallText": 9
+     "centerShare": 0.36,
+     "smallText": 14
     },
     "eyebrows": [],
     "numbered": [],
@@ -621,20 +622,20 @@
      ],
      "textColors": [
       {
-       "color": "#d9d4cf",
-       "share": 0.41
+       "color": "#9b958f",
+       "share": 0.53
       },
       {
-       "color": "#9b958f",
-       "share": 0.38
+       "color": "#d9d4cf",
+       "share": 0.24
       },
       {
        "color": "#f4f3f1",
-       "share": 0.16
+       "share": 0.21
       },
       {
-       "color": "#fb923c",
-       "share": 0.05
+       "color": "#f0605a",
+       "share": 0.02
       },
       {
        "color": "#2a1305",
@@ -648,13 +649,13 @@
        "s": 0.05,
        "l": 0.12
       },
-      "fg": "#f4f3f1"
+      "fg": "#9b958f"
      },
      "lowContrast": []
     },
     "buttons": {
-     "count": 14,
-     "inHero": 14,
+     "count": 18,
+     "inHero": 18,
      "radius": 8,
      "height": 41,
      "withShadow": 0,
@@ -662,11 +663,11 @@
      "mono": 0,
      "upper": 0,
      "heroLabels": [
-      "Home",
+      "Neu",
+      "Start",
       "Kalender",
-      "Profil",
-      "Verlauf",
-      "Social"
+      "Zusammen",
+      "Postfach"
      ]
     },
     "surfaces": {
@@ -679,8 +680,8 @@
      "gradientText": 0,
      "hairlines": 2,
      "hairlineSamples": [
-      "div._header_jsx83_1 768px",
-      "div._menuDiv_4updc_1 260px"
+      "div._header_dxniv_1 768px",
+      "div._menuDiv_1rma1_1 260px"
      ],
      "outlinedBoxes": 1,
      "dashed": 0,
@@ -710,29 +711,29 @@
      "w": 768,
      "h": 1024
     },
-    "pageH": 1063,
+    "pageH": 1183,
     "margins": {
-     "left": 20,
-     "right": 56
+     "left": 26,
+     "right": 26
     },
     "sections": [
      {
-      "sel": "header._toolbar_1q3pz_25",
-      "tag": "header",
-      "top": 120,
-      "height": 137,
-      "words": 9,
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 1029,
+      "words": 114,
       "media": 0,
-      "middle": 11,
+      "middle": 0,
       "heading": {
        "text": "Oktober 2026",
        "size": 28,
        "tag": "h1"
       },
-      "left": 16,
-      "right": 16,
-      "textLeft": 16,
-      "textRight": 121,
+      "left": 24,
+      "right": 0,
+      "textLeft": 24,
+      "textRight": -42,
       "fullBleed": false,
       "footer": false,
       "hero": true,
@@ -740,21 +741,21 @@
       "pinned": false
      },
      {
-      "sel": "div._monthCard_1q3pz_266._card_1xqg9_61",
-      "tag": "div",
-      "top": 273,
-      "height": 691,
-      "words": 88,
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 1029,
+      "height": 154,
+      "words": 7,
       "media": 0,
-      "middle": 19,
+      "middle": 16,
       "heading": null,
-      "left": 44,
-      "right": 56,
-      "textLeft": 48,
-      "textRight": 56,
+      "left": 137,
+      "right": 123,
+      "textLeft": 137,
+      "textRight": 123,
       "fullBleed": false,
       "footer": true,
-      "hero": true,
+      "hero": false,
       "continues": false,
       "pinned": false
      }
@@ -764,14 +765,14 @@
      {
       "text": "Oktober 2026",
       "size": 28,
-      "top": 121,
+      "top": 133,
       "firstScreen": true
      }
     ],
     "edgeText": [],
     "edges": [
      {
-      "x": 16,
+      "x": 24,
       "n": 1
      }
     ],
@@ -793,15 +794,15 @@
     "sidebar": {
      "w": 260,
      "tag": "div",
-     "links": 8,
+     "links": 13,
      "share": 0.34
     },
     "topbar": {
-     "h": 88
+     "h": 56
     },
     "canvas": {
-     "left": 14,
-     "right": -215
+     "left": 18,
+     "right": -195
     },
     "hero": {
      "text": "Oktober 2026",
@@ -814,7 +815,7 @@
      "weight": 600,
      "tracking": -0.01,
      "leading": 1.2,
-     "top": 121,
+     "top": 133,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -855,7 +856,7 @@
     "numbers": {
      "cells": 0,
      "leftAligned": 0,
-     "figures": 38,
+     "figures": 31,
      "tabularShare": 1,
      "kpiMax": 13.6
     },
@@ -863,7 +864,7 @@
     "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0.16,
+     "under13": 0.2,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
@@ -882,9 +883,9 @@
     "title": {
      "text": "Oktober 2026",
      "size": 28,
-     "top": 121
+     "top": 133
     },
-    "colourShare": 0.005
+    "colourShare": 0.003
    },
    "consoleErrors": []
   },
@@ -892,15 +893,16 @@
    "width": 390,
    "height": 844,
    "load": "load",
-   "screens": 1,
+   "screens": 2,
    "filled": [
-    0.74
+    0.75,
+    0.68
    ],
    "motion": {
-    "elements": 0,
+    "elements": 1,
     "css": 0,
     "transitions": 0,
-    "scripted": 0,
+    "scripted": 1,
     "videos": 0,
     "playingVideos": 0
    },
@@ -910,14 +912,14 @@
      "h": 844
     },
     "page": {
-     "height": 844,
-     "screens": 1,
-     "words": 344,
+     "height": 1102,
+     "screens": 1.3,
+     "words": 354,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 16,
-     "sections": 1,
+     "svg": 27,
+     "sections": 0,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
@@ -943,7 +945,7 @@
      "weight": 600,
      "tracking": -0.01,
      "leading": 1.2,
-     "top": 114,
+     "top": 117,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -978,24 +980,18 @@
      "sizes": [
       9,
       10,
+      11,
+      12,
       13,
       14,
       15,
-      16,
       18,
       21
      ],
-     "sizeCount": 8,
+     "sizeCount": 9,
      "notLoaded": [],
-     "body": {
-      "font": "Inter Variable",
-      "size": 13,
-      "leading": 1.5,
-      "weight": 400,
-      "tracking": -0.007,
-      "contrast": 6.6
-     },
-     "measureChars": 37,
+     "body": null,
+     "measureChars": null,
      "max": {
       "size": 20.8,
       "vw": 5.3,
@@ -1010,8 +1006,8 @@
      "microLabelShare": 0,
      "microSamples": [],
      "upperShare": 0,
-     "centerShare": 0.52,
-     "smallText": 0
+     "centerShare": 0.47,
+     "smallText": 3
     },
     "eyebrows": [],
     "numbered": [],
@@ -1037,15 +1033,19 @@
      "textColors": [
       {
        "color": "#9b958f",
-       "share": 0.43
+       "share": 0.65
       },
       {
        "color": "#f4f3f1",
-       "share": 0.34
+       "share": 0.3
+      },
+      {
+       "color": "#f0605a",
+       "share": 0.03
       },
       {
        "color": "#d9d4cf",
-       "share": 0.23
+       "share": 0.02
       },
       {
        "color": "#2a1305",
@@ -1053,19 +1053,19 @@
       }
      ],
      "button": {
-      "bg": "#2c2a28",
+      "bg": "#211f1e",
       "hsl": {
-       "h": 30,
+       "h": 20,
        "s": 0.05,
-       "l": 0.16
+       "l": 0.12
       },
-      "fg": "#f4f3f1"
+      "fg": "#9b958f"
      },
      "lowContrast": []
     },
     "buttons": {
-     "count": 13,
-     "inHero": 13,
+     "count": 17,
+     "inHero": 17,
      "radius": 8,
      "height": 41,
      "withShadow": 0,
@@ -1073,10 +1073,10 @@
      "mono": 0,
      "upper": 0,
      "heroLabels": [
-      "Home",
+      "Start",
       "Kalender",
-      "Profil",
-      "Verlauf",
+      "Zusammen",
+      "Postfach",
       "Social"
      ]
     },
@@ -1088,10 +1088,11 @@
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 2,
+     "hairlines": 3,
      "hairlineSamples": [
-      "div._header_jsx83_1 390px",
-      "div._menuDiv_4updc_1 260px"
+      "div._header_dxniv_1 390px",
+      "div._menuDiv_1rma1_1 260px",
+      "nav._bar_1l81o_3 390px"
      ],
      "outlinedBoxes": 1,
      "dashed": 0,
@@ -1121,18 +1122,18 @@
      "w": 390,
      "h": 844
     },
-    "pageH": 844,
+    "pageH": 1102,
     "margins": {
-     "left": 12,
-     "right": 12
+     "left": 16,
+     "right": 16
     },
     "sections": [
      {
-      "sel": "header._toolbar_1q3pz_25",
-      "tag": "header",
-      "top": 108,
-      "height": 176,
-      "words": 8,
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 864,
+      "words": 48,
       "media": 0,
       "middle": 0,
       "heading": {
@@ -1140,10 +1141,10 @@
        "size": 21,
        "tag": "h1"
       },
-      "left": 12,
-      "right": 12,
-      "textLeft": 12,
-      "textRight": 49,
+      "left": 16,
+      "right": 16,
+      "textLeft": 16,
+      "textRight": 45,
       "fullBleed": false,
       "footer": false,
       "hero": true,
@@ -1151,21 +1152,21 @@
       "pinned": false
      },
      {
-      "sel": "div._monthCard_1q3pz_266._card_1xqg9_61",
-      "tag": "div",
-      "top": 296,
-      "height": 474,
-      "words": 38,
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 864,
+      "height": 178,
+      "words": 7,
       "media": 0,
-      "middle": 27,
+      "middle": 16,
       "heading": null,
-      "left": 36,
-      "right": 45,
-      "textLeft": 36,
-      "textRight": 45,
+      "left": 20,
+      "right": 20,
+      "textLeft": 20,
+      "textRight": 20,
       "fullBleed": false,
       "footer": true,
-      "hero": true,
+      "hero": false,
       "continues": false,
       "pinned": false
      }
@@ -1175,20 +1176,14 @@
      {
       "text": "Oktober 2026",
       "size": 21,
-      "top": 114,
+      "top": 117,
       "firstScreen": true
      }
     ],
-    "edgeText": [
-     {
-      "text": "Oktober 2026",
-      "side": "left",
-      "px": 12
-     }
-    ],
+    "edgeText": [],
     "edges": [
      {
-      "x": 12,
+      "x": 16,
       "n": 1
      }
     ],
@@ -1209,11 +1204,11 @@
     "ground": "#0e0d0c",
     "sidebar": null,
     "topbar": {
-     "h": 88
+     "h": 56
     },
     "canvas": {
-     "left": 12,
-     "right": -276
+     "left": 16,
+     "right": -268
     },
     "hero": {
      "text": "Oktober 2026",
@@ -1226,7 +1221,7 @@
      "weight": 600,
      "tracking": -0.01,
      "leading": 1.2,
-     "top": 114,
+     "top": 117,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -1275,13 +1270,15 @@
     "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0.01,
+     "under13": 0.08,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
       0,
       9,
       10,
+      11,
+      12,
       13,
       14,
       15,
@@ -1293,22 +1290,14 @@
     "title": {
      "text": "Oktober 2026",
      "size": 21,
-     "top": 114
+     "top": 117
     },
     "colourShare": 0.004
    },
    "consoleErrors": []
   }
  ],
- "findings": [
-  {
-   "level": "WARN",
-   "id": "edge-text",
-   "width": 390,
-   "message": "1 text block(s) sit 12–15px from the phone's edge: \"Oktober 2026\" (12px)",
-   "fix": "The page margin is 16–20px on a phone; the header and the corner labels sit on it too."
-  }
- ],
+ "findings": [],
  "images": [
   {
    "viewport": "desktop",

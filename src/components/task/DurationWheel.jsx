@@ -3,6 +3,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from '../../i18n/useTranslation';
 import { durationText } from '../../features/calendar/calendar';
 
+import Icon from '../icons';
 // height of one number in a wheel (the same as --wheel-item in the css)
 const ITEM_PX = 36;
 // how long the wheel has to be still before the number under the band counts
@@ -125,7 +126,7 @@ export default function DurationField({ label, value, onChange, maxHours, hint, 
                 <button type="button" className={styles.value} aria-expanded={open} aria-controls={`${id}-wheel`}
                     aria-describedby={`${id}-label`} onClick={() => setOpen(!open)}>
                     <span className={has ? undefined : styles.none}>{has ? durationText(value) : (noneText ?? t('durationNone'))}</span>
-                    <span className={styles.chevron} aria-hidden="true">{open ? '▴' : '▾'}</span>
+                    <span className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`} aria-hidden="true"><Icon name="chevronDown" size={16} /></span>
                 </button>
                 {has &&
                     <button type="button" className={styles.clear} onClick={() => onChange(null)}

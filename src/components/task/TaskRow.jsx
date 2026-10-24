@@ -6,6 +6,8 @@ import Icon from '../icons';
 import TaskMeta from './TaskMeta.jsx';
 import TaskLabels from '../TaskLabels.jsx';
 import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
+import { isRepeating } from '../../features/tasks/deleteScope';
+import { isSharedWithMe } from '../../features/tasks/taskAction';
 import { useTranslation } from '../../i18n/useTranslation';
 import { dueText, formatDate, formatDuration, isOverdue, toInputDate } from '../../features/helperFunction';
 import { prioLevel } from '../../features/calendar/calendar';
@@ -132,7 +134,8 @@ const TaskRow = forwardRef(function TaskRow({
                                 title={t('removeFromGroup')} aria-label={`${t('removeFromGroup')}: ${task.name}`}>
                                 <Icon name="close" className={styles.actionIcon} />
                             </button>}
-                        {onDelete && <ConfirmDeleteButton onConfirm={onDelete} label={`${deleteLabel}: ${task.name}`} title={deleteLabel} />}
+                        {/* a repeating task asks what goes instead (DeleteScopeDialog) */}
+                        {onDelete && <ConfirmDeleteButton onConfirm={onDelete} label={`${deleteLabel}: ${task.name}`} title={deleteLabel} ask={!isRepeating(task) || isSharedWithMe(task)} />}
                     </>}
             </div>
         </motion.li>

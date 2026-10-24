@@ -1,0 +1,10 @@
+/* the new-task form above the page, from the header down */
+.backdrop {
+  composes: overlay from './ui.module.css';
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: var(--header-h) 1rem 1rem;
+  overflow-y: auto;
+  z-index: var(--z-modal);
+}

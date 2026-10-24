@@ -157,7 +157,6 @@
 
 .doneToggleOn{
     color: var(--text-h);
-    border-color: color-mix(in srgb, var(--primary) 50%, transparent);
 }
 
 .doneBox{
@@ -174,9 +173,9 @@
 }
 
 .doneToggleOn .doneBox{
-    color: var(--primary-text);
-    background-color: var(--primary);
-    border-color: var(--primary);
+    color: var(--bg);
+    background-color: var(--text-h);
+    border-color: var(--text-h);
 }
 
 .doneToggleOn .doneBox::after{
@@ -1001,12 +1000,13 @@ button.agendaName:hover{
 }
 
 @media (max-width: 640px) {
+    /* the grid gets almost the full width; the toolbar keeps the page's 16px margin */
     .page{
         width: calc(100% - 1rem);
     }
 
     .toolbar{
-        margin: 1.25rem 0.25rem 0.75rem;
+        margin: 1.25rem 0.5rem 0.75rem;
         gap: 0.65rem;
     }
 
@@ -1191,8 +1191,9 @@ button.agendaName:hover{
 
 .sourceLink{
     font-weight: 600;
-    color: var(--primary-text);
+    color: var(--text-h);
     text-decoration: none;
+    text-underline-offset: 3px;
 }
 
 .sourceLink:hover{
@@ -1208,5 +1209,95 @@ button.agendaName:hover{
     .sourceSelect{
         flex: 1;
         max-width: none;
+    }
+}
+
+/* ---------- "Filters": group, done ones and export behind one button ---------- */
+.filterWrap{
+    position: relative;
+}
+
+.filterBtn{
+    height: 2.15rem;
+    gap: 0.4rem;
+    padding: 0 0.85rem 0 0.6rem;
+    font-size: 0.85rem;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-pill);
+    box-shadow: none;
+}
+
+.filterBtn:hover{
+    color: var(--text-h);
+    background: var(--hover-wash);
+    border-color: var(--border-strong);
+    box-shadow: none;
+}
+
+/* something is filtered out: the button says so in full ink */
+.filterBtnOn{
+    color: var(--text-h);
+    background: var(--surface-strong);
+    border-color: transparent;
+}
+
+.filterMenu{
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.4rem);
+    z-index: var(--z-modal);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+    width: 15rem;
+    padding: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-float);
+    animation: filterPop 0.16s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.filterField{
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.filterField .groupSelect{
+    max-width: none;
+    width: 100%;
+}
+
+.filterMenu .doneToggle,
+.filterMenu .exportBtn{
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.filterDivider{
+    height: 1px;
+    margin: 0 -0.75rem;
+    background: var(--border);
+}
+
+@keyframes filterPop{
+    from{ opacity: 0; transform: translateY(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .filterMenu{ animation: none; }
+}
+
+@media (max-width: 640px){
+    .filterMenu{
+        right: auto;
+        left: 0;
     }
 }

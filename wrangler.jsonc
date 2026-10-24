@@ -6,6 +6,6 @@
        "not_found_handling": "single-page-application"
      },
      "routes": [
-       { "pattern": "quidey.com", "custom_domain": true }
+       { "pattern": "app.quidey.com", "custom_domain": true }
      ]
    }

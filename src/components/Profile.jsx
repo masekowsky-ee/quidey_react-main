@@ -2,16 +2,18 @@ import styles from './Profile.module.css';
 import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess, logout, register } from "../features/auth/authAction";
 import { setCustomError as showError } from "../features/settings/settingsAction";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import CustomError from './CustomError.jsx'
 import ProfileView from './ProfileView.jsx'
 import ResendVerification from './ResendVerification.jsx'
+import { listAccounts, switchAccount } from '../features/auth/accounts'
 import {useTranslation} from '../i18n/useTranslation'
 
 // Same rule as the server: 3-30 letters, digits, _ . or -
 const USERNAME_PATTERN = /^[A-Za-z0-9_.-]{3,30}$/;
 
-// initialSignState / initialEmail: the landing page opens it on "sign up" with the address typed there
+// initialSignState / initialEmail: the sign-in screen opens it on "sign up" (/signup) with the
+// address typed into the landing page's email line
 export default function Profile({ initialSignState = 0, initialEmail = '' } = {}){
     const { t } = useTranslation();
 
@@ -35,6 +37,20 @@ export default function Profile({ initialSignState = 0, initialEmail = '' } = {}
     // { kind: 'registered' | 'unverified', email }
     const [verifyNotice, setVerifyNotice] = useState(null);
 
+    // one request at a time: a second click (or Enter) while it runs does nothing. The ref
+    // catches clicks that come before React has drawn the disabled button.
+    const [sending, setSending] = useState(false);
+    const sendingRef = useRef(false);
+    const once = (request) => {
+        if (sendingRef.current) return;
+        sendingRef.current = true;
+        setSending(true);
+        request().finally(() => {
+            sendingRef.current = false;
+            setSending(false);
+        });
+    };
+
     const handleSignOut = () => {
         dispatch(logout());
     }
@@ -55,13 +71,13 @@ export default function Profile({ initialSignState = 0, initialEmail = '' } = {}
             setCustomError({bool: true, message: `${t('missingFieldsError')}`});
         } else {
             setVerifyNotice(null);
-            dispatch(loginSuccess(username, password))
+            once(() => dispatch(loginSuccess(username, password))
                 .catch(err => {
                     // signed in with the address: it goes straight into the new-link form
                     if (err?.code === 'EMAIL_NOT_VERIFIED') setVerifyNotice({ kind: 'unverified', email: username.includes('@') ? username.trim() : '' });
                     else setCustomError({bool: true, message: authErrorText(err)});
                     setPassword("");
-                });
+                }));
         }
     }
 
@@ -105,7 +121,7 @@ export default function Profile({ initialSignState = 0, initialEmail = '' } = {}
             setCustomError({bool: true, message: t('authError_AGE_CONFIRMATION_REQUIRED')});
         } else {
             // on failure everything stays filled in, so only the wrong field needs fixing
-            dispatch(register(username.trim(), displayName, email, birthDate, password))
+            once(() => dispatch(register(username.trim(), displayName, email, birthDate, password))
                 .then(() => {
                     // on to sign in, which works once the link in the mail is opened
                     setVerifyNotice({ kind: 'registered', email: email.trim() });
@@ -113,12 +129,14 @@ export default function Profile({ initialSignState = 0, initialEmail = '' } = {}
                     setPassword("");
                     setPasswordValidate("");
                 })
-                .catch(err => setCustomError({bool: true, message: authErrorText(err)}));
+                .catch(err => setCustomError({bool: true, message: authErrorText(err)})));
         }
     }
 
     // 0 = sign in, 1 = sign up
     const [signState, setSignState] = useState(initialSignState);
+    // accounts still signed in on this device (while adding another one): one tap goes back
+    const [savedAccounts] = useState(() => (signedIn ? [] : listAccounts()));
 
     const signArr = ['signIn', 'signUp'];
 
@@ -157,6 +175,22 @@ export default function Profile({ initialSignState = 0, initialEmail = '' } = {}
                         </div>
                     )}
 
+                    {signState === 0 && savedAccounts.length > 0 &&
+                        <div className={styles.savedAccounts}>
+                            <p className={styles.savedTitle}>{t('accountsOnDevice')}</p>
+                            {savedAccounts.map(account => (
+                                <button key={account.username} type="button" className={styles.savedAccount} onClick={() => switchAccount(account.username)}>
+                                    <span className={styles.savedAvatar} aria-hidden="true">{(account.displayName || account.username)[0].toUpperCase()}</span>
+                                    <span className={styles.savedNames}>
+                                        <span>{account.displayName || account.username}</span>
+                                        <small>@{account.username}</small>
+                                    </span>
+                                    <span className={styles.savedGo} aria-hidden="true">→</span>
+                                </button>
+                            ))}
+                            <p className={styles.savedOr}>{t('accountOrSignInOther')}</p>
+                        </div>}
+
                     {signState === 0 ?
                         <form className={styles.form} onSubmit={(e) => handleSignIn(e, username, password)} >
                             <div className={styles.field}>
@@ -167,7 +201,9 @@ export default function Profile({ initialSignState = 0, initialEmail = '' } = {}
                                 <label htmlFor="passwordInput">{t('password')}</label>
                                 <input placeholder={t('password')} value={password} onChange={(e) => setPassword(e.target.value)} id="passwordInput" type="password" autoComplete="current-password" />
                             </div>
-                            <button className={styles.submitBtn} type="submit">{t('signIn')}</button>
+                            <button className={styles.submitBtn} type="submit" disabled={sending} aria-busy={sending}>
+                                {sending ? t('signingIn') : t('signIn')}
+                            </button>
                         </form>
                         :
                         <form className={styles.form} onSubmit={(e) => handleSignUp(e, email, birthDate, displayName, username, password, passwordValidate)} >
@@ -222,7 +258,9 @@ export default function Profile({ initialSignState = 0, initialEmail = '' } = {}
                                     <span>{t('confirmAge')}</span>
                                 </label>
                             </div>
-                            <button className={styles.submitBtn} type="submit">{t('signUp')}</button>
+                            <button className={styles.submitBtn} type="submit" disabled={sending} aria-busy={sending}>
+                                {sending ? t('signingUp') : t('signUp')}
+                            </button>
                         </form>
                     }
                 </section>

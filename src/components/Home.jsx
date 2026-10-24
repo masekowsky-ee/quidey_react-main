@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { dateKey } from '../features/calendar/calendar.js'
 import TaskContainer from './TaskContainer.jsx'
-import TaskForm from './TaskForm.jsx'
+import { showForms } from '../features/settings/settingsAction.js'
 import styles from './Home.module.css';
 import GroupForm from './GroupForm.jsx';
 import WeekDaysContainer from './WeekDaysContainer.jsx';
@@ -42,7 +44,11 @@ function TitleRow({ tasks }) {
                     : <>
                         <span>{fill(t('openTasksCount'), { count: open.length })}</span>
                         {dueToday > 0 && <span>{fill(t('dueTodayCount'), { count: dueToday })}</span>}
-                        {overdue > 0 && <span className={styles.overdue}>{fill(t('overdueCount'), { count: overdue })}</span>}
+                        {/* the overdue ones wait in the calendar's agenda: one tap there */}
+                        {overdue > 0 &&
+                            <Link to={`/calendar?view=agenda&date=${dateKey(today)}`} className={styles.overdue}>
+                                {fill(t('overdueCount'), { count: overdue })}
+                            </Link>}
                     </>}
                 {eventsToday > 0 && <span>{fill(t(eventsToday === 1 ? 'eventsTodayOne' : 'eventsTodayCount'), { count: eventsToday })}</span>}
             </p>
@@ -65,7 +71,8 @@ export default function Home({ setActiveTimer }){
     const sharedTasks = useSelector(selectSharedSoloTasks);
     const showSharedTasks = useSelector(state => state.settings.showSharedTasks);
 
-    const [createTask, setCreateTask] = useState(false);
+    // the new-task form opens over any page (QuickAdd in the shell); Home's button opens it too
+    const setCreateTask = useCallback((open) => dispatch(showForms(Boolean(open))), [dispatch]);
     const [createGroup, setCreateGroup] = useState(false);
 
     const sessionParams = useSelector(state => state.session.sessionParams)
@@ -179,9 +186,8 @@ export default function Home({ setActiveTimer }){
             <TitleRow tasks={showSharedTasks ? [...tasks, ...sharedTasks] : tasks} />
             <TaskInvites />
             <WeekDaysContainer />
-            {(createTask || createGroup) && <div className={styles.formsDiv}>
-                {createTask && <TaskForm setCreateTask={setCreateTask}/>}
-                {createGroup && <GroupForm setCreateGroup={setCreateGroup}/>}
+            {createGroup && <div className={styles.formsDiv}>
+                <GroupForm setCreateGroup={setCreateGroup}/>
             </div>}
             <div className={styles.columns}>
                 <div className={styles.mainCol}>

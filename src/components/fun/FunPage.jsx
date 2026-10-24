@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import styles from './Fun.module.css';
 import { useTranslation } from '../../i18n/useTranslation';
-import { lineOfDay } from '../../features/fun/dailyLines';
+import { lineOfDay, yearText } from '../../features/fun/dailyLines';
 import { LEVELS, readLevel, storeLevel } from '../../features/fun/games';
 import WordGuess from './WordGuess';
 import Scramble from './Scramble';
@@ -46,7 +46,7 @@ export default function FunPage() {
                 <p className={styles.intro}>{t('funIntro')}</p>
                 <figure className={styles.lineCard}>
                     <figcaption className={styles.lineLabel}>{t(`lineOf_${line.type}`)}</figcaption>
-                    <blockquote className={styles.lineText}>{line[language] ?? line.en}</blockquote>
+                    <blockquote className={styles.lineText}>{line[language] ?? line.en}{line.year !== null && `, ${yearText(line, language)}`}</blockquote>
                 </figure>
             </header>
 

@@ -32,7 +32,7 @@ function joinSession(id) {
 export const isRealtimeConnected = () => Boolean(socket?.connected);
 
 // Production builds talk to VITE_API_URL; locally Vite's proxy forwards /socket.io.
-// The client library is loaded only now, so the landing page and the sign-in don't carry it.
+// The client library is loaded only now, so the sign-in screen doesn't carry it.
 // Resolves once the socket exists (not necessarily connected yet).
 export async function connectRealtime() {
     if (socket) return;

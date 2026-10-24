@@ -17,6 +17,7 @@ import ActivityFeed from './together/ActivityFeed';
 import WorkSummary from './together/WorkSummary';
 import ShareMyTasks from './together/ShareMyTasks';
 
+import Icon from './icons';
 const STORAGE_KEY = 'teamSessionId';
 
 function readStoredSessionId() {
@@ -84,7 +85,7 @@ export default function TeamHome() {
                             onClick={() => choose(s.id)}
                         >
                             {work.sessionId === s.id
-                                ? <span className={styles.playIcon} aria-label={t('workingOnIt')}>▶</span>
+                                ? <span className={styles.playIcon} role="img" aria-label={t('workingOnIt')}><Icon name="play" size={14} /></span>
                                 : s.workingCount > 0 && <span className={styles.liveDot} aria-hidden="true" />}
                             {s.name}
                         </button>

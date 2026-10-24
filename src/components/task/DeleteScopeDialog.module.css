@@ -1,0 +1,135 @@
+/* "What should be deleted?" for a repeating task: a small centred card, three stacked choices */
+
+.backdrop{
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-alert);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: var(--overlay);
+    animation: fadeIn 0.16s ease-out;
+}
+
+.dialog{
+    width: min(24rem, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.4rem 1.25rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+    animation: rise 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.badge{
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-bottom: 0.4rem;
+    color: var(--danger);
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    border-radius: var(--radius);
+}
+
+.title{
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    color: var(--text-h);
+}
+
+.name{
+    margin: 0 0 0.85rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
+.choices{
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.choice{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    text-align: left;
+    color: var(--text-h);
+    background: var(--surface-inset);
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background-color var(--ease), border-color var(--ease), transform 0.12s ease-out;
+}
+
+.choice:hover{
+    background: var(--surface-hover);
+    border-color: var(--border-strong);
+}
+
+.choice:active{
+    transform: scale(0.985);
+}
+
+.choice:focus-visible{
+    outline: 2px solid var(--primary-fg);
+    outline-offset: 2px;
+}
+
+.choiceAll{
+    color: var(--danger);
+}
+
+.choiceAll:hover{
+    border-color: var(--danger);
+    background: color-mix(in srgb, var(--danger) 8%, var(--surface-inset));
+}
+
+.choiceLabel{
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.choiceHint{
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.cancel{
+    align-self: stretch;
+    margin-top: 0.6rem;
+    padding: 0.6rem;
+    font: inherit;
+    font-weight: 550;
+    color: var(--text);
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+}
+
+.cancel:hover{
+    background: var(--hover-wash);
+}
+
+@keyframes fadeIn{
+    from{ opacity: 0; }
+}
+
+@keyframes rise{
+    from{ opacity: 0; transform: translateY(8px) scale(0.98); }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .backdrop, .dialog{ animation: none; }
+}

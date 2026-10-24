@@ -1,5 +1,6 @@
 import styles from './Inbox.module.css';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
 import { FEEDBACK_CATEGORIES, sendFeedback } from '../features/inbox/inbox';
 
@@ -8,6 +9,10 @@ export default function Feedback() {
     const { t } = useTranslation();
     const [category, setCategory] = useState('idea');
     const [message, setMessage] = useState('');
+    // where an answer goes: my account's address until I type another one
+    const accountEmail = useSelector(state => state.auth.user?.email) ?? '';
+    const [typedEmail, setTypedEmail] = useState(null);
+    const email = typedEmail ?? accountEmail;
     const [state, setState] = useState({ sending: false, sent: false, error: '' });
 
     const submit = async (e) => {
@@ -18,7 +23,7 @@ export default function Feedback() {
         }
         setState({ sending: true, sent: false, error: '' });
         try {
-            await sendFeedback(category, message.trim());
+            await sendFeedback(category, message.trim(), email.trim());
             setMessage('');
             setState({ sending: false, sent: true, error: '' });
         } catch (err) {
@@ -50,6 +55,11 @@ export default function Feedback() {
                         <label className={styles.subTitle} htmlFor="feedbackMessage">{t(`feedbackPrompt_${category}`)}</label>
                         <textarea id="feedbackMessage" className={styles.feedbackText} rows={7} maxLength={5000} value={message}
                             onChange={(e) => { setMessage(e.target.value); setState(s => ({ ...s, error: '' })); }} />
+                        <label className={styles.subTitle} htmlFor="feedbackEmail">{t('feedbackEmail')}</label>
+                        <input id="feedbackEmail" className={styles.feedbackEmail} type="email" autoComplete="email" maxLength={254}
+                            value={email} aria-describedby="feedbackEmailHint"
+                            onChange={(e) => { setTypedEmail(e.target.value); setState(s => ({ ...s, error: '' })); }} />
+                        <p id="feedbackEmailHint" className={styles.fieldHint}>{t('feedbackEmailHint')}</p>
                         {state.error && <p className={styles.error} role="alert">{state.error}</p>}
                         <div>
                             <button type="submit" className={styles.sendBtn} disabled={state.sending}>

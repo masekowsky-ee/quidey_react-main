@@ -3,7 +3,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
-import { deleteTask, leaveTask, updateTaskProps } from '../../features/tasks/taskAction';
+import { deleteTaskAsking, leaveTask, updateTaskProps } from '../../features/tasks/taskAction';
 import { removeSharedTask, updateSharedTask } from '../../features/together/togetherAction';
 import { showToast } from '../../features/toast/toast';
 import TaskEditor from '../calendar/TaskEditor.jsx';
@@ -45,8 +45,9 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
 
     const run = async (action, doneText) => {
         try {
-            // a thunk for the store, or a promise from handlers
-            await (typeof action === 'function' ? dispatch(action) : action);
+            // a thunk for the store, or a promise from handlers; false: cancelled (stays open)
+            const result = await (typeof action === 'function' ? dispatch(action) : action);
+            if (result === false) return false;
             if (doneText) toast(doneText, 'info');
             onClose();
             return true;
@@ -79,6 +80,7 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
                     ? <TaskEditor
                         task={task}
                         personal={false}
+                        allowEvents
                         onSave={(changes) => run(updateSharedTask(shared.sessionId, task.id, changes))}
                         onCancel={onClose}
                         onDelete={shared.canRemove ? () => run(removeSharedTask(shared.sessionId, task.id), t('taskDeleted')) : undefined}
@@ -87,7 +89,7 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
                         task={task}
                         onSave={(changes) => run(updateTaskProps(changes, task))}
                         onCancel={onClose}
-                        onDelete={() => run(deleteTask(task.id), t('taskDeleted'))}
+                        onDelete={() => run(deleteTaskAsking(task), t('taskDeleted'))}
                         onLeave={() => run(leaveTask(task), t('taskLeft'))}
                         onPickGroups={setPickerTask}
                     />}

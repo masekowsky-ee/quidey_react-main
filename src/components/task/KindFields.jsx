@@ -27,8 +27,9 @@ export function KindSwitch({ value, onChange }) {
 
 // What kind of event it is: my types as chips (radio buttons), "none" first; "+ New type"
 // adds one right here and picks it. While I have none, a few suggestions are offered.
-// value: a type id or null; onChange(id | null).
-export function EventTypePicker({ value, onChange }) {
+// value: a type id or null; onChange(id | null). autoNote: why it was picked by itself (a keyword
+// of the name), shown under the chips; picking another one or "none" takes it away.
+export function EventTypePicker({ value, onChange, autoNote = null }) {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
     const name = useId();
@@ -94,6 +95,7 @@ export function EventTypePicker({ value, onChange }) {
                     </span>
                     : <button type="button" className={styles.newBtn} onClick={() => setAdding(true)}>+ {t('eventTypeNew')}</button>}
             </div>
+            {autoNote && <p className={styles.autoNote}>{autoNote}</p>}
             {types.length > 0 && <Link to="/settings#event-types" className={styles.manage}>{t('eventTypesManage')}</Link>}
         </fieldset>
     );

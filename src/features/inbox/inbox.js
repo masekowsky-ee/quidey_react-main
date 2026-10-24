@@ -76,8 +76,9 @@ export const deleteNotification = (id) => apiFetch(`/api/notifications/${id}`, {
 export const FEEDBACK_CATEGORIES = ['idea', 'bug', 'praise', 'other'];
 
 // Mailed to the operator. Rejects with the API error (error.code: INVALID_MESSAGE, RATE_LIMITED, SEND_FAILED)
-export const sendFeedback = (category, message) =>
-    apiFetch('/api/feedback', { method: 'POST', body: JSON.stringify({ category, message }) });
+// email: where an answer should go (empty: my account's address)
+export const sendFeedback = (category, message, email = '') =>
+    apiFetch('/api/feedback', { method: 'POST', body: JSON.stringify({ category, message, ...(email ? { email } : {}) }) });
 
 // ---------- admin ----------
 

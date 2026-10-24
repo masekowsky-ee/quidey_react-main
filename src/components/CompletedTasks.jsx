@@ -5,6 +5,7 @@ import { updateTaskProps } from '../features/tasks/taskAction';
 import { formatDate } from '../features/helperFunction';
 import TaskLabels from './TaskLabels.jsx';
 
+import Icon from './icons';
 const NO_DATE = 'unknown';
 
 // The "completed tasks" folder of the history: every done task, grouped by the day it was
@@ -47,7 +48,7 @@ export default function CompletedTasks() {
                         <ul className={styles.doneList}>
                             {day.tasks.map(task => (
                                 <li key={task.id} className={styles.doneRow}>
-                                    <span className={styles.doneCheck} aria-hidden="true">✓</span>
+                                    <span className={styles.doneCheck} aria-hidden="true"><Icon name="check" size={14} strokeWidth={2.2} /></span>
                                     <div className={styles.doneText}>
                                         <span className={styles.doneName}>{task.name}</span>
                                         <span className={styles.sessionMeta}>

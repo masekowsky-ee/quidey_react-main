@@ -2,7 +2,8 @@ import styles from '../Together.module.css';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
-import { formatDuration, displayName, formatDate } from '../../features/helperFunction';
+import { formatDuration, displayName, formatDate, toInputDate } from '../../features/helperFunction';
+import { isEvent } from '../../features/tasks/kinds';
 import { fetchTaskState } from '../../features/tasks/taskAction';
 import {
     addSharedTask, setSharedTaskDone, removeSharedTask, assignSharedTask,
@@ -17,8 +18,9 @@ import Icon from '../calendar/icons.jsx';
 
 const FILTERS = ['all', 'mine', 'free'];
 
-// The session's tasks: add new ones or my own, mark done, assign, edit their details
-// (day, time, priority, colour, ... all optional) and work on them
+// The session's tasks and events: add new ones or my own, mark tasks done, assign, edit their
+// details (day, time, priority, colour, ... all optional) and work on them. An event needs a day
+// and is done once it's over (the server ticks it off); nobody works on it or is assigned to it.
 export default function SharedTaskList({ session, showShareSelect = true }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
@@ -28,6 +30,12 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
     const now = useNow(Boolean(work.taskId) || othersWorking(session));
 
     const [newTask, setNewTask] = useState('');
+    // what the field adds: a task, or an event on a day (today unless another is picked)
+    const [newKind, setNewKind] = useState('task');
+    const [newDay, setNewDay] = useState(() => toInputDate(new Date()));
+    const [newTime, setNewTime] = useState('');
+    // "add one of my tasks" stays a quiet link until it's wanted
+    const [pickOwn, setPickOwn] = useState(false);
     const [filter, setFilter] = useState('all');
     const [showDone, setShowDone] = useState(false);
     // the dialog shows the task as the session has it now (it may change while open)
@@ -49,14 +57,21 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
         e.preventDefault();
         const name = newTask.trim();
         if (!name) return;
-        if (await run(addSharedTask(id, { name }))) setNewTask('');
+        const fields = newKind === 'event'
+            ? { name, kind: 'event', due: newDay || toInputDate(new Date()), ...(newTime ? { due_time: newTime } : {}) }
+            : { name };
+        if (await run(addSharedTask(id, fields))) {
+            setNewTask('');
+            setNewTime('');
+        }
     };
 
     const sharedMine = new Set(session.tasks.map(task => task.sourceTaskId).filter(Boolean));
-    const shareable = myTasks.filter(task => !task.done && task.kind !== 'event' && !sharedMine.has(task.id));
+    const shareable = myTasks.filter(task => !task.done && !sharedMine.has(task.id));
     const handleShareOwn = (e) => {
         const taskId = Number(e.target.value);
         e.target.value = '';
+        setPickOwn(false);
         if (taskId) run(addSharedTask(id, { taskId }), 'toast_taskShared');
     };
 
@@ -68,8 +83,9 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
         }
     };
 
+    // events belong to everybody: they stay in every filter
     const matches = (task) =>
-        filter === 'all' || (filter === 'mine' ? task.assignee?.id === me : !task.assignee);
+        filter === 'all' || isEvent(task) || (filter === 'mine' ? task.assignee?.id === me : !task.assignee);
     const open = session.tasks.filter(task => !task.done && matches(task));
     const done = session.tasks.filter(task => task.done);
     const counts = {
@@ -85,17 +101,23 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
         const workers = workersOn(task.id);
         const mine = workingOn === task.id;
         const total = totalOn(task);
+        const event = isEvent(task);
         return (
-            <li key={task.id} className={`${styles.taskRow} ${task.done ? styles.taskDone : ''} ${mine ? styles.taskMine : ''}`}
+            <li key={task.id} className={`${styles.taskRow} ${task.done ? styles.taskDone : ''} ${mine ? styles.taskMine : ''} ${event ? styles.taskEvent : ''}`}
                 data-task-color={taskColorAttr(task)}>
-                <input
-                    type="checkbox"
-                    className={styles.check}
-                    checked={task.done}
-                    disabled={!isOpen}
-                    onChange={() => handleDone(task)}
-                    aria-label={`${t('markDone')}: ${task.name}`}
-                />
+                {/* an event isn't ticked off: it's done once it's over */}
+                {event
+                    ? <span className={styles.eventMark} title={t(task.done ? 'eventOver' : 'kind_event')}>
+                        <Icon name="calendar" size={18} />
+                    </span>
+                    : <input
+                        type="checkbox"
+                        className={styles.check}
+                        checked={task.done}
+                        disabled={!isOpen}
+                        onChange={() => handleDone(task)}
+                        aria-label={`${t('markDone')}: ${task.name}`}
+                    />}
                 <div className={styles.who}>
                     <span className={styles.name}>{task.name}</span>
                     {task.description && <span className={styles.desc}>{task.description}</span>}
@@ -106,7 +128,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                         </span>
                     )}
                     <span className={styles.taskMeta}>
-                        {isOpen && !task.done ? (
+                        {isOpen && !task.done && !event ? (
                             <select
                                 className={task.assignee ? styles.assigneeSelectSet : styles.assigneeSelect}
                                 value={task.assignee?.id ?? ''}
@@ -133,14 +155,14 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                 )}
                 {isOpen && !task.done && (
                     <div className={styles.actions}>
-                        {mine
+                        {!event && (mine
                             ? <button className={styles.secondaryBtn} onClick={() => dispatch(stopWork())}>{t('pause')}</button>
-                            : <button className={styles.acceptBtn} onClick={() => dispatch(startWork(session, task))}>{t('workOnThis')}</button>}
+                            : <button className={styles.acceptBtn} onClick={() => dispatch(startWork(session, task))}>{t('workOnThis')}</button>)}
                         <button className={styles.quietBtn} onClick={() => setEditTaskId(task.id)} aria-label={`${t('editTask')}: ${task.name}`} title={t('editTask')}>
                             <Icon name="edit" size={18} />
                         </button>
                         {canRemove(task) && (
-                            <button className={styles.quietBtn} onClick={() => run(removeSharedTask(id, task.id))} aria-label={`${t('taskDeleteBtn')}: ${task.name}`} title={t('taskDeleteBtn')}>✕</button>
+                            <button className={styles.quietBtn} onClick={() => run(removeSharedTask(id, task.id))} aria-label={`${t('taskDeleteBtn')}: ${task.name}`} title={t('taskDeleteBtn')}><Icon name="close" size={18} /></button>
                         )}
                     </div>
                 )}
@@ -171,20 +193,38 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
             {isOpen && (
                 <div className={styles.addTask}>
                     <form className={styles.addRow} onSubmit={handleAdd}>
+                        <div className={styles.kindToggle} role="radiogroup" aria-label={t('kindLegend')}>
+                            {['task', 'event'].map(kind => (
+                                <button key={kind} type="button" role="radio" aria-checked={newKind === kind}
+                                    className={newKind === kind ? styles.kindOn : undefined} onClick={() => setNewKind(kind)}>
+                                    {t(`kind_${kind}`)}
+                                </button>
+                            ))}
+                        </div>
                         <input
                             value={newTask}
                             maxLength={200}
                             onChange={(e) => setNewTask(e.target.value)}
-                            placeholder={t('newSharedTask')}
-                            aria-label={t('newSharedTask')}
+                            placeholder={t(newKind === 'event' ? 'newSharedEvent' : 'newSharedTask')}
+                            aria-label={t(newKind === 'event' ? 'newSharedEvent' : 'newSharedTask')}
                         />
+                        {newKind === 'event' && <>
+                            <input type="date" className={styles.dayInput} value={newDay} required
+                                onChange={(e) => setNewDay(e.target.value)} aria-label={t('eventDay')} />
+                            <input type="time" className={styles.timeInput} value={newTime}
+                                onChange={(e) => setNewTime(e.target.value)} aria-label={`${t('eventStart')} (${t('allDay')}: –)`} title={t('eventStart')} />
+                        </>}
                         <button type="submit" className={styles.primaryBtn} disabled={!newTask.trim()}>{t('add')}</button>
                     </form>
-                    {showShareSelect && shareable.length > 0 && (
-                        <select defaultValue="" onChange={handleShareOwn} aria-label={t('addFromMyTasks')} className={styles.select}>
+                    {showShareSelect && shareable.length > 0 && (pickOwn
+                        ? <select autoFocus defaultValue="" onChange={handleShareOwn} onBlur={() => setPickOwn(false)}
+                            aria-label={t('addFromMyTasks')} className={styles.select}>
                             <option value="" disabled>{t('addFromMyTasks')}</option>
                             {shareable.map(task => <option key={task.id} value={task.id}>{task.name}</option>)}
                         </select>
+                        : <button type="button" className={styles.linkAction} onClick={() => setPickOwn(true)}>
+                            <Icon name="add" size={16} /> {t('shareOwnTask')}
+                        </button>
                     )}
                 </div>
             )}
@@ -197,7 +237,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                     {done.length > 0 && (
                         <>
                             <button className={styles.doneToggle} aria-expanded={showDone} onClick={() => setShowDone(v => !v)}>
-                                {showDone ? '▾' : '▸'} {t('done')} ({done.length})
+                                <span className={`${styles.doneChevron} ${showDone ? styles.doneChevronOpen : ''}`} aria-hidden="true"><Icon name="next" size={16} /></span> {t('done')} ({done.length})
                             </button>
                             {showDone && <ul className={styles.scrollList}>{done.map(row)}</ul>}
                         </>

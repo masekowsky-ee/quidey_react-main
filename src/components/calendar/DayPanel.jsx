@@ -18,7 +18,7 @@ const PRIO_TEXT = { high: 'prioHigh', medium: 'prioMedium', low: 'prioLow' };
 
 const isTyping = (el) => el?.closest?.('input, textarea, select, [contenteditable="true"]');
 
-function TaskRow({ task, today, personal, editing, onEdit, onCloseEdit, onToggleDone, onSave, onDelete, onLeave, onPickGroups, onOpenGroup }) {
+function TaskRow({ task, today, personal, allowEvents, editing, onEdit, onCloseEdit, onToggleDone, onSave, onDelete, onLeave, onPickGroups, onOpenGroup }) {
     const { t } = useTranslation();
     const event = isEvent(task);
     const level = event ? null : prioLevel(task.prio);
@@ -56,7 +56,40 @@ function TaskRow({ task, today, personal, editing, onEdit, onCloseEdit, onToggle
             </div>
             {editing && (personal
                 ? <TaskEditor task={task} onSave={onSave} onCancel={onCloseEdit} onDelete={onDelete} onLeave={onLeave} onPickGroups={onPickGroups} />
-                : <TaskEditor task={task} personal={false} onSave={onSave} onCancel={onCloseEdit} onDelete={task.canRemove ? onDelete : undefined} />)}
+                : <TaskEditor task={task} personal={false} allowEvents={allowEvents} onSave={onSave} onCancel={onCloseEdit} onDelete={task.canRemove ? onDelete : undefined} />)}
+        </li>
+    );
+}
+
+// A coming repeat of a repeating task (only a preview, see projectRepeats): it can't be ticked
+// off or edited on its own, but deleted on its own (or with the following); "edit series" opens
+// the real task on its day.
+function PreviewRow({ task, onOpenSeries, onDelete }) {
+    const { t } = useTranslation();
+    const event = isEvent(task);
+    return (
+        <li className={`${styles.row} ${styles.rowPreview} ${event ? styles.rowEvent : ''}`} data-task-color={taskColorAttr(task)}>
+            <div className={styles.rowMain}>
+                <span className={styles.eventMark} title={t('repeatPreview')}>
+                    <Icon name="repeat" size={16} />
+                </span>
+                <div className={styles.rowText}>
+                    <span className={styles.rowNameStatic}>{task.name}</span>
+                    <TaskMeta task={task} />
+                    <span className={styles.previewNote}>{t('repeatPreview')}</span>
+                </div>
+                <div className={styles.rowMeta}>
+                    {onOpenSeries &&
+                        <button type="button" className={styles.editBtn} onClick={() => onOpenSeries(task.repeatOf)}
+                            aria-label={`${t('editSeries')}: ${task.name}`} title={t('editSeries')}>
+                            <Icon name="edit" size={18} />
+                        </button>}
+                    <button type="button" className={styles.editBtn} onClick={() => onDelete(task)}
+                        aria-label={`${t(event ? 'deleteEvent' : 'deleteTask')}: ${task.name}`} title={t(event ? 'deleteEvent' : 'deleteTask')}>
+                        <Icon name="delete" size={18} />
+                    </button>
+                </div>
+            </div>
         </li>
     );
 }
@@ -67,8 +100,8 @@ function TaskRow({ task, today, personal, editing, onEdit, onCloseEdit, onToggle
 // personal: false in a shared calendar (session or family): no groups, reminders or sharing,
 // each task says who added it, and only who added it (or the owner) can delete it (canRemove).
 export default function DayPanel({
-    date, today, tasks, focus, sharedEntries, initialTaskId, newTaskGroup, locale, longDate, personal = true,
-    onClose, onShiftDay, onAddTask, onToggleDone, onSaveTask, onDeleteTask, onLeaveTask, onOpenGroup,
+    date, today, tasks, focus, sharedEntries, initialTaskId, newTaskGroup, locale, longDate, personal = true, allowEvents = false,
+    onClose, onShiftDay, onAddTask, onToggleDone, onSaveTask, onDeleteTask, onLeaveTask, onOpenGroup, onOpenSeries,
 }) {
     const { t } = useTranslation();
     const key = dateKey(date);
@@ -83,6 +116,12 @@ export default function DayPanel({
     // the task being edited, remembered with its day so changing the day closes the editor
     const [editing, setEditing] = useState({ day: key, id: initialTaskId === 'new' ? null : initialTaskId });
     const editingId = editing.day === key ? editing.id : null;
+    // "edit series" from a coming repeat names another task (and day) while the panel stays open
+    const [lastInitialId, setLastInitialId] = useState(initialTaskId);
+    if (initialTaskId !== lastInitialId) {
+        setLastInitialId(initialTaskId);
+        setEditing({ day: key, id: initialTaskId === 'new' ? null : initialTaskId });
+    }
     const [pickerTask, setPickerTask] = useState(null);
     // stable, so the picker doesn't move the focus again each time the tasks change
     const closePicker = useCallback(() => setPickerTask(null), []);
@@ -117,7 +156,7 @@ export default function DayPanel({
         const name = draft.trim();
         if (!name || busy) return;
         setBusy(true);
-        const ok = await onAddTask(name, key, draftTime || null, personal ? draftKind : 'task');
+        const ok = await onAddTask(name, key, draftTime || null, personal || allowEvents ? draftKind : 'task');
         setBusy(false);
         if (ok) {
             setDraft('');
@@ -167,7 +206,7 @@ export default function DayPanel({
                     </button>
                 </div>
 
-                {personal &&
+                {(personal || allowEvents) &&
                     <div className={styles.quickKind} role="radiogroup" aria-label={t('kindLegend')}>
                         {['task', 'event'].map(kind => (
                             <button key={kind} type="button" role="radio" aria-checked={draftKind === kind}
@@ -179,8 +218,8 @@ export default function DayPanel({
                     </div>}
                 <form className={styles.quickAdd} onSubmit={add}>
                     <input ref={addRef} value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={200}
-                        placeholder={t(draftKind === 'event' && personal ? 'addEventForDay' : 'addTaskForDay')}
-                        aria-label={t(draftKind === 'event' && personal ? 'addEventForDay' : 'addTaskForDay')} />
+                        placeholder={t(draftKind === 'event' && (personal || allowEvents) ? 'addEventForDay' : 'addTaskForDay')}
+                        aria-label={t(draftKind === 'event' && (personal || allowEvents) ? 'addEventForDay' : 'addTaskForDay')} />
                     <input type="time" className={styles.quickTime} value={draftTime} onChange={(e) => setDraftTime(e.target.value)}
                         aria-label={`${t('taskTime')} (${t('allDay')}: –)`} title={t('taskTime')} />
                     <button type="submit" className={styles.addBtn} disabled={!draft.trim() || busy}>{t('add')}</button>
@@ -189,12 +228,15 @@ export default function DayPanel({
 
                 {tasks.length > 0
                     ? <ul className={styles.list}>
-                        {tasks.map(task => (
+                        {tasks.map(task => task.projected
+                            ? <PreviewRow key={task.id} task={task} onOpenSeries={onOpenSeries} onDelete={remove} />
+                            : (
                             <TaskRow
                                 key={task.id}
                                 task={task}
                                 today={today}
                                 personal={personal}
+                                allowEvents={allowEvents}
                                 editing={editingId === task.id}
                                 onEdit={() => setEditing({ day: key, id: task.id })}
                                 onCloseEdit={() => setEditing({ day: key, id: null })}

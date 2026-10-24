@@ -119,6 +119,8 @@ describe('logo in the accent color', () => {
 
 describe('Settings page', () => {
     const renderSettings = () => {
+        // the open area lives in the address's hash: every test starts on the first one
+        window.history.replaceState(null, '', '/settings')
         const store = makeStore()
         render(<Provider store={store}><Settings /></Provider>)
         return store
@@ -136,7 +138,8 @@ describe('Settings page', () => {
 
     it('a new session length applies to the idle timer right away', () => {
         const store = renderSettings()
-
+        // the timer's length is in the "Planen" area
+        fireEvent.click(screen.getByRole('tab', { name: 'Planen' }))
         fireEvent.click(screen.getByRole('button', { name: '45' }))
 
         expect(store.getState().settings.defaultSessionMinutes).toBe(45)
@@ -146,7 +149,7 @@ describe('Settings page', () => {
     it('does not touch a running timer', () => {
         const store = renderSettings()
         store.dispatch(setTimer(10 * 60 * 1000, true))
-
+        fireEvent.click(screen.getByRole('tab', { name: 'Planen' }))
         fireEvent.click(screen.getByRole('button', { name: '15' }))
 
         expect(store.getState().settings.defaultSessionMinutes).toBe(15)

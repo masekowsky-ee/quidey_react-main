@@ -2,6 +2,122 @@
     composes: pageColumn from './ui.module.css';
 }
 
+/* two columns: what a group is about beside its settings (div.page: it has to beat the
+   composed column's width, whatever order the stylesheets load in) */
+div.page{
+    width: min(1100px, calc(100% - 2 * var(--page-gutter, 1rem)));
+}
+
+/* the title and the three areas on one line */
+.head{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    margin: 2.5rem 0 1rem;
+}
+
+.head .title{
+    margin: 0;
+}
+
+.areas{
+    composes: tabBar from './ui.module.css';
+}
+
+.areaActive{
+    composes: segmentActive from './ui.module.css';
+}
+
+.view{
+    display: flex;
+    flex-direction: column;
+}
+
+/* A group: name and sentence on the left (a third), its settings in a panel on the right.
+   Groups are split by one full-width rule. */
+.section{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 1.5rem 2.5rem;
+    padding: 2rem 0;
+}
+
+.section + .section{
+    border-top: 1px solid var(--border);
+}
+
+.section:first-child{
+    padding-top: 0.5rem;
+}
+
+.sectionText{
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    /* level with the panel's first line */
+    padding-top: 1.1rem;
+}
+
+.sectionTitle{
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.sectionHint{
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+/* the settings themselves: one lightness step above the page, no edge */
+.sectionPanel{
+    min-width: 0;
+    padding: 1.1rem 1.25rem;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+}
+
+/* a setting whose control needs the width (the colour swatches): name above it */
+.rowStack{
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.row + .rowStack,
+.rowStack + .row{
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--btn-border);
+}
+
+/* the event types inside a section that names them */
+.embedded{
+    display: flex;
+    flex-direction: column;
+}
+
+.embedded > .typeList{
+    margin-top: 0;
+}
+
+@media (max-width: 860px){
+    .section{
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.75rem;
+        padding: 1.5rem 0;
+    }
+
+    .sectionText{
+        padding-top: 0;
+    }
+}
+
 .title{
     composes: pageTitle from './ui.module.css';
 }
@@ -169,8 +285,76 @@
     padding: 0.45rem 0;
 }
 
-.typeRow + .typeRow{
+.typeItem{
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0.55rem;
+}
+
+.typeItem + .typeItem{
     border-top: 1px solid var(--btn-border);
+}
+
+/* the keywords under a type: removable chips and a field for one more */
+.keywords{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    padding-left: 2.6rem;
+}
+
+.keywordsLabel{
+    margin-right: 0.15rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.keyword{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.1rem 0.2rem 0.1rem 0.6rem;
+    font-size: 0.8rem;
+    color: var(--text);
+    background: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+}
+
+.keywordRemove{
+    display: grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    font-size: 0.9rem;
+    line-height: 1;
+    color: var(--text-muted);
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+}
+
+.keywordRemove:hover{
+    color: var(--text-h);
+    background: var(--hover-wash);
+}
+
+.keywordInput{
+    flex: 1 1 8rem;
+    min-width: 7rem;
+    height: 1.75rem;
+    font-size: 0.82rem;
+    background: transparent;
+    border-color: transparent;
+}
+
+.keywordInput:hover,
+.keywordInput:focus{
+    border-color: var(--control-border);
 }
 
 .typeName{

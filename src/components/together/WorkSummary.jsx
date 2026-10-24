@@ -8,6 +8,7 @@ import { timeOf } from '../../features/together/togetherAction';
 import { selectWork, localMs, othersRunningMs, othersWorking, useNow } from '../../features/together/work';
 import Avatar from './Avatar';
 
+import Icon from '../icons';
 // Who worked on what and for how long, by person or by task, with a CSV download
 export default function WorkSummary({ session }) {
     const { t } = useTranslation();
@@ -84,7 +85,7 @@ export default function WorkSummary({ session }) {
                                 <ul className={styles.breakdown}>
                                     {perTask.map(({ task, ms }) => (
                                         <li key={task.id}>
-                                            <span className={styles.breakdownName}>{task.done && '✓ '}{task.name}</span>
+                                            <span className={styles.breakdownName}>{task.done && <Icon name="check" size={13} strokeWidth={2.2} className={styles.doneMark} />}{task.name}</span>
                                             <span className={styles.breakdownTime}>{formatDuration(ms)}</span>
                                         </li>
                                     ))}
@@ -98,7 +99,7 @@ export default function WorkSummary({ session }) {
                     {tasks.map(({ task, byPerson, total }) => (
                         <li key={task.id} className={styles.summaryPerson}>
                             <div className={styles.summaryHead}>
-                                <span className={styles.name}>{task.done && '✓ '}{task.name}</span>
+                                <span className={styles.name}>{task.done && <Icon name="check" size={13} strokeWidth={2.2} className={styles.doneMark} />}{task.name}</span>
                                 <span className={styles.timeMain}>{formatDuration(total)}</span>
                             </div>
                             {/* one colored part per person */}

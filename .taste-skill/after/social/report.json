@@ -1,6 +1,6 @@
 {
- "url": "http://localhost:5174/e2e-login.html?t=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoibGVuYS5rIiwidHYiOjAsImlhdCI6MTc5MjQ0NTM2OSwiZXhwIjoxNzkzMDUwMTY5fQ.QD-_GRGjW0nUYYWZm1A4mAW9-bZY1VTu_SvRzMUVNQM&to=/social",
- "at": "2026-10-19T21:52:22.397Z",
+ "url": "http://localhost:5174/social",
+ "at": "2026-10-24T21:47:51.107Z",
  "allow": [],
  "viewports": [
   {
@@ -9,13 +9,13 @@
    "load": "load",
    "screens": 1,
    "filled": [
-    0.12
+    0.17
    ],
    "motion": {
-    "elements": 0,
+    "elements": 1,
     "css": 0,
     "transitions": 0,
-    "scripted": 0,
+    "scripted": 1,
     "videos": 0,
     "playingVideos": 0
    },
@@ -27,12 +27,12 @@
     "page": {
      "height": 900,
      "screens": 1,
-     "words": 39,
+     "words": 54,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 12,
-     "sections": 2,
+     "svg": 23,
+     "sections": 1,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
@@ -58,7 +58,7 @@
      "weight": 600,
      "tracking": -0.02,
      "leading": 1.2,
-     "top": 128,
+     "top": 96,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -97,20 +97,12 @@
       15,
       16,
       18,
-      21,
       24
      ],
-     "sizeCount": 8,
+     "sizeCount": 7,
      "notLoaded": [],
-     "body": {
-      "font": "Inter Variable",
-      "size": 13,
-      "leading": 1.5,
-      "weight": 400,
-      "tracking": -0.007,
-      "contrast": 6.6
-     },
-     "measureChars": 73,
+     "body": null,
+     "measureChars": null,
      "max": {
       "size": 24,
       "vw": 1.7,
@@ -125,8 +117,8 @@
      "microLabelShare": 0,
      "microSamples": [],
      "upperShare": 0,
-     "centerShare": 0.55,
-     "smallText": 1
+     "centerShare": 0.43,
+     "smallText": 4
     },
     "eyebrows": [],
     "numbered": [],
@@ -142,19 +134,15 @@
      "textColors": [
       {
        "color": "#9b958f",
-       "share": 0.51
-      },
-      {
-       "color": "#d9d4cf",
-       "share": 0.26
+       "share": 0.71
       },
       {
        "color": "#f4f3f1",
-       "share": 0.17
+       "share": 0.29
       },
       {
-       "color": "#0e0d0c",
-       "share": 0.06
+       "color": "#2a1305",
+       "share": 0
       }
      ],
      "button": {
@@ -169,8 +157,8 @@
      "lowContrast": []
     },
     "buttons": {
-     "count": 13,
-     "inHero": 13,
+     "count": 19,
+     "inHero": 19,
      "radius": 8,
      "height": 41,
      "withShadow": 0,
@@ -178,11 +166,11 @@
      "mono": 0,
      "upper": 0,
      "heroLabels": [
-      "Home",
+      "Neu",
+      "Start",
       "Kalender",
-      "Profil",
-      "Verlauf",
-      "Social"
+      "Zusammen",
+      "Postfach"
      ]
     },
     "surfaces": {
@@ -193,10 +181,11 @@
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 2,
+     "hairlines": 3,
      "hairlineSamples": [
-      "div._header_jsx83_1 1440px",
-      "div._menuDiv_4updc_1 260px"
+      "div._header_dxniv_1 1200px",
+      "div._menuDiv_1rma1_1 240px",
+      "li._row_1dcg4_61 630px"
      ],
      "outlinedBoxes": 1,
      "dashed": 0,
@@ -228,23 +217,66 @@
     },
     "pageH": 900,
     "margins": {
-     "left": 380,
-     "right": 384
+     "left": 500,
+     "right": 339
     },
-    "sections": [],
+    "sections": [
+     {
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 452,
+      "words": 24,
+      "media": 0,
+      "middle": 78,
+      "heading": {
+       "text": "Social",
+       "size": 24,
+       "tag": "h1"
+      },
+      "left": 500,
+      "right": 379,
+      "textLeft": 500,
+      "textRight": 391,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 452,
+      "height": 154,
+      "words": 7,
+      "media": 0,
+      "middle": 16,
+      "heading": null,
+      "left": 593,
+      "right": 339,
+      "textLeft": 593,
+      "textRight": 339,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
     "gaps": [],
     "h1s": [
      {
       "text": "Social",
       "size": 24,
-      "top": 128,
+      "top": 96,
       "firstScreen": true
      }
     ],
     "edgeText": [],
     "edges": [
      {
-      "x": 380,
+      "x": 500,
       "n": 1
      }
     ],
@@ -253,12 +285,12 @@
     "stage": false,
     "explains": false,
     "slivers": [],
-    "voidShare": 0.6,
+    "voidShare": 0.33,
     "voidBox": {
-     "x": 0,
-     "y": 360,
-     "w": 1440,
-     "h": 540
+     "x": 240,
+     "y": 540,
+     "w": 1200,
+     "h": 360
     }
    },
    "app": {
@@ -269,17 +301,15 @@
     "dark": true,
     "ground": "#0e0d0c",
     "sidebar": {
-     "w": 260,
+     "w": 240,
      "tag": "div",
-     "links": 8,
-     "share": 0.18
+     "links": 13,
+     "share": 0.17
     },
-    "topbar": {
-     "h": 88
-    },
+    "topbar": null,
     "canvas": {
-     "left": 120,
-     "right": 26
+     "left": 260,
+     "right": 4
     },
     "hero": {
      "text": "Social",
@@ -292,7 +322,7 @@
      "weight": 600,
      "tracking": -0.02,
      "leading": 1.2,
-     "top": 128,
+     "top": 96,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -307,11 +337,11 @@
     },
     "tiles": 0,
     "panels": {
-     "count": 3,
+     "count": 2,
      "radii": [
       [
        0,
-       2
+       1
       ],
       [
        18,
@@ -341,10 +371,12 @@
     "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0,
+     "under13": 0.27,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
+      11,
+      12,
       13,
       14,
       15,
@@ -357,9 +389,9 @@
     "title": {
      "text": "Social",
      "size": 24,
-     "top": 128
+     "top": 96
     },
-    "colourShare": 0
+    "colourShare": 0.002
    },
    "consoleErrors": []
   },
@@ -369,13 +401,13 @@
    "load": "load",
    "screens": 1,
    "filled": [
-    0.14
+    0.24
    ],
    "motion": {
-    "elements": 0,
+    "elements": 1,
     "css": 0,
     "transitions": 0,
-    "scripted": 0,
+    "scripted": 1,
     "videos": 0,
     "playingVideos": 0
    },
@@ -387,12 +419,12 @@
     "page": {
      "height": 1024,
      "screens": 1,
-     "words": 39,
+     "words": 55,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 12,
-     "sections": 2,
+     "svg": 23,
+     "sections": 1,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
@@ -418,7 +450,7 @@
      "weight": 600,
      "tracking": -0.02,
      "leading": 1.2,
-     "top": 128,
+     "top": 96,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -462,15 +494,8 @@
      ],
      "sizeCount": 8,
      "notLoaded": [],
-     "body": {
-      "font": "Inter Variable",
-      "size": 13,
-      "leading": 1.5,
-      "weight": 400,
-      "tracking": -0.007,
-      "contrast": 6.6
-     },
-     "measureChars": 73,
+     "body": null,
+     "measureChars": null,
      "max": {
       "size": 24,
       "vw": 3.1,
@@ -485,8 +510,8 @@
      "microLabelShare": 0,
      "microSamples": [],
      "upperShare": 0,
-     "centerShare": 0.55,
-     "smallText": 1
+     "centerShare": 0.44,
+     "smallText": 4
     },
     "eyebrows": [],
     "numbered": [],
@@ -512,19 +537,15 @@
      "textColors": [
       {
        "color": "#9b958f",
-       "share": 0.51
-      },
-      {
-       "color": "#d9d4cf",
-       "share": 0.26
+       "share": 0.7
       },
       {
        "color": "#f4f3f1",
-       "share": 0.17
+       "share": 0.3
       },
       {
-       "color": "#0e0d0c",
-       "share": 0.06
+       "color": "#2a1305",
+       "share": 0
       }
      ],
      "button": {
@@ -539,8 +560,8 @@
      "lowContrast": []
     },
     "buttons": {
-     "count": 13,
-     "inHero": 13,
+     "count": 19,
+     "inHero": 19,
      "radius": 8,
      "height": 41,
      "withShadow": 0,
@@ -548,11 +569,11 @@
      "mono": 0,
      "upper": 0,
      "heroLabels": [
-      "Home",
+      "Neu",
+      "Start",
       "Kalender",
-      "Profil",
-      "Verlauf",
-      "Social"
+      "Zusammen",
+      "Postfach"
      ]
     },
     "surfaces": {
@@ -563,10 +584,11 @@
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 2,
+     "hairlines": 3,
      "hairlineSamples": [
-      "div._header_jsx83_1 768px",
-      "div._menuDiv_4updc_1 260px"
+      "div._header_dxniv_1 768px",
+      "div._menuDiv_1rma1_1 260px",
+      "li._row_1dcg4_61 630px"
      ],
      "outlinedBoxes": 1,
      "dashed": 0,
@@ -599,15 +621,58 @@
     "pageH": 1024,
     "margins": {
      "left": 44,
-     "right": 48
+     "right": 123
     },
-    "sections": [],
+    "sections": [
+     {
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 452,
+      "words": 24,
+      "media": 0,
+      "middle": 78,
+      "heading": {
+       "text": "Social",
+       "size": 24,
+       "tag": "h1"
+      },
+      "left": 44,
+      "right": 163,
+      "textLeft": 44,
+      "textRight": 175,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 452,
+      "height": 154,
+      "words": 7,
+      "media": 0,
+      "middle": 16,
+      "heading": null,
+      "left": 137,
+      "right": 123,
+      "textLeft": 137,
+      "textRight": 123,
+      "fullBleed": false,
+      "footer": true,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     }
+    ],
     "gaps": [],
     "h1s": [
      {
       "text": "Social",
       "size": 24,
-      "top": 128,
+      "top": 96,
       "firstScreen": true
      }
     ],
@@ -636,15 +701,15 @@
     "sidebar": {
      "w": 260,
      "tag": "div",
-     "links": 8,
+     "links": 13,
      "share": 0.34
     },
     "topbar": {
-     "h": 88
+     "h": 56
     },
     "canvas": {
-     "left": 13,
-     "right": 26
+     "left": 14,
+     "right": 16
     },
     "hero": {
      "text": "Social",
@@ -657,7 +722,7 @@
      "weight": 600,
      "tracking": -0.02,
      "leading": 1.2,
-     "top": 128,
+     "top": 96,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -706,10 +771,12 @@
     "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0,
+     "under13": 0.27,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
+      11,
+      12,
       13,
       14,
       15,
@@ -722,9 +789,9 @@
     "title": {
      "text": "Social",
      "size": 24,
-     "top": 128
+     "top": 96
     },
-    "colourShare": 0.001
+    "colourShare": 0.002
    },
    "consoleErrors": []
   },
@@ -734,13 +801,13 @@
    "load": "load",
    "screens": 1,
    "filled": [
-    0.29
+    0.38
    ],
    "motion": {
-    "elements": 0,
+    "elements": 1,
     "css": 0,
     "transitions": 0,
-    "scripted": 0,
+    "scripted": 1,
     "videos": 0,
     "playingVideos": 0
    },
@@ -752,12 +819,12 @@
     "page": {
      "height": 844,
      "screens": 1,
-     "words": 39,
+     "words": 60,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 12,
-     "sections": 2,
+     "svg": 23,
+     "sections": 1,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
@@ -783,7 +850,7 @@
      "weight": 600,
      "tracking": -0.02,
      "leading": 1.2,
-     "top": 128,
+     "top": 96,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -814,7 +881,7 @@
       "align": "left",
       "position": "center",
       "widthRatio": 0.92,
-      "top": 128,
+      "top": 96,
       "tag": "h1",
       "kind": "heading"
      }
@@ -838,6 +905,7 @@
      ],
      "familyCount": 1,
      "sizes": [
+      11,
       12,
       13,
       14,
@@ -846,17 +914,10 @@
       18,
       24
      ],
-     "sizeCount": 7,
+     "sizeCount": 8,
      "notLoaded": [],
-     "body": {
-      "font": "Inter Variable",
-      "size": 13,
-      "leading": 1.5,
-      "weight": 400,
-      "tracking": -0.007,
-      "contrast": 6.6
-     },
-     "measureChars": 37,
+     "body": null,
+     "measureChars": null,
      "max": {
       "size": 24,
       "vw": 6.2,
@@ -871,8 +932,8 @@
      "microLabelShare": 0,
      "microSamples": [],
      "upperShare": 0,
-     "centerShare": 0.55,
-     "smallText": 1
+     "centerShare": 0.48,
+     "smallText": 4
     },
     "eyebrows": [],
     "numbered": [],
@@ -898,19 +959,15 @@
      "textColors": [
       {
        "color": "#9b958f",
-       "share": 0.51
-      },
-      {
-       "color": "#d9d4cf",
-       "share": 0.26
+       "share": 0.73
       },
       {
        "color": "#f4f3f1",
-       "share": 0.17
+       "share": 0.27
       },
       {
-       "color": "#0e0d0c",
-       "share": 0.06
+       "color": "#2a1305",
+       "share": 0
       }
      ],
      "button": {
@@ -925,8 +982,8 @@
      "lowContrast": []
     },
     "buttons": {
-     "count": 13,
-     "inHero": 13,
+     "count": 18,
+     "inHero": 18,
      "radius": 8,
      "height": 41,
      "withShadow": 0,
@@ -934,10 +991,10 @@
      "mono": 0,
      "upper": 0,
      "heroLabels": [
-      "Home",
+      "Start",
       "Kalender",
-      "Profil",
-      "Verlauf",
+      "Zusammen",
+      "Postfach",
       "Social"
      ]
     },
@@ -949,10 +1006,12 @@
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 2,
+     "hairlines": 4,
      "hairlineSamples": [
-      "div._header_jsx83_1 390px",
-      "div._menuDiv_4updc_1 260px"
+      "div._header_dxniv_1 390px",
+      "div._menuDiv_1rma1_1 260px",
+      "nav._bar_1l81o_3 390px",
+      "li._row_1dcg4_61 308px"
      ],
      "outlinedBoxes": 1,
      "dashed": 0,
@@ -984,16 +1043,59 @@
     },
     "pageH": 844,
     "margins": {
-     "left": 16,
+     "left": 20,
      "right": 20
     },
-    "sections": [],
+    "sections": [
+     {
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 548,
+      "words": 26,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Social",
+       "size": 24,
+       "tag": "h1"
+      },
+      "left": 16,
+      "right": 20,
+      "textLeft": 16,
+      "textRight": 49,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 548,
+      "height": 178,
+      "words": 7,
+      "media": 0,
+      "middle": 16,
+      "heading": null,
+      "left": 20,
+      "right": 20,
+      "textLeft": 20,
+      "textRight": 20,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
     "gaps": [],
     "h1s": [
      {
       "text": "Social",
       "size": 24,
-      "top": 128,
+      "top": 96,
       "firstScreen": true
      }
     ],
@@ -1021,11 +1123,11 @@
     "ground": "#0e0d0c",
     "sidebar": null,
     "topbar": {
-     "h": 88
+     "h": 56
     },
     "canvas": {
-     "left": 8,
-     "right": -217
+     "left": 16,
+     "right": 0
     },
     "hero": {
      "text": "Social",
@@ -1038,7 +1140,7 @@
      "weight": 600,
      "tracking": -0.02,
      "leading": 1.2,
-     "top": 128,
+     "top": 96,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -1053,11 +1155,11 @@
     },
     "tiles": 0,
     "panels": {
-     "count": 3,
+     "count": 4,
      "radii": [
       [
        0,
-       2
+       3
       ],
       [
        18,
@@ -1087,10 +1189,12 @@
     "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0,
+     "under13": 0.27,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
+      11,
+      12,
       13,
       14,
       15,
@@ -1102,9 +1206,9 @@
     "title": {
      "text": "Social",
      "size": 24,
-     "top": 128
+     "top": 96
     },
-    "colourShare": 0.001
+    "colourShare": 0.003
    },
    "consoleErrors": []
   }
@@ -1114,7 +1218,7 @@
    "level": "WARN",
    "id": "hero-void",
    "width": 1440,
-   "message": "60% of the first screen is one empty block (1440×540px at 0,360).",
+   "message": "33% of the first screen is one empty block (1200×360px at 240,540).",
    "fix": "Place the void on purpose or fill it: move the picture, the film or one fact into it, grow the headline to meet it, or shrink the screen to its content. A void reads as placed only when something closes it on the far side and it is the screen's one rest."
   }
  ],

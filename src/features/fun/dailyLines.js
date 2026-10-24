@@ -1,5 +1,7 @@
 // The line of the day in the header ticker: facts, quotes and slogans, each in English and German.
-// [type, english, german]; type is 'fact' | 'quote' | 'slogan'.
+// [type, english, german, year?, about?]; type is 'fact' | 'quote' | 'slogan'.
+// year: when a quote was said or first printed (negative: BC), only where that is known;
+// about: true when the year is only roughly known.
 // Quotes are only ones with a reliable source, no "Einstein said" internet classics.
 
 export const LINE_TYPES = ['fact', 'quote', 'slogan'];
@@ -93,57 +95,57 @@ const LINES = [
     ['fact', 'Lego is the world\'s largest tyre manufacturer by number of tyres.', 'Gemessen an der Stückzahl ist Lego der größte Reifenhersteller der Welt.'],
 
     // ---------- quotes ----------
-    ['quote', '"Well done is better than well said." – Benjamin Franklin', '"Gut gemacht ist besser als gut gesagt." – Benjamin Franklin'],
-    ['quote', '"Lost time is never found again." – Benjamin Franklin', '"Verlorene Zeit findet man nie wieder." – Benjamin Franklin'],
-    ['quote', '"You may delay, but time will not." – Benjamin Franklin', '"Du magst zögern, die Zeit tut es nicht." – Benjamin Franklin'],
-    ['quote', '"Imagination is more important than knowledge." – Albert Einstein', '"Fantasie ist wichtiger als Wissen." – Albert Einstein'],
-    ['quote', '"The only way to do great work is to love what you do." – Steve Jobs', '"Großartige Arbeit leistest du nur, wenn du liebst, was du tust." – Steve Jobs'],
-    ['quote', '"Stay hungry. Stay foolish." – Whole Earth Catalog', '"Bleib hungrig. Bleib verrückt." – Whole Earth Catalog'],
-    ['quote', '"I love deadlines. I love the whooshing noise they make as they go by." – Douglas Adams', '"Ich liebe Deadlines. Ich liebe das zischende Geräusch, das sie beim Vorbeifliegen machen." – Douglas Adams'],
-    ['quote', '"Don\'t Panic." – The Hitchhiker\'s Guide to the Galaxy', '"Keine Panik." – Per Anhalter durch die Galaxis'],
-    ['quote', '"Time is an illusion. Lunchtime doubly so." – Douglas Adams', '"Zeit ist eine Illusion. Mittagszeit erst recht." – Douglas Adams'],
-    ['quote', '"Premature optimization is the root of all evil." – Donald Knuth', '"Vorzeitige Optimierung ist die Wurzel allen Übels." – Donald Knuth'],
-    ['quote', '"Talk is cheap. Show me the code." – Linus Torvalds', '"Reden ist billig. Zeig mir den Code." – Linus Torvalds'],
-    ['quote', '"Any sufficiently advanced technology is indistinguishable from magic." – Arthur C. Clarke', '"Jede hinreichend fortschrittliche Technologie ist von Magie nicht zu unterscheiden." – Arthur C. Clarke'],
-    ['quote', '"The best way to predict the future is to invent it." – Alan Kay', '"Der beste Weg, die Zukunft vorherzusagen, ist, sie zu erfinden." – Alan Kay'],
+    ['quote', '"Well done is better than well said." – Benjamin Franklin', '"Gut gemacht ist besser als gut gesagt." – Benjamin Franklin', 1737],
+    ['quote', '"Lost time is never found again." – Benjamin Franklin', '"Verlorene Zeit findet man nie wieder." – Benjamin Franklin', 1748],
+    ['quote', '"You may delay, but time will not." – Benjamin Franklin', '"Du magst zögern, die Zeit tut es nicht." – Benjamin Franklin', 1758],
+    ['quote', '"Imagination is more important than knowledge." – Albert Einstein', '"Fantasie ist wichtiger als Wissen." – Albert Einstein', 1929],
+    ['quote', '"The only way to do great work is to love what you do." – Steve Jobs', '"Großartige Arbeit leistest du nur, wenn du liebst, was du tust." – Steve Jobs', 2005],
+    ['quote', '"Stay hungry. Stay foolish." – Whole Earth Catalog', '"Bleib hungrig. Bleib verrückt." – Whole Earth Catalog', 1974],
+    ['quote', '"I love deadlines. I love the whooshing noise they make as they go by." – Douglas Adams', '"Ich liebe Deadlines. Ich liebe das zischende Geräusch, das sie beim Vorbeifliegen machen." – Douglas Adams', 2002],
+    ['quote', '"Don\'t Panic." – The Hitchhiker\'s Guide to the Galaxy', '"Keine Panik." – Per Anhalter durch die Galaxis', 1979],
+    ['quote', '"Time is an illusion. Lunchtime doubly so." – Douglas Adams', '"Zeit ist eine Illusion. Mittagszeit erst recht." – Douglas Adams', 1979],
+    ['quote', '"Premature optimization is the root of all evil." – Donald Knuth', '"Vorzeitige Optimierung ist die Wurzel allen Übels." – Donald Knuth', 1974],
+    ['quote', '"Talk is cheap. Show me the code." – Linus Torvalds', '"Reden ist billig. Zeig mir den Code." – Linus Torvalds', 2000],
+    ['quote', '"Any sufficiently advanced technology is indistinguishable from magic." – Arthur C. Clarke', '"Jede hinreichend fortschrittliche Technologie ist von Magie nicht zu unterscheiden." – Arthur C. Clarke', 1973],
+    ['quote', '"The best way to predict the future is to invent it." – Alan Kay', '"Der beste Weg, die Zukunft vorherzusagen, ist, sie zu erfinden." – Alan Kay', 1971],
     ['quote', '"Nothing in life is to be feared, it is only to be understood." – Marie Curie', '"Nichts im Leben muss man fürchten, man muss es nur verstehen." – Marie Curie'],
-    ['quote', '"We are what we repeatedly do. Excellence, then, is not an act, but a habit." – Will Durant', '"Wir sind, was wir wiederholt tun. Vortrefflichkeit ist daher keine Handlung, sondern eine Gewohnheit." – Will Durant'],
-    ['quote', '"I would have written a shorter letter, but I did not have the time." – Blaise Pascal', '"Ich hätte einen kürzeren Brief geschrieben, aber mir fehlte die Zeit." – Blaise Pascal'],
+    ['quote', '"We are what we repeatedly do. Excellence, then, is not an act, but a habit." – Will Durant', '"Wir sind, was wir wiederholt tun. Vortrefflichkeit ist daher keine Handlung, sondern eine Gewohnheit." – Will Durant', 1926],
+    ['quote', '"I would have written a shorter letter, but I did not have the time." – Blaise Pascal', '"Ich hätte einen kürzeren Brief geschrieben, aber mir fehlte die Zeit." – Blaise Pascal', 1656],
     ['quote', '"A journey of a thousand miles begins with a single step." – Laozi', '"Eine Reise von tausend Meilen beginnt mit dem ersten Schritt." – Laozi'],
-    ['quote', '"Veni, vidi, vici." – Julius Caesar', '"Ich kam, ich sah, ich siegte." – Julius Caesar'],
-    ['quote', '"Carpe diem." – Horace', '"Nutze den Tag." – Horaz'],
-    ['quote', '"There is nothing good unless you do it." – Erich Kästner', '"Es gibt nichts Gutes, außer: Man tut es." – Erich Kästner'],
-    ['quote', '"The limits of my language mean the limits of my world." – Ludwig Wittgenstein', '"Die Grenzen meiner Sprache bedeuten die Grenzen meiner Welt." – Ludwig Wittgenstein'],
-    ['quote', '"Knowing is not enough; we must apply. Willing is not enough; we must do." – Goethe', '"Es ist nicht genug zu wissen, man muss auch anwenden; es ist nicht genug zu wollen, man muss auch tun." – Goethe'],
-    ['quote', '"Without music, life would be a mistake." – Friedrich Nietzsche', '"Ohne Musik wäre das Leben ein Irrtum." – Friedrich Nietzsche'],
-    ['quote', '"I can resist everything except temptation." – Oscar Wilde', '"Ich kann allem widerstehen, nur der Versuchung nicht." – Oscar Wilde'],
-    ['quote', '"Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away." – Antoine de Saint-Exupéry', '"Perfektion ist nicht dann erreicht, wenn man nichts mehr hinzufügen, sondern wenn man nichts mehr weglassen kann." – Antoine de Saint-Exupéry'],
+    ['quote', '"Veni, vidi, vici." – Julius Caesar', '"Ich kam, ich sah, ich siegte." – Julius Caesar', -47],
+    ['quote', '"Carpe diem." – Horace', '"Nutze den Tag." – Horaz', -23],
+    ['quote', '"There is nothing good unless you do it." – Erich Kästner', '"Es gibt nichts Gutes, außer: Man tut es." – Erich Kästner', 1950],
+    ['quote', '"The limits of my language mean the limits of my world." – Ludwig Wittgenstein', '"Die Grenzen meiner Sprache bedeuten die Grenzen meiner Welt." – Ludwig Wittgenstein', 1921],
+    ['quote', '"Knowing is not enough; we must apply. Willing is not enough; we must do." – Goethe', '"Es ist nicht genug zu wissen, man muss auch anwenden; es ist nicht genug zu wollen, man muss auch tun." – Goethe', 1829],
+    ['quote', '"Without music, life would be a mistake." – Friedrich Nietzsche', '"Ohne Musik wäre das Leben ein Irrtum." – Friedrich Nietzsche', 1889],
+    ['quote', '"I can resist everything except temptation." – Oscar Wilde', '"Ich kann allem widerstehen, nur der Versuchung nicht." – Oscar Wilde', 1892],
+    ['quote', '"Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away." – Antoine de Saint-Exupéry', '"Perfektion ist nicht dann erreicht, wenn man nichts mehr hinzufügen, sondern wenn man nichts mehr weglassen kann." – Antoine de Saint-Exupéry', 1939],
     ['quote', '"There are only two hard things in computer science: cache invalidation and naming things." – Phil Karlton', '"Es gibt nur zwei schwierige Dinge in der Informatik: Cache-Invalidierung und Dinge benennen." – Phil Karlton'],
     ['quote', '"Your mind is for having ideas, not holding them." – David Allen', '"Dein Kopf ist dafür da, Ideen zu haben, nicht sie aufzubewahren." – David Allen'],
-    ['quote', '"Plans are worthless, but planning is everything." – Dwight D. Eisenhower', '"Pläne sind nichts, Planung ist alles." – Dwight D. Eisenhower'],
-    ['quote', '"What is important is seldom urgent and what is urgent is seldom important." – Dwight D. Eisenhower', '"Was wichtig ist, ist selten dringend, und was dringend ist, ist selten wichtig." – Dwight D. Eisenhower'],
-    ['quote', '"Be water, my friend." – Bruce Lee', '"Sei wie Wasser, mein Freund." – Bruce Lee'],
-    ['quote', '"Do. Or do not. There is no try." – Yoda', '"Tu es oder tu es nicht. Es gibt kein Versuchen." – Yoda'],
+    ['quote', '"Plans are worthless, but planning is everything." – Dwight D. Eisenhower', '"Pläne sind nichts, Planung ist alles." – Dwight D. Eisenhower', 1957],
+    ['quote', '"What is important is seldom urgent and what is urgent is seldom important." – Dwight D. Eisenhower', '"Was wichtig ist, ist selten dringend, und was dringend ist, ist selten wichtig." – Dwight D. Eisenhower', 1954],
+    ['quote', '"Be water, my friend." – Bruce Lee', '"Sei wie Wasser, mein Freund." – Bruce Lee', 1971],
+    ['quote', '"Do. Or do not. There is no try." – Yoda', '"Tu es oder tu es nicht. Es gibt kein Versuchen." – Yoda', 1980],
     ['quote', '"Fall seven times, stand up eight." – Japanese proverb', '"Siebenmal hinfallen, achtmal aufstehen." – Japanisches Sprichwort'],
     ['quote', '"Even monkeys fall from trees." – Japanese proverb', '"Auch Affen fallen von Bäumen." – Japanisches Sprichwort'],
-    ['quote', '"Not all those who wander are lost." – J. R. R. Tolkien', '"Nicht jeder, der wandert, ist verloren." – J. R. R. Tolkien'],
-    ['quote', '"All we have to decide is what to do with the time that is given us." – J. R. R. Tolkien', '"Wir müssen nur entscheiden, was wir mit der Zeit anfangen, die uns gegeben ist." – J. R. R. Tolkien'],
-    ['quote', '"It always takes longer than you expect, even when you take into account Hofstadter\'s Law." – Douglas Hofstadter', '"Es dauert immer länger als erwartet, selbst wenn man Hofstadters Gesetz berücksichtigt." – Douglas Hofstadter'],
-    ['quote', '"The first 90 percent of the code accounts for the first 90 percent of the development time. The remaining 10 percent accounts for the other 90 percent." – Tom Cargill', '"Die ersten 90 Prozent des Codes brauchen 90 Prozent der Zeit. Die restlichen 10 Prozent brauchen die anderen 90 Prozent." – Tom Cargill'],
-    ['quote', '"Less, but better." – Dieter Rams', '"Weniger, aber besser." – Dieter Rams'],
+    ['quote', '"Not all those who wander are lost." – J. R. R. Tolkien', '"Nicht jeder, der wandert, ist verloren." – J. R. R. Tolkien', 1954],
+    ['quote', '"All we have to decide is what to do with the time that is given us." – J. R. R. Tolkien', '"Wir müssen nur entscheiden, was wir mit der Zeit anfangen, die uns gegeben ist." – J. R. R. Tolkien', 1954],
+    ['quote', '"It always takes longer than you expect, even when you take into account Hofstadter\'s Law." – Douglas Hofstadter', '"Es dauert immer länger als erwartet, selbst wenn man Hofstadters Gesetz berücksichtigt." – Douglas Hofstadter', 1979],
+    ['quote', '"The first 90 percent of the code accounts for the first 90 percent of the development time. The remaining 10 percent accounts for the other 90 percent." – Tom Cargill', '"Die ersten 90 Prozent des Codes brauchen 90 Prozent der Zeit. Die restlichen 10 Prozent brauchen die anderen 90 Prozent." – Tom Cargill', 1985],
+    ['quote', '"Less, but better." – Dieter Rams', '"Weniger, aber besser." – Dieter Rams', 1995],
     ['quote', '"If you want to go fast, go alone. If you want to go far, go together." – African proverb', '"Wenn du schnell gehen willst, geh allein. Wenn du weit gehen willst, geh mit anderen." – Afrikanisches Sprichwort'],
     ['quote', '"Alone we can do so little; together we can do so much." – Helen Keller', '"Allein können wir so wenig tun, gemeinsam so viel." – Helen Keller'],
-    ['quote', '"Rest is not idleness." – John Lubbock', '"Ruhe ist kein Müßiggang." – John Lubbock'],
-    ['quote', '"Almost everything will work again if you unplug it for a few minutes, including you." – Anne Lamott', '"Fast alles funktioniert wieder, wenn man ein paar Minuten den Stecker zieht – auch du." – Anne Lamott'],
-    ['quote', '"Everything flows." – Heraclitus', '"Alles fließt." – Heraklit'],
+    ['quote', '"Rest is not idleness." – John Lubbock', '"Ruhe ist kein Müßiggang." – John Lubbock', 1894],
+    ['quote', '"Almost everything will work again if you unplug it for a few minutes, including you." – Anne Lamott', '"Fast alles funktioniert wieder, wenn man ein paar Minuten den Stecker zieht – auch du." – Anne Lamott', 2017],
+    ['quote', '"Everything flows." – Heraclitus', '"Alles fließt." – Heraklit', -500, true],
     ['quote', '"Make it work, make it right, make it fast." – Kent Beck', '"Mach, dass es läuft, mach es richtig, mach es schnell." – Kent Beck'],
-    ['quote', '"Programs must be written for people to read, and only incidentally for machines to execute." – Abelson & Sussman', '"Programme müssen für Menschen zum Lesen geschrieben werden und nur nebenbei für Maschinen zum Ausführen." – Abelson & Sussman'],
+    ['quote', '"Programs must be written for people to read, and only incidentally for machines to execute." – Abelson & Sussman', '"Programme müssen für Menschen zum Lesen geschrieben werden und nur nebenbei für Maschinen zum Ausführen." – Abelson & Sussman', 1985],
     ['quote', '"Order is half of life." – German proverb', '"Ordnung ist das halbe Leben." – Sprichwort'],
     ['quote', '"The early bird catches the worm." – Proverb', '"Morgenstund hat Gold im Mund." – Sprichwort'],
     ['quote', '"Good things take time." – Proverb', '"Gut Ding will Weile haben." – Sprichwort'],
     ['quote', '"The best time to plant a tree was 20 years ago. The second best time is now." – Proverb', '"Die beste Zeit, einen Baum zu pflanzen, war vor 20 Jahren. Die zweitbeste ist jetzt." – Sprichwort'],
-    ['quote', '"He who knows nothing must believe everything." – Marie von Ebner-Eschenbach', '"Wer nichts weiß, muss alles glauben." – Marie von Ebner-Eschenbach'],
-    ['quote', '"Absorb what is useful, discard what is useless, add what is specifically your own." – Bruce Lee', '"Nimm auf, was nützlich ist, verwirf, was nutzlos ist, und füge hinzu, was ganz dein Eigenes ist." – Bruce Lee'],
+    ['quote', '"He who knows nothing must believe everything." – Marie von Ebner-Eschenbach', '"Wer nichts weiß, muss alles glauben." – Marie von Ebner-Eschenbach', 1880],
+    ['quote', '"Absorb what is useful, discard what is useless, add what is specifically your own." – Bruce Lee', '"Nimm auf, was nützlich ist, verwirf, was nutzlos ist, und füge hinzu, was ganz dein Eigenes ist." – Bruce Lee', 1975],
     ['quote', '"Inspiration exists, but it has to find you working." – Pablo Picasso', '"Inspiration gibt es, aber sie muss dich bei der Arbeit antreffen." – Pablo Picasso'],
     ['quote', '"So many books, so little time." – Frank Zappa', '"So viele Bücher, so wenig Zeit." – Frank Zappa'],
 
@@ -225,7 +227,18 @@ const LINES = [
     ['slogan', 'Psst: there\'s a secret playground behind this line.', 'Psst: Hinter dieser Zeile liegt ein geheimer Spielplatz.'],
 ];
 
-export const DAILY_LINES = LINES.map(([type, en, de]) => ({ type, en, de }));
+export const DAILY_LINES = LINES.map(([type, en, de, year = null, about = false]) => ({ type, en, de, year, about }));
+
+// A quote's year in the app's language: "1737", "47 v. Chr." / "47 BC", "um 500 v. Chr." / "c. 500 BC";
+// '' without a year
+export function yearText(line, language = 'de') {
+    if (line?.year === null || line?.year === undefined) return '';
+    const bc = line.year < 0;
+    const number = Math.abs(line.year);
+    const text = language === 'de' ? `${number}${bc ? ' v. Chr.' : ''}` : `${number}${bc ? ' BC' : ''}`;
+    if (!line.about) return text;
+    return language === 'de' ? `um ${text}` : `c. ${text}`;
+}
 
 // Days since 1 Jan 1970 in local time, so the line changes at the user's midnight
 export function dayNumber(date = new Date()) {

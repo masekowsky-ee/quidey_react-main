@@ -1,0 +1,1378 @@
+{
+ "url": "http://localhost:5174/together/1",
+ "at": "2026-10-24T21:17:44.906Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 2,
+   "filled": [
+    0.64,
+    0.57
+   ],
+   "motion": {
+    "elements": 1,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 1,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 1352,
+     "screens": 1.5,
+     "words": 252,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 28,
+     "sections": 5,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [
+      "✎",
+      "✕"
+     ],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Statistik-Lerngruppe ✎",
+     "words": 2,
+     "chars": 22,
+     "lines": 1,
+     "size": 24,
+     "vw": 1.7,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 132,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Statistik-Lerngruppe ✎",
+     "words": 2,
+     "lines": 1,
+     "size": 24,
+     "font": "Inter Variable"
+    },
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter Variable",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      24
+     ],
+     "sizeCount": 9,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter Variable",
+      "size": 16,
+      "leading": 1.5,
+      "weight": 400,
+      "tracking": -0.006,
+      "contrast": 6
+     },
+     "measureChars": 79,
+     "max": {
+      "size": 24,
+      "vw": 1.7,
+      "font": "Inter Variable",
+      "text": "Statistik-Lerngruppe"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.15,
+     "smallText": 18
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#0e0d0c",
+     "bodyBgHsl": {
+      "h": 30,
+      "s": 0.08,
+      "l": 0.05
+     },
+     "dark": true,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#9b958f",
+       "share": 0.61
+      },
+      {
+       "color": "#f4f3f1",
+       "share": 0.28
+      },
+      {
+       "color": "#d9d4cf",
+       "share": 0.07
+      },
+      {
+       "color": "#0e0d0c",
+       "share": 0.03
+      },
+      {
+       "color": "#2a1305",
+       "share": 0
+      }
+     ],
+     "button": {
+      "bg": "#f4f3f1",
+      "hsl": {
+       "h": 40,
+       "s": 0.12,
+       "l": 0.95
+      },
+      "fg": "#f4f3f1"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 27,
+     "inHero": 24,
+     "radius": "pill",
+     "height": 41,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Start",
+      "Kalender",
+      "Postfach",
+      "Zusammen",
+      "Social"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 6,
+     "hairlineSamples": [
+      "div._header_1cipx_1 1200px",
+      "div._menuDiv_8508f_1 240px",
+      "li._taskRow_15ae3_115 625px",
+      "li._taskRow_15ae3_115._taskEvent_15ae3_1390 625px",
+      "li._row_15ae3_114 371px"
+     ],
+     "outlinedBoxes": 5,
+     "dashed": 1,
+     "blurred": 0,
+     "roundedBoxes": 5,
+     "boxRadius": 18,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 3,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 204
+      }
+     ]
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 2,
+     "fixed": true,
+     "height": 900,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "inter variable"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 1352,
+    "margins": {
+     "left": 280,
+     "right": 65
+    },
+    "sections": [
+     {
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 1198,
+      "words": 171,
+      "media": 0,
+      "middle": 66,
+      "heading": {
+       "text": "Statistik-Lerngruppe",
+       "size": 24,
+       "tag": "h1"
+      },
+      "left": 280,
+      "right": 40,
+      "textLeft": 280,
+      "textRight": 56,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": true
+     },
+     {
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 1198,
+      "height": 154,
+      "words": 7,
+      "media": 0,
+      "middle": 16,
+      "heading": null,
+      "left": 593,
+      "right": 339,
+      "textLeft": 593,
+      "textRight": 339,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Statistik-Lerngruppe ✎",
+      "size": 24,
+      "top": 132,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 305,
+      "n": 4
+     },
+     {
+      "x": 1000,
+      "n": 2
+     },
+     {
+      "x": 280,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 7,
+    "bodySize": 13,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0.04,
+    "voidBox": {
+     "x": 0,
+     "y": 420,
+     "w": 960,
+     "h": 60
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": true,
+    "ground": "#0e0d0c",
+    "sidebar": {
+     "w": 240,
+     "tag": "div",
+     "links": 15,
+     "share": 0.17
+    },
+    "topbar": null,
+    "canvas": {
+     "left": 40,
+     "right": 40
+    },
+    "hero": {
+     "text": "Statistik-Lerngruppe ✎",
+     "words": 2,
+     "chars": 22,
+     "lines": 1,
+     "size": 24,
+     "vw": 1.7,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 132,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 6,
+     "firstScreen": 5,
+     "ragged": [
+      {
+       "diff": 87,
+       "top": 204
+      }
+     ],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 9,
+     "radii": [
+      [
+       18,
+       5
+      ],
+      [
+       0,
+       3
+      ],
+      [
+       14,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 1,
+     "tabularShare": 0,
+     "kpiMax": 12.8
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.23,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      21,
+      24
+     ]
+    },
+    "title": {
+     "text": "Statistik-Lerngruppe\n✎",
+     "size": 24,
+     "top": 132
+    },
+    "colourShare": 0.001
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 3,
+   "filled": [
+    0.78,
+    0.71,
+    0.68
+   ],
+   "motion": {
+    "elements": 1,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 1,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 2085,
+     "screens": 2,
+     "words": 253,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 28,
+     "sections": 5,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [
+      "✎",
+      "✕"
+     ],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Statistik-Lerngruppe ✎",
+     "words": 2,
+     "chars": 22,
+     "lines": 1,
+     "size": 24,
+     "vw": 3.1,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 132,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Statistik-Lerngruppe ✎",
+     "words": 2,
+     "lines": 1,
+     "size": 24,
+     "font": "Inter Variable"
+    },
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter Variable",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      21,
+      24
+     ],
+     "sizeCount": 10,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter Variable",
+      "size": 16,
+      "leading": 1.5,
+      "weight": 400,
+      "tracking": -0.006,
+      "contrast": 6
+     },
+     "measureChars": 84,
+     "max": {
+      "size": 24,
+      "vw": 3.1,
+      "font": "Inter Variable",
+      "text": "Statistik-Lerngruppe"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.16,
+     "smallText": 18
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#0e0d0c",
+     "bodyBgHsl": {
+      "h": 30,
+      "s": 0.08,
+      "l": 0.05
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#181716",
+       "top": 0,
+       "hsl": {
+        "h": 30,
+        "s": 0.04,
+        "l": 0.09
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#9b958f",
+       "share": 0.6
+      },
+      {
+       "color": "#f4f3f1",
+       "share": 0.29
+      },
+      {
+       "color": "#d9d4cf",
+       "share": 0.07
+      },
+      {
+       "color": "#0e0d0c",
+       "share": 0.03
+      },
+      {
+       "color": "#2a1305",
+       "share": 0
+      }
+     ],
+     "button": {
+      "bg": "#f4f3f1",
+      "hsl": {
+       "h": 40,
+       "s": 0.12,
+       "l": 0.95
+      },
+      "fg": "#f4f3f1"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 27,
+     "inHero": 23,
+     "radius": "pill",
+     "height": 41,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Start",
+      "Kalender",
+      "Postfach",
+      "Zusammen",
+      "Social"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 6,
+     "hairlineSamples": [
+      "div._header_1cipx_1 768px",
+      "div._menuDiv_8508f_1 260px",
+      "li._taskRow_15ae3_115 666px",
+      "li._taskRow_15ae3_115._taskEvent_15ae3_1390 666px",
+      "li._row_15ae3_114 666px"
+     ],
+     "outlinedBoxes": 5,
+     "dashed": 1,
+     "blurred": 0,
+     "roundedBoxes": 5,
+     "boxRadius": 18,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 2,
+     "fixed": true,
+     "height": 1024,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "inter variable"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 2085,
+    "margins": {
+     "left": 24,
+     "right": 49
+    },
+    "sections": [
+     {
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 1931,
+      "words": 171,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Statistik-Lerngruppe",
+       "size": 24,
+       "tag": "h1"
+      },
+      "left": 24,
+      "right": 24,
+      "textLeft": 24,
+      "textRight": 40,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 1931,
+      "height": 154,
+      "words": 7,
+      "media": 0,
+      "middle": 16,
+      "heading": null,
+      "left": 137,
+      "right": 123,
+      "textLeft": 137,
+      "textRight": 123,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Statistik-Lerngruppe ✎",
+      "size": 24,
+      "top": 132,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 49,
+      "n": 6
+     },
+     {
+      "x": 24,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 7,
+    "bodySize": 13,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": true,
+    "ground": "#0e0d0c",
+    "sidebar": {
+     "w": 260,
+     "tag": "div",
+     "links": 15,
+     "share": 0.34
+    },
+    "topbar": {
+     "h": 56
+    },
+    "canvas": {
+     "left": 9,
+     "right": 16
+    },
+    "hero": {
+     "text": "Statistik-Lerngruppe ✎",
+     "words": 2,
+     "chars": 22,
+     "lines": 1,
+     "size": 24,
+     "vw": 3.1,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 132,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 6,
+     "firstScreen": 4,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 10,
+     "radii": [
+      [
+       18,
+       5
+      ],
+      [
+       0,
+       4
+      ],
+      [
+       14,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 1,
+     "tabularShare": 0,
+     "kpiMax": 12.8
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.23,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      21,
+      24
+     ]
+    },
+    "title": {
+     "text": "Statistik-Lerngruppe\n✎",
+     "size": 24,
+     "top": 132
+    },
+    "colourShare": 0.002
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 4,
+   "filled": [
+    0.72,
+    0.8,
+    0.62,
+    0.62
+   ],
+   "motion": {
+    "elements": 1,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 1,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 2534,
+     "screens": 3,
+     "words": 258,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 28,
+     "sections": 5,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [
+      "✎",
+      "✕"
+     ],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Statistik-Lerngruppe ✎",
+     "words": 2,
+     "chars": 22,
+     "lines": 1,
+     "size": 24,
+     "vw": 6.2,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 132,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Statistik-Lerngruppe ✎",
+     "words": 2,
+     "lines": 1,
+     "size": 24,
+     "font": "Inter Variable"
+    },
+    "headings": [
+     {
+      "text": "Statistik-Lerngruppe ✎",
+      "words": 2,
+      "chars": 22,
+      "lines": 1,
+      "size": 24,
+      "vw": 6.2,
+      "font": "Inter Variable",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.64,
+      "top": 132,
+      "tag": "button",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 1,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter Variable",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      24
+     ],
+     "sizeCount": 9,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter Variable",
+      "size": 16,
+      "leading": 1.5,
+      "weight": 400,
+      "tracking": -0.006,
+      "contrast": 6
+     },
+     "measureChars": 39,
+     "max": {
+      "size": 24,
+      "vw": 6.2,
+      "font": "Inter Variable",
+      "text": "Statistik-Lerngruppe"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.18,
+     "smallText": 18
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#0e0d0c",
+     "bodyBgHsl": {
+      "h": 30,
+      "s": 0.08,
+      "l": 0.05
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#181716",
+       "top": 0,
+       "hsl": {
+        "h": 30,
+        "s": 0.04,
+        "l": 0.09
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#9b958f",
+       "share": 0.61
+      },
+      {
+       "color": "#f4f3f1",
+       "share": 0.29
+      },
+      {
+       "color": "#d9d4cf",
+       "share": 0.07
+      },
+      {
+       "color": "#0e0d0c",
+       "share": 0.03
+      },
+      {
+       "color": "#2a1305",
+       "share": 0
+      }
+     ],
+     "button": {
+      "bg": "#f4f3f1",
+      "hsl": {
+       "h": 40,
+       "s": 0.12,
+       "l": 0.95
+      },
+      "fg": "#f4f3f1"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 27,
+     "inHero": 21,
+     "radius": "pill",
+     "height": 41,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Start",
+      "Kalender",
+      "Postfach",
+      "Zusammen",
+      "Social"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 7,
+     "hairlineSamples": [
+      "div._header_1cipx_1 390px",
+      "div._menuDiv_8508f_1 260px",
+      "nav._bar_1l81o_3 390px",
+      "li._taskRow_15ae3_115 304px",
+      "li._taskRow_15ae3_115._taskEvent_15ae3_1390 304px"
+     ],
+     "outlinedBoxes": 6,
+     "dashed": 1,
+     "blurred": 0,
+     "roundedBoxes": 6,
+     "boxRadius": 18,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 2,
+     "fixed": true,
+     "height": 844,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "inter variable"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 2534,
+    "margins": {
+     "left": 16,
+     "right": 20
+    },
+    "sections": [
+     {
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 2295,
+      "words": 171,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Statistik-Lerngruppe",
+       "size": 24,
+       "tag": "h1"
+      },
+      "left": 16,
+      "right": 16,
+      "textLeft": 16,
+      "textRight": 17,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 2295,
+      "height": 178,
+      "words": 7,
+      "media": 0,
+      "middle": 16,
+      "heading": null,
+      "left": 20,
+      "right": 20,
+      "textLeft": 20,
+      "textRight": 20,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Statistik-Lerngruppe ✎",
+      "size": 24,
+      "top": 132,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 41,
+      "n": 6
+     },
+     {
+      "x": 16,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 7,
+    "bodySize": 13,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": true,
+    "ground": "#0e0d0c",
+    "sidebar": null,
+    "topbar": {
+     "h": 56
+    },
+    "canvas": {
+     "left": 16,
+     "right": 14
+    },
+    "hero": {
+     "text": "Statistik-Lerngruppe ✎",
+     "words": 2,
+     "chars": 22,
+     "lines": 1,
+     "size": 24,
+     "vw": 6.2,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 132,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 6,
+     "firstScreen": 3,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 10,
+     "radii": [
+      [
+       18,
+       5
+      ],
+      [
+       0,
+       4
+      ],
+      [
+       14,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 1,
+     "tabularShare": 0,
+     "kpiMax": 12.8
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.23,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      24
+     ]
+    },
+    "title": {
+     "text": "Statistik-Lerngruppe\n✎",
+     "size": 24,
+     "top": 132
+    },
+    "colourShare": 0.001
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "FAIL",
+   "id": "emoji",
+   "width": 1440,
+   "message": "Emoji in the page: ✎ ✕",
+   "fix": "Remove. Use words or real imagery.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "ragged-row",
+   "width": 1440,
+   "message": "1 pair(s) of cards in one row end at different heights (by 87px).",
+   "fix": "Cards that share a row share a bottom edge: balance them by their content (the same number of rows, a block of similar height beside it), or stack them. In testing, ragged rows were marked down every time."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\before\\together_1\\desktop-fold.jpg",
+   "pages": [
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\before\\together_1\\desktop-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\before\\together_1\\tablet-fold.jpg",
+   "pages": [
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\before\\together_1\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\before\\together_1\\mobile-fold.jpg",
+   "pages": [
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\before\\together_1\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

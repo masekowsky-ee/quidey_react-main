@@ -32,6 +32,24 @@ export const EVENT_TYPE_SUGGESTIONS = {
     ],
 };
 
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// The event type an entry's name points to by one of the type's keywords: { type, keyword } or
+// null. A keyword counts where a word of the name starts with it, case aside: "Arbeit" finds
+// "Arbeit", "Arbeitstreffen" and "Spät-Arbeit", not "Bearbeiten". The first type in the list wins.
+export function matchEventType(name, types) {
+    const text = String(name ?? '');
+    if (!text.trim()) return null;
+    for (const type of types ?? []) {
+        for (const raw of type.keywords ?? []) {
+            const keyword = raw.trim();
+            if (!keyword) continue;
+            if (new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRegExp(keyword)}`, 'iu').test(text)) return { type, keyword };
+        }
+    }
+    return null;
+}
+
 // Translated message for an event type the api refused
 export function eventTypeErrorText(t, err) {
     const key = `eventTypeError_${err?.code}`;

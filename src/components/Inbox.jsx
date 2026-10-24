@@ -17,6 +17,7 @@ import { dateKey, taskStart, timeText } from '../features/calendar/calendar';
 import { showToast } from '../features/toast/toast';
 import TaskInvites from './task/TaskInvites.jsx';
 
+import Icon from './icons';
 const TABS = ['messages', 'requests', 'notices', 'reminders'];
 const SEEN_DELAY_MS = 1500;
 const REMINDER_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
@@ -45,7 +46,32 @@ function useWhen() {
 // ---------- messages ----------
 
 // selected: the conversation open beside the list (wide screens), marked in it
-function Conversations({ onOpen, selected = null }) {
+// The friends to write to: the ones I haven't written with yet first (all of them once I have)
+function NewChat({ onOpen, others }) {
+    const { t } = useTranslation();
+    const friends = useSelector(state => state.friends.friends);
+    const list = others && others.length > 0 ? others : friends;
+    return (
+        <div className={styles.newChat}>
+            <h3 className={styles.subTitle}>{t('inboxNewMessage')}</h3>
+            {friends.length === 0
+                ? <p className={styles.empty}>{t('inboxNoFriends')} <Link to="/social?tab=add">{t('addFriend')}</Link></p>
+                : (
+                    <div className={styles.chips}>
+                        {list.map(friend => (
+                            <button key={friend.id} className={styles.chip} onClick={() => onOpen(friend.id)}>
+                                <Avatar user={friend} />{displayName(friend)}
+                            </button>
+                        ))}
+                    </div>
+                )}
+        </div>
+    );
+}
+
+// newChat: the friends to start a conversation with under the list (left out where the open
+// pane beside it offers them)
+function Conversations({ onOpen, selected = null, newChat = true }) {
     const { t } = useTranslation();
     const when = useWhen();
     const friends = useSelector(state => state.friends.friends);
@@ -93,20 +119,7 @@ function Conversations({ onOpen, selected = null }) {
                         ))}
                     </ul>
                 )}
-            <div className={styles.newChat}>
-                <h3 className={styles.subTitle}>{t('inboxNewMessage')}</h3>
-                {friends.length === 0
-                    ? <p className={styles.empty}>{t('inboxNoFriends')} <Link to="/social?tab=add">{t('addFriend')}</Link></p>
-                    : (
-                        <div className={styles.chips}>
-                            {(others.length > 0 ? others : friends).map(friend => (
-                                <button key={friend.id} className={styles.chip} onClick={() => onOpen(friend.id)}>
-                                    <Avatar user={friend} />{displayName(friend)}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-            </div>
+            {newChat && <NewChat onOpen={onOpen} others={others} />}
         </>
     );
 }
@@ -334,7 +347,7 @@ function Notices() {
                                 ? <Link to={view.to} className={styles.rowTitle}>{view.title}</Link>
                                 : <span className={styles.rowTitle}>{view.title}</span>}
                             <span className={styles.rowMeta}>{notice.kind === 'broadcast' ? t('inboxFromTeam') : ''} {when(notice.createdAt)}</span>
-                            <button className={styles.deleteBtn} onClick={() => remove(notice.id)} aria-label={`${t('delete')}: ${view.title}`}>✕</button>
+                            <button className={styles.deleteBtn} onClick={() => remove(notice.id)} aria-label={`${t('delete')}: ${view.title}`} title={t('delete')}><Icon name="close" size={16} /></button>
                         </div>
                         <p className={styles.noticeBody}>{view.body}</p>
                     </li>
@@ -430,12 +443,15 @@ export default function Inbox() {
             {split
                 ? <div className={styles.split} role="tabpanel" aria-label={t('inboxTab_messages')}>
                     <section className={`${styles.card} ${styles.splitList}`}>
-                        <Conversations onOpen={openConversation} selected={openWith} />
+                        <Conversations onOpen={openConversation} selected={openWith} newChat={false} />
                     </section>
                     <section className={`${styles.card} ${styles.splitThread}`}>
                         {openWith
                             ? <Thread key={openWith} userId={openWith} />
-                            : <p className={styles.pickHint}>{t('inboxPickConversation')}</p>}
+                            : <div className={styles.pickPane}>
+                                <p className={styles.pickHint}>{t('inboxPickConversation')}</p>
+                                <NewChat onOpen={openConversation} />
+                            </div>}
                     </section>
                 </div>
                 :

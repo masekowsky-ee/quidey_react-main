@@ -14,9 +14,15 @@ const withCurrent = (list, current) =>
 
 const toNumberOrNull = (value) => (value === '' ? null : Number(value));
 
+// how often a repeating task comes back at most (like the server)
+const REPEAT_LEFT_MAX = 1000;
+// what "ends after …" starts with
+const REPEAT_LEFT_DEFAULT = 10;
+
 // The optional details of a task: reminder, repeating, location, link and extra info (a task's
 // planned time and an event's length are on the wheels, see DurationWheel).
-// value: { reminder_minutes, reminder_email, location, link, details, repeat };
+// value: { reminder_minutes, reminder_email, location, link, details, repeat, repeat_left };
+// repeat_left: how many more times it comes back after this one (null: no end).
 // onChange gets the changed fields.
 // hasTime: reminders count from the start time, so without one they are off.
 // hasDate: repeating counts from the day, so without one it is off too.
@@ -68,6 +74,28 @@ export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = 
                 </select>
             </label>}
             {personal && !hasDate && <p id={`${id}-repeat-hint`} className={styles.hint}>{t('repeatNeedsDate')}</p>}
+            {/* a repeat can end: never, or after a number of times */}
+            {personal && hasDate && value.repeat &&
+                <fieldset className={styles.repeatEnd}>
+                    <legend className={styles.repeatEndLegend}>{t('repeatEnds')}</legend>
+                    <div className={styles.repeatEndChoice}>
+                        <button type="button" aria-pressed={!Number.isInteger(value.repeat_left)}
+                            onClick={() => onChange({ repeat_left: null })}>{t('repeatEndsNever')}</button>
+                        <button type="button" aria-pressed={Number.isInteger(value.repeat_left)}
+                            onClick={() => onChange({ repeat_left: Number.isInteger(value.repeat_left) ? value.repeat_left : REPEAT_LEFT_DEFAULT })}>
+                            {t('repeatEndsAfter')}
+                        </button>
+                    </div>
+                    {Number.isInteger(value.repeat_left) &&
+                        <label className={styles.repeatCount}>
+                            <input type="number" inputMode="numeric" min="1" max={REPEAT_LEFT_MAX} value={value.repeat_left}
+                                onChange={(e) => {
+                                    const n = Number.parseInt(e.target.value, 10);
+                                    onChange({ repeat_left: Number.isNaN(n) ? 1 : Math.min(REPEAT_LEFT_MAX, Math.max(1, n)) });
+                                }} />
+                            <span>{t('repeatEndsTimes')}</span>
+                        </label>}
+                </fieldset>}
             <div className={styles.row}>
                 <label className={styles.field}>
                     <span>{t('location')}</span>

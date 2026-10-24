@@ -17,17 +17,15 @@
     background: color-mix(in srgb, var(--tint) 14%, var(--surface));
 }
 
+/* the stored styles stay, drawn flat: no gradients in the app */
 .banner[data-banner="gradient"]{
-    background: linear-gradient(135deg,
-        color-mix(in srgb, var(--tint) 85%, var(--surface)),
-        color-mix(in srgb, var(--tint) 22%, var(--surface)));
+    background: color-mix(in srgb, var(--tint) 62%, var(--surface));
 }
 
 .banner[data-banner="aurora"]{
-    background:
-        radial-gradient(70% 140% at 15% 0%, color-mix(in srgb, var(--tint) 80%, transparent), transparent 70%),
-        radial-gradient(60% 120% at 85% 100%, color-mix(in srgb, var(--tint) 45%, var(--text-h)), transparent 70%),
-        color-mix(in srgb, var(--tint) 18%, var(--surface));
+    /* two flat bands of the colour, the lower one deeper */
+    background: color-mix(in srgb, var(--tint) 30%, var(--surface));
+    box-shadow: inset 0 -2.75rem 0 color-mix(in srgb, var(--tint) 70%, var(--surface));
 }
 
 .banner[data-banner="dots"]{
@@ -50,9 +48,9 @@
 }
 
 .banner[data-banner="glow"]{
-    background:
-        radial-gradient(60% 130% at 50% 120%, color-mix(in srgb, var(--tint) 90%, transparent), transparent 75%),
-        var(--surface-inset);
+    /* the dark ground with one band of colour along its foot */
+    background: var(--surface-inset);
+    box-shadow: inset 0 -0.75rem 0 color-mix(in srgb, var(--tint) 85%, var(--surface));
 }
 
 /* Nothing to show to non-friends: a quiet strip */
@@ -550,13 +548,14 @@
 }
 
 .badge[data-earned="false"] .badgeIcon{
-    filter: grayscale(1);
-    opacity: 0.4;
+    color: var(--text-muted);
+    opacity: 0.55;
 }
 
+/* an earned badge: its outline in the one data hue */
 .badgeIcon{
-    font-size: 1.25rem;
-    line-height: 1;
+    display: inline-flex;
+    color: var(--primary-fg);
 }
 
 .badgeText{

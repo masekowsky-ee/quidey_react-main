@@ -325,3 +325,25 @@
     max-width: 100%;
   }
 }
+
+/* ---------- fewer choices at once ----------
+   With a mouse, a row's actions appear where the row is looked at (hover or keyboard focus),
+   so a list of ten tasks doesn't offer thirty buttons at the same time. They keep their room,
+   so nothing moves when they appear. On touch, focus and edit stay; delete is in the editor. */
+@media (hover: hover) and (pointer: fine) {
+  .actions {
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+  }
+
+  .row:hover .actions,
+  .row:focus-within .actions {
+    opacity: 1;
+  }
+}
+
+@media (hover: none) {
+  .actions > :last-child:not(.action):not(.sessionLink) {
+    display: none;
+  }
+}

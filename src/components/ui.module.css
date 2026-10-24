@@ -85,10 +85,18 @@
     box-shadow: none;
 }
 
-/* Page-level tabs (inbox, friends, admin, ...): a full-width segmented bar */
+/* Page-level tabs (inbox, friends, admin, ...): a segmented bar as wide as its options (a
+   track across the whole page reads as a progress bar); full width only on phones, below */
 .tabBar {
     composes: segmented;
     display: flex;
+    width: fit-content;
+    align-self: flex-start;
+}
+
+.tabBar > button {
+    flex: none;
+    padding-inline: 1.1rem;
 }
 
 /* Phones: equal columns that always fit, count badges sit on the corner

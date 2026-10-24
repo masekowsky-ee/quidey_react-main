@@ -288,3 +288,10 @@
     color: var(--text-muted);
     background: transparent;
 }
+
+/* a small tick before a finished task's name */
+.doneMark{
+    margin-right: 0.3rem;
+    vertical-align: -0.1em;
+    color: var(--text-muted);
+}

@@ -24,8 +24,15 @@
 .calendarLink{
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--primary-text);
+    /* full ink: readable on the page and on a card */
+    color: var(--text-h);
     text-decoration: none;
+    text-underline-offset: 3px;
+}
+
+.calendarLink:hover,
+.calendarLink:focus-visible{
+    text-decoration: underline;
 }
 
 .calendarLink:hover{
@@ -71,7 +78,7 @@
 }
 
 .entryCheck:hover{
-    color: var(--primary-text);
+    color: var(--primary-fg);
     border-color: var(--primary);
     background: transparent;
 }
@@ -90,7 +97,7 @@
 }
 
 .entryToday{
-    color: var(--primary-text);
+    color: var(--primary-fg);
 }
 
 .entryName{

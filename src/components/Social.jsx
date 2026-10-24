@@ -154,10 +154,11 @@ export default function Social() {
                                         </>
                                     ) : (
                                         <>
-                                            <button className={styles.acceptBtn} disabled={busyId === friend.id} onClick={() => workTogether(friend)}>
+                                            {/* one per friend, so outlined, not the page's primary */}
+                                            <button className={styles.rowActionBtn} disabled={busyId === friend.id} onClick={() => workTogether(friend)}>
                                                 {t('workTogether')}
                                             </button>
-                                            <button className={styles.quietBtn} onClick={() => setConfirmRemoveId(friend.id)}>{t('removeFriend')}</button>
+                                            <button className={`${styles.quietBtn} ${styles.revealBtn}`} onClick={() => setConfirmRemoveId(friend.id)}>{t('removeFriend')}</button>
                                         </>
                                     )}
                                 </UserRow>

@@ -6,6 +6,7 @@ import {useTranslation} from '../../i18n/useTranslation'
 import { fetchSharedHistory } from '../../features/together/togetherAction';
 import { inPeriod } from '../../features/stats/period';
 
+import Icon from '../icons';
 // 95 -> "1 h 35 min", 40 -> "40 min"
 function formatMinutes(totalMinutes) {
     const h = Math.floor(totalMinutes / 60);
@@ -107,7 +108,7 @@ export default function SessionList({ period }){
                                         <ul className={styles.tags}>
                                             {data.tasks.map(task => (
                                                 <li key={task.id} className={styles.tag}>
-                                                    {task.done && '✓ '}{task.name}
+                                                    {task.done && <Icon name="check" size={13} strokeWidth={2.2} className={styles.doneMark} />}{task.name}
                                                     <span className={styles.tagTime}>{formatTaskTime(Math.round(task.ms / 1000))}</span>
                                                 </li>
                                             ))}

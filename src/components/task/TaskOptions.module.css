@@ -544,3 +544,52 @@
         justify-content: flex-end;
     }
 }
+
+/* When a repeat ends: never, or after a number of times */
+.repeatEnd{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin: -0.15rem 0 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+.repeatEndLegend{
+    float: left;
+    padding: 0;
+    margin-right: 0.25rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.repeatEndChoice{
+    composes: segmented from '../ui.module.css';
+}
+
+.repeatEndChoice > button{
+    padding: 0.25rem 0.8rem;
+    font-size: 0.82rem;
+}
+
+.repeatEndChoice > button[aria-pressed="true"],
+.repeatEndChoice > button[aria-pressed="true"]:hover{
+    color: var(--text-h);
+    background: var(--surface-strong);
+}
+
+.repeatCount{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.85rem;
+    color: var(--text);
+}
+
+.repeatCount input{
+    width: 4.5rem;
+}

@@ -218,7 +218,7 @@ describe('Quidey Family', () => {
         const chat = screen.getByRole('list', { name: 'Chat' })
         expect(within(chat).getByText('Hello all')).toBeInTheDocument()
 
-        fireEvent.change(screen.getByRole('textbox', { name: 'Message the team…' }), { target: { value: 'Hi!' } })
+        fireEvent.change(screen.getByRole('textbox', { name: 'Message the family…' }), { target: { value: 'Hi!' } })
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Send' })) })
         expect(within(chat).getByText('Hi!')).toBeInTheDocument()
 

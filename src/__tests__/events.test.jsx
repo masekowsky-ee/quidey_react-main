@@ -178,7 +178,7 @@ describe('creating an event', () => {
 
         routes({ 'POST /api/event-types': WORK, 'POST /api/tasks': { id: 40, name: 'Shift', kind: 'event', done: true } })
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: '+ Work' })) })
-        expect(bodyOf('/api/event-types', 'POST')).toEqual({ name: 'Work', color: 'blue' })
+        expect(bodyOf('/api/event-types', 'POST')).toEqual({ name: 'Work', color: 'blue', keywords: ['Work'] })
         expect(screen.getByRole('radio', { name: 'Work' })).toBeChecked()
 
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Create' })) })
@@ -274,7 +274,7 @@ describe('event types in the settings', () => {
         wrap(store, <EventTypeSettings />)
         apiFetch.mockResolvedValueOnce({ id: 8, name: 'Lecture', color: 'violet', position: 1 })
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: '+ Lecture' })) })
-        expect(bodyOf('/api/event-types', 'POST')).toEqual({ name: 'Lecture', color: 'violet' })
+        expect(bodyOf('/api/event-types', 'POST')).toEqual({ name: 'Lecture', color: 'violet', keywords: ['Lecture'] })
         expect(store.getState().task.eventTypes.map(t => t.name)).toEqual(['Work', 'Lecture'])
 
         const name = screen.getByRole('textbox', { name: 'Name of Work' })

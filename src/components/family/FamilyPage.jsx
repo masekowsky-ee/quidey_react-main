@@ -94,7 +94,7 @@ function FamilyTitle({ family, onChanged }) {
     return family.isOwner
         ? <h1 className={styles.title}>
             <button className={styles.renamable} title={t('rename')} onClick={() => setEditing(true)}>
-                {family.name} <span className={styles.editHint} aria-hidden="true">✎</span>
+                {family.name} <span className={styles.editHint} aria-hidden="true"><Icon name="edit" size={18} /></span>
             </button>
         </h1>
         : <h1 className={styles.title}>{family.name}</h1>;
@@ -334,7 +334,7 @@ function FamilyChat({ family }) {
             </ol>
             <form className={styles.chatForm} onSubmit={send}>
                 <input value={text} maxLength={MESSAGE_MAX} onChange={(e) => setText(e.target.value)}
-                    placeholder={t('messagePlaceholder')} aria-label={t('messagePlaceholder')} />
+                    placeholder={t('familyMessagePlaceholder')} aria-label={t('familyMessagePlaceholder')} />
                 <button type="submit" className={styles.primaryBtn} disabled={sending || !text.trim()}>{t('send')}</button>
             </form>
         </section>
@@ -396,9 +396,6 @@ export default function FamilyPage() {
                     <p className={styles.meta}>
                         {fill(t('familyFoundedBy'), { name: displayName(family.owner) })} · {memberCount} {t(memberCount === 1 ? 'member' : 'members')}
                     </p>
-                    <div className={own.headLinks}>
-                        <Link to={calendarLink('family', family.id)} className={own.calendarLink}>{t('calendarOpenCalendar')} →</Link>
-                    </div>
                 </div>
             </div>
             <div className={styles.roomGrid}>

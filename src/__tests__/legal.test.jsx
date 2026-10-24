@@ -26,7 +26,7 @@ describe('legal pages', () => {
         expect(screen.getByRole('heading', { name: 'Impressum' })).toBeInTheDocument()
         expect(screen.getAllByText(OWNER.name, { exact: false }).length).toBeGreaterThan(0)
         expect(screen.getAllByText(OWNER.email, { exact: false }).length).toBeGreaterThan(0)
-        expect(screen.getAllByRole('link', { name: 'quidey.com/kontakt' })[0]).toHaveAttribute('href', '/kontakt')
+        expect(screen.getAllByRole('link', { name: 'app.quidey.com/kontakt' })[0]).toHaveAttribute('href', '/kontakt')
     })
 
     it('every page links to all the others in the footer', () => {

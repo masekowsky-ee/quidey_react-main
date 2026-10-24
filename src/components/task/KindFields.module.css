@@ -188,3 +188,10 @@
 .manage:hover{
     color: var(--primary-fg);
 }
+
+/* "Picked by itself: the name contains „Arbeit“" */
+.autoNote{
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}

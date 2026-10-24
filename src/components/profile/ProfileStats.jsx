@@ -4,6 +4,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { fill, formatDate, formatDuration, mondayIndex, parseDate } from '../../features/helperFunction';
 import { badgesFor } from '../../features/profile/badges';
 import { groupColorAttr } from '../../features/tasks/taskColors';
+import Icon from '../icons';
 
 // The day `daysAgo` days before `today` (a local Date)
 const dayBefore = (today, daysAgo) => new Date(today.getFullYear(), today.getMonth(), today.getDate() - daysAgo);
@@ -190,7 +191,7 @@ export default function ProfileStats({ stats, title, colorAttr }) {
                 <ul className={styles.badges}>
                     {badges.map(badge => (
                         <li key={badge.id} className={styles.badge} data-earned={badge.earned}>
-                            <span className={styles.badgeIcon} aria-hidden="true">{badge.icon}</span>
+                            <span className={styles.badgeIcon} aria-hidden="true"><Icon name={badge.icon} size={22} /></span>
                             <span className={styles.badgeText}>
                                 {t(`badge_${badge.id}`)}
                                 <small>{badge.earned ? t('badgeEarned') : t(`badge_${badge.id}_hint`)}</small>

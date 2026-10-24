@@ -1,5 +1,7 @@
 import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, GET_NOTES, REFRESH_TASKS, TASK_REPLACED, SET_TASK_INVITES, TASK_INVITE_ACCEPTED, TASK_INVITE_REMOVED, TASK_SHARE_REMOVED, SET_EVENT_TYPES, EVENT_TYPE_SAVED, EVENT_TYPE_REMOVED } from './taskActionTypes';
 import { apiFetch, toInputDate } from '../helperFunction';
+import { askDeleteScope, isRepeating } from './deleteScope';
+import { dateKey } from '../calendar/calendar';
 
 
 // Action creators for task management
@@ -16,8 +18,9 @@ export const fetchTaskState = () => {
 
 // The optional task fields (see the api): time of day, duration (an event's length, a task's
 // planned time) and reminder in minutes, location, link and extra details, colour, whether the
-// reminder also comes by mail, and task or event (kind) with the event's type
-export const TASK_EXTRA_FIELDS = ['due_time', 'duration_minutes', 'reminder_minutes', 'location', 'link', 'details', 'repeat', 'color', 'reminder_email', 'kind', 'event_type_id'];
+// reminder also comes by mail, and task or event (kind) with the event's type; repeat_left: how
+// many more times a repeating task comes back (null: no end)
+export const TASK_EXTRA_FIELDS = ['due_time', 'duration_minutes', 'reminder_minutes', 'location', 'link', 'details', 'repeat', 'repeat_left', 'color', 'reminder_email', 'kind', 'event_type_id'];
 const extrasOf = (source) => Object.fromEntries(TASK_EXTRA_FIELDS
     .filter(field => source?.[field] !== undefined)
     .map(field => [field, source[field] === '' ? null : source[field]]));
@@ -54,14 +57,34 @@ export const addTask = (name, due, description, prio, activeGroupId = null, user
     };
 }
 
-export const deleteTask = (taskId) => {
+// scope (for a repeating task): 'one' | 'following' | 'all', see the api; occurrence: the day
+// (YYYY-MM-DD) of a coming repeat that is only a preview so far
+export const deleteTask = (taskId, { scope = null, occurrence = null } = {}) => {
     return async (dispatch) => {
-        await apiFetch(`/api/tasks/${taskId}`, {method: "DELETE"});
-        
-        dispatch({
-            type: DELETE_TASK,
-            payload: taskId,
-        });
+        const query = new URLSearchParams({ ...(scope ? { scope } : {}), ...(occurrence ? { occurrence } : {}) }).toString();
+        const data = await apiFetch(`/api/tasks/${taskId}${query ? `?${query}` : ''}`, {method: "DELETE"});
+
+        // the whole row can go at once; a coming repeat only changes its task
+        for (const id of data?.deletedIds ?? [taskId]) dispatch({ type: DELETE_TASK, payload: id });
+        if (occurrence && data?.task) dispatch({ type: TASK_REPLACED, payload: data.task });
+        // only this one of a repeating task: the next one takes its place
+        if (data?.nextTask) dispatch({ type: ADD_TASK, payload: data.nextTask });
+    };
+}
+
+// Deletes my task; for a repeating one (or a preview of a coming repeat) it asks first what
+// goes (DeleteScopeDialog). Resolves with false when that was cancelled, true once deleted.
+export const deleteTaskAsking = (task) => {
+    return async (dispatch) => {
+        if (!isRepeating(task)) {
+            await dispatch(deleteTask(task.id));
+            return true;
+        }
+        const scope = await askDeleteScope(task);
+        if (!scope) return false;
+        const real = task.projected ? task.repeatOf : task;
+        await dispatch(deleteTask(real.id, { scope, occurrence: task.projected ? dateKey(task.due) : null }));
+        return true;
     };
 }
 
@@ -77,7 +100,7 @@ export const updateTaskProps = (taskPropObject, task) => {
         const data = await apiFetch(`/api/tasks/${params.id}`, {
             method: "PUT",
             // the optional fields too; without a day there is no time of day
-            body: JSON.stringify({name, due, description, prio, done, id, ...extrasOf(params), ...(due ? {} : { due_time: null, repeat: null })})
+            body: JSON.stringify({name, due, description, prio, done, id, ...extrasOf(params), ...(due ? {} : { due_time: null, repeat: null, repeat_left: null })})
         });
 
         const { nextTask, ...task } = data;
@@ -104,14 +127,15 @@ export const refreshTasks = () => {
 
 // ---------- event types ----------
 
-// { name, color? } -> the new type (at the end of my list)
-export const addEventType = (name, color = null) => async (dispatch) => {
-    const type = await apiFetch("/api/event-types", { method: "POST", body: JSON.stringify({ name, color }) });
+// { name, color?, keywords? } -> the new type (at the end of my list). Its name is its first
+// keyword unless others are given, so an event called like it gets it by itself.
+export const addEventType = (name, color = null, keywords = [name]) => async (dispatch) => {
+    const type = await apiFetch("/api/event-types", { method: "POST", body: JSON.stringify({ name, color, keywords }) });
     dispatch({ type: EVENT_TYPE_SAVED, payload: type });
     return type;
 };
 
-// changes: { name?, color?, position? }
+// changes: { name?, color?, position?, keywords? }
 export const updateEventType = (id, changes) => async (dispatch) => {
     const type = await apiFetch(`/api/event-types/${id}`, { method: "PUT", body: JSON.stringify(changes) });
     dispatch({ type: EVENT_TYPE_SAVED, payload: type });

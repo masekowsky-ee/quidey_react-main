@@ -1,0 +1,50 @@
+/* The signed-out screen: the wordmark and a link back to the landing page above the sign-in card */
+.screen{
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg);
+}
+
+.brand{
+    width: min(680px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    margin: 0 auto;
+    padding: calc(1.5rem + env(safe-area-inset-top, 0px)) 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.wordmark{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    color: var(--text-h);
+    text-decoration: none;
+}
+
+.logo{
+    width: 1.75rem;
+    height: 1.75rem;
+}
+
+.about{
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.about:hover{
+    color: var(--text-h);
+    text-decoration: underline;
+}
+
+/* the footer sits at the bottom of a short screen */
+.screen > footer{
+    margin-top: auto;
+}

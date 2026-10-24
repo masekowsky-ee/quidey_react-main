@@ -41,7 +41,7 @@ function ContactLines() {
         <p>
             E-Mail: <V>{OWNER.email}</V>
             {hasPhone(OWNER.phone) && <><br />Telefon: <V>{OWNER.phone}</V></>}
-            <br />Kontaktformular: <Link to="/kontakt">quidey.com/kontakt</Link>
+            <br />Kontaktformular: <Link to="/kontakt">app.quidey.com/kontakt</Link>
         </p>
     );
 }
@@ -143,7 +143,8 @@ function Privacy() {
 
             <h2>3. Aufruf der Website (Hosting)</h2>
             <p>
-                Die Website wird über {PROCESSORS.frontendHost} („Cloudflare“) ausgeliefert. Beim Aufruf verarbeitet
+                Quidey besteht aus der Startseite quidey.com und der App app.quidey.com. Beide werden über
+                {' '}{PROCESSORS.frontendHost} („Cloudflare“) ausgeliefert. Beim Aufruf verarbeitet
                 Cloudflare technisch notwendige Verbindungsdaten: IP-Adresse, Zeitpunkt, aufgerufene Adresse,
                 Browser-Kennung (User-Agent) sowie Daten zur Abwehr von Angriffen. Rechtsgrundlage ist Art. 6 Abs. 1
                 lit. f DSGVO; mein berechtigtes Interesse ist eine sichere, schnelle und stabile Auslieferung.
@@ -151,6 +152,13 @@ function Privacy() {
                 USA verarbeiten; Cloudflare ist unter dem EU-US Data Privacy Framework zertifiziert
                 (Angemessenheitsbeschluss der EU-Kommission, Art. 45 DSGVO), ergänzend gelten
                 Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO).
+            </p>
+            <p>
+                Die Startseite quidey.com setzt keine Cookies, speichert nichts in deinem Browser, lädt nichts von
+                Dritten und sendet keine Daten an die API. Anmelden und Registrieren finden in der App statt. Gibst du
+                auf der Startseite deine E-Mail-Adresse ein, reicht dein Browser sie nur an das Registrierungsformular
+                der App weiter (im Teil der Adresse nach „#“, der nicht an einen Server übertragen wird); gespeichert
+                wird sie erst, wenn du dich registrierst.
             </p>
             <p>
                 Die Programmierschnittstelle (API) und die Datenbank laufen auf einem Server bei <V>{PROCESSORS.backendHost}</V>.
@@ -282,8 +290,10 @@ function Privacy() {
                 Schreibst du mir über das Kontaktformular oder per E-Mail, verarbeite ich deinen Namen, deine
                 E-Mail-Adresse und deine Nachricht, um sie zu beantworten. Sendest du in der App Feedback, gehen
                 deine Nachricht, die gewählte Art (Idee, Fehler, Lob, Sonstiges), dein Benutzer- und Anzeigename und
-                deine E-Mail-Adresse an mich, damit ich nachfragen oder antworten kann; gespeichert wird das
-                Feedback in Quidey selbst nicht. Formular und Feedback werden über
+                die E-Mail-Adresse für die Antwort an mich (vorausgefüllt mit der deines Kontos, du kannst eine andere
+                angeben), damit ich nachfragen oder antworten kann; gespeichert wird das Feedback in Quidey selbst
+                nicht. Bist du angemeldet, füllt das Kontaktformular Name und E-Mail-Adresse aus deinem Konto vor;
+                gesendet wird erst, was du abschickst. Formular und Feedback werden über
                 {' '}<V>{PROCESSORS.mailProvider}</V> an mein Postfach weitergeleitet. Rechtsgrundlage ist
                 Art. 6 Abs. 1 lit. f DSGVO (Beantwortung deiner Anfrage), bei Fragen zu deinem Konto Art. 6 Abs. 1
                 lit. b DSGVO. Die Nachrichten lösche ich, sobald die Anfrage erledigt ist, spätestens nach
@@ -295,7 +305,9 @@ function Privacy() {
                 Quidey setzt keine Cookies. Im lokalen Speicher deines Browsers (localStorage) liegen nur:
             </p>
             <ul>
-                <li>dein Anmelde-Token (7 Tage gültig, wird beim Abmelden gelöscht);</li>
+                <li>dein Anmelde-Token (7 Tage gültig, wird beim Abmelden gelöscht). Meldest du auf demselben Gerät
+                    mehrere Konten an, um zwischen ihnen zu wechseln, liegen für jedes davon Token, Benutzer- und
+                    Anzeigename (höchstens fünf Konten); beim Abmelden eines Kontos wird sein Eintrag gelöscht;</li>
                 <li>deine Einstellungen: Sprache, Design, Farbe, Animationen, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer oder Stoppuhr, Kalenderansicht;</li>
                 <li>ob du die Einführung gesehen hast, welche Erinnerungen schon angezeigt wurden und welche gemeinsame Sitzung gerade gestoppt wird;</li>
                 <li>Schwierigkeit und Bestwerte der Spiele.</li>

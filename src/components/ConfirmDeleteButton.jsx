@@ -10,7 +10,8 @@ const ARMED_MS = 4000;
 // a second click deletes. Waiting, leaving the button or Escape takes the question back.
 // It is the same button the whole time, so the keyboard focus stays on it.
 // label: what it deletes, for screen readers ("Delete: Shopping"); confirmText: the question.
-export default function ConfirmDeleteButton({ onConfirm, label, confirmText, className = '', title }) {
+// ask: false deletes on the first click, for when onConfirm asks by itself (e.g. what of a repeating task goes).
+export default function ConfirmDeleteButton({ onConfirm, label, confirmText, className = '', title, ask = true }) {
     const { t } = useTranslation();
     const [armed, setArmed] = useState(false);
     const timer = useRef(null);
@@ -24,6 +25,10 @@ export default function ConfirmDeleteButton({ onConfirm, label, confirmText, cla
 
     const onClick = (e) => {
         e.stopPropagation();
+        if (!ask) {
+            onConfirm();
+            return;
+        }
         if (!armed) {
             setArmed(true);
             clearTimeout(timer.current);

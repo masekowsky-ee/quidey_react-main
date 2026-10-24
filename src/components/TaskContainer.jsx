@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import styles from './TaskContainer.module.css';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import {deleteTask, deleteGroup, deleteGroupTasks, editGroup, updateTaskProps, editDisplaygroup, leaveTask, isSharedWithMe} from '../features/tasks/taskAction'
+import {deleteTaskAsking, deleteGroup, deleteGroupTasks, editGroup, updateTaskProps, editDisplaygroup, leaveTask, isSharedWithMe} from '../features/tasks/taskAction'
 import TaskColorButton from './task/TaskColorButton.jsx'
 import TaskRow from './task/TaskRow.jsx'
 import ConfirmDeleteButton from './ConfirmDeleteButton.jsx'
@@ -111,8 +111,9 @@ export default function TaskContainer(props){
                 .catch(reportError);
             return;
         }
-        dispatch(deleteTask(task.id))
-            .then(() => dispatch(showToast(t('taskDeleted'), 'info')))
+        // a repeating one asks first what goes; cancelled, nothing happens
+        dispatch(deleteTaskAsking(task))
+            .then((deleted) => { if (deleted) dispatch(showToast(t('taskDeleted'), 'info')); })
             .catch(reportError);
     }
 

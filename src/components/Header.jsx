@@ -1,7 +1,8 @@
 import styles from './Header.module.css';
 import {Link} from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { setShowMenu } from '../features/settings/settingsAction'
+import { setShowMenu, showForms } from '../features/settings/settingsAction'
+import Icon from './icons'
 import { selectTimerProgress } from '../features/session/sessionAction'
 import TeamWorkPill from './together/TeamWorkPill'
 import TeamQuickPanel from './together/TeamQuickPanel'
@@ -62,6 +63,12 @@ export default function Header(props){
                     <div className={styles.end}>
                         <DailyTicker />
                         <TeamQuickPanel />
+                        {/* the most frequent job, from every page: a new task or event */}
+                        <button type="button" className={styles.newBtn} onClick={() => dispatch(showForms(true))}
+                            aria-label={t('newEntry')} title={t('newEntry')}>
+                            <Icon name="plus" size={18} strokeWidth={2} />
+                            <span className={styles.newLabel}>{t('newEntryShort')}</span>
+                        </button>
                     </div>
                 </div>
             </>}

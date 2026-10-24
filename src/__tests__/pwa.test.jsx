@@ -77,6 +77,8 @@ describe('install as app (settings)', () => {
         act(() => { window.dispatchEvent(event) })
         expect(event.defaultPrevented).toBe(true)
 
+        // it has an area of its own in the settings
+        fireEvent.click(screen.getByRole('tab', { name: 'App' }))
         fireEvent.click(screen.getByRole('button', { name: 'Installieren' }))
         expect(event.prompt).toHaveBeenCalledTimes(1)
         expect(await screen.findByText('Quidey ist als App installiert.')).toBeInTheDocument()

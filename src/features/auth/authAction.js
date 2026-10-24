@@ -1,5 +1,6 @@
 import { LOGIN_SUCCESS, LOGOUT, SET_USER, SET_ACCESS } from "./authActionTypes";
 import { apiFetch, apiUrl } from '../helperFunction';
+import { forgetAccount, forgetToken, listAccounts, rememberAccount, switchAccount } from './accounts';
 
 // Signs in with the username or the email address (the server tells them apart by the "@")
 export const loginSuccess = (username, password) => {
@@ -10,6 +11,8 @@ export const loginSuccess = (username, password) => {
         });
 
         localStorage.setItem("token", data.token);
+        // stays on this device next to the accounts signed in before (to switch between them)
+        rememberAccount({ username: data.username ?? username, token: data.token, displayName: data.display_name });
 
         dispatch({
             type: LOGIN_SUCCESS,
@@ -42,8 +45,18 @@ export const requestBetaAccess = (reason) => {
     };
 };
 
+// Signs this account out on this device. Another account still signed in here takes over
+// (the app loads again as that one); otherwise it's the sign-in.
 export const logout = () => {
-    return (dispatch) => {
+    return (dispatch, getState) => {
+        const token = localStorage.getItem('token');
+        forgetToken(token);
+        forgetAccount(getState().auth.user?.username);
+        const next = listAccounts()[0];
+        if (next) {
+            switchAccount(next.username);
+            return;
+        }
         localStorage.removeItem('token');
         dispatch({ type: LOGOUT });
     };
@@ -69,6 +82,7 @@ export const checkAuth = () => {
 
         // only a real rejection signs out; a server error (e.g. 500 from the dev proxy) keeps the token
         if (response.status === 401 || response.status === 403) {
+            forgetToken(token);
             localStorage.removeItem("token");
             dispatch({ type: LOGOUT });
             return;
@@ -76,6 +90,7 @@ export const checkAuth = () => {
         if (!response.ok) return;
 
         const data = await response.json();
+        rememberAccount({ username: data.username, token });
         dispatch({
             type: LOGIN_SUCCESS,
             payload: { token, username: data.username },
@@ -89,6 +104,8 @@ export const setUser = () => {
 
         const data = await apiFetch(`/api/users`, {method: "GET"});
 
+        // the name shown in the account switcher
+        if (data?.[0]) rememberAccount({ username: data[0].username, token: localStorage.getItem('token'), displayName: data[0].display_name });
         dispatch({
             type: SET_USER,
             payload: data,
@@ -145,6 +162,7 @@ export const changePassword = (currentPassword, newPassword) => {
         });
         if (data?.token) {
             localStorage.setItem('token', data.token);
+            rememberAccount({ username: getState().auth.user?.username, token: data.token });
             dispatch({ type: LOGIN_SUCCESS, payload: { token: data.token, username: getState().auth.user?.username } });
         }
     };

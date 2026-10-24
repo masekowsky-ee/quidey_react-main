@@ -5,6 +5,7 @@ import { formatDate } from '../../features/helperFunction';
 import { addSharedTask } from '../../features/together/togetherAction';
 import { useTogetherRun } from '../../features/together/hooks';
 
+import Icon from '../icons';
 // My own open tasks, each one click away from the session
 export default function ShareMyTasks({ session }) {
     const { t } = useTranslation();
@@ -28,7 +29,7 @@ export default function ShareMyTasks({ session }) {
                                 {task.due && <span className={styles.meta}>{formatDate(task.due)}</span>}
                             </div>
                             {shared.has(task.id)
-                                ? <span className={styles.sharedTag}>✓ {t('inSession')}</span>
+                                ? <span className={styles.sharedTag}><Icon name="check" size={13} strokeWidth={2.2} /> {t('inSession')}</span>
                                 : (
                                     <button className={styles.secondaryBtn} onClick={() => run(addSharedTask(session.id, { taskId: task.id }), 'toast_taskShared')}>
                                         {t('shareTask')}

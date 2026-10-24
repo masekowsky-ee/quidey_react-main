@@ -30,7 +30,7 @@ const settingsReducer = (state = intitialState, action) => {
         case SET_CUSTOM_ERROR:
             return { ...state, customError: action.payload };
         case SET_SHOW_FORMS:
-            return { ...state, showForms: !state.showForms };
+            return { ...state, showForms: typeof action.payload === 'boolean' ? action.payload : !state.showForms };
         case SET_THEME:
             return THEMES.includes(action.payload) ? { ...state, theme: action.payload } : state;
         case SET_SHOW_SHARED_TASKS:

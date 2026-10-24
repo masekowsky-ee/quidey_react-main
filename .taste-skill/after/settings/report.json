@@ -1,6 +1,6 @@
 {
- "url": "http://localhost:5174/e2e-login.html?t=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoibGVuYS5rIiwidHYiOjAsImlhdCI6MTc5MjQ0NTM2OSwiZXhwIjoxNzkzMDUwMTY5fQ.QD-_GRGjW0nUYYWZm1A4mAW9-bZY1VTu_SvRzMUVNQM&to=/settings",
- "at": "2026-10-19T21:52:08.980Z",
+ "url": "http://localhost:5174/settings",
+ "at": "2026-10-24T21:48:25.062Z",
  "allow": [],
  "viewports": [
   {
@@ -12,10 +12,10 @@
     0.29
    ],
    "motion": {
-    "elements": 0,
+    "elements": 1,
     "css": 0,
     "transitions": 0,
-    "scripted": 0,
+    "scripted": 1,
     "videos": 0,
     "playingVideos": 0
    },
@@ -27,12 +27,12 @@
     "page": {
      "height": 900,
      "screens": 1,
-     "words": 59,
+     "words": 83,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 12,
-     "sections": 4,
+     "svg": 23,
+     "sections": 2,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
@@ -58,7 +58,7 @@
      "weight": 600,
      "tracking": -0.02,
      "leading": 1.2,
-     "top": 128,
+     "top": 102,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -91,25 +91,25 @@
      ],
      "familyCount": 1,
      "sizes": [
+      12,
       13,
       14,
       15,
       16,
       18,
-      21,
       24
      ],
      "sizeCount": 7,
      "notLoaded": [],
      "body": {
       "font": "Inter Variable",
-      "size": 13,
+      "size": 14,
       "leading": 1.5,
       "weight": 400,
       "tracking": -0.007,
       "contrast": 6.6
      },
-     "measureChars": 73,
+     "measureChars": 50,
      "max": {
       "size": 24,
       "vw": 1.7,
@@ -124,8 +124,8 @@
      "microLabelShare": 0,
      "microSamples": [],
      "upperShare": 0,
-     "centerShare": 0.46,
-     "smallText": 2
+     "centerShare": 0.32,
+     "smallText": 3
     },
     "eyebrows": [],
     "numbered": [],
@@ -141,15 +141,15 @@
      "textColors": [
       {
        "color": "#9b958f",
-       "share": 0.47
+       "share": 0.73
       },
       {
        "color": "#f4f3f1",
-       "share": 0.36
+       "share": 0.27
       },
       {
-       "color": "#d9d4cf",
-       "share": 0.17
+       "color": "#2a1305",
+       "share": 0
       }
      ],
      "button": {
@@ -164,20 +164,20 @@
      "lowContrast": []
     },
     "buttons": {
-     "count": 21,
-     "inHero": 21,
-     "radius": 8,
-     "height": 41,
+     "count": 29,
+     "inHero": 29,
+     "radius": "pill",
+     "height": 33,
      "withShadow": 0,
      "withGradient": 0,
      "mono": 0,
      "upper": 0,
      "heroLabels": [
-      "Home",
+      "Neu",
+      "Start",
       "Kalender",
-      "Profil",
-      "Verlauf",
-      "Social"
+      "Zusammen",
+      "Postfach"
      ]
     },
     "surfaces": {
@@ -188,30 +188,24 @@
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 4,
+     "hairlines": 5,
      "hairlineSamples": [
-      "div._header_jsx83_1 1440px",
-      "div._menuDiv_4updc_1 260px",
-      "div._row_gfvwz_18 630px",
-      "div._row_gfvwz_18 630px"
+      "div._header_dxniv_1 1200px",
+      "div._menuDiv_1rma1_1 240px",
+      "section#appearance._section_apfea_40 1100px",
+      "div._rowStack_apfea_86 667px",
+      "div._row_apfea_86 667px"
      ],
-     "outlinedBoxes": 3,
+     "outlinedBoxes": 0,
      "dashed": 0,
      "blurred": 0,
-     "roundedBoxes": 3,
+     "roundedBoxes": 2,
      "boxRadius": 18,
      "squareMedia": 0,
      "roundedMedia": 0,
      "mediaRadius": 0,
      "textShadow": 0,
-     "cardRows": [
-      {
-       "count": 3,
-       "iconTopped": false,
-       "rounded": true,
-       "top": 181
-      }
-     ]
+     "cardRows": []
     },
     "heroMedia": [],
     "nav": {
@@ -232,41 +226,80 @@
     },
     "pageH": 900,
     "margins": {
-     "left": 405,
-     "right": 409
+     "left": 290,
+     "right": 70
     },
-    "sections": [],
+    "sections": [
+     {
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 717,
+      "words": 57,
+      "media": 0,
+      "middle": 63,
+      "heading": {
+       "text": "Einstellungen",
+       "size": 24,
+       "tag": "h1"
+      },
+      "left": 290,
+      "right": 54,
+      "textLeft": 290,
+      "textRight": 73,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 717,
+      "height": 154,
+      "words": 7,
+      "media": 0,
+      "middle": 16,
+      "heading": null,
+      "left": 593,
+      "right": 339,
+      "textLeft": 593,
+      "textRight": 339,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
     "gaps": [],
     "h1s": [
      {
       "text": "Einstellungen",
       "size": 24,
-      "top": 128,
+      "top": 102,
       "firstScreen": true
      }
     ],
     "edgeText": [],
     "edges": [
      {
-      "x": 405,
-      "n": 3
-     },
-     {
-      "x": 380,
-      "n": 1
+      "x": 290,
+      "n": 4
      }
     ],
     "leftBlocks": 4,
-    "bodySize": 16,
+    "bodySize": 14,
     "stage": false,
     "explains": false,
     "slivers": [],
-    "voidShare": 0.22,
+    "voidShare": 0.13,
     "voidBox": {
-     "x": 0,
-     "y": 120,
-     "w": 360,
-     "h": 780
+     "x": 120,
+     "y": 420,
+     "w": 540,
+     "h": 300
     }
    },
    "app": {
@@ -277,17 +310,15 @@
     "dark": true,
     "ground": "#0e0d0c",
     "sidebar": {
-     "w": 260,
+     "w": 240,
      "tag": "div",
-     "links": 8,
-     "share": 0.18
+     "links": 13,
+     "share": 0.17
     },
-    "topbar": {
-     "h": 88
-    },
+    "topbar": null,
     "canvas": {
-     "left": 145,
-     "right": 60
+     "left": 50,
+     "right": 20
     },
     "hero": {
      "text": "Einstellungen",
@@ -300,7 +331,7 @@
      "weight": 600,
      "tracking": -0.02,
      "leading": 1.2,
-     "top": 128,
+     "top": 102,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -308,8 +339,8 @@
     },
     "charts": 0,
     "layout": {
-     "panels": 4,
-     "firstScreen": 4,
+     "panels": 3,
+     "firstScreen": 3,
      "ragged": [],
      "voids": []
     },
@@ -318,11 +349,11 @@
      "count": 5,
      "radii": [
       [
-       18,
+       0,
        3
       ],
       [
-       0,
+       18,
        2
       ]
      ],
@@ -341,18 +372,20 @@
     "numbers": {
      "cells": 0,
      "leftAligned": 0,
-     "figures": 5,
-     "tabularShare": 0,
-     "kpiMax": 14
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
     },
     "rows": null,
     "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0,
+     "under13": 0.18,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
+      11,
+      12,
       13,
       14,
       15,
@@ -365,9 +398,9 @@
     "title": {
      "text": "Einstellungen",
      "size": 24,
-     "top": 128
+     "top": 102
     },
-    "colourShare": 0.003
+    "colourShare": 0.004
    },
    "consoleErrors": []
   },
@@ -377,13 +410,13 @@
    "load": "load",
    "screens": 1,
    "filled": [
-    0.51
+    0.47
    ],
    "motion": {
-    "elements": 0,
+    "elements": 1,
     "css": 0,
     "transitions": 0,
-    "scripted": 0,
+    "scripted": 1,
     "videos": 0,
     "playingVideos": 0
    },
@@ -395,12 +428,12 @@
     "page": {
      "height": 1024,
      "screens": 1,
-     "words": 59,
+     "words": 84,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 12,
-     "sections": 4,
+     "svg": 23,
+     "sections": 2,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
@@ -426,7 +459,7 @@
      "weight": 600,
      "tracking": -0.02,
      "leading": 1.2,
-     "top": 128,
+     "top": 102,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -459,6 +492,7 @@
      ],
      "familyCount": 1,
      "sizes": [
+      12,
       13,
       14,
       15,
@@ -467,17 +501,17 @@
       21,
       24
      ],
-     "sizeCount": 7,
+     "sizeCount": 8,
      "notLoaded": [],
      "body": {
       "font": "Inter Variable",
-      "size": 13,
+      "size": 14,
       "leading": 1.5,
       "weight": 400,
       "tracking": -0.007,
       "contrast": 6.6
      },
-     "measureChars": 73,
+     "measureChars": 103,
      "max": {
       "size": 24,
       "vw": 3.1,
@@ -492,8 +526,8 @@
      "microLabelShare": 0,
      "microSamples": [],
      "upperShare": 0,
-     "centerShare": 0.46,
-     "smallText": 2
+     "centerShare": 0.33,
+     "smallText": 3
     },
     "eyebrows": [],
     "numbered": [],
@@ -519,15 +553,15 @@
      "textColors": [
       {
        "color": "#9b958f",
-       "share": 0.47
+       "share": 0.72
       },
       {
        "color": "#f4f3f1",
-       "share": 0.36
+       "share": 0.28
       },
       {
-       "color": "#d9d4cf",
-       "share": 0.17
+       "color": "#2a1305",
+       "share": 0
       }
      ],
      "button": {
@@ -542,20 +576,20 @@
      "lowContrast": []
     },
     "buttons": {
-     "count": 21,
-     "inHero": 21,
-     "radius": 8,
-     "height": 41,
+     "count": 29,
+     "inHero": 29,
+     "radius": "pill",
+     "height": 33,
      "withShadow": 0,
      "withGradient": 0,
      "mono": 0,
      "upper": 0,
      "heroLabels": [
-      "Home",
+      "Neu",
+      "Start",
       "Kalender",
-      "Profil",
-      "Verlauf",
-      "Social"
+      "Zusammen",
+      "Postfach"
      ]
     },
     "surfaces": {
@@ -566,30 +600,24 @@
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 4,
+     "hairlines": 5,
      "hairlineSamples": [
-      "div._header_jsx83_1 768px",
-      "div._menuDiv_4updc_1 260px",
-      "div._row_gfvwz_18 630px",
-      "div._row_gfvwz_18 630px"
+      "div._header_dxniv_1 768px",
+      "div._menuDiv_1rma1_1 260px",
+      "section#appearance._section_apfea_40 720px",
+      "div._rowStack_apfea_86 680px",
+      "div._row_apfea_86 680px"
      ],
-     "outlinedBoxes": 3,
+     "outlinedBoxes": 0,
      "dashed": 0,
      "blurred": 0,
-     "roundedBoxes": 3,
+     "roundedBoxes": 1,
      "boxRadius": 18,
      "squareMedia": 0,
      "roundedMedia": 0,
      "mediaRadius": 0,
      "textShadow": 0,
-     "cardRows": [
-      {
-       "count": 3,
-       "iconTopped": false,
-       "rounded": true,
-       "top": 181
-      }
-     ]
+     "cardRows": []
     },
     "heroMedia": [],
     "nav": {
@@ -610,27 +638,27 @@
     },
     "pageH": 1024,
     "margins": {
-     "left": 69,
-     "right": 73
+     "left": 24,
+     "right": 44
     },
     "sections": [
      {
-      "sel": "section._card_gfvwz_9._card_1xqg9_61",
-      "tag": "section",
-      "top": 181,
-      "height": 268,
-      "words": 16,
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 802,
+      "words": 57,
       "media": 0,
-      "middle": 211,
+      "middle": 0,
       "heading": {
-       "text": "Allgemein",
-       "size": 14,
-       "tag": "h2"
+       "text": "Einstellungen",
+       "size": 24,
+       "tag": "h1"
       },
-      "left": 69,
-      "right": 73,
-      "textLeft": 69,
-      "textRight": 85,
+      "left": 24,
+      "right": 28,
+      "textLeft": 24,
+      "textRight": 47,
       "fullBleed": false,
       "footer": false,
       "hero": true,
@@ -638,45 +666,18 @@
       "pinned": false
      },
      {
-      "sel": "section._card_gfvwz_9._card_1xqg9_61",
-      "tag": "section",
-      "top": 465,
-      "height": 161,
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 802,
+      "height": 154,
       "words": 7,
       "media": 0,
-      "middle": 8,
-      "heading": {
-       "text": "Farbthema",
-       "size": 14,
-       "tag": "h2"
-      },
-      "left": 69,
-      "right": 69,
-      "textLeft": 69,
-      "textRight": 103,
-      "fullBleed": false,
-      "footer": false,
-      "hero": true,
-      "continues": false,
-      "pinned": false
-     },
-     {
-      "sel": "section._card_gfvwz_9._card_1xqg9_61",
-      "tag": "section",
-      "top": 642,
-      "height": 130,
-      "words": 12,
-      "media": 0,
-      "middle": 182,
-      "heading": {
-       "text": "Sitzung",
-       "size": 14,
-       "tag": "h2"
-      },
-      "left": 69,
-      "right": 73,
-      "textLeft": 69,
-      "textRight": 89,
+      "middle": 16,
+      "heading": null,
+      "left": 137,
+      "right": 123,
+      "textLeft": 137,
+      "textRight": 123,
       "fullBleed": false,
       "footer": true,
       "hero": false,
@@ -689,23 +690,19 @@
      {
       "text": "Einstellungen",
       "size": 24,
-      "top": 128,
+      "top": 102,
       "firstScreen": true
      }
     ],
     "edgeText": [],
     "edges": [
      {
-      "x": 69,
-      "n": 3
-     },
-     {
-      "x": 44,
-      "n": 1
+      "x": 24,
+      "n": 4
      }
     ],
     "leftBlocks": 4,
-    "bodySize": 16,
+    "bodySize": 14,
     "stage": false,
     "explains": false,
     "slivers": [],
@@ -722,15 +719,15 @@
     "sidebar": {
      "w": 260,
      "tag": "div",
-     "links": 8,
+     "links": 13,
      "share": 0.34
     },
     "topbar": {
-     "h": 88
+     "h": 56
     },
     "canvas": {
-     "left": 22,
-     "right": 26
+     "left": 13,
+     "right": 16
     },
     "hero": {
      "text": "Einstellungen",
@@ -743,7 +740,7 @@
      "weight": 600,
      "tracking": -0.02,
      "leading": 1.2,
-     "top": 128,
+     "top": 102,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -751,21 +748,21 @@
     },
     "charts": 0,
     "layout": {
-     "panels": 4,
-     "firstScreen": 4,
+     "panels": 3,
+     "firstScreen": 3,
      "ragged": [],
      "voids": []
     },
     "tiles": 0,
     "panels": {
-     "count": 5,
+     "count": 6,
      "radii": [
       [
-       18,
-       3
+       0,
+       4
       ],
       [
-       0,
+       18,
        2
       ]
      ],
@@ -784,18 +781,20 @@
     "numbers": {
      "cells": 0,
      "leftAligned": 0,
-     "figures": 5,
-     "tabularShare": 0,
-     "kpiMax": 14
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
     },
     "rows": null,
     "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0,
+     "under13": 0.18,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
+      11,
+      12,
       13,
       14,
       15,
@@ -808,7 +807,7 @@
     "title": {
      "text": "Einstellungen",
      "size": 24,
-     "top": 128
+     "top": 102
     },
     "colourShare": 0.005
    },
@@ -820,14 +819,14 @@
    "load": "load",
    "screens": 2,
    "filled": [
-    0.73,
-    0.73
+    0.58,
+    0.58
    ],
    "motion": {
-    "elements": 0,
+    "elements": 1,
     "css": 0,
     "transitions": 0,
-    "scripted": 0,
+    "scripted": 1,
     "videos": 0,
     "playingVideos": 0
    },
@@ -837,14 +836,14 @@
      "h": 844
     },
     "page": {
-     "height": 1114,
-     "screens": 1.3,
-     "words": 59,
+     "height": 1353,
+     "screens": 1.6,
+     "words": 89,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 12,
-     "sections": 4,
+     "svg": 23,
+     "sections": 2,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
@@ -870,7 +869,7 @@
      "weight": 600,
      "tracking": -0.02,
      "leading": 1.2,
-     "top": 128,
+     "top": 96,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -899,9 +898,9 @@
       "italic": false,
       "mono": false,
       "align": "left",
-      "position": "center",
-      "widthRatio": 0.92,
-      "top": 128,
+      "position": "left",
+      "widthRatio": 0.39,
+      "top": 96,
       "tag": "h1",
       "kind": "heading"
      }
@@ -925,6 +924,8 @@
      ],
      "familyCount": 1,
      "sizes": [
+      11,
+      12,
       13,
       14,
       15,
@@ -932,17 +933,17 @@
       18,
       24
      ],
-     "sizeCount": 6,
+     "sizeCount": 8,
      "notLoaded": [],
      "body": {
       "font": "Inter Variable",
-      "size": 13,
+      "size": 14,
       "leading": 1.5,
       "weight": 400,
       "tracking": -0.007,
       "contrast": 6.6
      },
-     "measureChars": 37,
+     "measureChars": 51,
      "max": {
       "size": 24,
       "vw": 6.2,
@@ -957,8 +958,8 @@
      "microLabelShare": 0,
      "microSamples": [],
      "upperShare": 0,
-     "centerShare": 0.46,
-     "smallText": 2
+     "centerShare": 0.37,
+     "smallText": 3
     },
     "eyebrows": [],
     "numbered": [],
@@ -984,15 +985,15 @@
      "textColors": [
       {
        "color": "#9b958f",
-       "share": 0.47
+       "share": 0.74
       },
       {
        "color": "#f4f3f1",
-       "share": 0.36
+       "share": 0.26
       },
       {
-       "color": "#d9d4cf",
-       "share": 0.17
+       "color": "#2a1305",
+       "share": 0
       }
      ],
      "button": {
@@ -1007,8 +1008,8 @@
      "lowContrast": []
     },
     "buttons": {
-     "count": 21,
-     "inHero": 21,
+     "count": 28,
+     "inHero": 25,
      "radius": 8,
      "height": 41,
      "withShadow": 0,
@@ -1016,10 +1017,10 @@
      "mono": 0,
      "upper": 0,
      "heroLabels": [
-      "Home",
+      "Start",
       "Kalender",
-      "Profil",
-      "Verlauf",
+      "Zusammen",
+      "Postfach",
       "Social"
      ]
     },
@@ -1031,17 +1032,18 @@
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 4,
+     "hairlines": 6,
      "hairlineSamples": [
-      "div._header_jsx83_1 390px",
-      "div._menuDiv_4updc_1 260px",
-      "div._row_gfvwz_18 308px",
-      "div._row_gfvwz_18 308px"
+      "div._header_dxniv_1 390px",
+      "div._menuDiv_1rma1_1 260px",
+      "nav._bar_1l81o_3 390px",
+      "section#appearance._section_apfea_40 358px",
+      "div._rowStack_apfea_86 318px"
      ],
-     "outlinedBoxes": 3,
+     "outlinedBoxes": 0,
      "dashed": 0,
      "blurred": 0,
-     "roundedBoxes": 3,
+     "roundedBoxes": 2,
      "boxRadius": 18,
      "squareMedia": 0,
      "roundedMedia": 0,
@@ -1066,29 +1068,29 @@
      "w": 390,
      "h": 844
     },
-    "pageH": 1114,
+    "pageH": 1353,
     "margins": {
-     "left": 41,
-     "right": 41
+     "left": 16,
+     "right": 20
     },
     "sections": [
      {
-      "sel": "section._card_gfvwz_9._card_1xqg9_61",
-      "tag": "section",
-      "top": 181,
-      "height": 405,
-      "words": 16,
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 1115,
+      "words": 57,
       "media": 0,
       "middle": 0,
       "heading": {
-       "text": "Allgemein",
-       "size": 14,
-       "tag": "h2"
+       "text": "Einstellungen",
+       "size": 24,
+       "tag": "h1"
       },
-      "left": 41,
-      "right": 45,
-      "textLeft": 41,
-      "textRight": 69,
+      "left": 16,
+      "right": 20,
+      "textLeft": 16,
+      "textRight": 24,
       "fullBleed": false,
       "footer": false,
       "hero": true,
@@ -1096,45 +1098,18 @@
       "pinned": false
      },
      {
-      "sel": "section._card_gfvwz_9._card_1xqg9_61",
-      "tag": "section",
-      "top": 602,
-      "height": 246,
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 1115,
+      "height": 178,
       "words": 7,
       "media": 0,
-      "middle": 8,
-      "heading": {
-       "text": "Farbthema",
-       "size": 14,
-       "tag": "h2"
-      },
-      "left": 41,
-      "right": 41,
-      "textLeft": 41,
-      "textRight": 69,
-      "fullBleed": false,
-      "footer": false,
-      "hero": false,
-      "continues": false,
-      "pinned": false
-     },
-     {
-      "sel": "section._card_gfvwz_9._card_1xqg9_61",
-      "tag": "section",
-      "top": 863,
-      "height": 186,
-      "words": 12,
-      "media": 0,
-      "middle": 2,
-      "heading": {
-       "text": "Sitzung",
-       "size": 14,
-       "tag": "h2"
-      },
-      "left": 41,
-      "right": 45,
-      "textLeft": 41,
-      "textRight": 65,
+      "middle": 16,
+      "heading": null,
+      "left": 20,
+      "right": 20,
+      "textLeft": 20,
+      "textRight": 20,
       "fullBleed": false,
       "footer": true,
       "hero": false,
@@ -1147,23 +1122,19 @@
      {
       "text": "Einstellungen",
       "size": 24,
-      "top": 128,
+      "top": 96,
       "firstScreen": true
      }
     ],
     "edgeText": [],
     "edges": [
      {
-      "x": 41,
-      "n": 3
-     },
-     {
       "x": 16,
-      "n": 1
+      "n": 4
      }
     ],
     "leftBlocks": 4,
-    "bodySize": 16,
+    "bodySize": 14,
     "stage": false,
     "explains": false,
     "slivers": [],
@@ -1179,11 +1150,11 @@
     "ground": "#0e0d0c",
     "sidebar": null,
     "topbar": {
-     "h": 88
+     "h": 56
     },
     "canvas": {
-     "left": 14,
-     "right": 14
+     "left": 16,
+     "right": 1
     },
     "hero": {
      "text": "Einstellungen",
@@ -1196,7 +1167,7 @@
      "weight": 600,
      "tracking": -0.02,
      "leading": 1.2,
-     "top": 128,
+     "top": 96,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -1204,7 +1175,7 @@
     },
     "charts": 0,
     "layout": {
-     "panels": 4,
+     "panels": 3,
      "firstScreen": 3,
      "ragged": [],
      "voids": []
@@ -1215,11 +1186,11 @@
      "radii": [
       [
        0,
-       4
+       5
       ],
       [
        18,
-       3
+       2
       ]
      ],
      "heavyBorders": 0,
@@ -1237,18 +1208,20 @@
     "numbers": {
      "cells": 0,
      "leftAligned": 0,
-     "figures": 5,
-     "tabularShare": 0,
-     "kpiMax": 14
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
     },
     "rows": null,
     "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0,
+     "under13": 0.18,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
+      11,
+      12,
       13,
       14,
       15,
@@ -1260,9 +1233,9 @@
     "title": {
      "text": "Einstellungen",
      "size": 24,
-     "top": 128
+     "top": 96
     },
-    "colourShare": 0.01
+    "colourShare": 0.006
    },
    "consoleErrors": []
   }

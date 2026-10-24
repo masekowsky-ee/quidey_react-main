@@ -8,7 +8,7 @@ const withGroupIds = (task, change) => ({ ...task, group_ids: change(task.group_
 const UPDATABLE = [
     'name', 'due', 'description', 'prio', 'done',
     'due_time', 'duration_minutes', 'reminder_minutes', 'location', 'link', 'details',
-    'repeat', 'completed_at', 'color', 'reminder_email', 'kind', 'event_type_id', 'event_type',
+    'repeat', 'repeat_left', 'repeat_skip', 'completed_at', 'color', 'reminder_email', 'kind', 'event_type_id', 'event_type',
     'group_ids', 'isOwner', 'owner', 'shareId', 'sharedWith',
 ];
 const applyUpdate = (task, row) => {

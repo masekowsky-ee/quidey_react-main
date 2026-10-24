@@ -2,14 +2,16 @@
 
 Quidey is a calm planner for students: tasks, a focus timer, a calendar, and friends you study
 with live. German-first (de default, en available), currently a **closed beta** — only users
-with `is_pro` or `is_tester` (admins always) get into the app. Public site: **quidey.com**.
+with `is_pro` or `is_tester` (admins always) get into the app. The app runs on **app.quidey.com**;
+the public landing page on **quidey.com** is a separate static site (repo `quidey_landing`).
 
-Two repositories, side by side on this machine:
+Three repositories, side by side on this machine:
 
 | Repo | Path | GitHub |
 |---|---|---|
 | Frontend (this one) | `C:\Users\eesge\quidey_react-main` | masekowsky-ee/quidey_react-main |
 | Backend | `C:\Users\eesge\quidey_react-backend` | masekowsky-ee/quidey_react-backend |
+| Landing page (Astro, static) | `C:\Users\eesge\quidey_landing` | not on GitHub yet |
 
 `README.md` is still the untouched Vite template; this file is the real description.
 
@@ -24,7 +26,7 @@ Two repositories, side by side on this machine:
 - Animation: `motion` (Framer Motion) with three user-chosen levels `minimal | normal | extreme`
   (`src/features/settings/motion.js`, `MOTION` presets, confetti `burst`). Remotion
   (`@remotion/player`) renders the intro (`src/components/intro/`, only when the app is opened
-  fresh on `/`: not on reload, back/forward or a deep link) and the landing hero loop.
+  fresh on `/`: not on reload, back/forward or a deep link).
 - Realtime: `socket.io-client` (`src/features/realtime/socket.js`, `useRealtime(event, handler)`),
   loaded with a dynamic import only once signed in.
 - Icons: one outline set, `src/components/icons.jsx` (`<Icon name size? />`, 24px grid, 1.7
@@ -33,7 +35,6 @@ Two repositories, side by side on this machine:
   app is idle (`preloadPages`); `LegalFooter` lives in its own file so the legal texts stay
   lazy. `vite.config.js` puts react / router / state / motion in their own long-cached chunks.
 - i18n: `src/i18n/translations.js` (de/en dictionaries) + `useTranslation()` → `t(key)`.
-  Landing page copy lives separately in `src/components/landing/landingCopy.js`.
 - Tests: Vitest + jsdom + Testing Library, all in `src/__tests__/` (`npm test`).
   Lint: ESLint 10 flat config (`npm run lint`).
 
@@ -43,7 +44,10 @@ Order of checks on every render:
 1. `/verify-email` → `VerifyEmail` (works signed in or out).
 2. Legal paths (`/impressum`, `/datenschutz`, `/nutzungsbedingungen`, `/kontakt`, see
    `src/legal/paths.js`) → `LegalPage`, always public.
-3. Not signed in → `Landing` (marketing page with sign-in / sign-up).
+3. Not signed in → `SignIn` (wordmark, link back to the landing page, the `Profile` sign-in /
+   sign-up card, legal footer). `/signup` opens on sign-up; the landing page's email line hands
+   the address over as `#email=…` (read once, then removed from the URL). Signed in, `/signin`
+   and `/signup` redirect to `/`. `LANDING_URL` in `src/features/site.js`.
 4. Signed in, access not checked yet → `AccessPending`; not pro → `/beta` (`BetaGate`, user can
    request beta access).
 5. Pro → full app in the frame `AppShell.module.css`: `Header`, `Menu`, `TabBar`, `Toaster`,
@@ -53,7 +57,13 @@ Order of checks on every render:
    Kalender, Zusammen, Postfach, Mehr → drawer) replaces the header's button. The shell sets
    `--sidebar-w`, `--tabbar-h` and `--page-gutter`; fixed parts (toasts, timer button) and every
    page container use them. The closed drawer is `inert`; `setShowMenu(true|false)` (no argument
-   toggles).
+   toggles). Menu (Hick's law: few choices at once): Start, Kalender, Zusammen, Postfach, then
+   "Mehr" (Social, Family, Statistiken), at the bottom Admin/Einstellungen/Feedback and the
+   `AccountSwitcher` (profile, tour, switch account, add account, sign out). The active entry is
+   brighter ink, no fill; count badges are neutral (the accent stays on data, never on nav,
+   tabs or buttons; one filled inverted primary per screen). The header's "Neu" opens the
+   new-task form over any page (`QuickAdd`, `settings.showForms` via `showForms(true|false)`).
+   Row actions in lists appear on hover/focus with a mouse (always on touch).
 
 App also: re-checks access on a `PRO_REQUIRED` API error or a refused socket
 (`REALTIME_REJECTED`); signs out on `TOKEN_REVOKED`/`TOKEN_INVALID`; opens the Socket.IO
@@ -94,7 +104,17 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   focus + event time (`stats/TimeChart.jsx`, fixed validated pair blue/orange, table view), bars per
   event type and per group, then the all-time `ProfileStats` ("Aktivität"). Sessions list in
   `stats/SessionList.jsx`, completed tasks in `CompletedTasks.jsx` (events left out).
-- `/profile`, `/settings` — profile, password, "sign out everywhere", delete account; language,
+- Repeats: `tasks.repeat_left` (how many more times, null = no end; "Endet: nie / nach N") and
+  `tasks.repeat_skip` (coming days deleted on their own). Deleting a repeating task (or a coming
+  repeat, which the calendar's day panel lists as a preview row) asks "only this / this and
+  following / all" (`DeleteScopeDialog`, `askDeleteScope`, `deleteTaskAsking`;
+  `DELETE /api/tasks/:id?scope=one|following|all&occurrence=YYYY-MM-DD`).
+- Event types have `keywords`; an event whose name has a word starting with one gets the type by
+  itself until one is picked by hand (`matchEventType` in `kinds.js`); a task whose name fits
+  offers "als Event eintragen". New types get their name as first keyword.
+- `/profile`, `/settings` — profile, password, "sign out everywhere", delete account; settings in
+  areas (Darstellung | Planen | App, the area in the URL hash, `#event-types` opens Planen),
+  each section a label column beside a panel; language,
   theme (dark/light/system), accent colour (green, ocean, violet, sunset (default), rose, gold —
   also recolours the favicon), motion level, home layout.
 - `/social` — friends and friend requests; names link to `/u/:username`, the Add tab can open a
@@ -112,7 +132,9 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   stopwatch counting for everyone, activity feed, session chat (realtime). Session tasks can carry
   the same details as own tasks — day, time, prio, duration, location, link, details, colour — all
   optional (only the name is required), edited by any member via `TaskEditDialog shared={…}`
-  (`TaskEditor personal={false}`). Reminders, repeating, groups and sharing stay personal; adding
+  (`TaskEditor personal={false} allowEvents`). Session entries can be events
+  (`shared_session_tasks.kind`): they need a day, are done once over (session owner's time zone,
+  `syncSessionEvents`), have no tick, assignee or stopwatch and stay out of Home's list. Reminders, repeating, groups and sharing stay personal; adding
   an own task copies its details, later edits don't sync back (only `done` does).
 - `/inbox` — direct messages between friends + notifications/admin broadcasts (realtime).
   From 1100px the messages tab is split: conversations beside the open one (`?with=<userId>`).
@@ -132,8 +154,9 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   `plannedTime.js`) or an event's length; both set on wheels (`task/DurationWheel.jsx`). Events
   have a type from my own list (`event_types`, `state.task.eventTypes`, managed in Settings →
   Event-Typen, `EventTypeSettings.jsx`; picker `task/KindFields.jsx`). Home's list holds tasks
-  only; today's events sit above it (`task/TodayEvents.jsx`). Events can't be focused, shared into
-  sessions or overdue. On phones the week strip has no calendar card (the tab bar has it).
+  only; today's events sit above it (`task/TodayEvents.jsx`). Events can't be focused or overdue; shared
+  into a session they stay events there. The week strip has no calendar card (menu and tab bar lead there; the title row's overdue
+  count links to the agenda).
 
 PWA: installable app. `public/manifest.webmanifest` + icons in `public/icons/` (logo on the dark
 background, incl. a maskable one and the apple-touch-icon). `pwa.js` is a Vite plugin that writes
@@ -147,7 +170,9 @@ startup and offers it as a button (Chrome/Edge/Android), explains the share menu
 says "installed" when running standalone, and hides the row everywhere else.
 
 Client-side storage: only `localStorage` (no cookies), plus the service worker's Cache Storage
-for the app's own files: `token` (JWT), `language`, `accent`,
+for the app's own files: `token` (JWT), `accounts` (several accounts on one device:
+`[{ username, displayName, token }]`, max 5, `src/features/auth/accounts.js`; switching reloads
+the app as the other one, signing out takes over the next remembered account), `language`, `accent`,
 `theme`, `motion`, `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`, `teamSessionId`. `public/theme-init.js` applies
 the theme before React loads.
 
@@ -165,7 +190,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.
@@ -208,7 +233,9 @@ the theme before React loads.
 
 **Frontend → Cloudflare Workers (static assets)**, configured in `wrangler.jsonc`: worker
 `quideyreactmain`, serves `./dist`, SPA fallback (`not_found_handling: single-page-application`),
-custom domain `quidey.com`. There is no deploy script in package.json; deploy is
+custom domain `app.quidey.com` (`index.html` has `robots: noindex`; search engines get the landing
+page). The landing page (`quidey_landing`) is its own worker `quidey-landing` on `quidey.com`; it
+forwards the old app URLs that used to live there. There is no deploy script in package.json; deploy is
 `npm run build` then wrangler (`npx wrangler deploy`).
 - The production API address comes from `.env.production.local` (`VITE_API_URL=https://…`,
   git-ignored, ends up public in the bundle — never a secret).
@@ -223,7 +250,7 @@ custom domain `quidey.com`. There is no deploy script in package.json; deploy is
 listening on localhost behind Caddy/nginx with HTTPS (e.g. `api.quidey.com`), `TRUST_PROXY`
 matching the proxy count (1, or 2 with Cloudflare in front), Postgres only on localhost with the
 limited role `quidey_app` (`scripts/db-app-role.sql`), migrations run as `postgres`, regular
-`pg_dump` backups, `CORS_ORIGINS=https://quidey.com`.
+`pg_dump` backups, `CORS_ORIGINS=https://app.quidey.com`, `FRONTEND_URL=https://app.quidey.com`.
 
 ## Legal / GDPR
 

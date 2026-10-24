@@ -10,6 +10,7 @@ import {
 } from '../../features/together/togetherAction';
 import { useTogetherRun } from '../../features/together/hooks';
 
+import Icon from '../icons';
 // Header button with everything collaborative one click away: invites, running sessions,
 // starting a new one, friend requests. The badge counts what is waiting for me.
 export default function TeamQuickPanel() {
@@ -74,7 +75,7 @@ export default function TeamQuickPanel() {
                                             <span className={styles.quickMeta}>{t('invitedBy')} {displayName(invite.invitedBy ?? invite.owner)}</span>
                                         </div>
                                         <button className={styles.quickPrimary} onClick={() => join(invite.id)}>{t('join')}</button>
-                                        <button className={styles.quickQuiet} onClick={() => run(removeSharedMember(invite.id, 'me', 'me'))} aria-label={`${t('decline')}: ${invite.name}`} title={t('decline')}>✕</button>
+                                        <button className={styles.quickQuiet} onClick={() => run(removeSharedMember(invite.id, 'me', 'me'))} aria-label={`${t('decline')}: ${invite.name}`} title={t('decline')}><Icon name="close" size={16} /></button>
                                     </li>
                                 ))}
                             </ul>

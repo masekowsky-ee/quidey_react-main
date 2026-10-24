@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styles from './Legal.module.css';
 import { apiFetch } from '../features/helperFunction';
@@ -11,13 +12,17 @@ const ERRORS = {
 };
 const GENERIC_ERROR = 'Die Nachricht konnte nicht gesendet werden. Bitte versuche es später erneut oder schreib eine E-Mail.';
 
-const empty = { name: '', email: '', message: '', website: '' };
+// name and email: null until typed in, then a signed-in person's own come in by themselves
+const empty = { name: null, email: null, message: '', website: '' };
 
 // The contact form: the second quick way to reach the operator that § 5 DDG asks for, next to
 // the email address. Works without an account; the server mails the message to the operator.
 export default function ContactForm() {
     const [form, setForm] = useState(empty);
     const [state, setState] = useState({ sending: false, sent: false, error: null });
+    const user = useSelector(state => state.auth.user);
+    const name = form.name ?? user?.display_name ?? '';
+    const email = form.email ?? user?.email ?? '';
 
     const set = (field) => (e) => {
         setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -32,7 +37,7 @@ export default function ContactForm() {
         }
         setState({ sending: true, sent: false, error: null });
         try {
-            await apiFetch('/api/contact', { method: 'POST', body: JSON.stringify(form) });
+            await apiFetch('/api/contact', { method: 'POST', body: JSON.stringify({ ...form, name, email }) });
             setForm(empty);
             setState({ sending: false, sent: true, error: null });
         } catch (err) {
@@ -52,11 +57,11 @@ export default function ContactForm() {
         <form className={styles.form} onSubmit={submit}>
             <div className={styles.field}>
                 <label htmlFor="contactName">Name</label>
-                <input id="contactName" value={form.name} onChange={set('name')} maxLength={100} autoComplete="name" required />
+                <input id="contactName" value={name} onChange={set('name')} maxLength={100} autoComplete="name" required />
             </div>
             <div className={styles.field}>
                 <label htmlFor="contactEmail">E-Mail-Adresse</label>
-                <input id="contactEmail" type="email" value={form.email} onChange={set('email')} maxLength={254} autoComplete="email" required />
+                <input id="contactEmail" type="email" value={email} onChange={set('email')} maxLength={254} autoComplete="email" required />
             </div>
             <div className={styles.field}>
                 <label htmlFor="contactMessage">Nachricht</label>

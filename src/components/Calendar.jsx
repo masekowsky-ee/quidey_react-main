@@ -1,22 +1,23 @@
 import styles from './Calendar.module.css';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
-import { addTask, deleteTask, leaveTask, updateTaskProps } from '../features/tasks/taskAction';
+import { addTask, deleteTaskAsking, leaveTask, updateTaskProps } from '../features/tasks/taskAction';
 import TaskInvites from './task/TaskInvites.jsx';
 import { fetchSharedHistory, togetherErrorText } from '../features/together/togetherAction';
 import { familyErrorText, selectFamilies } from '../features/family/family';
 import { useIsTester } from '../features/auth/tester';
 import { calendarSourceKey, parseCalendarSource, useSharedCalendar } from '../features/calendar/sources';
 import { showToast } from '../features/toast/toast';
-import { downloadFile, fill, isOverdue, sameDay, toDateOnly } from '../features/helperFunction';
+import { downloadFile, fill, isOverdue, parseDate, sameDay, toDateOnly } from '../features/helperFunction';
 import {
     CALENDAR_VIEWS, addDays, addMonths, dateKey, filterTasks, focusByDay as toFocusByDay, fromKey,
     groupByDay, projectRepeats, isoWeek, readStoredCalendarView, startOfWeek, storeCalendarView, toIcs,
 } from '../features/calendar/calendar';
 import { useTaskDrag } from '../features/calendar/useTaskDrag';
+import { matchEventType } from '../features/tasks/kinds';
 import MonthView from './calendar/MonthView.jsx';
 import WeekView from './calendar/WeekView.jsx';
 import AgendaView from './calendar/AgendaView.jsx';
@@ -53,6 +54,9 @@ export default function Calendar() {
     const source = requestedSource.kind === 'family' && !isTester ? parseCalendarSource(null) : requestedSource;
     const shared = useSharedCalendar(source);
     const isShared = source.kind !== 'mine';
+    // a shared session's calendar holds events too (a family's only tasks)
+    const sharedEvents = source.kind === 'session';
+    const eventTypes = useSelector(state => state.task.eventTypes);
     const tasks = isShared ? shared.tasks : ownTasks;
     // my focus sessions belong to my own calendar only
     const sessions = isShared ? null : ownSessions;
@@ -72,6 +76,22 @@ export default function Calendar() {
     const [showDone, setShowDone] = useState(true);
     const [query, setQuery] = useState('');
     const filtersActive = groupId !== 'all' || !showDone || query.trim() !== '';
+    // the filters behind the "Filters" button: how many differ from showing everything
+    const hiddenFilters = (groupId !== 'all' ? 1 : 0) + (showDone ? 0 : 1);
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const filterRef = useRef(null);
+    // a click elsewhere or Escape closes the filters
+    useEffect(() => {
+        if (!filtersOpen) return undefined;
+        const onDown = (e) => { if (!filterRef.current?.contains(e.target)) setFiltersOpen(false); };
+        const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); setFiltersOpen(false); } };
+        document.addEventListener('pointerdown', onDown);
+        document.addEventListener('keydown', onKey);
+        return () => {
+            document.removeEventListener('pointerdown', onDown);
+            document.removeEventListener('keydown', onKey);
+        };
+    }, [filtersOpen]);
     const clearFilters = () => { setGroupFilter('all'); setShowDone(true); setQuery(''); };
 
     const shown = useMemo(() => filterTasks(tasks, { groupId, showDone, query }), [tasks, groupId, showDone, query]);
@@ -82,8 +102,14 @@ export default function Calendar() {
         () => groupByDay([...shown, ...projectRepeats(shown, addDays(focusedDate, 400))]),
         [shown, focusedDate]
     );
-    // the day panel shows every task of its day in the chosen group, done ones too
-    const panelTasksByDay = useMemo(() => groupByDay(filterTasks(tasks, { groupId })), [tasks, groupId]);
+    // the day panel shows every task of its day in the chosen group, done ones too, and the
+    // coming repeats on that day (each can be deleted on its own there)
+    const openDayKey = openDay ? dateKey(openDay) : null;
+    const panelTasksByDay = useMemo(() => {
+        const inGroup = filterTasks(tasks, { groupId });
+        const until = openDayKey ? fromKey(openDayKey) : null;
+        return groupByDay(isShared || !until ? inGroup : [...inGroup, ...projectRepeats(inGroup, until)]);
+    }, [tasks, groupId, isShared, openDayKey]);
     const focusByDay = useMemo(() => toFocusByDay(sessions), [sessions]);
     const overdueCount = shown.filter(task => isOverdue(task, today)).length;
 
@@ -166,9 +192,10 @@ export default function Calendar() {
     // kind: 'task' or 'event' (only in my own calendar; an event has no priority)
     const addTaskOn = async (name, key, time = null, kind = 'task') => {
         try {
-            if (isShared) await shared.add({ name, due: key, ...(time ? { due_time: time } : {}) });
+            if (isShared) await shared.add({ name, due: key, ...(time ? { due_time: time } : {}), ...(sharedEvents && kind === 'event' ? { kind } : {}) });
+            // a new event of mine takes the type its name points to (a keyword of the type)
             else await dispatch(addTask(name, key, '', kind === 'event' ? null : NEW_TASK_PRIO, newTaskGroup?.id ?? null, undefined,
-                { ...(time ? { due_time: time } : {}), ...(kind === 'event' ? { kind } : {}) }));
+                { ...(time ? { due_time: time } : {}), ...(kind === 'event' ? { kind, event_type_id: matchEventType(name, eventTypes)?.type.id ?? null } : {}) }));
             return true;
         } catch (err) {
             reportError(err);
@@ -203,7 +230,8 @@ export default function Calendar() {
     const removeTask = async (task) => {
         try {
             if (isShared) await shared.remove(task.id);
-            else await dispatch(deleteTask(task.id));
+            // a repeating one asks first what goes (also a coming repeat, by its day)
+            else if (!(await dispatch(deleteTaskAsking(task)))) return false;
             toast(t('taskDeleted'), 'info');
             return true;
         } catch (err) {
@@ -326,21 +354,37 @@ export default function Calendar() {
                             <input type="search" value={query} onChange={(e) => setQuery(e.target.value)}
                                 placeholder={t('searchTasks')} aria-label={t('searchTasks')} />
                         </label>
-                        {groups.length > 0 &&
-                            <select className={styles.groupSelect} value={String(groupId)} aria-label={t('filterGroup')}
-                                onChange={(e) => setGroupFilter(e.target.value === 'all' ? 'all' : groups.find(group => String(group.id) === e.target.value)?.id ?? 'all')}>
-                                <option value="all">{t('allGroups')}</option>
-                                {groups.map(group => <option key={group.id} value={String(group.id)}>{group.name}</option>)}
-                            </select>}
-                        <button type="button" className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}
-                            aria-pressed={showDone} onClick={() => setShowDone(!showDone)}>
-                            <span className={styles.doneBox} aria-hidden="true" />
-                            {t('showDoneTasks')}
-                        </button>
-                        <button type="button" className={styles.exportBtn} onClick={exportIcs} title={t('exportIcsHint')}>
-                            <Icon name="download" size={18} />
-                            <span>{t('exportIcs')}</span>
-                        </button>
+                        {/* the rarer controls wait behind one button: group, done ones, export */}
+                        <div className={styles.filterWrap} ref={filterRef}>
+                            <button type="button" className={`${styles.filterBtn} ${hiddenFilters > 0 ? styles.filterBtnOn : ''}`}
+                                aria-expanded={filtersOpen} aria-controls={filtersOpen ? 'calendarFilters' : undefined}
+                                onClick={() => setFiltersOpen(open => !open)}>
+                                <Icon name="filter" size={18} />
+                                <span>{hiddenFilters > 0 ? fill(t('calendarFiltersActive'), { count: hiddenFilters }) : t('calendarFilters')}</span>
+                            </button>
+                            {filtersOpen &&
+                                <div className={styles.filterMenu} id="calendarFilters" role="group" aria-label={t('calendarFilters')}>
+                                    {groups.length > 0 &&
+                                        <label className={styles.filterField}>
+                                            <span>{t('filterGroup')}</span>
+                                            <select className={styles.groupSelect} value={String(groupId)}
+                                                onChange={(e) => setGroupFilter(e.target.value === 'all' ? 'all' : groups.find(group => String(group.id) === e.target.value)?.id ?? 'all')}>
+                                                <option value="all">{t('allGroups')}</option>
+                                                {groups.map(group => <option key={group.id} value={String(group.id)}>{group.name}</option>)}
+                                            </select>
+                                        </label>}
+                                    <button type="button" className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}
+                                        aria-pressed={showDone} onClick={() => setShowDone(!showDone)}>
+                                        <span className={styles.doneBox} aria-hidden="true" />
+                                        {t('showDoneTasks')}
+                                    </button>
+                                    <div className={styles.filterDivider} role="separator" />
+                                    <button type="button" className={styles.exportBtn} onClick={() => { setFiltersOpen(false); exportIcs(); }} title={t('exportIcsHint')}>
+                                        <Icon name="download" size={18} />
+                                        <span>{t('exportIcs')}</span>
+                                    </button>
+                                </div>}
+                        </div>
                     </div>
                 </div>
             </header>
@@ -363,6 +407,7 @@ export default function Calendar() {
                     focus={focusByDay[openKey]}
                     sharedEntries={isShared ? [] : (sharedHistory ?? []).filter(entry => entry.lastWorkedAt && sameDay(new Date(entry.lastWorkedAt), openDay))}
                     personal={!isShared}
+                    allowEvents={sharedEvents}
                     initialTaskId={openTaskId}
                     newTaskGroup={newTaskGroup}
                     locale={locale}
@@ -373,6 +418,7 @@ export default function Calendar() {
                     onToggleDone={toggleDone}
                     onSaveTask={saveTask}
                     onDeleteTask={removeTask}
+                    onOpenSeries={(task) => openDate(parseDate(dateKey(task.due)), task.id)}
                     onLeaveTask={isShared ? undefined : leaveSharedTask}
                     onOpenGroup={openGroup}
                 />}

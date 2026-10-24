@@ -22,6 +22,8 @@ import { fetchSharedSessions, fetchMySharedTasks } from './features/together/tog
 import { useWorkReporter } from './features/together/work.js'
 import Toaster from './components/Toaster.jsx';
 import Tutorial from './components/Tutorial.jsx';
+import DeleteScopeDialog from './components/task/DeleteScopeDialog.jsx';
+import QuickAdd from './components/QuickAdd.jsx';
 import { fetchInboxUnread } from './features/inbox/inbox.js';
 import { useInboxRealtime } from './features/inbox/useInboxRealtime.js';
 import { connectRealtime, disconnectRealtime, useRealtime, useSafetyPoll, REALTIME_REJECTED } from './features/realtime/socket.js';
@@ -36,11 +38,11 @@ import { MOTION, useApplyMotion, useMotionLevel } from './features/settings/moti
 
 const REQUEST_REFRESH_MS = 60 * 1000;
 
-// The pages load when first opened, so the first screen (and the landing page for visitors)
+// The pages load when first opened, so the first screen (and the sign-in for visitors)
 // doesn't carry the whole app. Once the app is idle the rest is fetched in the background
 // (preloadPages), so switching pages stays instant.
 const PAGES = {
-  Landing: () => import('./components/landing/Landing.jsx'),
+  SignIn: () => import('./components/SignIn.jsx'),
   LegalPage: () => import('./legal/LegalPage.jsx'),
   VerifyEmail: () => import('./components/VerifyEmail.jsx'),
   TeamHome: () => import('./components/TeamHome.jsx'),
@@ -59,7 +61,7 @@ const PAGES = {
   FamilyPage: () => import('./components/family/FamilyPage.jsx'),
   FunPage: () => import('./components/fun/FunPage.jsx'),
 };
-const Landing = lazy(PAGES.Landing);
+const SignIn = lazy(PAGES.SignIn);
 const LegalPage = lazy(PAGES.LegalPage);
 const VerifyEmail = lazy(PAGES.VerifyEmail);
 const TeamHome = lazy(PAGES.TeamHome);
@@ -78,11 +80,11 @@ const Family = lazy(PAGES.Family);
 const FamilyPage = lazy(PAGES.FamilyPage);
 const FunPage = lazy(PAGES.FunPage);
 
-// the app's pages (not the landing page or legal texts) in the background, when nothing else runs
+// the app's pages (not the sign-in or legal texts) in the background, when nothing else runs
 function preloadPages() {
   const load = () => {
     for (const [name, page] of Object.entries(PAGES)) {
-      if (!['Landing', 'LegalPage', 'VerifyEmail'].includes(name)) page().catch(() => {});
+      if (!['SignIn', 'LegalPage', 'VerifyEmail'].includes(name)) page().catch(() => {});
     }
   };
   const id = window.requestIdleCallback ? window.requestIdleCallback(load, { timeout: 5000 }) : setTimeout(load, 2000);
@@ -188,14 +190,8 @@ function App(){
   if (location.pathname === '/verify-email') return <Suspense fallback={pageLoading}><VerifyEmail /></Suspense>;
   // Impressum, Datenschutz and terms must open for everybody, signed in or not
   if (LEGAL_PATHS.includes(location.pathname)) return <Suspense fallback={pageLoading}><LegalPage /></Suspense>;
-  // signed out: the landing page, with the way in (sign in / sign up) on it
-  if (!signedIn) {
-    return (
-      <MotionConfig reducedMotion="never">
-        <Suspense fallback={pageLoading}><Landing /></Suspense>
-      </MotionConfig>
-    );
-  }
+  // signed out: the way in (sign in / sign up). The landing page is its own site on quidey.com
+  if (!signedIn) return <Suspense fallback={pageLoading}><SignIn /></Suspense>;
   if (signedIn && !access.checked) return <AccessPending />;
   if (signedIn && !access.isPro) {
     return (
@@ -222,6 +218,8 @@ function App(){
         <CustomError/>
         <Toaster/>
         <Tutorial/>
+        <DeleteScopeDialog/>
+        <QuickAdd/>
         <main className={shell.main}>
         {/* each page comes in as the motion setting says */}
         <motion.div key={location.pathname} {...MOTION.page[motionLevel]}>
@@ -246,6 +244,9 @@ function App(){
           {/* hidden: only reachable through the daily line in the header */}
           <Route path="/fun" element={<FunPage/>} />
           <Route path="/beta" element={<Navigate to="/" replace />} />
+          {/* where the landing page sends people to sign in or up */}
+          <Route path="/signin" element={<Navigate to="/" replace />} />
+          <Route path="/signup" element={<Navigate to="/" replace />} />
         </Routes>
         </Suspense>
         </motion.div>

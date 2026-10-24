@@ -65,8 +65,13 @@
 }
 
 .chevron{
-    font-size: 0.7rem;
+    display: inline-flex;
     color: var(--text-muted);
+    transition: transform var(--ease);
+}
+
+.chevronOpen{
+    transform: rotate(180deg);
 }
 
 .clear{

@@ -6,6 +6,7 @@ import { useTranslation } from '../i18n/useTranslation';
 import { addGroup, addGroupTasks, deleteGroupTasks } from '../features/tasks/taskAction';
 import { setCustomError } from '../features/settings/settingsAction';
 
+import Icon from './icons';
 // Dialog to put a task into groups or take it out: every group is a toggle with a tick.
 // Closes with Escape, the close button, or a click next to it. A new group can be made
 // right here and the task goes straight into it.
@@ -88,7 +89,7 @@ export default function GroupPicker({ task, onClose }) {
                                             disabled={busyId === group.id}
                                             onClick={() => toggle(group)}
                                         >
-                                            <span className={styles.check} aria-hidden="true">{inGroup ? '✓' : ''}</span>
+                                            <span className={styles.check} aria-hidden="true">{inGroup && <Icon name="check" size={14} strokeWidth={2.2} />}</span>
                                             <span className={styles.optionName}>{group.name}</span>
                                             {group.description && <span className={styles.optionDesc}>{group.description}</span>}
                                         </button>

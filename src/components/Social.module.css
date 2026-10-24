@@ -254,3 +254,32 @@
         flex-direction: column;
     }
 }
+
+/* A row's own action (one per friend): outlined, so the page keeps one filled primary */
+.rowActionBtn{
+    height: 2rem;
+    color: var(--text-h);
+    background: transparent;
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-pill);
+    box-shadow: none;
+}
+
+.rowActionBtn:hover{
+    background: var(--hover-wash);
+    border-color: var(--border-strong);
+    box-shadow: none;
+}
+
+/* "Remove" shows where the row is looked at (always on touch) */
+@media (hover: hover) and (pointer: fine){
+    .revealBtn{
+        opacity: 0;
+        transition: opacity 0.15s ease-out;
+    }
+
+    .row:hover .revealBtn,
+    .row:focus-within .revealBtn{
+        opacity: 1;
+    }
+}

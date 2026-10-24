@@ -16,6 +16,7 @@ import ActivityFeed from './together/ActivityFeed';
 import WorkSummary from './together/WorkSummary';
 import { calendarLink } from '../features/calendar/sources';
 
+import Icon from './icons';
 // Title of a session; the owner can click it to rename the session
 export function SessionTitle({ session, className }) {
     const { t } = useTranslation();
@@ -49,7 +50,7 @@ export function SessionTitle({ session, className }) {
         ? (
             <h1 className={className}>
                 <button className={styles.renamable} title={t('rename')} onClick={() => setEditing(true)}>
-                    {session.name} <span className={styles.editHint} aria-hidden="true">✎</span>
+                    {session.name} <span className={styles.editHint} aria-hidden="true"><Icon name="edit" size={18} /></span>
                 </button>
             </h1>
         )

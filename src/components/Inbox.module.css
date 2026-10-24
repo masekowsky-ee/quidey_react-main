@@ -115,14 +115,16 @@ button.rowSelected:hover{
     display: grid;
     grid-template-columns: 22rem minmax(0, 1fr);
     gap: 1rem;
-    align-items: start;
+    /* the list and the open conversation end on one line */
+    align-items: stretch;
 }
 
 .splitList{
     padding: 1rem;
 }
 
-.splitThread{
+/* an open conversation gets room to read; with nothing open the panes keep their content's height */
+.splitThread:has(> .thread){
     min-height: 24rem;
 }
 
@@ -137,9 +139,22 @@ button.rowSelected:hover{
 }
 
 .pickHint{
-    margin: auto;
+    margin: 0;
     color: var(--text-muted);
-    text-align: center;
+}
+
+/* nothing open: a sentence and the friends to write to, from the top of the pane */
+.pickPane{
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 0.5rem;
+}
+
+.pickPane .newChat{
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
 }
 
 .avatar{
@@ -386,4 +401,16 @@ a.rowTitle:hover{
     box-sizing: border-box;
     resize: vertical;
     font: inherit;
+}
+
+.feedbackEmail{
+    width: 100%;
+    max-width: 26rem;
+    box-sizing: border-box;
+}
+
+.fieldHint{
+    margin: -0.25rem 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
 }

@@ -120,19 +120,24 @@ export function repeatDate(start, repeat, n) {
 }
 
 // Previews of the coming repeats of open repeating tasks, up to `until` (a Date): copies with
-// projected: true, the day as due and repeatOf: the real task (the one to open). They are not
-// stored anywhere; the server creates each one when the one before it is done.
+// projected: true, the day as due, repeatOf: the real task and repeatStep: how many steps of its
+// rhythm away. They are not stored anywhere; the server creates each one when the one before it
+// is done. Like there, a task with an end (repeat_left) stops after that many steps, and the days
+// deleted on their own (repeat_skip) are left out, but still count as a step.
 const MAX_PREVIEWS = 400;
 export function projectRepeats(tasks, until) {
     const previews = [];
     for (const task of tasks) {
         if (task.done || !REPEATS.includes(task.repeat) || !task.due) continue;
         const start = parseDate(dateKey(task.due));
-        for (let n = 1; n <= MAX_PREVIEWS; n++) {
+        const skipped = new Set(task.repeat_skip ?? []);
+        const steps = Number.isInteger(task.repeat_left) ? Math.min(task.repeat_left, MAX_PREVIEWS) : MAX_PREVIEWS;
+        for (let n = 1; n <= steps; n++) {
             const date = repeatDate(start, task.repeat, n);
             if (date > until) break;
             const key = dateKey(date);
-            previews.push({ ...task, id: `${task.id}@${key}`, due: key, projected: true, repeatOf: task });
+            if (skipped.has(key)) continue;
+            previews.push({ ...task, id: `${task.id}@${key}`, due: key, projected: true, repeatOf: task, repeatStep: n });
         }
     }
     return previews;

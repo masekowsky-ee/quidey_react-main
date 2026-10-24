@@ -10,6 +10,7 @@ import { useTogetherRun } from '../../features/together/hooks';
 import Avatar from './Avatar';
 import FriendPicker from './FriendPicker';
 
+import Icon from '../icons';
 // Members with what they are doing right now, their time, and inviting more friends
 export default function TeamPresence({ session }) {
     const { t } = useTranslation();
@@ -81,7 +82,7 @@ export default function TeamPresence({ session }) {
                                 onClick={() => run(removeSharedMember(session.id, person.user.id, me))}
                                 title={t(person.status === 'invited' ? 'withdrawRequest' : 'removeFriend')}
                                 aria-label={`${t(person.status === 'invited' ? 'withdrawRequest' : 'removeFriend')}: ${displayName(person.user)}`}
-                            >✕</button>
+                            ><Icon name="close" size={16} /></button>
                         )}
                     </li>
                 ))}

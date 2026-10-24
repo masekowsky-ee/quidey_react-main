@@ -1,0 +1,1278 @@
+{
+ "url": "http://localhost:5174/inbox",
+ "at": "2026-10-24T21:53:26.992Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.22
+   ],
+   "motion": {
+    "elements": 1,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 1,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 900,
+     "screens": 1,
+     "words": 52,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 23,
+     "sections": 2,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Postfach",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 24,
+     "vw": 1.7,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 96,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Postfach",
+     "words": 1,
+     "lines": 1,
+     "size": 24,
+     "font": "Inter Variable"
+    },
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter Variable",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      24
+     ],
+     "sizeCount": 8,
+     "notLoaded": [],
+     "body": null,
+     "measureChars": null,
+     "max": {
+      "size": 24,
+      "vw": 1.7,
+      "font": "Inter Variable",
+      "text": "Postfach"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.39,
+     "smallText": 2
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#0e0d0c",
+     "bodyBgHsl": {
+      "h": 30,
+      "s": 0.08,
+      "l": 0.05
+     },
+     "dark": true,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#9b958f",
+       "share": 0.79
+      },
+      {
+       "color": "#f4f3f1",
+       "share": 0.2
+      },
+      {
+       "color": "#fb923c",
+       "share": 0.01
+      },
+      {
+       "color": "#2a1305",
+       "share": 0
+      }
+     ],
+     "button": {
+      "bg": "#211f1e",
+      "hsl": {
+       "h": 20,
+       "s": 0.05,
+       "l": 0.12
+      },
+      "fg": "#f4f3f1"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 18,
+     "inHero": 18,
+     "radius": 8,
+     "height": 41,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Neu",
+      "Start",
+      "Kalender",
+      "Zusammen",
+      "Postfach"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 2,
+     "hairlineSamples": [
+      "div._header_dxniv_1 1200px",
+      "div._menuDiv_1rma1_1 240px"
+     ],
+     "outlinedBoxes": 2,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 2,
+     "boxRadius": 18,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 2,
+     "fixed": true,
+     "height": 900,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "inter variable"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 900,
+    "margins": {
+     "left": 290,
+     "right": 313
+    },
+    "sections": [
+     {
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 441,
+      "words": 26,
+      "media": 0,
+      "middle": 2,
+      "heading": {
+       "text": "Postfach",
+       "size": 24,
+       "tag": "h1"
+      },
+      "left": 290,
+      "right": 313,
+      "textLeft": 290,
+      "textRight": 313,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 441,
+      "height": 154,
+      "words": 7,
+      "media": 0,
+      "middle": 16,
+      "heading": null,
+      "left": 593,
+      "right": 339,
+      "textLeft": 593,
+      "textRight": 339,
+      "fullBleed": false,
+      "footer": true,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Postfach",
+      "size": 24,
+      "top": 96,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 290,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 1,
+    "bodySize": 16,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0.33,
+    "voidBox": {
+     "x": 240,
+     "y": 540,
+     "w": 1200,
+     "h": 360
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": true,
+    "ground": "#0e0d0c",
+    "sidebar": {
+     "w": 240,
+     "tag": "div",
+     "links": 13,
+     "share": 0.17
+    },
+    "topbar": null,
+    "canvas": {
+     "left": 50,
+     "right": 4
+    },
+    "hero": {
+     "text": "Postfach",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 24,
+     "vw": 1.7,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 96,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 3,
+     "firstScreen": 3,
+     "ragged": [],
+     "voids": [
+      {
+       "gap": 103,
+       "at": 249,
+       "panel": "Noch keine Nachrichten."
+      }
+     ]
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 3,
+     "radii": [
+      [
+       18,
+       2
+      ],
+      [
+       0,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.28,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      21,
+      24
+     ]
+    },
+    "title": {
+     "text": "Postfach",
+     "size": 24,
+     "top": 96
+    },
+    "colourShare": 0.001
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.19
+   ],
+   "motion": {
+    "elements": 1,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 1,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 1024,
+     "screens": 1,
+     "words": 45,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 23,
+     "sections": 1,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Postfach",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 24,
+     "vw": 3.1,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 96,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Postfach",
+     "words": 1,
+     "lines": 1,
+     "size": 24,
+     "font": "Inter Variable"
+    },
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter Variable",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      18,
+      21,
+      24
+     ],
+     "sizeCount": 8,
+     "notLoaded": [],
+     "body": null,
+     "measureChars": null,
+     "max": {
+      "size": 24,
+      "vw": 3.1,
+      "font": "Inter Variable",
+      "text": "Postfach"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.48,
+     "smallText": 2
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#0e0d0c",
+     "bodyBgHsl": {
+      "h": 30,
+      "s": 0.08,
+      "l": 0.05
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#181716",
+       "top": 0,
+       "hsl": {
+        "h": 30,
+        "s": 0.04,
+        "l": 0.09
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#9b958f",
+       "share": 0.73
+      },
+      {
+       "color": "#f4f3f1",
+       "share": 0.26
+      },
+      {
+       "color": "#fb923c",
+       "share": 0.01
+      },
+      {
+       "color": "#2a1305",
+       "share": 0
+      }
+     ],
+     "button": {
+      "bg": "#211f1e",
+      "hsl": {
+       "h": 20,
+       "s": 0.05,
+       "l": 0.12
+      },
+      "fg": "#f4f3f1"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 18,
+     "inHero": 18,
+     "radius": 8,
+     "height": 41,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Neu",
+      "Start",
+      "Kalender",
+      "Zusammen",
+      "Postfach"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 3,
+     "hairlineSamples": [
+      "div._header_dxniv_1 768px",
+      "div._menuDiv_1rma1_1 260px",
+      "div._newChat_131gq_154 630px"
+     ],
+     "outlinedBoxes": 1,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 1,
+     "boxRadius": 18,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 2,
+     "fixed": true,
+     "height": 1024,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "inter variable"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 1024,
+    "margins": {
+     "left": 44,
+     "right": 123
+    },
+    "sections": [
+     {
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 428,
+      "words": 17,
+      "media": 0,
+      "middle": 2,
+      "heading": {
+       "text": "Postfach",
+       "size": 24,
+       "tag": "h1"
+      },
+      "left": 44,
+      "right": 256,
+      "textLeft": 44,
+      "textRight": 274,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 428,
+      "height": 154,
+      "words": 7,
+      "media": 0,
+      "middle": 16,
+      "heading": null,
+      "left": 137,
+      "right": 123,
+      "textLeft": 137,
+      "textRight": 123,
+      "fullBleed": false,
+      "footer": true,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Postfach",
+      "size": 24,
+      "top": 96,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 44,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 1,
+    "bodySize": 16,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": true,
+    "ground": "#0e0d0c",
+    "sidebar": {
+     "w": 260,
+     "tag": "div",
+     "links": 13,
+     "share": 0.34
+    },
+    "topbar": {
+     "h": 56
+    },
+    "canvas": {
+     "left": 11,
+     "right": 16
+    },
+    "hero": {
+     "text": "Postfach",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 24,
+     "vw": 3.1,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 96,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 2,
+     "firstScreen": 2,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 3,
+     "radii": [
+      [
+       0,
+       2
+      ],
+      [
+       18,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.33,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      21,
+      24
+     ]
+    },
+    "title": {
+     "text": "Postfach",
+     "size": 24,
+     "top": 96
+    },
+    "colourShare": 0.001
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.27
+   ],
+   "motion": {
+    "elements": 1,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 1,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 844,
+     "screens": 1,
+     "words": 50,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 23,
+     "sections": 1,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Postfach",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 24,
+     "vw": 6.2,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 96,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Postfach",
+     "words": 1,
+     "lines": 1,
+     "size": 24,
+     "font": "Inter Variable"
+    },
+    "headings": [
+     {
+      "text": "Postfach",
+      "words": 1,
+      "chars": 8,
+      "lines": 1,
+      "size": 24,
+      "vw": 6.2,
+      "font": "Inter Variable",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 96,
+      "tag": "h1",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 1,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter Variable",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      18,
+      24
+     ],
+     "sizeCount": 7,
+     "notLoaded": [],
+     "body": null,
+     "measureChars": null,
+     "max": {
+      "size": 24,
+      "vw": 6.2,
+      "font": "Inter Variable",
+      "text": "Postfach"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.53,
+     "smallText": 2
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#0e0d0c",
+     "bodyBgHsl": {
+      "h": 30,
+      "s": 0.08,
+      "l": 0.05
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#181716",
+       "top": 0,
+       "hsl": {
+        "h": 30,
+        "s": 0.04,
+        "l": 0.09
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#9b958f",
+       "share": 0.74
+      },
+      {
+       "color": "#f4f3f1",
+       "share": 0.25
+      },
+      {
+       "color": "#fb923c",
+       "share": 0.01
+      },
+      {
+       "color": "#2a1305",
+       "share": 0
+      }
+     ],
+     "button": {
+      "bg": "#211f1e",
+      "hsl": {
+       "h": 20,
+       "s": 0.05,
+       "l": 0.12
+      },
+      "fg": "#f4f3f1"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 17,
+     "inHero": 17,
+     "radius": 8,
+     "height": 41,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Start",
+      "Kalender",
+      "Zusammen",
+      "Postfach",
+      "Social"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 4,
+     "hairlineSamples": [
+      "div._header_dxniv_1 390px",
+      "div._menuDiv_1rma1_1 260px",
+      "nav._bar_1l81o_3 390px",
+      "div._newChat_131gq_154 308px"
+     ],
+     "outlinedBoxes": 1,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 1,
+     "boxRadius": 18,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 2,
+     "fixed": true,
+     "height": 844,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "inter variable"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 844,
+    "margins": {
+     "left": 16,
+     "right": 20
+    },
+    "sections": [
+     {
+      "sel": "div",
+      "tag": "div",
+      "top": 0,
+      "height": 433,
+      "words": 17,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Postfach",
+       "size": 24,
+       "tag": "h1"
+      },
+      "left": 16,
+      "right": 20,
+      "textLeft": 16,
+      "textRight": 21,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer._footer_1e7o6_74",
+      "tag": "footer",
+      "top": 433,
+      "height": 178,
+      "words": 7,
+      "media": 0,
+      "middle": 16,
+      "heading": null,
+      "left": 20,
+      "right": 20,
+      "textLeft": 20,
+      "textRight": 20,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Postfach",
+      "size": 24,
+      "top": 96,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 16,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 1,
+    "bodySize": 16,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": true,
+    "ground": "#0e0d0c",
+    "sidebar": null,
+    "topbar": {
+     "h": 56
+    },
+    "canvas": {
+     "left": 16,
+     "right": 0
+    },
+    "hero": {
+     "text": "Postfach",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 24,
+     "vw": 6.2,
+     "font": "Inter Variable",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.2,
+     "top": 96,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 2,
+     "firstScreen": 2,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 3,
+     "radii": [
+      [
+       0,
+       2
+      ],
+      [
+       18,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.33,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      24
+     ]
+    },
+    "title": {
+     "text": "Postfach",
+     "size": 24,
+     "top": 96
+    },
+    "colourShare": 0.002
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "WARN",
+   "id": "hero-void",
+   "width": 1440,
+   "message": "33% of the first screen is one empty block (1200×360px at 240,540).",
+   "fix": "Place the void on purpose or fill it: move the picture, the film or one fact into it, grow the headline to meet it, or shrink the screen to its content. A void reads as placed only when something closes it on the far side and it is the screen's one rest."
+  },
+  {
+   "level": "WARN",
+   "id": "panel-void",
+   "width": 1440,
+   "message": "1 card(s) hold a blank band inside: 103px in \"Noch keine Nachrichten.\".",
+   "fix": "A card stretches to its neighbour only when it has content to fill. Keep a legend or a note directly under its chart (only an action or a total may sit at a stretched card's foot), let a short card keep its own height (align-items: start), and let a filtered block shrink to its rows."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\after\\inbox\\desktop-fold.jpg",
+   "pages": [
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\after\\inbox\\desktop-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\after\\inbox\\tablet-fold.jpg",
+   "pages": [
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\after\\inbox\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\after\\inbox\\mobile-fold.jpg",
+   "pages": [
+    "C:\\Users\\eesge\\quidey_react-main\\.taste-skill\\after\\inbox\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

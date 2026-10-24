@@ -106,10 +106,24 @@
   }
 }
 
+.menuNav {
+  display: flex;
+  flex-direction: column;
+}
+
 .menuList {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+}
+
+/* "More": a quiet sentence-case label over the places used less often */
+.groupLabel {
+  margin: 24px 0 6px;
+  padding: 0 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
 /* Settings, tutorial and admin: pushed to the bottom of the panel */
@@ -119,7 +133,7 @@
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 /* Icon | label | (badge on the right) */
@@ -127,7 +141,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: var(--text);
+  /* resting entries are a step quieter; the page you are on brightens to full ink */
+  color: var(--text-muted);
   text-decoration: none;
   font-size: 0.9375rem;
   font-weight: 500;
@@ -154,10 +169,11 @@
   color: var(--text-h);
 }
 
-/* The page you are on: a neutral pill, the label in full ink */
+/* The page you are on: its label and icon in full ink and a little heavier, no fill (the
+   accent never marks navigation) */
 .active {
   color: var(--text-h);
-  background-color: var(--surface-strong);
+  font-weight: 600;
 }
 
 .active .menuIcon {
@@ -166,13 +182,13 @@
 
 .menuItem:hover {
   color: var(--text-h);
-  background: var(--surface-hover);
+  background: var(--hover-wash);
   border-color: transparent;
   box-shadow: none;
 }
 
 .active:hover {
-  background-color: var(--surface-strong);
+  background-color: var(--hover-wash);
 }
 
 .menuItem:active {
@@ -209,8 +225,10 @@
   line-height: 1.25rem;
   text-align: center;
   vertical-align: 0.1em;
-  color: var(--primary-text);
-  background-color: var(--primary);
+  font-variant-numeric: tabular-nums;
+  /* a count that needs doing: ink on the strongest surface, not the accent */
+  color: var(--text-h);
+  background-color: var(--surface-strong);
   border-radius: 999px;
 }
 
@@ -221,7 +239,7 @@
   height: 0.55rem;
   margin-left: auto;
   margin-right: 0.35rem;
-  background-color: var(--primary);
+  background-color: var(--text-h);
   border-radius: 999px;
 }
 
@@ -315,4 +333,11 @@
     opacity: 0;
     translate: -16px 0;
   }
+}
+
+/* the signed-in account, last in the menu */
+.account {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
 }

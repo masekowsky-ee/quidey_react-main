@@ -295,6 +295,12 @@
 
 .tabs{
     composes: tabBar from './ui.module.css';
+    /* sign in | sign up: the two halves of the card */
+    width: 100%;
+}
+
+.tabs > button{
+    flex: 1;
 }
 
 .tabActive{
@@ -372,4 +378,81 @@
 
 .consent a{
     color: var(--primary-fg);
+}
+
+/* Accounts still signed in on this device, above the sign-in form */
+.savedAccounts{
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.savedTitle,
+.savedOr{
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.savedOr{
+    margin-top: 0.6rem;
+    text-align: center;
+}
+
+.savedAccount{
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font: inherit;
+    text-align: left;
+    color: var(--text-h);
+    background: var(--surface-inset);
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color var(--ease), background-color var(--ease);
+}
+
+.savedAccount:hover{
+    background: var(--surface-hover);
+    border-color: var(--border-strong);
+}
+
+.savedAvatar{
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.85rem;
+    font-weight: 650;
+    color: var(--primary-text);
+    background: var(--primary);
+    border-radius: 50%;
+}
+
+.savedNames{
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.savedNames > span{
+    font-weight: 600;
+}
+
+.savedNames > small{
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.savedGo{
+    margin-left: auto;
+    color: var(--text-muted);
 }

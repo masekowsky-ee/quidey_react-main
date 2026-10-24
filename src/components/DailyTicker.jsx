@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Header.module.css';
 import { useTranslation } from '../i18n/useTranslation';
-import { lineOfDay } from '../features/fun/dailyLines';
+import { lineOfDay, yearText } from '../features/fun/dailyLines';
 
 // Secret marker: the fun page only opens when reached through this link
 const FUN_PAGE_STATE = { fromTicker: true };
@@ -14,7 +14,9 @@ export default function DailyTicker() {
     const [open, setOpen] = useState(false);
     const wrapRef = useRef(null);
     const line = lineOfDay();
-    const text = line[language] ?? line.en;
+    // a quote ends with who said it, and when: "… – Benjamin Franklin, 1737"
+    const year = yearText(line, language);
+    const text = `${line[language] ?? line.en}${year ? `, ${year}` : ''}`;
     const label = t(`lineOf_${line.type}`);
 
     // closes on a click elsewhere and on Escape
