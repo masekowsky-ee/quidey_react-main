@@ -8,29 +8,6 @@ import { fetchAccess, logout, requestBetaAccess } from '../features/auth/authAct
 export const REASON_MIN = 10;
 export const REASON_MAX = 1000;
 
-// Shown while the server hasn't said yet whether I may use the app
-export function AccessPending() {
-    const { t } = useTranslation();
-    const dispatch = useDispatch();
-    const [retrying, setRetrying] = useState(false);
-    const retry = async () => {
-        setRetrying(true);
-        await dispatch(fetchAccess()).catch(() => {});
-        setRetrying(false);
-    };
-    return (
-        <main className={styles.page} aria-busy="true">
-            <section className={styles.card}>
-                <p className={styles.text}>{t('betaConnecting')}</p>
-                <div className={styles.actions}>
-                    <button className={styles.secondaryBtn} onClick={retry} disabled={retrying}>{t('betaRetry')}</button>
-                    <button className={styles.quietBtn} onClick={() => dispatch(logout())}>{t('logout')}</button>
-                </div>
-            </section>
-        </main>
-    );
-}
-
 // Closed beta: everybody without pro lands here after logging in or registering.
 // They can ask for access once, with a reason; afterwards the screen shows how it stands.
 export default function BetaGate() {

@@ -11,7 +11,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { checkAuth, setUser, fetchAccess } from "./features/auth/authAction";
 import { PRO_REQUIRED_EVENT, SIGNED_OUT_EVENT } from "./features/helperFunction";
 import { logout } from "./features/auth/authAction";
-import BetaGate, { AccessPending } from "./components/BetaGate.jsx";
+import BetaGate from "./components/BetaGate.jsx";
+import { AppSkeleton, GateSkeleton, PageSkeleton } from "./components/skeleton/Skeleton.jsx";
 import { fetchTaskState, fetchTaskInvites, refreshTasks } from "./features/tasks/taskAction.js"
 import { useTaskReminders } from "./features/tasks/reminders.js"
 import { useEventEnds } from "./features/tasks/kinds.js"
@@ -38,6 +39,9 @@ import { LegalFooter } from './legal/LegalFooter.jsx';
 import { LEGAL_PATHS } from './legal/paths.js';
 import { useApplyTheme } from './features/settings/theme.js';
 import { MOTION, useApplyMotion, useMotionLevel } from './features/settings/motion.js';
+import { UI_VARIANTS, useApplyUiVariant, useNavModel, useUiVariant } from './features/tester/variants.js';
+import TesterOnly from './components/TesterOnly.jsx';
+import CommandPalette from './components/variants/CommandPalette.jsx';
 
 const REQUEST_REFRESH_MS = 60 * 1000;
 
@@ -61,6 +65,7 @@ const PAGES = {
   Admin: () => import('./components/Admin.jsx'),
   FamilyPage: () => import('./components/family/FamilyPage.jsx'),
   FunPage: () => import('./components/fun/FunPage.jsx'),
+  Tester: () => import('./components/tester/Tester.jsx'),
 };
 const SignIn = lazy(PAGES.SignIn);
 const LegalPage = lazy(PAGES.LegalPage);
@@ -78,6 +83,7 @@ const SharedSession = lazy(PAGES.SharedSession);
 const Admin = lazy(PAGES.Admin);
 const FamilyPage = lazy(PAGES.FamilyPage);
 const FunPage = lazy(PAGES.FunPage);
+const Tester = lazy(PAGES.Tester);
 
 // the app's pages (not the sign-in or legal texts) in the background, when nothing else runs
 function preloadPages() {
@@ -90,13 +96,18 @@ function preloadPages() {
   return () => (window.cancelIdleCallback ? window.cancelIdleCallback(id) : clearTimeout(id));
 }
 
-// while a page's code is on its way (only the first time, and briefly)
-const pageLoading = <div aria-busy="true" style={{ minHeight: '50vh' }} />;
+// while a page's code is on its way (only the first time, and briefly): the page's shape
+const pageLoading = <PageSkeleton />;
+const gateLoading = <GateSkeleton />;
 
 function App(){
   const dispatch = useDispatch();
   useApplyTheme();
   useApplyMotion();
+  // testers: the interface variant they picked (<html data-ui>), its way of navigating
+  useApplyUiVariant();
+  const uiVariant = useUiVariant();
+  const navModel = useNavModel();
   const motionLevel = useMotionLevel();
   // the team stopwatch keeps running on every page
   useWorkReporter();
@@ -194,12 +205,13 @@ function App(){
   const location = useLocation();
 
   // the link from the verification mail works signed in or not, and before beta access
-  if (location.pathname === '/verify-email') return <Suspense fallback={pageLoading}><VerifyEmail /></Suspense>;
+  if (location.pathname === '/verify-email') return <Suspense fallback={gateLoading}><VerifyEmail /></Suspense>;
   // Impressum, Datenschutz and terms must open for everybody, signed in or not
   if (LEGAL_PATHS.includes(location.pathname)) return <Suspense fallback={pageLoading}><LegalPage /></Suspense>;
   // signed out: the way in (sign in / sign up). The landing page is its own site on quidey.com
-  if (!signedIn) return <Suspense fallback={pageLoading}><SignIn /></Suspense>;
-  if (signedIn && !access.checked) return <AccessPending />;
+  if (!signedIn) return <Suspense fallback={gateLoading}><SignIn /></Suspense>;
+  // the app's frame until the server says whether I may use it
+  if (signedIn && !access.checked) return <AppSkeleton />;
   if (signedIn && !access.isPro) {
     return (
       <>
@@ -218,7 +230,7 @@ function App(){
     // "minimal" as the default there), so it isn't applied a second time here
     <MotionConfig reducedMotion="never">
     {/* the frame: sidebar (desktop) or drawer, header, tab bar (phones); see AppShell.module.css */}
-    <div className={shell.shell}>
+    <div className={shell.shell} data-nav={navModel} data-part="shell">
         <Header activeTimer={activeTimer}/>
         <Menu/>
         <TabBar/>
@@ -227,7 +239,8 @@ function App(){
         <Tutorial/>
         <DeleteScopeDialog/>
         <QuickAdd/>
-        <main className={shell.main}>
+        {UI_VARIANTS[uiVariant].nav === 'command' && <CommandPalette/>}
+        <main className={shell.main} data-part="main">
         {/* each page comes in as the motion setting says */}
         {/* ...the tabs of the Gemeinschaft page are one page: switching them doesn't */}
         <motion.div key={location.pathname.startsWith(COMMUNITY_PATHS.feed) ? COMMUNITY_PATHS.feed : location.pathname} {...MOTION.page[motionLevel]}>
@@ -253,6 +266,8 @@ function App(){
           <Route path="/together/:id" element={<SharedSession/>} />
           <Route path="/family/:id" element={<FamilyPage/>} />
           <Route path="/admin" element={access.isAdmin ? <Admin/> : <Navigate to="/" replace />} />
+          {/* testers: interface variants and the features in test, with their ratings */}
+          <Route path="/tester" element={<TesterOnly fallback={<Navigate to="/" replace />}><Tester/></TesterOnly>} />
           {/* hidden: only reachable through the daily line in the header */}
           <Route path="/fun" element={<FunPage/>} />
           <Route path="/beta" element={<Navigate to="/" replace />} />

@@ -1,0 +1,420 @@
+/* The Tester page: one reading column, wider than the settings so a preview fits beside each
+   variant. Built only from the shared tokens, so it looks right in every variant it compares. */
+.page {
+  composes: page from '../ui.module.css';
+  width: min(52rem, calc(100% - 2 * var(--page-gutter, 1rem)));
+  margin: 0 auto;
+  padding-bottom: 4rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  text-align: left;
+}
+
+.head {
+  padding-top: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+.intro {
+  max-width: 65ch;
+  color: var(--text-muted);
+}
+
+.adminLink,
+.tryLink {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-h);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
+.adminLink:hover,
+.tryLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.loadError {
+  color: var(--danger);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.sectionHint {
+  max-width: 65ch;
+  color: var(--text-muted);
+}
+
+/* what a new variant takes over: a quiet line, not a warning */
+.note {
+  max-width: 65ch;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* one panel, the variants (or features) as rows divided by hairlines */
+.list {
+  composes: panel from '../ui.module.css';
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.row + .row {
+  border-top: 1px solid var(--border);
+}
+
+/* the variant in use: a step lighter, like a selected row */
+.row[data-active] {
+  background: var(--surface-hover);
+}
+
+.featureRow {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.rowMain {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rowHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2rem;
+}
+
+.rowTitle {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.rowHint {
+  max-width: 62ch;
+  font-size: 0.9375rem;
+  color: var(--text);
+}
+
+.rowMeta {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.useBtn {
+  flex-shrink: 0;
+  height: 2rem;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+}
+
+.activeMark {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 2rem;
+  padding: 0 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--contrast-text);
+  background: var(--contrast-top);
+  border-radius: var(--radius-pill);
+}
+
+/* ---------- the small drawing of a variant (VariantPreview) ---------- */
+.preview {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  width: 8.5rem;
+  aspect-ratio: 4 / 3;
+  align-self: start;
+  overflow: hidden;
+  background: var(--p-ground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.previewNav {
+  background: color-mix(in srgb, var(--p-ink) 9%, var(--p-ground));
+  border-right: 1px solid color-mix(in srgb, var(--p-ink) 14%, transparent);
+}
+
+.preview[data-nav="rail"] {
+  grid-template-columns: 0.9rem minmax(0, 1fr);
+}
+
+/* tabs on top: the nav is a band across, the body below */
+.preview[data-nav="top"] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 1.1rem minmax(0, 1fr);
+}
+
+.preview[data-nav="top"] .previewNav {
+  border-right: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--p-ink) 14%, transparent);
+}
+
+/* a command bar: a field floating at the top of the body */
+.preview[data-nav="command"] .previewBody::before {
+  content: '';
+  height: 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--p-ink) 30%, transparent);
+  border-radius: 2px;
+  background: var(--p-panel);
+}
+
+.previewBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.5rem;
+  min-width: 0;
+}
+
+.previewTitle {
+  width: 55%;
+  height: 0.4rem;
+  border-radius: 2px;
+  background: var(--p-ink);
+}
+
+.previewRow {
+  height: 0.85rem;
+  border-radius: 3px;
+  background: var(--p-panel);
+  border: 1px solid color-mix(in srgb, var(--p-ink) 10%, transparent);
+}
+
+.previewRow[data-mark] {
+  box-shadow: inset 0.25rem 0 0 var(--p-mark);
+}
+
+/* ---------- stars and comment (FeedbackFields) ---------- */
+.feedback {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+/* an outline star; lit ones are filled in the accent (a rating is data) */
+.star {
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--text-muted);
+}
+
+.star svg {
+  transition: fill var(--ease-out), color var(--ease-out);
+}
+
+.starOn {
+  color: var(--primary-fg);
+}
+
+.starOn svg {
+  fill: currentColor;
+}
+
+@media (hover: hover) {
+  /* hovering a star previews it and the ones before it */
+  .stars:hover .star {
+    color: var(--primary-fg);
+  }
+
+  .stars:hover .star:hover ~ .star {
+    color: var(--text-muted);
+  }
+}
+
+.clearStars {
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  background: none;
+  border-color: transparent;
+}
+
+.clearStars:hover {
+  color: var(--text-h);
+}
+
+.comment {
+  width: 100%;
+  min-height: 3.5rem;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.feedbackFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2rem;
+}
+
+.status {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.statusError {
+  color: var(--danger);
+}
+
+.saveBtn {
+  height: 2rem;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+}
+
+/* ---------- my comparison ---------- */
+.empty {
+  color: var(--text-muted);
+}
+
+.ranking {
+  composes: panel from '../ui.module.css';
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 1.25rem;
+}
+
+.rankItem {
+  display: grid;
+  grid-template-columns: minmax(7rem, 12rem) auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+}
+
+.rankItem + .rankItem {
+  border-top: 1px solid var(--border);
+}
+
+.rankName {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.favorite {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.1rem 0.5rem;
+  color: var(--text-h);
+  background: var(--surface-strong);
+  border-radius: var(--radius-pill);
+}
+
+/* the empty column a ranking without favourite leaves stays */
+.rankItem:not(:has(.favorite)) .rankBar {
+  grid-column: 3;
+}
+
+.rankBar {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-inset);
+  overflow: hidden;
+}
+
+.rankBar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+.rankValue {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.85rem;
+    padding: 1rem;
+  }
+
+  .preview {
+    width: 100%;
+    max-width: 12rem;
+  }
+
+  .rankItem {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .rankBar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .rankItem:not(:has(.favorite)) .rankBar {
+    grid-column: 1 / -1;
+  }
+}

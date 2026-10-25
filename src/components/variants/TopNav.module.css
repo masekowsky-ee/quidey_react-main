@@ -1,0 +1,76 @@
+/* The second header row of the "tabs on top" variants (wide screens only). The look of the tabs
+   comes from each variant's stylesheet (src/ui-variants); this is their plain structure. */
+.bar {
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  .bar {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    height: var(--ticker-h);
+    padding: 0 var(--page-gutter);
+    box-sizing: border-box;
+  }
+}
+
+.tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.85rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: color var(--ease-out), background-color var(--ease-out);
+}
+
+.tab:hover {
+  color: var(--text-h);
+  background: var(--hover-wash);
+}
+
+.active {
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
+}
+
+.count {
+  min-width: 1.15rem;
+  padding: 0 0.3rem;
+  box-sizing: border-box;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.15rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-h);
+  background: var(--surface-strong);
+  border-radius: var(--radius-pill);
+}
+
+.dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  corner-shape: round;
+  background: var(--text-h);
+}

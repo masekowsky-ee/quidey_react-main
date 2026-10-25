@@ -19,6 +19,9 @@ import { DESKTOP_QUERY, useMediaQuery } from '../features/layout/breakpoints.js'
 import { fill, isOverdue, sameDay, parseDate } from '../features/helperFunction.js'
 import { isEvent } from '../features/tasks/kinds.js'
 import { useTranslation } from '../i18n/useTranslation.js'
+import { useUiVariant } from '../features/tester/variants.js'
+import DepartureBoard from './variants/DepartureBoard.jsx'
+import Seats from './variants/Seats.jsx'
 
 import {useSelector, useDispatch} from 'react-redux';
 
@@ -36,7 +39,7 @@ function TitleRow({ tasks }) {
     const overdue = open.filter(task => isOverdue(task, today)).length;
     const eventsToday = tasks.filter(task => isEvent(task) && !task.done && isToday(task)).length;
     return (
-        <header className={styles.titleRow}>
+        <header className={styles.titleRow} data-part="home-title">
             <div className={styles.titleText}>
             <h1 className={styles.title}>{title}</h1>
             <p className={styles.summary}>
@@ -71,6 +74,9 @@ export default function Home({ setActiveTimer }){
     const tasks = useSelector(state => state.task.tasks);
     const sharedTasks = useSelector(selectSharedSoloTasks);
     const showSharedTasks = useSelector(state => state.settings.showSharedTasks);
+    // testers' interface variants arrange Home their own way (src/ui-variants) and add a part:
+    // the departure board (Abfahrtstafel), the reading room's seats (Lesesaal)
+    const uiVariant = useUiVariant();
 
     // the new-task form opens over any page (QuickAdd in the shell); Home's button opens it too
     const setCreateTask = useCallback((open) => dispatch(showForms(Boolean(open))), [dispatch]);
@@ -182,18 +188,24 @@ export default function Home({ setActiveTimer }){
     const timerPanel = <TimerContainer inline={desktop} setActiveTimer={setActiveTimer} setWorkedTime={setWorkedTime}
         timer={timer} setTimer={setTimer} activeTask={activeTask} />;
 
+    const listedTasks = showSharedTasks ? [...tasks, ...sharedTasks] : tasks;
     return (
-        <div className={styles.page}>
-            <TitleRow tasks={showSharedTasks ? [...tasks, ...sharedTasks] : tasks} />
+        <div className={styles.page} data-part="home">
+            <TitleRow tasks={listedTasks} />
+            {uiVariant === 'tafel' && <DepartureBoard tasks={listedTasks} activeTask={activeTask} />}
             {/* streak, today's challenges and level, friends: what keeps one going */}
-            <Momentum />
+            <div data-part="home-momentum" data-label={t('momentumTitle')}>
+                <Momentum />
+            </div>
             <TaskInvites />
-            <WeekDaysContainer />
+            <div data-part="home-week" data-label={t('calendar')}>
+                <WeekDaysContainer />
+            </div>
             {createGroup && <div className={styles.formsDiv}>
                 <GroupForm setCreateGroup={setCreateGroup}/>
             </div>}
-            <div className={styles.columns}>
-                <div className={styles.mainCol}>
+            <div className={styles.columns} data-part="home-columns">
+                <div className={styles.mainCol} data-part="home-list" data-label={t('taskContainer')}>
                     <GroupBtnContainer setCreateGroup={setCreateGroup} />
                     <TaskContainer
                         activeTask={activeTask}
@@ -206,7 +218,7 @@ export default function Home({ setActiveTimer }){
                         dragOffset={dragOffset}
                     />
                 </div>
-                <aside className={styles.focusCol} aria-label={t('focusTitle')}>
+                <aside className={styles.focusCol} aria-label={t('focusTitle')} data-part="home-focus" data-label={t('focusTitle')}>
                     <WorkingContainer
                         dropZoneRef={dropZoneRef}
                         activeTask={activeTask}
@@ -215,6 +227,7 @@ export default function Home({ setActiveTimer }){
                         dragging={Boolean(draggedTask)}
                     />
                     {desktop && timerPanel}
+                    {uiVariant === 'lesesaal' && <Seats />}
                 </aside>
             </div>
             {!desktop && timerPanel}

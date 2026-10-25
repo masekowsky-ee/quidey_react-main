@@ -168,3 +168,23 @@
 @media (prefers-reduced-motion: reduce){
     .menu{ animation: none; }
 }
+
+/* compact (the narrow rail of a tester variant): the avatar alone, the accounts open beside it */
+.compact .trigger{
+    justify-content: center;
+    width: auto;
+    padding: 0.4rem;
+}
+
+.compact .names,
+.compact .triggerIcon{
+    display: none;
+}
+
+.compact .menu{
+    left: calc(100% + 0.5rem);
+    right: auto;
+    bottom: 0;
+    width: 16rem;
+    transform-origin: bottom left;
+}

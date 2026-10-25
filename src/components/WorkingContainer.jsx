@@ -99,7 +99,7 @@ export default function WorkingContainer (props) {
     );
 
     return (
-        <section className={styles.focus} aria-labelledby="focus-title">
+        <section className={styles.focus} aria-labelledby="focus-title" data-part="focus" data-active={activeTask ? 'true' : undefined}>
             <h2 id="focus-title" className={styles.focusTitle}>{t('focusTitle')}</h2>
             <div ref={dropZoneRef}
                 className={`${styles.currentTaskDiv} ${activeTask ? '' : styles.dropZoneEmpty} ${dragging ? styles.dropReady : ''} ${activeTask?.shared ? styles.sharedPanel : ''}`}>

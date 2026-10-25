@@ -61,10 +61,6 @@
     text-align: center;
 }
 
-.loading{
-    min-height: 20rem;
-}
-
 /* ---------- period: week | month | year | all, and back / forward ---------- */
 
 .periodBar{

@@ -22,8 +22,10 @@ function Count({ count, label }) {
 // online: how many friends have the app open (a green dot at the icon's foot)
 function Tab({ to, end, match, icon, label, count = 0, countLabel, news, newsLabel, online = 0, onlineLabel }) {
     const { pathname } = useLocation();
+    const matched = match?.(pathname);
     return (
-        <NavLink to={to} end={end} className={({ isActive }) => `${styles.tab} ${isActive || match?.(pathname) ? styles.active : ''}`}>
+        <NavLink to={to} end={end} className={({ isActive }) => `${styles.tab} ${isActive || matched ? styles.active : ''}`}
+            data-active={matched || undefined}>
             <span className={styles.iconWrap}>
                 <Icon name={icon} className={styles.icon} />
                 <Count count={count} label={countLabel} />
@@ -53,7 +55,7 @@ export default function TabBar() {
     const onlineFriends = useOnlineFriends().length;
 
     return (
-        <nav className={styles.bar} aria-label={t('mainNav')}>
+        <nav className={styles.bar} aria-label={t('mainNav')} data-part="tabbar">
             <Tab to="/" end icon="home" label={t('home')} />
             <Tab to="/calendar" icon="calendar" label={t('calendar')}
                 count={taskInviteCount} countLabel={t('taskInvitesTitle')} />

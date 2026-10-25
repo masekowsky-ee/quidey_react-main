@@ -166,14 +166,6 @@ const communityTexts = {
         profileShareActivityHint: 'Freund:innen sehen deine Fokuszeit des Tages, geschaffte Challenges, neue Level und Serien. Beiträge teilst du immer selbst.',
         profileError_LEVEL_LOCKED: 'Das gibt es erst ab einem höheren Level.',
         profileError_BADGE_NOT_EARNED: 'Dieses Abzeichen hast du noch nicht verdient.',
-
-        tut_community_title: 'Gemeinschaft',
-        tut_community_text: 'Im Feed siehst du, woran deine Freund:innen arbeiten. Tages- und Wochen-Challenges bringen XP, und mit jedem Level schaltest du mehr für dein Profil frei.',
-        tut_community_tips: [
-            'Fokus-Minuten und erledigte Aufgaben zählen von selbst.',
-            'Feuere Freund:innen im Feed an, das zählt für manche Challenges.',
-            'Was im Feed erscheint, stellst du im Profil unter „Profil gestalten“ ein.',
-        ],
     },
     en: {
         community: 'Community',
@@ -340,14 +332,6 @@ const communityTexts = {
         profileShareActivityHint: "Friends see your day's focus time, finished challenges, new levels and streaks. Posts you always share yourself.",
         profileError_LEVEL_LOCKED: 'That comes with a higher level.',
         profileError_BADGE_NOT_EARNED: "You haven't earned this badge yet.",
-
-        tut_community_title: 'Community',
-        tut_community_text: 'The feed shows what your friends are working on. Daily and weekly challenges give XP, and every level unlocks more for your profile.',
-        tut_community_tips: [
-            'Focus minutes and finished tasks count by themselves.',
-            'Cheer friends on in the feed, some challenges count that.',
-            'What shows up in the feed is set on your profile under “Customize profile”.',
-        ],
     },
 };
 

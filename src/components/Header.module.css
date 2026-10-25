@@ -730,3 +730,79 @@ a.quickRowBtn{
         margin-left: 1rem;
     }
 }
+
+/* ---------- testers' interface variants (features/tester/variants.js) ---------- */
+/* "tabs on top": the menu is a drawer on wide screens too, so its button and the logo stay */
+@media (min-width: 1100px) {
+    .undocked .div > .menuBtn{
+        display: inline-flex;
+    }
+
+    .undocked .div > .brand{
+        display: inline-flex;
+    }
+
+    .undocked .div{
+        padding-left: 0;
+    }
+}
+
+/* "command bar": a field-like button in the middle of the bar that opens it (Ctrl/⌘ K) */
+.commandBtn{
+    flex: 0 1 26rem;
+    min-width: 0;
+    height: 2.25rem;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    padding: 0 0.4rem 0 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    background: var(--surface-inset);
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-sm);
+}
+
+@media (hover: hover) {
+    .commandBtn:hover{
+        color: var(--text-h);
+        background: var(--surface-inset);
+        border-color: var(--border-strong);
+        box-shadow: none;
+    }
+}
+
+.commandText{
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.commandKbd{
+    flex-shrink: 0;
+    padding: 0.05rem 0.35rem;
+    font: inherit;
+    font-size: 0.75rem;
+    border: 1px solid var(--control-border);
+    border-radius: 4px;
+}
+
+/* phones and tablets: the magnifier alone */
+@media (max-width: 1099px) {
+    .commandBtn{
+        flex: none;
+        width: 2.5rem;
+        justify-content: center;
+        padding: 0;
+        background: none;
+        border-color: transparent;
+    }
+
+    .commandText,
+    .commandKbd{
+        display: none;
+    }
+}

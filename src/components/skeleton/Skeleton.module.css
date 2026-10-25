@@ -1,0 +1,253 @@
+/* Skeletons: the layout that is coming, grey where text and pictures will be.
+   They fade in after a moment, so a quick load never flashes them; with the motion level
+   "normal" or "extreme" a soft light runs across (one light for all bones: fixed background). */
+
+.bone{
+    display: block;
+    flex-shrink: 0;
+    max-width: 100%;
+    height: 0.875rem;
+    background-color: var(--surface-strong);
+    border-radius: 4px;
+}
+
+.round{
+    composes: bone;
+    border-radius: 50%;
+    corner-shape: round;
+}
+
+:root:not([data-motion="minimal"]) .bone{
+    background-image: linear-gradient(100deg,
+        transparent 30%,
+        color-mix(in srgb, var(--text-h) 7%, transparent) 50%,
+        transparent 70%);
+    background-size: 200vw 100%;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    animation: sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes sweep{
+    from{ background-position: 150vw 0; }
+    to{ background-position: -150vw 0; }
+}
+
+.wrap{
+    animation: appear 0.3s ease-out 0.15s both;
+}
+
+@keyframes appear{
+    from{ opacity: 0; }
+}
+
+.srOnly{
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ---------- rows: a picture, a line, a shorter line ---------- */
+
+.rows{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.rows > li{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0;
+}
+
+.rows > li + li{
+    border-top: 1px solid var(--border);
+}
+
+.lines{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+/* ---------- a page: title, a card of rows, a second card ---------- */
+
+.page{
+    composes: pageColumn from '../ui.module.css';
+}
+
+.title{
+    composes: bone;
+    width: 12rem;
+    height: 1.6rem;
+    margin: 2rem 0 0.5rem;
+}
+
+.card{
+    composes: card from '../ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* ---------- outside the app (sign-in, verify mail): one centered card ---------- */
+
+.gate{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
+    background-color: var(--bg);
+}
+
+.gate .card{
+    width: min(28rem, 100%);
+    box-sizing: border-box;
+    gap: 1rem;
+    padding: 2rem;
+}
+
+.field{
+    composes: bone;
+    height: 2.75rem;
+    border-radius: 10px;
+}
+
+/* ---------- the app's frame while it starts: header, sidebar / tab bar, a page ---------- */
+
+.shell{
+    --sidebar-w: 0px;
+    --tabbar-h: 0px;
+    --page-gutter: 1.5rem;
+    min-height: 100vh;
+    padding-left: var(--sidebar-w);
+    box-sizing: border-box;
+    background-color: var(--bg);
+}
+
+.header{
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-w);
+    right: 0;
+    height: var(--header-h);
+    padding: env(safe-area-inset-top, 0px) var(--page-gutter) 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background-color: var(--surface-bar);
+    border-bottom: 1px solid var(--border);
+}
+
+.headerEnd{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sidebar,
+.tabbar{
+    display: none;
+}
+
+.sidebar{
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--sidebar-w);
+    padding: 0 24px 16px;
+    box-sizing: border-box;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.sidebarHead{
+    height: var(--header-bar-h);
+    display: flex;
+    align-items: center;
+}
+
+.navItem{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tabbar{
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing: border-box;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    place-items: center;
+    background-color: var(--surface-bar);
+    border-top: 1px solid var(--border);
+}
+
+.tab{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* after a while without an answer: say what is going on, offer to try again */
+.slow{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin: 1.5rem 0 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    animation: appear 0.3s ease-out both;
+}
+
+.slowBtn{
+    composes: ghostBtn from '../ui.module.css';
+}
+
+/* same widths as src/features/layout/breakpoints.js and AppShell.module.css */
+@media (min-width: 1100px) {
+    .shell{
+        --sidebar-w: 15rem;
+        --page-gutter: 2.5rem;
+    }
+
+    .sidebar{
+        display: flex;
+    }
+
+    .header .brand{
+        display: none;
+    }
+}
+
+@media (max-width: 720px) {
+    .shell{
+        --tabbar-h: 3.75rem;
+        --page-gutter: 1rem;
+        padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+    }
+
+    .tabbar{
+        display: grid;
+    }
+}

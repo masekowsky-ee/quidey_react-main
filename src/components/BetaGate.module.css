@@ -132,10 +132,12 @@
 
 .reason{
     margin: 0.25rem 0 0;
-    padding: 0.5rem 0.8rem;
+    padding: 0.6rem 0.85rem;
     font-size: 0.88rem;
     color: var(--text-muted);
-    border-left: 3px solid var(--btn-border);
+    /* my own words, set apart as a quiet sunken well */
+    background-color: var(--surface-inset);
+    border-radius: 8px;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
 }

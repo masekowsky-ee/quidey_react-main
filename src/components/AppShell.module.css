@@ -38,3 +38,23 @@
     padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* Testers' interface variants (features/tester/variants.js) bring their own navigation on wide
+   screens: <div data-nav>. "top" puts the main places as tabs in a second header row (the menu
+   is a drawer then), "rail" is a narrow column of icons, "command" a compact sidebar. */
+@media (min-width: 1100px) {
+  .shell[data-nav="top"] {
+    --sidebar-w: 0px;
+    --ticker-h: 2.75rem;
+    --header-h: calc(var(--header-bar-h) + var(--ticker-h) + env(safe-area-inset-top, 0px));
+  }
+
+  .shell[data-nav="rail"] {
+    --sidebar-w: 5.25rem;
+  }
+
+  .shell[data-nav="command"] {
+    --sidebar-w: 13rem;
+    --page-gutter: 1.75rem;
+  }
+}

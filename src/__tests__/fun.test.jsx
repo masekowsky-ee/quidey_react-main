@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
@@ -252,10 +252,10 @@ describe('tutorial', () => {
         expect(screen.getByRole('button', { name: 'Zurück' })).toBeDisabled()
 
         fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
-        expect(screen.getByRole('heading', { name: 'Sammle deine Aufgaben' })).toBeInTheDocument()
-
+        expect(screen.getByRole('heading', { name: 'Aufgaben und Events' })).toBeInTheDocument()
         // jump to the last step with the dots, then finish
-        const dots = screen.getAllByRole('tab')
+        const dots = within(screen.getByRole('tablist', { name: 'Einführung' })).getAllByRole('tab')
+        expect(dots).toHaveLength(9)
         fireEvent.click(dots.at(-1))
         fireEvent.click(screen.getByRole('button', { name: "Los geht's" }))
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -281,7 +281,7 @@ describe('tutorial', () => {
         fireEvent.keyDown(window, { key: 'ArrowRight' })
         fireEvent.keyDown(window, { key: 'ArrowRight' })
         fireEvent.keyDown(window, { key: 'ArrowRight' })
-        expect(screen.getByRole('heading', { name: 'Plane im Kalender' })).toBeInTheDocument()
+        expect(screen.getByRole('heading', { name: 'Deine Woche im Blick' })).toBeInTheDocument()
         expect(screen.getAllByRole('listitem').length).toBeGreaterThan(0)
 
         fireEvent.click(screen.getByRole('button', { name: /Kalender öffnen/ }))
@@ -290,20 +290,60 @@ describe('tutorial', () => {
         expect(localStorage.getItem('tutorialSeen:ann')).toBe('1')
     })
 
-    it('has the family step for everybody', () => {
+    it('jumps to a chapter from the welcome card', () => {
         const store = makeStore()
         store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
         renderTutorial(store)
-        expect(screen.getByRole('tab', { name: 'Quidey Family' })).toBeInTheDocument()
+        const chapters = screen.getByRole('navigation', { name: 'Spring direkt zu einem Kapitel' })
+        fireEvent.click(within(chapters).getByRole('button', { name: 'Wachsen' }))
+        expect(screen.getByRole('heading', { name: 'Serie, XP und deine Pflanze' })).toBeInTheDocument()
+    })
+
+    it('opens the new-task form from the planning step', () => {
+        const store = makeStore()
+        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        renderTutorial(store)
+        fireEvent.keyDown(window, { key: 'ArrowRight' })
+        fireEvent.click(screen.getByRole('button', { name: 'Erste Aufgabe anlegen' }))
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+        expect(store.getState().settings.showForms).toBe(true)
+        expect(localStorage.getItem('tutorialSeen:ann')).toBe('1')
+    })
+
+    it('changes the accent and the theme right in the tour', () => {
+        const store = makeStore()
+        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        renderTutorial(store)
+        fireEvent.click(within(screen.getByRole('navigation', { name: 'Spring direkt zu einem Kapitel' })).getByRole('button', { name: 'Dein Stil' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Ozean' }))
+        expect(store.getState().settings.accent).toBe('ocean')
+        expect(screen.getByRole('button', { name: 'Ozean' })).toHaveAttribute('aria-pressed', 'true')
+        fireEvent.click(screen.getByRole('button', { name: /Hell/ }))
+        expect(store.getState().settings.theme).toBe('light')
+    })
+
+    it('ends with where the navigation is and first steps', () => {
+        const store = makeStore()
+        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        renderTutorial(store)
+        fireEvent.keyDown(window, { key: 'End' })
+        expect(screen.getByRole('heading', { name: 'Alles griffbereit' })).toBeInTheDocument()
+        // no wide screen in jsdom: the menu is behind the header's button
+        expect(screen.getByText(/Menü-Knopf/)).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /Freunde finden/ })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /Profil gestalten/ })).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Überspringen' })).not.toBeInTheDocument()
     })
 
     it('every step has its texts in both languages', () => {
         for (const lang of ['de', 'en']) {
-            for (const id of ['welcome', 'tasks', 'focus', 'calendar', 'friends', 'together', 'family', 'inbox', 'history', 'settings', 'menu']) {
+            for (const id of ['welcome', 'plan', 'focus', 'calendar', 'grow', 'together', 'stats', 'yours', 'ready']) {
+                expect(translations[lang][`tut_${id}_short`]).toBeTruthy()
                 expect(translations[lang][`tut_${id}_title`]).toBeTruthy()
-                expect(translations[lang][`tut_${id}_text`]).toBeTruthy()
                 expect(Array.isArray(translations[lang][`tut_${id}_tips`])).toBe(true)
+                if (id !== 'ready') expect(translations[lang][`tut_${id}_text`]).toBeTruthy()
             }
+            for (const nav of ['phone', 'drawer', 'sidebar', 'other']) expect(translations[lang][`tut_ready_text_${nav}`]).toBeTruthy()
         }
     })
 

@@ -1,5 +1,7 @@
 import communityTexts from './communityTexts';
 import moreTexts from './moreTexts';
+import testerTexts from './testerTexts';
+import tourTexts from './tourTexts';
 
 const translations = {
     de: {
@@ -433,7 +435,6 @@ const translations = {
         adminOverview: 'Überblick',
         adminOpenRequests: 'Offen',
         adminAllRequests: 'Alle',
-        adminLoading: 'Lädt…',
         adminNoOpenRequests: 'Keine offenen Anfragen.',
         adminNoRequests: 'Noch keine Anfragen.',
         adminApprove: 'Freischalten',
@@ -864,87 +865,6 @@ const translations = {
         openInCalendar: 'Im Kalender öffnen',
 
         tutorial: 'Einführung',
-        tutSkip: 'Überspringen',
-        tutBack: 'Zurück',
-        tutNext: 'Weiter',
-        tutDone: "Los geht's",
-        tutHello: 'Hallo {name}!',
-        tutOpen: '{page} öffnen',
-        tutTesterBadge: 'Für Tester',
-        tutKeys: '← → zum Blättern · Esc schließt',
-        tut_welcome_title: 'Willkommen bei Quidey!',
-        tut_welcome_text: 'Dein Planer für Lernen und Studium: Aufgaben, Fokuszeit, Kalender und Freunde, mit denen du live lernst. Die Tour dauert etwa eine Minute.',
-        tut_welcome_tips: [
-            'Blättere mit „Weiter“, den Punkten unten oder wisch einfach zur Seite.',
-            'Bei jedem Schritt kannst du die passende Seite direkt öffnen.',
-        ],
-        tut_tasks_title: 'Sammle deine Aufgaben',
-        tut_tasks_text: 'Auf der Startseite legst du Aufgaben an. Nur der Name ist Pflicht, alles andere ergänzt du, wenn du magst.',
-        tut_tasks_tips: [
-            'Gruppen, Priorität, Dauer und eine von acht Farben helfen beim Sortieren.',
-            'Tag, Uhrzeit und Wiederholung (wöchentlich, monatlich, jährlich) stellst du im Editor ein.',
-            'Erinnerungen bekommst du in der App und auf Wunsch auch per E-Mail.',
-        ],
-        tut_focus_title: 'Fokus mit Timer oder Stoppuhr',
-        tut_focus_text: 'Zieh eine Aufgabe in den Arbeitsbereich und leg los. Die Zeit wird direkt dieser Aufgabe gutgeschrieben.',
-        tut_focus_tips: [
-            'Der Timer zählt deine Sitzung herunter, die Stoppuhr zählt einfach hoch.',
-            'Die laufende Zeit bleibt oben im Header sichtbar, egal auf welcher Seite du bist.',
-            'Die Standardlänge einer Sitzung legst du in den Einstellungen fest.',
-        ],
-        tut_calendar_title: 'Plane im Kalender',
-        tut_calendar_text: 'Monat, Woche oder Agenda: Wähl die Ansicht, die gerade passt, und behalte den Überblick.',
-        tut_calendar_tips: [
-            'Zieh Aufgaben einfach auf einen anderen Tag.',
-            'Oben in der Leiste wechselst du zu den Kalendern geteilter Sitzungen.',
-            'Aufgaben, die Freunde mit dir teilen, nimmst du hier an.',
-        ],
-        tut_friends_title: 'Freunde und Profile',
-        tut_friends_text: 'Unter Gemeinschaft → Freunde findest du Freunde über ihren Benutzernamen und beantwortest Anfragen.',
-        tut_friends_tips: [
-            'Gestalte dein Profil mit Banner, Status, Bio und Interessen.',
-            'Freunde sehen dein ganzes Profil, die Statistik nur, wenn du sie nicht ausblendest.',
-            'Eine Aufgabe kannst du direkt an einen Freund schicken.',
-        ],
-        tut_together_title: 'Gemeinsam lernen',
-        tut_together_text: 'Starte unter Gemeinschaft → Sitzungen eine geteilte Sitzung und lade Freunde ein. Ihr arbeitet live an derselben Aufgabenliste.',
-        tut_together_tips: [
-            'Eine Stoppuhr zählt für alle mit, und ihr seht, wer gerade woran sitzt.',
-            'Chat und Aktivitäten kommen in Echtzeit an.',
-            'In den Einstellungen kannst du die Startseite auf „Team“ umstellen.',
-        ],
-        tut_family_title: 'Quidey Family',
-        tut_family_text: 'Schon für dich freigeschaltet: eine feste Gruppe mit Freunden, mit gemeinsamem Kalender und eigenem Chat.',
-        tut_family_tips: [
-            'Einträge bearbeitet ihr auf der Family-Seite oder direkt im Kalender.',
-            'Sag uns über Feedback, wie es sich anfühlt. Family ist noch in Arbeit.',
-        ],
-        tut_inbox_title: 'Dein Postfach',
-        tut_inbox_text: 'Hier landen Nachrichten von Freunden und Benachrichtigungen, und zwar sofort.',
-        tut_inbox_tips: [
-            'Eine Zahl im Menü zeigt dir, was noch ungelesen ist.',
-            'Auch Neuigkeiten vom Quidey-Team findest du hier.',
-        ],
-        tut_history_title: 'Schau zurück',
-        tut_history_text: 'In den Statistiken siehst du, wie viel Zeit du fokussiert hast und wie viel deine Events gedauert haben, pro Woche, Monat oder Jahr.',
-        tut_history_tips: [
-            'Gib Events einen Typ wie „Arbeit“: Dann steht da z. B. „32 h Arbeit“ für den Monat.',
-            'Mit den Pfeilen gehst du zur letzten Woche, zum letzten Monat und weiter zurück.',
-            'Darunter warten deine Heatmap über 26 Wochen, Serien und Abzeichen.',
-        ],
-        tut_settings_title: 'Mach es zu deinem',
-        tut_settings_text: 'In den Einstellungen passt du Quidey an dich an.',
-        tut_settings_tips: [
-            'Sprache, hell, dunkel oder wie dein System, dazu eine Farbpalette und eine von sechs Akzentfarben.',
-            'Wie viel Bewegung du magst: minimal, normal oder extrem.',
-            'Installier Quidey als App, dann startet es wie jede andere App. Unter „App“ findest du auch diese Einführung wieder.',
-        ],
-        tut_menu_title: 'Alles griffbereit',
-        tut_menu_text: 'Alles erreichst du über das Menü. Diese Tour startest du jederzeit neu unter Einstellungen → App.',
-        tut_menu_tips: [
-            'Etwas fehlt oder hakt? Schreib uns über „Feedback“ im Menü.',
-            'Psst: Klick doch mal auf die Glühbirne und das Fenster dahinter.',
-        ],
 
         lineOf_fact: 'Fakt des Tages',
         lineOf_quote: 'Zitat des Tages',
@@ -1536,7 +1456,6 @@ const translations = {
         adminOverview: 'Overview',
         adminOpenRequests: 'Open',
         adminAllRequests: 'All',
-        adminLoading: 'Loading…',
         adminNoOpenRequests: 'No open requests.',
         adminNoRequests: 'No requests yet.',
         adminApprove: 'Approve',
@@ -1967,87 +1886,6 @@ const translations = {
         openInCalendar: 'Open in calendar',
 
         tutorial: 'Tutorial',
-        tutSkip: 'Skip',
-        tutBack: 'Back',
-        tutNext: 'Next',
-        tutDone: "Let's go",
-        tutHello: 'Hi {name}!',
-        tutOpen: 'Open {page}',
-        tutTesterBadge: 'For testers',
-        tutKeys: '← → to browse · Esc closes',
-        tut_welcome_title: 'Welcome to Quidey!',
-        tut_welcome_text: 'Your planner for learning and studying: tasks, focus time, a calendar and friends you study with live. The tour takes about a minute.',
-        tut_welcome_tips: [
-            'Move on with "Next", the dots below, or just swipe sideways.',
-            'Every step can open the page it is about right away.',
-        ],
-        tut_tasks_title: 'Collect your tasks',
-        tut_tasks_text: 'You create tasks on the home page. Only the name is required, add everything else whenever you like.',
-        tut_tasks_tips: [
-            'Groups, priority, duration and one of eight colours help you sort.',
-            'Set the day, time and repeat (weekly, monthly, yearly) in the editor.',
-            'Reminders show up in the app, and by email if you want.',
-        ],
-        tut_focus_title: 'Focus with timer or stopwatch',
-        tut_focus_text: 'Drag a task into the work area and get going. The time is booked straight onto that task.',
-        tut_focus_tips: [
-            'The timer counts your session down, the stopwatch simply counts up.',
-            'The running time stays visible in the header, whichever page you are on.',
-            'Set the default session length in the settings.',
-        ],
-        tut_calendar_title: 'Plan in the calendar',
-        tut_calendar_text: 'Month, week or agenda: pick the view that fits right now and keep the overview.',
-        tut_calendar_tips: [
-            'Just drag tasks onto another day.',
-            'The toolbar switches to the calendars of shared sessions.',
-            'Accept tasks your friends share with you here.',
-        ],
-        tut_friends_title: 'Friends and profiles',
-        tut_friends_text: 'Under Community → Friends you find friends by their username and answer requests.',
-        tut_friends_tips: [
-            'Design your profile with a banner, status, bio and interests.',
-            'Friends see your whole profile, your statistics only if you keep them visible.',
-            'You can send a task straight to a friend.',
-        ],
-        tut_together_title: 'Study together',
-        tut_together_text: 'Start a shared session under Community → Sessions and invite friends. You work live on the same task list.',
-        tut_together_tips: [
-            'A stopwatch counts for everyone, and you see who is working on what.',
-            'Chat and activity arrive in real time.',
-            'In the settings you can switch your home page to "Team".',
-        ],
-        tut_family_title: 'Quidey Family',
-        tut_family_text: 'Already unlocked for you: a fixed group of friends with a shared calendar and its own chat.',
-        tut_family_tips: [
-            'Edit entries on the family page or right in the calendar.',
-            'Tell us how it feels via Feedback. Family is still a work in progress.',
-        ],
-        tut_inbox_title: 'Your inbox',
-        tut_inbox_text: 'Messages from friends and notifications land here, instantly.',
-        tut_inbox_tips: [
-            'A number in the menu shows what is still unread.',
-            'News from the Quidey team shows up here too.',
-        ],
-        tut_history_title: 'Look back',
-        tut_history_text: 'Your statistics show how long you focused and how long your events took, per week, month or year.',
-        tut_history_tips: [
-            'Give events a type like "Work": then you see e.g. "32 h Work" for the month.',
-            'The arrows take you to last week, last month and further back.',
-            'Below wait your 26-week heat map, streaks and badges.',
-        ],
-        tut_settings_title: 'Make it yours',
-        tut_settings_text: 'The settings let you shape Quidey around you.',
-        tut_settings_tips: [
-            'Language, light, dark or like your system, plus a colour palette and one of six accent colours.',
-            'How much motion you like: minimal, normal or extreme.',
-            'Install Quidey as an app and it starts like any other app. Under "App" you also find this tour again.',
-        ],
-        tut_menu_title: 'Always at hand',
-        tut_menu_text: 'Everything lives in the menu. You can restart this tour any time under Settings → App.',
-        tut_menu_tips: [
-            'Something missing or broken? Write to us via "Feedback" in the menu.',
-            'Psst: try clicking the light bulb and the window behind it.',
-        ],
 
         lineOf_fact: 'Fact of the day',
         lineOf_quote: 'Quote of the day',
@@ -2210,7 +2048,7 @@ const translations = {
     }
 }
 
-// Gemeinschaft (feed, challenges, levels) lives in its own file
-for (const language of ['de', 'en']) Object.assign(translations[language], communityTexts[language], moreTexts[language]);
+// Gemeinschaft (feed, challenges, levels), the tour and others live in their own files
+for (const language of ['de', 'en']) Object.assign(translations[language], communityTexts[language], moreTexts[language], testerTexts[language], tourTexts[language]);
 
 export default translations;

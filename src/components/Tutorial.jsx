@@ -1,35 +1,42 @@
 import { useEffect, useRef, useState } from 'react';
-import { COMMUNITY_PATHS } from '../features/community/paths';
+import { friendsPath } from '../features/community/paths';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import styles from './Tutorial.module.css';
 import { useTranslation } from '../i18n/useTranslation';
-import { setShowTutorial } from '../features/settings/settingsAction';
+import { setShowTutorial, showForms } from '../features/settings/settingsAction';
 import { hasSeenTutorial, storeTutorialSeen } from '../features/settings/preferences';
 import { MOTION, useCelebrate, useMotionLevel } from '../features/settings/motion';
 import { useIsTester } from '../features/auth/tester';
+import { PHONE_QUERY, useMediaQuery } from '../features/layout/breakpoints';
+import { useNavModel } from '../features/tester/variants';
 import { fill } from '../features/helperFunction';
 
 import Icon from './icons';
-import Logo from './Logo';
+import TourPreview from './tour/TourPreview';
 
-// The steps of the tour: icon, the page it is about (for the "open" button, `page` is the
-// translation key of its name) and whether only testers get it. Texts per step:
-// tut_<id>_title, tut_<id>_text and tut_<id>_tips (a list).
+// The chapters of the tour, in the order a student meets them: plan, focus, see the week, grow,
+// do it with friends, look back, make it yours. Texts per step (tourTexts.js): tut_<id>_short,
+// _title, _text and _tips. `go` is the step's one way out: open its page (`to`, named by the
+// translation key `page`, or by `label`) or the new-task form (`newTask`).
 const STEPS = [
     { id: 'welcome' },
-    { id: 'tasks', icon: 'tasks', to: '/', page: 'home' },
-    { id: 'focus', icon: 'timer', to: '/', page: 'home' },
-    { id: 'calendar', icon: 'calendar', to: '/calendar', page: 'calendar' },
-    { id: 'community', icon: 'together', to: COMMUNITY_PATHS.feed, page: 'community' },
-    { id: 'friends', icon: 'social', to: COMMUNITY_PATHS.friends, page: 'communityTab_friends' },
-    { id: 'together', icon: 'together', to: COMMUNITY_PATHS.sessions, page: 'communityTab_sessions' },
-    { id: 'family', icon: 'family', to: COMMUNITY_PATHS.family, page: 'family' },
-    { id: 'inbox', icon: 'inbox', to: '/inbox', page: 'inbox' },
-    { id: 'history', icon: 'history', to: '/stats', page: 'history' },
-    { id: 'settings', icon: 'settings', to: '/settings', page: 'settings' },
-    { id: 'menu', icon: 'menu' },
+    { id: 'plan', go: { newTask: true, label: 'tutNewTask' } },
+    { id: 'focus', go: { to: '/', page: 'home' } },
+    { id: 'calendar', go: { to: '/calendar', page: 'calendar' } },
+    { id: 'grow', go: { to: '/profile', page: 'profile' } },
+    { id: 'together', go: { to: friendsPath('add'), label: 'tutFindFriends' } },
+    { id: 'stats', go: { to: '/stats', page: 'history' } },
+    { id: 'yours', go: { to: '/settings', page: 'settings' } },
+    { id: 'ready' },
+];
+
+// the last step's first things to do
+const FIRST_STEPS = [
+    { newTask: true, label: 'tutNewTask', icon: 'plus' },
+    { to: friendsPath('add'), label: 'tutFindFriends', icon: 'social' },
+    { to: '/profile', label: 'tutDesignProfile', icon: 'profile' },
 ];
 
 // a swipe this far (px) or this fast (px/s) turns the page
@@ -38,9 +45,19 @@ const SWIPE_SPEED = 400;
 
 const FOCUSABLE = 'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])';
 
-// The intro tour: a few cards that explain the app, each with tips and a button to the page it
-// is about. Opens by itself the first time an account signs in on this device, and any time
-// from the menu. Arrow keys, the dots or a swipe move through it.
+// Where the navigation is right now: the tab bar (phones), the header's menu button (drawer),
+// the sidebar, or another way of a tester's interface variant
+function useNavPlace() {
+    const phone = useMediaQuery(PHONE_QUERY);
+    const model = useNavModel();
+    if (phone) return 'phone';
+    return model === 'drawer' || model === 'sidebar' ? model : 'other';
+}
+
+// The intro tour: one card per chapter, each with a small scene of the page it is about, a few
+// tips and a way straight there. Opens by itself the first time an account signs in on this
+// device, and any time from Settings → App. Arrow keys, the dots, the chapter chips or a swipe
+// move through it.
 export default function Tutorial() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -49,6 +66,7 @@ export default function Tutorial() {
     const user = useSelector((state) => state.auth.user);
     const username = user?.username;
     const isTester = useIsTester();
+    const nav = useNavPlace();
     const level = useMotionLevel();
     const celebrate = useCelebrate(0);
     const [index, setIndex] = useState(0);
@@ -59,7 +77,7 @@ export default function Tutorial() {
     // where the focus was before the tour opened, it goes back there afterwards
     const returnFocus = useRef(null);
 
-    const steps = STEPS.filter((s) => !s.tester || isTester);
+    const steps = STEPS;
     const current = Math.min(index, steps.length - 1);
     const step = steps[current];
     const last = current === steps.length - 1;
@@ -90,10 +108,11 @@ export default function Tutorial() {
         close();
     };
 
-    // to the page a step is about; the tour is done then
-    const openPage = () => {
+    // out of the tour, to a page or into the new-task form; the tour is done then
+    const act = (go) => {
         close({ restoreFocus: false });
-        navigate(step.to);
+        if (go.newTask) dispatch(showForms(true));
+        else navigate(go.to);
     };
 
     const go = (to) => {
@@ -145,7 +164,9 @@ export default function Tutorial() {
     if (!open) return null;
 
     const name = user?.display_name || username;
-    const tips = t(`tut_${step.id}_tips`);
+    const text = step.id === 'ready' ? t(`tut_ready_text_${nav}`) : t(`tut_${step.id}_text`);
+    const tips = [...t(`tut_${step.id}_tips`), ...(step.id === 'ready' && isTester ? [t('tut_ready_tester')] : [])];
+    const goLabel = (to) => (to.label ? t(to.label) : fill(t('tutOpen'), { page: t(to.page) }));
 
     return (
         <motion.div className={styles.backdrop} onClick={() => close()} {...MOTION.overlay[level]}>
@@ -166,7 +187,7 @@ export default function Tutorial() {
                 </div>
 
                 <div className={styles.progress} aria-hidden="true">
-                    <div className={styles.progressFill} style={{ width: `${((current + 1) / steps.length) * 100}%` }} />
+                    <div className={styles.progressFill} style={{ transform: `scaleX(${(current + 1) / steps.length})` }} />
                 </div>
 
                 <motion.div
@@ -179,28 +200,52 @@ export default function Tutorial() {
                     onDragEnd={onSwipe}
                     {...MOTION.tourStep[level](dir)}
                 >
-                    {step.id === 'welcome' ? (
-                        <Logo className={styles.logo} />
-                    ) : (
-                        <div className={styles.iconWrap} aria-hidden="true">
-                            <Icon name={step.icon} className={styles.icon} strokeWidth={1.6} />
-                        </div>
-                    )}
-                    {step.id === 'welcome' && name && <p className={styles.eyebrow}>{fill(t('tutHello'), { name })}</p>}
-                    {step.tester && <span className={styles.badge}>{t('tutTesterBadge')}</span>}
-                    <h2 id="tutorial-title" className={styles.title}>{t(`tut_${step.id}_title`)}</h2>
-                    <p id="tutorial-text" className={styles.text}>{t(`tut_${step.id}_text`)}</p>
-                    {Array.isArray(tips) && (
-                        <ul className={styles.tips}>
-                            {tips.map((tip) => <li key={tip} className={styles.tip}>{tip}</li>)}
-                        </ul>
-                    )}
-                    {step.to && (
-                        <button type="button" className={styles.open} onClick={openPage}>
-                            {fill(t('tutOpen'), { page: t(step.page) })}
-                            <span aria-hidden="true">→</span>
-                        </button>
-                    )}
+                    <div className={styles.stage}>
+                        <TourPreview id={step.id} nav={nav} />
+                    </div>
+
+                    <div className={styles.copy}>
+                        <p className={styles.eyebrow}>
+                            {step.id === 'welcome' && name ? fill(t('tutHello'), { name }) : t(`tut_${step.id}_short`)}
+                        </p>
+                        <h2 id="tutorial-title" className={styles.title}>{t(`tut_${step.id}_title`)}</h2>
+                        <p id="tutorial-text" className={styles.text}>{text}</p>
+                        {tips.length > 0 && (
+                            <ul className={styles.tips}>
+                                {tips.map((tip) => <li key={tip} className={styles.tip}>{tip}</li>)}
+                            </ul>
+                        )}
+
+                        {step.id === 'welcome' && (
+                            <nav className={styles.chapters} aria-label={t('tutJump')}>
+                                {steps.slice(1, -1).map((s, i) => (
+                                    <button key={s.id} type="button" className={styles.chapter} onClick={() => go(i + 1)}>
+                                        {t(`tut_${s.id}_short`)}
+                                    </button>
+                                ))}
+                            </nav>
+                        )}
+
+                        {step.id === 'ready' && (
+                            <div className={styles.firstSteps}>
+                                <h3 className={styles.firstStepsTitle}>{t('tutFirstSteps')}</h3>
+                                {FIRST_STEPS.map((first) => (
+                                    <button key={first.label} type="button" className={styles.firstStep} onClick={() => act(first)}>
+                                        <Icon name={first.icon} size={18} />
+                                        <span>{t(first.label)}</span>
+                                        <Icon name="arrowRight" size={16} className={styles.firstStepArrow} />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {step.go && (
+                            <button type="button" className={styles.open} onClick={() => act(step.go)}>
+                                {goLabel(step.go)}
+                                <span aria-hidden="true">→</span>
+                            </button>
+                        )}
+                    </div>
                 </motion.div>
 
                 <div className={styles.dots} role="tablist" aria-label={t('tutorial')}>

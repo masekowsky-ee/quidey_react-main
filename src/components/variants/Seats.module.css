@@ -1,0 +1,103 @@
+/* Who is in the reading room (Lesesaal variant): small seat plates in a row */
+.room {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  text-align: left;
+}
+
+.title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.seats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* a plate: the seat number over the person */
+.seat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 6.5rem;
+  max-width: 11rem;
+  padding: 0.55rem 0.75rem;
+  box-sizing: border-box;
+  color: var(--text);
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--ease-out), background-color var(--ease-out);
+}
+
+a.seat:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+}
+
+.seat[data-me] {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+
+.number {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.person > span:first-child {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.65rem;
+  flex-shrink: 0;
+}
+
+.name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.status {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.more {
+  justify-content: center;
+  align-items: center;
+  min-width: 3.5rem;
+  font-weight: 600;
+}
+
+.empty {
+  max-width: 50ch;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}

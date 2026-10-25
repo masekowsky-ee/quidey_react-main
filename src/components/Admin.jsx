@@ -10,8 +10,10 @@ import {
     fetchAdminOverview, fetchBetaRequests, fetchAdminUsers,
     decideBetaRequest, resetBetaRequest, updateAdminUser,
 } from '../features/admin/adminAction';
+import AdminTesterFeedback from './tester/AdminTesterFeedback';
+import { Bone, Skeleton, SkeletonRows } from './skeleton/Skeleton.jsx';
 
-const TABS = ['requests', 'users', 'broadcast', 'overview'];
+const TABS = ['requests', 'users', 'broadcast', 'testers', 'overview'];
 const SEARCH_DELAY_MS = 300;
 
 // Translated message for an admin API error
@@ -98,7 +100,7 @@ function RequestsTab() {
                     ))}
                 </div>
             </div>
-            {requests === null ? <p className={styles.empty} aria-busy="true">{t('adminLoading')}</p>
+            {requests === null ? <SkeletonRows count={3} />
                 : requests.length === 0 ? <p className={styles.empty}>{t(scope === 'pending' ? 'adminNoOpenRequests' : 'adminNoRequests')}</p>
                     : (
                         <ul className={styles.list}>
@@ -188,7 +190,7 @@ function UsersTab() {
                     aria-label={t('adminSearch')}
                 />
             </div>
-            {users === null ? <p className={styles.empty} aria-busy="true">{t('adminLoading')}</p>
+            {users === null ? <SkeletonRows count={5} />
                 : users.length === 0 ? <p className={styles.empty}>{t('adminNoUsers')}</p>
                     : (
                         <ul className={styles.list}>
@@ -284,7 +286,18 @@ function OverviewTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch]);
 
-    if (!data) return <section className={styles.card}><p className={styles.empty} aria-busy="true">{t('adminLoading')}</p></section>;
+    if (!data) {
+        return (
+            <Skeleton style={{ display: 'contents' }}>
+                <div className={styles.stats}>
+                    {[0, 1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className={styles.stat}><Bone w="2.5rem" h="1.6rem" /><Bone w="60%" h="0.8rem" style={{ marginTop: '0.35rem' }} /></div>
+                    ))}
+                </div>
+                <section className={styles.card}><Bone w="8rem" h="1.1rem" /><SkeletonRows count={4} avatar={false} /></section>
+            </Skeleton>
+        );
+    }
 
     const stats = [
         ['users', data.users], ['adminStatAccess', data.withAccess], ['adminStatPending', data.pendingRequests],
@@ -400,7 +413,7 @@ function BroadcastTab() {
             </section>
             <section className={styles.card}>
                 <h2 className={styles.cardTitle}>{t('adminBroadcastsSent')}</h2>
-                {!sent ? <p className={styles.empty} aria-busy="true">{t('adminLoading')}</p>
+                {!sent ? <SkeletonRows count={3} avatar={false} />
                     : sent.length === 0 ? <p className={styles.empty}>{t('adminNoBroadcasts')}</p> : (
                         <ul className={styles.list}>
                             {sent.map(item => (
@@ -438,7 +451,7 @@ export default function Admin() {
             <div className={styles.tabs} role="tablist" aria-label={t('admin')}>
                 {TABS.map(key => (
                     <button key={key} role="tab" aria-selected={tab === key} className={tab === key ? styles.tabActive : undefined} onClick={() => setTab(key)}>
-                        {t({ requests: 'adminRequests', users: 'adminUsers', broadcast: 'adminBroadcast', overview: 'adminOverview' }[key])}
+                        {t({ requests: 'adminRequests', users: 'adminUsers', broadcast: 'adminBroadcast', testers: 'adminTesterFeedback', overview: 'adminOverview' }[key])}
                         {key === 'requests' && pendingCount > 0 && <span className={styles.badge}>{pendingCount}</span>}
                     </button>
                 ))}
@@ -446,6 +459,7 @@ export default function Admin() {
             {tab === 'requests' && <RequestsTab />}
             {tab === 'users' && <UsersTab />}
             {tab === 'broadcast' && <BroadcastTab />}
+            {tab === 'testers' && <AdminTesterFeedback />}
             {tab === 'overview' && <OverviewTab />}
         </div>
     );

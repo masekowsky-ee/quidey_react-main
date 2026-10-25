@@ -1,0 +1,285 @@
+/* Tester variant "Abfahrtstafel" (features/tester/variants.js): the departure board at the
+   station. A night-blue board, white condensed grotesk in time columns (Barlow Semi Condensed,
+   after road and station signage), square signage corners, and the board's yellow only for what
+   happens now or changes. The header (and the phone's tab bar) is the board in both themes.
+   Tabs on top; Home starts with today as departures (DepartureBoard).
+   Everything is under :root[data-ui="tafel"], so nothing changes for anyone else. */
+
+@font-face {
+  font-family: 'Barlow Semi Condensed';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('@fontsource/barlow-semi-condensed/files/barlow-semi-condensed-latin-400-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Barlow Semi Condensed';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('@fontsource/barlow-semi-condensed/files/barlow-semi-condensed-latin-500-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Barlow Semi Condensed';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('@fontsource/barlow-semi-condensed/files/barlow-semi-condensed-latin-600-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Barlow Semi Condensed';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('@fontsource/barlow-semi-condensed/files/barlow-semi-condensed-latin-700-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Barlow Semi Condensed';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 700;
+  src: url('@fontsource/barlow-semi-condensed/files/barlow-semi-condensed-latin-ext-500-normal.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ---------- the board at night (dark, the variant's home scene) ---------- */
+:root[data-ui="tafel"][data-theme] {
+  --board-ground: #0c2253;
+  --board-ink: #ffffff;
+  --board-muted: #aebddf;
+  --board-rule: rgba(255, 255, 255, 0.12);
+  --board-signal: #ffd23f;
+  --board-signal-ink: #191400;
+
+  --bg: #061430;
+  --surface-bar: #0a1d45;
+  --surface-inset: #041027;
+  --surface: #0c2253;
+  --surface-hover: #112b66;
+  --surface-strong: #183677;
+  --border: #173170;
+  --control-border: #2b4886;
+  --border-strong: #7f97cc;
+  --text: #dfe7fb;
+  --text-h: #ffffff;
+  --text-muted: #aebddf;
+
+  --primary: #ffd23f;
+  --primary-text: #191400;
+  --primary-fg: #ffd23f;
+  --danger: #ff806f;
+  --online: #4ade80;
+  --online-text: #6ee7a0;
+  --hover-wash: rgba(255, 255, 255, 0.08);
+
+  --contrast-top: #ffffff;
+  --contrast-bottom: #ffffff;
+  --contrast-text: #061430;
+
+  --radius-sm: 2px;
+  --radius: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+  --shadow-float: 0 16px 40px -16px rgba(0, 3, 12, 0.75);
+  --shadow-modal: 0 24px 64px -24px rgba(0, 3, 12, 0.85);
+  --overlay: rgba(2, 8, 22, 0.62);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.16);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+
+  --sans: 'Barlow Semi Condensed', 'Arial Narrow', system-ui, sans-serif;
+  font: 16.5px/1.45 var(--sans);
+  letter-spacing: 0.005em;
+  font-variant-numeric: tabular-nums;
+  color-scheme: dark;
+}
+
+/* ---------- by day: white platform signs, the board stays night blue ---------- */
+:root[data-ui="tafel"][data-theme="light"] {
+  --board-ground: #0a1d45;
+
+  --bg: #eef1f6;
+  --surface-bar: #0a1d45;
+  --surface-inset: #e5e9f1;
+  --surface: #ffffff;
+  --surface-hover: #f1f4f9;
+  --surface-strong: #dce2ed;
+  --border: #d7dde8;
+  --control-border: #bcc6d8;
+  --border-strong: #2b3c62;
+  --text: #1c2944;
+  --text-h: #091735;
+  --text-muted: #4d5b78;
+
+  --primary: #f2c200;
+  --primary-text: #191400;
+  --primary-fg: #7a5c00;
+  --danger: #b42318;
+  --online: #16a34a;
+  --online-text: #15803d;
+  --hover-wash: rgba(9, 23, 53, 0.06);
+
+  --contrast-top: #0a1d45;
+  --contrast-bottom: #0a1d45;
+  --contrast-text: #ffffff;
+  --shadow-float: 0 14px 36px -14px rgba(9, 23, 53, 0.28);
+  --shadow-modal: 0 22px 60px -22px rgba(9, 23, 53, 0.34);
+  --overlay: rgba(9, 23, 53, 0.32);
+  --scrollbar-thumb: rgba(9, 23, 53, 0.18);
+  --scrollbar-thumb-hover: rgba(9, 23, 53, 0.32);
+  color-scheme: light;
+}
+
+/* the header and the phone's tab bar are the board in both themes: its tokens inside them */
+:root[data-ui="tafel"][data-theme="light"] :is([data-part="header"], [data-part="tabbar"]) {
+  --surface: #0c2253;
+  --surface-hover: #112b66;
+  --surface-strong: #183677;
+  --surface-inset: #061430;
+  --border: #173170;
+  --control-border: #2b4886;
+  --border-strong: #7f97cc;
+  --text: #dfe7fb;
+  --text-h: #ffffff;
+  --text-muted: #aebddf;
+  --primary: #ffd23f;
+  --primary-fg: #ffd23f;
+  --hover-wash: rgba(255, 255, 255, 0.08);
+  --contrast-top: #ffffff;
+  --contrast-text: #061430;
+  color-scheme: dark;
+}
+
+:root[data-ui="tafel"] ::selection {
+  background: color-mix(in srgb, var(--primary) 45%, transparent);
+  color: var(--text-h);
+}
+
+:root[data-ui="tafel"] :where(input, textarea) {
+  caret-color: var(--primary-fg);
+}
+
+/* signage is square: buttons and fields too */
+:root[data-ui="tafel"] :where(button) {
+  border-radius: var(--radius);
+  font-weight: 600;
+}
+
+:root[data-ui="tafel"] :where(button:has(svg)) {
+  border-radius: var(--radius);
+}
+
+:root[data-ui="tafel"] :is(h1, h2) {
+  font-weight: 700;
+  letter-spacing: 0.005em;
+}
+
+:root[data-ui="tafel"] h1 {
+  font-size: 1.75rem;
+}
+
+/* ---------- the strip on top: places as station signs ---------- */
+:root[data-ui="tafel"] [data-part="header"] {
+  border-bottom: none;
+}
+
+:root[data-ui="tafel"] [data-part="topnav"] {
+  align-items: center;
+  background: var(--surface-inset);
+}
+
+:root[data-ui="tafel"] [data-part="topnav-tab"] {
+  height: 2rem;
+  padding: 0 0.85rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: var(--radius);
+}
+
+/* where you are: the white plate with the board's blue on it, like a platform number */
+:root[data-ui="tafel"] [data-part="topnav-tab"]:is([aria-current="page"], [data-active]),
+:root[data-ui="tafel"] [data-part="topnav-tab"]:is([aria-current="page"], [data-active]):hover {
+  color: var(--contrast-text);
+  background: var(--contrast-top);
+}
+
+:root[data-ui="tafel"] [data-part="tabbar"] :is([aria-current="page"], [data-active]) span:first-child {
+  color: var(--contrast-text);
+  background: var(--contrast-top);
+}
+
+:root[data-ui="tafel"] [data-part="menu"] [data-part="menu-item"]:is([aria-current="page"], [data-active]) {
+  color: var(--contrast-text);
+  background: var(--contrast-top);
+}
+
+:root[data-ui="tafel"] [data-part="menu"] [data-part="menu-item"]:is([aria-current="page"], [data-active]) svg {
+  color: var(--contrast-text);
+}
+
+/* ---------- Home: the board first, then the list and focus, the week, the momentum ---------- */
+:root[data-ui="tafel"] [data-part="home"] {
+  gap: 1.25rem;
+}
+
+:root[data-ui="tafel"] [data-part="board"] {
+  order: 0;
+}
+
+:root[data-ui="tafel"] [data-part="home-columns"] {
+  order: 1;
+}
+
+:root[data-ui="tafel"] [data-part="home-week"] {
+  order: 2;
+}
+
+:root[data-ui="tafel"] [data-part="home-momentum"] {
+  order: 3;
+}
+
+/* the next days as small boards: day and date in the white of the signs */
+:root[data-ui="tafel"] [data-part="week-day"] {
+  border-radius: var(--radius);
+}
+
+:root[data-ui="tafel"] [data-part="week-day"] > :first-child {
+  font-weight: 700;
+}
+
+:root[data-ui="tafel"] [data-part="week-day"][data-today]::before {
+  height: 3px;
+}
+
+/* the list reads like the board: the time first, in columns */
+:root[data-ui="tafel"] [data-part="task-row"] {
+  font-size: 1.0625rem;
+}
+
+:root[data-ui="tafel"] [data-part="task-check"] {
+  border-radius: 2px;
+  corner-shape: round;
+}
+
+/* the running focus: the board's yellow plate on its title */
+:root[data-ui="tafel"] [data-part="focus"][data-active] > h2 {
+  align-self: flex-start;
+  padding: 0 0.5rem;
+  color: var(--primary-text);
+  background: var(--primary);
+  border-radius: var(--radius-sm);
+}
+
+:root[data-ui="tafel"] [data-part="timer"] h2 {
+  font-size: 2.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}

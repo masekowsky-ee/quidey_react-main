@@ -160,7 +160,7 @@ export default function TimerContainer(props){
     }
 
     return(
-        <div className={inline ? styles.inlinePanel : styles.panel}>
+        <div className={inline ? styles.inlinePanel : styles.panel} data-part="timer">
             <div className={styles.panelHead}>
                 <div className={styles.modeSwitch} role="group" aria-label={t('timerMode')}>
                     {['timer', 'stopwatch'].map(mode =>

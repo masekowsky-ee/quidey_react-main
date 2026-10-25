@@ -12,6 +12,7 @@ import CompletedTasks from './CompletedTasks.jsx';
 import SessionList from './stats/SessionList.jsx';
 import TimeChart from './stats/TimeChart.jsx';
 import Icon from './calendar/icons.jsx';
+import { Bone, Skeleton } from './skeleton/Skeleton.jsx';
 
 const TABS = ['overview', 'sessions', 'done'];
 
@@ -96,7 +97,29 @@ function Bars({ rows, empty }) {
 // Overview of a period: numbers, time per day/month, time per event type, focus per group
 function Overview({ period, stats, error, t, locale }) {
     if (error) return <p className={`${styles.card} ${styles.empty}`} role="alert">{t('statsLoadError')}</p>;
-    if (!stats) return <div className={styles.loading} aria-busy="true" />;
+    if (!stats) {
+        return (
+            <Skeleton style={{ display: 'contents' }}>
+                <div className={styles.tiles}>
+                    {[0, 1, 2, 3].map(i => (
+                        <div key={i} className={styles.tile}><Bone w="60%" h="0.8125rem" /><Bone w="3.5rem" h="1.375rem" style={{ marginTop: '0.3rem' }} /></div>
+                    ))}
+                </div>
+                <section className={styles.card}>
+                    <Bone w="9rem" h="1.1rem" />
+                    <Bone w="100%" h="12rem" style={{ marginTop: '1rem' }} />
+                </section>
+                <div className={styles.twoCols}>
+                    {[0, 1].map(i => (
+                        <section key={i} className={styles.card}>
+                            <Bone w="7rem" h="1.1rem" />
+                            {['80%', '55%', '35%'].map(w => <Bone key={w} w={w} h="0.75rem" style={{ marginTop: '0.9rem' }} />)}
+                        </section>
+                    ))}
+                </div>
+            </Skeleton>
+        );
+    }
     const { buckets, labelEvery } = chartBuckets(t, locale, period, stats);
     const typeRows = stats.events.types.map(type => ({
         key: type.id ?? 'none',

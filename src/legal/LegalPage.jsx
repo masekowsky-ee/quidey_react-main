@@ -335,6 +335,15 @@ function Privacy() {
                 lit. b DSGVO. Die Nachrichten lösche ich, sobald die Anfrage erledigt ist, spätestens nach
                 12 Monaten, sofern keine gesetzliche Aufbewahrungspflicht besteht.
             </p>
+            <p>
+                <strong>Bewertungen als Tester:</strong> Bist du Tester, kannst du im Testbereich neue Gestaltungen
+                der App und Funktionen im Test mit 1 bis 5 Sternen bewerten und kommentieren. Gespeichert werden je
+                Thema deine Sterne, dein Kommentar und wann du sie zuletzt geändert hast, zusammen mit deinem Konto.
+                Sehen können sie nur du und die Admins (mit deinem Benutzer- und Anzeigenamen), damit ich auswerten
+                kann, was gut ankommt und was nicht. Du kannst jede Bewertung jederzeit ändern oder entfernen; mit
+                deinem Konto werden sie gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (Verbesserung der
+                App anhand der Rückmeldungen ihrer Tester).
+            </p>
 
             <h2>8. Speicherung auf deinem Gerät</h2>
             <p>
@@ -344,7 +353,7 @@ function Privacy() {
                 <li>dein Anmelde-Token (7 Tage gültig, wird beim Abmelden gelöscht). Meldest du auf demselben Gerät
                     mehrere Konten an, um zwischen ihnen zu wechseln, liegen für jedes davon Token, Benutzer- und
                     Anzeigename (höchstens fünf Konten); beim Abmelden eines Kontos wird sein Eintrag gelöscht;</li>
-                <li>deine Einstellungen: Sprache, Design, Farbpalette, Akzentfarbe, Animationen, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer oder Stoppuhr, Kalenderansicht;</li>
+                <li>deine Einstellungen: Sprache, Design, Farbpalette, Akzentfarbe, Animationen, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer oder Stoppuhr, Kalenderansicht, als Tester die gewählte Gestaltung der App;</li>
                 <li>ob du die Einführung gesehen hast, welche Erinnerungen schon angezeigt wurden, an welchem Tag dich Quidey zuletzt an deine Serie erinnert hat und welche gemeinsame Sitzung gerade gestoppt wird;</li>
                 <li>Schwierigkeit und Bestwerte der Spiele.</li>
             </ul>
@@ -367,7 +376,7 @@ function Privacy() {
             <p>
                 Deine Konto- und Inhaltsdaten speichere ich, solange dein Konto besteht. Löschst du dein Konto, werden
                 Konto, Aufgaben, Events, Event-Typen, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen,
-                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen und alle
+                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen, deine Bewertungen als Tester und alle
                 Nachrichten, die du geschrieben oder bekommen hast, sofort gelöscht – auch beim Gegenüber, auch deine
                 Nachrichten in Family-Chats. Einträge in Protokollen (Verlauf gemeinsamer Sitzungen, Admin-Protokoll)
                 und von dir angelegte Einträge in Family-Kalendern verlieren den Bezug zu deinem Konto. Hast du eine

@@ -12,7 +12,8 @@ const initialOf = (name) => (String(name ?? '?').trim()[0] ?? '?').toUpperCase()
 // Who is signed in, at the foot of the menu: a tap opens the accounts on this device (one tap
 // switches), the profile, "add account" and "sign out". onNavigate: the drawer closes when a
 // link is used.
-export default function AccountSwitcher({ onNavigate }) {
+// compact: only the avatar (the narrow rail of a tester variant); the accounts open beside it
+export default function AccountSwitcher({ onNavigate, compact = false }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const user = useSelector(state => state.auth.user);
@@ -46,7 +47,7 @@ export default function AccountSwitcher({ onNavigate }) {
     if (!username) return null;
 
     return (
-        <div className={styles.wrap} ref={wrapRef}>
+        <div className={`${styles.wrap} ${compact ? styles.compact : ''}`} ref={wrapRef}>
             {open &&
                 <div className={styles.menu} id={menuId} role="menu" aria-label={t('accounts')}>
                     <div className={styles.current}>

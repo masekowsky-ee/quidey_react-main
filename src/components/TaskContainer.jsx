@@ -155,7 +155,7 @@ export default function TaskContainer(props){
     };
 
     return (
-        <section className={styles.section} aria-labelledby="tasks-title">
+        <section className={styles.section} aria-labelledby="tasks-title" data-part="task-list">
             {taskInEditor && <TaskEditDialog task={taskInEditor} onClose={closeEditor} />}
             <div className={styles.sectionHead}>
                 <button className={styles.collapseBtn} onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed}

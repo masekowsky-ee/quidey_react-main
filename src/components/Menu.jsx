@@ -16,7 +16,8 @@ import { selectTaskInviteCount } from '../features/tasks/taskAction';
 import { selectIsAdmin, selectAdminPendingCount } from '../features/admin/adminAction';
 import { selectInboxCount } from '../features/inbox/inbox';
 import { selectFamilies, selectFamilyInviteCount } from '../features/family/family';
-import { DESKTOP_QUERY, useMediaQuery } from '../features/layout/breakpoints';
+import { useMenuDocked, useNavModel } from '../features/tester/variants';
+import { selectIsTester } from '../features/auth/tester';
 import AccountSwitcher from './AccountSwitcher';
 import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, useMotionLevel } from '../features/settings/motion';
@@ -26,7 +27,7 @@ import { MOTION, useMotionLevel } from '../features/settings/motion';
 function MenuLink({ to, end, match, icon, label, onClick, count = 0, countLabel, news = false, newsLabel }) {
     const { pathname } = useLocation();
     return (
-        <NavLink to={to} end={end} onClick={onClick}
+        <NavLink to={to} end={end} onClick={onClick} data-part="menu-item" data-active={match?.(pathname) || undefined}
             className={({ isActive }) => `${styles.menuItem} ${isActive || match?.(pathname) ? styles.active : ''}`}>
             <Icon name={icon} className={styles.menuIcon} />
             <span className={styles.menuLabel}>{label}</span>
@@ -45,7 +46,7 @@ function OnlineFriendsRow({ onClick }) {
     if (online.length === 0) return null;
     const names = online.map(friend => displayName(friend)).join(', ');
     return (
-        <Link to={COMMUNITY_PATHS.friends} className={styles.onlineRow} onClick={onClick}
+        <Link to={COMMUNITY_PATHS.friends} className={styles.onlineRow} onClick={onClick} data-part="menu-sub"
             aria-label={`${fill(t(online.length === 1 ? 'onlineFriendsOne' : 'onlineFriendsCount'), { count: online.length })}: ${names}`}
             title={names}>
             <span className={styles.onlineFaces} aria-hidden="true">
@@ -64,7 +65,7 @@ function FamilyLinks({ onClick }) {
     const families = useSelector(selectFamilies);
     if (families.length === 0) return null;
     return (
-        <ul className={styles.familyLinks} aria-label={t('myFamilies')}>
+        <ul className={styles.familyLinks} aria-label={t('myFamilies')} data-part="menu-sub">
             {families.map(family => (
                 <li key={family.id}>
                     <NavLink to={`/family/${family.id}`} onClick={onClick}
@@ -79,11 +80,15 @@ function FamilyLinks({ onClick }) {
 }
 
 // The app's navigation. On a wide screen a sidebar that is always there; narrower, a drawer
-// from the left (opened by the header's menu button or the tab bar's "More").
+// from the left (opened by the header's menu button or the tab bar's "More"). Testers' interface
+// variants can make it a narrow rail, or keep it a drawer on wide screens too (their main places
+// are tabs in the header then, see features/tester/variants.js).
 export default function Menu(){
-    const desktop = useMediaQuery(DESKTOP_QUERY);
+    const docked = useMenuDocked();
+    const nav = useNavModel();
     const showMenu = useSelector((state) => state.settings.showMenu);
-    const isOpen = showMenu && !desktop;
+    const isOpen = showMenu && !docked;
+    const isTester = useSelector(selectIsTester);
     const incomingCount = useSelector(selectIncomingCount);
     const inviteCount = useSelector(selectInviteCount);
     const taskInviteCount = useSelector(selectTaskInviteCount);
@@ -118,10 +123,11 @@ export default function Menu(){
     return (
         <>
             <AnimatePresence>
-                {isOpen && <motion.div className={styles.overlay} onClick={onClose} {...overlayMotion} />}
+                {isOpen && <motion.div className={`${styles.overlay} ${nav === 'top' ? styles.undocked : ''}`} onClick={onClose} {...overlayMotion} />}
             </AnimatePresence>
             {/* a closed drawer is off screen: out of the tab order and hidden from screen readers too */}
-            <div className={`${styles.menuDiv} ${isOpen ? styles.open : ''}`} inert={!desktop && !isOpen}>
+            <div className={[styles.menuDiv, isOpen && styles.open, nav === 'top' && styles.undocked, nav === 'rail' && styles.rail].filter(Boolean).join(' ')}
+                inert={!docked && !isOpen} data-part="menu">
                 <div className={styles.menuHead}>
                     <Link to="/" className={styles.brand} onClick={onClose} aria-label={`Quidey, ${t('home')}`}>
                         <Logo className={styles.brandMark} />
@@ -156,6 +162,8 @@ export default function Menu(){
 
                 {/* settings, feedback and admin sit at the bottom, the account last */}
                 <div className={styles.menuBottom}>
+                    {/* testers: switch the interface variant, rate what is being tested */}
+                    {isTester && <MenuLink to="/tester" icon="flask" label={t('testerNav')} onClick={onClose} />}
                     {isAdmin && (
                         <MenuLink to="/admin" icon="admin" label={t('admin')} onClick={onClose}
                             count={adminPendingCount} countLabel={t('adminOpenRequests')} />
@@ -164,7 +172,7 @@ export default function Menu(){
                     <MenuLink to="/feedback" icon="feedback" label={t('feedback')} onClick={onClose} />
                     {/* who is signed in: profile, switch accounts, add one, sign out */}
                     <div className={styles.account}>
-                        <AccountSwitcher onNavigate={onClose} />
+                        <AccountSwitcher onNavigate={onClose} compact={nav === 'rail'} />
                     </div>
                 </div>
             </div>

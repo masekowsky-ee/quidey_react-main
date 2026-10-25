@@ -17,6 +17,7 @@ import { reminderAt } from '../features/tasks/reminders';
 import { dateKey, taskStart, timeText } from '../features/calendar/calendar';
 import { showToast } from '../features/toast/toast';
 import TaskInvites from './task/TaskInvites.jsx';
+import { Bone, Skeleton, SkeletonRows } from './skeleton/Skeleton.jsx';
 
 import Icon from './icons';
 const TABS = ['messages', 'requests', 'notices', 'reminders'];
@@ -92,7 +93,7 @@ function Conversations({ onOpen, selected = null, newChat = true }) {
     const others = friends.filter(friend => !talkedTo.has(friend.id));
 
     if (error) return <p className={styles.error}>{errorText(t, error)}</p>;
-    if (!conversations) return <p className={styles.empty} aria-busy="true">{t('loading')}</p>;
+    if (!conversations) return <SkeletonRows count={4} />;
 
     return (
         <>
@@ -181,7 +182,13 @@ function Thread({ userId, onBack }) {
                 {onBack && <button className={styles.backBtn} onClick={onBack} aria-label={t('back')}>←</button>}
                 {thread && <><Avatar user={thread.user} presence /><h2 className={styles.threadName}><Link to={`/u/${thread.user.username}`}>{displayName(thread.user)}</Link></h2></>}
             </div>
-            {!thread && !error && <p className={styles.empty} aria-busy="true">{t('loading')}</p>}
+            {!thread && !error && (
+                <Skeleton className={styles.messages}>
+                    {['55%', '40%', '65%', '30%'].map((w, i) => (
+                        <Bone key={i} w={w} h="2.25rem" style={{ borderRadius: '14px', alignSelf: i % 2 ? 'flex-end' : 'flex-start' }} />
+                    ))}
+                </Skeleton>
+            )}
             {thread && (
                 <ol className={styles.messages} aria-live="polite">
                     {thread.messages.length === 0 && <li className={styles.empty}>{t('inboxSayHello')}</li>}
@@ -334,7 +341,7 @@ function Notices() {
     };
 
     if (error) return <p className={styles.error}>{errorText(t, error)}</p>;
-    if (!notices) return <p className={styles.empty} aria-busy="true">{t('loading')}</p>;
+    if (!notices) return <SkeletonRows count={4} avatar={false} />;
     if (notices.length === 0) return <p className={styles.empty}>{t('inboxNoNotices')}</p>;
 
     return (

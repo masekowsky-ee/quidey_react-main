@@ -1,4 +1,5 @@
-import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS, SET_PALETTE } from "./settingsActionTypes";
+import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS, SET_PALETTE, SET_UI_VARIANT } from "./settingsActionTypes";
+import { UI_VARIANT_IDS, readStoredUiVariant } from "../tester/variants";
 import { THEMES, readStoredTheme } from "./theme";
 import { HOME_LAYOUTS, readStoredHomeLayout } from "./homeLayout";
 import { MOTION_LEVELS, readStoredMotion } from "./motion";
@@ -18,6 +19,7 @@ const intitialState = {
     defaultSessionMinutes: readStoredSessionMinutes(), // length of new sessions, remembered in localStorage
     motion: readStoredMotion(), // 'minimal' | 'normal' | 'extreme', remembered in localStorage
     showSharedTasks: readStoredShowSharedTasks(), // shared sessions' tasks in Home's list, remembered in localStorage
+    uiVariant: readStoredUiVariant(), // testers: the interface variant (features/tester/variants.js), remembered in localStorage
 }
 
 const settingsReducer = (state = intitialState, action) => {
@@ -46,6 +48,8 @@ const settingsReducer = (state = intitialState, action) => {
             return SESSION_LENGTHS.includes(action.payload) ? { ...state, defaultSessionMinutes: action.payload } : state;
         case SET_MOTION:
             return MOTION_LEVELS.includes(action.payload) ? { ...state, motion: action.payload } : state;
+        case SET_UI_VARIANT:
+            return UI_VARIANT_IDS.includes(action.payload) ? { ...state, uiVariant: action.payload } : state;
         case SET_SHOW_TUTORIAL:
             return { ...state, showTutorial: Boolean(action.payload) };
         default:

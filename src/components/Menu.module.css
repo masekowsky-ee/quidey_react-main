@@ -435,3 +435,102 @@
   padding-top: 8px;
   border-top: 1px solid var(--border);
 }
+
+/* ---------- testers' interface variants (features/tester/variants.js) ---------- */
+@media (min-width: 1100px) {
+  /* "tabs on top": the main places are in the header, the menu stays a drawer on wide screens
+     too (the sidebar rules above are undone) */
+  .menuDiv.undocked {
+    width: 260px;
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    z-index: var(--z-menu);
+    background: var(--surface);
+    padding: 20px;
+    padding-top: calc(20px + env(safe-area-inset-top, 0px));
+    padding-left: calc(20px + env(safe-area-inset-left, 0px));
+  }
+
+  .menuDiv.undocked.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-float);
+  }
+
+  .undocked .menuHead {
+    height: auto;
+    margin: 0 0 20px;
+    padding: 0 4px 0 12px;
+  }
+
+  .undocked .menuHead > .closeBtn {
+    display: inline-flex;
+  }
+
+  .overlay.undocked {
+    display: block;
+  }
+
+  /* "rail": a narrow column of icons, each name small under its icon */
+  .menuDiv.rail {
+    padding: 0 6px 12px;
+    padding-left: calc(6px + env(safe-area-inset-left, 0px));
+    align-items: stretch;
+  }
+
+  .rail .menuHead {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .rail .brand > span,
+  .rail .groupLabel,
+  .rail .familyLinks,
+  .rail .onlineRow {
+    display: none;
+  }
+
+  .rail .groupLabel + .menuList {
+    margin-top: 12px;
+  }
+
+  .rail .menuItem {
+    position: relative;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 2px 7px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .rail .menuLabel {
+    flex: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rail .menuIcon {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  /* counts and dots sit on the icon's corner */
+  .rail .badge,
+  .rail .dot {
+    position: absolute;
+    top: 3px;
+    right: calc(50% - 1.35rem);
+    margin: 0;
+  }
+
+  .rail .menuBottom {
+    gap: 0;
+  }
+
+  .rail .account {
+    display: flex;
+    justify-content: center;
+  }
+}

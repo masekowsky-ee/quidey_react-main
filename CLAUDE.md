@@ -49,7 +49,8 @@ Order of checks on every render:
    sign-up card, legal footer). `/signup` opens on sign-up; the landing page's email line hands
    the address over as `#email=…` (read once, then removed from the URL). Signed in, `/signin`
    and `/signup` redirect to `/`. `LANDING_URL` in `src/features/site.js`.
-4. Signed in, access not checked yet → `AccessPending`; not pro → `/beta` (`BetaGate`, user can
+4. Signed in, access not checked yet → `AppSkeleton` (the app's frame in grey, after 5 s
+   "Verbindung…" + retry / sign out); not pro → `/beta` (`BetaGate`, user can
    request beta access).
 5. Pro → full app in the frame `AppShell.module.css`: `Header`, `Menu`, `TabBar`, `Toaster`,
    `Tutorial`, animated page routes in `<main>`. Widths (`src/features/layout/breakpoints.js`,
@@ -196,7 +197,36 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   From 1100px the messages tab is split: conversations beside the open one (`?with=<userId>`).
 - `/feedback` — feedback form (mailed to the owner).
 - `/admin` — only for `isAdmin`: overview, beta requests (approve/decline), users (pro/admin
-  toggles), broadcasts, admin action log.
+  toggles), broadcasts, tester feedback (`?tab=testers`, `tester/AdminTesterFeedback.jsx`:
+  average, star spread, "favourite of N", comments per topic), admin action log.
+- `/tester` — **Testbereich**, testers only (`TesterOnly` route guard; menu entry "Tester" beside
+  Admin, also in the top tabs and the command bar). `components/tester/Tester.jsx`: the interface
+  variants (preview, "Verwenden", stars 1–5 + comment each), "Dein Vergleich" (my variants by my
+  stars) and the features in test (`TEST_FEATURES` in `src/features/tester/feedback.js`: add/remove
+  an entry + texts `testerFeature_<id>` / `testerFeatureHint_<id>` in `i18n/testerTexts.js`, no
+  server change). A star saves at once (same star again removes it), the comment with its button.
+  API `GET /api/tester/feedback`, `PUT|DELETE /api/tester/feedback/:topic` (topics `ui:<variant>`,
+  `feature:<id>`), admins `GET /api/admin/tester-feedback` (migration 027).
+- Interface variants (testers only, `src/features/tester/variants.js`, `settings.uiVariant`,
+  localStorage `uiVariant`; everybody else always gets `current`): `current` (today's look),
+  `schulheft` (white squared paper, ballpoint blue, red margin only on the task in focus, Lexend,
+  tabs on top, week as a timetable), `lesesaal` (bottle green + brass lamp light on the focus card,
+  Source Serif 4 / Source Sans 3, narrow icon rail, Home one column with focus first + `Seats`),
+  `uebersicht` (dense, M PLUS 1 at a 14px root, hairline modules with red tabs, compact sidebar +
+  command bar Ctrl/⌘ K `variants/CommandPalette.jsx`, Home as a grid mosaic), `tafel` (night-blue
+  departure board, Barlow Semi Condensed, yellow only for now/changes, tabs on top, Home starts
+  with `variants/DepartureBoard.jsx`). Each variant has a light and a dark rendition.
+  How it works: `<html data-ui>` (set by `useApplyUiVariant` once the variant's stylesheet
+  `src/ui-variants/<id>.css` has loaded — a lazy chunk, fonts self-hosted, latin subsets only);
+  its tokens override palette/accent. Every rule is under `:root[data-ui="<id>"]` and targets
+  `data-part` hooks (`shell`, `header`, `menu`, `menu-item`, `topnav-tab`, `tabbar`, `home`,
+  `home-title|week|momentum|columns|list|focus`, `week-day`, `task-row`, `task-check`, `focus`
+  (+ `data-active`), `timer`, `board`, `seats`), active nav items carry `aria-current` or
+  `data-active`. The navigation model per variant (`UI_VARIANTS[id].nav`: `sidebar | rail | top |
+  command`, `useNavModel()`, `useMenuDocked()`) is generic: `AppShell.module.css` (`data-nav` on the
+  shell sets `--sidebar-w`, and for `top` a taller `--header-h`), `Menu.module.css` (`.undocked`
+  drawer on wide screens, `.rail`), `Header` (`TopNav` row, command field). Surface brief:
+  `.impeccable/surfaces/src-app-jsx.md`.
 - `/fun` — hidden mini-games (word guess, scramble, sequence, stats), reached only via the
   daily line in the header.
 - Task sharing: send a task to a friend (`task_shares`), accepted shares appear in their list.
@@ -230,7 +260,8 @@ for the app's own files: `token` (JWT), `accounts` (several accounts on one devi
 `[{ username, displayName, token }]`, max 5, `src/features/auth/accounts.js`; switching reloads
 the app as the other one, signing out takes over the next remembered account), `language`, `accent`,
 `theme`, `palette`, `motion`, `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
-`teamSessionId`, `streakNudge` (day of the last streak reminder). `public/theme-init.js` applies
+`teamSessionId`, `streakNudge` (day of the last streak reminder), `uiVariant` (testers' interface
+variant). `public/theme-init.js` applies
 the theme before React loads.
 
 ## API access
@@ -247,7 +278,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.

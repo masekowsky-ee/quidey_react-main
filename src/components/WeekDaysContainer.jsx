@@ -23,13 +23,14 @@ export default function WeekDaysContainer(){
     const tasksByDay = groupByDay(tasks);
 
     return (
-        <div className={styles.weekStrip}>
+        <div className={styles.weekStrip} data-part="week">
             <div className={styles.days}>
                 {weekDates.map((date, i) => {
                     const key = dateKey(date);
                     const dayTasks = tasksByDay[key] ?? [];
                     return (
-                        <Link to={`/calendar?date=${key}&day=${key}`} className={`${styles.day} ${i === 0 ? styles.today : ''}`} key={key}>
+                        <Link to={`/calendar?date=${key}&day=${key}`} className={`${styles.day} ${i === 0 ? styles.today : ''}`} key={key}
+                            data-part="week-day" data-today={i === 0 ? 'true' : undefined}>
                             <div className={styles.dayHead}>
                                 <span className={styles.weekday}>{i === 0 ? t('today') : t(days[date.getDay()])}</span>
                                 <span className={styles.dayNum}>{date.getDate()}.{date.getMonth() + 1}</span>

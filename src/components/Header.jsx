@@ -12,6 +12,9 @@ import { selectMenuBadgeCount } from '../features/inbox/inbox'
 import { selectHasNews } from '../features/realtime/news'
 import { useTranslation } from '../i18n/useTranslation'
 import { fill } from '../features/helperFunction'
+import TopNav from './variants/TopNav'
+import { openCommands } from '../features/tester/commands'
+import { UI_VARIANTS, useNavModel, useUiVariant } from '../features/tester/variants'
 
 function formatTime(ms) {
     const h = Math.floor(ms / 3600000);
@@ -49,10 +52,13 @@ export default function Header(props){
     const { t } = useTranslation();
     const timer = useSelector((state) => state.session.timer);
     const timerMode = useSelector((state) => state.session.timerMode);
+    // testers' interface variants: tabs on top (with the menu as a drawer), or a command bar
+    const nav = useNavModel();
+    const commandBar = UI_VARIANTS[useUiVariant()].nav === 'command';
     return (
-        <div className={styles.header}>
+        <div className={`${styles.header} ${nav === 'top' ? styles.undocked : ''}`} data-part="header">
             {token && <>
-                <div className={styles.div}>
+                <div className={styles.div} data-part="header-row">
                     {/* tablets only: desktop has the sidebar, phones the tab bar's "More" */}
                     <button onClick={()=>showMenu()} className={`${styles.btn} ${styles.menuBtn}`}
                         aria-label={badgeCount > 0 ? `${t('menu')}, ${badgeCount} ${t('inboxUnread')}` : hasNews ? `${t('menu')}, ${t('menuNews')}` : t('menu')}>
@@ -75,6 +81,13 @@ export default function Header(props){
                                 </div>}
                             </div>}
                         <TeamWorkPill />
+                        {commandBar &&
+                            <button type="button" className={styles.commandBtn} onClick={openCommands}
+                                aria-label={`${t('commandOpen')} (${t('commandShortcut')})`} aria-keyshortcuts="Control+K Meta+K">
+                                <Icon name="search" size={16} />
+                                <span className={styles.commandText}>{t('commandPlaceholder')}</span>
+                                <kbd className={styles.commandKbd}>{t('commandShortcut')}</kbd>
+                            </button>}
                     </div>
                     <div className={styles.end}>
                         <StreakPill />
@@ -88,6 +101,7 @@ export default function Header(props){
                         </button>
                     </div>
                 </div>
+                {nav === 'top' && <TopNav />}
             </>}
         </div>
     );

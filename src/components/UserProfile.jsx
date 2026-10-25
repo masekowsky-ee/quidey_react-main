@@ -11,6 +11,7 @@ import { setCustomError } from '../features/settings/settingsAction';
 import ProfileCard from './profile/ProfileCard.jsx';
 import ProfileStats from './profile/ProfileStats.jsx';
 import ProfileAvatar from './profile/ProfileAvatar.jsx';
+import { Bone, Skeleton } from './skeleton/Skeleton.jsx';
 
 // Translated message for a friends API error, using the error code the backend sends
 function errorText(t, err) {
@@ -60,14 +61,33 @@ export default function UserProfile() {
     const status = state.username === username ? state.status : 'loading';
     if (status === 'ready' && profile.relation === 'self') return <Navigate to="/profile" replace />;
 
+    // the profile card's shape: banner, avatar over its edge, name, handle, a few lines
+    if (status === 'loading') {
+        return (
+            <Skeleton className={styles.page}>
+                <div className={styles.pageTop} />
+                <section className={styles.card}>
+                    <div className={styles.banner} data-banner="none" />
+                    <div className={styles.body}>
+                        <div className={styles.top}><Bone round w="5.5rem" style={{ boxShadow: '0 0 0 4px var(--surface)' }} /></div>
+                        <Bone w="11rem" h="1.375rem" style={{ marginTop: '0.25rem' }} />
+                        <Bone w="7rem" />
+                        <Bone w="85%" style={{ marginTop: '0.5rem' }} />
+                        <Bone w="60%" />
+                    </div>
+                </section>
+            </Skeleton>
+        );
+    }
+
     if (status !== 'ready') {
         return (
             <div className={styles.page}>
                 <div className={styles.pageTop} />
-                <p className={styles.notice} aria-busy={status === 'loading'} role={status === 'loading' ? undefined : 'alert'}>
-                    {t({ loading: 'loading', missing: 'profileNotFound', error: 'profileLoadError' }[status])}
+                <p className={styles.notice} role="alert">
+                    {t({ missing: 'profileNotFound', error: 'profileLoadError' }[status])}
                 </p>
-                {status !== 'loading' && <Link to={COMMUNITY_PATHS.friends}>{t('profileBackToFriends')}</Link>}
+                <Link to={COMMUNITY_PATHS.friends}>{t('profileBackToFriends')}</Link>
             </div>
         );
     }

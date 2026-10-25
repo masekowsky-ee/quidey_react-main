@@ -1,4 +1,6 @@
-/* Intro tour: one card at a time over a dimmed, blurred page */
+/* Intro tour: one card at a time over a dimmed, blurred page. Each card has a stage (the step's
+   small scene, TourPreview) above its words; wide screens put the two side by side. The
+   accent stays on the scenes' data: dots, progress and buttons are ink. */
 
 .backdrop{
     composes: overlay from './ui.module.css';
@@ -15,7 +17,7 @@
     width: min(28rem, 100%);
     max-height: calc(100svh - 2rem);
     overflow-y: auto;
-    padding: 1.25rem 1.5rem 1.5rem;
+    padding: 1.1rem 1.25rem 1.25rem;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -49,13 +51,27 @@
     color: var(--text-muted);
 }
 
+/* Thin bar under the counter: how far along the tour is */
+.progress{
+    height: 2px;
+    margin-top: -0.6rem;
+    border-radius: var(--radius-pill);
+    background: var(--surface-strong);
+    overflow: hidden;
+}
+
+.progressFill{
+    height: 100%;
+    border-radius: inherit;
+    background: var(--text-h);
+    transform-origin: left;
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
 .body{
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.6rem;
-    min-height: 19rem;
-    text-align: center;
+    gap: 1rem;
     touch-action: pan-y; /* horizontal swipes turn the page, vertical ones still scroll */
     cursor: grab;
 }
@@ -64,110 +80,150 @@
     cursor: grabbing;
 }
 
-/* Thin bar under the counter: how far along the tour is */
-.progress{
-    height: 3px;
-    margin-top: -0.5rem;
-    border-radius: 999px;
-    background: var(--surface-strong);
+/* the step's scene on a sunken well */
+.stage{
+    flex: none;
+    height: 10rem;
+    padding: 0.75rem;
+    box-sizing: border-box;
     overflow: hidden;
+    background: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
 }
 
-.progressFill{
-    height: 100%;
-    border-radius: inherit;
-    background: var(--primary);
-    transition: width 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-}
-
-/* Calm disc behind the step's icon, a pale wash of the accent */
-.iconWrap{
-    width: 4.5rem;
-    height: 4.5rem;
+.copy{
     display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    corner-shape: round;
-    color: var(--primary-fg);
-    background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.55rem;
+    min-height: 15rem;
+    text-align: left; /* #root centres */
 }
 
-.icon{
-    width: 2.25rem;
-    height: 2.25rem;
-}
-
-/* The welcome card shows the logo itself, a bit larger than the step icons */
-.logo{
-    width: 4.5rem;
-    height: 4.5rem;
-}
-
+/* the chapter's name, or the greeting on the first card */
 .eyebrow{
-    margin: 0.25rem 0 -0.4rem;
-    font-size: 0.875rem;
+    margin: 0;
+    font-size: 0.8125rem;
     font-weight: 500;
-    color: var(--primary-fg);
-}
-
-/* "Beta" on steps only testers see */
-.badge{
-    padding: 0.1rem 0.55rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    color: var(--primary-fg);
-    background: color-mix(in srgb, var(--primary) 14%, var(--surface));
-    border-radius: 999px;
+    color: var(--text-muted);
 }
 
 .title{
-    margin: 0.35rem 0 0;
+    margin: 0;
     font-size: 1.375rem;
     font-weight: 600;
+    line-height: 1.2;
     letter-spacing: -0.02em;
+    color: var(--text-h);
+    text-wrap: balance;
 }
 
 .text{
-    max-width: 24rem;
     margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 400;
     line-height: 1.55;
     color: var(--text);
+    text-wrap: pretty;
 }
 
-/* Two or three short tips, left aligned with a small accent mark */
+/* Two or three short tips with a small mark */
 .tips{
     width: 100%;
-    max-width: 24rem;
-    margin: 0.25rem 0 0;
-    padding: 0.75rem 0.9rem;
+    margin: 0.15rem 0 0;
+    padding: 0;
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    text-align: left;
+    gap: 0.45rem;
     font-size: 0.875rem;
     line-height: 1.45;
     color: var(--text-muted);
-    background: color-mix(in srgb, var(--primary) 5%, var(--surface));
-    border-radius: var(--radius-sm);
 }
 
 .tip{
     position: relative;
-    padding-left: 1.1rem;
+    padding-left: 1rem;
 }
 
 .tip::before{
     content: '';
     position: absolute;
     left: 0.1rem;
-    top: 0.5em;
-    width: 0.4rem;
-    height: 0.4rem;
+    top: 0.55em;
+    width: 0.35rem;
+    height: 0.35rem;
     border-radius: 50%;
-    background: var(--primary);
+    corner-shape: round;
+    background: var(--border-strong);
+}
+
+/* Welcome: every chapter as a chip, to jump straight there */
+.chapters{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.25rem;
+}
+
+.chapter{
+    height: 2rem;
+    padding: 0 0.8rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: var(--radius-pill);
+}
+
+/* Last card: three first things to do */
+.firstSteps{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+}
+
+.firstStepsTitle{
+    margin: 0 0 0.1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.firstStep{
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    height: 2.5rem;
+    padding: 0 0.85rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: left;
+    color: var(--text-h);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+}
+
+.firstStep:hover{
+    background: var(--surface-hover);
+    border-color: var(--border-strong);
+}
+
+.firstStep span{
+    flex: 1;
+}
+
+.firstStepArrow{
+    color: var(--text-muted);
+    transition: transform var(--ease-out);
+}
+
+.firstStep:hover .firstStepArrow{
+    transform: translateX(3px);
 }
 
 /* "Open calendar ->": to the page the step is about */
@@ -177,14 +233,15 @@
     align-items: center;
     gap: 0.4rem;
     height: 2rem;
-    margin-top: auto;
+    margin: auto 0 0 -0.75rem;
     padding: 0 0.75rem;
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--primary-fg);
+    color: var(--text-h);
 }
 
 .open span{
+    color: var(--text-muted);
     transition: transform var(--ease-out);
 }
 
@@ -198,7 +255,7 @@
     gap: 0.4rem;
 }
 
-/* Small pill per step; the current one is wider and accent-colored */
+/* Small pill per step; the current one is wider and in full ink */
 .dot{
     position: relative;
     width: 0.5rem;
@@ -206,7 +263,7 @@
     min-width: 0;
     padding: 0;
     border: none;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background-color: var(--surface-strong);
     box-shadow: none;
     transition: width var(--ease-out), background-color var(--ease-out);
@@ -230,13 +287,13 @@
 }
 
 .dotDone{
-    background-color: color-mix(in srgb, var(--primary) 45%, var(--surface-strong));
+    background-color: var(--border-strong);
 }
 
 .dotActive,
 .dotActive:hover{
     width: 1.5rem;
-    background-color: var(--primary);
+    background-color: var(--text-h);
 }
 
 .actions{
@@ -274,19 +331,57 @@
     }
 }
 
-@media (max-width: 480px){
+/* wide screens: the scene beside the words, one height for every step */
+@media (min-width: 900px){
     .dialog{
-        padding: 1rem 1.1rem 1.25rem;
+        width: min(50rem, 100%);
+        padding: 1.25rem 1.5rem 1.5rem;
     }
 
     .body{
+        display: grid;
+        grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+        gap: 1.75rem;
+        min-height: 24.5rem; /* the tallest step (the last), so the card keeps its height */
+    }
+
+    .stage{
+        height: auto;
+    }
+
+    .copy{
         min-height: 0;
+        padding-top: 0.5rem;
+    }
+
+    .title{
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px){
+    .dialog{
+        padding: 0.9rem 1rem 1.1rem;
+        gap: 0.85rem;
+    }
+
+    .stage{
+        height: 9rem;
+    }
+
+    .copy{
+        min-height: 0;
+    }
+
+    .title{
+        font-size: 1.25rem;
     }
 }
 
 @media (prefers-reduced-motion: reduce){
     .progressFill,
-    .open span{
+    .open span,
+    .firstStepArrow{
         transition: none;
     }
 }

@@ -16,7 +16,7 @@ import { taskColorAttr } from '../../features/tasks/taskColors';
 // The round check at the start of a row: empty while open (a tick shows on hover), filled when done
 function Check({ done, onToggle, label }) {
     return (
-        <button type="button" className={`${styles.check} ${done ? styles.checkDone : ''}`} onClick={onToggle}
+        <button type="button" className={`${styles.check} ${done ? styles.checkDone : ''}`} onClick={onToggle} data-part="task-check"
             aria-label={label} title={label} aria-pressed={done}>
             <Icon name="check" className={styles.checkIcon} strokeWidth={2.2} />
         </button>
@@ -98,7 +98,7 @@ const TaskRow = forwardRef(function TaskRow({
     return (
         <motion.li ref={ref} {...motionProps}
             className={`${styles.row} ${shared ? styles.sharedRow : ''} ${task.done ? styles.doneRow : ''}`}
-            data-task-color={shared ? undefined : taskColorAttr(task)}
+            data-task-color={shared ? undefined : taskColorAttr(task)} data-part="task-row"
             style={hidden ? { visibility: 'hidden' } : undefined}>
             {onDragStart && !task.done ? <DragHandle onPointerDown={onDragStart} label={t('dragATask')} /> : <span className={styles.drag} />}
             <Check done={task.done} onToggle={onToggleDone}

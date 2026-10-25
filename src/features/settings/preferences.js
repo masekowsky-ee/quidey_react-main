@@ -24,6 +24,15 @@ export const ACCENTS = ['green', 'ocean', 'violet', 'sunset', 'rose', 'gold'];
 // "Abendrot" (sunset) unless another one was chosen
 export const DEFAULT_ACCENT = 'sunset';
 export const readStoredAccent = () => readStored('accent', ACCENTS, DEFAULT_ACCENT);
+// the swatch shown for each accent (its dark-mode colour) and its name's translation key
+export const ACCENT_SWATCHES = [
+    { value: 'sunset', label: 'accentSunset', color: '#fb923c' }, // the default
+    { value: 'green', label: 'accentGreen', color: '#0ed30e' },
+    { value: 'ocean', label: 'accentOcean', color: '#38bdf8' },
+    { value: 'violet', label: 'accentViolet', color: '#a78bfa' },
+    { value: 'rose', label: 'accentRose', color: '#fb7185' },
+    { value: 'gold', label: 'accentGold', color: '#facc15' },
+];
 export const storeAccent = (accent) => store('accent', accent);
 
 // Colour palettes: the ground the app stands on (backgrounds, surfaces, lines, text), apart from

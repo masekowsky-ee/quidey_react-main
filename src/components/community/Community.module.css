@@ -682,10 +682,9 @@ a.rankName:hover{
 
 /* ---------- loading and errors: the layout, grey where the values will be ---------- */
 
+/* the shared bone: grey, with the soft light running across */
 .skeleton{
-    display: block;
-    background: var(--surface-strong);
-    border-radius: 4px;
+    composes: bone from '../skeleton/Skeleton.module.css';
 }
 
 .errorLine{

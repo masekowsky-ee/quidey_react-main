@@ -5,20 +5,10 @@ import {useSelector, useDispatch} from 'react-redux';
 import {setLanguage, setTheme, setAccent, setPalette, setDefaultSessionMinutes, setMotion, setShowSharedTasks, setShowTutorial} from '../features/settings/settingsAction';
 import {MOTION_LEVELS} from '../features/settings/motion';
 import {setSessionParams} from '../features/session/sessionAction';
-import {SESSION_LENGTHS, PALETTES} from '../features/settings/preferences';
+import {SESSION_LENGTHS, PALETTES, ACCENT_SWATCHES as ACCENT_OPTIONS} from '../features/settings/preferences';
 import HomeLayoutSwitch from './together/HomeLayoutSwitch';
 import {useInstallState, promptInstall} from '../features/pwa/install';
 import EventTypeSettings from './EventTypeSettings.jsx';
-
-// Swatch color shown for each palette (its dark-mode accent)
-const ACCENT_OPTIONS = [
-    { value: 'sunset', label: 'accentSunset', color: '#fb923c' }, // the default
-    { value: 'green', label: 'accentGreen', color: '#0ed30e' },
-    { value: 'ocean', label: 'accentOcean', color: '#38bdf8' },
-    { value: 'violet', label: 'accentViolet', color: '#a78bfa' },
-    { value: 'rose', label: 'accentRose', color: '#fb7185' },
-    { value: 'gold', label: 'accentGold', color: '#facc15' },
-];
 
 const LANGUAGES = [
     { code: 'de', label: 'german' },

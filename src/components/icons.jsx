@@ -45,6 +45,10 @@ const PATHS = {
     sun: <><circle cx="12" cy="12" r="3.8" /><path d="M12 2.8v2.2M12 19v2.2M2.8 12h2.2M19 12h2.2M5.5 5.5l1.6 1.6M16.9 16.9l1.6 1.6M5.5 18.5l1.6-1.6M16.9 7.1l1.6-1.6" /></>,
     moon: <path d="M19.5 14.6A7.6 7.6 0 0 1 9.4 4.5a7.6 7.6 0 1 0 10.1 10.1z" />,
     tag: <><path d="M4 4.5h7.2l8.3 8.3a1.5 1.5 0 0 1 0 2.1l-4.6 4.6a1.5 1.5 0 0 1-2.1 0L4.5 11.2V4.5H4z" /><circle cx="8.5" cy="8.5" r="1.2" /></>,
+    // the Tester page: a lab flask
+    flask: <><path d="M9.5 3.5h5M10.5 3.5v5.2L5 18.2a1.5 1.5 0 0 0 1.3 2.3h11.4a1.5 1.5 0 0 0 1.3-2.3l-5.5-9.5V3.5" /><path d="M7.6 14h8.8" /></>,
+    search: <><circle cx="10.5" cy="10.5" r="6" /><path d="M15 15l5 5" /></>,
+    arrowRight: <path d="M5 12h14M13.5 6.5L19 12l-5.5 5.5" />,
 };
 
 // size: width and height in px; without it, CSS (className) decides
