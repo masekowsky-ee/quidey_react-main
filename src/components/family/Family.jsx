@@ -75,7 +75,7 @@ export default function Family() {
     return (
         // a tab of the Gemeinschaft page, which has the title
         <div className={styles.embedded}>
-            <p className={styles.lead}>{t('familyIntro')} <span className={styles.sharedTag}>{t('testerBadge')}</span></p>
+            <p className={styles.lead}>{t('familyIntro')}</p>
 
             {invites.length > 0 &&
                 <section className={`${styles.card} ${styles.inviteCard}`}>
@@ -107,6 +107,7 @@ export default function Family() {
                         {families.map(family => (
                             <li key={family.id} className={own.familyItem}>
                                 <Link to={`/family/${family.id}`} className={own.familyLink}>
+                                    <span className={own.listEmoji} data-task-color={family.color ?? undefined} aria-hidden="true">{family.emoji ?? '🏡'}</span>
                                     <div className={styles.who}>
                                         <span className={styles.name}>{family.name}</span>
                                         <span className={styles.meta}>

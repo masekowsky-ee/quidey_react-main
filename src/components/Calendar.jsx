@@ -8,7 +8,6 @@ import { addTask, deleteTaskAsking, leaveTask, updateTaskProps } from '../featur
 import TaskInvites from './task/TaskInvites.jsx';
 import { fetchSharedHistory, togetherErrorText } from '../features/together/togetherAction';
 import { familyErrorText, selectFamilies } from '../features/family/family';
-import { useIsTester } from '../features/auth/tester';
 import { calendarSourceKey, parseCalendarSource, useSharedCalendar } from '../features/calendar/sources';
 import { showToast } from '../features/toast/toast';
 import { downloadFile, fill, isOverdue, parseDate, sameDay, toDateOnly } from '../features/helperFunction';
@@ -45,13 +44,11 @@ export default function Calendar() {
     const ownSessions = useSelector(state => state.session.workedSessionData);
     const sharedHistory = useSelector(state => state.together.history);
     const sharedSessions = useSelector(state => state.together.sessions);
-    const isTester = useIsTester();
     const families = useSelector(selectFamilies);
 
     const [params, setParams] = useSearchParams();
-    // which calendar: mine, a shared session's or a family's (families are for testers only, for now)
-    const requestedSource = parseCalendarSource(params.get('cal'));
-    const source = requestedSource.kind === 'family' && !isTester ? parseCalendarSource(null) : requestedSource;
+    // which calendar: mine, a shared session's or a family's
+    const source = parseCalendarSource(params.get('cal'));
     const shared = useSharedCalendar(source);
     const isShared = source.kind !== 'mine';
     // a shared session's calendar holds events too (a family's only tasks)
@@ -297,7 +294,7 @@ export default function Calendar() {
     return (
         <div className={styles.page} onClickCapture={onClickCapture}>
             <header className={styles.toolbar}>
-                {(openSessions.length > 0 || (isTester && families.length > 0) || isShared) &&
+                {(openSessions.length > 0 || families.length > 0 || isShared) &&
                     <div className={styles.sourceRow}>
                         <label className={styles.sourceLabel}>
                             <span>{t('calendarOf')}</span>
@@ -308,7 +305,7 @@ export default function Calendar() {
                                     <optgroup label={t('calendarSessions')}>
                                         {openSessions.map(s => <option key={s.id} value={`session-${s.id}`}>{s.name}</option>)}
                                     </optgroup>}
-                                {isTester && families.length > 0 &&
+                                {families.length > 0 &&
                                     <optgroup label={t('calendarFamilies')}>
                                         {families.map(f => <option key={f.id} value={`family-${f.id}`}>{f.name}</option>)}
                                     </optgroup>}

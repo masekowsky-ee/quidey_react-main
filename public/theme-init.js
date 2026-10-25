@@ -9,6 +9,8 @@ try {
   document.documentElement.dataset.theme = light ? 'light' : 'dark';
   // accent color palette; unknown values simply fall back to the CSS default, Abendrot (sunset)
   document.documentElement.dataset.accent = localStorage.getItem('accent') || 'sunset';
+  // colour palette (the ground: warm, graphite, nord, ...); unknown values keep the default, warm
+  document.documentElement.dataset.palette = localStorage.getItem('palette') || 'warm';
   // amount of motion (features/settings/motion.js): saved choice, else the system's "reduce motion"
   var motion = localStorage.getItem('motion');
   document.documentElement.dataset.motion = ['minimal', 'normal', 'extreme'].indexOf(motion) >= 0 ? motion

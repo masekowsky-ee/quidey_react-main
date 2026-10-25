@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
 import { formatDate, displayName, fill } from '../features/helperFunction';
 import ProfileAvatar from './profile/ProfileAvatar.jsx';
+import { OnlineLabel } from './presence/OnlineDot.jsx';
 import { createSharedSession } from '../features/together/togetherAction';
 import { useTogetherRun } from '../features/together/hooks';
 import { setCustomError } from '../features/settings/settingsAction';
@@ -22,14 +23,18 @@ function errorText(t, err) {
     return text === key ? t('friendError_generic') : text;
 }
 
-// A person with a link to their profile (friends see all of it, others only the names)
-function UserRow({ user, meta, children }) {
+// A person with a link to their profile (friends see all of it, others only the names);
+// `online`: they have the app open right now (friends only)
+function UserRow({ user, meta, online = false, children }) {
     const { t } = useTranslation();
     return (
         <li className={styles.row}>
-            <ProfileAvatar user={user} />
+            <ProfileAvatar user={{ ...user, online }} presence={online} />
             <div className={styles.who}>
-                <Link className={styles.name} to={`/u/${user.username}`}>{displayName(user)}</Link>
+                <span className={styles.nameLine}>
+                    <Link className={styles.name} to={`/u/${user.username}`}>{displayName(user)}</Link>
+                    {online && <OnlineLabel />}
+                </span>
                 <span className={styles.meta}>@{user.username}{user.level > 0 && ` · ${fill(t('levelShort'), { level: user.level })}`}{meta && ` · ${meta}`}</span>
                 {user.status && <span className={styles.status}>{user.status}</span>}
             </div>
@@ -41,7 +46,11 @@ function UserRow({ user, meta, children }) {
 export default function Social() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const { friends, incoming, outgoing } = useSelector(state => state.friends);
+    const { friends: byName, incoming, outgoing } = useSelector(state => state.friends);
+    const presence = useSelector(state => state.presence);
+    const isOnline = (friend) => presence[friend.id] ?? friend.online ?? false;
+    // who has the app open first (by name, as before, within each)
+    const friends = [...byName.filter(isOnline), ...byName.filter(friend => !isOnline(friend))];
     const me = useSelector(state => state.auth.user);
     const homeLayout = useSelector(state => state.settings.homeLayout);
     const navigate = useNavigate();
@@ -142,7 +151,7 @@ export default function Social() {
                     ) : (
                         <ul className={styles.list}>
                             {friends.map(friend => (
-                                <UserRow key={friend.id} user={friend} meta={friend.since && `${t('friendsSince')} ${formatDate(friend.since)}`}>
+                                <UserRow key={friend.id} user={friend} online={isOnline(friend)} meta={friend.since && `${t('friendsSince')} ${formatDate(friend.since)}`}>
                                     {confirmRemoveId === friend.id ? (
                                         <>
                                             <span className={styles.confirmText}>{t('confirmRemoveFriend')}</span>

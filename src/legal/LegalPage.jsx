@@ -237,13 +237,18 @@ function Privacy() {
                 Sitzung an ihren Tagen, alle Mitglieder können dort planen; zusätzliche Daten entstehen dabei nicht.
             </p>
             <p>
-                <strong>Quidey Family</strong> (zurzeit nur für Tester): Eine Family ist eine feste Gruppe, zu der du
+                <strong>Quidey Family</strong>: Eine Family ist eine feste Gruppe, zu der du
                 Freunde einlädst. Gespeichert werden Name der Family, wer sie gegründet hat, wer eingeladen wurde
                 (von wem, wann) und wer beigetreten ist. Alle Mitglieder sehen die Namen der anderen Mitglieder, den
                 gemeinsamen Kalender mit allem, was ihr eintragt (z. B. Tag, Uhrzeit, Priorität, Dauer, Ort, Link,
                 Beschreibung, weitere Infos, Farbe, erledigt, wer den Eintrag angelegt hat), und den Chat der Family
-                (Text, Absender, Zeitpunkt). Eingeladene sehen nur Name, Gründer und Mitgliederzahl, bis sie
-                beitreten. Verlässt du eine Family, bleiben deine Einträge und Nachrichten für die anderen sichtbar.
+                (Text, Absender, Zeitpunkt). Dazu kommen die Pinnwand der Family (ein kurzer Text, den alle Mitglieder
+                ändern können, mit wer ihn zuletzt geändert hat und wann), Emoji und Farbe der Family, die Liste
+                (Einträge ohne Tag) und bei Einträgen, wer sie übernimmt. Mitglieder, die ihre Statistiken im Profil
+                zeigen, sehen die anderen außerdem mit ihrer Fokuszeit, ihren XP und ihrer Serie der laufenden Woche;
+                diese Werte werden nicht gespeichert, sondern bei jedem Aufruf berechnet. Eingeladene sehen nur Name,
+                Gründer und Mitgliederzahl, bis sie beitreten. Verlässt du eine Family, bleiben deine Einträge und
+                Nachrichten für die anderen sichtbar; was dir zugeteilt war, ist danach niemandem zugeteilt.
                 Löscht die gründende Person die Family, werden Kalender und Chat für alle gelöscht. Rechtsgrundlage ist
                 Art. 6 Abs. 1 lit. b DSGVO.
             </p>
@@ -269,7 +274,18 @@ function Privacy() {
                 weitere Gestaltungsmöglichkeiten frei (Avatar-Rahmen, Titel, bis zu drei angeheftete Abzeichen), die
                 deine Freunde auf deinem Profil sehen. Dein Level sehen deine Freunde in ihrer Freundesliste und im
                 Feed. In der Wochenübersicht „Diese Woche unter Freund:innen“ erscheinen deine XP seit Montag nur,
-                wenn du deine Statistiken im Profil zeigst. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+                wenn du deine Statistiken im Profil zeigst, zusammen mit deiner aktuellen Serie (Tage mit Fokus in
+                Folge). Deine eigene Serie, dein Rekord und die letzten sieben Tage werden ebenfalls nur berechnet,
+                nicht gespeichert. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+            </p>
+            <p>
+                <strong>Online-Status:</strong> Solange du Quidey geöffnet hast, besteht eine Live-Verbindung zum
+                Server. Daraus zeigt Quidey deinen Freunden und den Mitgliedern deiner laufenden gemeinsamen Sitzungen
+                und deiner Families, dass du gerade online bist (ein grüner Punkt), und sagt ihnen Bescheid, wenn du
+                kommst oder gehst. Gespeichert wird dabei nichts: Der Server kennt nur die gerade offenen Verbindungen,
+                es gibt keinen Verlauf und kein „zuletzt online“. Im Profil unter „Profil gestalten“ kannst du das mit
+                „Zeigen, wenn ich online bin“ jederzeit abschalten; dann erscheinst du für niemanden online.
+                Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
             </p>
             <p>
                 <strong>Feed:</strong> Im Feed unter „Gemeinschaft“ sehen deine Freunde – und nur sie – was du teilst:
@@ -328,8 +344,8 @@ function Privacy() {
                 <li>dein Anmelde-Token (7 Tage gültig, wird beim Abmelden gelöscht). Meldest du auf demselben Gerät
                     mehrere Konten an, um zwischen ihnen zu wechseln, liegen für jedes davon Token, Benutzer- und
                     Anzeigename (höchstens fünf Konten); beim Abmelden eines Kontos wird sein Eintrag gelöscht;</li>
-                <li>deine Einstellungen: Sprache, Design, Farbe, Animationen, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer oder Stoppuhr, Kalenderansicht;</li>
-                <li>ob du die Einführung gesehen hast, welche Erinnerungen schon angezeigt wurden und welche gemeinsame Sitzung gerade gestoppt wird;</li>
+                <li>deine Einstellungen: Sprache, Design, Farbpalette, Akzentfarbe, Animationen, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer oder Stoppuhr, Kalenderansicht;</li>
+                <li>ob du die Einführung gesehen hast, welche Erinnerungen schon angezeigt wurden, an welchem Tag dich Quidey zuletzt an deine Serie erinnert hat und welche gemeinsame Sitzung gerade gestoppt wird;</li>
                 <li>Schwierigkeit und Bestwerte der Spiele.</li>
             </ul>
             <p>

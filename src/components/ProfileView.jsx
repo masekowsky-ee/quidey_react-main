@@ -9,6 +9,8 @@ import { Link } from 'react-router-dom';
 import { fetchOwnProfile } from '../features/profile/profileOptions';
 import ProfileCard from './profile/ProfileCard.jsx';
 import ProfileEditor from './profile/ProfileEditor.jsx';
+import PlantCard from './progress/PlantCard.jsx';
+import PasswordInput from './PasswordInput.jsx';
 
 // Translated message for a profile API error, using the error code the backend sends
 function errorText(t, err) {
@@ -194,6 +196,9 @@ export default function ProfileView({ onSignOut }) {
             </ProfileCard>
             {customMessage && <p className={styles.success} role="status">{customMessage}</p>}
 
+            {/* the level plant, large: watch it grow from the seed */}
+            <PlantCard />
+
             {customizing && profile && (
                 <ProfileEditor
                     profile={profile}
@@ -290,16 +295,16 @@ export default function ProfileView({ onSignOut }) {
                     <input type="text" name="username" value={user?.username ?? ''} autoComplete="username" readOnly hidden />
                     <div className={styles.field}>
                         <label htmlFor="currentPassword">{t('currentPassword')}</label>
-                        <input id="currentPassword" type="password" value={passwords.current} onChange={setPassword('current')} autoComplete="current-password" />
+                        <PasswordInput id="currentPassword" value={passwords.current} onChange={setPassword('current')} autoComplete="current-password" />
                     </div>
                     <div className={styles.fieldRow}>
                         <div className={styles.field}>
                             <label htmlFor="newPassword">{t('newPassword')}</label>
-                            <input id="newPassword" type="password" value={passwords.next} onChange={setPassword('next')} autoComplete="new-password" />
+                            <PasswordInput id="newPassword" value={passwords.next} onChange={setPassword('next')} autoComplete="new-password" />
                         </div>
                         <div className={styles.field}>
                             <label htmlFor="confirmNewPassword">{t('passwordValidate')}</label>
-                            <input id="confirmNewPassword" type="password" value={passwords.confirm} onChange={setPassword('confirm')} autoComplete="new-password" />
+                            <PasswordInput id="confirmNewPassword" value={passwords.confirm} onChange={setPassword('confirm')} autoComplete="new-password" />
                         </div>
                     </div>
                     <p className={styles.hint}>{t('newPasswordHint')}</p>
@@ -336,7 +341,7 @@ export default function ProfileView({ onSignOut }) {
                         <input type="text" name="username" value={user?.username ?? ''} autoComplete="username" readOnly hidden />
                         <div className={styles.field}>
                             <label htmlFor="deletePassword">{t('deleteAccountPassword')}</label>
-                            <input id="deletePassword" type="password" value={deletePassword} autoComplete="current-password" autoFocus
+                            <PasswordInput id="deletePassword" value={deletePassword} autoComplete="current-password" autoFocus
                                 onChange={(e) => { setDeletePassword(e.target.value); setDeleteMessage(null); }} />
                         </div>
                         {message(deleteMessage)}

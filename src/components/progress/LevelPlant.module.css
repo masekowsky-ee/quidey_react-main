@@ -1,0 +1,144 @@
+/* The level plant (LevelPlant.jsx): a round "avatar" with the plant standing in it. Colours
+   from index.css (--plant-*), the pot in the profile's colour (--task-color) when there is one. */
+
+.frame{
+    --plant-size: 120px;
+    position: relative;
+    display: inline-flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: var(--plant-size);
+    height: var(--plant-size);
+    flex-shrink: 0;
+    border-radius: 50%;
+    corner-shape: round;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--plant-leaf) 12%, transparent), transparent 62%),
+        var(--surface-inset);
+    box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.svg{
+    display: block;
+    width: 94%;
+    height: 94%;
+    overflow: visible;
+}
+
+/* every part grows and moves to its new place when the level changes */
+.part{
+    transition: transform 0.9s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+/* and grows in from its base when it first appears */
+.grow{
+    animation: growIn 0.8s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+}
+
+@keyframes growIn{
+    from{ transform: scale(0); }
+    to{ transform: scale(1); }
+}
+
+:global(:root[data-motion="minimal"]) .part{
+    transition: none;
+}
+
+:global(:root[data-motion="minimal"]) .grow{
+    animation: none;
+}
+
+@media (prefers-reduced-motion: reduce){
+    .part{ transition: none; }
+    .grow{ animation: none; }
+    .firefly{ animation: none; }
+}
+
+/* ---------- colours ---------- */
+
+.leaf1{ fill: var(--plant-leaf); }
+.leaf2{ fill: var(--plant-leaf-2); }
+.leaf3{ fill: var(--plant-leaf-3); }
+
+.stem{
+    fill: none;
+    stroke: var(--plant-leaf-2);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+}
+
+.trunk{
+    fill: var(--plant-trunk);
+}
+
+.branch{
+    fill: none;
+    stroke: var(--plant-trunk);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+}
+
+.root{
+    fill: none;
+    stroke: var(--plant-trunk);
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.seed{
+    fill: var(--plant-trunk);
+}
+
+.blossom{
+    fill: var(--plant-blossom);
+}
+
+.fruit{
+    fill: var(--plant-fruit);
+}
+
+.halo{
+    fill: color-mix(in srgb, var(--plant-fruit) 16%, transparent);
+}
+
+.fly{
+    fill: var(--plant-fruit);
+}
+
+/* fireflies drift a little (not with minimal motion) */
+:global(:root:not([data-motion="minimal"])) .firefly > .grow{
+    animation: growIn 0.8s cubic-bezier(0.34, 1.45, 0.64, 1) both, drift 3.2s ease-in-out 0.8s infinite alternate;
+}
+
+@keyframes drift{
+    from{ transform: translate(0, 0); opacity: 1; }
+    to{ transform: translate(2px, -3px); opacity: 0.45; }
+}
+
+.grass{
+    fill: none;
+    stroke: var(--plant-leaf-2);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+}
+
+.grassGround{
+    fill: color-mix(in srgb, var(--plant-leaf-2) 55%, var(--plant-soil));
+}
+
+.soilDark,
+.soil{
+    fill: var(--plant-soil);
+}
+
+/* the pot in the profile's colour, or a warm clay */
+.pot{
+    fill: color-mix(in srgb, var(--task-color, #c2410c) 70%, var(--plant-soil));
+}
+
+.potRim{
+    fill: color-mix(in srgb, var(--task-color, #c2410c) 85%, var(--plant-soil));
+}

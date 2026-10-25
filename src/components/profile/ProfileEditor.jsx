@@ -25,6 +25,7 @@ const draftOf = (profile) => ({
     interests: profile.interests ?? [],
     showStats: profile.showStats ?? true,
     shareActivity: profile.shareActivity ?? true,
+    showOnline: profile.showOnline ?? true,
 });
 
 // Set up my profile: avatar, frame, colour, banner, title, pinned badges, status, bio,
@@ -262,6 +263,14 @@ export default function ProfileEditor({ profile, onChange, onSaved, onClose }) {
                 <span>
                     {t('profileShareActivity')}
                     <small>{t('profileShareActivityHint')}</small>
+                </span>
+            </label>
+
+            <label className={styles.toggle}>
+                <input type="checkbox" checked={draft.showOnline} onChange={(e) => update({ showOnline: e.target.checked })} />
+                <span>
+                    {t('profileShowOnline')}
+                    <small>{t('profileShowOnlineHint')}</small>
                 </span>
             </label>
 

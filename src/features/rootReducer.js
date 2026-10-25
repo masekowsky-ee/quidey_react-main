@@ -11,6 +11,7 @@ import newsReducer from "./realtime/news";
 import familyReducer from "./family/family";
 import feedReducer from "./feed/feed";
 import progressReducer from "./progress/progress";
+import presenceReducer from "./presence/presence";
 
 const rootReducer = combineReducers({
     task: taskReducer,
@@ -25,6 +26,7 @@ const rootReducer = combineReducers({
     family: familyReducer,
     feed: feedReducer,
     progress: progressReducer,
+    presence: presenceReducer,
 });
 
 export default rootReducer;

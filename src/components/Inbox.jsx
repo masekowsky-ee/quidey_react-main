@@ -61,7 +61,7 @@ function NewChat({ onOpen, others }) {
                     <div className={styles.chips}>
                         {list.map(friend => (
                             <button key={friend.id} className={styles.chip} onClick={() => onOpen(friend.id)}>
-                                <Avatar user={friend} />{displayName(friend)}
+                                <Avatar user={friend} presence />{displayName(friend)}
                             </button>
                         ))}
                     </div>
@@ -104,7 +104,7 @@ function Conversations({ onOpen, selected = null, newChat = true }) {
                             <li key={user.id}>
                                 <button className={`${styles.row} ${selected === user.id ? styles.rowSelected : ''}`}
                                     onClick={() => onOpen(user.id)} aria-current={selected === user.id ? 'true' : undefined}>
-                                    <Avatar user={user} />
+                                    <Avatar user={user} presence />
                                     <span className={styles.rowText}>
                                         <span className={styles.rowTitle}>{displayName(user)}</span>
                                         <span className={`${styles.rowMeta} ${unread ? styles.unreadText : ''}`}>
@@ -179,7 +179,7 @@ function Thread({ userId, onBack }) {
         <div className={styles.thread}>
             <div className={styles.threadHead}>
                 {onBack && <button className={styles.backBtn} onClick={onBack} aria-label={t('back')}>←</button>}
-                {thread && <><Avatar user={thread.user} /><h2 className={styles.threadName}><Link to={`/u/${thread.user.username}`}>{displayName(thread.user)}</Link></h2></>}
+                {thread && <><Avatar user={thread.user} presence /><h2 className={styles.threadName}><Link to={`/u/${thread.user.username}`}>{displayName(thread.user)}</Link></h2></>}
             </div>
             {!thread && !error && <p className={styles.empty} aria-busy="true">{t('loading')}</p>}
             {thread && (

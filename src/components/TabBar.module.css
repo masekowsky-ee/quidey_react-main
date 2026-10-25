@@ -106,6 +106,18 @@
   box-shadow: 0 0 0 2px var(--surface-bar);
 }
 
+/* friends online: a small green dot at the foot of the icon, apart from counts and news */
+.online {
+  position: absolute;
+  bottom: 0.1rem;
+  right: 1rem;
+  width: 0.45rem;
+  height: 0.45rem;
+  background-color: var(--online);
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px var(--surface-bar);
+}
+
 .dot {
   position: absolute;
   top: 0.05rem;

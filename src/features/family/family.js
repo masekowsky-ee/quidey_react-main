@@ -4,16 +4,18 @@ import { apiFetch, displayName, fill } from '../helperFunction';
 import { LOGOUT } from '../auth/authActionTypes';
 import { showToast } from '../toast/toast';
 import { useTranslation } from '../../i18n/useTranslation';
-import { useIsTester } from '../auth/tester';
 import { useRealtimeRefresh, useSafetyPoll } from '../realtime/socket';
 
-// Quidey Family (testers only for now): a fixed group of accounts with a shared calendar and a
-// chat of their own, apart from the shared sessions. The store keeps only the list of my
+// Quidey Family: a fixed group of accounts with a shared calendar, a
+// list (entries without a day), a board, and a chat of their own, apart from the shared sessions. The store keeps only the list of my
 // families and invites (menu badge, calendar picker); a family's page and calendar load the
 // family itself. The server tells the members "family:changed" { familyId } and sends new chat
 // messages as "family:message" { familyId, message }.
 
-const base = '/api/tester/families';
+const base = '/api/families';
+
+// The emojis a family can pick (the api checks the same list)
+export const FAMILY_EMOJIS = ['🏡', '🌳', '⭐', '🌻', '🐾', '🎈', '🍀', '🔥', '🌙', '🎵', '☕', '📚', '🏖️', '❤️', '🦊', '🚀'];
 const familyUrl = (id) => `${base}/${id}`;
 
 const SET_FAMILIES = 'SET_FAMILIES';
@@ -24,7 +26,7 @@ const initialState = { families: [], invites: [], loaded: false };
 export default function familyReducer(state = initialState, action) {
     switch (action.type) {
         case SET_FAMILIES:
-            return { families: action.payload.families, invites: action.payload.invites, loaded: true };
+            return { families: action.payload?.families ?? [], invites: action.payload?.invites ?? [], loaded: true };
         case FAMILY_GONE:
             return {
                 ...state,
@@ -39,7 +41,7 @@ export default function familyReducer(state = initialState, action) {
 }
 
 export const selectFamilies = (state) => state.family.families;
-export const selectFamilyInviteCount = (state) => state.auth.access.isTester ? state.family.invites.length : 0;
+export const selectFamilyInviteCount = (state) => state.family.invites.length;
 
 const send = (method, body) => ({ method, body: body === undefined ? undefined : JSON.stringify(body) });
 
@@ -56,10 +58,14 @@ const familyChange = (url, options) => async (dispatch) => {
     return family;
 };
 
-// { id, name, createdAt, owner, isOwner, me, people: [{ user, status, isOwner, joinedAt }], tasks }
+// { id, name, emoji, color, createdAt, owner, isOwner, me, note: { text, updatedAt, updatedBy } | null,
+//   people: [{ user, status, isOwner, joinedAt, online }], tasks (with assignee),
+//   week: { weekStart, people: [{ userId, xp, focusMin, streak }] } }
 export const fetchFamily = (id) => apiFetch(familyUrl(id));
 export const createFamily = (name, friendIds = []) => familyChange(base, send('POST', { name, friendIds }));
 export const renameFamily = (id, name) => familyChange(familyUrl(id), send('PATCH', { name }));
+// changes: { emoji?, color? } (owner), { note? } (any member; '' clears it)
+export const updateFamily = (id, changes) => familyChange(familyUrl(id), send('PATCH', changes));
 export const joinFamily = (id) => familyChange(`${familyUrl(id)}/join`, send('POST'));
 export const inviteToFamily = (id, userIds) => familyChange(`${familyUrl(id)}/invites`, send('POST', { userIds }));
 
@@ -77,7 +83,8 @@ export const deleteFamily = (id) => async (dispatch) => {
 
 // ---------- the shared calendar (answers with the whole family) ----------
 
-// task: { name, and optionally due, due_time, prio, description, duration_minutes, location, link, details, color }
+// task: { name, and optionally due, due_time, prio, description, duration_minutes, location, link, details, color,
+// assignee_id (a joined member, or null) }. Without a day it is an item on the family's list.
 export const addFamilyTask = (id, task) => apiFetch(`${familyUrl(id)}/tasks`, send('POST', task));
 export const updateFamilyTask = (id, taskId, changes) => apiFetch(`${familyUrl(id)}/tasks/${taskId}`, send('PATCH', changes));
 export const removeFamilyTask = (id, taskId) => apiFetch(`${familyUrl(id)}/tasks/${taskId}`, send('DELETE'));
@@ -96,14 +103,13 @@ export function familyErrorText(t, err) {
     return text === key ? t('friendError_generic') : text;
 }
 
-// App-wide for testers: my families and invites, loaded at the start and whenever the server
+// App-wide: my families and invites, loaded at the start and whenever the server
 // says one changed (a new invite comes with a toast); polled only as the safety net
 export function useFamilyList(enabled) {
     const dispatch = useDispatch();
     const store = useStore();
     const { t } = useTranslation();
-    const isTester = useIsTester();
-    const on = enabled && isTester;
+    const on = enabled;
 
     const load = async () => {
         const before = store.getState().family;

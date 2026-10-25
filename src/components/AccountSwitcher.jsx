@@ -10,9 +10,9 @@ import Icon from './icons';
 const initialOf = (name) => (String(name ?? '?').trim()[0] ?? '?').toUpperCase();
 
 // Who is signed in, at the foot of the menu: a tap opens the accounts on this device (one tap
-// switches), the profile, the tour, "add account" and "sign out". onNavigate: the drawer closes
-// when a link is used; onTutorial: opens the tour.
-export default function AccountSwitcher({ onNavigate, onTutorial }) {
+// switches), the profile, "add account" and "sign out". onNavigate: the drawer closes when a
+// link is used.
+export default function AccountSwitcher({ onNavigate }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const user = useSelector(state => state.auth.user);
@@ -61,11 +61,6 @@ export default function AccountSwitcher({ onNavigate, onTutorial }) {
                         <Icon name="profile" size={18} />
                         <span>{t('profile')}</span>
                     </Link>
-                    {onTutorial &&
-                        <button type="button" role="menuitem" className={styles.item} onClick={() => { setOpen(false); onTutorial(); }}>
-                            <Icon name="tutorial" size={18} />
-                            <span>{t('tutorial')}</span>
-                        </button>}
                     {others.length > 0 && <div className={styles.divider} role="separator" />}
                     {others.map(account => (
                         <button key={account.username} type="button" role="menuitem" className={styles.item}

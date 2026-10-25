@@ -6,14 +6,14 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { fill } from '../../features/helperFunction';
 import { COMMUNITY_PATHS, COMMUNITY_TABS } from '../../features/community/paths';
 import { fetchProgress, fetchRanking, formatNumber, tierFor } from '../../features/progress/progress';
-import { selectIncomingCount } from '../../features/friends/friendsAction';
+import { fetchFriends, selectIncomingCount } from '../../features/friends/friendsAction';
 import { selectInviteCount } from '../../features/together/togetherAction';
 import { selectFamilyInviteCount } from '../../features/family/family';
-import { useIsTester } from '../../features/auth/tester';
 import Feed from './Feed';
 import LevelCard from './LevelCard';
 import Challenges from './Challenges';
 import Ranking from './Ranking';
+import OnlineNow from './OnlineNow';
 import Together from '../Together';
 import Social from '../Social';
 import Family from '../family/Family';
@@ -21,14 +21,13 @@ import Family from '../family/Family';
 const TAB_CONTENT = { feed: Feed, sessions: Together, friends: Social, family: Family };
 
 // Gemeinschaft: everything with other people on one page. The feed is its start; shared
-// sessions, friends and families (testers) are tabs with their own address. Beside them (under
+// sessions, friends and families are tabs with their own address. Beside them (under
 // the title on a phone, feed only) my level, today's and this week's challenges and the week
 // among friends.
 export default function Community() {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
     const { tab: tabParam } = useParams();
-    const isTester = useIsTester();
     const tab = tabParam ?? 'feed';
     const progress = useSelector(state => state.progress.data);
     const news = useSelector(state => state.news);
@@ -42,9 +41,10 @@ export default function Community() {
     useEffect(() => {
         dispatch(fetchProgress()).catch(() => {});
         dispatch(fetchRanking()).catch(() => {});
+        dispatch(fetchFriends()).catch(() => {});
     }, [dispatch]);
 
-    const tabs = COMMUNITY_TABS.filter(key => key !== 'family' || isTester);
+    const tabs = COMMUNITY_TABS;
     if (!tabs.includes(tab)) return <Navigate to={COMMUNITY_PATHS.feed} replace />;
     const Content = TAB_CONTENT[tab];
 
@@ -86,6 +86,7 @@ export default function Community() {
                     my level and today's challenges above it, the week and the ranking below */}
                 <section className={styles.railTop} aria-label={t('communityProgress')}>
                     <LevelCard />
+                    <OnlineNow />
                     <Challenges period="day" />
                 </section>
                 <div className={styles.main}>

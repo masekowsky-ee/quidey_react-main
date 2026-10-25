@@ -11,6 +11,7 @@ import Logo from './Logo'
 import { selectMenuBadgeCount } from '../features/inbox/inbox'
 import { selectHasNews } from '../features/realtime/news'
 import { useTranslation } from '../i18n/useTranslation'
+import { fill } from '../features/helperFunction'
 
 function formatTime(ms) {
     const h = Math.floor(ms / 3600000);
@@ -18,6 +19,21 @@ function formatTime(ms) {
     const s = Math.floor((ms % 60000) / 1000);
     const mmss = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     return h > 0 ? `${h}:${mmss}` : mmss;
+}
+
+// The streak in the bar, on every page: a flame and the days. Burning once today counts, an
+// outline while today still waits. Opens Home, where the streak has its own panel.
+function StreakPill() {
+    const { t } = useTranslation();
+    const progress = useSelector((state) => state.progress.data);
+    if (!progress || progress.streak <= 0) return null;
+    const label = fill(t(progress.streakToday ? 'streakPillDone' : 'streakPillWaiting'), { days: progress.streak });
+    return (
+        <Link to="/" className={styles.streakPill} data-lit={progress.streakToday} aria-label={label} title={label}>
+            <Icon name="flame" size={16} strokeWidth={1.8} />
+            <span>{progress.streak}</span>
+        </Link>
+    );
 }
 
 export default function Header(props){
@@ -61,6 +77,7 @@ export default function Header(props){
                         <TeamWorkPill />
                     </div>
                     <div className={styles.end}>
+                        <StreakPill />
                         <DailyTicker />
                         <TeamQuickPanel />
                         {/* the most frequent job, from every page: a new task or event */}

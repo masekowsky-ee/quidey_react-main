@@ -21,6 +21,17 @@
   --primary-text: #2a1305;   /* text on an accent background */
   --primary-fg: var(--primary); /* accent used as text or outline on the page background */
   --danger: #f0605a;
+  /* somebody has the app open right now (a dot on their avatar): green in every palette */
+  --online: #22c55e;
+  --online-text: #4ade80;
+  /* the level plant (components/progress/LevelPlant.jsx) */
+  --plant-leaf: #4ade80;
+  --plant-leaf-2: #22c55e;
+  --plant-leaf-3: #15803d;
+  --plant-trunk: #a16207;
+  --plant-soil: #57534e;
+  --plant-blossom: #f9a8d4;
+  --plant-fruit: #fbbf24;
   --glow: transparent;        /* kept for old references; nothing glows */
   /* soft wash behind a hovered icon or row */
   --hover-wash: color-mix(in srgb, var(--text-h) 7%, transparent);
@@ -110,6 +121,15 @@
   --primary-text: #1c0a00;
   --primary-fg: #c2410c;   /* darker orange, readable as text on white */
   --danger: #c4242a;
+  --online: #16a34a;
+  --online-text: #15803d;
+  --plant-leaf: #22c55e;
+  --plant-leaf-2: #16a34a;
+  --plant-leaf-3: #166534;
+  --plant-trunk: #92400e;
+  --plant-soil: #78716c;
+  --plant-blossom: #ec4899;
+  --plant-fruit: #f59e0b;
   --glow: transparent;
 
   --contrast-top: #151413;
@@ -147,6 +167,152 @@
 :root[data-theme="light"][data-accent="sunset"] { --primary: #f97316; --primary-text: #1c0a00; --primary-fg: #c2410c; }
 :root[data-theme="light"][data-accent="rose"]   { --primary: #f43f5e; --primary-text: #ffffff; --primary-fg: #be123c; }
 :root[data-theme="light"][data-accent="gold"]   { --primary: #eab308; --primary-text: #1f1700; --primary-fg: #a16207; }
+
+/* Colour palettes, chosen in the settings (<html data-palette>): the ground the app stands on,
+   for dark and light. "warm" (the warm near-black and paper white above) is the default; the
+   accent is chosen apart from it. Same roles as above: surfaces rise by lightness alone,
+   --text-muted keeps 4.5:1 up to --surface-strong. The swatches in the settings come from
+   src/features/settings/preferences.js (PALETTES): keep both in step. */
+:root[data-palette="graphite"] {
+  --bg: #0d0e10;
+  --surface-bar: #0d0e10;
+  --surface-inset: #090a0b;
+  --surface: #16181b;
+  --surface-hover: #1e2024;
+  --surface-strong: #2a2d32;
+  --border: #24262a;
+  --border-strong: #565b63;
+  --control-border: #32353a;
+  --text: #d6d9de;
+  --text-h: #f3f4f6;
+  --text-muted: #959ba4;
+}
+:root[data-theme="light"][data-palette="graphite"] {
+  --bg: #f4f5f7;
+  --surface-bar: #f4f5f7;
+  --surface-inset: #eceef1;
+  --surface: #ffffff;
+  --surface-hover: #eff1f4;
+  --surface-strong: #e3e6ea;
+  --border: #e6e8eb;
+  --border-strong: #4f555d;
+  --control-border: #d1d5db;
+  --text: #2a2e34;
+  --text-h: #121418;
+  --text-muted: #5d636b;
+}
+:root[data-palette="nord"] {
+  --bg: #0b1018;
+  --surface-bar: #0b1018;
+  --surface-inset: #070b11;
+  --surface: #131a25;
+  --surface-hover: #1a2230;
+  --surface-strong: #242e3e;
+  --border: #1f2836;
+  --border-strong: #52617a;
+  --control-border: #2c3647;
+  --text: #d3dae6;
+  --text-h: #eef2f8;
+  --text-muted: #8f9bb0;
+}
+:root[data-theme="light"][data-palette="nord"] {
+  --bg: #f2f5f9;
+  --surface-bar: #f2f5f9;
+  --surface-inset: #e9eef4;
+  --surface: #ffffff;
+  --surface-hover: #edf1f6;
+  --surface-strong: #dfe6ef;
+  --border: #e2e8f0;
+  --border-strong: #4a5568;
+  --control-border: #cbd5e1;
+  --text: #273142;
+  --text-h: #0f1724;
+  --text-muted: #566275;
+}
+:root[data-palette="forest"] {
+  --bg: #0a0f0c;
+  --surface-bar: #0a0f0c;
+  --surface-inset: #070a08;
+  --surface: #121a15;
+  --surface-hover: #19231d;
+  --surface-strong: #233027;
+  --border: #1d2820;
+  --border-strong: #4f6656;
+  --control-border: #2a372e;
+  --text: #d2ddd5;
+  --text-h: #eef5f0;
+  --text-muted: #8fa396;
+}
+:root[data-theme="light"][data-palette="forest"] {
+  --bg: #f3f6f2;
+  --surface-bar: #f3f6f2;
+  --surface-inset: #eaefe8;
+  --surface: #ffffff;
+  --surface-hover: #edf2eb;
+  --surface-strong: #dde6da;
+  --border: #e1e8de;
+  --border-strong: #4b5a4e;
+  --control-border: #cdd8ca;
+  --text: #26302a;
+  --text-h: #111a14;
+  --text-muted: #56635a;
+}
+:root[data-palette="plum"] {
+  --bg: #100c12;
+  --surface-bar: #100c12;
+  --surface-inset: #0b080d;
+  --surface: #19141c;
+  --surface-hover: #221b26;
+  --surface-strong: #2e2533;
+  --border: #261f2a;
+  --border-strong: #62546a;
+  --control-border: #362c3b;
+  --text: #ddd4e0;
+  --text-h: #f6f1f7;
+  --text-muted: #a194a6;
+}
+:root[data-theme="light"][data-palette="plum"] {
+  --bg: #f7f4f8;
+  --surface-bar: #f7f4f8;
+  --surface-inset: #efeaf1;
+  --surface: #ffffff;
+  --surface-hover: #f2edf4;
+  --surface-strong: #e7e0ea;
+  --border: #ebe5ed;
+  --border-strong: #574b5d;
+  --control-border: #d8cfdc;
+  --text: #2f2833;
+  --text-h: #17121a;
+  --text-muted: #61566a;
+}
+:root[data-palette="mono"] {
+  --bg: #000000;
+  --surface-bar: #000000;
+  --surface-inset: #000000;
+  --surface: #0f0f0f;
+  --surface-hover: #181818;
+  --surface-strong: #242424;
+  --border: #1c1c1c;
+  --border-strong: #555555;
+  --control-border: #2e2e2e;
+  --text: #dcdcdc;
+  --text-h: #ffffff;
+  --text-muted: #9a9a9a;
+}
+:root[data-theme="light"][data-palette="mono"] {
+  --bg: #ffffff;
+  --surface-bar: #ffffff;
+  --surface-inset: #f3f3f3;
+  --surface: #ffffff;
+  --surface-hover: #f4f4f4;
+  --surface-strong: #e8e8e8;
+  --border: #e3e3e3;
+  --border-strong: #4d4d4d;
+  --control-border: #cfcfcf;
+  --text: #262626;
+  --text-h: #0a0a0a;
+  --text-muted: #5c5c5c;
+}
 
 /* Task colours (src/features/tasks/taskColors.js), chosen per task: a row or chip with
    data-task-color gets --task-color, which its left edge (and a soft tint) uses instead of the

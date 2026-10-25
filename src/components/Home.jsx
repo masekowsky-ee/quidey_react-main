@@ -11,6 +11,7 @@ import WorkingContainer from './WorkingContainer.jsx';
 import TimerContainer from './TimerContainer.jsx';
 import SoloTogetherStrip from './together/SoloTogetherStrip.jsx';
 import TaskInvites from './task/TaskInvites.jsx';
+import Momentum from './home/Momentum.jsx';
 import { updateCurrentSessionData, addWorkedTask } from '../features/session/sessionAction.js'
 import { fetchMySharedTasks, selectSharedSoloTasks } from '../features/together/togetherAction.js'
 import { useSoloSharedWork } from '../features/together/useSoloSharedWork.js'
@@ -184,6 +185,8 @@ export default function Home({ setActiveTimer }){
     return (
         <div className={styles.page}>
             <TitleRow tasks={showSharedTasks ? [...tasks, ...sharedTasks] : tasks} />
+            {/* streak, today's challenges and level, friends: what keeps one going */}
+            <Momentum />
             <TaskInvites />
             <WeekDaysContainer />
             {createGroup && <div className={styles.formsDiv}>

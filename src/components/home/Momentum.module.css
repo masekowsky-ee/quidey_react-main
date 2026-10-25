@@ -1,0 +1,404 @@
+/* Home's motivation strip (Momentum.jsx): streak, today, friends. Three panels side by side on
+   a wide screen; on a phone a row to swipe through, so the task list stays near the top. */
+
+.strip{
+    display: grid;
+    grid-template-columns: 1.15fr 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 1099px){
+    .strip{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .strip > :last-child{
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 720px){
+    .strip{
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: min(82%, 20rem);
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        margin: 0 calc(-1 * var(--page-gutter, 1rem));
+        padding: 0 var(--page-gutter, 1rem);
+        scroll-padding: 0 var(--page-gutter, 1rem);
+    }
+
+    .strip::-webkit-scrollbar{
+        display: none;
+    }
+
+    .strip > *{
+        scroll-snap-align: start;
+    }
+
+    .strip > :last-child{
+        grid-column: auto;
+    }
+}
+
+.card{
+    composes: panel from '../ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+    padding: 1.1rem 1.2rem;
+}
+
+.cardHead{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.cardLabel{
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.cardMeta{
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.cardLink{
+    margin-top: auto;
+    align-self: flex-start;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-h);
+    text-decoration: none;
+}
+
+.cardLink:hover{
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.empty{
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text);
+}
+
+/* ---------- streak ---------- */
+
+.streakTop{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* the flame: amber and filled once today counts, an outline while it waits, grey with no streak */
+.flame{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    corner-shape: round;
+    color: var(--text-muted);
+    background: var(--surface-inset);
+    transition: color 0.4s ease, background-color 0.4s ease;
+}
+
+.card[data-streak="lit"] .flame{
+    color: var(--plant-fruit);
+    background: color-mix(in srgb, var(--plant-fruit) 16%, var(--surface));
+}
+
+.card[data-streak="lit"] .flame path{
+    fill: color-mix(in srgb, var(--plant-fruit) 55%, transparent);
+}
+
+.card[data-streak="waiting"] .flame{
+    color: var(--plant-fruit);
+    background: var(--surface-inset);
+}
+
+/* a lit flame flickers a little, unless motion is minimal */
+:global(:root:not([data-motion="minimal"])) .card[data-streak="lit"] .flame svg{
+    transform-origin: 50% 90%;
+    animation: flicker 2.8s ease-in-out infinite;
+}
+
+@keyframes flicker{
+    0%, 100%{ transform: scale(1) rotate(0deg); }
+    30%{ transform: scale(1.06, 0.97) rotate(-2deg); }
+    60%{ transform: scale(0.97, 1.05) rotate(1.5deg); }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .card[data-streak="lit"] .flame svg{
+        animation: none !important;
+    }
+}
+
+.streakNumber{
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.streakNumber strong{
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--text-h);
+    font-variant-numeric: tabular-nums;
+}
+
+/* the last seven days, today last */
+.days{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.days li{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.dayDot{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    corner-shape: round;
+    color: var(--surface);
+    background: var(--surface-inset);
+    box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.days li[data-active="true"] .dayDot{
+    background: var(--plant-fruit);
+    box-shadow: none;
+    color: #241500;
+}
+
+.days li[data-today="true"] .dayDot{
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--text-muted);
+}
+
+.days li[data-today="true"][data-active="true"] .dayDot{
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--plant-fruit);
+}
+
+.dayName{
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+}
+
+.days li[data-today="true"] .dayName{
+    color: var(--text-h);
+    font-weight: 600;
+}
+
+.streakStatus{
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-h);
+}
+
+.card[data-streak="waiting"] .streakStatus{
+    color: var(--plant-fruit);
+    font-weight: 500;
+}
+
+:global(:root[data-theme="light"]) .card[data-streak="waiting"] .streakStatus{
+    color: #a16207;
+}
+
+.streakMeta{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.9rem;
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.streakMeta:empty{
+    display: none;
+}
+
+/* ---------- today ---------- */
+
+.challenges{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.challenges li{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 0.6rem;
+    row-gap: 0.3rem;
+    align-items: baseline;
+}
+
+.challengeName{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 0;
+    font-size: 0.8125rem;
+    color: var(--text-h);
+}
+
+.challenges li[data-done="true"] .challengeName{
+    color: var(--text-muted);
+}
+
+.challengeXp{
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.bar{
+    grid-column: 1 / -1;
+    position: relative;
+    height: 4px;
+    background: var(--surface-inset);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.bar span{
+    position: absolute;
+    inset: 0;
+    background: var(--primary);
+    transform-origin: left center;
+    transition: transform 0.6s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.levelRow{
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    color: inherit;
+    text-decoration: none;
+}
+
+.levelText{
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    font-size: 0.8125rem;
+}
+
+.levelText strong{
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.levelText small{
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.levelRow:hover strong{
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* ---------- friends ---------- */
+
+.faces{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.faces a{
+    display: inline-flex;
+    border-radius: 50%;
+corner-shape: round;
+}
+
+.moreFaces{
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    padding-left: 0.2rem;
+}
+
+.friendStreaks{
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.friendStreaks li{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.friendStreaks a{
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-h);
+    text-decoration: none;
+}
+
+.friendStreaks a:hover{
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.friendStreak{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.friendStreak svg{
+    color: var(--plant-fruit);
+}

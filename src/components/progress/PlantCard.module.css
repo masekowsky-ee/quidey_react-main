@@ -1,0 +1,112 @@
+/* The level plant on the profile page: the plant large, beside it its name, the level and the
+   way to watch it grow */
+
+.card{
+    composes: card from '../ui.module.css';
+}
+
+.head{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.title{
+    composes: cardTitle from '../ui.module.css';
+    margin: 0;
+}
+
+.link{
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.link:hover{
+    color: var(--text-h);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.body{
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.text{
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+    flex: 1;
+}
+
+.tier{
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-h);
+}
+
+.level{
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.past{
+    color: var(--text-muted);
+}
+
+.hint{
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    max-width: 32ch;
+}
+
+.controls{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    margin-top: 0.9rem;
+}
+
+.replay{
+    white-space: nowrap;
+}
+
+.slider{
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    flex: 1;
+    min-width: 9rem;
+}
+
+.sliderLabel{
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.slider input{
+    width: 100%;
+    accent-color: var(--plant-leaf-2);
+}
+
+@media (max-width: 520px){
+    .body{
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .plant{
+        align-self: center;
+    }
+}

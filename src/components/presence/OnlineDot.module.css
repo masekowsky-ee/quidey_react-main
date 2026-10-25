@@ -1,0 +1,46 @@
+/* The green dot on an avatar: this person has the app open right now. The avatar it sits on
+   gets .host (position: relative); the ring in the surface colour sets it off the avatar. */
+.host{
+    position: relative;
+}
+
+.dot{
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    width: 32%;
+    height: 32%;
+    min-width: 0.55rem;
+    min-height: 0.55rem;
+    max-width: 0.95rem;
+    max-height: 0.95rem;
+    border-radius: 50%;
+    corner-shape: round;
+    background: var(--online);
+    box-shadow: 0 0 0 2px var(--surface);
+    pointer-events: none;
+}
+
+/* a large profile avatar: the dot sits on its rim */
+.large{
+    right: 4%;
+    bottom: 4%;
+}
+
+/* a word next to a name ("online"), in the same green */
+.label{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    color: var(--online-text);
+    font-weight: 500;
+}
+
+.label::before{
+    content: '';
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: 50%;
+    corner-shape: round;
+    background: var(--online);
+}

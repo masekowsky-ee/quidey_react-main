@@ -1,4 +1,5 @@
 import communityTexts from './communityTexts';
+import moreTexts from './moreTexts';
 
 const translations = {
     de: {
@@ -277,9 +278,8 @@ const translations = {
         calendarSessionEnded: 'Die Session ist beendet, ihr Kalender lässt sich nur noch ansehen.',
         calendarGone: 'Diesen Kalender gibt es für dich nicht (mehr). Du siehst wieder deinen eigenen.',
         addedByName: 'von {name}',
-        // Quidey Family (testers)
+        // Quidey Family
         family: 'Family',
-        testerBadge: 'Beta',
         familyIntro: 'Eine feste Gruppe mit gemeinsamem Kalender und eigenem Chat, unabhängig von Sessions. Ideal für Familie, WG oder die Lerngruppe, die bleibt.',
         familyInvites: 'Family-Einladungen',
         familyInvitedBy: 'Eingeladen von {name}',
@@ -325,7 +325,6 @@ const translations = {
         familyError_TEXT_REQUIRED: 'Die Nachricht ist leer.',
         familyError_TEXT_TOO_LONG: 'Die Nachricht ist zu lang.',
         familyError_RATE_LIMITED: 'Zu viele Nachrichten. Warte einen Moment.',
-        familyError_TESTER_REQUIRED: 'Family ist gerade nur für Tester.',
         familyError_INVALID_INPUT: 'Da stimmt eine Angabe nicht.',
 
         homeLayout: 'Startseite',
@@ -530,7 +529,7 @@ const translations = {
         logoutEverywhereHint: 'Meldet dich auf allen Geräten ab, auch hier',
         confirmLogoutEverywhere: 'Auf allen Geräten abmelden?',
 
-        accentColor: 'Farbthema',
+        accentColor: 'Akzentfarbe',
         accentGreen: 'Grün',
         accentOcean: 'Ozean',
         accentViolet: 'Lila',
@@ -874,7 +873,7 @@ const translations = {
         tutTesterBadge: 'Für Tester',
         tutKeys: '← → zum Blättern · Esc schließt',
         tut_welcome_title: 'Willkommen bei Quidey!',
-        tut_welcome_text: 'Dein ruhiger Planer fürs Lernen: Aufgaben, Fokuszeit, Kalender und Freunde, mit denen du live lernst. Die Tour dauert etwa eine Minute.',
+        tut_welcome_text: 'Dein Planer für Lernen und Studium: Aufgaben, Fokuszeit, Kalender und Freunde, mit denen du live lernst. Die Tour dauert etwa eine Minute.',
         tut_welcome_tips: [
             'Blättere mit „Weiter“, den Punkten unten oder wisch einfach zur Seite.',
             'Bei jedem Schritt kannst du die passende Seite direkt öffnen.',
@@ -936,12 +935,12 @@ const translations = {
         tut_settings_title: 'Mach es zu deinem',
         tut_settings_text: 'In den Einstellungen passt du Quidey an dich an.',
         tut_settings_tips: [
-            'Sprache, hell, dunkel oder wie dein System, dazu eine von sechs Akzentfarben.',
+            'Sprache, hell, dunkel oder wie dein System, dazu eine Farbpalette und eine von sechs Akzentfarben.',
             'Wie viel Bewegung du magst: minimal, normal oder extrem.',
-            'Installier Quidey als App, dann startet es wie jede andere App.',
+            'Installier Quidey als App, dann startet es wie jede andere App. Unter „App“ findest du auch diese Einführung wieder.',
         ],
         tut_menu_title: 'Alles griffbereit',
-        tut_menu_text: 'Alles erreichst du über das Menü oben links. Dort startest du diese Tour auch jederzeit neu.',
+        tut_menu_text: 'Alles erreichst du über das Menü. Diese Tour startest du jederzeit neu unter Einstellungen → App.',
         tut_menu_tips: [
             'Etwas fehlt oder hakt? Schreib uns über „Feedback“ im Menü.',
             'Psst: Klick doch mal auf die Glühbirne und das Fenster dahinter.',
@@ -1382,9 +1381,8 @@ const translations = {
         calendarSessionEnded: 'This session has ended; its calendar is view-only now.',
         calendarGone: "This calendar isn't available to you (any more). Back to your own.",
         addedByName: 'by {name}',
-        // Quidey Family (testers)
+        // Quidey Family
         family: 'Family',
-        testerBadge: 'Beta',
         familyIntro: 'A fixed group with a shared calendar and its own chat, apart from sessions. Made for family, flatmates or the study group that sticks around.',
         familyInvites: 'Family invites',
         familyInvitedBy: 'Invited by {name}',
@@ -1430,7 +1428,6 @@ const translations = {
         familyError_TEXT_REQUIRED: 'The message is empty.',
         familyError_TEXT_TOO_LONG: 'The message is too long.',
         familyError_RATE_LIMITED: 'Too many messages. Wait a moment.',
-        familyError_TESTER_REQUIRED: 'Family is for testers only right now.',
         familyError_INVALID_INPUT: "Something in there isn't right.",
 
         homeLayout: 'Home page',
@@ -1637,7 +1634,7 @@ const translations = {
 
         groupError: 'Please enter a valid, unused group name',
         sessionTimeError: 'Please enter a valid time (00:15 - 03:45)',
-        accentColor: 'Color theme',
+        accentColor: 'Accent colour',
         accentGreen: 'Green',
         accentOcean: 'Ocean',
         accentViolet: 'Violet',
@@ -1979,7 +1976,7 @@ const translations = {
         tutTesterBadge: 'For testers',
         tutKeys: '← → to browse · Esc closes',
         tut_welcome_title: 'Welcome to Quidey!',
-        tut_welcome_text: 'Your calm planner for studying: tasks, focus time, a calendar and friends you study with live. The tour takes about a minute.',
+        tut_welcome_text: 'Your planner for learning and studying: tasks, focus time, a calendar and friends you study with live. The tour takes about a minute.',
         tut_welcome_tips: [
             'Move on with "Next", the dots below, or just swipe sideways.',
             'Every step can open the page it is about right away.',
@@ -2041,12 +2038,12 @@ const translations = {
         tut_settings_title: 'Make it yours',
         tut_settings_text: 'The settings let you shape Quidey around you.',
         tut_settings_tips: [
-            'Language, light, dark or like your system, plus one of six accent colours.',
+            'Language, light, dark or like your system, plus a colour palette and one of six accent colours.',
             'How much motion you like: minimal, normal or extreme.',
-            'Install Quidey as an app and it starts like any other app.',
+            'Install Quidey as an app and it starts like any other app. Under "App" you also find this tour again.',
         ],
         tut_menu_title: 'Always at hand',
-        tut_menu_text: 'Everything lives in the menu at the top left. You can restart this tour there any time.',
+        tut_menu_text: 'Everything lives in the menu. You can restart this tour any time under Settings → App.',
         tut_menu_tips: [
             'Something missing or broken? Write to us via "Feedback" in the menu.',
             'Psst: try clicking the light bulb and the window behind it.',
@@ -2214,6 +2211,6 @@ const translations = {
 }
 
 // Gemeinschaft (feed, challenges, levels) lives in its own file
-for (const language of ['de', 'en']) Object.assign(translations[language], communityTexts[language]);
+for (const language of ['de', 'en']) Object.assign(translations[language], communityTexts[language], moreTexts[language]);
 
 export default translations;

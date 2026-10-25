@@ -208,7 +208,7 @@ describe('customizing my profile', () => {
         const put = apiFetch.mock.calls.find(([url, options]) => url === '/api/profile' && options?.method === 'PUT')
         expect(JSON.parse(put[1].body)).toEqual({
             emoji: '📚', color: 'teal', banner: 'dots', frame: null, title: null, showcase: [], status: 'Lerne Bio', bio: 'Hallo!', study: '',
-            interests: ['Chemie'], showStats: false, shareActivity: true,
+            interests: ['Chemie'], showStats: false, shareActivity: true, showOnline: true,
         })
         expect(screen.getByText('Profil gespeichert.')).toBeInTheDocument()
         expect(screen.queryByRole('button', { name: 'Speichern' })).not.toBeInTheDocument()

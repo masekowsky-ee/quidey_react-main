@@ -1,18 +1,21 @@
 import { useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { COMMUNITY_PATHS, isCommunityPath } from '../features/community/paths';
+import { useOnlineFriends } from '../features/presence/presence';
+import { displayName, fill } from '../features/helperFunction';
+import ProfileAvatar from './profile/ProfileAvatar';
 import styles from './Menu.module.css';
 import Icon from './icons';
 import Logo from './Logo';
 import {useSelector, useDispatch} from 'react-redux'
 import {useTranslation} from '../i18n/useTranslation'
-import {setShowMenu, setShowTutorial} from '../features/settings/settingsAction';
+import {setShowMenu} from '../features/settings/settingsAction';
 import { selectIncomingCount } from '../features/friends/friendsAction';
 import { selectInviteCount } from '../features/together/togetherAction';
 import { selectTaskInviteCount } from '../features/tasks/taskAction';
 import { selectIsAdmin, selectAdminPendingCount } from '../features/admin/adminAction';
 import { selectInboxCount } from '../features/inbox/inbox';
-import { selectFamilyInviteCount } from '../features/family/family';
+import { selectFamilies, selectFamilyInviteCount } from '../features/family/family';
 import { DESKTOP_QUERY, useMediaQuery } from '../features/layout/breakpoints';
 import AccountSwitcher from './AccountSwitcher';
 import { AnimatePresence, motion } from 'motion/react';
@@ -30,6 +33,48 @@ function MenuLink({ to, end, match, icon, label, onClick, count = 0, countLabel,
             {count > 0 && <span className={styles.badge} aria-label={`${count} ${countLabel}`}>{count}</span>}
             {count === 0 && news && <span className={styles.dot} role="img" aria-label={newsLabel} />}
         </NavLink>
+    );
+}
+
+// Under "Gemeinschaft": the friends who have the app open right now (a few faces and how many),
+// one tap to the friends list. Nothing while nobody is online.
+const FACES = 3;
+function OnlineFriendsRow({ onClick }) {
+    const { t } = useTranslation();
+    const online = useOnlineFriends();
+    if (online.length === 0) return null;
+    const names = online.map(friend => displayName(friend)).join(', ');
+    return (
+        <Link to={COMMUNITY_PATHS.friends} className={styles.onlineRow} onClick={onClick}
+            aria-label={`${fill(t(online.length === 1 ? 'onlineFriendsOne' : 'onlineFriendsCount'), { count: online.length })}: ${names}`}
+            title={names}>
+            <span className={styles.onlineFaces} aria-hidden="true">
+                {online.slice(0, FACES).map(friend => <ProfileAvatar key={friend.id} user={friend} />)}
+            </span>
+            <span className={styles.onlineText} aria-hidden="true">
+                {fill(t(online.length === 1 ? 'onlineFriendsOne' : 'onlineFriendsCount'), { count: online.length })}
+            </span>
+        </Link>
+    );
+}
+
+// Under "Gemeinschaft" too: a direct way into each family I'm in. Nothing without one.
+function FamilyLinks({ onClick }) {
+    const { t } = useTranslation();
+    const families = useSelector(selectFamilies);
+    if (families.length === 0) return null;
+    return (
+        <ul className={styles.familyLinks} aria-label={t('myFamilies')}>
+            {families.map(family => (
+                <li key={family.id}>
+                    <NavLink to={`/family/${family.id}`} onClick={onClick}
+                        className={({ isActive }) => `${styles.familyLink} ${isActive ? styles.active : ''}`}>
+                        <span className={styles.familyEmoji} data-task-color={family.color ?? undefined} aria-hidden="true">{family.emoji ?? '🏡'}</span>
+                        <span className={styles.familyName}>{family.name}</span>
+                    </NavLink>
+                </li>
+            ))}
+        </ul>
     );
 }
 
@@ -70,11 +115,6 @@ export default function Menu(){
         return () => window.removeEventListener('keydown', onKey);
     }, [isOpen, dispatch]);
 
-    const openTutorial = () => {
-        onClose();
-        dispatch(setShowTutorial(true));
-    }
-
     return (
         <>
             <AnimatePresence>
@@ -92,7 +132,8 @@ export default function Menu(){
                     </button>
                 </div>
                 {/* the four places of every day first (the same as the phone's tab bar), then the
-                    rest under "More"; profile and the tour live in the account menu at the foot */}
+                    rest under "More"; the profile lives in the account menu at the foot, the
+                    tour in the settings */}
                 <nav className={styles.menuNav} aria-label={t('menu')}>
                     <div className={styles.menuList}>
                         <MenuLink to="/" end icon="home" label={t('home')} onClick={onClose} />
@@ -102,6 +143,8 @@ export default function Menu(){
                         <MenuLink to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} onClick={onClose}
                             count={inviteCount + incomingCount + familyInviteCount} countLabel={t('communityCount')}
                             news={news.together || news.social || news.feed} newsLabel={t('menuNews')} />
+                        <FamilyLinks onClick={onClose} />
+                        <OnlineFriendsRow onClick={onClose} />
                         <MenuLink to="/inbox" icon="inbox" label={t('inbox')} onClick={onClose}
                             count={inboxCount} countLabel={t('inboxUnread')} />
                     </div>
@@ -119,9 +162,9 @@ export default function Menu(){
                     )}
                     <MenuLink to="/settings" icon="settings" label={t('settings')} onClick={onClose} />
                     <MenuLink to="/feedback" icon="feedback" label={t('feedback')} onClick={onClose} />
-                    {/* who is signed in: profile, the tour, switch accounts, add one, sign out */}
+                    {/* who is signed in: profile, switch accounts, add one, sign out */}
                     <div className={styles.account}>
-                        <AccountSwitcher onNavigate={onClose} onTutorial={openTutorial} />
+                        <AccountSwitcher onNavigate={onClose} />
                     </div>
                 </div>
             </div>

@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
-import { LOGIN_SUCCESS, SET_ACCESS } from '../features/auth/authActionTypes'
+import { LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { DAILY_LINES, LINE_TYPES, lineOfDay, dayNumber, yearText } from '../features/fun/dailyLines'
 import { GUESS_WORDS, SCRAMBLE_WORDS } from '../features/fun/words'
 import {
@@ -15,6 +15,7 @@ import { fill } from '../features/helperFunction'
 import translations from '../i18n/translations'
 import Tutorial from '../components/Tutorial'
 import Menu from '../components/Menu'
+import Settings from '../components/Settings'
 import DailyTicker from '../components/DailyTicker'
 import FunPage from '../components/fun/FunPage'
 
@@ -221,16 +222,32 @@ describe('tutorial', () => {
         expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
 
-    it('walks through the steps and can be reopened from the menu', () => {
+    it('is no longer in the account menu', () => {
         localStorage.setItem('tutorialSeen:ann', '1')
         const store = makeStore()
         store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
         renderTutorial(store)
+        fireEvent.click(screen.getByRole('button', { name: /Konten öffnen/ }))
+        expect(screen.queryByRole('menuitem', { name: 'Einführung' })).not.toBeInTheDocument()
+    })
+
+    it('walks through the steps and can be reopened from the settings', () => {
+        localStorage.setItem('tutorialSeen:ann', '1')
+        const store = makeStore()
+        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        render(
+            <Provider store={store}>
+                <MemoryRouter>
+                    <Settings />
+                    <Tutorial />
+                </MemoryRouter>
+            </Provider>
+        )
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-        // the tour lives in the account menu at the foot of the menu
-        fireEvent.click(screen.getByRole('button', { name: /Konten öffnen/ }))
-        fireEvent.click(screen.getByRole('menuitem', { name: 'Einführung' }))
+        // the tour lives in the settings, area "App"
+        fireEvent.click(screen.getByRole('tab', { name: 'App' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Einführung starten' }))
         expect(screen.getByRole('dialog')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Zurück' })).toBeDisabled()
 
@@ -273,18 +290,10 @@ describe('tutorial', () => {
         expect(localStorage.getItem('tutorialSeen:ann')).toBe('1')
     })
 
-    it('has the family step only for testers', () => {
+    it('has the family step for everybody', () => {
         const store = makeStore()
         store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
-        const { unmount } = renderTutorial(store)
-        const regular = screen.getAllByRole('tab').length
-        expect(screen.queryByRole('tab', { name: 'Quidey Family' })).not.toBeInTheDocument()
-        unmount()
-
-        store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isTester: true } })
-        store.dispatch({ type: 'SET_SHOW_TUTORIAL', payload: true })
         renderTutorial(store)
-        expect(screen.getAllByRole('tab')).toHaveLength(regular + 1)
         expect(screen.getByRole('tab', { name: 'Quidey Family' })).toBeInTheDocument()
     })
 

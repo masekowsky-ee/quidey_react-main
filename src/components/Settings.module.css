@@ -90,7 +90,8 @@ div.page{
 }
 
 .row + .rowStack,
-.rowStack + .row{
+.rowStack + .row,
+.rowStack + .rowStack{
     margin-top: 0.9rem;
     padding-top: 0.9rem;
     border-top: 1px solid var(--btn-border);
@@ -158,6 +159,13 @@ div.page{
 
 .installButton{
     composes: btnPrimary from './ui.module.css';
+}
+
+/* not the screen's one primary: the tour is something to look at again, not a task
+   (the global outlined button) */
+.tourButton{
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .segmentActive{
@@ -229,6 +237,43 @@ div.page{
 
 .swatchLabel{
     font-weight: 500;
+}
+
+/* a palette: its dark half and its light half, each a page with a card and a line of text on it */
+.palettePreview{
+    display: flex;
+    width: 3.25rem;
+    height: 2rem;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    box-shadow: 0 0 0 1px var(--btn-border);
+}
+
+.palettePreview > span{
+    position: relative;
+    flex: 1;
+    background: var(--ground);
+}
+
+.palettePreview > span::before{
+    content: '';
+    position: absolute;
+    inset: 0.4rem 0.25rem 0.4rem 0.3rem;
+    border-radius: 3px;
+    background: var(--card);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+.palettePreview > span::after{
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    right: 0.55rem;
+    top: calc(50% - 1px);
+    height: 2px;
+    border-radius: 1px;
+    background: var(--ink);
+    opacity: 0.7;
 }
 
 @media (max-width: 520px) {

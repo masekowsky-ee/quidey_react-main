@@ -151,7 +151,7 @@ describe('Gemeinschaft page', () => {
         expect(screen.getByRole('heading', { level: 1, name: 'Gemeinschaft' })).toBeInTheDocument()
         expect(screen.getByText('Level 3 · Keimling · noch 155 XP bis Level 4')).toBeInTheDocument()
         const tabs = screen.getByRole('navigation', { name: 'Bereiche der Gemeinschaft' })
-        expect(within(tabs).getAllByRole('link').map(link => link.textContent)).toEqual(['Feed', 'Sitzungen', 'Freunde'])
+        expect(within(tabs).getAllByRole('link').map(link => link.textContent)).toEqual(['Feed', 'Sitzungen', 'Freunde', 'Family'])
         expect(screen.getByRole('progressbar', { name: '520 von 675 XP' })).toHaveAttribute('aria-valuenow', '520')
         expect(screen.getByText('4 Tage Serie')).toBeInTheDocument()
     })
@@ -216,10 +216,12 @@ describe('Gemeinschaft page', () => {
         expect(screen.getByRole('link', { name: 'Freund:innen finden' })).toHaveAttribute('href', '/community/friends?tab=add')
     })
 
-    it('the family tab is only for testers; an unknown tab leads to the feed', async () => {
+    it('the family tab is for everybody; an unknown tab leads to the feed', async () => {
         api(COMMUNITY)
         await renderCommunity('/community/family')
-        expect(screen.getByTestId('where')).toHaveTextContent(/^\/community$/)
+        expect(screen.getByTestId('where')).toHaveTextContent('/community/family')
+        await renderCommunity('/community/nothing')
+        expect(screen.getAllByTestId('where').at(-1)).toHaveTextContent(/^\/community$/)
     })
 })
 

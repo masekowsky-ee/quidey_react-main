@@ -94,6 +94,19 @@
     text-underline-offset: 3px;
 }
 
+/* the name, and "online" beside it */
+.nameLine{
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-width: 0;
+    font-size: 0.8rem;
+}
+
+.nameLine .name{
+    font-size: 1rem;
+}
+
 /* what a friend is working on (their profile status) */
 .status{
     font-size: 0.8rem;

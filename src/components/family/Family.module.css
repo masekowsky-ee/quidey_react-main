@@ -12,6 +12,22 @@
     composes: sessionLink from '../Together.module.css';
     flex: 1;
     min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* the family's emoji on its colour, in the list */
+.listEmoji{
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.25rem;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--task-color, var(--surface-strong)) 28%, var(--surface));
 }
 
 .headLinks{
@@ -113,9 +129,291 @@
 
 .quickAdd{
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    grid-template-columns: minmax(0, 1fr) auto auto auto auto;
     gap: 0.5rem;
     margin-top: 0.85rem;
+}
+
+/* ---------- looks: the family's emoji on its colour ---------- */
+
+/* --task-color comes from the page's data-task-color (the family's colour) */
+.familyPage{
+    --family-tint: var(--task-color, var(--surface-strong));
+}
+
+.titleRow{
+    align-items: center;
+    gap: 1rem;
+    justify-content: flex-start;
+}
+
+.emojiBadge{
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    padding: 0;
+    font-size: 1.7rem;
+    line-height: 1;
+    background: color-mix(in srgb, var(--family-tint) 28%, var(--surface));
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: none;
+}
+
+button.emojiBadge:hover{
+    background: color-mix(in srgb, var(--family-tint) 40%, var(--surface));
+    border: none;
+}
+
+.looksWrap{
+    position: relative;
+}
+
+.looks{
+    position: absolute;
+    z-index: var(--z-modal);
+    top: calc(100% + 0.5rem);
+    left: 0;
+    width: min(18rem, calc(100vw - 2rem));
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.9rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-float);
+}
+
+.looksLabel{
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.emojiGrid{
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0.2rem;
+    width: 100%;
+}
+
+.emojiGrid button{
+    min-width: 0;
+    height: 2rem;
+    padding: 0;
+    font-size: 1.1rem;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+}
+
+.emojiGrid button:hover{
+    background: var(--hover-wash);
+}
+
+.emojiGrid .emojiOn,
+.emojiGrid .emojiOn:hover{
+    border-color: var(--text-h);
+    background: var(--surface-hover);
+}
+
+.colorRow{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.colorDot,
+.colorNone{
+    width: 1.6rem;
+    height: 1.6rem;
+    min-width: 0;
+    padding: 0;
+    border-radius: 50%;
+    corner-shape: round;
+    border: 2px solid transparent;
+    box-shadow: none;
+}
+
+.colorDot{
+    background: var(--task-color);
+}
+
+.colorNone{
+    background: var(--surface-strong);
+    border-color: var(--border-strong);
+}
+
+.colorDot[aria-pressed="true"],
+.colorNone[aria-pressed="true"]{
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text-h);
+}
+
+/* ---------- the board ---------- */
+
+.board{
+    border-left: 3px solid var(--family-tint);
+}
+
+.boardText{
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: var(--text-h);
+    line-height: 1.55;
+}
+
+.boardMeta{
+    margin: 0.6rem 0 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.boardForm{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.boardForm textarea{
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.boardCount{
+    margin-right: auto;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- the list (entries without a day) ---------- */
+
+.list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.listItem{
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0;
+}
+
+.listItem + .listItem{
+    border-top: 1px solid var(--btn-border);
+}
+
+.listName{
+    overflow-wrap: anywhere;
+    color: var(--text-h);
+}
+
+.listItem[data-done="true"] .listName{
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+.listItem[data-done="true"] .entryCheck{
+    color: var(--text-h);
+    background: var(--surface-strong);
+    border-color: transparent;
+}
+
+/* who takes care of it: a select that looks like a quiet chip */
+.assigneeChip{
+    max-width: 8.5rem;
+    height: 1.9rem;
+    padding: 0 0.5rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    background: var(--surface-inset);
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius-pill);
+}
+
+.listAdd{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+}
+
+.doneToggle{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    align-self: flex-start;
+    margin-top: 0.5rem;
+    padding: 0.2rem 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.doneToggle:hover{
+    color: var(--text-h);
+    background: none;
+}
+
+.doneToggle[aria-expanded="true"] svg{
+    rotate: 180deg;
+}
+
+.filterBtn{
+    height: auto;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.8rem;
+    border-radius: var(--radius-pill);
+}
+
+.filterBtn[aria-pressed="true"]{
+    color: var(--contrast-text);
+    background: var(--contrast-top);
+    border-color: transparent;
+}
+
+/* ---------- members: online and their week ---------- */
+
+.weekLine{
+    margin: -0.25rem 0 0.6rem;
+    font-size: 0.85rem;
+    color: var(--text);
+}
+
+.memberMeta{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2rem 0.75rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.streak{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.streak svg{
+    color: var(--plant-fruit);
 }
 
 /* ---------- members ---------- */
@@ -142,6 +440,18 @@
 @media (max-width: 600px){
     .quickAdd{
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .quickAdd > button[type="submit"]{
+        grid-column: 1 / -1;
+    }
+
+    .listAdd{
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .listAdd > :first-child{
+        grid-column: 1 / -1;
     }
 
     .quickAdd > :first-child{

@@ -10,16 +10,18 @@ import {
     fetchSharedSessions, joinSharedSession, removeSharedMember, selectInviteCount,
 } from '../../features/together/togetherAction';
 import { useTogetherRun } from '../../features/together/hooks';
+import { selectFamilies } from '../../features/family/family';
 
 import Icon from '../icons';
-// Header button with everything collaborative one click away: invites, running sessions,
-// starting a new one, friend requests. The badge counts what is waiting for me.
+// Header button with everything collaborative one click away: invites, my families, running
+// sessions, starting a new one, friend requests. The badge counts what is waiting for me.
 export default function TeamQuickPanel() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const run = useTogetherRun();
     const { sessions, invites } = useSelector(state => state.together);
+    const families = useSelector(selectFamilies);
     const inviteCount = useSelector(selectInviteCount);
     const requestCount = useSelector(selectIncomingCount);
     const homeLayout = useSelector(state => state.settings.homeLayout);
@@ -77,6 +79,24 @@ export default function TeamQuickPanel() {
                                         </div>
                                         <button className={styles.quickPrimary} onClick={() => join(invite.id)}>{t('join')}</button>
                                         <button className={styles.quickQuiet} onClick={() => run(removeSharedMember(invite.id, 'me', 'me'))} aria-label={`${t('decline')}: ${invite.name}`} title={t('decline')}><Icon name="close" size={16} /></button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    {families.length > 0 && (
+                        <div className={styles.quickSection}>
+                            <h3 className={styles.quickTitle}>{t('myFamilies')}</h3>
+                            <ul className={styles.quickList}>
+                                {families.map(family => (
+                                    <li key={family.id}>
+                                        <Link to={`/family/${family.id}`} className={styles.quickRowBtn} onClick={() => setOpen(false)}>
+                                            <span className={styles.quickEmoji} data-task-color={family.color ?? undefined} aria-hidden="true">{family.emoji ?? '🏡'}</span>
+                                            <div className={styles.quickWho}>
+                                                <span className={styles.quickName}>{family.name}</span>
+                                                <span className={styles.quickMeta}>{family.memberCount} {t(family.memberCount === 1 ? 'member' : 'members')}</span>
+                                            </div>
+                                        </Link>
                                     </li>
                                 ))}
                             </ul>

@@ -2,10 +2,10 @@ import styles from './Settings.module.css';
 import { useState } from 'react';
 import {useTranslation} from '../i18n/useTranslation'
 import {useSelector, useDispatch} from 'react-redux';
-import {setLanguage, setTheme, setAccent, setDefaultSessionMinutes, setMotion, setShowSharedTasks} from '../features/settings/settingsAction';
+import {setLanguage, setTheme, setAccent, setPalette, setDefaultSessionMinutes, setMotion, setShowSharedTasks, setShowTutorial} from '../features/settings/settingsAction';
 import {MOTION_LEVELS} from '../features/settings/motion';
 import {setSessionParams} from '../features/session/sessionAction';
-import {SESSION_LENGTHS} from '../features/settings/preferences';
+import {SESSION_LENGTHS, PALETTES} from '../features/settings/preferences';
 import HomeLayoutSwitch from './together/HomeLayoutSwitch';
 import {useInstallState, promptInstall} from '../features/pwa/install';
 import EventTypeSettings from './EventTypeSettings.jsx';
@@ -33,6 +33,7 @@ const THEME_OPTIONS = [
 
 // The settings come in three areas, one view each, so only a few choices are in sight at a
 // time. The area is in the address's hash (#plan, #app; the editor's #event-types opens "plan").
+// "App": the intro tour and, where the browser can, installing Quidey.
 const AREAS = ['look', 'plan', 'app'];
 const areaFromHash = () => {
     const hash = typeof window === 'undefined' ? '' : window.location.hash.slice(1);
@@ -89,14 +90,14 @@ export default function Settings(){
     const theme = useSelector((state) => state.settings.theme);
     const homeLayout = useSelector((state) => state.settings.homeLayout);
     const accent = useSelector((state) => state.settings.accent);
+    const palette = useSelector((state) => state.settings.palette);
     const motionLevel = useSelector((state) => state.settings.motion);
     const defaultSessionMinutes = useSelector((state) => state.settings.defaultSessionMinutes);
     const showSharedTasks = useSelector((state) => state.settings.showSharedTasks);
     const installState = useInstallState();
     const dispatch = useDispatch();
     const [chosenArea, setArea] = useState(areaFromHash);
-    // "App" only where this browser can install it (elsewhere the area is left out)
-    const areas = AREAS.filter(name => name !== 'app' || installState !== 'unavailable');
+    const areas = AREAS;
     const area = areas.includes(chosenArea) ? chosenArea : 'look';
 
     const openArea = (next) => {
@@ -143,6 +144,27 @@ export default function Settings(){
                         <SettingRow title={t('settingsThemeRow')}>
                             <Choice label={t('appearance')} value={theme} onChange={(value) => dispatch(setTheme(value))} options={THEME_OPTIONS} />
                         </SettingRow>
+                        <div className={styles.rowStack}>
+                            <span className={styles.rowText}>
+                                <span className={styles.rowLabel}>{t('paletteSetting')}</span>
+                                <span className={styles.rowHint}>{t('paletteSettingHint')}</span>
+                            </span>
+                            {/* each tile: the palette's dark half and its light half, a card on each */}
+                            <div className={styles.swatches} role="group" aria-label={t('paletteSetting')}>
+                                {Object.entries(PALETTES).map(([value, { dark, light }]) => (
+                                    <button key={value} type="button"
+                                        className={`${styles.swatch} ${palette === value ? styles.swatchActive : ''}`}
+                                        aria-pressed={palette === value}
+                                        onClick={() => dispatch(setPalette(value))}>
+                                        <span className={styles.palettePreview} aria-hidden="true">
+                                            <span style={{ '--ground': dark[0], '--card': dark[1], '--ink': dark[2] }} />
+                                            <span style={{ '--ground': light[0], '--card': light[1], '--ink': light[2] }} />
+                                        </span>
+                                        <span className={styles.swatchLabel}>{t(`palette_${value}`)}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                         <div className={styles.rowStack}>
                             <span className={styles.rowLabel}>{t('accentColor')}</span>
                             <div className={styles.swatches} role="group" aria-label={t('accentColor')}>
@@ -191,15 +213,25 @@ export default function Settings(){
                     </SettingSection>
                 </>}
 
-                {area === 'app' &&
-                    <SettingSection id="install" title={t('installApp')} description={t('settingsAppHint')}>
-                        <SettingRow title={t('installApp')}
-                            hint={t({ installed: 'installAppDone', ios: 'installAppIos', prompt: 'installAppHint' }[installState])}>
-                            {installState === 'prompt' && (
-                                <button type="button" className={styles.installButton} onClick={promptInstall}>{t('installAppButton')}</button>
-                            )}
+                {area === 'app' && <>
+                    <SettingSection id="tour" title={t('tutorial')} description={t('settingsTourHint')}>
+                        <SettingRow title={t('settingsTourRow')} hint={t('settingsTourRowHint')}>
+                            <button type="button" className={styles.tourButton} onClick={() => dispatch(setShowTutorial(true))}>
+                                {t('settingsTourStart')}
+                            </button>
                         </SettingRow>
-                    </SettingSection>}
+                    </SettingSection>
+                    {/* only where this browser can install it */}
+                    {installState !== 'unavailable' &&
+                        <SettingSection id="install" title={t('installApp')} description={t('settingsAppHint')}>
+                            <SettingRow title={t('installApp')}
+                                hint={t({ installed: 'installAppDone', ios: 'installAppIos', prompt: 'installAppHint' }[installState])}>
+                                {installState === 'prompt' && (
+                                    <button type="button" className={styles.installButton} onClick={promptInstall}>{t('installAppButton')}</button>
+                                )}
+                            </SettingRow>
+                        </SettingSection>}
+                </>}
             </div>
         </div>
     );

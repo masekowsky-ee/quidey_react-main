@@ -20,6 +20,15 @@ export const MAX_LEVEL = 50;
 // total XP at which a level starts: 0, 150, 375, 675, ... (150 + 75 per level for each step)
 export const levelStartXp = (level) => 150 * (level - 1) + 37.5 * (level - 1) * (level - 2);
 
+// Streaks worth celebrating (the api posts them to the feed too): the next one after `streak`
+export const STREAK_MILESTONES = [3, 7, 14, 30, 50, 100, 200, 365];
+export const nextStreakMilestone = (streak, milestones = STREAK_MILESTONES) =>
+    milestones.find(goal => goal > streak) ?? null;
+
+// From this hour on, a streak that today hasn't continued yet gets one reminder (once a day,
+// remembered in localStorage as `streakNudge`)
+export const STREAK_NUDGE_HOUR = 18;
+
 // The level names: Quidey grows like a plant, from a seed to an old forest
 export const TIERS = [
     { id: 'seed', level: 1 }, { id: 'sprout', level: 3 }, { id: 'sapling', level: 6 }, { id: 'shrub', level: 10 },
@@ -111,6 +120,19 @@ export default function progressReducer(state = initialState, action) {
 
 const allChallenges = (data) => data ? [...data.daily, ...data.weekly] : [];
 
+// Evening, a streak running and no focus today yet: one quiet reminder a day
+function nudgeStreak(dispatch, data, t, now = new Date()) {
+    if (!data || data.streak <= 0 || data.streakToday || now.getHours() < STREAK_NUDGE_HOUR) return;
+    try {
+        if (localStorage.getItem('streakNudge') === data.today) return;
+        localStorage.setItem('streakNudge', data.today);
+    } catch {
+        return; // without storage it would come on every look: better not at all
+    }
+    dispatch(showToast(fill(t(data.streak === 1 ? 'toast_streakWaitingOne' : 'toast_streakWaiting'), { days: data.streak }), 'info',
+        { to: '/', detail: t('toast_streakWaitingDetail') }));
+}
+
 // My progress, completing what I reached. What is new since the last look (a challenge done, a
 // level up) comes with a toast; a level up also with confetti when the motion setting allows.
 export const fetchProgress = () => async (dispatch, getState) => {
@@ -123,10 +145,11 @@ export const fetchProgress = () => async (dispatch, getState) => {
         throw err;
     }
     dispatch({ type: PROGRESS_LOADED, payload: data });
-    if (!before) return data;
-
     const { language, motion } = getState().settings;
     const t = (key) => translate(language, key);
+    nudgeStreak(dispatch, data, t);
+    if (!before) return data;
+
     const wasDone = new Set(allChallenges(before).filter(c => c.done).map(c => `${c.id}:${before.today}:${before.weekStart}`));
     for (const challenge of allChallenges(data)) {
         if (challenge.done && !wasDone.has(`${challenge.id}:${data.today}:${data.weekStart}`)
@@ -134,6 +157,13 @@ export const fetchProgress = () => async (dispatch, getState) => {
             dispatch(showToast(fill(t('toast_challengeDone'), { xp: challenge.xp }), 'success',
                 { to: '/community', detail: challengeTitle(t, challenge) }));
         }
+    }
+    // the streak went on today: a milestone is celebrated, any other day just counted
+    if (data.streakToday && !before.streakToday && data.today === before.today && data.streak > 0) {
+        const milestone = STREAK_MILESTONES.includes(data.streak);
+        dispatch(showToast(fill(t(milestone ? 'toast_streakMilestone' : data.streak === 1 ? 'toast_streakStartedOne' : 'toast_streakGoesOn'), { days: data.streak }),
+            'success', { to: '/', detail: milestone ? t('toast_streakMilestoneDetail') : undefined }));
+        if (milestone && motion !== 'minimal' && typeof window !== 'undefined') burst(window.innerWidth / 2, window.innerHeight * 0.3, motion === 'extreme' ? 60 : 30);
     }
     if (data.level > before.level) {
         dispatch(showToast(fill(t('toast_levelUp'), { level: data.level }), 'success',

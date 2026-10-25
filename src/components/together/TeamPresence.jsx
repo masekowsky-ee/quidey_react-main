@@ -17,6 +17,8 @@ export default function TeamPresence({ session }) {
     const dispatch = useDispatch();
     const run = useTogetherRun();
     const friends = useSelector(state => state.friends.friends);
+    const presence = useSelector(state => state.presence);
+    const onlineNow = (person) => presence[person.user.id] ?? person.online ?? false;
     const work = useSelector(selectWork);
     const now = useNow(Boolean(work.taskId) || othersWorking(session));
 
@@ -63,7 +65,8 @@ export default function TeamPresence({ session }) {
             <ul className={styles.scrollList}>
                 {people.map(person => (
                     <li key={person.user.id} className={styles.row}>
-                        <Avatar user={person.user} live={Boolean(person.task)} />
+                        <Avatar user={{ ...person.user, online: person.online }} live={Boolean(person.task)}
+                            presence={person.status === 'joined' && person.user.id !== me} />
                         <div className={styles.who}>
                             <span className={styles.name}>
                                 {displayName(person.user)}{person.user.id === me && ` (${t('you')})`}
@@ -72,7 +75,8 @@ export default function TeamPresence({ session }) {
                             <span className={person.task ? styles.liveText : styles.meta}>
                                 {person.status === 'invited'
                                     ? t('invitedWaiting')
-                                    : person.task ? `${t('on')} ${person.task.name}` : t('idle')}
+                                    : person.task ? `${t('on')} ${person.task.name}`
+                                    : person.user.id !== me && onlineNow(person) ? t('onlineIdle') : t('idle')}
                             </span>
                         </div>
                         {person.status === 'joined' && person.total > 0 && <span className={styles.timeSmall}>{formatDuration(person.total)}</span>}

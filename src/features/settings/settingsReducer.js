@@ -1,8 +1,8 @@
-import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS } from "./settingsActionTypes";
+import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS, SET_PALETTE } from "./settingsActionTypes";
 import { THEMES, readStoredTheme } from "./theme";
 import { HOME_LAYOUTS, readStoredHomeLayout } from "./homeLayout";
 import { MOTION_LEVELS, readStoredMotion } from "./motion";
-import { LANGUAGES, readStoredLanguage, ACCENTS, readStoredAccent, SESSION_LENGTHS, readStoredSessionMinutes, readStoredShowSharedTasks } from "./preferences";
+import { LANGUAGES, readStoredLanguage, ACCENTS, readStoredAccent, SESSION_LENGTHS, readStoredSessionMinutes, readStoredShowSharedTasks, PALETTE_NAMES, readStoredPalette } from "./preferences";
 
 const intitialState = {
     showMenu: false,
@@ -14,6 +14,7 @@ const intitialState = {
     theme: readStoredTheme(), // 'dark' | 'light' | 'system', remembered in localStorage
     homeLayout: readStoredHomeLayout(), // 'solo' | 'team', remembered in localStorage
     accent: readStoredAccent(), // accent color palette, remembered in localStorage
+    palette: readStoredPalette(), // colour palette of the ground (warm, graphite, ...), remembered in localStorage
     defaultSessionMinutes: readStoredSessionMinutes(), // length of new sessions, remembered in localStorage
     motion: readStoredMotion(), // 'minimal' | 'normal' | 'extreme', remembered in localStorage
     showSharedTasks: readStoredShowSharedTasks(), // shared sessions' tasks in Home's list, remembered in localStorage
@@ -39,6 +40,8 @@ const settingsReducer = (state = intitialState, action) => {
             return HOME_LAYOUTS.includes(action.payload) ? { ...state, homeLayout: action.payload } : state;
         case SET_ACCENT:
             return ACCENTS.includes(action.payload) ? { ...state, accent: action.payload } : state;
+        case SET_PALETTE:
+            return PALETTE_NAMES.includes(action.payload) ? { ...state, palette: action.payload } : state;
         case SET_DEFAULT_SESSION_MINUTES:
             return SESSION_LENGTHS.includes(action.payload) ? { ...state, defaultSessionMinutes: action.payload } : state;
         case SET_MOTION:

@@ -228,6 +228,23 @@
 
 /* ---------- level ---------- */
 
+.levelPlant{
+    flex-shrink: 0;
+    display: inline-flex;
+    border-radius: 50%;
+    corner-shape: round;
+    transition: transform var(--ease-out);
+}
+
+.levelPlant:hover{
+    transform: scale(1.04);
+}
+
+.levelName{
+    margin-right: auto;
+    margin-left: 0.85rem;
+}
+
 .levelTop{
     display: flex;
     flex-direction: row;
@@ -586,6 +603,71 @@ a.rankName:hover{
 
 .rankGap{
     height: 0.5rem;
+}
+
+/* a friend's streak beside their XP: a small flame and the days */
+.rankStreak{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    margin-left: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.rankStreak svg{
+    color: var(--plant-fruit);
+}
+
+/* ---------- online now ---------- */
+
+.onlineList{
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.onlineItem{
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.5rem;
+}
+
+.onlineWho{
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.onlineStatus{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.onlineAction{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    corner-shape: round;
+    color: var(--text-muted);
+    transition: color var(--ease-out), background-color var(--ease-out);
+}
+
+.onlineAction:hover{
+    color: var(--text-h);
+    background: var(--hover-wash);
 }
 
 .hint{

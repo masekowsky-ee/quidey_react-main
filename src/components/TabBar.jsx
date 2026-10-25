@@ -11,13 +11,16 @@ import { selectTaskInviteCount } from '../features/tasks/taskAction';
 import { selectAdminPendingCount } from '../features/admin/adminAction';
 import { selectInboxCount } from '../features/inbox/inbox';
 import { selectFamilyInviteCount } from '../features/family/family';
+import { useOnlineFriends } from '../features/presence/presence';
+import { fill } from '../features/helperFunction';
 
 function Count({ count, label }) {
     if (count <= 0) return null;
     return <span className={styles.count} aria-label={`${count} ${label}`}>{count > 9 ? '9+' : count}</span>;
 }
 
-function Tab({ to, end, match, icon, label, count = 0, countLabel, news, newsLabel }) {
+// online: how many friends have the app open (a green dot at the icon's foot)
+function Tab({ to, end, match, icon, label, count = 0, countLabel, news, newsLabel, online = 0, onlineLabel }) {
     const { pathname } = useLocation();
     return (
         <NavLink to={to} end={end} className={({ isActive }) => `${styles.tab} ${isActive || match?.(pathname) ? styles.active : ''}`}>
@@ -25,6 +28,7 @@ function Tab({ to, end, match, icon, label, count = 0, countLabel, news, newsLab
                 <Icon name={icon} className={styles.icon} />
                 <Count count={count} label={countLabel} />
                 {count === 0 && news && <span className={styles.dot} role="img" aria-label={newsLabel} />}
+                {online > 0 && <span className={styles.online} role="img" aria-label={onlineLabel} />}
             </span>
             <span className={styles.label}>{label}</span>
         </NavLink>
@@ -46,6 +50,7 @@ export default function TabBar() {
     const adminPending = useSelector(selectAdminPendingCount);
     const moreCount = isAdmin ? adminPending : 0;
     const menuOpen = useSelector(state => state.settings.showMenu);
+    const onlineFriends = useOnlineFriends().length;
 
     return (
         <nav className={styles.bar} aria-label={t('mainNav')}>
@@ -54,7 +59,9 @@ export default function TabBar() {
                 count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
             <Tab to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')}
                 count={inviteCount + friendRequests + familyInvites} countLabel={t('communityCount')}
-                news={news.together || news.social || news.feed} newsLabel={t('menuNews')} />
+                news={news.together || news.social || news.feed} newsLabel={t('menuNews')}
+                online={onlineFriends}
+                onlineLabel={fill(t(onlineFriends === 1 ? 'onlineFriendsOne' : 'onlineFriendsCount'), { count: onlineFriends })} />
             <Tab to="/inbox" icon="inbox" label={t('inbox')}
                 count={inboxCount} countLabel={t('inboxUnread')} />
             <button type="button" className={`${styles.tab} ${menuOpen ? styles.active : ''}`}

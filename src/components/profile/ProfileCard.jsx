@@ -6,6 +6,7 @@ import { displayName, fill, formatDate } from '../../features/helperFunction';
 import { DEFAULT_BANNER, profileColorAttr } from '../../features/profile/profileOptions';
 import { BADGES } from '../../features/profile/badges';
 import { tierFor } from '../../features/progress/progress';
+import LevelPlant from '../progress/LevelPlant';
 
 // The head of a profile: banner, avatar, names and whatever the person set up.
 // `limited`: somebody who isn't a friend; only the names are there, so no banner either.
@@ -20,7 +21,9 @@ export default function ProfileCard({ profile, limited = false, heading: Heading
             <div className={styles.banner} data-banner={limited ? 'none' : (profile.banner ?? DEFAULT_BANNER)} aria-hidden="true" />
             <div className={styles.body}>
                 <div className={styles.top}>
-                    <ProfileAvatar user={limited ? { ...profile, emoji: null, color: null, frame: null } : profile} large />
+                    {/* a friend's profile: the green dot while they have the app open */}
+                    <ProfileAvatar user={limited ? { ...profile, emoji: null, color: null, frame: null } : profile} large
+                        presence={profile.relation === 'friend'} />
                     {children && <div className={styles.actions}>{children}</div>}
                 </div>
                 <div>
@@ -34,7 +37,11 @@ export default function ProfileCard({ profile, limited = false, heading: Heading
                     <>
                         {profile.level > 0 && (
                             <p className={styles.levelLine}>
-                                <strong>{fill(t('levelLabel'), { level: profile.level })}</strong> · {t(`tier_${tierFor(profile.level).id}`)}
+                                {/* the level plant: how far they have grown */}
+                                <LevelPlant level={profile.level} size={40} />
+                                <span>
+                                    <strong>{fill(t('levelLabel'), { level: profile.level })}</strong> · {t(`tier_${tierFor(profile.level).id}`)}
+                                </span>
                             </p>
                         )}
                         {profile.status && <p className={styles.status}>{profile.status}</p>}

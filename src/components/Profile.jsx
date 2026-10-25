@@ -8,6 +8,7 @@ import ProfileView from './ProfileView.jsx'
 import ResendVerification from './ResendVerification.jsx'
 import { listAccounts, switchAccount } from '../features/auth/accounts'
 import {useTranslation} from '../i18n/useTranslation'
+import PasswordInput from './PasswordInput.jsx';
 
 // Same rule as the server: 3-30 letters, digits, _ . or -
 const USERNAME_PATTERN = /^[A-Za-z0-9_.-]{3,30}$/;
@@ -199,7 +200,7 @@ export default function Profile({ initialSignState = 0, initialEmail = '' } = {}
                             </div>
                             <div className={styles.field}>
                                 <label htmlFor="passwordInput">{t('password')}</label>
-                                <input placeholder={t('password')} value={password} onChange={(e) => setPassword(e.target.value)} id="passwordInput" type="password" autoComplete="current-password" />
+                                <PasswordInput placeholder={t('password')} value={password} onChange={(e) => setPassword(e.target.value)} id="passwordInput" autoComplete="current-password" />
                             </div>
                             <button className={styles.submitBtn} type="submit" disabled={sending} aria-busy={sending}>
                                 {sending ? t('signingIn') : t('signIn')}
@@ -228,11 +229,11 @@ export default function Profile({ initialSignState = 0, initialEmail = '' } = {}
                             <div className={styles.fieldRow}>
                                 <div className={styles.field}>
                                     <label htmlFor="passwordInput">{t('password')}</label>
-                                    <input placeholder={t('password')} value={password} onChange={(e) => setPassword(e.target.value)} id="passwordInput" type="password" autoComplete="new-password" />
+                                    <PasswordInput placeholder={t('password')} value={password} onChange={(e) => setPassword(e.target.value)} id="passwordInput" autoComplete="new-password" />
                                 </div>
                                 <div className={styles.field}>
                                     <label htmlFor="passwordValidateInput">{t('passwordValidate')}</label>
-                                    <input placeholder={t('passwordValidate')} value={passwordValidate} onChange={(e) => setPasswordValidate(e.target.value)} id="passwordValidateInput" type="password" autoComplete="new-password" />
+                                    <PasswordInput placeholder={t('passwordValidate')} value={passwordValidate} onChange={(e) => setPasswordValidate(e.target.value)} id="passwordValidateInput" autoComplete="new-password" />
                                 </div>
                             </div>
                             {/* the legal pages open in a new tab, so the form stays filled in */}

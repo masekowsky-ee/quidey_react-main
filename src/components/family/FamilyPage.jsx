@@ -5,13 +5,16 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
-import { displayName, fill, formatRelative, parseDate, sameDay, toDateOnly } from '../../features/helperFunction';
+import { displayName, fill, formatDuration, formatRelative, parseDate, sameDay, toDateOnly } from '../../features/helperFunction';
 import { dateKey, taskTimeText } from '../../features/calendar/calendar';
 import { fetchFriends } from '../../features/friends/friendsAction';
 import {
     addFamilyTask, removeFamilyTask, updateFamilyTask, deleteFamily, fetchFamily, fetchFamilyMessages, inviteToFamily, removeFamilyMember,
-    renameFamily, sendFamilyMessage,
+    renameFamily, sendFamilyMessage, updateFamily, FAMILY_EMOJIS,
 } from '../../features/family/family';
+import { TASK_COLORS } from '../../features/tasks/taskColors';
+import { rememberPresence } from '../../features/presence/presence';
+import { OnlineLabel } from '../presence/OnlineDot';
 import { calendarLink } from '../../features/calendar/sources';
 import { useRealtime, useRealtimeRefresh, useSafetyPoll } from '../../features/realtime/socket';
 import { useNow } from '../../features/together/work';
@@ -19,10 +22,32 @@ import { useFamilyRun } from './useFamilyRun';
 import Avatar from '../together/Avatar';
 import TaskEditDialog from '../task/TaskEditDialog';
 import Icon from '../calendar/icons.jsx';
+// the app's outline set, for what the calendar's icons don't have (flame, chevron)
+import AppIcon from '../icons';
 import FriendPicker from '../together/FriendPicker';
 
 const UPCOMING_MAX = 8;
 const MESSAGE_MAX = 1000;
+const NOTE_MAX = 2000;
+
+// The joined members, for "who takes care of it"
+const joinedPeople = (family) => family.people.filter(person => person.status === 'joined');
+
+// "Who takes care of it?": nobody, or one of the joined members
+function AssigneeSelect({ family, value, onChange, className, label }) {
+    const { t } = useTranslation();
+    return (
+        <select className={className} value={value ?? ''} aria-label={label ?? t('familyAssignee')} title={label ?? t('familyAssignee')}
+            onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}>
+            <option value="">{t('familyAssigneeNobody')}</option>
+            {joinedPeople(family).map(person => (
+                <option key={person.user.id} value={person.user.id}>
+                    {person.user.id === family.me ? t('familyAssigneeMe') : displayName(person.user)}
+                </option>
+            ))}
+        </select>
+    );
+}
 
 // Loads a family and keeps it current: again on "family:changed" for it, and as a safety net.
 // missing: I'm not (or no longer) in it, or it was deleted.
@@ -76,6 +101,168 @@ function useFamilyChat(id) {
     return { ...current, addMessages, loadOlder };
 }
 
+// The family's emoji and colour; the owner opens a small panel to pick them
+function FamilyLooks({ family, onChanged }) {
+    const { t } = useTranslation();
+    const run = useFamilyRun();
+    const [open, setOpen] = useState(false);
+    const emoji = family.emoji ?? '🏡';
+    if (!family.isOwner) return <span className={own.emojiBadge} aria-hidden="true">{emoji}</span>;
+
+    const change = async (changes) => {
+        const changed = await run(updateFamily(family.id, changes));
+        if (changed) onChanged(changed);
+    };
+    return (
+        <span className={own.looksWrap}>
+            <button type="button" className={own.emojiBadge} onClick={() => setOpen(value => !value)}
+                aria-expanded={open} aria-label={t('familyLooks')} title={t('familyLooks')}>
+                {emoji}
+            </button>
+            {open &&
+                <div className={own.looks} role="group" aria-label={t('familyLooks')}>
+                    <p className={own.looksLabel}>{t('familyEmoji')}</p>
+                    <div className={own.emojiGrid}>
+                        {FAMILY_EMOJIS.map(item => (
+                            <button key={item} type="button" aria-pressed={family.emoji === item}
+                                className={family.emoji === item ? own.emojiOn : undefined} onClick={() => change({ emoji: item })}>
+                                {item}
+                            </button>
+                        ))}
+                    </div>
+                    <p className={own.looksLabel}>{t('familyColor')}</p>
+                    <div className={own.colorRow}>
+                        <button type="button" className={own.colorNone} aria-pressed={!family.color}
+                            aria-label={t('familyColorNone')} title={t('familyColorNone')} onClick={() => change({ color: null })} />
+                        {TASK_COLORS.map(color => (
+                            <button key={color} type="button" data-task-color={color} className={own.colorDot}
+                                aria-pressed={family.color === color} aria-label={t(`taskColor_${color}`)} title={t(`taskColor_${color}`)}
+                                onClick={() => change({ color })} />
+                        ))}
+                    </div>
+                    <button type="button" className={styles.quietBtn} onClick={() => setOpen(false)}>{t('familyLooksDone')}</button>
+                </div>}
+        </span>
+    );
+}
+
+// The board: one short text for everybody (any member changes it)
+function FamilyBoard({ family, onChanged }) {
+    const { t, language } = useTranslation();
+    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const run = useFamilyRun();
+    const now = useNow(true, 60 * 1000);
+    const [editing, setEditing] = useState(false);
+    const [text, setText] = useState('');
+    const [busy, setBusy] = useState(false);
+    const note = family.note;
+
+    const start = () => { setText(note?.text ?? ''); setEditing(true); };
+    const save = async (e) => {
+        e.preventDefault();
+        setBusy(true);
+        const changed = await run(updateFamily(family.id, { note: text.trim() }));
+        setBusy(false);
+        if (changed) { onChanged(changed); setEditing(false); }
+    };
+
+    return (
+        <section className={`${styles.card} ${own.board}`}>
+            <div className={styles.cardHead}>
+                <h2 className={styles.cardTitle}>{t('familyBoard')}</h2>
+                {!editing && <button type="button" className={styles.quietBtn} onClick={start}>{note ? t('familyBoardEdit') : t('familyBoardPin')}</button>}
+            </div>
+            {editing
+                ? <form className={own.boardForm} onSubmit={save}>
+                    <textarea value={text} maxLength={NOTE_MAX} rows={4} autoFocus onChange={(e) => setText(e.target.value)}
+                        placeholder={t('familyBoardPlaceholder')} aria-label={t('familyBoard')} />
+                    <div className={styles.formActions}>
+                        <span className={own.boardCount}>{text.length} / {NOTE_MAX}</span>
+                        <button type="button" className={styles.quietBtn} onClick={() => setEditing(false)}>{t('cancel')}</button>
+                        <button type="submit" className={styles.primaryBtn} disabled={busy}>{t('save')}</button>
+                    </div>
+                </form>
+                : note
+                    ? <>
+                        <p className={own.boardText}>{note.text}</p>
+                        <p className={own.boardMeta}>
+                            {note.updatedBy && fill(t('familyBoardBy'), { name: displayName(note.updatedBy) })}
+                            {note.updatedAt && <> · <time dateTime={note.updatedAt}>{formatRelative(note.updatedAt, now, locale)}</time></>}
+                        </p>
+                    </>
+                    : <p className={styles.emptyLine}>{t('familyBoardEmpty')}</p>}
+        </section>
+    );
+}
+
+// The family's list: entries without a day (shopping, chores), ticked off by anybody, each
+// with whoever takes care of it; done ones folded away under the open ones
+function FamilyList({ family, onChanged }) {
+    const { t } = useTranslation();
+    const run = useFamilyRun();
+    const [name, setName] = useState('');
+    const [assignee, setAssignee] = useState(null);
+    const [busy, setBusy] = useState(false);
+    const [showDone, setShowDone] = useState(false);
+    const items = family.tasks.filter(task => !task.due);
+    const open = items.filter(task => !task.done);
+    const done = items.filter(task => task.done);
+
+    const change = (request) => request.then(onChanged);
+    const add = async (e) => {
+        e.preventDefault();
+        if (!name.trim()) return;
+        setBusy(true);
+        const changed = await run(addFamilyTask(family.id, { name: name.trim(), ...(assignee ? { assignee_id: assignee } : {}) }));
+        setBusy(false);
+        if (changed) { onChanged(changed); setName(''); }
+    };
+    const canRemove = (task) => family.isOwner || task.addedBy?.id === family.me;
+
+    const row = (task) => (
+        <li key={task.id} className={own.listItem} data-done={task.done}>
+            <button type="button" className={own.entryCheck} aria-pressed={task.done}
+                onClick={() => run(change(updateFamilyTask(family.id, task.id, { done: !task.done })), task.done ? null : 'toast_entryDone')}
+                aria-label={`${t(task.done ? 'markUndone' : 'markDone')}: ${task.name}`} title={t(task.done ? 'markUndone' : 'markDone')}>
+                <Icon name="check" size={14} />
+            </button>
+            <span className={own.listName}>{task.name}</span>
+            <AssigneeSelect family={family} value={task.assignee?.id} className={own.assigneeChip}
+                label={`${t('familyAssignee')}: ${task.name}`}
+                onChange={(id) => run(change(updateFamilyTask(family.id, task.id, { assignee_id: id })))} />
+            {canRemove(task)
+                ? <button type="button" className={own.entryEdit} onClick={() => run(change(removeFamilyTask(family.id, task.id)))}
+                    aria-label={`${t('delete')}: ${task.name}`} title={t('delete')}>
+                    <Icon name="close" size={16} />
+                </button>
+                : <span />}
+        </li>
+    );
+
+    return (
+        <section className={styles.card}>
+            <div className={styles.cardHead}>
+                <h2 className={styles.cardTitle}>{t('familyList')}</h2>
+                {open.length > 0 && <span className={styles.meta}>{fill(t('familyListOpen'), { count: open.length })}</span>}
+            </div>
+            {items.length === 0 && <p className={styles.emptyLine}>{t('familyListEmpty')}</p>}
+            {open.length > 0 && <ul className={own.list}>{open.map(row)}</ul>}
+            {done.length > 0 &&
+                <button type="button" className={own.doneToggle} aria-expanded={showDone} onClick={() => setShowDone(value => !value)}>
+                    {fill(t('familyListDone'), { count: done.length })}
+                    <AppIcon name="chevronDown" size={14} />
+                </button>}
+            {showDone && done.length > 0 && <ul className={own.list}>{done.map(row)}</ul>}
+            <form className={own.listAdd} onSubmit={add}>
+                <input value={name} maxLength={200} onChange={(e) => setName(e.target.value)}
+                    placeholder={t('familyListAdd')} aria-label={t('familyListAdd')} />
+                <AssigneeSelect family={family} value={assignee} onChange={setAssignee} />
+                <button type="submit" className={styles.primaryBtn} disabled={busy || !name.trim()}>{t('add')}</button>
+            </form>
+        </section>
+    );
+}
+
 // Title; the owner clicks it to rename
 function FamilyTitle({ family, onChanged }) {
     const { t } = useTranslation();
@@ -112,8 +299,10 @@ function Upcoming({ family, onChanged }) {
     const [name, setName] = useState('');
     const [day, setDay] = useState(todayKey);
     const [time, setTime] = useState('');
+    const [assignee, setAssignee] = useState(null);
     const [busy, setBusy] = useState(false);
     const [editingId, setEditingId] = useState(null);
+    const [onlyMine, setOnlyMine] = useState(false);
     const editing = family.tasks.find(task => task.id === editingId) ?? null;
 
     // every change answers with the whole family, which is shown right away
@@ -124,13 +313,16 @@ function Upcoming({ family, onChanged }) {
     // the server sends them by day and time; "YYYY-MM-DD" compares like dates
     const upcoming = family.tasks
         .filter(task => !task.done && task.due && dateKey(task.due) >= todayKey)
+        .filter(task => !onlyMine || task.assignee?.id === family.me)
         .slice(0, UPCOMING_MAX);
 
     const add = async (e) => {
         e.preventDefault();
         if (!name.trim() || !day) return;
         setBusy(true);
-        const changed = await run(addFamilyTask(family.id, { name: name.trim(), due: day, ...(time ? { due_time: time } : {}) }));
+        const changed = await run(addFamilyTask(family.id, {
+            name: name.trim(), due: day, ...(time ? { due_time: time } : {}), ...(assignee ? { assignee_id: assignee } : {}),
+        }));
         setBusy(false);
         if (changed) {
             onChanged(changed);
@@ -148,10 +340,15 @@ function Upcoming({ family, onChanged }) {
         <section className={styles.card}>
             <div className={styles.cardHead}>
                 <h2 className={styles.cardTitle}>{t('familyUpcoming')}</h2>
-                <Link to={calendarLink('family', family.id)} className={own.calendarLink}>{t('calendarOpenCalendar')} →</Link>
+                <span className={own.headLinks}>
+                    <button type="button" className={own.filterBtn} aria-pressed={onlyMine} onClick={() => setOnlyMine(value => !value)}>
+                        {t('familyOnlyMine')}
+                    </button>
+                    <Link to={calendarLink('family', family.id)} className={own.calendarLink}>{t('calendarOpenCalendar')} →</Link>
+                </span>
             </div>
             {upcoming.length === 0
-                ? <p className={styles.emptyLine}>{t('familyNothingPlanned')}</p>
+                ? <p className={styles.emptyLine}>{t(onlyMine ? 'familyNothingMine' : 'familyNothingPlanned')}</p>
                 : <ul className={own.upcoming}>
                     {upcoming.map(task => (
                         <li key={task.id} className={own.entry}>
@@ -167,7 +364,11 @@ function Upcoming({ family, onChanged }) {
                                     {task.name}
                                 </Link>
                                 <span className={own.entryMeta}>
-                                    {[task.location, task.addedBy && fill(t('addedByName'), { name: displayName(task.addedBy) })].filter(Boolean).join(' · ')}
+                                    {[
+                                        task.assignee && fill(t(task.assignee.id === family.me ? 'familyForMe' : 'familyForName'), { name: displayName(task.assignee) }),
+                                        task.location,
+                                        task.addedBy && fill(t('addedByName'), { name: displayName(task.addedBy) }),
+                                    ].filter(Boolean).join(' · ')}
                                 </span>
                             </span>
                             <button type="button" className={own.entryEdit} onClick={() => setEditingId(task.id)}
@@ -193,6 +394,7 @@ function Upcoming({ family, onChanged }) {
                     placeholder={t('familyAddEntry')} aria-label={t('familyAddEntry')} />
                 <input type="date" value={day} onChange={(e) => setDay(e.target.value)} aria-label={t('dueDate')} required />
                 <input type="time" value={time} onChange={(e) => setTime(e.target.value)} aria-label={t('taskTime')} />
+                <AssigneeSelect family={family} value={assignee} onChange={setAssignee} />
                 <button type="submit" className={styles.primaryBtn} disabled={busy || !name.trim() || !day}>{t('add')}</button>
             </form>
         </section>
@@ -215,6 +417,11 @@ function Members({ family, onChanged }) {
 
     const inFamily = new Set(family.people.map(person => person.user.id));
     const candidates = friends.filter(friend => !inFamily.has(friend.id));
+    const presence = useSelector(state => state.presence);
+    const isOnline = (person) => person.user.id !== family.me && (presence[person.user.id] ?? person.online ?? false);
+    // this week, for those who show their numbers
+    const week = new Map((family.week?.people ?? []).map(entry => [entry.userId, entry]));
+    const togetherMin = (family.week?.people ?? []).reduce((sum, entry) => sum + entry.focusMin, 0);
 
     const invite = async () => {
         setBusy(true);
@@ -242,16 +449,29 @@ function Members({ family, onChanged }) {
                 <h2 className={styles.cardTitle}>{t('familyMembers')}</h2>
                 {!inviting && <button className={styles.addPersonBtn} onClick={() => setInviting(true)}>+ {t('invite')}</button>}
             </div>
+            {togetherMin > 0 &&
+                <p className={own.weekLine}>{fill(t('familyWeekTogether'), { time: formatDuration(togetherMin * 60000) })}</p>}
             <ul className={styles.list}>
-                {family.people.map(person => (
+                {family.people.map(person => {
+                    const mine = week.get(person.user.id);
+                    return (
                     <li key={person.user.id} className={styles.row}>
-                        <Avatar user={person.user} />
+                        <Avatar user={{ ...person.user, online: person.online }} presence={person.user.id !== family.me} />
                         <div className={styles.who}>
                             <span className={styles.name}>
                                 <Link to={`/u/${person.user.username}`}>{displayName(person.user)}</Link>
                                 {person.isOwner && <span className={styles.ownerTag}>{t('owner')}</span>}
                                 {person.status === 'invited' && <span className={styles.ownerTag}>{t('invited')}</span>}
                             </span>
+                            {(isOnline(person) || mine) &&
+                                <span className={own.memberMeta}>
+                                    {isOnline(person) && <OnlineLabel />}
+                                    {mine && mine.focusMin > 0 && <span>{fill(t('familyWeekFocus'), { time: formatDuration(mine.focusMin * 60000) })}</span>}
+                                    {mine && mine.streak > 0 &&
+                                        <span className={own.streak} title={fill(t('streakDaysTitle'), { days: mine.streak })}>
+                                            <AppIcon name="flame" size={13} />{mine.streak}
+                                        </span>}
+                                </span>}
                         </div>
                         {family.isOwner && !person.isOwner &&
                             <button className={`${confirmId === person.user.id ? styles.dangerBtn : styles.quietDangerBtn} ${own.memberActions}`}
@@ -260,7 +480,8 @@ function Members({ family, onChanged }) {
                                 {confirmId === person.user.id ? t('confirmRemoveShort') : t(person.status === 'invited' ? 'withdrawRequest' : 'removeMember')}
                             </button>}
                     </li>
-                ))}
+                    );
+                })}
             </ul>
             {inviting &&
                 <div className={own.inviteBox}>
@@ -371,8 +592,12 @@ function FamilyActions({ family, onGone }) {
 export default function FamilyPage() {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const id = Number(useParams().id);
     const { family, missing, show } = useFamily(id);
+
+    // who of them has the app open (kept current live afterwards)
+    useEffect(() => { if (family) dispatch(rememberPresence(family.people)); }, [family, dispatch]);
 
     if (missing || !Number.isInteger(id) || id <= 0) {
         return (
@@ -389,9 +614,10 @@ export default function FamilyPage() {
 
     const memberCount = family.people.filter(person => person.status === 'joined').length;
     return (
-        <div className={styles.pageWide}>
+        <div className={`${styles.pageWide} ${own.familyPage}`} data-task-color={family.color ?? undefined}>
             <Link to={COMMUNITY_PATHS.family} className={styles.back}>← {t('family')}</Link>
-            <div className={styles.titleRow}>
+            <div className={`${styles.titleRow} ${own.titleRow}`}>
+                <FamilyLooks family={family} onChanged={show} />
                 <div className={styles.titleBlock}>
                     <FamilyTitle family={family} onChanged={show} />
                     <p className={styles.meta}>
@@ -401,7 +627,9 @@ export default function FamilyPage() {
             </div>
             <div className={styles.roomGrid}>
                 <div className={styles.roomMain}>
+                    <FamilyBoard family={family} onChanged={show} />
                     <Upcoming family={family} onChanged={show} />
+                    <FamilyList family={family} onChanged={show} />
                     <Members family={family} onChanged={show} />
                 </div>
                 <div className={styles.roomSide}>

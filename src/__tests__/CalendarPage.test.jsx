@@ -358,15 +358,11 @@ describe('shared calendars', () => {
         expect(screen.getByRole('button', { name: 'Delete: Flashcards' })).toBeInTheDocument()
     })
 
-    it("family calendars are for testers; the picker switches between calendars", async () => {
-        answer({ 'GET /api/tester/families/3': FAMILY })
+    it("shows a family's calendar (no tester needed); the picker switches between calendars", async () => {
+        answer({ 'GET /api/families/3': FAMILY })
         let store
         await act(async () => { store = setup('/calendar?date=2026-10-19&cal=family-3') })
-        // not a tester: my own calendar, nothing asked from the tester API
-        expect(within(cell('2026-10-19')).getByText('Dentist')).toBeInTheDocument()
-        expect(apiFetch.mock.calls.some(([url]) => url.startsWith('/api/tester'))).toBe(false)
-
-        withAccess(store, true)
+        withAccess(store, false)
         act(() => { store.dispatch({ type: 'SET_FAMILIES', payload: { families: [{ id: 3, name: 'The Bergs' }], invites: [] } }) })
         await act(async () => {})
         expect(within(cell('2026-10-24')).getByText('Grandma visits')).toBeInTheDocument()

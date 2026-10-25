@@ -4,6 +4,8 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { fill } from '../../features/helperFunction';
 import { TIERS, UNLOCKS, fetchProgress, formatNumber, nextUnlocks, tierFor, unlockText } from '../../features/progress/progress';
 import Icon from '../icons';
+import LevelPlant from '../progress/LevelPlant';
+import { Link } from 'react-router-dom';
 
 // limit: at most this many rows (the next few unlocks)
 function UnlockRows({ steps, reached, t, limit = Infinity, className = '' }) {
@@ -71,7 +73,11 @@ export default function LevelCard() {
             </div>
 
             <div className={styles.levelTop}>
-                <div>
+                {/* the plant grows with the level (large on the profile, where it can be replayed) */}
+                <Link to="/profile" className={styles.levelPlant} aria-label={t('plantOpen')} title={t('plantOpen')}>
+                    <LevelPlant level={level} share={share} size={64} />
+                </Link>
+                <div className={styles.levelName}>
                     <p className={styles.levelNumber}>{level}</p>
                     <p className={styles.levelTier}>{t(`tier_${tier.id}`)}</p>
                 </div>

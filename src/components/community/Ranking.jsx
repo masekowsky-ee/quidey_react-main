@@ -6,6 +6,7 @@ import { displayName, fill } from '../../features/helperFunction';
 import { friendsPath } from '../../features/community/paths';
 import ProfileAvatar from '../profile/ProfileAvatar';
 import { formatNumber } from '../../features/progress/progress';
+import Icon from '../icons';
 
 // the top five, and me below them when I'm further down
 const SHOWN = 5;
@@ -24,13 +25,21 @@ export default function Ranking() {
     const row = (item, index) => (
         <li key={item.user.id} className={styles.rankRow} data-me={item.me}>
             <span className={styles.rank}>{index + 1}</span>
-            <ProfileAvatar user={item.user} />
+            <ProfileAvatar user={{ ...item.user, online: item.online }} presence={!item.me} />
             {item.me
                 ? <span className={styles.rankName}>{t('rankingYou')}<small>{fill(t('levelShort'), { level: item.user.level })}</small></span>
                 : <Link className={styles.rankName} to={`/u/${item.user.username}`}>
                     {displayName(item.user)}<small>{fill(t('levelShort'), { level: item.user.level })}</small>
                 </Link>}
-            <span className={styles.rankXp}>{fill(t('rankingXp'), { xp: formatNumber(item.weekXp, language) })}</span>
+            <span className={styles.rankXp}>
+                {fill(t('rankingXp'), { xp: formatNumber(item.weekXp, language) })}
+                {item.streak > 0 && (
+                    <span className={styles.rankStreak} title={fill(t('streakDaysTitle'), { days: item.streak })}
+                        aria-label={fill(t('streakDaysTitle'), { days: item.streak })}>
+                        <Icon name="flame" size={13} />{item.streak}
+                    </span>
+                )}
+            </span>
         </li>
     );
 

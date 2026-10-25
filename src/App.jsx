@@ -17,7 +17,8 @@ import { useTaskReminders } from "./features/tasks/reminders.js"
 import { useEventEnds } from "./features/tasks/kinds.js"
 import { useAccountLocale } from "./features/settings/accountLocale.js"
 import { fetchSessions } from "./features/session/sessionAction.js"
-import { fetchFriendRequests } from "./features/friends/friendsAction.js"
+import { fetchFriendRequests, fetchFriends } from "./features/friends/friendsAction.js"
+import { usePresenceRealtime } from "./features/presence/presence.js"
 import { fetchSharedSessions, fetchMySharedTasks } from './features/together/togetherAction.js'
 import { useWorkReporter } from './features/together/work.js'
 import Toaster from './components/Toaster.jsx';
@@ -33,7 +34,6 @@ import { useFamilyList } from './features/family/family.js';
 import { useProgressWatcher } from './features/progress/progress.js';
 import { useFeedRealtime } from './features/feed/feed.js';
 import { COMMUNITY_PATHS } from './features/community/paths.js';
-import TesterOnly from './components/TesterOnly.jsx';
 import { LegalFooter } from './legal/LegalFooter.jsx';
 import { LEGAL_PATHS } from './legal/paths.js';
 import { useApplyTheme } from './features/settings/theme.js';
@@ -146,6 +146,8 @@ function App(){
   // live connection (useLiveLists); polled only as the safety net
   useSafetyPoll(() => {
     dispatch(fetchFriendRequests()).catch(() => {});
+    // friends (with who of them is online, for the menu and Home)
+    dispatch(fetchFriends()).catch(() => {});
     dispatch(fetchSharedSessions()).catch(() => {});
     // the shared sessions' tasks for the solo view
     dispatch(fetchMySharedTasks()).catch(() => {});
@@ -164,6 +166,8 @@ function App(){
   }, [allowed, token]);
   useInboxRealtime();
   useLiveLists();
+  // friends coming online or going away
+  usePresenceRealtime(dispatch);
   useClearNews();
   // Quidey Family (testers): my families and invites
   useFamilyList(allowed);
@@ -247,7 +251,7 @@ function App(){
           <Route path="/inbox" element={<Inbox/>} />
           <Route path="/feedback" element={<Feedback/>} />
           <Route path="/together/:id" element={<SharedSession/>} />
-          <Route path="/family/:id" element={<TesterOnly fallback={<Navigate to="/" replace />}><FamilyPage/></TesterOnly>} />
+          <Route path="/family/:id" element={<FamilyPage/>} />
           <Route path="/admin" element={access.isAdmin ? <Admin/> : <Navigate to="/" replace />} />
           {/* hidden: only reachable through the daily line in the header */}
           <Route path="/fun" element={<FunPage/>} />

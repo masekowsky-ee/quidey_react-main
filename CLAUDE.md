@@ -1,6 +1,6 @@
 # Quidey — project overview
 
-Quidey is a calm planner for students: tasks, a focus timer, a calendar, and friends you study
+Quidey is a planner for learning and studying ("Planer für Lernen und Studium"): tasks, a focus timer, a calendar, and friends you study
 with live. German-first (de default, en available), currently a **closed beta** — only users
 with `is_pro` or `is_tester` (admins always) get into the app. The app runs on **app.quidey.com**;
 the public landing page on **quidey.com** is a separate static site (repo `quidey_landing`).
@@ -21,7 +21,8 @@ Three repositories, side by side on this machine:
   `composes:` shared classes from `src/components/ui.module.css`), Inter via `@fontsource-variable`.
 - State: Redux (`configureStore` + classic reducers/action types + thunks), slices in
   `src/features/rootReducer.js`: `task`, `session`, `auth`, `settings`, `friends`, `together`,
-  `toast`, `inbox`, `news`, `family`, `feed`, `progress`.
+  `toast`, `inbox`, `news`, `family`, `feed`, `progress`, `presence` (who is online: user id →
+  bool, `src/features/presence/presence.js`).
 - Routing: react-router-dom 7 (`BrowserRouter` in `src/main.jsx`).
 - Animation: `motion` (Framer Motion) with three user-chosen levels `minimal | normal | extreme`
   (`src/features/settings/motion.js`, `MOTION` presets, confetti `burst`). Remotion
@@ -59,11 +60,22 @@ Order of checks on every render:
    page container use them. The closed drawer is `inert`; `setShowMenu(true|false)` (no argument
    toggles). Menu (Hick's law: few choices at once): Start, Kalender, Gemeinschaft, Postfach, then
    "Mehr" (Statistiken), at the bottom Admin/Einstellungen/Feedback and the
-   `AccountSwitcher` (profile, tour, switch account, add account, sign out). The active entry is
+   `AccountSwitcher` (profile, switch account, add account, sign out). Under Gemeinschaft a row of
+   the friends online right now (faces + "N Freunde online", `useOnlineFriends`); the tab bar puts
+   a green dot on Gemeinschaft while any friend is online. The tour ("Einführung") lives in
+   Settings → App. The header has a streak pill (flame + days, filled once today counts). The active entry is
    brighter ink, no fill; count badges are neutral (the accent stays on data, never on nav,
    tabs or buttons; one filled inverted primary per screen). The header's "Neu" opens the
    new-task form over any page (`QuickAdd`, `settings.showForms` via `showForms(true|false)`).
    Row actions in lists appear on hover/focus with a mouse (always on touch).
+
+Online status: the backend counts each user's open sockets (`realtime.js`, in memory, never
+stored, 8 s grace on disconnect) and tells friends + people in open shared sessions/families
+`presence:changed { userId, online }`; lists carry `online` (friends, session people, family
+people, profiles of friends, ranking). Hidden for everybody with `users.show_online = false`
+(profile editor: "Zeigen, wenn ich online bin"). Frontend: `presence` slice, `usePresenceRealtime`
+in App, `useOnline(id, fallback)`, `<Avatar presence>` / `<ProfileAvatar presence>` draw the green
+dot (`components/presence/OnlineDot.jsx`, `--online`). App loads the friends list app-wide.
 
 App also: re-checks access on a `PRO_REQUIRED` API error or a refused socket
 (`REALTIME_REJECTED`); signs out on `TOKEN_REVOKED`/`TOKEN_INVALID`; opens the Socket.IO
@@ -77,7 +89,9 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
 ## Pages / features
 
 - `/` Home — layout `solo` or `team` (`TeamHome`), switchable in settings. Solo (`Home.jsx`):
-  title row (today's date as h1, open / due today / overdue, Solo|Team switch), next 8 days
+  title row (today's date as h1, open / due today / overdue, Solo|Team switch), the motivation
+  strip (`home/Momentum.jsx`: streak with the last 7 days, today's state and next milestone; today's
+  daily challenges + level plant; friends online and friends' streaks; a swipe row on phones), next 8 days
   (`WeekDaysContainer`), group filter chips (`GroupBtnContainer`: "Alle", groups, session groups,
   "+"), the list (`TaskContainer`, one `task/TaskRow` per task: check, name (click renames), one
   line of details, day as "Heute/Morgen/weekday" (`dueText`), priority as "Hoch/Mittel", focus /
@@ -90,14 +104,14 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
 - `/calendar` — month / week / agenda views, drag tasks between days, keyboard grid,
   `TaskEditor` (times, reminders, repeat weekly/monthly/yearly, notes, groups/labels, sharing).
   Several calendars: `?cal=session-<id>` shows a shared session's tasks, `?cal=family-<id>` a
-  family's calendar (testers); picker in the toolbar. `src/features/calendar/sources.js`
+  family's calendar; picker in the toolbar. `src/features/calendar/sources.js`
   (`useSharedCalendar`) loads them and routes add/move/edit/delete to their API; DayPanel gets
   `personal={false}` (no groups/reminders/sharing, "von X", delete only with `canRemove`).
 - `/community` — **Gemeinschaft**: everything with other people on one page
   (`components/community/Community.jsx`, paths in `src/features/community/paths.js`). Tabs with their
   own address: Feed (`/community`), Sitzungen (`/community/sessions`, the old `/together` list),
-  Freunde (`/community/friends`, the old Social, `?tab=add|requests`), Family (`/community/family`,
-  testers). `/together`, `/social`, `/family` redirect there; `/together/:id`, `/family/:id`,
+  Freunde (`/community/friends`, the old Social, `?tab=add|requests`), Family (`/community/family`).
+  `/together`, `/social`, `/family` redirect there; `/together/:id`, `/family/:id`,
   `/u/:username` stay. The menu entry counts session invites + friend requests + family invites and
   shows any of the `news` dots (`feed`, `together`, `social`). Beside every tab (≥58rem, container
   query) a rail: `LevelCard` (level, tier, XP bar, growth line of the 8 tiers, next unlocks, how XP
@@ -108,6 +122,17 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
     (`day` = the day's focus/tasks, updated as it grows; `challenge`, `level`, `streak`, `post` up to
     280 chars), grouped by day, cheering on (one per person, flame), mine can be removed. Live:
     `feed:changed` reloads it and sets `news.feed`, `feed:cheered` toasts.
+  - Rail also has `OnlineNow` (friends online, write to them). Ranking rows show each friend's
+    streak and online dot.
+  - Streaks: `/api/progress` also returns `streakToday`, `bestStreak`, `recentDays` (7 × { day,
+    active }), `todayFocusMin`, `streakMilestones`. `fetchProgress` toasts "Serie verlängert" /
+    milestones (3, 7, 14, 30, … with confetti) when today makes it, and once a day from 18:00 a
+    reminder while today is still open (`streakNudge` in localStorage).
+  - Level plant (`components/progress/LevelPlant.jsx`): an SVG avatar that grows with level + XP
+    share (seed in a pot → sprout → sapling → shrub → tree on an island → grove → forest → old
+    tree with fireflies); parts keep keys and move via CSS transforms, so they grow in place.
+    Large on `/profile` (`PlantCard`: "Wachstum ansehen" replay, slider through the levels), small
+    in `ProfileCard`, `LevelCard` and Home's strip.
   - XP/levels/challenges (`src/features/progress/progress.js`, same rules as the api's
     `utils/progress.js`): 1 XP per focus minute (≤600/day), 5 per task (≤30/day), challenge XP.
     Level n→n+1 needs 150 + 75·(n−1) XP, top level 50 (`MAX_LEVEL`); the owner (`is_owner`) is always
@@ -118,11 +143,14 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
     double 16, dotted 22, orbit 30), titles (from 5), up to 3 pinned badges (18). Locked choices are
     shown dimmed with their level; a value already chosen stays allowed; unlocks never go away
     (`users.level` = highest reached). Profile also has `shareActivity` (automatic feed entries).
-- `/family/:id` — **Quidey Family, tester only** (`TesterOnly` route + menu entry):
+- `/family/:id` — **Quidey Family**, for everybody (was tester only until 2026-10-25); each family I am in has a direct link in the menu (under Gemeinschaft) and in the header's people panel (`TeamQuickPanel`):
   a fixed group of friends with a shared calendar (entries editable on the page via
-  `TaskEditDialog handlers={…}` and in the calendar) and its own chat. Slice `family` in
+  `TaskEditDialog handlers={…}` and in the calendar) and its own chat. Also: a board (`note`, any
+  member), emoji + colour (owner, `FAMILY_EMOJIS`), a list (entries without a day), who takes
+  care of an entry (`assignee_id`, "Nur meine" filter), members online and their week (focus,
+  streak; only who shows statistics). Slice `family` in
   `src/features/family/family.js` (list + invites, `useFamilyList` in App), pages in
-  `src/components/family/`. API under `/api/tester/families` (backend migration 022).
+  `src/components/family/`. API under `/api/families` (behind `requirePro`) (backend migration 022).
 - `/stats` — **Statistiken** (formerly `/history`, which redirects): tabs Übersicht | Sitzungen |
   Erledigt (`?tab=`), period Woche/Monat/Jahr/Gesamt stepped back with arrows (`?range=&offset=`,
   `src/features/stats/period.js`). Overview from `GET /api/stats?from&to`: tiles, stacked columns
@@ -140,8 +168,11 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
 - `/profile`, `/settings` — profile, password, "sign out everywhere", delete account; settings in
   areas (Darstellung | Planen | App, the area in the URL hash, `#event-types` opens Planen),
   each section a label column beside a panel; language,
-  theme (dark/light/system), accent colour (green, ocean, violet, sunset (default), rose, gold —
-  also recolours the favicon), motion level, home layout.
+  theme (dark/light/system), colour palette (the ground: warm (default), graphite, nord, forest,
+  plum, mono — `<html data-palette>`, values in `index.css`, swatches in `preferences.js`
+  `PALETTES`), accent colour (green, ocean, violet, sunset (default), rose, gold — also recolours
+  the favicon), motion level, home layout. "App": the tour and (where possible) installing.
+  Password fields use `PasswordInput` (eye button to show/hide).
 - Friends tab (`Social.jsx`) — friends and friend requests; names link to `/u/:username`, the Add
   tab can open a profile before sending a request.
 - Profiles: `/profile` shows my profile card (banner, avatar, status, bio, study, interests),
@@ -198,7 +229,8 @@ Client-side storage: only `localStorage` (no cookies), plus the service worker's
 for the app's own files: `token` (JWT), `accounts` (several accounts on one device:
 `[{ username, displayName, token }]`, max 5, `src/features/auth/accounts.js`; switching reloads
 the app as the other one, signing out takes over the next remembered account), `language`, `accent`,
-`theme`, `motion`, `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`, `teamSessionId`. `public/theme-init.js` applies
+`theme`, `palette`, `motion`, `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
+`teamSessionId`, `streakNudge` (day of the last streak reminder). `public/theme-init.js` applies
 the theme before React loads.
 
 ## API access
@@ -215,7 +247,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.
@@ -235,7 +267,7 @@ the theme before React loads.
   `message:new`, `inbox:read`, `notification:new`, `session:event` (chat, with data) and the
   data-less "load again" signals `session:changed`, `invites:changed`, `friends:changed`,
   `tasks:changed`, plus for families `family:changed` { familyId } and `family:message`
-  { familyId, message } (to testers' user rooms only), for the feed `feed:changed` (author and
+  { familyId, message } (to the members' user rooms), for the feed `feed:changed` (author and
   friends) and `feed:cheered` { user, entryId }. Plain time reports (`/activity` every 30 s, online window 75 s) send nothing unless what the
   others see changed (started / stopped / switched task).
 - Mail via SMTP (Resend, `smtp.resend.com`): verification links, task reminders, contact form and

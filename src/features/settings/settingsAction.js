@@ -1,7 +1,7 @@
-import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS } from "./settingsActionTypes";
+import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS, SET_PALETTE } from "./settingsActionTypes";
 import { HOME_LAYOUTS, storeHomeLayout } from "./homeLayout";
 import { MOTION_LEVELS, storeMotion } from "./motion";
-import { LANGUAGES, storeLanguage, ACCENTS, storeAccent, SESSION_LENGTHS, storeSessionMinutes, storeShowSharedTasks } from "./preferences";
+import { LANGUAGES, storeLanguage, ACCENTS, storeAccent, SESSION_LENGTHS, storeSessionMinutes, storeShowSharedTasks, PALETTE_NAMES, storePalette } from "./preferences";
 
 // open: true / false; without it the menu toggles
 export const setShowMenu = (open) => ({
@@ -54,6 +54,15 @@ export const setAccent = (accent) => {
     return {
         type: SET_ACCENT,
         payload: accent
+    };
+};
+
+// One of PALETTE_NAMES ('warm', 'graphite', ...); remembered for the next visit
+export const setPalette = (palette) => {
+    if (PALETTE_NAMES.includes(palette)) storePalette(palette);
+    return {
+        type: SET_PALETTE,
+        payload: palette
     };
 };
 
