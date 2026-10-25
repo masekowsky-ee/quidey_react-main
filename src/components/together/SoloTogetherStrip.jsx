@@ -1,4 +1,5 @@
 import styles from '../Together.module.css';
+import { COMMUNITY_PATHS } from '../../features/community/paths';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -22,7 +23,7 @@ export default function SoloTogetherStrip() {
     return (
         <div className={styles.soloStrip}>
             {hint
-                ? <Link to="/together" className={styles.soloHint}><span className={styles.liveDot} aria-hidden="true" />{hint} →</Link>
+                ? <Link to={COMMUNITY_PATHS.sessions} className={styles.soloHint}><span className={styles.liveDot} aria-hidden="true" />{hint} →</Link>
                 : <span />}
             <HomeLayoutSwitch />
         </div>

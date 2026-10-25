@@ -1,4 +1,5 @@
 import styles from './Together.module.css';
+import { COMMUNITY_PATHS } from '../features/community/paths';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -112,7 +113,7 @@ export default function SharedSession() {
                 <h1 className={styles.title}>{t('together')}</h1>
                 <section className={`${styles.card} ${styles.empty}`}>
                     <p>{t('sessionNotFound')}</p>
-                    <Link to="/together" className={styles.primaryBtn}>{t('backToTogether')}</Link>
+                    <Link to={COMMUNITY_PATHS.sessions} className={styles.primaryBtn}>{t('backToTogether')}</Link>
                 </section>
             </div>
         );
@@ -121,7 +122,7 @@ export default function SharedSession() {
 
     return (
         <div className={styles.pageWide}>
-            <Link to="/together" className={styles.back}>← {t('together')}</Link>
+            <Link to={COMMUNITY_PATHS.sessions} className={styles.back}>← {t('communityTab_sessions')}</Link>
             <div className={styles.titleRow}>
                 <div className={styles.titleBlock}>
                     <SessionTitle session={session} className={styles.title} />
@@ -146,7 +147,7 @@ export default function SharedSession() {
                 </div>
             </div>
 
-            <SessionActions session={session} onGone={() => navigate('/together')} />
+            <SessionActions session={session} onGone={() => navigate(COMMUNITY_PATHS.sessions)} />
         </div>
     );
 }

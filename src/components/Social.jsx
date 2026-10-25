@@ -24,12 +24,13 @@ function errorText(t, err) {
 
 // A person with a link to their profile (friends see all of it, others only the names)
 function UserRow({ user, meta, children }) {
+    const { t } = useTranslation();
     return (
         <li className={styles.row}>
             <ProfileAvatar user={user} />
             <div className={styles.who}>
                 <Link className={styles.name} to={`/u/${user.username}`}>{displayName(user)}</Link>
-                <span className={styles.meta}>@{user.username}{meta && ` · ${meta}`}</span>
+                <span className={styles.meta}>@{user.username}{user.level > 0 && ` · ${fill(t('levelShort'), { level: user.level })}`}{meta && ` · ${meta}`}</span>
                 {user.status && <span className={styles.status}>{user.status}</span>}
             </div>
             <div className={styles.actions}>{children}</div>
@@ -112,10 +113,9 @@ export default function Social() {
     };
 
     return (
-        <div className={styles.page}>
-            <h1 className={styles.title}>{t('social')}</h1>
-
-            <div className={styles.tabs} role="tablist" aria-label={t('social')}>
+        // a tab of the Gemeinschaft page, which has the title
+        <div className={styles.embedded}>
+            <div className={styles.tabs} role="tablist" aria-label={t('friends')}>
                 {TABS.map(key => (
                     <button
                         key={key}

@@ -1,4 +1,5 @@
 import { useDispatch, useStore } from 'react-redux';
+import { COMMUNITY_PATHS } from '../community/paths';
 import { apiFetch, displayName, fill } from '../helperFunction';
 import { LOGOUT } from '../auth/authActionTypes';
 import { showToast } from '../toast/toast';
@@ -112,7 +113,7 @@ export function useFamilyList(enabled) {
             const known = new Set(before.invites.map(invite => invite.id));
             for (const invite of after.invites.filter(item => !known.has(item.id))) {
                 dispatch(showToast(fill(t('liveFamilyInvite'), { name: displayName(invite.invitedBy ?? invite.owner) }),
-                    'info', { to: '/family', detail: invite.name }));
+                    'info', { to: COMMUNITY_PATHS.family, detail: invite.name }));
             }
         } catch {
             // the next signal or poll tries again

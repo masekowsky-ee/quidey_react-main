@@ -1,0 +1,374 @@
+/* The feed (Feed.jsx, FeedEntry.jsx): one panel, the composer on top, then the days.
+   Rows, not cards: a 36px avatar slot, the text on one left edge, actions under it. */
+
+.feed{
+    composes: panel from '../ui.module.css';
+    padding: 1.25rem 1.25rem 0.5rem;
+}
+
+.title{
+    margin: 0 0 0.9rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+/* ---------- composer ---------- */
+
+.composer{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.composerLabel{
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.composerField{
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 4.25rem;
+    padding: 0.65rem 0.8rem;
+    font: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-h);
+    background: var(--surface-inset);
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-sm);
+    resize: vertical;
+    transition: border-color var(--ease);
+}
+
+.composerField::placeholder{
+    color: var(--text-muted);
+}
+
+.composerField:hover{
+    border-color: var(--border-strong);
+}
+
+.composerField:focus-visible{
+    outline: 2px solid var(--text-h);
+    outline-offset: 1px;
+    border-color: transparent;
+}
+
+.composerFoot{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.composerHint,
+.composerError{
+    flex: 1;
+    min-width: 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.composerError{
+    color: var(--danger);
+}
+
+.counter{
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.postBtn{
+    composes: btnPrimary from '../ui.module.css';
+    flex: none;
+    min-width: 6rem;
+}
+
+.postBtn:disabled{
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ---------- days and entries ---------- */
+
+.day + .day{
+    border-top: 1px solid var(--border);
+}
+
+.dayTitle{
+    margin: 1.1rem 0 0.25rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.list{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.entry{
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    gap: 0.85rem;
+    align-items: start;
+    padding: 0.85rem 0;
+}
+
+.entry + .entry{
+    border-top: 1px solid var(--border);
+}
+
+.avatarLink{
+    display: inline-flex;
+    text-decoration: none;
+}
+
+.body{
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.line{
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+.name{
+    font-weight: 600;
+    color: var(--text-h);
+    text-decoration: none;
+}
+
+.name:hover{
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.postText{
+    margin: 0.3rem 0 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-h);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.meta{
+    margin: 0.2rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.actions{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.45rem;
+    min-height: 2rem;
+}
+
+/* cheering on: a quiet outlined pill; pressed, it fills with the ink (never the accent) */
+.cheer{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2rem;
+    padding: 0 0.8rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text);
+    background: none;
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-pill);
+    box-shadow: none;
+    transition: border-color var(--ease), background-color var(--ease), color var(--ease), transform var(--ease);
+}
+
+.cheer:hover{
+    color: var(--text-h);
+    border-color: var(--border-strong);
+    background: var(--hover-wash);
+}
+
+.cheer:active{
+    transform: scale(0.95);
+}
+
+.cheer:focus-visible{
+    outline: 2px solid var(--text-h);
+    outline-offset: 2px;
+}
+
+.cheered,
+.cheered:hover{
+    color: var(--contrast-text);
+    background: var(--contrast-top);
+    border-color: transparent;
+}
+
+.cheered svg{
+    animation: lit 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes lit{
+    0%{ transform: scale(0.6) rotate(-12deg); }
+    60%{ transform: scale(1.25) rotate(6deg); }
+    100%{ transform: scale(1) rotate(0); }
+}
+
+.cheerCount{
+    font-variant-numeric: tabular-nums;
+}
+
+.cheerSummary{
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 0;
+    margin: 0.45rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.remove{
+    margin-top: -0.25rem;
+}
+
+/* row actions show on hover or focus with a mouse, always on touch (like the task rows) */
+@media (hover: hover){
+    .entry .remove{
+        opacity: 0;
+        transition: opacity var(--ease);
+    }
+
+    .entry:hover .remove,
+    .entry:focus-within .remove{
+        opacity: 1;
+    }
+}
+
+/* ---------- states ---------- */
+
+.skeleton{
+    display: block;
+    background: var(--surface-strong);
+    border-radius: 4px;
+}
+
+.state{
+    margin: 1.25rem 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.textBtn{
+    padding: 0;
+    min-width: 0;
+    height: auto;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-h);
+    background: none;
+    border: none;
+    box-shadow: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.textBtn:hover{
+    background: none;
+}
+
+.empty{
+    padding: 1.5rem 0 1.25rem;
+}
+
+.emptyTitle{
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-h);
+}
+
+.emptyText{
+    margin: 0.3rem 0 0;
+    max-width: 34rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.emptyAction{
+    display: inline-flex;
+    align-items: center;
+    height: 2.25rem;
+    margin-top: 0.9rem;
+    padding: 0 1.1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-h);
+    text-decoration: none;
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-pill);
+}
+
+.emptyAction:hover{
+    border-color: var(--border-strong);
+}
+
+.moreBtn{
+    display: block;
+    width: 100%;
+    height: 2.5rem;
+    margin: 0.25rem 0 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text);
+    background: none;
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-pill);
+    box-shadow: none;
+}
+
+.moreBtn:hover{
+    border-color: var(--border-strong);
+    background: var(--hover-wash);
+}
+
+@media (max-width: 640px){
+    .feed{
+        padding: 1rem 1rem 0.25rem;
+    }
+
+    /* who sees it stays on the phone too: the hint takes its own line */
+    .composerFoot{
+        flex-wrap: wrap;
+    }
+
+    .composerHint,
+    .composerError{
+        flex-basis: 100%;
+    }
+
+    .counter{
+        margin-left: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .cheered svg{
+        animation: none;
+    }
+}

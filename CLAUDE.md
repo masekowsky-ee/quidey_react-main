@@ -21,7 +21,7 @@ Three repositories, side by side on this machine:
   `composes:` shared classes from `src/components/ui.module.css`), Inter via `@fontsource-variable`.
 - State: Redux (`configureStore` + classic reducers/action types + thunks), slices in
   `src/features/rootReducer.js`: `task`, `session`, `auth`, `settings`, `friends`, `together`,
-  `toast`, `inbox`.
+  `toast`, `inbox`, `news`, `family`, `feed`, `progress`.
 - Routing: react-router-dom 7 (`BrowserRouter` in `src/main.jsx`).
 - Animation: `motion` (Framer Motion) with three user-chosen levels `minimal | normal | extreme`
   (`src/features/settings/motion.js`, `MOTION` presets, confetti `burst`). Remotion
@@ -54,11 +54,11 @@ Order of checks on every render:
    `Tutorial`, animated page routes in `<main>`. Widths (`src/features/layout/breakpoints.js`,
    `useMediaQuery`): ≥1100px the `Menu` is a fixed sidebar and the header starts beside it;
    721–1099px the menu is a drawer behind the header's button; ≤720px a bottom `TabBar` (Start,
-   Kalender, Zusammen, Postfach, Mehr → drawer) replaces the header's button. The shell sets
+   Kalender, Gemeinschaft, Postfach, Mehr → drawer) replaces the header's button. The shell sets
    `--sidebar-w`, `--tabbar-h` and `--page-gutter`; fixed parts (toasts, timer button) and every
    page container use them. The closed drawer is `inert`; `setShowMenu(true|false)` (no argument
-   toggles). Menu (Hick's law: few choices at once): Start, Kalender, Zusammen, Postfach, then
-   "Mehr" (Social, Family, Statistiken), at the bottom Admin/Einstellungen/Feedback and the
+   toggles). Menu (Hick's law: few choices at once): Start, Kalender, Gemeinschaft, Postfach, then
+   "Mehr" (Statistiken), at the bottom Admin/Einstellungen/Feedback and the
    `AccountSwitcher` (profile, tour, switch account, add account, sign out). The active entry is
    brighter ink, no fill; count badges are neutral (the accent stays on data, never on nav,
    tabs or buttons; one filled inverted primary per screen). The header's "Neu" opens the
@@ -93,7 +93,32 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   family's calendar (testers); picker in the toolbar. `src/features/calendar/sources.js`
   (`useSharedCalendar`) loads them and routes add/move/edit/delete to their API; DayPanel gets
   `personal={false}` (no groups/reminders/sharing, "von X", delete only with `canRemove`).
-- `/family`, `/family/:id` — **Quidey Family, tester only** (`TesterOnly` route + menu entry):
+- `/community` — **Gemeinschaft**: everything with other people on one page
+  (`components/community/Community.jsx`, paths in `src/features/community/paths.js`). Tabs with their
+  own address: Feed (`/community`), Sitzungen (`/community/sessions`, the old `/together` list),
+  Freunde (`/community/friends`, the old Social, `?tab=add|requests`), Family (`/community/family`,
+  testers). `/together`, `/social`, `/family` redirect there; `/together/:id`, `/family/:id`,
+  `/u/:username` stay. The menu entry counts session invites + friend requests + family invites and
+  shows any of the `news` dots (`feed`, `together`, `social`). Beside every tab (≥58rem, container
+  query) a rail: `LevelCard` (level, tier, XP bar, growth line of the 8 tiers, next unlocks, how XP
+  works, all unlocks), `Challenges` (today 3, this week 2) and `Ranking` (XP since Monday among
+  friends who show their statistics); on a phone only with the feed (level + today above, week +
+  ranking below).
+  - Feed (`Feed.jsx`, `FeedEntry.jsx`, slice `src/features/feed/feed.js`): entries of friends and me
+    (`day` = the day's focus/tasks, updated as it grows; `challenge`, `level`, `streak`, `post` up to
+    280 chars), grouped by day, cheering on (one per person, flame), mine can be removed. Live:
+    `feed:changed` reloads it and sets `news.feed`, `feed:cheered` toasts.
+  - XP/levels/challenges (`src/features/progress/progress.js`, same rules as the api's
+    `utils/progress.js`): 1 XP per focus minute (≤600/day), 5 per task (≤30/day), challenge XP.
+    Level n→n+1 needs 150 + 75·(n−1) XP, top level 50 (`MAX_LEVEL`); the owner (`is_owner`) is always
+    on it. Tiers seed … ancient. `useProgressWatcher` (App) re-checks after every saved session and
+    ticked task; new challenges done / level ups toast (+ confetti by motion level).
+  - Unlocks by level (`requiredLevel`, `UNLOCKS`): emojis (40, by 10s at 1/3/6/12), colours (4 more
+    at 4), banners (stripes/grid 5, aurora/glow 8, rings 14, topo 18, sky 24), avatar frames (ring 10,
+    double 16, dotted 22, orbit 30), titles (from 5), up to 3 pinned badges (18). Locked choices are
+    shown dimmed with their level; a value already chosen stays allowed; unlocks never go away
+    (`users.level` = highest reached). Profile also has `shareActivity` (automatic feed entries).
+- `/family/:id` — **Quidey Family, tester only** (`TesterOnly` route + menu entry):
   a fixed group of friends with a shared calendar (entries editable on the page via
   `TaskEditDialog handlers={…}` and in the calendar) and its own chat. Slice `family` in
   `src/features/family/family.js` (list + invites, `useFamilyList` in App), pages in
@@ -117,8 +142,8 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   each section a label column beside a panel; language,
   theme (dark/light/system), accent colour (green, ocean, violet, sunset (default), rose, gold —
   also recolours the favicon), motion level, home layout.
-- `/social` — friends and friend requests; names link to `/u/:username`, the Add tab can open a
-  profile before sending a request.
+- Friends tab (`Social.jsx`) — friends and friend requests; names link to `/u/:username`, the Add
+  tab can open a profile before sending a request.
 - Profiles: `/profile` shows my profile card (banner, avatar, status, bio, study, interests),
   "Profil gestalten" (`components/profile/ProfileEditor.jsx`, live preview) and my numbers in short
   (the full statistics are on `/stats`).
@@ -128,7 +153,7 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   `ProfileAvatar`, `ProfileStats` — tiles, 26-week heat map, last 14 days, weekdays, top groups,
   badges). Option lists in `src/features/profile/profileOptions.js` (same lists as the API),
   badges are derived from the numbers (`badges.js`, nothing stored).
-- `/together`, `/together/:id` — shared live study sessions: members, shared task list, a
+- Sessions tab (`Together.jsx`), `/together/:id` — shared live study sessions: members, shared task list, a
   stopwatch counting for everyone, activity feed, session chat (realtime). Session tasks can carry
   the same details as own tasks — day, time, prio, duration, location, link, details, colour — all
   optional (only the name is required), edited by any member via `TaskEditDialog shared={…}`
@@ -190,7 +215,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.
@@ -210,7 +235,8 @@ the theme before React loads.
   `message:new`, `inbox:read`, `notification:new`, `session:event` (chat, with data) and the
   data-less "load again" signals `session:changed`, `invites:changed`, `friends:changed`,
   `tasks:changed`, plus for families `family:changed` { familyId } and `family:message`
-  { familyId, message } (to testers' user rooms only). Plain time reports (`/activity` every 30 s, online window 75 s) send nothing unless what the
+  { familyId, message } (to testers' user rooms only), for the feed `feed:changed` (author and
+  friends) and `feed:cheered` { user, entryId }. Plain time reports (`/activity` every 30 s, online window 75 s) send nothing unless what the
   others see changed (started / stopped / switched task).
 - Mail via SMTP (Resend, `smtp.resend.com`): verification links, task reminders, contact form and
   feedback to `CONTACT_TO`. Without `SMTP_HOST` mails are only logged. All mails share one HTML
@@ -220,10 +246,18 @@ the theme before React loads.
   `PUT /api/users/locale`, default Europe/Berlin) and mails the owner once per reminder time
   (`reminder_mailed_at`). Only the owner can switch it on.
 - Profiles: `GET /api/profile` (mine), `PUT /api/profile` (only the fields sent: bio, status,
-  study, interests, color, banner, emoji, showStats), `GET /api/profiles/:username` (rate limited
+  study, interests, color, banner, emoji, frame, title, showcase, showStats, shareActivity; choices
+  above my level → 403 `LEVEL_LOCKED`), `GET /api/profiles/:username` (rate limited
   per account; `relation` self/friend/incoming/outgoing/none decides what is in it). Statistics
   are computed per request (`loadStats`/`summarizeStats`, days in `users.timezone`), never stored.
-  `/api/friends` also returns each friend's emoji, colour and status.
+  `/api/friends` also returns each friend's emoji, colour, status and level.
+- Progress & feed (`utils/progress.js`): `GET /api/progress` (works out XP, completes challenges,
+  raises `users.level`, keeps today's feed entry, posts milestones; also run after `POST
+  /api/sessions`), `GET /api/progress/friends` (week ranking), `GET /api/feed?before=`, `POST
+  /api/feed/posts`, `DELETE /api/feed/:id` (a `day` entry is hidden, not deleted), `PUT|DELETE
+  /api/feed/:id/cheer`. Challenges are dealt per day/week by a hash of the date (the same for
+  everybody; none that needs friends without any). Team stopwatch time is also booked per day in
+  `shared_time_days`.
 - CLI: `npm run pro -- list|requests|grant|revoke|decline|admin|unadmin|tester|untester <username>`.
 - Tests: `npm test` (`test/api.test.mjs`, node:test, creates/drops its own DB). Extend for every new route.
 - Config via `.env` (see `.env.example`): `NODE_ENV`, `DB_*`, `JWT_SECRET` (≥32 chars), `PORT`,
@@ -233,8 +267,10 @@ the theme before React loads.
 
 **Frontend → Cloudflare Workers (static assets)**, configured in `wrangler.jsonc`: worker
 `quideyreactmain`, serves `./dist`, SPA fallback (`not_found_handling: single-page-application`),
-custom domain `app.quidey.com` (`index.html` has `robots: noindex`; search engines get the landing
-page). The landing page (`quidey_landing`) is its own worker `quidey-landing` on `quidey.com`; it
+custom domain `app.quidey.com`. The app stays out of search results: `index.html` has
+`robots: noindex`, `dist/_headers` sends `X-Robots-Tag: noindex` on every path, and
+`public/robots.txt` allows crawling on purpose (a blocked crawler never sees the noindex). Search
+engines get the landing page, which owns `robots.txt` + `sitemap.xml` on quidey.com. The landing page (`quidey_landing`) is its own worker `quidey-landing` on `quidey.com`; it
 forwards the old app URLs that used to live there. There is no deploy script in package.json; deploy is
 `npm run build` then wrangler (`npx wrangler deploy`).
 - The production API address comes from `.env.production.local` (`VITE_API_URL=https://…`,

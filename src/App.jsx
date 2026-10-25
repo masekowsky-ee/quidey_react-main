@@ -30,6 +30,9 @@ import { connectRealtime, disconnectRealtime, useRealtime, useSafetyPoll, REALTI
 import { useLiveLists } from './features/realtime/useLiveLists.js';
 import { useClearNews } from './features/realtime/useClearNews.js';
 import { useFamilyList } from './features/family/family.js';
+import { useProgressWatcher } from './features/progress/progress.js';
+import { useFeedRealtime } from './features/feed/feed.js';
+import { COMMUNITY_PATHS } from './features/community/paths.js';
 import TesterOnly from './components/TesterOnly.jsx';
 import { LegalFooter } from './legal/LegalFooter.jsx';
 import { LEGAL_PATHS } from './legal/paths.js';
@@ -50,14 +53,12 @@ const PAGES = {
   Stats: () => import('./components/Stats.jsx'),
   Profile: () => import('./components/Profile.jsx'),
   Settings: () => import('./components/Settings.jsx'),
-  Social: () => import('./components/Social.jsx'),
   UserProfile: () => import('./components/UserProfile.jsx'),
   Inbox: () => import('./components/Inbox.jsx'),
   Feedback: () => import('./components/Feedback.jsx'),
-  Together: () => import('./components/Together.jsx'),
+  Community: () => import('./components/community/Community.jsx'),
   SharedSession: () => import('./components/SharedSession.jsx'),
   Admin: () => import('./components/Admin.jsx'),
-  Family: () => import('./components/family/Family.jsx'),
   FamilyPage: () => import('./components/family/FamilyPage.jsx'),
   FunPage: () => import('./components/fun/FunPage.jsx'),
 };
@@ -69,14 +70,12 @@ const Calendar = lazy(PAGES.Calendar);
 const Stats = lazy(PAGES.Stats);
 const Profile = lazy(PAGES.Profile);
 const Settings = lazy(PAGES.Settings);
-const Social = lazy(PAGES.Social);
 const UserProfile = lazy(PAGES.UserProfile);
 const Inbox = lazy(PAGES.Inbox);
 const Feedback = lazy(PAGES.Feedback);
-const Together = lazy(PAGES.Together);
+const Community = lazy(PAGES.Community);
 const SharedSession = lazy(PAGES.SharedSession);
 const Admin = lazy(PAGES.Admin);
-const Family = lazy(PAGES.Family);
 const FamilyPage = lazy(PAGES.FamilyPage);
 const FunPage = lazy(PAGES.FunPage);
 
@@ -168,6 +167,10 @@ function App(){
   useClearNews();
   // Quidey Family (testers): my families and invites
   useFamilyList(allowed);
+  // XP, levels and challenges: looked at again after every session and ticked-off task;
+  // the feed reloads when a friend's entry comes
+  useProgressWatcher(allowed);
+  useFeedRealtime();
 
   // tasks shared with friends change on their side (announced live, see useLiveLists), my own
   // ones maybe on another device: read again as a safety net (not right at the start,
@@ -222,7 +225,8 @@ function App(){
         <QuickAdd/>
         <main className={shell.main}>
         {/* each page comes in as the motion setting says */}
-        <motion.div key={location.pathname} {...MOTION.page[motionLevel]}>
+        {/* ...the tabs of the Gemeinschaft page are one page: switching them doesn't */}
+        <motion.div key={location.pathname.startsWith(COMMUNITY_PATHS.feed) ? COMMUNITY_PATHS.feed : location.pathname} {...MOTION.page[motionLevel]}>
         <Suspense fallback={pageLoading}>
         <Routes location={location}>
           <Route path="/" element={homeLayout === 'team' ? <TeamHome/> : <Home setActiveTimer={setActiveTimer}/>} />
@@ -232,13 +236,17 @@ function App(){
           <Route path="/history" element={<Navigate to={{ pathname: '/stats', search: location.search }} replace />} />
           <Route path="/profile" element={<Profile/>} />
           <Route path="/settings" element={<Settings/>} />
-          <Route path="/social" element={<Social/>} />
+          {/* Gemeinschaft: the feed, then sessions, friends and families as tabs */}
+          <Route path="/community" element={<Community/>} />
+          <Route path="/community/:tab" element={<Community/>} />
+          {/* the old addresses of the lists (bookmarks, links in mails and toasts) */}
+          <Route path="/social" element={<Navigate to={{ pathname: COMMUNITY_PATHS.friends, search: location.search }} replace />} />
+          <Route path="/together" element={<Navigate to={{ pathname: COMMUNITY_PATHS.sessions, search: location.search }} replace />} />
+          <Route path="/family" element={<Navigate to={COMMUNITY_PATHS.family} replace />} />
           <Route path="/u/:username" element={<UserProfile/>} />
           <Route path="/inbox" element={<Inbox/>} />
           <Route path="/feedback" element={<Feedback/>} />
-          <Route path="/together" element={<Together/>} />
           <Route path="/together/:id" element={<SharedSession/>} />
-          <Route path="/family" element={<TesterOnly fallback={<Navigate to="/" replace />}><Family/></TesterOnly>} />
           <Route path="/family/:id" element={<TesterOnly fallback={<Navigate to="/" replace />}><FamilyPage/></TesterOnly>} />
           <Route path="/admin" element={access.isAdmin ? <Admin/> : <Navigate to="/" replace />} />
           {/* hidden: only reachable through the daily line in the header */}

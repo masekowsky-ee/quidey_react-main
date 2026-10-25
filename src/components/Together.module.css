@@ -1453,3 +1453,16 @@ a.primaryBtn{
     flex: none;
     align-self: center;
 }
+
+/* as a tab of the Gemeinschaft page (community/Community.jsx): the page has the frame and title */
+.embedded{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.lead{
+    margin: 0;
+    color: var(--text-muted);
+}

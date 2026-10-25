@@ -1,4 +1,5 @@
 import styles from './Inbox.module.css';
+import { friendsPath } from '../features/community/paths';
 import { DESKTOP_QUERY, useMediaQuery } from '../features/layout/breakpoints';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -55,7 +56,7 @@ function NewChat({ onOpen, others }) {
         <div className={styles.newChat}>
             <h3 className={styles.subTitle}>{t('inboxNewMessage')}</h3>
             {friends.length === 0
-                ? <p className={styles.empty}>{t('inboxNoFriends')} <Link to="/social?tab=add">{t('addFriend')}</Link></p>
+                ? <p className={styles.empty}>{t('inboxNoFriends')} <Link to={friendsPath('add')}>{t('addFriend')}</Link></p>
                 : (
                     <div className={styles.chips}>
                         {list.map(friend => (

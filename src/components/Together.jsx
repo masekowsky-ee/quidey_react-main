@@ -11,6 +11,8 @@ import { useTogetherRun } from '../features/together/hooks';
 import Avatar from './together/Avatar';
 import QuickStart from './together/QuickStart';
 
+// The shared sessions: invites, the open ones, a form to start one and the ended ones
+
 function SessionRow({ session, t }) {
     return (
         <li>
@@ -73,9 +75,9 @@ export default function Together() {
     const past = sessions.filter(s => s.endedAt);
 
     return (
-        <div className={styles.page}>
-            <h1 className={styles.title}>{t('together')}</h1>
-            <p className={styles.intro}>{t('togetherIntro')}</p>
+        // a tab of the Gemeinschaft page, which has the title
+        <div className={styles.embedded}>
+            <p className={styles.lead}>{t('togetherIntro')}</p>
 
             {invites.length > 0 && (
                 <section className={`${styles.card} ${styles.inviteCard}`}>

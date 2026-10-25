@@ -261,6 +261,26 @@ function Privacy() {
                 Art. 6 Abs. 1 lit. b DSGVO.
             </p>
             <p>
+                <strong>Level, XP und Challenges:</strong> Aus deiner Fokuszeit (eigene und gemeinsame Sitzungen,
+                dafür wird deine Zeit in gemeinsamen Sitzungen auch pro Tag gespeichert), deinen erledigten Aufgaben
+                und geschafften Challenges berechnet Quidey Erfahrungspunkte (XP) und dein Level. Gespeichert werden
+                nur, welche Tages- oder Wochen-Challenge du wann geschafft hast (mit ihren XP) und das höchste Level,
+                das du erreicht hast; die XP selbst werden bei jedem Aufruf neu berechnet. Mit dem Level schaltest du
+                weitere Gestaltungsmöglichkeiten frei (Avatar-Rahmen, Titel, bis zu drei angeheftete Abzeichen), die
+                deine Freunde auf deinem Profil sehen. Dein Level sehen deine Freunde in ihrer Freundesliste und im
+                Feed. In der Wochenübersicht „Diese Woche unter Freund:innen“ erscheinen deine XP seit Montag nur,
+                wenn du deine Statistiken im Profil zeigst. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+            </p>
+            <p>
+                <strong>Feed:</strong> Im Feed unter „Gemeinschaft“ sehen deine Freunde – und nur sie – was du teilst:
+                deine Fokuszeit und erledigten Aufgaben des Tages, geschaffte Challenges, neue Level und Lernserien,
+                sowie kurze Beiträge (bis zu 280 Zeichen), die du selbst schreibst. Die automatischen Einträge kannst
+                du im Profil unter „Profil gestalten“ mit „Meine Erfolge im Feed teilen“ abschalten; deine Beiträge
+                teilst du immer selbst. Jeden deiner Einträge kannst du aus dem Feed nehmen. Freunde können Einträge
+                „anfeuern“; gespeichert wird, wer welchen Eintrag wann angefeuert hat. Wer deine Einträge angefeuert
+                hat, siehst nur du, andere sehen nur die Anzahl. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+            </p>
+            <p>
                 <strong>Nachrichten im Postfach:</strong> Du kannst deinen Freunden direkt schreiben. Gespeichert werden
                 Absender, Empfänger, Text, Zeitpunkt und ob die Nachricht gelesen wurde. Eine Nachricht sehen nur ihr
                 beide; ich lese sie nicht, außer es ist zur Abwehr von Missbrauch oder wegen einer gesetzlichen Pflicht
@@ -330,7 +350,8 @@ function Privacy() {
             <h2>9. Speicherdauer</h2>
             <p>
                 Deine Konto- und Inhaltsdaten speichere ich, solange dein Konto besteht. Löschst du dein Konto, werden
-                Konto, Aufgaben, Events, Event-Typen, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen und alle
+                Konto, Aufgaben, Events, Event-Typen, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen,
+                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen und alle
                 Nachrichten, die du geschrieben oder bekommen hast, sofort gelöscht – auch beim Gegenüber, auch deine
                 Nachrichten in Family-Chats. Einträge in Protokollen (Verlauf gemeinsamer Sitzungen, Admin-Protokoll)
                 und von dir angelegte Einträge in Family-Kalendern verlieren den Bezug zu deinem Konto. Hast du eine
@@ -434,8 +455,9 @@ function Terms() {
 
             <h2>6. Verhalten</h2>
             <p>
-                Belästigung, Beleidigung, Spam und rechtswidrige Inhalte in Nachrichten, Namen oder geteilten Aufgaben
-                sind verboten. Bei Verstößen kann der Betreiber Inhalte entfernen und den Zugang sperren oder das Konto
+                Belästigung, Beleidigung, Spam und rechtswidrige Inhalte in Nachrichten, Feed-Beiträgen, Namen oder
+                geteilten Aufgaben sind verboten. XP, Level und Challenges sind ein Spiel ohne Geldwert; wer sie mit
+                künstlich erzeugten Sitzungen oder Aufgaben in die Höhe treibt, kann sie zurückgesetzt bekommen. Bei Verstößen kann der Betreiber Inhalte entfernen und den Zugang sperren oder das Konto
                 löschen; bei schweren Verstößen ohne vorherige Warnung.
             </p>
 

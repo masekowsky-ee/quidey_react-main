@@ -154,7 +154,7 @@ describe('somebody else\'s profile', () => {
 describe('customizing my profile', () => {
     const me = { username: 'jo', display_name: 'Jo Berg', email: 'jo@example.com', created_at: '2026-08-15T12:00:00Z' }
     const own = { id: 1, username: 'jo', displayName: 'Jo Berg', relation: 'self', bio: null, status: null, study: null,
-        interests: [], color: null, banner: null, emoji: null, showStats: true, stats: statsFixture({ sessions: 0, totalMs: 0, longestStreak: 0, longestSessionMs: 0, tasksDone: 0, sharedSessions: 0 }) }
+        interests: [], color: null, banner: null, emoji: null, showStats: true, shareActivity: true, level: 5, frame: null, title: null, showcase: [], stats: statsFixture({ sessions: 0, totalMs: 0, longestStreak: 0, longestSessionMs: 0, tasksDone: 0, sharedSessions: 0 }) }
 
     async function renderOwn() {
         const store = configureStore({ reducer: rootReducer })
@@ -207,8 +207,8 @@ describe('customizing my profile', () => {
 
         const put = apiFetch.mock.calls.find(([url, options]) => url === '/api/profile' && options?.method === 'PUT')
         expect(JSON.parse(put[1].body)).toEqual({
-            emoji: '📚', color: 'teal', banner: 'dots', status: 'Lerne Bio', bio: 'Hallo!', study: '',
-            interests: ['Chemie'], showStats: false,
+            emoji: '📚', color: 'teal', banner: 'dots', frame: null, title: null, showcase: [], status: 'Lerne Bio', bio: 'Hallo!', study: '',
+            interests: ['Chemie'], showStats: false, shareActivity: true,
         })
         expect(screen.getByText('Profil gespeichert.')).toBeInTheDocument()
         expect(screen.queryByRole('button', { name: 'Speichern' })).not.toBeInTheDocument()

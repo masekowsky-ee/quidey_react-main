@@ -1,4 +1,5 @@
 import styles from '../Together.module.css';
+import { COMMUNITY_PATHS, friendsPath } from '../../features/community/paths';
 import own from './Family.module.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -265,7 +266,7 @@ function Members({ family, onChanged }) {
                 <div className={own.inviteBox}>
                     {candidates.length > 0
                         ? <FriendPicker friends={candidates} selected={selected} onChange={setSelected} />
-                        : <p className={styles.hint}>{t('noFriendsToInvite')} <Link to="/social?tab=add">{t('addFriend')}</Link></p>}
+                        : <p className={styles.hint}>{t('noFriendsToInvite')} <Link to={friendsPath('add')}>{t('addFriend')}</Link></p>}
                     <div className={styles.formActions}>
                         <button type="button" className={styles.quietBtn} onClick={() => { setInviting(false); setSelected([]); }}>{t('cancel')}</button>
                         <button type="button" className={styles.primaryBtn} disabled={busy || selected.length === 0} onClick={invite}>{t('invite')}</button>
@@ -379,7 +380,7 @@ export default function FamilyPage() {
                 <h1 className={styles.title}>{t('family')}</h1>
                 <section className={`${styles.card} ${styles.empty}`}>
                     <p>{t('familyNotFound')}</p>
-                    <Link to="/family" className={styles.primaryBtn}>{t('backToFamilies')}</Link>
+                    <Link to={COMMUNITY_PATHS.family} className={styles.primaryBtn}>{t('backToFamilies')}</Link>
                 </section>
             </div>
         );
@@ -389,7 +390,7 @@ export default function FamilyPage() {
     const memberCount = family.people.filter(person => person.status === 'joined').length;
     return (
         <div className={styles.pageWide}>
-            <Link to="/family" className={styles.back}>← {t('family')}</Link>
+            <Link to={COMMUNITY_PATHS.family} className={styles.back}>← {t('family')}</Link>
             <div className={styles.titleRow}>
                 <div className={styles.titleBlock}>
                     <FamilyTitle family={family} onChanged={show} />
@@ -407,7 +408,7 @@ export default function FamilyPage() {
                     <FamilyChat family={family} />
                 </div>
             </div>
-            <FamilyActions family={family} onGone={() => navigate('/family')} />
+            <FamilyActions family={family} onGone={() => navigate(COMMUNITY_PATHS.family)} />
         </div>
     );
 }

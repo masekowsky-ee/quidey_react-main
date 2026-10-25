@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { COMMUNITY_PATHS } from '../features/community/paths';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTask, shareTask } from '../features/tasks/taskAction'
@@ -164,7 +165,7 @@ export default function TaskForm(props){
                                     <FriendPicker friends={friends} selected={shareWith} onChange={setShareWith} />
                                     {shareWith.length > 0 && <p className={styles.shareHint}>{t('shareOnCreateHint')}</p>}
                                 </>
-                                : <p className={styles.shareHint}>{t('noFriendsToShare')} <Link to="/social">{t('findFriends')} →</Link></p>}
+                                : <p className={styles.shareHint}>{t('noFriendsToShare')} <Link to={COMMUNITY_PATHS.friends}>{t('findFriends')} →</Link></p>}
                         </div>
                     </div>}
 

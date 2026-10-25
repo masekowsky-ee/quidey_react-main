@@ -36,6 +36,9 @@ export function headersFile(apiUrl) {
         'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
         'Cross-Origin-Opener-Policy': 'same-origin',
+        // the app stays out of search results (quidey.com is the page to find); the SPA fallback
+        // answers every address with index.html, so the header covers what the meta tag can't
+        'X-Robots-Tag': 'noindex',
     };
     const block = (path, entries) => `${path}\n` + Object.entries(entries).map(([name, value]) => `  ${name}: ${value}`).join('\n') + '\n';
     // Built files carry a hash of their content in the name, so a changed file gets a new name:

@@ -1,4 +1,5 @@
 import { useDispatch, useStore } from 'react-redux';
+import { COMMUNITY_PATHS, friendsPath } from '../community/paths';
 import { fetchFriends, fetchFriendRequests } from '../friends/friendsAction';
 import { fetchSharedSessions, fetchMySharedTasks } from '../together/togetherAction';
 import { refreshTasks, fetchTaskInvites } from '../tasks/taskAction';
@@ -34,10 +35,10 @@ export function useLiveLists() {
         await Promise.all([quietly(fetchFriendRequests()), quietly(fetchFriends())]);
         const after = store.getState().friends;
         for (const request of added(before.incoming, after.incoming, before.requestsLoaded)) {
-            popup(fill(t('liveFriendRequest'), { name: displayName(request.user) }), '/social?tab=requests');
+            popup(fill(t('liveFriendRequest'), { name: displayName(request.user) }), friendsPath('requests'));
         }
         const newFriends = added(before.friends, after.friends, before.friendsLoaded);
-        for (const friend of newFriends) popup(fill(t('liveNewFriend'), { name: displayName(friend) }), '/social');
+        for (const friend of newFriends) popup(fill(t('liveNewFriend'), { name: displayName(friend) }), COMMUNITY_PATHS.friends);
         if (newFriends.length > 0 || (before.friendsLoaded && after.friends.length < before.friends.length)) dispatch(markNews('social'));
     });
     useRealtimeRefresh(['invites:changed', 'session:changed'], async () => {
@@ -47,7 +48,7 @@ export function useLiveLists() {
             quietly(fetchMySharedTasks())]);
         const after = store.getState().together;
         for (const invite of added(before.invites, after.invites, before.listLoaded)) {
-            popup(fill(t('liveSessionInvite'), { name: displayName(invite.invitedBy ?? invite.owner) }), '/together', invite.name);
+            popup(fill(t('liveSessionInvite'), { name: displayName(invite.invitedBy ?? invite.owner) }), COMMUNITY_PATHS.sessions, invite.name);
         }
     });
     // something happened in one of my sessions (tasks, members, who works on what)

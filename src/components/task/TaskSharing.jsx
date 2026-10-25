@@ -1,4 +1,5 @@
 import styles from './TaskOptions.module.css';
+import { COMMUNITY_PATHS } from '../../features/community/paths';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -60,7 +61,7 @@ export default function TaskSharing({ task }) {
                     </button>
                 </div>}
             {friends.length === 0 &&
-                <p className={styles.hint}>{t('noFriendsToShare')} <Link to="/social">{t('findFriends')} →</Link></p>}
+                <p className={styles.hint}>{t('noFriendsToShare')} <Link to={COMMUNITY_PATHS.friends}>{t('findFriends')} →</Link></p>}
         </div>
     );
 }

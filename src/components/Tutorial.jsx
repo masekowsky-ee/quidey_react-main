@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { COMMUNITY_PATHS } from '../features/community/paths';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -21,9 +22,10 @@ const STEPS = [
     { id: 'tasks', icon: 'tasks', to: '/', page: 'home' },
     { id: 'focus', icon: 'timer', to: '/', page: 'home' },
     { id: 'calendar', icon: 'calendar', to: '/calendar', page: 'calendar' },
-    { id: 'friends', icon: 'social', to: '/social', page: 'social' },
-    { id: 'together', icon: 'together', to: '/together', page: 'together' },
-    { id: 'family', icon: 'family', to: '/family', page: 'family', tester: true },
+    { id: 'community', icon: 'together', to: COMMUNITY_PATHS.feed, page: 'community' },
+    { id: 'friends', icon: 'social', to: COMMUNITY_PATHS.friends, page: 'communityTab_friends' },
+    { id: 'together', icon: 'together', to: COMMUNITY_PATHS.sessions, page: 'communityTab_sessions' },
+    { id: 'family', icon: 'family', to: COMMUNITY_PATHS.family, page: 'family', tester: true },
     { id: 'inbox', icon: 'inbox', to: '/inbox', page: 'inbox' },
     { id: 'history', icon: 'history', to: '/stats', page: 'history' },
     { id: 'settings', icon: 'settings', to: '/settings', page: 'settings' },

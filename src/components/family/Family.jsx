@@ -11,6 +11,7 @@ import { useFamilyRun } from './useFamilyRun';
 import { calendarLink } from '../../features/calendar/sources';
 import Avatar from '../together/Avatar';
 import FriendPicker from '../together/FriendPicker';
+import { friendsPath } from '../../features/community/paths';
 
 // Start a family: name + friends to invite
 function NewFamily({ onCreated }) {
@@ -41,7 +42,7 @@ function NewFamily({ onCreated }) {
             <span className={styles.label}>{t('inviteFriends')}</span>
             {friends.length > 0
                 ? <FriendPicker friends={friends} selected={invitees} onChange={setInvitees} />
-                : <p className={styles.hint}>{t('noFriendsToInvite')} <Link to="/social?tab=add">{t('addFriend')}</Link></p>}
+                : <p className={styles.hint}>{t('noFriendsToInvite')} <Link to={friendsPath('add')}>{t('addFriend')}</Link></p>}
             <div className={styles.formActions}>
                 <button type="submit" className={styles.primaryBtn} disabled={busy || !name.trim()}>{t('createFamily')}</button>
             </div>
@@ -72,9 +73,9 @@ export default function Family() {
     };
 
     return (
-        <div className={styles.page}>
-            <h1 className={styles.title}>{t('family')} <span className={styles.sharedTag}>{t('testerBadge')}</span></h1>
-            <p className={styles.intro}>{t('familyIntro')}</p>
+        // a tab of the Gemeinschaft page, which has the title
+        <div className={styles.embedded}>
+            <p className={styles.lead}>{t('familyIntro')} <span className={styles.sharedTag}>{t('testerBadge')}</span></p>
 
             {invites.length > 0 &&
                 <section className={`${styles.card} ${styles.inviteCard}`}>

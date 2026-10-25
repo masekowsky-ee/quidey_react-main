@@ -1,3 +1,5 @@
+import communityTexts from './communityTexts';
+
 const translations = {
     de: {
         app: 'App',
@@ -899,14 +901,14 @@ const translations = {
             'Aufgaben, die Freunde mit dir teilen, nimmst du hier an.',
         ],
         tut_friends_title: 'Freunde und Profile',
-        tut_friends_text: 'Unter Social findest du Freunde über ihren Benutzernamen und beantwortest Anfragen.',
+        tut_friends_text: 'Unter Gemeinschaft → Freunde findest du Freunde über ihren Benutzernamen und beantwortest Anfragen.',
         tut_friends_tips: [
             'Gestalte dein Profil mit Banner, Status, Bio und Interessen.',
             'Freunde sehen dein ganzes Profil, die Statistik nur, wenn du sie nicht ausblendest.',
             'Eine Aufgabe kannst du direkt an einen Freund schicken.',
         ],
         tut_together_title: 'Gemeinsam lernen',
-        tut_together_text: 'Starte unter Zusammen eine geteilte Sitzung und lade Freunde ein. Ihr arbeitet live an derselben Aufgabenliste.',
+        tut_together_text: 'Starte unter Gemeinschaft → Sitzungen eine geteilte Sitzung und lade Freunde ein. Ihr arbeitet live an derselben Aufgabenliste.',
         tut_together_tips: [
             'Eine Stoppuhr zählt für alle mit, und ihr seht, wer gerade woran sitzt.',
             'Chat und Aktivitäten kommen in Echtzeit an.',
@@ -2004,14 +2006,14 @@ const translations = {
             'Accept tasks your friends share with you here.',
         ],
         tut_friends_title: 'Friends and profiles',
-        tut_friends_text: 'Under Social you find friends by their username and answer requests.',
+        tut_friends_text: 'Under Community → Friends you find friends by their username and answer requests.',
         tut_friends_tips: [
             'Design your profile with a banner, status, bio and interests.',
             'Friends see your whole profile, your statistics only if you keep them visible.',
             'You can send a task straight to a friend.',
         ],
         tut_together_title: 'Study together',
-        tut_together_text: 'Start a shared session under Together and invite friends. You work live on the same task list.',
+        tut_together_text: 'Start a shared session under Community → Sessions and invite friends. You work live on the same task list.',
         tut_together_tips: [
             'A stopwatch counts for everyone, and you see who is working on what.',
             'Chat and activity arrive in real time.',
@@ -2210,5 +2212,8 @@ const translations = {
         shareOwnTask: 'Add one of my tasks',
     }
 }
+
+// Gemeinschaft (feed, challenges, levels) lives in its own file
+for (const language of ['de', 'en']) Object.assign(translations[language], communityTexts[language]);
 
 export default translations;

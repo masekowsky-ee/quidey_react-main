@@ -149,7 +149,7 @@ describe('Shared session page', () => {
     it('keeps working on other pages, and books the last seconds when the tab closes', async () => {
         const store = await renderSession()
         await act(async () => { fireEvent.click(within(taskRow('Report')).getByText('Daran arbeiten')) })
-        await act(async () => { fireEvent.click(screen.getByText(/← Zusammen/)) })
+        await act(async () => { fireEvent.click(screen.getByText(/← Sitzungen/)) })
         expect(activity().at(-1).body).toEqual({ currentTaskId: 10 })
         expect(store.getState().together.work.taskId).toBe(10)
 

@@ -9,6 +9,8 @@ import toastReducer from "./toast/toast";
 import inboxReducer from "./inbox/inbox";
 import newsReducer from "./realtime/news";
 import familyReducer from "./family/family";
+import feedReducer from "./feed/feed";
+import progressReducer from "./progress/progress";
 
 const rootReducer = combineReducers({
     task: taskReducer,
@@ -21,6 +23,8 @@ const rootReducer = combineReducers({
     inbox: inboxReducer,
     news: newsReducer,
     family: familyReducer,
+    feed: feedReducer,
+    progress: progressReducer,
 });
 
 export default rootReducer;

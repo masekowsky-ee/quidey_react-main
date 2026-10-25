@@ -1,0 +1,6 @@
+# app.quidey.com is the signed-in app: nothing here belongs in search results. Search engines
+# find Quidey through the landing page on quidey.com (its own robots.txt and sitemap.xml).
+# Crawling stays allowed on purpose: a crawler that is shut out never sees the noindex
+# (meta tag in index.html, X-Robots-Tag header in dist/_headers) and may list bare URLs anyway.
+User-agent: *
+Allow: /

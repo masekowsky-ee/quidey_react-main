@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import { COMMUNITY_PATHS, isCommunityPath } from '../features/community/paths';
 import styles from './Menu.module.css';
 import Icon from './icons';
 import Logo from './Logo';
@@ -13,17 +14,17 @@ import { selectIsAdmin, selectAdminPendingCount } from '../features/admin/adminA
 import { selectInboxCount } from '../features/inbox/inbox';
 import { selectFamilyInviteCount } from '../features/family/family';
 import { DESKTOP_QUERY, useMediaQuery } from '../features/layout/breakpoints';
-import TesterOnly from './TesterOnly';
 import AccountSwitcher from './AccountSwitcher';
 import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, useMotionLevel } from '../features/settings/motion';
 
 // One entry: icon, label and an optional count badge (or a dot: something changed there);
-// the current page is highlighted
-function MenuLink({ to, end, icon, label, onClick, count = 0, countLabel, news = false, newsLabel }) {
+// the current page is highlighted (`match`: also on other addresses that belong to it)
+function MenuLink({ to, end, match, icon, label, onClick, count = 0, countLabel, news = false, newsLabel }) {
+    const { pathname } = useLocation();
     return (
         <NavLink to={to} end={end} onClick={onClick}
-            className={({ isActive }) => `${styles.menuItem} ${isActive ? styles.active : ''}`}>
+            className={({ isActive }) => `${styles.menuItem} ${isActive || match?.(pathname) ? styles.active : ''}`}>
             <Icon name={icon} className={styles.menuIcon} />
             <span className={styles.menuLabel}>{label}</span>
             {count > 0 && <span className={styles.badge} aria-label={`${count} ${countLabel}`}>{count}</span>}
@@ -97,20 +98,15 @@ export default function Menu(){
                         <MenuLink to="/" end icon="home" label={t('home')} onClick={onClose} />
                         <MenuLink to="/calendar" icon="calendar" label={t('calendar')} onClick={onClose}
                             count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
-                        <MenuLink to="/together" icon="together" label={t('together')} onClick={onClose}
-                            count={inviteCount} countLabel={t('sessionInvites')} news={news.together} newsLabel={t('menuNews')} />
+                        {/* friends, shared sessions, families and the feed: one place for other people */}
+                        <MenuLink to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} onClick={onClose}
+                            count={inviteCount + incomingCount + familyInviteCount} countLabel={t('communityCount')}
+                            news={news.together || news.social || news.feed} newsLabel={t('menuNews')} />
                         <MenuLink to="/inbox" icon="inbox" label={t('inbox')} onClick={onClose}
                             count={inboxCount} countLabel={t('inboxUnread')} />
                     </div>
                     <p className={styles.groupLabel}>{t('menuMore')}</p>
                     <div className={styles.menuList}>
-                        {/* with open requests, go straight to them */}
-                        <MenuLink to={incomingCount > 0 ? '/social?tab=requests' : '/social'} icon="social" label={t('social')} onClick={onClose}
-                            count={incomingCount} countLabel={t('friendRequests')} news={news.social} newsLabel={t('menuNews')} />
-                        <TesterOnly>
-                            <MenuLink to="/family" icon="family" label={t('family')} onClick={onClose}
-                                count={familyInviteCount} countLabel={t('familyInvites')} />
-                        </TesterOnly>
                         <MenuLink to="/stats" icon="history" label={t('history')} onClick={onClose} />
                     </div>
                 </nav>

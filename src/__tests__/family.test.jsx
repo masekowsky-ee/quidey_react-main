@@ -10,6 +10,7 @@ import { SET_ACCESS } from '../features/auth/authActionTypes'
 import { connectRealtime, disconnectRealtime, REFRESH_DELAY_MS } from '../features/realtime/socket'
 import { useFamilyList } from '../features/family/family'
 import Menu from '../components/Menu'
+import Community from '../components/community/Community'
 import Family from '../components/family/Family'
 import FamilyPage from '../components/family/FamilyPage'
 
@@ -60,6 +61,16 @@ const api = (routes) => apiFetch.mockImplementation(async (url, options = {}) =>
 })
 const sent = (method, url) => apiFetch.mock.calls.filter(([u, o = {}]) => u === url && (o.method ?? 'GET') === method)
 
+// what the community page loads besides the tab
+const COMMUNITY_API = {
+    'GET /api/progress': {
+        today: '2026-10-19', weekStart: '2026-10-19', xp: 0, sources: { focus: 0, tasks: 0, challenges: 0 },
+        level: 1, unlockLevel: 1, levelStartXp: 0, nextLevelXp: 150, daily: [], weekly: [], streak: 0, shareActivity: true,
+    },
+    'GET /api/progress/friends': { weekStart: '2026-10-19', ranking: [] },
+    'GET /api/feed': { entries: [], next: null },
+}
+
 function LocationSpy() {
     return <output data-testid="location" hidden>{useLocation().pathname}</output>
 }
@@ -80,6 +91,7 @@ function setup(path, { tester = true } = {}) {
                 <Routes>
                     <Route path="/menu" element={<Menu />} />
                     <Route path="/family" element={<Family />} />
+                    <Route path="/community/:tab" element={<Community />} />
                     <Route path="/family/:id" element={<FamilyPage />} />
                 </Routes>
                 <LocationSpy />
@@ -103,15 +115,25 @@ afterEach(() => {
 })
 
 describe('Quidey Family', () => {
-    it('is in the menu for testers only, with the open invites as a badge', async () => {
-        api({ 'GET /api/tester/families': { families: [], invites: [{ id: 3, name: 'The Bergs', owner: BO, invitedBy: BO, memberCount: 2 }] } })
+    it('is a tab of the community page for testers only; its invites count on the menu entry', async () => {
+        api({ ...COMMUNITY_API, 'GET /api/tester/families': { families: [], invites: [{ id: 3, name: 'The Bergs', owner: BO, invitedBy: BO, memberCount: 2 }] } })
         await act(async () => { setup('/menu') })
-        expect(screen.getByRole('link', { name: /Family/ })).toHaveAttribute('href', '/family')
-        expect(screen.getByLabelText('1 Family invites')).toBeInTheDocument()
+        expect(screen.getByRole('link', { name: /Community/ })).toHaveAttribute('href', '/community')
+        expect(screen.getByLabelText('1 invites and requests')).toBeInTheDocument()
+        expect(screen.queryByRole('link', { name: /^Family/ })).not.toBeInTheDocument()
+    })
+
+    it('the tab shows the invites', async () => {
+        api({ ...COMMUNITY_API, 'GET /api/tester/families': { families: [], invites: [{ id: 3, name: 'The Bergs', owner: BO, invitedBy: BO, memberCount: 2 }] } })
+        await act(async () => { setup('/community/family') })
+        const tabs = screen.getByRole('navigation', { name: 'Parts of the community' })
+        expect(within(tabs).getByRole('link', { name: /Family/ })).toHaveAttribute('href', '/community/family')
+        expect(screen.getByText('The Bergs')).toBeInTheDocument()
     })
 
     it('stays hidden and asks nothing from the server for everybody else', async () => {
-        await act(async () => { setup('/menu', { tester: false }) })
+        api(COMMUNITY_API)
+        await act(async () => { setup('/community/family', { tester: false }) })
         expect(screen.queryByRole('link', { name: /Family/ })).not.toBeInTheDocument()
         expect(apiFetch.mock.calls.some(([url]) => url.startsWith('/api/tester'))).toBe(false)
     })

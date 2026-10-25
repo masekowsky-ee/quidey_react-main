@@ -13,6 +13,9 @@ dist-ssr
 *.local
 coverage
 
+# wrangler (local dev state and temporary bundles)
+.wrangler
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

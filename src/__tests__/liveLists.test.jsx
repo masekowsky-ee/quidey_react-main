@@ -123,7 +123,7 @@ describe('news from the live lists', () => {
         await serverSends('friends:changed', {})
         await wait(REFRESH_DELAY_MS)
         await act(async () => {})
-        expect(store.getState().toast.map(toast => [toast.text, toast.to])).toEqual([['Freundschaftsanfrage von Ben', '/social?tab=requests']])
+        expect(store.getState().toast.map(toast => [toast.text, toast.to])).toEqual([['Freundschaftsanfrage von Ben', '/community/friends?tab=requests']])
 
         // the same list again: nothing new
         await serverSends('friends:changed', {})
@@ -135,7 +135,7 @@ describe('news from the live lists', () => {
         await serverSends('invites:changed', {})
         await wait(REFRESH_DELAY_MS)
         await act(async () => {})
-        expect(store.getState().toast.at(-1)).toMatchObject({ text: 'Ben lädt dich in eine Session ein', detail: 'Mathe', to: '/together' })
+        expect(store.getState().toast.at(-1)).toMatchObject({ text: 'Ben lädt dich in eine Session ein', detail: 'Mathe', to: '/community/sessions' })
 
         expect(store.getState().news.together).toBe(false)
         await serverSends('session:changed', { sessionId: 5 })

@@ -1,4 +1,5 @@
 import styles from './profile/ProfileParts.module.css';
+import { COMMUNITY_PATHS } from '../features/community/paths';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -66,7 +67,7 @@ export default function UserProfile() {
                 <p className={styles.notice} aria-busy={status === 'loading'} role={status === 'loading' ? undefined : 'alert'}>
                     {t({ loading: 'loading', missing: 'profileNotFound', error: 'profileLoadError' }[status])}
                 </p>
-                {status !== 'loading' && <Link to="/social">{t('profileBackToFriends')}</Link>}
+                {status !== 'loading' && <Link to={COMMUNITY_PATHS.friends}>{t('profileBackToFriends')}</Link>}
             </div>
         );
     }

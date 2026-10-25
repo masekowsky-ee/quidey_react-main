@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
+import { COMMUNITY_PATHS, isCommunityPath } from '../features/community/paths';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './TabBar.module.css';
 import Icon from './icons';
@@ -16,9 +17,10 @@ function Count({ count, label }) {
     return <span className={styles.count} aria-label={`${count} ${label}`}>{count > 9 ? '9+' : count}</span>;
 }
 
-function Tab({ to, end, icon, label, count = 0, countLabel, news, newsLabel }) {
+function Tab({ to, end, match, icon, label, count = 0, countLabel, news, newsLabel }) {
+    const { pathname } = useLocation();
     return (
-        <NavLink to={to} end={end} className={({ isActive }) => `${styles.tab} ${isActive ? styles.active : ''}`}>
+        <NavLink to={to} end={end} className={({ isActive }) => `${styles.tab} ${isActive || match?.(pathname) ? styles.active : ''}`}>
             <span className={styles.iconWrap}>
                 <Icon name={icon} className={styles.icon} />
                 <Count count={count} label={countLabel} />
@@ -29,8 +31,8 @@ function Tab({ to, end, icon, label, count = 0, countLabel, news, newsLabel }) {
     );
 }
 
-// Phones: the main pages at the thumb, the rest of the menu behind "More" (with the counts of
-// what is in there: friend requests, family invites, beta requests)
+// Phones: the main pages at the thumb, the rest of the menu behind "More" (with the count of
+// what is in there: beta requests)
 export default function TabBar() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
@@ -42,7 +44,7 @@ export default function TabBar() {
     const friendRequests = useSelector(selectIncomingCount);
     const familyInvites = useSelector(selectFamilyInviteCount);
     const adminPending = useSelector(selectAdminPendingCount);
-    const moreCount = friendRequests + familyInvites + (isAdmin ? adminPending : 0);
+    const moreCount = isAdmin ? adminPending : 0;
     const menuOpen = useSelector(state => state.settings.showMenu);
 
     return (
@@ -50,8 +52,9 @@ export default function TabBar() {
             <Tab to="/" end icon="home" label={t('home')} />
             <Tab to="/calendar" icon="calendar" label={t('calendar')}
                 count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
-            <Tab to="/together" icon="together" label={t('together')}
-                count={inviteCount} countLabel={t('sessionInvites')} news={news.together} newsLabel={t('menuNews')} />
+            <Tab to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')}
+                count={inviteCount + friendRequests + familyInvites} countLabel={t('communityCount')}
+                news={news.together || news.social || news.feed} newsLabel={t('menuNews')} />
             <Tab to="/inbox" icon="inbox" label={t('inbox')}
                 count={inboxCount} countLabel={t('inboxUnread')} />
             <button type="button" className={`${styles.tab} ${menuOpen ? styles.active : ''}`}
@@ -59,7 +62,6 @@ export default function TabBar() {
                 <span className={styles.iconWrap}>
                     <Icon name="more" className={styles.icon} />
                     <Count count={moreCount} label={t('menuNews')} />
-                    {moreCount === 0 && news.social && <span className={styles.dot} role="img" aria-label={t('menuNews')} />}
                 </span>
                 <span className={styles.label}>{t('more')}</span>
             </button>

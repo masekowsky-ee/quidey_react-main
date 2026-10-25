@@ -1,4 +1,5 @@
 import styles from '../Header.module.css';
+import { COMMUNITY_PATHS, friendsPath } from '../../features/community/paths';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -104,9 +105,9 @@ export default function TeamQuickPanel() {
                         )}
                     </div>
                     <div className={styles.quickActions}>
-                        <button className={styles.quickPrimary} onClick={() => go(homeLayout === 'team' ? '/?new=1' : '/together?new=1')}>+ {t('newSession')}</button>
-                        <Link to="/together" className={styles.quickLink} onClick={() => setOpen(false)}>{t('allSessions')}</Link>
-                        <Link to={requestCount > 0 ? '/social?tab=requests' : '/social'} className={styles.quickLink} onClick={() => setOpen(false)}>
+                        <button className={styles.quickPrimary} onClick={() => go(homeLayout === 'team' ? '/?new=1' : `${COMMUNITY_PATHS.sessions}?new=1`)}>+ {t('newSession')}</button>
+                        <Link to={COMMUNITY_PATHS.sessions} className={styles.quickLink} onClick={() => setOpen(false)}>{t('allSessions')}</Link>
+                        <Link to={friendsPath(requestCount > 0 ? 'requests' : null)} className={styles.quickLink} onClick={() => setOpen(false)}>
                             {t('friends')}{requestCount > 0 && <span className={styles.quickBadgeInline}>{requestCount}</span>}
                         </Link>
                     </div>

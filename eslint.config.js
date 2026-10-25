@@ -6,7 +6,7 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
   // design tooling (skills, review reports), not app code
-  globalIgnores(['dist', '.claude', '.agents', '.taste-skill']),
+  globalIgnores(['dist', '.claude', '.agents', '.taste-skill', '.wrangler']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [

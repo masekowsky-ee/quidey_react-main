@@ -1,4 +1,5 @@
 import styles from '../Together.module.css';
+import { friendsPath } from '../../features/community/paths';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -52,7 +53,7 @@ export default function QuickStart({ onStarted, onCancel }) {
             <span className={styles.label}>{t('inviteFriends')}</span>
             {friends.length > 0
                 ? <FriendPicker friends={friends} selected={invitees} onChange={setInvitees} />
-                : <p className={styles.hint}>{t('noFriendsToInvite')} <Link to="/social?tab=add">{t('addFriend')}</Link></p>}
+                : <p className={styles.hint}>{t('noFriendsToInvite')} <Link to={friendsPath('add')}>{t('addFriend')}</Link></p>}
             <div className={styles.formActions}>
                 {onCancel && <button type="button" className={styles.quietBtn} onClick={onCancel}>{t('cancel')}</button>}
                 <button type="submit" className={styles.primaryBtn} disabled={creating || !name.trim()}>

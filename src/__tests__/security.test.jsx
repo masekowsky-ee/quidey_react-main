@@ -95,7 +95,7 @@ describe('security headers of the site', () => {
     it('are written for every path', () => {
         const file = headersFile('https://api.quidey.com')
         expect(file.startsWith('/*\n')).toBe(true)
-        for (const header of ['Content-Security-Policy', 'X-Content-Type-Options: nosniff', 'X-Frame-Options: DENY', 'Strict-Transport-Security', 'Referrer-Policy']) {
+        for (const header of ['Content-Security-Policy', 'X-Content-Type-Options: nosniff', 'X-Frame-Options: DENY', 'Strict-Transport-Security', 'Referrer-Policy', 'X-Robots-Tag: noindex']) {
             expect(file).toContain(header)
         }
         // hashed build files are cached for good, index.html isn't

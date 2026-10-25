@@ -28,7 +28,7 @@ export const PROCESSORS = {
 };
 
 // Date of the current version of the legal texts
-export const LEGAL_VERSION_DATE = '25.10.2026 (Startseite quidey.com und App app.quidey.com getrennt)';
+export const LEGAL_VERSION_DATE = '25.10.2026 (Gemeinschaft: Feed, Level und Challenges)';
 
 export const COPYRIGHT_YEAR = 2026;
 
