@@ -30,7 +30,7 @@ function StreakCard({ progress }) {
         <section className={styles.card} data-streak={state} aria-labelledby="streak-title">
             <h2 id="streak-title" className={styles.cardLabel}>{t('streakTitle')}</h2>
             <div className={styles.streakTop}>
-                <span className={styles.flame} aria-hidden="true"><Icon name="flame" size={30} strokeWidth={1.6} /></span>
+                <span className={styles.flame} aria-hidden="true"><Icon name="flame" size={28} strokeWidth={1.6} /></span>
                 <p className={styles.streakNumber}>
                     <strong>{streak}</strong>
                     <span>{t(streak === 1 ? 'streakDayOne' : 'streakDays')}</span>
@@ -42,7 +42,7 @@ function StreakCard({ progress }) {
                     return (
                         <li key={day.day} data-active={day.active} data-today={today}
                             aria-label={`${weekday(day.day)}: ${t(day.active ? 'streakDayDone' : 'streakDayMissed')}`}>
-                            <span className={styles.dayDot} aria-hidden="true">{day.active && <Icon name="check" size={12} strokeWidth={2.4} />}</span>
+                            <span className={styles.dayDot} aria-hidden="true" />
                             <span className={styles.dayName} aria-hidden="true">{weekday(day.day)}</span>
                         </li>
                     );
@@ -164,11 +164,12 @@ export function MomentumSkeleton() {
     const weekday = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { weekday: 'narrow' });
     const lastDays = Array.from({ length: 7 }, (_, i) => { const day = new Date(); day.setDate(day.getDate() - 6 + i); return day; });
     return (
-        <Skeleton className={styles.strip}>
+        // as tall as the loaded cards, so the week below doesn't move
+        <Skeleton className={styles.strip} style={{ minHeight: '16rem' }}>
             <section className={styles.card}>
                 <h2 className={styles.cardLabel}>{t('streakTitle')}</h2>
                 <div className={styles.streakTop}>
-                    <span className={styles.flame} />
+                    <Bone w="1.75rem" h="1.75rem" />
                     <Bone w="7.5rem" h="2.25rem" />
                 </div>
                 <ol className={styles.days}>

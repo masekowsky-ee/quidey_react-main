@@ -133,7 +133,11 @@
 .item:focus-visible{
     color: var(--text-h);
     background: var(--hover-wash);
-    outline: none;
+}
+
+/* the keyboard sees where it is: the global ring, drawn inside the menu's edge */
+.item:focus-visible{
+    outline-offset: -2px;
 }
 
 .item > svg{

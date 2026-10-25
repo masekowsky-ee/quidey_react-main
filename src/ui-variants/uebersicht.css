@@ -174,16 +174,23 @@
   }
 }
 
-/* the place you are in: red ink and a red square before it, like the site's category rail */
+/* the place you are in: ink on a grey step, with one short red mark at its edge, like the
+   site's category rail (the red stays a mark, never a fill) */
 :root[data-ui="uebersicht"] [data-part="menu-item"]:is([aria-current="page"], [data-active]),
 :root[data-ui="uebersicht"] [data-part="menu-item"]:is([aria-current="page"], [data-active]) svg,
 :root[data-ui="uebersicht"] [data-part="tabbar"] :is([aria-current="page"], [data-active]),
 :root[data-ui="uebersicht"] [data-part="tabbar"] :is([aria-current="page"], [data-active]) svg {
-  color: var(--primary-fg);
+  color: var(--text-h);
 }
 
 :root[data-ui="uebersicht"] [data-part="menu-item"]:is([aria-current="page"], [data-active]) {
-  background: var(--surface-inset);
+  background: var(--surface-strong);
+  box-shadow: inset 2px 0 0 var(--tab);
+}
+
+/* the streak in ink: the red is kept for the module rules and what is overdue */
+:root[data-ui="uebersicht"][data-theme] {
+  --streak-ink: var(--text-h);
 }
 
 /* ---------- Home: a mosaic of ruled modules ---------- */
@@ -234,7 +241,8 @@
   }
 }
 
-/* each module: a red rule across its head and a small red tab with its name */
+/* each module: a red rule across its head and its name under it in ink. The rule is the
+   variant's one red move; the names stay ink so the red never becomes a block of colour. */
 :root[data-ui="uebersicht"] [data-part="home-week"],
 :root[data-ui="uebersicht"] [data-part="home-momentum"],
 :root[data-ui="uebersicht"] [data-part="home-list"],
@@ -246,26 +254,23 @@
 :root[data-ui="uebersicht"] [data-part="home-week"]::before,
 :root[data-ui="uebersicht"] [data-part="home-momentum"]::before {
   content: attr(data-label);
-  display: inline-block;
-  margin-bottom: 0.5rem;
-  padding: 0.1rem 0.6rem 0.15rem;
-  font-size: 0.75rem;
+  display: block;
+  padding: 0.4rem 0 0.45rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  line-height: 1.4;
-  color: var(--tab-ink);
-  background: var(--tab);
+  line-height: 1.3;
+  color: var(--text-h);
 }
 
-/* the list's and focus's own titles become the tabs */
+/* the list's and focus's own titles read the same way */
 :root[data-ui="uebersicht"] #tasks-title,
 :root[data-ui="uebersicht"] #focus-title {
   min-height: 0;
-  padding: 0.1rem 0.6rem 0.15rem;
-  font-size: 0.75rem;
+  padding: 0.4rem 0 0.45rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  line-height: 1.4;
-  color: var(--tab-ink);
-  background: var(--tab);
+  line-height: 1.3;
+  color: var(--text-h);
 }
 
 :root[data-ui="uebersicht"] [data-part="home-focus"] > [data-part="focus"] > #focus-title {

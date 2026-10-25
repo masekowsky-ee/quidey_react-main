@@ -1,4 +1,5 @@
 import communityTexts from './communityTexts';
+import flowTexts from './flowTexts';
 import moreTexts from './moreTexts';
 import testerTexts from './testerTexts';
 import tourTexts from './tourTexts';
@@ -2046,7 +2047,8 @@ const translations = {
     }
 }
 
-// Gemeinschaft (feed, challenges, levels), the tour and others live in their own files
-for (const language of ['de', 'en']) Object.assign(translations[language], communityTexts[language], moreTexts[language], testerTexts[language], tourTexts[language]);
+// Gemeinschaft (feed, challenges, levels), the tour, the command bar and shortcuts and others
+// live in their own files
+for (const language of ['de', 'en']) Object.assign(translations[language], communityTexts[language], moreTexts[language], testerTexts[language], tourTexts[language], flowTexts[language]);
 
 export default translations;

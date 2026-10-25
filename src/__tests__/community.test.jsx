@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
@@ -114,7 +114,13 @@ describe('levels and unlocks', () => {
 })
 
 describe('progress toasts', () => {
-    beforeEach(() => { apiFetch.mockReset() })
+    // midday: from 18:00 an open streak would add its evening reminder to the toasts
+    beforeEach(() => {
+        apiFetch.mockReset()
+        vi.useFakeTimers({ toFake: ['Date'] })
+        vi.setSystemTime(new Date(2026, 9, 25, 12, 0))
+    })
+    afterEach(() => { vi.useRealTimers() })
 
     it('the first look says nothing; a challenge done since and a level up come with a toast', async () => {
         const store = configureStore({ reducer: rootReducer })

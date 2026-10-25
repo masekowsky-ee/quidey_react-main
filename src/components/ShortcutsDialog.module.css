@@ -1,0 +1,140 @@
+/* The keyboard shortcuts as a small centred card: the keys on the left, what they do beside
+   them, one row each (ShortcutsDialog.jsx) */
+
+.backdrop{
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-alert);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: var(--overlay);
+    overscroll-behavior: contain;
+    animation: fadeIn 0.16s ease-out;
+}
+
+.dialog{
+    width: min(26rem, 100%);
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.25rem 1.25rem 1rem;
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+    animation: rise 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.head{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.title{
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    color: var(--text-h);
+}
+
+.close{
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-radius: var(--radius-pill);
+    corner-shape: round;
+}
+
+.close:hover{
+    color: var(--text-h);
+    background: var(--hover-wash);
+}
+
+.intro{
+    margin: 0 0 0.25rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.list{
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+.row{
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.keys{
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+}
+
+.kbd{
+    min-width: 1.5rem;
+    padding: 0.1rem 0.45rem;
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--text-h);
+    background: var(--surface-inset);
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-sm);
+}
+
+.then{
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.label{
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+/* how to write a day, time and priority into a new task's name */
+.tip{
+    margin: 0.25rem 0 0;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--text);
+    background: var(--surface-inset);
+    border-radius: var(--radius-sm);
+}
+
+@keyframes fadeIn{
+    from{ opacity: 0; }
+}
+
+@keyframes rise{
+    from{ opacity: 0; transform: translateY(0.75rem) scale(0.98); }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .backdrop,
+    .dialog{
+        animation: fadeIn 0.16s ease-out;
+    }
+}

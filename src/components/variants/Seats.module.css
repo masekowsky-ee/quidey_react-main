@@ -49,10 +49,8 @@ a.seat:hover {
 }
 
 .number {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
   color: var(--text-muted);
 }

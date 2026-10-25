@@ -205,17 +205,16 @@
 }
 
 .streakPill svg{
-    color: var(--plant-fruit);
+    color: var(--streak-ink, var(--plant-fruit));
 }
 
+/* today counts: the number in ink and the flame filled; the pill itself stays plain */
 .streakPill[data-lit="true"]{
     color: var(--text-h);
-    border-color: color-mix(in srgb, var(--plant-fruit) 45%, var(--control-border));
-    background: color-mix(in srgb, var(--plant-fruit) 10%, transparent);
 }
 
 .streakPill[data-lit="true"] svg path{
-    fill: color-mix(in srgb, var(--plant-fruit) 55%, transparent);
+    fill: color-mix(in srgb, var(--streak-ink, var(--plant-fruit)) 55%, transparent);
 }
 
 .streakPill:hover{

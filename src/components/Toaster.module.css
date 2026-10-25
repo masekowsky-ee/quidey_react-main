@@ -57,7 +57,6 @@
     gap: 0.25rem;
     width: min(20rem, 100%);
     padding: 0;
-    border-left: 3px solid var(--primary);
     touch-action: none;
 }
 
@@ -113,6 +112,44 @@
 
 .close:hover{
     color: var(--text-h);
+    background: var(--hover-wash);
+    box-shadow: none;
+}
+
+/* a toast with one action (Undo): the text, then the action as an ink text button */
+.action{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: min(22rem, 100%);
+    padding: 0.3rem 0.3rem 0.3rem 0.9rem;
+    cursor: default;
+}
+
+.actionText{
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.actionBtn{
+    flex-shrink: 0;
+    height: 2rem;
+    padding: 0 0.75rem;
+    font: inherit;
+    font-weight: 600;
+    color: var(--text-h);
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.actionBtn:hover{
     background: var(--hover-wash);
     box-shadow: none;
 }

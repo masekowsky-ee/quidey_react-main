@@ -2,7 +2,7 @@ import styles from './Toaster.module.css';
 import { forwardRef, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { hideToast } from '../features/toast/toast';
+import { hideToast, runToastAction } from '../features/toast/toast';
 import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, useMotionLevel } from '../features/settings/motion';
 import { useTranslation } from '../i18n/useTranslation';
@@ -62,6 +62,21 @@ const LinkToast = forwardRef(function LinkToast({ toast, onClose, ...motionProps
     );
 });
 
+// Something just done that can be taken back ("Task done" + Undo): the button runs it, a swipe
+// closes it, and otherwise it goes by itself
+const ActionToast = forwardRef(function ActionToast({ toast, onClose, ...motionProps }, ref) {
+    const dispatch = useDispatch();
+    const swipe = useSwipe({ onClose });
+    return (
+        <motion.div ref={ref} className={`${styles.toast} ${styles.action}`} {...swipe.props} {...motionProps}>
+            <span className={styles.actionText}>{toast.text}</span>
+            <button type="button" className={styles.actionBtn} onClick={swipe.click(() => dispatch(runToastAction(toast.id)))}>
+                {toast.actionLabel}
+            </button>
+        </motion.div>
+    );
+});
+
 // Short messages at the bottom of the screen; they disappear by themselves and can be clicked
 // or swiped away (one that came in opens on a click or a swipe up)
 export default function Toaster() {
@@ -72,7 +87,7 @@ export default function Toaster() {
         <div className={styles.toaster} role="status" aria-live="polite">
             <AnimatePresence initial={false}>
                 {toasts.map(toast => {
-                    const Toast = toast.to ? LinkToast : PlainToast;
+                    const Toast = toast.actionLabel ? ActionToast : toast.to ? LinkToast : PlainToast;
                     return <Toast key={toast.id} toast={toast} onClose={() => dispatch(hideToast(toast.id))} {...toastMotion} />;
                 })}
             </AnimatePresence>

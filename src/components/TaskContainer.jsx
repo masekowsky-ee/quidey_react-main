@@ -131,6 +131,19 @@ export default function TaskContainer(props){
 
     const update = (task, changes) => dispatch(updateTaskProps(changes, task)).catch(reportError);
 
+    // ticked off: for a few seconds it can be taken back from the toast (not a repeating one:
+    // ticking it made the next one already)
+    const tickOff = (task) => {
+        dispatch(updateTaskProps({ done: true }, task))
+            .then(() => {
+                if (task.repeat) return;
+                dispatch(showToast(fill(t('taskDoneToast'), { name: task.name }), 'info', {
+                    action: { label: t('toastUndo'), run: () => update(task, { done: false }) },
+                }));
+            })
+            .catch(reportError);
+    };
+
     // my task is deleted; a task a friend shared with me is only left (it stays theirs)
     const handleTaskDelete = (task) => {
         if (isSharedWithMe(task)) {
@@ -170,7 +183,11 @@ export default function TaskContainer(props){
         return {
             ...base,
             hidden: draggedTask?.id === task.id,
-            onToggleDone: (e) => { if (!task.done) celebrate(e); update(task, { done: !task.done }); },
+            onToggleDone: (e) => {
+                if (task.done) return update(task, { done: false });
+                celebrate(e);
+                tickOff(task);
+            },
             onRename: (name) => update(task, { name }),
             onChangeDue: (due) => update(task, { due }),
             onEdit: () => setEditTaskId(task.id),

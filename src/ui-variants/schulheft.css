@@ -28,8 +28,8 @@
 :root[data-ui="schulheft"][data-theme] {
   --cell: 1.25rem;
   --ink: var(--primary-fg);
-  --grid: color-mix(in srgb, var(--ink) 12%, transparent);
-  --grid-strong: color-mix(in srgb, var(--ink) 22%, transparent);
+  --grid: color-mix(in srgb, var(--ink) 9%, transparent);
+  --grid-strong: color-mix(in srgb, var(--ink) 20%, transparent);
   --margin: #e2574c;
 
   --contrast-top: var(--primary);
@@ -247,13 +247,21 @@
   margin: 0 0.5rem;
 }
 
-/* today's column head in ink */
+/* today's column head: written in ink and underlined twice, as in a pupil's timetable
+   (no block of colour, the ink stays a line) */
 :root[data-ui="schulheft"] [data-part="week-day"][data-today] > :first-child {
-  background: var(--ink);
+  background: var(--surface);
+  box-shadow: inset 0 -2px 0 var(--ink);
 }
 
 :root[data-ui="schulheft"] [data-part="week-day"][data-today] > :first-child * {
-  color: var(--contrast-text);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* the streak in the ballpoint's blue, the one ink of the book */
+:root[data-ui="schulheft"][data-theme] {
+  --streak-ink: var(--ink);
 }
 
 :root[data-ui="schulheft"] [data-part="week-day"]:hover {

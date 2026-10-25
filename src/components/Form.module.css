@@ -195,6 +195,47 @@
     background: var(--task-color, var(--primary));
 }
 
+/* What the name says ("morgen 14 Uhr !hoch") and is taken over on saving: one quiet line
+   under the name, the words in ink, a way to keep the name as typed */
+.quickHint{
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: -0.25rem 0 0;
+    font-size: 0.82rem;
+    text-align: left;
+    color: var(--text-h);
+}
+
+.quickHint > span{
+    flex: 1;
+    min-width: 0;
+}
+
+.quickHint > button{
+    flex-shrink: 0;
+}
+
+.quickName{
+    color: var(--text-muted);
+}
+
+.quickIgnore{
+    padding: 0;
+    font: inherit;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.quickIgnore:hover{
+    color: var(--text-h);
+}
+
 /* "More options": the chevron points right while closed, down while open */
 .moreIcon,
 .moreIconOpen{

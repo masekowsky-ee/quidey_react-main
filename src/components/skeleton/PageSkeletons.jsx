@@ -107,7 +107,8 @@ function CalendarSkeleton() {
 function CommunitySkeleton() {
     const { t } = useTranslation();
     const { pathname } = useLocation();
-    const hasFriends = useSelector(state => state.friends.friends.length > 0);
+    // "online now" is beside the tab when I have friends (until they are known: likely)
+    const hasFriends = useSelector(state => !state.friends.friendsLoaded || state.friends.friends.length > 0);
     const tab = COMMUNITY_TABS.find(key => COMMUNITY_PATHS[key] === pathname) ?? 'feed';
     const rail = tab !== 'progress' && hasFriends;
     return (
@@ -116,6 +117,7 @@ function CommunitySkeleton() {
                 <div className={styles.headText}>
                     <h1 className={styles.headTitle}>{t('community')}</h1>
                     <Bone w="16rem" h="0.9375rem" />
+                    <Bone w="7rem" h="0.9375rem" className={styles.phoneOnly} />
                 </div>
                 {tab !== 'sessions' && <Bone pill w="8.5rem" h="2.25rem" />}
             </header>
@@ -141,7 +143,8 @@ function CommunitySkeleton() {
                     : <div className={styles.card}>
                         {tab === 'feed' &&
                             <div className={styles.composer}>
-                                <Bone w="7rem" h="1rem" />
+                                <Bone w="6rem" h="1rem" style={{ marginBottom: '0.4rem' }} />
+                                <Bone w="11rem" h="0.875rem" />
                                 <Bone w="100%" h="4.4rem" style={{ borderRadius: 'var(--radius-sm)' }} />
                                 <div className={styles.cardHead}><Bone w="12rem" h="0.8125rem" /><Bone pill w="7rem" h="2.25rem" /></div>
                             </div>}
@@ -225,12 +228,15 @@ function StatsSkeleton() {
 
 // ---------- profiles: the card (banner, avatar over its edge, name), more cards below ----------
 
-function ProfileCardSkeleton() {
+function ProfileCardSkeleton({ own }) {
     return (
         <div className={styles.profileCard}>
             <div className={styles.banner} />
             <div className={styles.profileBody}>
-                <div className={styles.profileTop}><Bone round w="5.5rem" className={styles.avatar} /></div>
+                <div className={styles.profileTop}>
+                    <Bone round w="5.5rem" className={styles.avatar} />
+                    {own && <Bone pill w="8.75rem" h="2.25rem" />}
+                </div>
                 <Bone w="11rem" h="1.375rem" style={{ marginTop: '0.25rem' }} />
                 <Bone w="6rem" />
                 <Bone w="9rem" h="2rem" style={{ marginTop: '0.25rem' }} />
@@ -246,7 +252,7 @@ function ProfileSkeleton({ own }) {
     return (
         <div className={styles.column}>
             {own ? <h1 className={styles.title}>{t('profile')}</h1> : <div className={styles.pageTop} />}
-            <ProfileCardSkeleton />
+            <ProfileCardSkeleton own={own} />
             <div className={styles.card}>
                 <Bone w="8rem" h="1rem" />
                 <div className={styles.levelTop}><Bone round w="10rem" /><div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', flex: 1 }}><Bone w="9rem" h="1.5rem" /><Bone w="4rem" /><Bone w="80%" /></div></div>
@@ -276,7 +282,7 @@ function SettingsSkeleton() {
                         <div className={styles.sectionText}><Bone w="7rem" h="1rem" /><Bone w="90%" h="0.8125rem" /><Bone w="60%" h="0.8125rem" /></div>
                         <div className={styles.sectionPanel}>
                             {Array.from({ length: rows }, (_, row) => (
-                                <div key={row} className={styles.settingRow}><Bone w="8rem" h="0.9375rem" /><Bone pill w="11rem" h="2.25rem" /></div>
+                                <div key={row} className={styles.settingRow}><Bone w="8rem" h="0.9375rem" /><Bone pill w="100%" h="2.25rem" className={styles.control} /></div>
                             ))}
                         </div>
                     </section>

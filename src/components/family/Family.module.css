@@ -413,7 +413,7 @@ button.emojiBadge:hover{
 }
 
 .streak svg{
-    color: var(--plant-fruit);
+    color: var(--streak-ink, var(--plant-fruit));
 }
 
 /* ---------- members ---------- */

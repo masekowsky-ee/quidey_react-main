@@ -26,7 +26,7 @@ const testerTexts = {
         uiVariantHint_current: 'Das jetzige Quidey: warmes Fast-Schwarz, ruhige Seitenleiste, die Farbe nur auf deinen Daten.',
         uiVariantHint_schulheft: 'Weißes Papier mit Kästchenraster und Kugelschreiber-Blau. Ein roter Rand gehört nur der Aufgabe im Fokus. Reiter oben, die Woche als Stundenplan.',
         uiVariantHint_lesesaal: 'Flaschengrün und Messinglicht wie abends in der Bibliothek. Die Aufgabe im Fokus liegt im Lampenlicht, Freund:innen online sitzen auf ihren Plätzen. Schmale Leiste links.',
-        uiVariantHint_uebersicht: 'Alles auf einen Blick: kleine Schrift, dicht gepackte Module mit roten Reitern. Springen und Anlegen über die Befehlsleiste (Strg K).',
+        uiVariantHint_uebersicht: 'Alles auf einen Blick: kleine Schrift, dicht gepackte Module unter roten Linien. Springen und Anlegen über die Befehlsleiste (Strg K).',
         uiVariantHint_tafel: 'Nachtblau wie die Anzeige am Bahnhof. Was heute ansteht, läuft als Abfahrt mit Uhrzeit, Gelb nur für „jetzt“ und Änderungen. Leiste oben.',
         testerCompareTitle: 'Dein Vergleich',
         testerCompareHint: 'Deine Varianten nach deinen Sternen.',
@@ -72,7 +72,7 @@ const testerTexts = {
         adminTesterFeatures: 'Funktionen',
         adminTesterOther: 'Frühere Themen',
 
-        // ---------- command bar (Übersicht) ----------
+        // ---------- command bar (everybody; Übersicht shows it as a field in the header) ----------
         commandOpen: 'Befehlsleiste',
         commandShortcut: 'Strg K',
         commandPlaceholder: 'Wohin oder was? Tippen zum Suchen',
@@ -130,7 +130,7 @@ const testerTexts = {
         uiVariantHint_current: 'Today’s Quidey: warm near-black, a calm sidebar, colour only on your data.',
         uiVariantHint_schulheft: 'White paper with a squared grid and ballpoint blue. A red margin belongs only to the task in focus. Tabs on top, the week as a timetable.',
         uiVariantHint_lesesaal: 'Bottle green and brass light like a library in the evening. The task in focus lies in the lamplight, friends online sit in their seats. A narrow rail on the left.',
-        uiVariantHint_uebersicht: 'Everything at a glance: small type, densely packed modules with red tabs. Jump and add things from the command bar (Ctrl K).',
+        uiVariantHint_uebersicht: 'Everything at a glance: small type, densely packed modules under red rules. Jump and add things from the command bar (Ctrl K).',
         uiVariantHint_tafel: 'Night blue like the board at the station. What’s on today runs as departures with their times, yellow only for “now” and changes. A bar on top.',
         testerCompareTitle: 'Your comparison',
         testerCompareHint: 'Your variants by your stars.',

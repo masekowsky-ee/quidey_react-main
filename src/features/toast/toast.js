@@ -12,14 +12,33 @@ let nextId = 1;
 // Something that came in (a message, a notice) stays a little longer and can be opened
 export const LINK_TOAST_MS = 7000;
 
+// One that can be undone stays long enough to reach its button
+export const ACTION_TOAST_MS = 6000;
+
+// what a toast's button does (functions stay out of the store), by toast id
+const actions = new Map();
+
 // tone: 'info' | 'success' | 'error'
 // options.to: a route; clicking the toast goes there (e.g. the conversation)
 // options.detail: a second line, e.g. the start of the message
-export const showToast = (text, tone = 'info', { to, detail } = {}) => (dispatch) => {
+// options.action: { label, run } a button on the toast, e.g. "Undo"
+export const showToast = (text, tone = 'info', { to, detail, action } = {}) => (dispatch) => {
     const id = nextId++;
-    dispatch({ type: SHOW_TOAST, payload: { id, text, tone, ...(to && { to }), ...(detail && { detail }) } });
-    setTimeout(() => dispatch(hideToast(id)), to ? LINK_TOAST_MS : TOAST_MS);
+    if (action) actions.set(id, action.run);
+    dispatch({ type: SHOW_TOAST, payload: { id, text, tone, ...(to && { to }), ...(detail && { detail }), ...(action && { actionLabel: action.label }) } });
+    setTimeout(() => {
+        actions.delete(id);
+        dispatch(hideToast(id));
+    }, action ? ACTION_TOAST_MS : to ? LINK_TOAST_MS : TOAST_MS);
     return id;
+};
+
+// The toast's button was pressed: its action runs once and the toast goes
+export const runToastAction = (id) => (dispatch) => {
+    const run = actions.get(id);
+    actions.delete(id);
+    dispatch(hideToast(id));
+    return run?.();
 };
 
 export const hideToast = (id) => ({ type: HIDE_TOAST, payload: id });

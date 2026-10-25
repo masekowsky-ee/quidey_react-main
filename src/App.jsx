@@ -40,9 +40,10 @@ import { LegalFooter } from './legal/LegalFooter.jsx';
 import { LEGAL_PATHS } from './legal/paths.js';
 import { useApplyTheme } from './features/settings/theme.js';
 import { MOTION, useApplyMotion, useMotionLevel } from './features/settings/motion.js';
-import { UI_VARIANTS, useApplyUiVariant, useNavModel, useUiVariant } from './features/tester/variants.js';
+import { useApplyUiVariant, useNavModel } from './features/tester/variants.js';
 import TesterOnly from './components/TesterOnly.jsx';
 import CommandPalette from './components/variants/CommandPalette.jsx';
+import ShortcutsDialog from './components/ShortcutsDialog.jsx';
 
 const REQUEST_REFRESH_MS = 60 * 1000;
 
@@ -106,7 +107,6 @@ function App(){
   useApplyMotion();
   // testers: the interface variant they picked (<html data-ui>), its way of navigating
   useApplyUiVariant();
-  const uiVariant = useUiVariant();
   const navModel = useNavModel();
   const motionLevel = useMotionLevel();
   // the team stopwatch keeps running on every page
@@ -241,7 +241,9 @@ function App(){
         <Tutorial/>
         <DeleteScopeDialog/>
         <QuickAdd/>
-        {UI_VARIANTS[uiVariant].nav === 'command' && <CommandPalette/>}
+        {/* Ctrl/⌘ K or "/": search tasks, jump, do; "?": the keyboard shortcuts */}
+        <CommandPalette/>
+        <ShortcutsDialog/>
         <main className={shell.main} data-part="main">
         {/* each page comes in as the motion setting says */}
         {/* ...the tabs of the Gemeinschaft page are one page: switching them doesn't */}

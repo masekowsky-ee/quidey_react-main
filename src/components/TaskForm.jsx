@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { COMMUNITY_PATHS } from '../features/community/paths';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,7 +15,9 @@ import TaskColorPicker from './task/TaskColorPicker.jsx';
 import DurationField from './task/DurationWheel.jsx';
 import { EventTypePicker, KindSwitch } from './task/KindFields.jsx';
 import { matchEventType } from '../features/tasks/kinds';
-import { fill } from '../features/helperFunction';
+import { dueText, fill } from '../features/helperFunction';
+import { parseQuickEntry, stripFound } from '../features/tasks/quickParse';
+import { prioLevel } from '../features/calendar/calendar';
 import { minutesOfDay, timeText } from '../features/calendar/calendar';
 
 import Icon from './icons';
@@ -58,11 +60,34 @@ export default function TaskForm(props){
     const [extras, setExtras] = useState(EMPTY_EXTRAS);
     const [shareWith, setShareWith] = useState([]);
     const [busy, setBusy] = useState(false);
+    // a day, time or priority written into the name ("morgen 14 Uhr !hoch") is taken over on
+    // saving, for the fields still empty; "Ignore" keeps the name as it was typed
+    const [ignoreQuick, setIgnoreQuick] = useState(false);
+    const parsed = useMemo(() => parseQuickEntry(name), [name]);
+    const quick = ignoreQuick ? {} : {
+        ...(!due && parsed.due && { due: parsed.due }),
+        ...(!time && parsed.time && { time: parsed.time }),
+        ...(!event && prio === null && parsed.prio !== null && { prio: parsed.prio }),
+    };
+    const quickKinds = Object.keys(quick);
+    // what is saved: the typed fields, with what the name said in the empty ones
+    const saved = {
+        name: quickKinds.length > 0 ? stripFound(name, parsed.found, quickKinds) : name,
+        due: quick.due ?? due,
+        time: quick.time ?? time,
+        prio: quick.prio ?? prio,
+    };
+    const quickParts = [
+        quick.due && dueText(quick.due, t),
+        quick.time && fill(t('quickAddAt'), { time: quick.time }),
+        quick.prio !== undefined && t(`quickAddPrio_${prioLevel(quick.prio)}`),
+    ].filter(Boolean);
 
     const friends = useFriends();
 
     async function handleSubmit(e){
         e.preventDefault();
+        const { name, due, time, prio } = saved;
         if (!name.trim()) {
             dispatch( setCustomError({bool: true, message: t('nameTaskError') }) );
             return;
@@ -116,8 +141,18 @@ export default function TaskForm(props){
             <h2>{t(event ? 'createEventH2' : 'createTaskH2')}</h2>
             <form className={`${styles.form}`} onSubmit={handleSubmit} noValidate>
                 <KindSwitch value={kind} onChange={(next) => { setKind(next); followName(name, next); }} />
+                {/* the form opens to be typed into: the name has the focus */}
                 <input className={styles.input} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}
+                    autoFocus aria-describedby={quickParts.length > 0 ? 'quick-add-hint' : undefined}
                     value={name} maxLength={200} onChange={(e) => { setName(e.target.value); followName(e.target.value, kind); }} />
+                {quickParts.length > 0 &&
+                    <p id="quick-add-hint" className={styles.quickHint} aria-live="polite">
+                        <span>
+                            {fill(t('quickAddFound'), { what: quickParts.join(' · ') })}
+                            {saved.name.trim() && <span className={styles.quickName}> {fill(t('quickAddName'), { name: saved.name })}</span>}
+                        </span>
+                        <button type="button" className={styles.quickIgnore} onClick={() => setIgnoreQuick(true)}>{t('quickAddIgnore')}</button>
+                    </p>}
                 {/* a task whose name fits a type: one tap makes it such an event */}
                 {!event && match &&
                     <button type="button" className={styles.typeHint} data-task-color={match.type.color ?? undefined}

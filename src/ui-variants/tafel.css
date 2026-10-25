@@ -284,13 +284,15 @@
   corner-shape: round;
 }
 
-/* the running focus: the board's yellow plate on its title */
-:root[data-ui="tafel"] [data-part="focus"][data-active] > h2 {
-  align-self: flex-start;
-  padding: 0 0.5rem;
-  color: var(--primary-text);
-  background: var(--primary);
-  border-radius: var(--radius-sm);
+/* the running focus: the board already says "im Fokus" in yellow, so here a thin yellow edge
+   along the top of the card is enough (the yellow stays for now and changes) */
+:root[data-ui="tafel"] [data-part="focus"][data-active] > h2 + div {
+  box-shadow: inset 0 3px 0 var(--board-signal);
+}
+
+/* the streak in the board's white, not its signal yellow */
+:root[data-ui="tafel"][data-theme] {
+  --streak-ink: var(--text-h);
 }
 
 :root[data-ui="tafel"] [data-part="timer"] h2 {

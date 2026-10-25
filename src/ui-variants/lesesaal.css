@@ -179,9 +179,12 @@
   border-bottom-color: transparent;
 }
 
-/* ---------- Home: one calm column, the lamp-lit focus first ---------- */
+/* ---------- Home: the lamp-lit focus first, the list on the desk beside it ----------
+   Narrow: one calm column, focus on top. From 1100px two columns: the focus desk on the left
+   (it stays in view), the list on the right, so both are on the first screen.
+   At 1440 (rail 5.5rem): 1440 - 88 - 2 x 40 = 1272 > 72rem (1152) = 600 + 40 + 512. */
 :root[data-ui="lesesaal"] [data-part="home"] {
-  width: min(44rem, calc(100% - 2 * var(--page-gutter, 1rem)));
+  width: min(72rem, calc(100% - 2 * var(--page-gutter, 1rem)));
   gap: 1.75rem;
 }
 
@@ -194,6 +197,23 @@
 :root[data-ui="lesesaal"] [data-part="home-focus"] {
   order: -1;
   position: static;
+}
+
+@media (min-width: 1100px) {
+  :root[data-ui="lesesaal"] [data-part="home-columns"] {
+    grid-template-columns: minmax(0, 1.17fr) minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+
+  :root[data-ui="lesesaal"] [data-part="home-focus"] {
+    position: sticky;
+    top: calc(var(--header-h) + 1.5rem);
+  }
+}
+
+/* the streak in the lamp's brass */
+:root[data-ui="lesesaal"][data-theme] {
+  --streak-ink: var(--primary-fg);
 }
 
 :root[data-ui="lesesaal"] [data-part="home-week"] {
@@ -224,38 +244,36 @@
   transition: border-color 0.6s ease, background-color 0.6s ease, box-shadow 0.6s ease;
 }
 
+/* the lamp's light: one soft pool from above on the card, no glow around it */
 :root[data-ui="lesesaal"] [data-part="focus"][data-active] > h2 + div {
   border-color: var(--lamp-edge);
   background:
-    radial-gradient(ellipse 75% 115% at 50% -18%, var(--lamp), transparent 68%),
+    radial-gradient(ellipse 70% 90% at 50% -20%, var(--lamp), transparent 70%),
     var(--surface);
-  box-shadow: 0 24px 60px -36px var(--lamp-edge);
 }
 
-/* the lamp's brass rim along the top of the pool */
+/* the lamp's brass rim: one short solid line along the top of the pool */
 :root[data-ui="lesesaal"] [data-part="focus"][data-active] > h2 + div::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 28%;
-  right: 28%;
+  top: -1px;
+  left: 50%;
+  width: 6rem;
   height: 2px;
+  translate: -50% 0;
   border-radius: 0 0 2px 2px;
-  background: linear-gradient(90deg, transparent, var(--primary), transparent);
-  opacity: 0.85;
+  background: var(--primary);
 }
 
-/* a task taken into focus: the lamp warms up */
-:root[data-ui="lesesaal"]:not([data-motion="minimal"]) [data-part="focus"][data-active] > h2 + div {
-  animation: lampOn 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+/* a task taken into focus: the lamp warms up (opacity of the pool only) */
+:root[data-ui="lesesaal"]:not([data-motion="minimal"]) [data-part="focus"][data-active] > h2 + div::before {
+  animation: lampOn 0.9s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
 @keyframes lampOn {
   from {
-    background:
-      radial-gradient(ellipse 75% 115% at 50% -18%, transparent, transparent 68%),
-      var(--surface);
-    box-shadow: 0 24px 60px -36px transparent;
+    opacity: 0;
+    scale: 0.4 1;
   }
 }
 

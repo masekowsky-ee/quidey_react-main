@@ -372,7 +372,6 @@ body{
 
     .boot-strip > :last-child{
         grid-column: 1 / -1;
-        height: 9rem;
     }
 
     .boot-aside{
@@ -399,7 +398,13 @@ body{
 
     .boot-strip > :last-child{
         grid-column: auto;
-        height: 16rem;
+    }
+
+    /* "New" is a round button on phones */
+    .boot .newb{
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
     }
 
     .boot-week{

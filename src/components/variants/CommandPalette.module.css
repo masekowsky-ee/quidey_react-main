@@ -108,11 +108,32 @@
   color: var(--text-h);
 }
 
+.optionLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* a task's day, on the right */
+.optionMeta {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .enterIcon {
+  flex-shrink: 0;
   width: 1rem;
   height: 1rem;
   margin-left: auto;
   color: var(--text-muted);
+}
+
+.optionMeta + .enterIcon {
+  margin-left: 0;
 }
 
 .empty {

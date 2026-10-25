@@ -1105,6 +1105,18 @@ a.primaryBtn{
     gap: 0.75rem;
 }
 
+/* phones: the task list comes first; Solo | Team stays in Settings → Start page (and on the
+   team home), and the strip only shows when friends are waiting or working */
+@media (max-width: 720px){
+    .soloStrip .layoutSwitch{
+        display: none;
+    }
+
+    .soloStrip:not(:has(a)){
+        display: none;
+    }
+}
+
 .soloHint{
     min-width: 0;
     display: inline-flex;

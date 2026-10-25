@@ -90,6 +90,13 @@ export default function Header(props){
                             </button>}
                     </div>
                     <div className={styles.end}>
+                        {/* the command bar from everywhere (Übersicht has its field in the middle) */}
+                        {!commandBar &&
+                            <button type="button" className={styles.btn} onClick={openCommands}
+                                aria-label={`${t('commandSearch')} (${t('commandShortcut')})`} title={`${t('commandSearch')} (${t('commandShortcut')})`}
+                                aria-keyshortcuts="Control+K Meta+K /">
+                                <Icon name="search" size={20} />
+                            </button>}
                         <StreakPill />
                         <DailyTicker />
                         <TeamQuickPanel />

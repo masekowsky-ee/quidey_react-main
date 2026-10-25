@@ -27,6 +27,17 @@
     from{ opacity: 0; translate: 0 0.5rem; }
 }
 
+@keyframes fadeIn{
+    from{ opacity: 0; }
+}
+
+/* with little motion it only fades in */
+@media (prefers-reduced-motion: reduce){
+    .slow{
+        animation-name: fadeIn;
+    }
+}
+
 .slowBtn{
     composes: ghostBtn from '../ui.module.css';
     height: 2rem;

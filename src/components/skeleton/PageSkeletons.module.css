@@ -15,10 +15,17 @@
     text-align: left;
 }
 
-/* Settings, the inbox's split view */
+/* Settings, the inbox's split view (not composed from pageColumn: its width would win) */
 .medium{
-    composes: pageColumn from '../ui.module.css';
+    composes: page from '../ui.module.css';
     width: min(1100px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    margin: 0 auto;
+    padding-bottom: 4rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: left;
 }
 
 /* Inbox, profiles, everything simple */
@@ -239,13 +246,47 @@
 
 .communityTabs{
     composes: segmented from '../ui.module.css';
+}
+
+/* div.: beats the composed segmented rules, whatever order the stylesheets load in */
+div.communityTabs{
     display: flex;
     width: fit-content;
     margin-bottom: 1.5rem;
 }
 
-.communityTabs > button{
+div.communityTabs > button{
+    flex: none;
     padding: 0.4rem 1.1rem;
+    font-size: 0.875rem;
+}
+
+/* the summary's second line: it wraps on a phone */
+.phoneOnly{
+    display: none;
+}
+
+@media (max-width: 640px){
+    .head{
+        margin-top: 1.5rem;
+    }
+
+    .phoneOnly{
+        display: block;
+    }
+
+    /* tabs share the width as their names need it, so all of them fit a phone */
+    div.communityTabs{
+        width: 100%;
+        border-radius: var(--radius);
+    }
+
+    div.communityTabs > button{
+        flex: 1 1 auto;
+        padding: 0.5rem 0.35rem;
+        font-size: min(0.8125rem, 3.5vw);
+        border-radius: calc(var(--radius) - 3px);
+    }
 }
 
 .layout{
@@ -450,10 +491,24 @@
     gap: 1rem;
 }
 
+.control{
+    max-width: 11rem;
+}
+
 @media (max-width: 720px){
     .section{
         grid-template-columns: minmax(0, 1fr);
         gap: 1rem;
+    }
+
+    /* on a phone a setting's name stands above its control */
+    .settingRow{
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .control{
+        max-width: none;
     }
 }
 

@@ -35,6 +35,18 @@ Three repositories, side by side on this machine:
 - Code splitting: every page except Home is `lazy()` in `App.jsx` (`PAGES`), preloaded when the
   app is idle (`preloadPages`); `LegalFooter` lives in its own file so the legal texts stay
   lazy. `vite.config.js` puts react / router / state / motion in their own long-cached chunks.
+- Loading = skeletons, never a blank or "Lädt…" screen (`src/components/skeleton/`): `Bone`
+  (grey shape; `round`, `pill`), `Skeleton` (aria-busy wrapper, one "Lädt…" status, `inert`,
+  `fade`), `SkeletonRows`. A page's shape uses its real layout: labels known up front (titles,
+  tabs, today's date, this month's grid) are text, data is grey. `PageSkeletons.jsx`:
+  `RouteSkeleton` (the Suspense fallback per address: Home, calendar, Gemeinschaft, inbox,
+  stats, profiles, settings, else a column; own CSS, the pages' styles aren't loaded yet) and
+  `GateSkeleton` (sign-in). Parts that load their own data draw their skeleton beside
+  themselves (`TaskRowSkeleton`, `MomentumSkeleton`, week strip / group chips / title line while
+  `selectTasksLoaded` is false, i.e. `task.loaded` before `SET_TASK_STATE`). First paint before
+  any JS: `index.html` carries a skeleton in `#root` styled by `public/boot.css` (theme colours
+  copied from `index.css`, a test compares them; classes only, the CSP forbids style
+  attributes); `theme-init.js` picks it via `<html data-boot="home|page|gate">`.
 - i18n: `src/i18n/translations.js` (de/en dictionaries) + `useTranslation()` → `t(key)`.
 - Tests: Vitest + jsdom + Testing Library, all in `src/__tests__/` (`npm test`).
   Lint: ESLint 10 flat config (`npm run lint`).
@@ -49,8 +61,8 @@ Order of checks on every render:
    sign-up card, legal footer). `/signup` opens on sign-up; the landing page's email line hands
    the address over as `#email=…` (read once, then removed from the URL). Signed in, `/signin`
    and `/signup` redirect to `/`. `LANDING_URL` in `src/features/site.js`.
-4. Signed in, access not checked yet → `AppSkeleton` (the app's frame in grey, after 5 s
-   "Verbindung…" + retry / sign out); not pro → `/beta` (`BetaGate`, user can
+4. Signed in, access not checked yet → `AppSkeleton` (the real `Header`/`Menu`/`TabBar`, inert,
+   and the address's `RouteSkeleton`; after 5 s a bar "Verbindung…" + retry / sign out); not pro → `/beta` (`BetaGate`, user can
    request beta access).
 5. Pro → full app in the frame `AppShell.module.css`: `Header`, `Menu`, `TabBar`, `Toaster`,
    `Tutorial`, animated page routes in `<main>`. Widths (`src/features/layout/breakpoints.js`,
@@ -59,8 +71,8 @@ Order of checks on every render:
    Kalender, Gemeinschaft, Postfach, Mehr → drawer) replaces the header's button. The shell sets
    `--sidebar-w`, `--tabbar-h` and `--page-gutter`; fixed parts (toasts, timer button) and every
    page container use them. The closed drawer is `inert`; `setShowMenu(true|false)` (no argument
-   toggles). Menu (Hick's law: few choices at once): Start, Kalender, Gemeinschaft, Postfach, then
-   "Mehr" (Statistiken), at the bottom Admin/Einstellungen/Feedback and the
+   toggles). Menu (Hick's law: few choices at once): Start, Kalender, Gemeinschaft, Postfach,
+   Statistiken (one list, no "Mehr" heading), at the bottom Admin/Einstellungen/Feedback and the
    `AccountSwitcher` (profile, switch account, add account, sign out). Under Gemeinschaft a row of
    the friends online right now (faces + "N Freunde online", `useOnlineFriends`); the tab bar puts
    a green dot on Gemeinschaft while any friend is online. The tour ("Einführung", `Tutorial.jsx`)
@@ -71,7 +83,19 @@ Order of checks on every render:
    brighter ink, no fill; count badges are neutral (the accent stays on data, never on nav,
    tabs or buttons; one filled inverted primary per screen). The header's "Neu" opens the
    new-task form over any page (`QuickAdd`, `settings.showForms` via `showForms(true|false)`).
+   Its name field takes a day, time and priority written into it ("Essay morgen 14 Uhr !hoch",
+   German and English, `features/tasks/quickParse.js`): a line under the name says what was
+   found, saving fills the still-empty fields with it and keeps only the rest as the name;
+   "Ignorieren" keeps the name as typed.
    Row actions in lists appear on hover/focus with a mouse (always on touch).
+   Quick ways through the app, for everybody: the command bar (`variants/CommandPalette.jsx`,
+   Ctrl/⌘ K, "/" or the header's search button; finds my open tasks and opens their editor,
+   jumps to places, new task, light/dark, shortcuts; variants and `/tester` only for testers)
+   and keyboard shortcuts (`features/shortcuts/shortcuts.js`, overview `ShortcutsDialog.jsx` on
+   "?": N new task, G then H/K/G/P/S to Start/Kalender/Gemeinschaft/Postfach/Statistiken; never
+   while typing or with a dialog open). Ticking off a task on Home shows a toast with
+   "Rückgängig" for 6 s (`showToast(…, { action: { label, run } })`, not for repeating tasks).
+   The streak's colour is `--streak-ink` (default `--plant-fruit`; variants set their own ink).
 
 Online status: the backend counts each user's open sockets (`realtime.js`, in memory, never
 stored, 8 s grace on disconnect) and tells friends + people in open shared sessions/families
@@ -113,15 +137,17 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   `personal={false}` (no groups/reminders/sharing, "von X", delete only with `canRemove`).
 - `/community` — **Gemeinschaft**: everything with other people on one page
   (`components/community/Community.jsx`, paths in `src/features/community/paths.js`). Tabs with their
-  own address: Feed (`/community`), Sitzungen (`/community/sessions`, the old `/together` list),
+  own address: Feed (`/community`), Fortschritt (`/community/progress`, `Progress.jsx`),
+  Sitzungen (`/community/sessions`, the old `/together` list),
   Freunde (`/community/friends`, the old Social, `?tab=add|requests`), Family (`/community/family`).
   `/together`, `/social`, `/family` redirect there; `/together/:id`, `/family/:id`,
   `/u/:username` stay. The menu entry counts session invites + friend requests + family invites and
-  shows any of the `news` dots (`feed`, `together`, `social`). Beside every tab (≥58rem, container
-  query) a rail: `LevelCard` (level, tier, XP bar, growth line of the 8 tiers, next unlocks, how XP
-  works, all unlocks), `Challenges` (today 3, this week 2) and `Ranking` (XP since Monday among
-  friends who show their statistics); on a phone only with the feed (level + today above, week +
-  ranking below).
+  shows any of the `news` dots (`feed`, `together`, `social`). The Fortschritt tab holds
+  `LevelCard` (level, tier, XP bar, growth line of the 8 tiers, next unlocks, how XP works, all
+  unlocks) on the left and `Challenges` (today 3, this week 2) + `Ranking` (XP since Monday among
+  friends who show their statistics) on the right (one column below 46rem); level-up and challenge
+  toasts and the plant card lead there. Beside the other tabs (≥58rem, container query) a rail with
+  `OnlineNow`, only while I have friends; on a phone only above the feed.
   - Feed (`Feed.jsx`, `FeedEntry.jsx`, slice `src/features/feed/feed.js`): entries of friends and me
     (`day` = the day's focus/tasks, updated as it grows; `challenge`, `level`, `streak`, `post` up to
     280 chars), grouped by day, cheering on (one per person, flame), mine can be removed. Live:
@@ -215,11 +241,12 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   `schulheft` (white squared paper that drifts at 12 % of the scroll as if far behind — a scroll-driven
   animation, standing still on "minimal" motion or without support —, ballpoint blue, red margin only on the task in focus, Lexend,
   tabs on top, week as a timetable), `lesesaal` (bottle green + brass lamp light on the focus card,
-  Source Serif 4 / Source Sans 3, narrow icon rail, Home one column with focus first + `Seats`),
-  `uebersicht` (dense, M PLUS 1 at a 14px root, hairline modules with red tabs, compact sidebar +
-  command bar Ctrl/⌘ K `variants/CommandPalette.jsx`, Home as a grid mosaic), `tafel` (night-blue
-  departure board, Barlow Semi Condensed, yellow only for now/changes, tabs on top, Home starts
-  with `variants/DepartureBoard.jsx`). Each variant has a light and a dark rendition.
+  Source Serif 4 / Source Sans 3, narrow icon rail, Home with the lamp-lit focus + `Seats` first:
+  from 1100px beside the list, narrower one column),
+  `uebersicht` (dense, M PLUS 1 at a 14px root, hairline modules under a red rule with their name
+  in ink, compact sidebar + the command bar as a field in the header, Home as a grid mosaic),
+  `tafel` (night-blue departure board, Barlow Semi Condensed, yellow only for now/changes, tabs on
+  top, Home starts with `variants/DepartureBoard.jsx`). Each variant has a light and a dark rendition.
   How it works: `<html data-ui>` (set by `useApplyUiVariant` once the variant's stylesheet
   `src/ui-variants/<id>.css` has loaded — a lazy chunk, fonts self-hosted, latin subsets only);
   colours: each variant has its own ground and accent (`data-palette="own"` / `data-accent="own"`,

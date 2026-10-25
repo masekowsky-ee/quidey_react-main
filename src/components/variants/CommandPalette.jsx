@@ -5,13 +5,18 @@ import { AnimatePresence, motion } from 'motion/react';
 import styles from './CommandPalette.module.css';
 import Icon from '../icons';
 import { useTranslation } from '../../i18n/useTranslation';
-import { fill } from '../../features/helperFunction';
-import { showForms } from '../../features/settings/settingsAction';
+import { dueText, fill, parseDate } from '../../features/helperFunction';
+import { setTheme, showForms } from '../../features/settings/settingsAction';
 import { COMMUNITY_PATHS } from '../../features/community/paths';
 import { MOTION, useMotionLevel } from '../../features/settings/motion';
 import { UI_VARIANT_IDS, setUiVariant, useUiVariant } from '../../features/tester/variants';
+import { useIsTester } from '../../features/auth/tester';
 import { OPEN_COMMANDS_EVENT } from '../../features/tester/commands';
+import { openShortcuts } from '../../features/shortcuts/shortcuts';
+import TaskEditDialog from '../task/TaskEditDialog.jsx';
 
+// how many tasks a search shows at most
+const TASKS_SHOWN = 6;
 
 // "Übung" finds "ubung", "Uebung" too
 const normalize = (text) => text.toLocaleLowerCase()
@@ -19,19 +24,27 @@ const normalize = (text) => text.toLocaleLowerCase()
     .replace(/ae/g, 'a').replace(/oe/g, 'o').replace(/ue/g, 'u')
     .normalize('NFD').replace(/[̀-ͯ]/g, '');
 
-// The command bar of the "Übersicht" variant: Ctrl/⌘ K (or the field in the header) opens it,
-// typing narrows the list, arrows choose, Enter runs, Escape closes. Places to jump to first,
-// then things to do.
+const matches = (words, text) => words.every(word => normalize(text).includes(word));
+
+// The command bar, for everybody: Ctrl/⌘ K, "/" or the search button in the header opens it,
+// typing narrows the list, arrows choose, Enter runs, Escape closes. Typed words find my open
+// tasks first (Enter opens the task's editor), then places to jump to, then things to do.
+// "Übersicht" also shows it as a field in the header.
 export default function CommandPalette() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const variant = useUiVariant();
+    const isTester = useIsTester();
     const isAdmin = useSelector(state => state.auth.access.isAdmin);
+    const tasks = useSelector(state => state.task.tasks);
     const overlayMotion = MOTION.overlay[useMotionLevel()];
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
     const [index, setIndex] = useState(0);
+    // the task whose editor a search opened
+    const [editTaskId, setEditTaskId] = useState(null);
+    const editTask = tasks.find(task => task.id === editTaskId);
     const inputRef = useRef(null);
     const returnFocus = useRef(null);
     const listId = useId();
@@ -61,6 +74,7 @@ export default function CommandPalette() {
 
     const commands = useMemo(() => {
         const go = (to, label, icon) => ({ id: `go:${to}`, group: 'go', label, icon, run: () => navigate(to) });
+        const dark = document.documentElement.dataset.theme !== 'light';
         return [
             go('/', t('home'), 'home'),
             go('/calendar', t('calendar'), 'calendar'),
@@ -73,21 +87,38 @@ export default function CommandPalette() {
             go('/profile', t('profile'), 'profile'),
             go('/settings', t('settings'), 'settings'),
             go('/feedback', t('feedback'), 'feedback'),
-            go('/tester', t('testerNav'), 'flask'),
+            ...(isTester ? [go('/tester', t('testerNav'), 'flask')] : []),
             ...(isAdmin ? [go('/admin', t('admin'), 'admin')] : []),
             { id: 'do:new', group: 'do', label: t('commandNewEntry'), icon: 'plus', run: () => dispatch(showForms(true)) },
-            ...UI_VARIANT_IDS.filter(id => id !== variant).map(id => ({
+            {
+                id: 'do:theme', group: 'do', label: t(dark ? 'commandThemeLight' : 'commandThemeDark'), icon: dark ? 'sun' : 'moon',
+                run: () => dispatch(setTheme(dark ? 'light' : 'dark')),
+            },
+            { id: 'do:shortcuts', group: 'do', label: t('commandShortcuts'), icon: 'tutorial', run: openShortcuts },
+            ...(isTester ? UI_VARIANT_IDS.filter(id => id !== variant).map(id => ({
                 id: `do:variant:${id}`, group: 'do', icon: 'switch',
                 label: fill(t('commandVariant'), { name: t(`uiVariant_${id}`) }),
                 run: () => dispatch(setUiVariant(id)),
-            })),
+            })) : []),
         ];
-    }, [t, navigate, dispatch, isAdmin, variant]);
+    // the theme is read when the bar opens
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [t, navigate, dispatch, isAdmin, isTester, variant, open]);
 
     const shown = useMemo(() => {
         const words = normalize(query.trim()).split(/\s+/).filter(Boolean);
-        return commands.filter(command => words.every(word => normalize(command.label).includes(word)));
-    }, [commands, query]);
+        // tasks only once something is typed: the open ones, soonest day first
+        const found = words.length === 0 ? [] : tasks
+            .filter(task => !task.done && matches(words, task.name))
+            .sort((a, b) => (parseDate(a.due)?.getTime() ?? Infinity) - (parseDate(b.due)?.getTime() ?? Infinity))
+            .slice(0, TASKS_SHOWN)
+            .map(task => ({
+                id: `task:${task.id}`, group: 'tasks', label: task.name, icon: 'tasks',
+                meta: task.due ? dueText(task.due, t) : t('commandTaskNoDay'),
+                run: () => setEditTaskId(task.id),
+            }));
+        return [...found, ...commands.filter(command => matches(words, command.label))];
+    }, [commands, query, tasks, t]);
     const current = Math.min(index, Math.max(0, shown.length - 1));
 
     const close = () => {
@@ -106,51 +137,56 @@ export default function CommandPalette() {
         else if (e.key === 'Enter' && shown[current]) { e.preventDefault(); run(shown[current]); }
     };
 
-    const groups = [['go', t('commandGroupGo')], ['do', t('commandGroupDo')]];
+    const groups = [['tasks', t('commandGroupTasks')], ['go', t('commandGroupGo')], ['do', t('commandGroupDo')]];
     const optionId = (command) => `${listId}-${command.id}`;
 
     return (
-        <AnimatePresence>
-            {open && <>
-                <motion.div className={styles.overlay} onClick={close} {...overlayMotion} />
-                <div className={styles.panel} role="dialog" aria-modal="true" aria-label={t('commandOpen')} data-part="commands">
-                    <div className={styles.field}>
-                        <Icon name="search" className={styles.fieldIcon} />
-                        <input ref={inputRef} className={styles.input} type="text" value={query}
-                            placeholder={t('commandPlaceholder')} aria-label={t('commandPlaceholder')}
-                            role="combobox" aria-expanded="true" aria-controls={listId} aria-autocomplete="list"
-                            aria-activedescendant={shown[current] ? optionId(shown[current]) : undefined}
-                            onChange={(e) => { setQuery(e.target.value); setIndex(0); }} onKeyDown={onKeyDown} />
-                        <kbd className={styles.kbd}>Esc</kbd>
+        <>
+            <AnimatePresence>
+                {open && <>
+                    <motion.div className={styles.overlay} onClick={close} {...overlayMotion} />
+                    <div className={styles.panel} role="dialog" aria-modal="true" aria-label={t('commandOpen')} data-part="commands">
+                        <div className={styles.field}>
+                            <Icon name="search" className={styles.fieldIcon} />
+                            <input ref={inputRef} className={styles.input} type="text" value={query}
+                                placeholder={t('commandPlaceholder')} aria-label={t('commandPlaceholder')}
+                                autoComplete="off" spellCheck={false}
+                                role="combobox" aria-expanded="true" aria-controls={listId} aria-autocomplete="list"
+                                aria-activedescendant={shown[current] ? optionId(shown[current]) : undefined}
+                                onChange={(e) => { setQuery(e.target.value); setIndex(0); }} onKeyDown={onKeyDown} />
+                            <kbd className={styles.kbd}>Esc</kbd>
+                        </div>
+                        <div id={listId} role="listbox" className={styles.list} aria-label={t('commandOpen')}>
+                            {shown.length === 0 && <p className={styles.empty}>{fill(t('commandNoResults'), { query: query.trim() })}</p>}
+                            {groups.map(([group, label]) => {
+                                const items = shown.filter(command => command.group === group);
+                                if (items.length === 0) return null;
+                                return (
+                                    <div key={group} role="group" aria-label={label} className={styles.group}>
+                                        <p className={styles.groupLabel} aria-hidden="true">{label}</p>
+                                        {items.map(command => {
+                                            const selected = shown[current] === command;
+                                            return (
+                                                <div key={command.id} id={optionId(command)} role="option" aria-selected={selected}
+                                                    className={`${styles.option} ${selected ? styles.selected : ''}`}
+                                                    onPointerMove={() => setIndex(shown.indexOf(command))}
+                                                    onClick={() => run(command)}>
+                                                    <Icon name={command.icon} className={styles.optionIcon} />
+                                                    <span className={styles.optionLabel}>{command.label}</span>
+                                                    {command.meta && <span className={styles.optionMeta}>{command.meta}</span>}
+                                                    {selected && <Icon name="arrowRight" className={styles.enterIcon} />}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <p className={styles.hint}>{t('commandHint')}</p>
                     </div>
-                    <div id={listId} role="listbox" className={styles.list} aria-label={t('commandOpen')}>
-                        {shown.length === 0 && <p className={styles.empty}>{fill(t('commandNoResults'), { query: query.trim() })}</p>}
-                        {groups.map(([group, label]) => {
-                            const items = shown.filter(command => command.group === group);
-                            if (items.length === 0) return null;
-                            return (
-                                <div key={group} role="group" aria-label={label} className={styles.group}>
-                                    <p className={styles.groupLabel} aria-hidden="true">{label}</p>
-                                    {items.map(command => {
-                                        const selected = shown[current] === command;
-                                        return (
-                                            <div key={command.id} id={optionId(command)} role="option" aria-selected={selected}
-                                                className={`${styles.option} ${selected ? styles.selected : ''}`}
-                                                onPointerMove={() => setIndex(shown.indexOf(command))}
-                                                onClick={() => run(command)}>
-                                                <Icon name={command.icon} className={styles.optionIcon} />
-                                                <span>{command.label}</span>
-                                                {selected && <Icon name="arrowRight" className={styles.enterIcon} />}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <p className={styles.hint}>{t('commandHint')}</p>
-                </div>
-            </>}
-        </AnimatePresence>
+                </>}
+            </AnimatePresence>
+            {editTask && <TaskEditDialog task={editTask} onClose={() => setEditTaskId(null)} />}
+        </>
     );
 }

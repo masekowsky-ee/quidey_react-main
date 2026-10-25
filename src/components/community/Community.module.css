@@ -621,7 +621,7 @@ a.rankName:hover{
 }
 
 .rankStreak svg{
-    color: var(--plant-fruit);
+    color: var(--streak-ink, var(--plant-fruit));
 }
 
 /* ---------- online now ---------- */
