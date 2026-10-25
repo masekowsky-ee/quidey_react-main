@@ -22,14 +22,37 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-/* ---------- the paper (day: the light theme and "system" by day) ---------- */
+/* ---------- what stays whatever the colours: type, shapes, the grid drawn in the ink ----------
+   The ground comes from the colour palette and the ink from the accent (Settings); "own" is the
+   book's own, below. Buttons are written in the ink. */
 :root[data-ui="schulheft"][data-theme] {
   --cell: 1.25rem;
-  --grid: rgba(64, 112, 196, 0.12);
-  --grid-strong: rgba(64, 112, 196, 0.22);
-  --ink: #2340b8;
+  --ink: var(--primary-fg);
+  --grid: color-mix(in srgb, var(--ink) 12%, transparent);
+  --grid-strong: color-mix(in srgb, var(--ink) 22%, transparent);
   --margin: #e2574c;
 
+  --contrast-top: var(--primary);
+  --contrast-bottom: var(--primary);
+  --contrast-text: var(--primary-text);
+
+  --radius-sm: 3px;
+  --radius: 5px;
+  --radius-lg: 6px;
+
+  --sans: 'Lexend Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
+  font: 15.5px/1.55 var(--sans);
+  letter-spacing: 0;
+}
+
+:root[data-ui="schulheft"][data-theme="dark"] {
+  --grid: color-mix(in srgb, var(--ink) 7%, transparent);
+  --grid-strong: color-mix(in srgb, var(--ink) 14%, transparent);
+  --margin: #ff7a70;
+}
+
+/* ---------- the book's own paper (palette "own"; day: the light theme) ---------- */
+:root[data-ui="schulheft"][data-palette="own"][data-theme] {
   --bg: #fbfcfe;
   --surface-bar: #fbfcfe;
   --surface-inset: #f1f4fa;
@@ -43,40 +66,19 @@
   --text-h: #131a2a;
   --text-muted: #5d6679;
 
-  --primary: #2340b8;
-  --primary-text: #ffffff;
-  --primary-fg: #2340b8;
   --danger: #c63027;
   --online: #16a34a;
   --online-text: #15803d;
   --hover-wash: rgba(35, 64, 184, 0.07);
-
-  --contrast-top: #2340b8;
-  --contrast-bottom: #2340b8;
-  --contrast-text: #ffffff;
-
-  --radius-sm: 3px;
-  --radius: 5px;
-  --radius-lg: 6px;
   --shadow-float: 0 10px 28px -12px rgba(19, 26, 42, 0.28);
   --shadow-modal: 0 20px 56px -20px rgba(19, 26, 42, 0.34);
   --overlay: rgba(19, 26, 42, 0.26);
   --scrollbar-thumb: rgba(35, 64, 184, 0.2);
   --scrollbar-thumb-hover: rgba(35, 64, 184, 0.36);
-
-  --sans: 'Lexend Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
-  font: 15.5px/1.55 var(--sans);
-  letter-spacing: 0;
-  color-scheme: light;
 }
 
 /* ---------- the same book at night, under the desk lamp ---------- */
-:root[data-ui="schulheft"][data-theme="dark"] {
-  --grid: rgba(150, 175, 235, 0.07);
-  --grid-strong: rgba(150, 175, 235, 0.14);
-  --ink: #9db1ff;
-  --margin: #ff7a70;
-
+:root[data-ui="schulheft"][data-palette="own"][data-theme="dark"] {
   --bg: #10141d;
   --surface-bar: #10141d;
   --surface-inset: #0c1017;
@@ -90,32 +92,58 @@
   --text-h: #f2f5fb;
   --text-muted: #9aa4b8;
 
-  --primary: #9db1ff;
-  --primary-text: #0b1230;
-  --primary-fg: #a9bbff;
   --danger: #ff7a70;
   --online: #22c55e;
   --online-text: #4ade80;
   --hover-wash: rgba(157, 177, 255, 0.09);
-
-  --contrast-top: #9db1ff;
-  --contrast-bottom: #9db1ff;
-  --contrast-text: #0b1230;
   --shadow-float: 0 16px 40px -16px rgba(0, 0, 0, 0.7);
   --shadow-modal: 0 24px 64px -24px rgba(0, 0, 0, 0.8);
   --overlay: rgba(4, 6, 10, 0.6);
   --scrollbar-thumb: rgba(157, 177, 255, 0.18);
   --scrollbar-thumb-hover: rgba(157, 177, 255, 0.32);
-  color-scheme: dark;
 }
 
-/* the squared paper under every page; the bars stay plain paper so the grid scrolls under them */
+/* ---------- the book's own ink: ballpoint blue (accent "own") ---------- */
+:root[data-ui="schulheft"][data-accent="own"][data-theme] {
+  --primary: #2340b8;
+  --primary-text: #ffffff;
+  --primary-fg: #2340b8;
+}
+
+:root[data-ui="schulheft"][data-accent="own"][data-theme="dark"] {
+  --primary: #9db1ff;
+  --primary-text: #0b1230;
+  --primary-fg: #a9bbff;
+}
+
+/* the squared paper under every page, far behind it: it stays with the window and drifts at about an
+   eighth of the scrolling (12 %), as if it lay a long way back. The drift runs on the page's
+   scroll (a scroll-driven animation over the first 10000px: -1200px). With "minimal" motion, and
+   where the browser can't do it, the paper simply stands still. */
 :root[data-ui="schulheft"] body {
   background-color: var(--bg);
   background-image:
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: var(--cell) var(--cell);
+  background-attachment: fixed;
+}
+
+@supports (animation-timeline: scroll()) {
+  :root[data-ui="schulheft"]:not([data-motion="minimal"]) body {
+    animation: schulheftPaperDrift linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0px 10000px;
+  }
+}
+
+@keyframes schulheftPaperDrift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 -1200px;
+  }
 }
 
 :root[data-ui="schulheft"] ::selection {

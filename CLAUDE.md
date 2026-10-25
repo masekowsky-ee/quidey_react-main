@@ -63,8 +63,11 @@ Order of checks on every render:
    "Mehr" (Statistiken), at the bottom Admin/Einstellungen/Feedback and the
    `AccountSwitcher` (profile, switch account, add account, sign out). Under Gemeinschaft a row of
    the friends online right now (faces + "N Freunde online", `useOnlineFriends`); the tab bar puts
-   a green dot on Gemeinschaft while any friend is online. The tour ("Einführung") lives in
-   Settings → App. The header has a streak pill (flame + days, filled once today counts). The active entry is
+   a green dot on Gemeinschaft while any friend is online. The tour ("Einführung", `Tutorial.jsx`)
+   opens once per account and device and again from Settings → App: 9 chapters (welcome, plan,
+   focus, calendar, grow, together, stats, yours, ready), each with a small animated scene
+   (`tour/TourPreview.jsx`; "yours" really switches accent/theme, "ready" shows where the nav is
+   at this width) and one way out (open the page / new-task form); texts in `i18n/tourTexts.js`. The header has a streak pill (flame + days, filled once today counts). The active entry is
    brighter ink, no fill; count badges are neutral (the accent stays on data, never on nav,
    tabs or buttons; one filled inverted primary per screen). The header's "Neu" opens the
    new-task form over any page (`QuickAdd`, `settings.showForms` via `showForms(true|false)`).
@@ -209,7 +212,8 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   `feature:<id>`), admins `GET /api/admin/tester-feedback` (migration 027).
 - Interface variants (testers only, `src/features/tester/variants.js`, `settings.uiVariant`,
   localStorage `uiVariant`; everybody else always gets `current`): `current` (today's look),
-  `schulheft` (white squared paper, ballpoint blue, red margin only on the task in focus, Lexend,
+  `schulheft` (white squared paper that drifts at 12 % of the scroll as if far behind — a scroll-driven
+  animation, standing still on "minimal" motion or without support —, ballpoint blue, red margin only on the task in focus, Lexend,
   tabs on top, week as a timetable), `lesesaal` (bottle green + brass lamp light on the focus card,
   Source Serif 4 / Source Sans 3, narrow icon rail, Home one column with focus first + `Seats`),
   `uebersicht` (dense, M PLUS 1 at a 14px root, hairline modules with red tabs, compact sidebar +
@@ -218,7 +222,13 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   with `variants/DepartureBoard.jsx`). Each variant has a light and a dark rendition.
   How it works: `<html data-ui>` (set by `useApplyUiVariant` once the variant's stylesheet
   `src/ui-variants/<id>.css` has loaded — a lazy chunk, fonts self-hosted, latin subsets only);
-  its tokens override palette/accent. Every rule is under `:root[data-ui="<id>"]` and targets
+  colours: each variant has its own ground and accent (`data-palette="own"` / `data-accent="own"`,
+  the default); Settings → Farbpalette / Akzentfarbe show the variant's own first and any other
+  palette or accent can be laid over it, remembered per variant (`settings.uiColors`, localStorage
+  `uiColors`, `setUiColors`, `selectColorChoice` — "current" keeps `settings.palette/accent`). So
+  each variant file has three layers: always (type, shapes, signature derived from `--primary`),
+  `[data-palette="own"]` (ground) and `[data-accent="own"]` (accent). Every rule is under
+  `:root[data-ui="<id>"]` and targets
   `data-part` hooks (`shell`, `header`, `menu`, `menu-item`, `topnav-tab`, `tabbar`, `home`,
   `home-title|week|momentum|columns|list|focus`, `week-day`, `task-row`, `task-check`, `focus`
   (+ `data-active`), `timer`, `board`, `seats`), active nav items carry `aria-current` or
@@ -260,8 +270,8 @@ for the app's own files: `token` (JWT), `accounts` (several accounts on one devi
 `[{ username, displayName, token }]`, max 5, `src/features/auth/accounts.js`; switching reloads
 the app as the other one, signing out takes over the next remembered account), `language`, `accent`,
 `theme`, `palette`, `motion`, `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
-`teamSessionId`, `streakNudge` (day of the last streak reminder), `uiVariant` (testers' interface
-variant). `public/theme-init.js` applies
+`teamSessionId`, `streakNudge` (day of the last streak reminder), `uiVariant` and `uiColors`
+(testers' interface variant and the colours picked per variant). `public/theme-init.js` applies
 the theme before React loads.
 
 ## API access

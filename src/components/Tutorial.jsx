@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { friendsPath } from '../features/community/paths';
+import { COMMUNITY_PATHS, friendsPath } from '../features/community/paths';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -25,7 +25,7 @@ const STEPS = [
     { id: 'plan', go: { newTask: true, label: 'tutNewTask' } },
     { id: 'focus', go: { to: '/', page: 'home' } },
     { id: 'calendar', go: { to: '/calendar', page: 'calendar' } },
-    { id: 'grow', go: { to: '/profile', page: 'profile' } },
+    { id: 'grow', go: { to: COMMUNITY_PATHS.progress, page: 'communityTab_progress' } },
     { id: 'together', go: { to: friendsPath('add'), label: 'tutFindFriends' } },
     { id: 'stats', go: { to: '/stats', page: 'history' } },
     { id: 'yours', go: { to: '/settings', page: 'settings' } },

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { SET_UI_VARIANT } from '../settings/settingsActionTypes';
+import { shallowEqual, useSelector } from 'react-redux';
+import { SET_UI_COLORS, SET_UI_VARIANT } from '../settings/settingsActionTypes';
+import { ACCENTS, PALETTE_NAMES } from '../settings/preferences';
 import { selectIsTester } from '../auth/tester';
 import { DESKTOP_QUERY, useMediaQuery } from '../layout/breakpoints';
 
@@ -50,6 +51,43 @@ export const setUiVariant = (variant) => {
     return { type: SET_UI_VARIANT, payload: variant };
 };
 
+// Colours: every variant has its own ground and accent ("own"); in the settings a tester can lay
+// any colour palette and accent over it instead, remembered per variant (so "current" keeps the
+// usual settings.palette / settings.accent). The swatches the settings show for "own": the
+// ground in dark and light (page, card, text, as PALETTES in preferences.js) and the accent.
+export const OWN_COLORS = 'own';
+export const VARIANT_COLORS = {
+    schulheft: { palette: { dark: ['#10141d', '#161b26', '#f2f5fb'], light: ['#fbfcfe', '#ffffff', '#131a2a'] }, accent: '#2340b8' },
+    lesesaal: { palette: { dark: ['#0b1310', '#121d18', '#f3eddd'], light: ['#edf1ea', '#fbfcf8', '#10201a'] }, accent: '#e3b35a' },
+    uebersicht: { palette: { dark: ['#101114', '#16171b', '#f5f6f8'], light: ['#f2f3f5', '#ffffff', '#0e1014'] }, accent: '#d7000f' },
+    tafel: { palette: { dark: ['#061430', '#0c2253', '#ffffff'], light: ['#eef1f6', '#ffffff', '#091735'] }, accent: '#ffd23f' },
+};
+
+const COLORS_KEY = 'uiColors';
+const validColors = (choice) => ({
+    ...(PALETTE_NAMES.includes(choice?.palette) || choice?.palette === OWN_COLORS ? { palette: choice.palette } : {}),
+    ...(ACCENTS.includes(choice?.accent) || choice?.accent === OWN_COLORS ? { accent: choice.accent } : {}),
+});
+
+// { [variant]: { palette?, accent? } }: what is not there is the variant's own
+export function readStoredUiColors() {
+    try {
+        const stored = JSON.parse(localStorage.getItem(COLORS_KEY) ?? '{}');
+        return Object.fromEntries(Object.keys(VARIANT_COLORS)
+            .filter(variant => stored?.[variant])
+            .map(variant => [variant, validColors(stored[variant])]));
+    } catch {
+        return {};
+    }
+}
+
+// changes: { palette?, accent? } for one variant ('own' or a name from preferences.js)
+export const setUiColors = (variant, changes) => (dispatch, getState) => {
+    if (!VARIANT_COLORS[variant]) return;
+    dispatch({ type: SET_UI_COLORS, payload: { variant, changes: validColors(changes) } });
+    try { localStorage.setItem(COLORS_KEY, JSON.stringify(getState().settings.uiColors)); } catch { /* only for this visit */ }
+};
+
 export const loadVariantStyles = (variant) => VARIANT_STYLES[variant]?.().catch(() => {});
 
 // A variant someone picked as a tester: fetched right away, so it is ready (no flash of the
@@ -62,6 +100,17 @@ export const selectUiVariant = (state) =>
     selectIsTester(state) ? state.settings.uiVariant : DEFAULT_UI_VARIANT;
 
 export const useUiVariant = () => useSelector(selectUiVariant);
+
+// The colour palette and accent in use: the variant's choice (its own colours unless one was
+// picked) or, in "current", the usual settings. { variant, palette, accent }
+export const selectColorChoice = (state) => {
+    const variant = selectUiVariant(state);
+    if (variant === DEFAULT_UI_VARIANT) return { variant, palette: state.settings.palette, accent: state.settings.accent };
+    const choice = state.settings.uiColors[variant] ?? {};
+    return { variant, palette: choice.palette ?? OWN_COLORS, accent: choice.accent ?? OWN_COLORS };
+};
+
+export const useColorChoice = () => useSelector(selectColorChoice, shallowEqual);
 
 // How the main places are reached on this screen: on narrower screens every variant has the
 // drawer (tablets) or the tab bar (phones)

@@ -8,6 +8,34 @@ import { formatClock } from '../features/helperFunction';
 import { useTranslation } from '../i18n/useTranslation';
 import Icon from './icons.jsx';
 
+// The inline timer as it will look, for the start screen (AppSkeleton): its mode and time come
+// from this device, so they are shown as they are; nothing in it works yet
+export function TimerSkeleton() {
+    const { t } = useTranslation();
+    const { timer, timerMode } = useSelector(state => state.session);
+    return (
+        <div className={styles.inlinePanel} data-part="timer">
+            <div className={styles.panelHead}>
+                <div className={styles.modeSwitch} aria-hidden="true">
+                    {['timer', 'stopwatch'].map(mode =>
+                        <button key={mode} type="button" tabIndex={-1} className={timerMode === mode ? styles.modeOn : styles.mode}>
+                            {t(mode === 'timer' ? 'timerModeTimer' : 'timerModeStopwatch')}
+                        </button>)}
+                </div>
+            </div>
+            <div className={styles.div}>
+                <h2 className={timerMode === 'stopwatch' ? styles.stopwatchH2 : styles.timerH2}>{formatClock(timer.time)}</h2>
+                <div className={styles.progress} />
+                <div className={styles.timerNav}>
+                    <button type="button" className={styles.btnGo} tabIndex={-1} aria-hidden="true">
+                        <Icon name="play" className={styles.ctrlIcon} strokeWidth={2} />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 // The focus timer. inline: a panel in the page (Home's focus column on wide screens); otherwise
 // folded into a round button at the bottom right until it's opened (then a small panel there).
 // Two modes: "timer" counts the session length down, "stopwatch" counts up

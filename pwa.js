@@ -18,6 +18,7 @@ import { createHash } from 'node:crypto';
 export const PUBLIC_FILES = [
     '/',
     '/theme-init.js',
+    '/boot.css',
     '/quidey-logo.svg',
     '/manifest.webmanifest',
     '/icons/icon-192.png',

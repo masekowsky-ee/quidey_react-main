@@ -6,8 +6,10 @@ import {setLanguage, setTheme, setAccent, setPalette, setDefaultSessionMinutes, 
 import {MOTION_LEVELS} from '../features/settings/motion';
 import {setSessionParams} from '../features/session/sessionAction';
 import {SESSION_LENGTHS, PALETTES, ACCENT_SWATCHES as ACCENT_OPTIONS} from '../features/settings/preferences';
+import { DEFAULT_UI_VARIANT, OWN_COLORS, VARIANT_COLORS, setUiColors, useColorChoice } from '../features/tester/variants';
 import HomeLayoutSwitch from './together/HomeLayoutSwitch';
 import {useInstallState, promptInstall} from '../features/pwa/install';
+import { fill } from '../features/helperFunction';
 import EventTypeSettings from './EventTypeSettings.jsx';
 
 const LANGUAGES = [
@@ -79,8 +81,21 @@ export default function Settings(){
     const language = useSelector((state) => state.settings.language);
     const theme = useSelector((state) => state.settings.theme);
     const homeLayout = useSelector((state) => state.settings.homeLayout);
-    const accent = useSelector((state) => state.settings.accent);
-    const palette = useSelector((state) => state.settings.palette);
+    // the colours of the interface in use: a tester's variant keeps its own choice (its own
+    // colours first), "current" the usual settings
+    const { variant, palette, accent } = useColorChoice();
+    const inVariant = variant !== DEFAULT_UI_VARIANT;
+    const variantName = inVariant ? t(`uiVariant_${variant}`) : '';
+    const choosePalette = (value) => dispatch(inVariant ? setUiColors(variant, { palette: value }) : setPalette(value));
+    const chooseAccent = (value) => dispatch(inVariant ? setUiColors(variant, { accent: value }) : setAccent(value));
+    const paletteOptions = [
+        ...(inVariant ? [[OWN_COLORS, VARIANT_COLORS[variant].palette]] : []),
+        ...Object.entries(PALETTES),
+    ];
+    const accentOptions = [
+        ...(inVariant ? [{ value: OWN_COLORS, color: VARIANT_COLORS[variant].accent }] : []),
+        ...ACCENT_OPTIONS,
+    ];
     const motionLevel = useSelector((state) => state.settings.motion);
     const defaultSessionMinutes = useSelector((state) => state.settings.defaultSessionMinutes);
     const showSharedTasks = useSelector((state) => state.settings.showSharedTasks);
@@ -137,20 +152,20 @@ export default function Settings(){
                         <div className={styles.rowStack}>
                             <span className={styles.rowText}>
                                 <span className={styles.rowLabel}>{t('paletteSetting')}</span>
-                                <span className={styles.rowHint}>{t('paletteSettingHint')}</span>
+                                <span className={styles.rowHint}>{inVariant ? fill(t('paletteSettingHintVariant'), { name: variantName }) : t('paletteSettingHint')}</span>
                             </span>
                             {/* each tile: the palette's dark half and its light half, a card on each */}
                             <div className={styles.swatches} role="group" aria-label={t('paletteSetting')}>
-                                {Object.entries(PALETTES).map(([value, { dark, light }]) => (
+                                {paletteOptions.map(([value, { dark, light }]) => (
                                     <button key={value} type="button"
                                         className={`${styles.swatch} ${palette === value ? styles.swatchActive : ''}`}
                                         aria-pressed={palette === value}
-                                        onClick={() => dispatch(setPalette(value))}>
+                                        onClick={() => choosePalette(value)}>
                                         <span className={styles.palettePreview} aria-hidden="true">
                                             <span style={{ '--ground': dark[0], '--card': dark[1], '--ink': dark[2] }} />
                                             <span style={{ '--ground': light[0], '--card': light[1], '--ink': light[2] }} />
                                         </span>
-                                        <span className={styles.swatchLabel}>{t(`palette_${value}`)}</span>
+                                        <span className={styles.swatchLabel}>{value === OWN_COLORS ? variantName : t(`palette_${value}`)}</span>
                                     </button>
                                 ))}
                             </div>
@@ -158,17 +173,17 @@ export default function Settings(){
                         <div className={styles.rowStack}>
                             <span className={styles.rowLabel}>{t('accentColor')}</span>
                             <div className={styles.swatches} role="group" aria-label={t('accentColor')}>
-                                {ACCENT_OPTIONS.map(({ value, label, color }) => (
+                                {accentOptions.map(({ value, label, color }) => (
                                     <button
                                         key={value}
                                         type="button"
                                         className={`${styles.swatch} ${accent === value ? styles.swatchActive : ''}`}
                                         style={{ '--swatch': color }}
                                         aria-pressed={accent === value}
-                                        onClick={() => dispatch(setAccent(value))}
+                                        onClick={() => chooseAccent(value)}
                                     >
                                         <span className={styles.swatchDot} aria-hidden="true" />
-                                        <span className={styles.swatchLabel}>{t(label)}</span>
+                                        <span className={styles.swatchLabel}>{value === OWN_COLORS ? variantName : t(label)}</span>
                                     </button>
                                 ))}
                             </div>

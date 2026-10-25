@@ -12,6 +12,23 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { dueText, formatDate, formatDuration, isOverdue, toInputDate } from '../../features/helperFunction';
 import { prioLevel } from '../../features/calendar/calendar';
 import { taskColorAttr } from '../../features/tasks/taskColors';
+import { Bone } from '../skeleton/Skeleton.jsx';
+
+// While my tasks are on their way: a row's shape, its name and line of details grey
+const SKELETON_NAME_WIDTHS = ['62%', '46%', '71%', '38%', '55%'];
+export function TaskRowSkeleton({ index = 0 }) {
+    return (
+        <li className={styles.row}>
+            <span className={styles.drag} />
+            <Bone round w="1.375rem" style={{ gridArea: 'check', margin: '0 auto' }} />
+            <div className={styles.body}>
+                <Bone w={SKELETON_NAME_WIDTHS[index % SKELETON_NAME_WIDTHS.length]} h="0.9375rem" />
+                <Bone w="28%" h="0.75rem" />
+            </div>
+            <div className={styles.when}><Bone w="3.75rem" h="0.8125rem" /></div>
+        </li>
+    );
+}
 
 // The round check at the start of a row: empty while open (a tick shows on hover), filled when done
 function Check({ done, onToggle, label }) {

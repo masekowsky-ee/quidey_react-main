@@ -1,0 +1,526 @@
+/* The pages' shapes while their code is on its way (PageSkeletons.jsx). The pages' own styles
+   come with their code, so their containers are measured again here: same widths, gaps and
+   cards as Calendar / Community / Inbox / Stats / Profile / Settings / SignIn .module.css.
+   Shared parts (cards, tab bars, titles) come from ui.module.css like on the pages. */
+
+/* ---------- containers ---------- */
+
+/* Calendar, Gemeinschaft */
+.wide{
+    composes: page from '../ui.module.css';
+    width: min(1180px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    margin: 0 auto;
+    padding-bottom: 4rem;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+/* Settings, the inbox's split view */
+.medium{
+    composes: pageColumn from '../ui.module.css';
+    width: min(1100px, calc(100% - 2 * var(--page-gutter, 1rem)));
+}
+
+/* Inbox, profiles, everything simple */
+.column{
+    composes: pageColumn from '../ui.module.css';
+}
+
+/* Statistics */
+.stats{
+    composes: pageColumn from '../ui.module.css';
+    width: min(760px, calc(100% - 2 * var(--page-gutter, 1rem)));
+}
+
+.title{
+    composes: pageTitle from '../ui.module.css';
+}
+
+.card{
+    composes: card from '../ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.cardHead{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.tabs{
+    composes: tabBar from '../ui.module.css';
+}
+
+.tabActive{
+    composes: segmentActive from '../ui.module.css';
+}
+
+.segmented{
+    composes: segmented from '../ui.module.css';
+}
+
+/* ---------- calendar ---------- */
+
+.toolbar{
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin: 2rem 0 1rem;
+}
+
+.titleRow,
+.controls{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+}
+
+.calendarTitle{
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.calendarNav,
+.filters{
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.filters{
+    gap: 0.5rem;
+}
+
+.monthCard{
+    composes: card from '../ui.module.css';
+    padding: 0.75rem;
+}
+
+.month{
+    display: grid;
+    grid-template-columns: 2rem repeat(7, minmax(0, 1fr));
+    gap: 0.4rem;
+}
+
+.weekdayHead{
+    padding: 0.25rem 0 0.35rem 0.6rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.weekend{
+    opacity: 0.7;
+}
+
+.weekNum{
+    padding-top: 0.45rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.cell{
+    min-height: 6.75rem;
+    padding: 0.45rem 0.5rem;
+    box-sizing: border-box;
+    background: var(--surface-hover);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+}
+
+.outside{
+    background: transparent;
+}
+
+.dayNum{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-h);
+    font-variant-numeric: tabular-nums;
+}
+
+.outside .dayNum{
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+@media (max-width: 1000px){
+    .cell{
+        min-height: 5.75rem;
+    }
+}
+
+@media (max-width: 640px){
+    .monthCard{
+        padding: 0.4rem;
+    }
+
+    .month{
+        grid-template-columns: 1.1rem repeat(7, minmax(0, 1fr));
+        gap: 0.25rem;
+    }
+
+    .weekdayHead{
+        padding-left: 0;
+        text-align: center;
+        font-size: 0.65rem;
+    }
+
+    .weekNum{
+        font-size: 0.58rem;
+        padding-top: 0.35rem;
+    }
+
+    .cell{
+        display: flex;
+        justify-content: center;
+        min-height: 3.9rem;
+        padding: 0.3rem 0.15rem;
+    }
+
+    .dayNum{
+        width: 1.5rem;
+        height: 1.5rem;
+        font-size: 0.8rem;
+    }
+
+    .filters{
+        flex: 1 1 100%;
+    }
+
+    .filters > :first-child{
+        flex: 1;
+    }
+}
+
+/* ---------- Gemeinschaft: title, tabs, the tab beside the rail ---------- */
+
+.community{
+    composes: wide;
+    container: community-skeleton / inline-size;
+}
+
+.head{
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 2.5rem 0 1.25rem;
+}
+
+.headTitle{
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text-h);
+}
+
+.headText{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 0;
+}
+
+.communityTabs{
+    composes: segmented from '../ui.module.css';
+    display: flex;
+    width: fit-content;
+    margin-bottom: 1.5rem;
+}
+
+.communityTabs > button{
+    padding: 0.4rem 1.1rem;
+}
+
+.layout{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.rail{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
+/* phones and narrow tablets: the rail only above the feed */
+.layout:not([data-tab="feed"]) .rail{
+    display: none;
+}
+
+@container community-skeleton (min-width: 58rem){
+    .layout[data-rail]{
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 21rem;
+        column-gap: 1.5rem;
+        align-items: start;
+    }
+
+    .layout .rail,
+    .layout:not([data-tab="feed"]) .rail{
+        display: flex;
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .layout > :not(.rail){
+        grid-column: 1;
+        grid-row: 1;
+    }
+}
+
+.composer{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.levelTop{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* ---------- inbox ---------- */
+
+.split{
+    display: grid;
+    grid-template-columns: 22rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.split > .card{
+    padding: 1rem;
+}
+
+/* ---------- statistics ---------- */
+
+.periodBar{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+}
+
+.stepper{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tiles{
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.tile{
+    composes: panel from '../ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.9rem 1rem;
+}
+
+.twoCols{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 720px){
+    .twoCols{
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 640px){
+    .tiles{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* ---------- profile card: banner, avatar over its edge, name ---------- */
+
+.profileCard{
+    composes: panel from '../ui.module.css';
+    overflow: hidden;
+}
+
+.banner{
+    height: 7.5rem;
+    background: var(--surface-strong);
+}
+
+.profileBody{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 0 1.5rem 1.5rem;
+}
+
+.profileTop{
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-top: -2.75rem;
+}
+
+/* the ring in the card's colour that sets the avatar off the banner */
+.avatar{
+    box-shadow: 0 0 0 4px var(--surface);
+}
+
+.pageTop{
+    margin-top: 2rem;
+}
+
+/* ---------- settings: a label column beside a panel ---------- */
+
+.settingsHead{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    margin: 2.5rem 0 1rem;
+}
+
+.settingsHead .title{
+    margin: 0;
+}
+
+.section{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 1.5rem 2.5rem;
+    padding: 2rem 0;
+}
+
+.section:first-of-type{
+    padding-top: 0.5rem;
+}
+
+.section + .section{
+    border-top: 1px solid var(--border);
+}
+
+.sectionText{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 1rem;
+}
+
+.sectionPanel{
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1.1rem 1.25rem;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+}
+
+.settingRow{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+@media (max-width: 720px){
+    .section{
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1rem;
+    }
+}
+
+/* ---------- signed out: the wordmark above the sign-in card ---------- */
+
+.screen{
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg);
+}
+
+.screen > footer{
+    margin-top: auto;
+}
+
+.brand{
+    width: min(680px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    margin: 0 auto;
+    padding: calc(1.5rem + env(safe-area-inset-top, 0px)) 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.wordmark{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    color: var(--text-h);
+}
+
+.logo{
+    width: 1.75rem;
+    height: 1.75rem;
+}
+
+.about{
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.gateColumn{
+    composes: pageColumn from '../ui.module.css';
+    padding-top: 0;
+}
+
+.authCard{
+    composes: card from '../ui.module.css';
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.field{
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.input{
+    height: 2.5rem;
+    border-radius: var(--radius-sm);
+}

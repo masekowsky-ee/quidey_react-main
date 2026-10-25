@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { editDisplaygroup } from '../features/tasks/taskAction';
+import { editDisplaygroup, selectTasksLoaded } from '../features/tasks/taskAction';
 import { selectSharedGroups } from '../features/together/togetherAction';
 import styles from './GroupBtnContainer.module.css';
 import { groupColorAttr } from '../features/tasks/taskColors';
 import {useTranslation} from '../i18n/useTranslation'
 import Icon from './icons';
+import { Bone } from './skeleton/Skeleton.jsx';
 
 // Which tasks the list shows: all of them, one of my groups, or a shared session's tasks.
 // A row of chips that scrolls sideways when there are many; "+" makes a new group.
@@ -17,6 +18,8 @@ export default function GroupBtnContainer({ setCreateGroup }){
     // a group named "all" from older accounts is the "All" chip itself
     const groups = useSelector(state => state.task.groups).filter(group => group.name !== 'all');
     const groupToDisplay = useSelector(state => state.task.groupToDisplay);
+    // my groups come with my tasks: until then two chips' shapes
+    const loaded = useSelector(selectTasksLoaded);
     const shown = groupToDisplay.group;
     const showingAll = !shown?.id || shown.name === 'all';
 
@@ -39,6 +42,7 @@ export default function GroupBtnContainer({ setCreateGroup }){
                 aria-pressed={showingAll} onClick={showAll}>
                 {t('all')}
             </button>
+            {!loaded && <><Bone pill w="5.5rem" h="2rem" /><Bone pill w="4.75rem" h="2rem" /></>}
             {groups.map(group => (
                 <button type="button" key={group.id} className={`${styles.chip} ${shown?.id === group.id ? styles.active : ''}`}
                     aria-pressed={shown?.id === group.id} onClick={() => show(group)}

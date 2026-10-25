@@ -10,6 +10,7 @@ import { useOnlineFriends } from '../../features/presence/presence';
 import ProfileAvatar from '../profile/ProfileAvatar';
 import LevelPlant from '../progress/LevelPlant';
 import Icon from '../icons';
+import { Bone, Skeleton } from '../skeleton/Skeleton.jsx';
 
 const FACES = 4;
 const STREAKS_SHOWN = 3;
@@ -156,17 +157,76 @@ function FriendsCard() {
     );
 }
 
+// The strip's shape until my progress is there: the three cards with their titles, the last
+// seven days (known already), grey where streak, challenges, level and friends will be
+export function MomentumSkeleton() {
+    const { t, language } = useTranslation();
+    const weekday = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { weekday: 'narrow' });
+    const lastDays = Array.from({ length: 7 }, (_, i) => { const day = new Date(); day.setDate(day.getDate() - 6 + i); return day; });
+    return (
+        <Skeleton className={styles.strip}>
+            <section className={styles.card}>
+                <h2 className={styles.cardLabel}>{t('streakTitle')}</h2>
+                <div className={styles.streakTop}>
+                    <span className={styles.flame} />
+                    <Bone w="7.5rem" h="2.25rem" />
+                </div>
+                <ol className={styles.days}>
+                    {lastDays.map((day, i) => (
+                        <li key={i} data-today={i === 6}>
+                            <span className={styles.dayDot} />
+                            <span className={styles.dayName}>{weekday.format(day)}</span>
+                        </li>
+                    ))}
+                </ol>
+                <Bone w="80%" />
+            </section>
+            <section className={styles.card}>
+                <div className={styles.cardHead}>
+                    <h2 className={styles.cardLabel}>{t('momentumToday')}</h2>
+                    <Bone w="3rem" h="0.75rem" />
+                </div>
+                <ul className={styles.challenges}>
+                    {['75%', '88%', '62%'].map(w => (
+                        <li key={w}>
+                            <Bone w={w} h="0.8125rem" />
+                            <Bone w="1.75rem" h="0.75rem" />
+                            <span className={styles.bar} />
+                        </li>
+                    ))}
+                </ul>
+                <div className={styles.levelRow}>
+                    <Bone round w="2.5rem" />
+                    <span className={styles.levelText} style={{ gap: '0.3rem' }}>
+                        <Bone w="8rem" h="0.8125rem" />
+                        <Bone w="6.5rem" h="0.75rem" />
+                    </span>
+                </div>
+            </section>
+            <section className={styles.card}>
+                <div className={styles.cardHead}>
+                    <h2 className={styles.cardLabel}>{t('momentumFriends')}</h2>
+                    <Bone w="6.5rem" h="0.75rem" />
+                </div>
+                <Bone w="7rem" h="0.875rem" style={{ marginTop: 'auto' }} />
+            </section>
+        </Skeleton>
+    );
+}
+
 // Home's motivation strip, under the day's title: streak, today's challenges and level,
-// friends. Nothing until my progress is loaded (App loads it once signed in).
+// friends. Its shape until my progress is loaded (App loads it once signed in).
 export default function Momentum() {
     const dispatch = useDispatch();
     const progress = useSelector(state => state.progress.data);
+    const failed = useSelector(state => state.progress.failed);
     const { t } = useTranslation();
 
     // the friends' streaks come with the week's ranking
     useEffect(() => { dispatch(fetchRanking()).catch(() => {}); }, [dispatch]);
 
-    if (!progress) return null;
+    // nothing when it couldn't be loaded (the rest of Home works without it)
+    if (!progress) return failed ? null : <MomentumSkeleton />;
     return (
         <div className={styles.strip} role="region" aria-label={t('momentumTitle')}>
             <StreakCard progress={progress} />

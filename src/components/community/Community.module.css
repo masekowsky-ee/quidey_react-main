@@ -1,9 +1,11 @@
-/* Gemeinschaft (Community.jsx) and its rail: level, challenges, the week among friends.
-   Colour stays on the data: the XP and challenge bars carry the accent, nothing else does.
+/* Gemeinschaft (Community.jsx), its rail (friends online) and the progress tab: level,
+   challenges, the week among friends. Colour stays on the data: the XP and challenge bars
+   carry the accent, nothing else does.
 
    Wide (the page at 58rem or more): two columns, the tab's content and a 21rem rail with one
    1.5rem gap: content + 1.5rem + 21rem = the page width, both edges on the page's edges.
-   Narrow: one column; the rail only on the feed tab, level and today above, the week below. */
+   Narrow: one column; the rail only on the feed tab, above it. The progress tab has no rail:
+   two columns of its own from 46rem, one below. */
 
 .page{
     composes: page from '../ui.module.css';
@@ -149,50 +151,59 @@
     min-width: 0;
 }
 
-.railTop,
-.railBottom{
+.rail{
     display: flex;
     flex-direction: column;
     gap: 1rem;
     min-width: 0;
 }
 
-/* phones and narrow tablets: the feed in the middle, the rail only beside the feed */
-.layout[data-tab="feed"] .railTop{ order: 0; }
-.layout[data-tab="feed"] .main{ order: 1; }
-.layout[data-tab="feed"] .railBottom{ order: 2; }
-.layout:not([data-tab="feed"]) .railTop,
-.layout:not([data-tab="feed"]) .railBottom{
+/* phones and narrow tablets: the rail only above the feed */
+.layout:not([data-tab="feed"]) .rail{
     display: none;
 }
 
 @container community (min-width: 58rem){
-    .layout{
+    .layout[data-rail]{
         display: grid;
         grid-template-columns: minmax(0, 1fr) 21rem;
-        grid-template-rows: auto 1fr;
         column-gap: 1.5rem;
-        row-gap: 1rem;
         align-items: start;
     }
 
-    .main{
-        grid-column: 1;
-        grid-row: 1 / span 2;
-    }
-
-    .layout .railTop,
-    .layout:not([data-tab="feed"]) .railTop{
+    .layout .rail{
         display: flex;
         grid-column: 2;
         grid-row: 1;
     }
 
-    .layout .railBottom,
-    .layout:not([data-tab="feed"]) .railBottom{
-        display: flex;
-        grid-column: 2;
-        grid-row: 2;
+    .main{
+        grid-column: 1;
+        grid-row: 1;
+    }
+}
+
+/* ---------- the progress tab ---------- */
+
+.progress{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.progressColumn{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
+@container community (min-width: 46rem){
+    .progress{
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.5rem;
+        align-items: start;
     }
 }
 
@@ -381,13 +392,6 @@
     font-size: 0.8125rem;
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
-}
-
-/* above the feed on a phone: only the very next unlock, the rest is one tap away */
-@container community (max-width: 57.99rem){
-    .upcoming .unlockRow:nth-child(n + 2){
-        display: none;
-    }
 }
 
 .unlockRow[data-unlocked="true"]{
@@ -721,18 +725,17 @@ a.rankName:hover{
         margin-top: 1.5rem;
     }
 
-    /* tabs share the width, so all four fit a phone */
+    /* tabs share the width as their names need it, so all five fit a phone */
     .tabs{
-        display: grid;
-        grid-auto-flow: column;
-        grid-auto-columns: minmax(0, 1fr);
+        display: flex;
         width: 100%;
         border-radius: var(--radius);
     }
 
     .tab{
+        flex: 1 1 auto;
         justify-content: center;
-        padding: 0.5rem 0.25rem;
+        padding: 0.5rem 0.35rem;
         font-size: min(0.8125rem, 3.5vw);
         border-radius: calc(var(--radius) - 3px);
     }

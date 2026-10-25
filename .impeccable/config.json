@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/components/tour/TourPreview.module.css"
+        ],
+        "createdAt": "2026-10-25T16:24:55.169Z",
+        "reason": "Claude triage: the tour's calendar scene replicates the app's real calendar chips, which carry border-left: 2px solid var(--task-color) (CalendarDay.module.css:188, Calendar.module.css:464)"
+      }
+    ]
+  }
+}

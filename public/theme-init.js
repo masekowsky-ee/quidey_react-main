@@ -15,6 +15,10 @@ try {
   var motion = localStorage.getItem('motion');
   document.documentElement.dataset.motion = ['minimal', 'normal', 'extreme'].indexOf(motion) >= 0 ? motion
     : (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'minimal' : 'normal');
+  // which skeleton the first paint shows (public/boot.css): Home, another page, or the sign-in
+  document.documentElement.dataset.boot = !localStorage.getItem('token') ? 'gate'
+    : window.location.pathname === '/' ? 'home' : 'page';
 } catch {
-  // storage blocked (private mode): the CSS default, dark Abendrot, stays
+  // storage blocked (private mode): the CSS default, dark Abendrot, stays; no account to show
+  document.documentElement.dataset.boot = 'gate';
 }

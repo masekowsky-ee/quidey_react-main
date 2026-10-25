@@ -12,7 +12,8 @@ import { checkAuth, setUser, fetchAccess } from "./features/auth/authAction";
 import { PRO_REQUIRED_EVENT, SIGNED_OUT_EVENT } from "./features/helperFunction";
 import { logout } from "./features/auth/authAction";
 import BetaGate from "./components/BetaGate.jsx";
-import { AppSkeleton, GateSkeleton, PageSkeleton } from "./components/skeleton/Skeleton.jsx";
+import AppSkeleton from "./components/skeleton/AppSkeleton.jsx";
+import { GateSkeleton, RouteSkeleton } from "./components/skeleton/PageSkeletons.jsx";
 import { fetchTaskState, fetchTaskInvites, refreshTasks } from "./features/tasks/taskAction.js"
 import { useTaskReminders } from "./features/tasks/reminders.js"
 import { useEventEnds } from "./features/tasks/kinds.js"
@@ -96,8 +97,7 @@ function preloadPages() {
   return () => (window.cancelIdleCallback ? window.cancelIdleCallback(id) : clearTimeout(id));
 }
 
-// while a page's code is on its way (only the first time, and briefly): the page's shape
-const pageLoading = <PageSkeleton />;
+// while the sign-in's code is on its way: its shape
 const gateLoading = <GateSkeleton />;
 
 function App(){
@@ -203,6 +203,8 @@ function App(){
 
   const [activeTimer, setActiveTimer] = useState(false);
   const location = useLocation();
+  // while a page's code is on its way (only the first time, and briefly): that page's shape
+  const pageLoading = <RouteSkeleton pathname={location.pathname} fade />;
 
   // the link from the verification mail works signed in or not, and before beta access
   if (location.pathname === '/verify-email') return <Suspense fallback={gateLoading}><VerifyEmail /></Suspense>;

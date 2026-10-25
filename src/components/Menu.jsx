@@ -137,9 +137,9 @@ export default function Menu(){
                         <Icon name="close" className={styles.closeIcon} />
                     </button>
                 </div>
-                {/* the four places of every day first (the same as the phone's tab bar), then the
-                    rest under "More"; the profile lives in the account menu at the foot, the
-                    tour in the settings */}
+                {/* the four places of every day (the same as the phone's tab bar), then the
+                    statistics; the profile lives in the account menu at the foot, the tour in
+                    the settings */}
                 <nav className={styles.menuNav} aria-label={t('menu')}>
                     <div className={styles.menuList}>
                         <MenuLink to="/" end icon="home" label={t('home')} onClick={onClose} />
@@ -153,9 +153,6 @@ export default function Menu(){
                         <OnlineFriendsRow onClick={onClose} />
                         <MenuLink to="/inbox" icon="inbox" label={t('inbox')} onClick={onClose}
                             count={inboxCount} countLabel={t('inboxUnread')} />
-                    </div>
-                    <p className={styles.groupLabel}>{t('menuMore')}</p>
-                    <div className={styles.menuList}>
                         <MenuLink to="/stats" icon="history" label={t('history')} onClick={onClose} />
                     </div>
                 </nav>

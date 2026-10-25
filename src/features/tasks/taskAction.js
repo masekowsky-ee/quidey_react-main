@@ -346,3 +346,6 @@ export const getNotes = (taskId) => {
     };
 };
 
+
+// whether my tasks are there: loaded from the server, or some already in the list (added offline, in tests)
+export const selectTasksLoaded = (state) => state.task.loaded || state.task.tasks.length > 0;

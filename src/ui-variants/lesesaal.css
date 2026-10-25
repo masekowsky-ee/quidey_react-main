@@ -41,12 +41,30 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-/* ---------- the reading room at night (dark, and the variant's home scene) ---------- */
+/* ---------- what stays whatever the colours: type, shapes, the lamp in the accent ----------
+   The ground comes from the colour palette and the lamp's light from the accent (Settings);
+   "own" is the reading room's own, below. */
 :root[data-ui="lesesaal"][data-theme] {
-  --lamp: rgba(255, 190, 92, 0.2);
-  --lamp-edge: rgba(227, 179, 90, 0.38);
+  --lamp: color-mix(in srgb, var(--primary) 20%, transparent);
+  --lamp-edge: color-mix(in srgb, var(--primary) 38%, transparent);
   --serif: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
 
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+
+  --sans: 'Source Sans 3 Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
+  font: 16.5px/1.55 var(--sans);
+  letter-spacing: 0;
+}
+
+:root[data-ui="lesesaal"][data-theme="light"] {
+  --lamp: color-mix(in srgb, var(--primary) 15%, transparent);
+  --lamp-edge: color-mix(in srgb, var(--primary) 32%, transparent);
+}
+
+/* ---------- the reading room at night (palette "own", dark: the variant's home scene) ---------- */
+:root[data-ui="lesesaal"][data-palette="own"][data-theme] {
   --bg: #0b1310;
   --surface-bar: #0b1310;
   --surface-inset: #070d0a;
@@ -60,9 +78,6 @@
   --text-h: #f3eddd;
   --text-muted: #9ca798;
 
-  --primary: #e3b35a;
-  --primary-text: #241703;
-  --primary-fg: #e9be6c;
   --danger: #ef7562;
   --online: #4ade80;
   --online-text: #6ee7a0;
@@ -72,26 +87,15 @@
   --contrast-bottom: #efe7d4;
   --contrast-text: #0b1310;
 
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 14px;
   --shadow-float: 0 18px 44px -18px rgba(0, 0, 0, 0.75);
   --shadow-modal: 0 26px 70px -26px rgba(0, 0, 0, 0.85);
   --overlay: rgba(3, 7, 5, 0.62);
   --scrollbar-thumb: rgba(239, 231, 212, 0.12);
   --scrollbar-thumb-hover: rgba(239, 231, 212, 0.24);
-
-  --sans: 'Source Sans 3 Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
-  font: 16.5px/1.55 var(--sans);
-  letter-spacing: 0;
-  color-scheme: dark;
 }
 
-/* ---------- the same room by day: sage plaster, oak, the lamp still warm ---------- */
-:root[data-ui="lesesaal"][data-theme="light"] {
-  --lamp: rgba(214, 150, 40, 0.15);
-  --lamp-edge: rgba(154, 101, 18, 0.32);
-
+/* ---------- the same room by day: sage plaster, oak ---------- */
+:root[data-ui="lesesaal"][data-palette="own"][data-theme="light"] {
   --bg: #edf1ea;
   --surface-bar: #edf1ea;
   --surface-inset: #e3e9df;
@@ -105,9 +109,6 @@
   --text-h: #10201a;
   --text-muted: #546258;
 
-  --primary: #9a6512;
-  --primary-text: #ffffff;
-  --primary-fg: #84550c;
   --danger: #b8322a;
   --online: #16a34a;
   --online-text: #15803d;
@@ -121,7 +122,19 @@
   --overlay: rgba(16, 32, 26, 0.28);
   --scrollbar-thumb: rgba(16, 32, 26, 0.16);
   --scrollbar-thumb-hover: rgba(16, 32, 26, 0.3);
-  color-scheme: light;
+}
+
+/* ---------- the lamp's own brass (accent "own") ---------- */
+:root[data-ui="lesesaal"][data-accent="own"][data-theme] {
+  --primary: #e3b35a;
+  --primary-text: #241703;
+  --primary-fg: #e9be6c;
+}
+
+:root[data-ui="lesesaal"][data-accent="own"][data-theme="light"] {
+  --primary: #9a6512;
+  --primary-text: #ffffff;
+  --primary-fg: #84550c;
 }
 
 :root[data-ui="lesesaal"] ::selection {

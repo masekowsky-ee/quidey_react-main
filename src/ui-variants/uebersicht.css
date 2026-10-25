@@ -23,11 +23,26 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-/* ---------- bright (light theme, the variant's home scene) ---------- */
+/* ---------- what stays whatever the colours: type, density, shapes, tabs in the accent ----------
+   The ground comes from the colour palette and the module tabs from the accent (Settings);
+   "own" is the variant's own, below. */
 :root[data-ui="uebersicht"][data-theme] {
-  --tab: #d7000f;
-  --tab-ink: #ffffff;
+  --tab: var(--primary);
+  --tab-ink: var(--primary-text);
 
+  --radius-sm: 2px;
+  --radius: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+  --header-bar-h: 3rem;
+
+  --sans: 'M PLUS 1 Variable', 'Hiragino Sans', 'Noto Sans JP', system-ui, 'Segoe UI', sans-serif;
+  font: 14px/1.45 var(--sans);
+  letter-spacing: 0;
+}
+
+/* ---------- its own ground: bright (palette "own", light: the variant's home scene) ---------- */
+:root[data-ui="uebersicht"][data-palette="own"][data-theme] {
   --bg: #f2f3f5;
   --surface-bar: #ffffff;
   --surface-inset: #f5f6f8;
@@ -41,9 +56,6 @@
   --text-h: #0e1014;
   --text-muted: #59606b;
 
-  --primary: #d7000f;
-  --primary-text: #ffffff;
-  --primary-fg: #c2000e;
   --danger: #b3202a;
   --online: #16a34a;
   --online-text: #15803d;
@@ -52,29 +64,15 @@
   --contrast-top: #16181d;
   --contrast-bottom: #16181d;
   --contrast-text: #ffffff;
-
-  --radius-sm: 2px;
-  --radius: 3px;
-  --radius-lg: 4px;
-  --radius-xl: 6px;
   --shadow-float: 0 8px 24px -10px rgba(14, 16, 20, 0.26);
   --shadow-modal: 0 18px 48px -18px rgba(14, 16, 20, 0.32);
   --overlay: rgba(14, 16, 20, 0.3);
   --scrollbar-thumb: rgba(14, 16, 20, 0.18);
   --scrollbar-thumb-hover: rgba(14, 16, 20, 0.32);
-  --header-bar-h: 3rem;
-
-  --sans: 'M PLUS 1 Variable', 'Hiragino Sans', 'Noto Sans JP', system-ui, 'Segoe UI', sans-serif;
-  font: 14px/1.45 var(--sans);
-  letter-spacing: 0;
-  color-scheme: light;
 }
 
 /* ---------- dark ---------- */
-:root[data-ui="uebersicht"][data-theme="dark"] {
-  --tab: #e5202b;
-  --tab-ink: #ffffff;
-
+:root[data-ui="uebersicht"][data-palette="own"][data-theme="dark"] {
   --bg: #101114;
   --surface-bar: #16171b;
   --surface-inset: #0c0d0f;
@@ -88,9 +86,6 @@
   --text-h: #f5f6f8;
   --text-muted: #9ba1ab;
 
-  --primary: #ff444d;
-  --primary-text: #1a0002;
-  --primary-fg: #ff5c64;
   --danger: #ff6b6b;
   --online: #22c55e;
   --online-text: #4ade80;
@@ -104,7 +99,19 @@
   --overlay: rgba(3, 3, 4, 0.6);
   --scrollbar-thumb: rgba(245, 246, 248, 0.14);
   --scrollbar-thumb-hover: rgba(245, 246, 248, 0.26);
-  color-scheme: dark;
+}
+
+/* ---------- its own utility red (accent "own") ---------- */
+:root[data-ui="uebersicht"][data-accent="own"][data-theme] {
+  --primary: #d7000f;
+  --primary-text: #ffffff;
+  --primary-fg: #c2000e;
+}
+
+:root[data-ui="uebersicht"][data-accent="own"][data-theme="dark"] {
+  --primary: #ff444d;
+  --primary-text: #1a0002;
+  --primary-fg: #ff5c64;
 }
 
 :root[data-ui="uebersicht"] ::selection {

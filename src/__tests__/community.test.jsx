@@ -129,7 +129,7 @@ describe('progress toasts', () => {
         api({ 'GET /api/progress': later })
         await store.dispatch(fetchProgress())
         expect(store.getState().toast.map(toast => toast.text)).toEqual(['Challenge geschafft: +40 XP', 'Level 4 erreicht'])
-        expect(store.getState().toast[0]).toMatchObject({ detail: '45 Minuten fokussieren', to: '/community' })
+        expect(store.getState().toast[0]).toMatchObject({ detail: '45 Minuten fokussieren', to: '/community/progress' })
     })
 
     it('a new day with other challenges is not news', async () => {
@@ -145,20 +145,29 @@ describe('progress toasts', () => {
 describe('Gemeinschaft page', () => {
     beforeEach(() => { apiFetch.mockReset() })
 
-    it('leads with my level, then the tabs, the feed and the rail', async () => {
+    it('leads with my level, then the tabs and the feed; level and challenges have their own tab', async () => {
         api(COMMUNITY)
         await renderCommunity()
         expect(screen.getByRole('heading', { level: 1, name: 'Gemeinschaft' })).toBeInTheDocument()
         expect(screen.getByText('Level 3 · Keimling · noch 155 XP bis Level 4')).toBeInTheDocument()
         const tabs = screen.getByRole('navigation', { name: 'Bereiche der Gemeinschaft' })
-        expect(within(tabs).getAllByRole('link').map(link => link.textContent)).toEqual(['Feed', 'Sitzungen', 'Freunde', 'Family'])
+        expect(within(tabs).getAllByRole('link').map(link => link.textContent)).toEqual(['Feed', 'Fortschritt', 'Sitzungen', 'Freunde', 'Family'])
+        expect(within(tabs).getByRole('link', { name: 'Fortschritt' })).toHaveAttribute('href', '/community/progress')
+        // the feed has no level card or challenges beside it any more
+        expect(screen.queryByRole('progressbar', { name: '520 von 675 XP' })).not.toBeInTheDocument()
+        expect(screen.queryByRole('region', { name: 'Heute' })).not.toBeInTheDocument()
+    })
+
+    it('the progress tab shows my level and streak', async () => {
+        api(COMMUNITY)
+        await renderCommunity('/community/progress')
         expect(screen.getByRole('progressbar', { name: '520 von 675 XP' })).toHaveAttribute('aria-valuenow', '520')
         expect(screen.getByText('4 Tage Serie')).toBeInTheDocument()
     })
 
     it("shows today's and this week's challenges with how far I am", async () => {
         api(COMMUNITY)
-        await renderCommunity()
+        await renderCommunity('/community/progress')
         const todayList = screen.getByRole('region', { name: 'Heute' })
         expect(within(todayList).getByText('1 von 3 · bis Mitternacht')).toBeInTheDocument()
         expect(within(todayList).getByText('18 / 45 Min.')).toBeInTheDocument()
@@ -170,7 +179,7 @@ describe('Gemeinschaft page', () => {
 
     it('ranks the week among friends, me in bold', async () => {
         api(COMMUNITY)
-        await renderCommunity()
+        await renderCommunity('/community/progress')
         const ranking = screen.getByRole('region', { name: 'Diese Woche unter Freund:innen' })
         const rows = within(ranking).getAllByRole('listitem')
         expect(rows.map(row => row.textContent)).toEqual(['1AAnnLv 7610 XP', '2MDuLv 3240 XP'])

@@ -10,26 +10,24 @@ import { fetchFriends, selectIncomingCount } from '../../features/friends/friend
 import { selectInviteCount } from '../../features/together/togetherAction';
 import { selectFamilyInviteCount } from '../../features/family/family';
 import Feed from './Feed';
-import LevelCard from './LevelCard';
-import Challenges from './Challenges';
-import Ranking from './Ranking';
+import Progress from './Progress';
 import OnlineNow from './OnlineNow';
 import Together from '../Together';
 import Social from '../Social';
 import Family from '../family/Family';
 
-const TAB_CONTENT = { feed: Feed, sessions: Together, friends: Social, family: Family };
+const TAB_CONTENT = { feed: Feed, progress: Progress, sessions: Together, friends: Social, family: Family };
 
-// Gemeinschaft: everything with other people on one page. The feed is its start; shared
-// sessions, friends and families are tabs with their own address. Beside them (under
-// the title on a phone, feed only) my level, today's and this week's challenges and the week
-// among friends.
+// Gemeinschaft: everything with other people on one page. The feed is its start; my progress
+// (level, challenges, the week among friends), shared sessions, friends and families are tabs
+// with their own address. Beside them (above the feed on a phone) the friends online right now.
 export default function Community() {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
     const { tab: tabParam } = useParams();
     const tab = tabParam ?? 'feed';
     const progress = useSelector(state => state.progress.data);
+    const hasFriends = useSelector(state => state.friends.friendsLoaded && state.friends.friends.length > 0);
     const news = useSelector(state => state.news);
     const counts = {
         sessions: useSelector(selectInviteCount),
@@ -47,6 +45,8 @@ export default function Community() {
     const tabs = COMMUNITY_TABS;
     if (!tabs.includes(tab)) return <Navigate to={COMMUNITY_PATHS.feed} replace />;
     const Content = TAB_CONTENT[tab];
+    // the progress tab takes the whole width; without friends there is nobody to show online
+    const rail = tab !== 'progress' && hasFriends;
 
     return (
         <div className={styles.page}>
@@ -81,20 +81,15 @@ export default function Community() {
                 ))}
             </nav>
 
-            <div className={styles.layout} data-tab={tab}>
-                {/* the rail: next to every tab on a wide screen; on a phone only with the feed,
-                    my level and today's challenges above it, the week and the ranking below */}
-                <section className={styles.railTop} aria-label={t('communityProgress')}>
-                    <LevelCard />
-                    <OnlineNow />
-                    <Challenges period="day" />
-                </section>
+            <div className={styles.layout} data-tab={tab} data-rail={rail || undefined}>
+                {/* the rail: next to every tab on a wide screen, on a phone only above the feed */}
+                {rail && (
+                    <aside className={styles.rail}>
+                        <OnlineNow />
+                    </aside>
+                )}
                 <div className={styles.main}>
                     <Content />
-                </div>
-                <div className={styles.railBottom}>
-                    <Challenges period="week" />
-                    <Ranking />
                 </div>
             </div>
         </div>

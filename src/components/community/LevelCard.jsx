@@ -110,7 +110,7 @@ export default function LevelCard() {
             {upcoming.length > 0 && (
                 <>
                     <h3 className={styles.subTitle}>{t('levelNext')}</h3>
-                    <UnlockRows steps={upcoming} reached={reached} t={t} limit={3} className={styles.upcoming} />
+                    <UnlockRows steps={upcoming} reached={reached} t={t} limit={3} />
                 </>
             )}
 

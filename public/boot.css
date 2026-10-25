@@ -1,0 +1,419 @@
+/* The first paint, before the app's code and styles are there: the ground in the saved theme
+   and palette instead of a white page, and a skeleton of what comes (index.html, inside #root;
+   React replaces it). public/theme-init.js sets data-theme / data-palette / data-motion and
+   data-boot: "home" (signed in, start page), "page" (signed in, any other page) or "gate"
+   (signed out). Same colours as src/index.css (a test compares them), same sizes as the app's
+   frame (AppShell, Header, Menu, TabBar) and Home. A file, not inline: the CSP forbids those. */
+
+:root{
+    --boot-bg: #0e0d0c;
+    --boot-surface: #181716;
+    --boot-surface-strong: #2c2a28;
+    --boot-border: #262422;
+}
+
+:root[data-theme="light"]{
+    --boot-bg: #f5f5f3;
+    --boot-surface: #ffffff;
+    --boot-surface-strong: #e6e5e2;
+    --boot-border: #e9e8e5;
+}
+
+:root[data-palette="graphite"]{ --boot-bg: #0d0e10; --boot-surface: #16181b; --boot-surface-strong: #2a2d32; --boot-border: #24262a; }
+:root[data-theme="light"][data-palette="graphite"]{ --boot-bg: #f4f5f7; --boot-surface: #ffffff; --boot-surface-strong: #e3e6ea; --boot-border: #e6e8eb; }
+:root[data-palette="nord"]{ --boot-bg: #0b1018; --boot-surface: #131a25; --boot-surface-strong: #242e3e; --boot-border: #1f2836; }
+:root[data-theme="light"][data-palette="nord"]{ --boot-bg: #f2f5f9; --boot-surface: #ffffff; --boot-surface-strong: #dfe6ef; --boot-border: #e2e8f0; }
+:root[data-palette="forest"]{ --boot-bg: #0a0f0c; --boot-surface: #121a15; --boot-surface-strong: #233027; --boot-border: #1d2820; }
+:root[data-theme="light"][data-palette="forest"]{ --boot-bg: #f3f6f2; --boot-surface: #ffffff; --boot-surface-strong: #dde6da; --boot-border: #e1e8de; }
+:root[data-palette="plum"]{ --boot-bg: #100c12; --boot-surface: #19141c; --boot-surface-strong: #2e2533; --boot-border: #261f2a; }
+:root[data-theme="light"][data-palette="plum"]{ --boot-bg: #f7f4f8; --boot-surface: #ffffff; --boot-surface-strong: #e7e0ea; --boot-border: #ebe5ed; }
+:root[data-palette="mono"]{ --boot-bg: #000000; --boot-surface: #0f0f0f; --boot-surface-strong: #242424; --boot-border: #1c1c1c; }
+:root[data-theme="light"][data-palette="mono"]{ --boot-bg: #ffffff; --boot-surface: #ffffff; --boot-surface-strong: #e8e8e8; --boot-border: #e3e3e3; }
+
+html{
+    background-color: var(--boot-bg);
+    color-scheme: dark;
+}
+
+:root[data-theme="light"]{
+    color-scheme: light;
+}
+
+body{
+    margin: 0;
+}
+
+/* ---------- shapes ---------- */
+
+.boot{
+    --sidebar-w: 0px;
+    --tabbar-h: 0px;
+    --gutter: 1.5rem;
+    --header-h: calc(3.5rem + env(safe-area-inset-top, 0px));
+    min-height: 100vh;
+    padding-left: var(--sidebar-w);
+    box-sizing: border-box;
+}
+
+.boot *{
+    box-sizing: border-box;
+}
+
+.boot .b{
+    display: block;
+    flex-shrink: 0;
+    height: 0.875rem;
+    background-color: var(--boot-surface-strong);
+    border-radius: 4px;
+}
+
+.boot .r{
+    border-radius: 50%;
+}
+
+.boot .p{
+    border-radius: 999px;
+}
+
+:root:not([data-motion="minimal"]) .boot .b{
+    background-image: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.06) 50%, transparent 70%);
+    background-size: 200vw 100%;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    animation: boot-sweep 1.6s ease-in-out infinite;
+}
+
+:root[data-theme="light"]:not([data-motion="minimal"]) .boot .b{
+    background-image: linear-gradient(100deg, transparent 30%, rgb(0 0 0 / 0.04) 50%, transparent 70%);
+}
+
+@keyframes boot-sweep{
+    from{ background-position: 150vw 0; }
+    to{ background-position: -150vw 0; }
+}
+
+/* sizes (index.html may not carry style attributes) */
+.boot .logo{ width: 1.75rem; height: 1.75rem; }
+.boot .word{ width: 4.5rem; height: 1.1rem; }
+.boot .hi{ width: 1.4rem; height: 1.4rem; }
+.boot .newb{ width: 4.9rem; height: 2.25rem; }
+.boot .i{ width: 1.35rem; height: 1.35rem; }
+.boot .l1{ width: 3rem; }
+.boot .l2{ width: 4.75rem; }
+.boot .l3{ width: 7rem; }
+.boot .l4{ width: 4.5rem; }
+.boot .l5{ width: 5.5rem; }
+.boot .l6{ width: 3.5rem; }
+.boot .l7{ width: 6.5rem; }
+.boot .l8{ width: 4.5rem; }
+.boot .l9{ width: 5rem; }
+.boot .av{ width: 2rem; height: 2rem; }
+.boot .t1{ width: 15rem; height: 1.6rem; }
+.boot .t2{ width: 12rem; height: 0.95rem; }
+.boot .sw{ width: 8.75rem; height: 2.5rem; }
+.boot .c1{ width: 3.5rem; height: 2rem; }
+.boot .c2{ width: 5.5rem; height: 2rem; }
+.boot .c3{ width: 4.75rem; height: 2rem; }
+.boot .ft{ width: 3.5rem; height: 1.1rem; margin-top: 0.45rem; }
+.boot .pt{ width: 12rem; height: 1.6rem; margin: 2.5rem 0 0.5rem; }
+.boot .ti{ width: 1.4rem; height: 1.4rem; }
+.boot .tl{ height: 0.6rem; }
+.boot .tl1{ width: 2rem; }
+.boot .tl2{ width: 3rem; }
+.boot .tl3{ width: 4.5rem; }
+.boot .about{ width: 6.5rem; }
+
+.boot .card{
+    background-color: var(--boot-surface);
+    border: 1px solid var(--boot-border);
+    border-radius: 18px;
+}
+
+/* which of the three is shown */
+.boot-app,
+.boot-gate,
+.boot-home,
+.boot-page{
+    display: none;
+}
+
+[data-boot="home"] .boot-app,
+[data-boot="page"] .boot-app,
+[data-boot="gate"] .boot-gate,
+[data-boot="home"] .boot-home,
+[data-boot="page"] .boot-page{
+    display: block;
+}
+
+/* ---------- the frame: header, sidebar (wide), tab bar (phones) ---------- */
+
+.boot-header{
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-w);
+    right: 0;
+    height: var(--header-h);
+    padding: env(safe-area-inset-top, 0px) 1rem 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background-color: var(--boot-bg);
+    border-bottom: 1px solid var(--boot-border);
+}
+
+.boot-brand,
+.boot-end{
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.boot-end{
+    gap: 1.25rem;
+}
+
+.boot-side{
+    display: none;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--sidebar-w);
+    padding: 0 12px 16px;
+    flex-direction: column;
+    gap: 2px;
+    background-color: var(--boot-bg);
+    border-right: 1px solid var(--boot-border);
+}
+
+.boot-side-head{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 3.5rem;
+    margin-bottom: 12px;
+    padding-left: 12px;
+}
+
+.boot-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 2.5rem;
+    padding: 0 12px;
+}
+
+.boot .boot-label{
+    width: 2.5rem;
+    height: 0.7rem;
+    margin: 24px 12px 6px;
+}
+
+.boot-account{
+    height: 3.25rem;
+}
+
+.boot-chips{
+    display: flex;
+    gap: 0.5rem;
+}
+
+.boot-side-foot{
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--boot-border);
+}
+
+.boot-tabs{
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    place-items: center;
+    background-color: var(--boot-bg);
+    border-top: 1px solid var(--boot-border);
+}
+
+.boot-tab{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* ---------- pages ---------- */
+
+.boot-home,
+.boot-page{
+    margin: 0 auto;
+    padding-top: var(--header-h);
+}
+
+.boot-home{
+    width: min(76rem, calc(100% - 2 * var(--gutter)));
+}
+
+.boot-page{
+    width: min(680px, calc(100% - 2 * var(--gutter)));
+}
+
+.boot-title{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 1.75rem;
+}
+
+.boot-stack{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.boot-strip{
+    display: grid;
+    grid-template-columns: 1.15fr 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.boot-strip .card{
+    height: 16rem;
+}
+
+.boot-week{
+    display: grid;
+    grid-template-columns: repeat(8, minmax(6.5rem, 1fr));
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    overflow: hidden;
+}
+
+.boot-week .card{
+    height: 6.5rem;
+    border-radius: 14px;
+}
+
+.boot-columns{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.boot-list{
+    height: 14rem;
+    margin-top: 1rem;
+}
+
+.boot-focus{
+    height: 6.5rem;
+    border: 1px dashed var(--boot-border);
+    border-radius: 18px;
+    margin-top: 0.75rem;
+}
+
+.boot-page .card{
+    height: 14rem;
+    margin-top: 1rem;
+}
+
+/* ---------- signed out: wordmark, the sign-in card ---------- */
+
+.boot-gate{
+    width: min(680px, calc(100% - 2 * var(--gutter)));
+    margin: 0 auto;
+    padding-top: calc(1.5rem + env(safe-area-inset-top, 0px));
+}
+
+.boot-gate-head{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.boot-gate .card{
+    height: 19rem;
+    margin-top: 3.25rem;
+}
+
+/* ---------- widths: the same as src/features/layout/breakpoints.js ---------- */
+
+@media (min-width: 1100px){
+    .boot{
+        --sidebar-w: 15rem;
+        --gutter: 2.5rem;
+    }
+
+    .boot-side{
+        display: flex;
+    }
+
+    .boot-header .boot-brand{
+        visibility: hidden;
+    }
+
+    .boot-columns{
+        grid-template-columns: minmax(0, 1fr) 22rem;
+    }
+}
+
+@media (max-width: 1099px){
+    .boot-strip{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .boot-strip > :last-child{
+        grid-column: 1 / -1;
+        height: 9rem;
+    }
+
+    .boot-aside{
+        order: -1;
+    }
+}
+
+@media (max-width: 720px){
+    .boot{
+        --tabbar-h: 3.75rem;
+        --gutter: 1rem;
+    }
+
+    .boot-tabs{
+        display: grid;
+    }
+
+    .boot-strip{
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: min(82%, 20rem);
+        overflow: hidden;
+    }
+
+    .boot-strip > :last-child{
+        grid-column: auto;
+        height: 16rem;
+    }
+
+    .boot-week{
+        grid-template-columns: repeat(8, minmax(5.75rem, 1fr));
+        gap: 0.4rem;
+    }
+
+    .boot-week .card{
+        height: 5.5rem;
+    }
+
+    .boot-columns,
+    .boot-strip,
+    .boot-week{
+        margin-top: 1rem;
+    }
+}

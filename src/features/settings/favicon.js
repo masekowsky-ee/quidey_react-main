@@ -23,9 +23,10 @@ export function logoSvg(color) {
         + `</svg>`;
 }
 
-// Points the page's icon at the logo in the accent's color
-export function applyFavicon(accent) {
-    const color = ACCENT_COLORS[accent] ?? ACCENT_COLORS.sunset;
+// Points the page's icon at the logo in the accent's color (ownColor: a tester variant's own
+// accent, for "own")
+export function applyFavicon(accent, ownColor) {
+    const color = ACCENT_COLORS[accent] ?? ownColor ?? ACCENT_COLORS.sunset;
     const link = document.querySelector('link[rel="icon"]');
     if (!link) return;
     link.type = 'image/svg+xml';

@@ -59,7 +59,7 @@ export default function PlantCard() {
         <section className={styles.card} aria-labelledby="plant-title">
             <div className={styles.head}>
                 <h2 id="plant-title" className={styles.title}>{t('plantTitle')}</h2>
-                <Link to={COMMUNITY_PATHS.feed} className={styles.link}>{t('plantToCommunity')} →</Link>
+                <Link to={COMMUNITY_PATHS.progress} className={styles.link}>{t('plantToCommunity')} →</Link>
             </div>
             <div className={styles.body}>
                 <LevelPlant level={current} share={shown === null ? share : 0} size={176} className={styles.plant}

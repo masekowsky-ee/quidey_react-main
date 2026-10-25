@@ -20,9 +20,67 @@
     <meta name="theme-color" content="#2b2b2b" />
     <title>Quidey</title>
     <script src="/theme-init.js"></script>
+    <!-- the first paint: the theme's ground and a skeleton of what comes, before the app's code -->
+    <link rel="stylesheet" href="/boot.css" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- shown until React replaces it (see public/boot.css; classes only, the CSP forbids style attributes) -->
+      <div class="boot" aria-busy="true" aria-label="Quidey">
+        <div class="boot-app">
+          <div class="boot-header">
+            <span class="boot-brand"><span class="b r logo"></span><span class="b word"></span></span>
+            <span class="boot-end"><span class="b r hi"></span><span class="b r hi"></span><span class="b p newb"></span></span>
+          </div>
+          <div class="boot-side">
+            <div class="boot-side-head"><span class="b r logo"></span><span class="b word"></span></div>
+            <div class="boot-item"><span class="b i"></span><span class="b l1"></span></div>
+            <div class="boot-item"><span class="b i"></span><span class="b l2"></span></div>
+            <div class="boot-item"><span class="b i"></span><span class="b l3"></span></div>
+            <div class="boot-item"><span class="b i"></span><span class="b l4"></span></div>
+            <span class="b boot-label"></span>
+            <div class="boot-item"><span class="b i"></span><span class="b l5"></span></div>
+            <div class="boot-side-foot">
+              <div class="boot-item"><span class="b i"></span><span class="b l6"></span></div>
+              <div class="boot-item"><span class="b i"></span><span class="b l7"></span></div>
+              <div class="boot-item"><span class="b i"></span><span class="b l8"></span></div>
+              <div class="boot-item boot-account"><span class="b r av"></span><span class="b l9"></span></div>
+            </div>
+          </div>
+          <div class="boot-home">
+            <div class="boot-title">
+              <div class="boot-stack"><span class="b t1"></span><span class="b t2"></span></div>
+              <span class="b p sw"></span>
+            </div>
+            <div class="boot-strip"><div class="card"></div><div class="card"></div><div class="card"></div></div>
+            <div class="boot-week"><div class="card"></div><div class="card"></div><div class="card"></div><div class="card"></div><div class="card"></div><div class="card"></div><div class="card"></div><div class="card"></div></div>
+            <div class="boot-columns">
+              <div>
+                <div class="boot-chips"><span class="b p c1"></span><span class="b p c2"></span><span class="b p c3"></span></div>
+                <div class="card boot-list"></div>
+              </div>
+              <div class="boot-aside"><span class="b ft"></span><div class="boot-focus"></div></div>
+            </div>
+          </div>
+          <div class="boot-page">
+            <span class="b pt"></span>
+            <div class="card"></div>
+            <div class="card"></div>
+          </div>
+          <div class="boot-tabs">
+            <div class="boot-tab"><span class="b ti"></span><span class="b tl tl1"></span></div>
+            <div class="boot-tab"><span class="b ti"></span><span class="b tl tl2"></span></div>
+            <div class="boot-tab"><span class="b ti"></span><span class="b tl tl3"></span></div>
+            <div class="boot-tab"><span class="b ti"></span><span class="b tl tl2"></span></div>
+            <div class="boot-tab"><span class="b ti"></span><span class="b tl tl1"></span></div>
+          </div>
+        </div>
+        <div class="boot-gate">
+          <div class="boot-gate-head"><span class="boot-brand"><span class="b r logo"></span><span class="b word"></span></span><span class="b about"></span></div>
+          <div class="card"></div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -12,3 +12,4 @@ export const SET_MOTION = "SET_MOTION";
 export const SET_SHOW_SHARED_TASKS = "SET_SHOW_SHARED_TASKS";
 export const SET_PALETTE = "SET_PALETTE";
 export const SET_UI_VARIANT = "SET_UI_VARIANT";
+export const SET_UI_COLORS = "SET_UI_COLORS";

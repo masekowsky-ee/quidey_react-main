@@ -10,6 +10,23 @@ import { showToast } from '../features/toast/toast'
 import { Link } from 'react-router-dom'
 import TaskLabels from './TaskLabels.jsx'
 import Icon from './icons.jsx'
+
+// The focus column's card with nothing in focus yet, for the start screen (AppSkeleton)
+export function FocusSkeleton() {
+    const { t } = useTranslation();
+    return (
+        <section className={styles.focus} data-part="focus">
+            <h2 className={styles.focusTitle}>{t('focusTitle')}</h2>
+            <div className={`${styles.currentTaskDiv} ${styles.dropZoneEmpty}`}>
+                <div className={styles.dropHint}>
+                    <Icon name="focus" className={styles.dropIcon} />
+                    <p className={styles.dropTitle}>{t('dragATask')}</p>
+                    <p className={styles.dropText}>{t('focusHint')}</p>
+                </div>
+            </div>
+        </section>
+    );
+}
 import { motion, useDragControls } from 'motion/react'
 import { useMotionLevel, burstFrom } from '../features/settings/motion'
 

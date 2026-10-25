@@ -11,7 +11,7 @@ import { UI_VARIANT_IDS } from './variants';
 export const TEST_FEATURES = [
     { id: 'presence', to: '/community/friends' },
     { id: 'streaks', to: '/' },
-    { id: 'progress', to: '/community' },
+    { id: 'progress', to: '/community/progress' },
     { id: 'feed', to: '/community' },
     { id: 'family', to: '/community/family' },
     { id: 'events', to: '/settings#event-types' },

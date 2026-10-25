@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { applyFavicon } from './favicon';
+import { VARIANT_COLORS, useColorChoice } from '../tester/variants';
 
 export const THEMES = ['dark', 'light', 'system'];
 const STORAGE_KEY = 'theme';
@@ -36,7 +37,9 @@ export function resolveTheme(theme, systemPrefersLight) {
 // the operating system while 'system' is selected
 export function useApplyTheme() {
     const theme = useSelector(state => state.settings.theme);
-    const palette = useSelector(state => state.settings.palette);
+    // the palette and accent of the interface in use: a tester's variant has its own (or the one
+    // picked for it), see features/tester/variants.js
+    const { variant, palette, accent } = useColorChoice();
 
     useEffect(() => {
         try { localStorage.setItem(STORAGE_KEY, theme); } catch { /* not saved, still applied */ }
@@ -56,11 +59,10 @@ export function useApplyTheme() {
         return () => media.removeEventListener('change', apply);
     }, [theme, palette]);
 
-    // Accent color palette (sunset, green, ...): <html data-accent>, colors in index.css;
-    // the tab icon is the logo in that color
-    const accent = useSelector(state => state.settings.accent);
+    // Accent color palette (sunset, green, ...): <html data-accent>, colors in index.css ("own":
+    // the variant's, in its stylesheet); the tab icon is the logo in that color
     useEffect(() => {
         document.documentElement.dataset.accent = accent;
-        applyFavicon(accent);
-    }, [accent]);
+        applyFavicon(accent, VARIANT_COLORS[variant]?.accent);
+    }, [accent, variant]);
 }

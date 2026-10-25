@@ -1,0 +1,35 @@
+/* The start screen's note when the server takes long to answer: a quiet bar above the bottom
+   edge (above the tab bar on phones), beside the sidebar on wide screens */
+.slow{
+    position: fixed;
+    left: calc(var(--sidebar-w, 0px) + var(--page-gutter, 1rem));
+    right: var(--page-gutter, 1rem);
+    bottom: calc(var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px) + 1rem);
+    z-index: var(--z-alert);
+    width: fit-content;
+    max-width: calc(100% - var(--sidebar-w, 0px) - 2 * var(--page-gutter, 1rem));
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.6rem 0.75rem 0.6rem 1rem;
+    box-sizing: border-box;
+    font-size: 0.875rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    animation: appear 0.3s ease-out both;
+}
+
+@keyframes appear{
+    from{ opacity: 0; translate: 0 0.5rem; }
+}
+
+.slowBtn{
+    composes: ghostBtn from '../ui.module.css';
+    height: 2rem;
+    padding: 0 0.75rem;
+    font-size: 0.875rem;
+}

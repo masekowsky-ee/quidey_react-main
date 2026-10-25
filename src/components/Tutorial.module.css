@@ -342,7 +342,7 @@
         display: grid;
         grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
         gap: 1.75rem;
-        min-height: 24.5rem; /* the tallest step (the last), so the card keeps its height */
+        min-height: 26rem; /* the tallest step (the last), so the card keeps its height */
     }
 
     .stage{

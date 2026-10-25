@@ -50,14 +50,35 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-/* ---------- the board at night (dark, the variant's home scene) ---------- */
+/* ---------- what stays whatever the colours: type, square shapes, the board's signal ----------
+   The ground comes from the colour palette and the board's signal from the accent (Settings);
+   with another palette the board is drawn in that palette's strongest surface. "own" is the
+   station's own, below. */
 :root[data-ui="tafel"][data-theme] {
+  --board-ground: var(--surface-strong);
+  --board-ink: var(--text-h);
+  --board-muted: var(--text-muted);
+  --board-rule: var(--border);
+  --board-signal: var(--primary);
+  --board-signal-ink: var(--primary-text);
+
+  --radius-sm: 2px;
+  --radius: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+
+  --sans: 'Barlow Semi Condensed', 'Arial Narrow', system-ui, sans-serif;
+  font: 16.5px/1.45 var(--sans);
+  letter-spacing: 0.005em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- the board at night (palette "own", dark: the variant's home scene) ---------- */
+:root[data-ui="tafel"][data-palette="own"][data-theme] {
   --board-ground: #0c2253;
   --board-ink: #ffffff;
   --board-muted: #aebddf;
   --board-rule: rgba(255, 255, 255, 0.12);
-  --board-signal: #ffd23f;
-  --board-signal-ink: #191400;
 
   --bg: #061430;
   --surface-bar: #0a1d45;
@@ -72,9 +93,6 @@
   --text-h: #ffffff;
   --text-muted: #aebddf;
 
-  --primary: #ffd23f;
-  --primary-text: #191400;
-  --primary-fg: #ffd23f;
   --danger: #ff806f;
   --online: #4ade80;
   --online-text: #6ee7a0;
@@ -83,26 +101,15 @@
   --contrast-top: #ffffff;
   --contrast-bottom: #ffffff;
   --contrast-text: #061430;
-
-  --radius-sm: 2px;
-  --radius: 3px;
-  --radius-lg: 4px;
-  --radius-xl: 6px;
   --shadow-float: 0 16px 40px -16px rgba(0, 3, 12, 0.75);
   --shadow-modal: 0 24px 64px -24px rgba(0, 3, 12, 0.85);
   --overlay: rgba(2, 8, 22, 0.62);
   --scrollbar-thumb: rgba(255, 255, 255, 0.16);
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
-
-  --sans: 'Barlow Semi Condensed', 'Arial Narrow', system-ui, sans-serif;
-  font: 16.5px/1.45 var(--sans);
-  letter-spacing: 0.005em;
-  font-variant-numeric: tabular-nums;
-  color-scheme: dark;
 }
 
 /* ---------- by day: white platform signs, the board stays night blue ---------- */
-:root[data-ui="tafel"][data-theme="light"] {
+:root[data-ui="tafel"][data-palette="own"][data-theme="light"] {
   --board-ground: #0a1d45;
 
   --bg: #eef1f6;
@@ -118,9 +125,6 @@
   --text-h: #091735;
   --text-muted: #4d5b78;
 
-  --primary: #f2c200;
-  --primary-text: #191400;
-  --primary-fg: #7a5c00;
   --danger: #b42318;
   --online: #16a34a;
   --online-text: #15803d;
@@ -134,11 +138,10 @@
   --overlay: rgba(9, 23, 53, 0.32);
   --scrollbar-thumb: rgba(9, 23, 53, 0.18);
   --scrollbar-thumb-hover: rgba(9, 23, 53, 0.32);
-  color-scheme: light;
 }
 
 /* the header and the phone's tab bar are the board in both themes: its tokens inside them */
-:root[data-ui="tafel"][data-theme="light"] :is([data-part="header"], [data-part="tabbar"]) {
+:root[data-ui="tafel"][data-palette="own"][data-theme="light"] :is([data-part="header"], [data-part="tabbar"]) {
   --surface: #0c2253;
   --surface-hover: #112b66;
   --surface-strong: #183677;
@@ -149,12 +152,24 @@
   --text: #dfe7fb;
   --text-h: #ffffff;
   --text-muted: #aebddf;
-  --primary: #ffd23f;
-  --primary-fg: #ffd23f;
+  --primary-fg: var(--primary);
   --hover-wash: rgba(255, 255, 255, 0.08);
   --contrast-top: #ffffff;
   --contrast-text: #061430;
   color-scheme: dark;
+}
+
+/* ---------- the board's own yellow (accent "own") ---------- */
+:root[data-ui="tafel"][data-accent="own"][data-theme] {
+  --primary: #ffd23f;
+  --primary-text: #191400;
+  --primary-fg: #ffd23f;
+}
+
+:root[data-ui="tafel"][data-accent="own"][data-theme="light"] {
+  --primary: #f2c200;
+  --primary-text: #191400;
+  --primary-fg: #7a5c00;
 }
 
 :root[data-ui="tafel"] ::selection {

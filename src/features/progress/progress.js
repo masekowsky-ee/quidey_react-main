@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiFetch, fill } from '../helperFunction';
 import { showToast } from '../toast/toast';
+import { COMMUNITY_PATHS } from '../community/paths';
 import { translate } from '../../i18n/useTranslation';
 import { burst } from '../settings/motion';
 import { PROFILE_COLORS, PROFILE_BANNERS, PROFILE_EMOJIS, AVATAR_FRAMES } from '../profile/profileOptions';
@@ -155,7 +156,7 @@ export const fetchProgress = () => async (dispatch, getState) => {
         if (challenge.done && !wasDone.has(`${challenge.id}:${data.today}:${data.weekStart}`)
             && (challenge.period === 'day' ? data.today === before.today : data.weekStart === before.weekStart)) {
             dispatch(showToast(fill(t('toast_challengeDone'), { xp: challenge.xp }), 'success',
-                { to: '/community', detail: challengeTitle(t, challenge) }));
+                { to: COMMUNITY_PATHS.progress, detail: challengeTitle(t, challenge) }));
         }
     }
     // the streak went on today: a milestone is celebrated, any other day just counted
@@ -167,7 +168,7 @@ export const fetchProgress = () => async (dispatch, getState) => {
     }
     if (data.level > before.level) {
         dispatch(showToast(fill(t('toast_levelUp'), { level: data.level }), 'success',
-            { to: '/community', detail: t(`tier_${tierFor(data.level).id}`) }));
+            { to: COMMUNITY_PATHS.progress, detail: t(`tier_${tierFor(data.level).id}`) }));
         if (motion !== 'minimal' && typeof window !== 'undefined') burst(window.innerWidth / 2, window.innerHeight * 0.4, motion === 'extreme' ? 70 : 36);
     }
     return data;

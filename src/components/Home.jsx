@@ -1,19 +1,21 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { dateKey } from '../features/calendar/calendar.js'
-import TaskContainer from './TaskContainer.jsx'
+import TaskContainer, { TaskListSkeleton } from './TaskContainer.jsx'
 import { showForms } from '../features/settings/settingsAction.js'
 import styles from './Home.module.css';
 import GroupForm from './GroupForm.jsx';
 import WeekDaysContainer from './WeekDaysContainer.jsx';
 import GroupBtnContainer from './GroupBtnContainer.jsx';
-import WorkingContainer from './WorkingContainer.jsx';
-import TimerContainer from './TimerContainer.jsx';
+import WorkingContainer, { FocusSkeleton } from './WorkingContainer.jsx';
+import TimerContainer, { TimerSkeleton } from './TimerContainer.jsx';
 import SoloTogetherStrip from './together/SoloTogetherStrip.jsx';
 import TaskInvites from './task/TaskInvites.jsx';
-import Momentum from './home/Momentum.jsx';
+import Momentum, { MomentumSkeleton } from './home/Momentum.jsx';
 import { updateCurrentSessionData, addWorkedTask } from '../features/session/sessionAction.js'
 import { fetchMySharedTasks, selectSharedSoloTasks } from '../features/together/togetherAction.js'
+import { selectTasksLoaded } from '../features/tasks/taskAction.js'
+import { Bone } from './skeleton/Skeleton.jsx'
 import { useSoloSharedWork } from '../features/together/useSoloSharedWork.js'
 import { DESKTOP_QUERY, useMediaQuery } from '../features/layout/breakpoints.js'
 import { fill, isOverdue, sameDay, parseDate } from '../features/helperFunction.js'
@@ -25,13 +27,21 @@ import Seats from './variants/Seats.jsx'
 
 import {useSelector, useDispatch} from 'react-redux';
 
-// "Thursday, 22 October" and how the day looks: open tasks, due today, overdue (the tasks the
-// list shows, so both say the same number); the Solo | Team switch on the right
+// "Thursday, 22 October": known before anything is loaded (also for the start screen's skeleton)
+function useTodayTitle() {
+    const { language } = useTranslation();
+    return new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB',
+        { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+}
+
+// The day as the title and how it looks: open tasks, due today, overdue (the tasks the list
+// shows, so both say the same number); the Solo | Team switch on the right. Until my tasks are
+// there the line under the title is grey, not "all done".
 function TitleRow({ tasks }) {
-    const { t, language } = useTranslation();
+    const { t } = useTranslation();
     const today = new Date();
-    const title = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB',
-        { weekday: 'long', day: 'numeric', month: 'long' }).format(today);
+    const title = useTodayTitle();
+    const loaded = useSelector(selectTasksLoaded);
     const isToday = (task) => { const due = parseDate(task.due); return due && sameDay(due, today); };
     // events aren't to-dos: they only count as today's events still to come
     const open = tasks.filter(task => !task.done && !isEvent(task));
@@ -43,7 +53,8 @@ function TitleRow({ tasks }) {
             <div className={styles.titleText}>
             <h1 className={styles.title}>{title}</h1>
             <p className={styles.summary}>
-                {open.length === 0
+                {!loaded ? <Bone w="13rem" h="0.9375rem" style={{ margin: '0.25rem 0' }} />
+                    : open.length === 0
                     ? <span>{t('allDoneToday')}</span>
                     : <>
                         <span>{fill(t('openTasksCount'), { count: open.length })}</span>
@@ -59,6 +70,35 @@ function TitleRow({ tasks }) {
             </div>
             <SoloTogetherStrip />
         </header>
+    );
+}
+
+// Home before the app knows it may load anything (the start screen, see AppSkeleton): the same
+// layout, the parts that need no data as they are, grey where tasks and progress will be
+export function HomeSkeleton() {
+    const desktop = useMediaQuery(DESKTOP_QUERY);
+    return (
+        <div className={styles.page} data-part="home">
+            <header className={styles.titleRow} data-part="home-title">
+                <div className={styles.titleText}>
+                    <h1 className={styles.title}>{useTodayTitle()}</h1>
+                    <p className={styles.summary}><Bone w="13rem" h="0.9375rem" style={{ margin: '0.25rem 0' }} /></p>
+                </div>
+                <SoloTogetherStrip />
+            </header>
+            <MomentumSkeleton />
+            <WeekDaysContainer />
+            <div className={styles.columns} data-part="home-columns">
+                <div className={styles.mainCol} data-part="home-list">
+                    <GroupBtnContainer setCreateGroup={() => {}} />
+                    <TaskListSkeleton />
+                </div>
+                <aside className={styles.focusCol} data-part="home-focus">
+                    <FocusSkeleton />
+                    {desktop && <TimerSkeleton />}
+                </aside>
+            </div>
+        </div>
     );
 }
 

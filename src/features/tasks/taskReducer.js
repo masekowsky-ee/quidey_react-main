@@ -40,6 +40,8 @@ const initialState = {
     invitesLoaded: false,
     // my event types in their order: [{ id, name, color, position }]
     eventTypes: [],
+    // whether my tasks came from the server yet (until then Home shows their shapes, not "nothing open")
+    loaded: false,
 };
 
 // A type's new name or colour also shows on the events that have it
@@ -117,6 +119,7 @@ const taskReducer = (state = initialState, action) => {
                 groups:  action.payload.groups,
                 groupToDisplay: {...state.groupToDisplay, tasks: action.payload.tasks},
                 notes: action.payload.notes,
+                loaded: true,
             }
         case ADD_TASK: 
             return {

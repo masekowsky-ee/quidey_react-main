@@ -6,7 +6,10 @@ import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
-import { readStoredUiVariant, setUiVariant, selectUiVariant, useApplyUiVariant, UI_VARIANT_IDS } from '../features/tester/variants'
+import { readStoredUiVariant, setUiVariant, selectUiVariant, useApplyUiVariant, UI_VARIANT_IDS, setUiColors, selectColorChoice, readStoredUiColors } from '../features/tester/variants'
+import { useApplyTheme } from '../features/settings/theme'
+import { setAccent, setPalette } from '../features/settings/settingsAction'
+import Settings from '../components/Settings'
 import { openCommands } from '../features/tester/commands'
 import Tester from '../components/tester/Tester'
 import AdminTesterFeedback from '../components/tester/AdminTesterFeedback'
@@ -92,6 +95,63 @@ describe('interface variants', () => {
         await vi.waitFor(() => expect(document.documentElement.dataset.ui).toBe('tafel'))
         await act(async () => { store.dispatch(setUiVariant('current')) })
         expect(document.documentElement.dataset.ui).toBeUndefined()
+    })
+})
+
+describe('colours of the variants', () => {
+    it('each variant has its own until another palette or accent is picked for it', () => {
+        const store = makeStore()
+        store.dispatch(setPalette('nord'))
+        store.dispatch(setAccent('ocean'))
+        expect(selectColorChoice(store.getState())).toEqual({ variant: 'current', palette: 'nord', accent: 'ocean' })
+        store.dispatch(setUiVariant('lesesaal'))
+        expect(selectColorChoice(store.getState())).toEqual({ variant: 'lesesaal', palette: 'own', accent: 'own' })
+        store.dispatch(setUiColors('lesesaal', { accent: 'rose' }))
+        expect(selectColorChoice(store.getState())).toEqual({ variant: 'lesesaal', palette: 'own', accent: 'rose' })
+        // remembered per variant; the others and "current" keep theirs
+        expect(readStoredUiColors()).toEqual({ lesesaal: { accent: 'rose' } })
+        store.dispatch(setUiVariant('tafel'))
+        expect(selectColorChoice(store.getState()).accent).toBe('own')
+        store.dispatch(setUiVariant('current'))
+        expect(selectColorChoice(store.getState())).toEqual({ variant: 'current', palette: 'nord', accent: 'ocean' })
+    })
+
+    it('ignores unknown colours and variants', () => {
+        const store = makeStore()
+        store.dispatch(setUiColors('schulheft', { palette: 'neon', accent: 'gold' }))
+        store.dispatch(setUiColors('current', { accent: 'gold' }))
+        expect(store.getState().settings.uiColors).toEqual({ schulheft: { accent: 'gold' } })
+        localStorage.setItem('uiColors', '{"tafel":{"palette":"mono","accent":"x"},"nope":{"accent":"gold"}}')
+        expect(readStoredUiColors()).toEqual({ tafel: { palette: 'mono' } })
+        localStorage.setItem('uiColors', 'not json')
+        expect(readStoredUiColors()).toEqual({})
+    })
+
+    it('go on <html data-palette> and <html data-accent>', () => {
+        const store = makeStore()
+        renderHook(() => useApplyTheme(), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> })
+        expect(document.documentElement.dataset.accent).toBe('sunset')
+        act(() => { store.dispatch(setUiVariant('schulheft')) })
+        expect(document.documentElement.dataset.palette).toBe('own')
+        expect(document.documentElement.dataset.accent).toBe('own')
+        act(() => { store.dispatch(setUiColors('schulheft', { palette: 'forest' })) })
+        expect(document.documentElement.dataset.palette).toBe('forest')
+    })
+
+    it('the settings show the variant colours first and keep the choice for it', () => {
+        const store = makeStore()
+        store.dispatch(setUiVariant('tafel'))
+        wrap(<Settings />, store, '/settings')
+        const palettes = screen.getByRole('group', { name: 'Farbpalette' })
+        const own = within(palettes).getAllByRole('button')[0]
+        expect(own).toHaveTextContent('Abfahrtstafel')
+        expect(own).toHaveAttribute('aria-pressed', 'true')
+        expect(screen.getByText(/Gilt nur für die Variante Abfahrtstafel/)).toBeInTheDocument()
+        fireEvent.click(within(palettes).getByRole('button', { name: /Nord/ }))
+        expect(store.getState().settings.uiColors.tafel).toEqual({ palette: 'nord' })
+        expect(store.getState().settings.palette).toBe('warm')
+        const accents = screen.getByRole('group', { name: 'Akzentfarbe' })
+        expect(within(accents).getAllByRole('button')[0]).toHaveTextContent('Abfahrtstafel')
     })
 })
 

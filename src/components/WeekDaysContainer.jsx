@@ -6,6 +6,8 @@ import { toDateOnly } from '../features/helperFunction'
 import { addDays, dateKey, groupByDay, prioLevel, taskTimeText } from '../features/calendar/calendar'
 import { taskColorAttr } from '../features/tasks/taskColors'
 import { isEvent } from '../features/tasks/kinds'
+import { selectTasksLoaded } from '../features/tasks/taskAction'
+import { Bone } from './skeleton/Skeleton.jsx'
 
 const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const MAX_VISIBLE_TASKS = 3;
@@ -17,6 +19,8 @@ export default function WeekDaysContainer(){
     const {t} = useTranslation();
 
     const tasks = useSelector(state => state.task.tasks);
+    // the days are known at once, what is on them only once my tasks are there
+    const loaded = useSelector(selectTasksLoaded);
 
     const today = toDateOnly(new Date());
     const weekDates = Array.from({ length: 8 }, (_, i) => addDays(today, i));
@@ -35,7 +39,9 @@ export default function WeekDaysContainer(){
                                 <span className={styles.weekday}>{i === 0 ? t('today') : t(days[date.getDay()])}</span>
                                 <span className={styles.dayNum}>{date.getDate()}.{date.getMonth() + 1}</span>
                             </div>
-                            {dayTasks.length === 0
+                            {!loaded
+                                ? <Bone w={i % 3 === 2 ? '55%' : '85%'} h="1.375rem" style={{ borderRadius: 6 }} />
+                                : dayTasks.length === 0
                                 ? <span className={styles.empty}>–</span>
                                 : <ul className={styles.dayList}>
                                     {dayTasks.slice(0, MAX_VISIBLE_TASKS).map(task => (
