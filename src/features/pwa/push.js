@@ -196,6 +196,10 @@ async function checkPush() {
         facts.subscription = endpointHost(subscription);
         const { plain, push, permission } = await permissionOf(registration);
         Object.assign(facts, { permission: plain, pushPermission: push });
+        // without its key the server sends nothing: then there is nothing to switch on here (an
+        // address this device still has stays, for when the server has one again)
+        facts.serverKey = await serverKey().then((key) => (key ? 'yes' : 'none'), () => 'not reachable');
+        if (facts.serverKey === 'none') return decide('unavailable: the server has no key', { status: 'unavailable', kinds: null });
         // The browser keeps a subscription only while it may show notifications, so one that is
         // there counts as on and allowed (unless the browser says "blocked" outright). Only a
         // clear "off" or "blocked" takes it down: a reload must never turn them off by itself.
@@ -248,7 +252,7 @@ export async function enablePush() {
         try {
             const key = await serverKey();
             if (!key) {
-                set({ status: 'unavailable' });
+                set({ status: 'unavailable', diagnosis: { ...state.diagnosis, serverKey: 'none', result: 'unavailable: the server has no key' } });
                 return false;
             }
             step = 'subscribe';

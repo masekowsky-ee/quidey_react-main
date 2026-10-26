@@ -84,7 +84,7 @@ const ON_OFF = [{ value: true, label: 'pushOn' }, { value: false, label: 'pushOf
 const DIAGNOSIS_ROWS = [
     ['result', 'Ergebnis / result'], ['checkedAt', 'Geprüft / checked'], ['support', 'Push API'], ['app', 'Als App / standalone'],
     ['stored', "localStorage 'push'"], ['permission', 'Notification.permission'], ['pushPermission', 'pushManager.permissionState'],
-    ['subscription', 'Push subscription'], ['worker', 'Service Worker'],
+    ['subscription', 'Push subscription'], ['worker', 'Service Worker'], ['serverKey', 'Server key (VAPID)'],
 ];
 const diagnosisValue = (value) => (value === null || value === undefined ? '–' : String(value));
 

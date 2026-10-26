@@ -246,6 +246,21 @@ describe('notifications on this device', () => {
         }
     })
 
+    it('a server without its key: no switch that cannot work, and no question after a task', async () => {
+        const browser = fakeBrowser({ permission: 'granted' })
+        const answer = apiFetch.getMockImplementation()
+        apiFetch.mockImplementation(async (url, options) => (url === '/api/push/key' ? { publicKey: null } : answer(url, options)))
+        renderApp()
+        openAppArea()
+        expect(await screen.findByText('Der Server verschickt gerade keine Benachrichtigungen.')).toBeInTheDocument()
+        expect(screen.queryByRole('group', { name: 'Auf diesem Gerät' })).not.toBeInTheDocument()
+        fireEvent.click(screen.getByText('Technische Details'))
+        expect(screen.getByText('unavailable: the server has no key')).toBeInTheDocument()
+        act(() => offerPushAfterTask())
+        expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+        expect(browser.pushManager.subscribe).not.toHaveBeenCalled()
+    })
+
     it('the technical details say what the check saw and why it is off', async () => {
         fakeBrowser({ permission: 'granted' })
         localStorage.setItem('push', 'off')
