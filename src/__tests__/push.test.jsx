@@ -229,6 +229,34 @@ describe('notifications on this device', () => {
         vi.restoreAllMocks()
     })
 
+    it('a browser call that hangs never holds up turning them on', async () => {
+        vi.useFakeTimers()
+        try {
+            const browser = fakeBrowser({ permission: 'granted' })
+            browser.pushManager.getSubscription.mockImplementationOnce(() => new Promise(() => {}))
+            const check = refreshPush()
+            await vi.advanceTimersByTimeAsync(5000)
+            await check
+            const turnOn = enablePush()
+            await vi.advanceTimersByTimeAsync(100)
+            expect(await turnOn).toBe(true)
+            expect(localStorage.getItem('push')).toBe('on')
+        } finally {
+            vi.useRealTimers()
+        }
+    })
+
+    it('the technical details say what the check saw and why it is off', async () => {
+        fakeBrowser({ permission: 'granted' })
+        localStorage.setItem('push', 'off')
+        renderApp()
+        openAppArea()
+        fireEvent.click(await screen.findByText('Technische Details'))
+        expect(screen.getByText('off: chosen off (or signed out)')).toBeInTheDocument()
+        expect(screen.getByText("localStorage 'push'").nextSibling.textContent).toBe('off')
+        expect(screen.getByText('Notification.permission').nextSibling.textContent).toBe('granted')
+    })
+
     it('every start hands the address over again, for whoever is signed in', async () => {
         fakeBrowser({ permission: 'granted' })
         await act(() => enablePush())

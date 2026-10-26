@@ -190,6 +190,43 @@ div.page{
     color: var(--danger);
 }
 
+/* what the last check of this device saw, closed until asked for */
+.pushDiagnosis{
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--btn-border);
+    font-size: 0.8rem;
+}
+
+.pushDiagnosis summary{
+    cursor: pointer;
+    color: var(--text-muted);
+    width: fit-content;
+}
+
+.pushDiagnosis dl{
+    display: grid;
+    gap: 0.3rem;
+    margin: 0.6rem 0 0;
+}
+
+.pushDiagnosis dl > div{
+    display: grid;
+    grid-template-columns: minmax(9rem, 14rem) minmax(0, 1fr);
+    gap: 0.75rem;
+}
+
+.pushDiagnosis dt{
+    color: var(--text-muted);
+}
+
+.pushDiagnosis dd{
+    margin: 0;
+    color: var(--text-h);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    overflow-wrap: anywhere;
+}
+
 .pushDetail{
     display: block;
     margin-top: 0.25rem;

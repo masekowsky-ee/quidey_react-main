@@ -79,6 +79,15 @@ function SettingSection({ title, description, children, id }) {
 }
 
 const ON_OFF = [{ value: true, label: 'pushOn' }, { value: false, label: 'pushOff' }];
+// What the last check of this device saw (push.js `diagnosis`), in this order; the names are
+// the browser's own, so a screenshot says exactly where it stops
+const DIAGNOSIS_ROWS = [
+    ['result', 'Ergebnis / result'], ['checkedAt', 'Geprüft / checked'], ['support', 'Push API'], ['app', 'Als App / standalone'],
+    ['stored', "localStorage 'push'"], ['permission', 'Notification.permission'], ['pushPermission', 'pushManager.permissionState'],
+    ['subscription', 'Push subscription'], ['worker', 'Service Worker'],
+];
+const diagnosisValue = (value) => (value === null || value === undefined ? '–' : String(value));
+
 const PUSH_HINTS = {
     unknown: 'pushChecking', unsupported: 'pushUnsupported', install: 'pushInstallFirst', denied: 'pushDenied',
     unavailable: 'pushUnavailable', off: 'pushOffHint', on: 'pushOnHint',
@@ -124,6 +133,20 @@ function PushSettings() {
                     {/* the browser's own words, so a device that can't be signed up says why */}
                     {push.detail && <small className={styles.pushDetail}>{push.detail}</small>}
                 </p>}
+            {push.diagnosis && (
+                <details className={styles.pushDiagnosis}>
+                    <summary>{t('pushDiagnosis')}</summary>
+                    <p className={styles.rowHint}>{t('pushDiagnosisHint')}</p>
+                    <dl>
+                        {DIAGNOSIS_ROWS.filter(([key]) => key in push.diagnosis).map(([key, label]) => (
+                            <div key={key}>
+                                <dt>{label}</dt>
+                                <dd>{diagnosisValue(push.diagnosis[key])}</dd>
+                            </div>
+                        ))}
+                    </dl>
+                </details>
+            )}
         </>
     );
 }

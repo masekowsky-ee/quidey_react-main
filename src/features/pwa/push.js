@@ -17,6 +17,14 @@ const WANTED_KEY = 'push';
 const ENDPOINT_KEY = 'pushEndpoint';
 const ASKED_KEY = 'pushAsked';
 const READY_TIMEOUT_MS = 10 * 1000;
+// a browser call in the check that doesn't answer in this time counts as failed (a hanging one
+// would otherwise hold up every later step, see inTurn)
+const CHECK_TIMEOUT_MS = 5 * 1000;
+
+const inTime = (promise, what) => Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`${what} gave no answer`)), CHECK_TIMEOUT_MS)),
+]);
 
 // The kinds each device can switch on or off (columns on the server)
 export const PUSH_KINDS = ['plan', 'digest', 'messages', 'social'];
@@ -27,7 +35,9 @@ export const PUSH_KINDS = ['plan', 'digest', 'messages', 'social'];
 // kinds: what this device gets, while on. asking: the question after the first task is open.
 // error: the text key of what went wrong last; detail: the browser's own words for it (shown
 // small under it, so a phone that can't be signed up says why).
-let state = { status: 'unknown', kinds: null, busy: false, error: null, detail: null, asking: false };
+// diagnosis: what the last check saw and decided (Settings → "Technische Details"), so a device
+// where it doesn't stay on can show why in a screenshot.
+let state = { status: 'unknown', kinds: null, busy: false, error: null, detail: null, asking: false, diagnosis: null };
 const listeners = new Set();
 const set = (changes) => {
     state = { ...state, ...changes };
@@ -147,27 +157,45 @@ export function refreshPush() {
 // Whether this browser lets the site show notifications: 'granted' | 'denied' | 'default'.
 // Notification.permission alone isn't enough: some phones read it as "default" right after a
 // reload of an installed app, while the push permission (pushManager.permissionState) is there.
+// Answers { plain, push, permission }: both readings and what counts.
 async function permissionOf(registration) {
     const plain = Notification.permission;
     let push = null;
     try {
-        push = (await registration?.pushManager.permissionState?.({ userVisibleOnly: true })) ?? null;
+        push = (await inTime(registration?.pushManager.permissionState?.({ userVisibleOnly: true }) ?? Promise.resolve(null), 'permissionState')) ?? null;
     } catch { /* older browsers: only the plain one */ }
-    if (plain === 'granted' || push === 'granted') return 'granted';
-    if (plain === 'denied' || push === 'denied') return 'denied';
-    return 'default';
+    const permission = plain === 'granted' || push === 'granted' ? 'granted'
+        : plain === 'denied' || push === 'denied' ? 'denied' : 'default';
+    return { plain, push, permission };
 }
+
+const workerState = (registration) => {
+    if (!registration) return 'none';
+    const worker = registration.active ? 'active' : registration.waiting ? 'waiting' : registration.installing ? 'installing' : 'none';
+    return navigator.serviceWorker.controller ? `${worker}, controls the page` : worker;
+};
+
+const endpointHost = (subscription) => {
+    try { return subscription ? new URL(subscription.endpoint).host : null; } catch { return '?'; }
+};
+
+const runsAsApp = () => Boolean(window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true);
 
 async function checkPush() {
     const support = pushSupport();
-    if (support !== 'supported') return set({ status: support, kinds: null });
+    const facts = { checkedAt: new Date().toLocaleTimeString(), support, app: runsAsApp(), stored: read(WANTED_KEY) };
+    const decide = (result, changes) => set({ ...changes, diagnosis: { ...facts, result } });
+    if (support !== 'supported') return decide(support, { status: support, kinds: null });
     // 'on' | 'off' (chosen here, or signed out) | null (nothing stored, e.g. storage was cleared)
-    const wanted = read(WANTED_KEY);
+    const wanted = facts.stored;
     let subscription = null;
     try {
-        const registration = await navigator.serviceWorker.getRegistration();
-        subscription = (await registration?.pushManager.getSubscription()) ?? null;
-        const permission = await permissionOf(registration);
+        const registration = await inTime(navigator.serviceWorker.getRegistration(), 'getRegistration');
+        facts.worker = workerState(registration);
+        subscription = (await inTime(registration?.pushManager.getSubscription() ?? Promise.resolve(null), 'getSubscription')) ?? null;
+        facts.subscription = endpointHost(subscription);
+        const { plain, push, permission } = await permissionOf(registration);
+        Object.assign(facts, { permission: plain, pushPermission: push });
         // The browser keeps a subscription only while it may show notifications, so one that is
         // there counts as on and allowed (unless the browser says "blocked" outright). Only a
         // clear "off" or "blocked" takes it down: a reload must never turn them off by itself.
@@ -180,16 +208,20 @@ async function checkPush() {
                 await subscription?.unsubscribe().catch(() => {});
             }
             if (wanted === 'on') write(WANTED_KEY, 'off');
-            return set({ status: permission === 'denied' ? 'denied' : 'off', kinds: null });
+            const why = !on ? (wanted === 'off' ? 'off: chosen off (or signed out)' : 'off: never turned on here')
+                : permission === 'denied' ? 'off: blocked by the browser' : 'off: no permission and no subscription';
+            return decide(why, { status: permission === 'denied' ? 'denied' : 'off', kinds: null });
         }
         const key = await serverKey();
-        if (!key) return set({ status: 'unavailable', kinds: null });
-        const kinds = await save(await subscribe(key));
+        if (!key) return decide('unavailable: the server has no key', { status: 'unavailable', kinds: null });
+        const renewed = await subscribe(key);
+        facts.subscription = endpointHost(renewed);
+        const kinds = await save(renewed);
         write(WANTED_KEY, 'on');
-        set({ status: 'on', kinds, error: null });
-    } catch {
+        decide('on', { status: 'on', kinds, error: null });
+    } catch (err) {
         // offline or the worker didn't come up: shown as it was chosen, checked again next start
-        set({ status: wanted === 'on' || subscription ? 'on' : 'off' });
+        decide(`error: ${err?.name || 'Error'}: ${err?.message || err}`.slice(0, 200), { status: wanted === 'on' || subscription ? 'on' : 'off' });
     }
 }
 
@@ -224,7 +256,7 @@ export async function enablePush() {
             step = 'server';
             const kinds = await save(subscription);
             write(WANTED_KEY, 'on');
-            set({ status: 'on', kinds });
+            set({ status: 'on', kinds, diagnosis: { ...state.diagnosis, stored: 'on', subscription: endpointHost(subscription), result: 'on: turned on just now' } });
             return true;
         } catch (err) {
             set(failure(step, err));
@@ -349,5 +381,5 @@ export function usePushSync(enabled, account, navigate) {
 export function resetPushState() {
     publicKey = undefined;
     queue = Promise.resolve();
-    state = { status: 'unknown', kinds: null, busy: false, error: null, detail: null, asking: false };
+    state = { status: 'unknown', kinds: null, busy: false, error: null, detail: null, asking: false, diagnosis: null };
 }
