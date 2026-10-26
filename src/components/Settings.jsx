@@ -2,8 +2,9 @@ import styles from './Settings.module.css';
 import { useEffect, useState } from 'react';
 import {useTranslation} from '../i18n/useTranslation'
 import {useSelector, useDispatch} from 'react-redux';
-import {setLanguage, setTheme, setAccent, setPalette, setDefaultSessionMinutes, setMotion, setShowSharedTasks, setShowTutorial} from '../features/settings/settingsAction';
+import {setLanguage, setTheme, setAccent, setPalette, setDefaultSessionMinutes, setMotion, setSound, setShowSharedTasks, setShowTutorial} from '../features/settings/settingsAction';
 import {MOTION_LEVELS} from '../features/settings/motion';
+import {SOUND_LEVELS, SOUND_NAMES, playSound} from '../features/settings/sound';
 import {setSessionParams} from '../features/session/sessionAction';
 import {SESSION_LENGTHS, PALETTES, ACCENT_SWATCHES as ACCENT_OPTIONS} from '../features/settings/preferences';
 import { DEFAULT_UI_VARIANT, OWN_COLORS, VARIANT_COLORS, setUiColors, useColorChoice } from '../features/tester/variants';
@@ -203,6 +204,12 @@ export default function Settings(){
         ...ACCENT_OPTIONS,
     ];
     const motionLevel = useSelector((state) => state.settings.motion);
+    const soundLevel = useSelector((state) => state.settings.sound);
+    // a new level is heard at once
+    const chooseSound = (level) => {
+        dispatch(setSound(level));
+        playSound('done');
+    };
     const defaultSessionMinutes = useSelector((state) => state.settings.defaultSessionMinutes);
     const showSharedTasks = useSelector((state) => state.settings.showSharedTasks);
     const installState = useInstallState();
@@ -298,6 +305,20 @@ export default function Settings(){
                             <Choice label={t('motionSetting')} value={motionLevel} onChange={(level) => dispatch(setMotion(level))}
                                 options={MOTION_LEVELS.map(level => ({ value: level, label: `motion_${level}` }))} />
                         </SettingRow>
+                        <SettingRow title={t('soundSetting')} hint={t(`soundHint_${soundLevel}`)}>
+                            <Choice label={t('soundSetting')} value={soundLevel} onChange={chooseSound}
+                                options={SOUND_LEVELS.map(level => ({ value: level, label: `sound_${level}` }))} />
+                        </SettingRow>
+                        {soundLevel !== 'off' && <div className={styles.rowStack}>
+                            <span className={styles.rowLabel}>{t('soundPreview')}</span>
+                            <div className={styles.soundChips} role="group" aria-label={t('soundPreview')}>
+                                {SOUND_NAMES.map(name => (
+                                    <button key={name} type="button" className={styles.soundChip} onClick={() => playSound(name)}>
+                                        {t(`sound_${name}`)}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>}
                     </SettingSection>
                 </>}
 

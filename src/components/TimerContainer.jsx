@@ -7,6 +7,7 @@ import { addWorkedTask, addTaskTime } from '../features/session/sessionAction.js
 import { formatClock } from '../features/helperFunction';
 import { useTranslation } from '../i18n/useTranslation';
 import Icon from './icons.jsx';
+import { playSound } from '../features/settings/sound';
 
 // The inline timer as it will look, for the start screen (AppSkeleton): its mode and time come
 // from this device, so they are shown as they are; nothing in it works yet
@@ -131,6 +132,8 @@ export default function TimerContainer(props){
         if (timer.active && (stopwatch || timer.time >= 1000)) {
             timeoutRef.current = setTimeout(() => {
                 dispatch(setTimer(timer.time + (stopwatch ? 1000 : -1000), timer.active));
+                // the countdown just ran out
+                if (!stopwatch && timer.time < 2000) playSound('focusEnd');
                 setWorkedTime(prev => prev + 1);
                 if (activeTaskRef.current) dispatch(addTaskTime(activeTaskRef.current, 1));
             }, 1000);
@@ -154,11 +157,14 @@ export default function TimerContainer(props){
             }
             setEditTimer(false);
             setActiveTimer(true);
+            playSound('focusStart');
             if (!activeTask) return;
             dispatch(addWorkedTask(activeTask))
         } else if (action === 'pause'){
+            if (timer.active) playSound('pause');
             dispatch(setTimer(timer.time, false));
         } else if (action === 'terminate'){
+            playSound('pause');
             clearTimeout(timeoutRef.current);
             dispatch(setTimer(0, false));
             setActiveTimer(false);

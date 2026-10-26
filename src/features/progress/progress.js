@@ -5,6 +5,7 @@ import { showToast } from '../toast/toast';
 import { COMMUNITY_PATHS } from '../community/paths';
 import { translate } from '../../i18n/useTranslation';
 import { burst } from '../settings/motion';
+import { playSound } from '../settings/sound';
 import { PROFILE_COLORS, PROFILE_BANNERS, PROFILE_EMOJIS, AVATAR_FRAMES } from '../profile/profileOptions';
 
 // Levels, XP and challenges. The server works them out (GET /api/progress, utils/progress.js in
@@ -151,12 +152,15 @@ export const fetchProgress = () => async (dispatch, getState) => {
     nudgeStreak(dispatch, data, t);
     if (!before) return data;
 
+    // of several good things at once only the biggest is heard
+    let sound = null;
     const wasDone = new Set(allChallenges(before).filter(c => c.done).map(c => `${c.id}:${before.today}:${before.weekStart}`));
     for (const challenge of allChallenges(data)) {
         if (challenge.done && !wasDone.has(`${challenge.id}:${data.today}:${data.weekStart}`)
             && (challenge.period === 'day' ? data.today === before.today : data.weekStart === before.weekStart)) {
             dispatch(showToast(fill(t('toast_challengeDone'), { xp: challenge.xp }), 'success',
                 { to: COMMUNITY_PATHS.progress, detail: challengeTitle(t, challenge) }));
+            sound = 'challenge';
         }
     }
     // the streak went on today: a milestone is celebrated, any other day just counted
@@ -164,13 +168,16 @@ export const fetchProgress = () => async (dispatch, getState) => {
         const milestone = STREAK_MILESTONES.includes(data.streak);
         dispatch(showToast(fill(t(milestone ? 'toast_streakMilestone' : data.streak === 1 ? 'toast_streakStartedOne' : 'toast_streakGoesOn'), { days: data.streak }),
             'success', { to: '/', detail: milestone ? t('toast_streakMilestoneDetail') : undefined }));
+        sound = milestone ? 'milestone' : 'streak';
         if (milestone && motion !== 'minimal' && typeof window !== 'undefined') burst(window.innerWidth / 2, window.innerHeight * 0.3, motion === 'extreme' ? 60 : 30);
     }
     if (data.level > before.level) {
         dispatch(showToast(fill(t('toast_levelUp'), { level: data.level }), 'success',
             { to: COMMUNITY_PATHS.progress, detail: t(`tier_${tierFor(data.level).id}`) }));
+        sound = 'levelUp';
         if (motion !== 'minimal' && typeof window !== 'undefined') burst(window.innerWidth / 2, window.innerHeight * 0.4, motion === 'extreme' ? 70 : 36);
     }
+    if (sound) playSound(sound);
     return data;
 };
 

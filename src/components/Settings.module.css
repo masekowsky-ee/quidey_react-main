@@ -168,6 +168,18 @@ div.page{
     white-space: nowrap;
 }
 
+/* every sound once, to listen to */
+.soundChips{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.soundChip{
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+}
+
 /* the all-day reminder time */
 .timeInput{
     flex-shrink: 0;

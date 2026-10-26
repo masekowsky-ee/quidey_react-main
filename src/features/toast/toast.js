@@ -1,6 +1,8 @@
 // Short messages that appear at the bottom and go away by themselves ("Invite sent").
 // For things worth knowing but not worth stopping for; real problems still use CustomError.
 
+import { playSound } from '../settings/sound';
+
 export const SHOW_TOAST = "SHOW_TOAST";
 export const HIDE_TOAST = "HIDE_TOAST";
 
@@ -23,6 +25,7 @@ const actions = new Map();
 // options.detail: a second line, e.g. the start of the message
 // options.action: { label, run } a button on the toast, e.g. "Undo"
 export const showToast = (text, tone = 'info', { to, detail, action } = {}) => (dispatch) => {
+    if (tone === 'error') playSound('error');
     const id = nextId++;
     if (action) actions.set(id, action.run);
     dispatch({ type: SHOW_TOAST, payload: { id, text, tone, ...(to && { to }), ...(detail && { detail }), ...(action && { actionLabel: action.label }) } });

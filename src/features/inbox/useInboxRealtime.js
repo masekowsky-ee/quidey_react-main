@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
 import { displayName, fill } from '../helperFunction';
 import { showToast } from '../toast/toast';
+import { playSound } from '../settings/sound';
 import { REALTIME_RECONNECT, useRealtime } from '../realtime/socket';
 import { fetchInboxUnread, noticeView } from './inbox';
 
@@ -22,6 +23,7 @@ export function useInboxRealtime() {
         refreshBadge();
         if (!user || !message || message.fromMe) return;
         const reading = onInbox && Number(params.get('with')) === user.id;
+        playSound('message');
         if (!reading) dispatch(showToast(fill(t('inboxLiveMessage'), { name: displayName(user) }), 'info',
             { to: `/inbox?with=${user.id}`, detail: message.body }));
     });
@@ -30,6 +32,7 @@ export function useInboxRealtime() {
         const reading = onInbox && params.get('tab') === 'notices';
         if (!notice?.title || reading) return;
         const view = noticeView(t, notice);
+        playSound('notify');
         // a task given to me opens its session; a notice from the team the notices
         if (view.to) dispatch(showToast(view.title, 'info', { to: view.to, detail: view.body }));
         else dispatch(showToast(fill(t('inboxLiveNotice'), { title: view.title }), 'info', { to: '/inbox?tab=notices', detail: view.body }));

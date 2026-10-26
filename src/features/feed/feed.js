@@ -1,6 +1,7 @@
 import { useDispatch, useStore } from 'react-redux';
 import { apiFetch, displayName, fill } from '../helperFunction';
 import { showToast } from '../toast/toast';
+import { playSound } from '../settings/sound';
 import { useTranslation } from '../../i18n/useTranslation';
 import { markNews } from '../realtime/news';
 import { useRealtime, useRealtimeRefresh } from '../realtime/socket';
@@ -99,6 +100,8 @@ export function useFeedRealtime() {
     });
     useRealtime('feed:changed', () => dispatch(markNews('feed')));
     useRealtime('feed:cheered', (payload) => {
-        if (payload?.user) dispatch(showToast(fill(t('liveFeedCheer'), { name: displayName(payload.user) }), 'info', { to: '/community' }));
+        if (!payload?.user) return;
+        playSound('cheer');
+        dispatch(showToast(fill(t('liveFeedCheer'), { name: displayName(payload.user) }), 'info', { to: '/community' }));
     });
 }

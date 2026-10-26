@@ -1,6 +1,7 @@
-import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS, SET_PALETTE } from "./settingsActionTypes";
+import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS, SET_PALETTE, SET_SOUND } from "./settingsActionTypes";
 import { HOME_LAYOUTS, storeHomeLayout } from "./homeLayout";
 import { MOTION_LEVELS, storeMotion } from "./motion";
+import { SOUND_LEVELS, storeSound } from "./sound";
 import { LANGUAGES, storeLanguage, ACCENTS, storeAccent, SESSION_LENGTHS, storeSessionMinutes, storeShowSharedTasks, PALETTE_NAMES, storePalette } from "./preferences";
 
 // open: true / false; without it the menu toggles
@@ -86,6 +87,15 @@ export const setMotion = (level) => {
     if (MOTION_LEVELS.includes(level)) storeMotion(level);
     return {
         type: SET_MOTION,
+        payload: level
+    };
+};
+
+// 'off' | 'soft' | 'full'; remembered for the next visit
+export const setSound = (level) => {
+    if (SOUND_LEVELS.includes(level)) storeSound(level);
+    return {
+        type: SET_SOUND,
         payload: level
     };
 };

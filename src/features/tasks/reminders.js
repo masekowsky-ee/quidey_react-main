@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { showToast } from '../toast/toast';
+import { playSound } from '../settings/sound';
 import { apiFetch, fill, parseDate } from '../helperFunction';
 import { translate } from '../../i18n/useTranslation';
 import { dateKey, durationText, minutesOfDay, remindersOf, taskStart, timeText } from '../calendar/calendar';
@@ -134,7 +135,10 @@ export function useTaskReminders(enabled = true) {
                 dispatch(showToast(text, 'info'));
                 notify(task.name, text, reminderKey(task, minutes));
             }
-            if (due.length > 0) storeShown(shown);
+            if (due.length > 0) {
+                storeShown(shown);
+                playSound('reminder');
+            }
         };
         check();
         const interval = setInterval(check, CHECK_EVERY_MS);

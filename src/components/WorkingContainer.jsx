@@ -29,6 +29,7 @@ export function FocusSkeleton() {
 }
 import { motion, useDragControls } from 'motion/react'
 import { useMotionLevel, burstFrom } from '../features/settings/motion'
+import { playSound } from '../features/settings/sound'
 
 // how far (px) or how fast (px/s) the card has to be swiped to put the task back
 const SWIPE_DISTANCE = 110;
@@ -80,6 +81,7 @@ export default function WorkingContainer (props) {
 
     const setActiveDoneHandler = (e) => {
         // finishing the task in focus is worth a burst on "normal", a big one on "extreme"
+        playSound('done');
         if (motionLevel === 'extreme' && e?.currentTarget) {
             burstFrom(e.currentTarget, 60);
             const target = e.currentTarget;

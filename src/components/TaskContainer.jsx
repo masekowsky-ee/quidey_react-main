@@ -20,6 +20,7 @@ import { showToast } from '../features/toast/toast'
 import TaskEditDialog from './task/TaskEditDialog.jsx'
 import { AnimatePresence } from 'motion/react'
 import { MOTION, useMotionLevel, burstFrom } from '../features/settings/motion'
+import { playSound } from '../features/settings/sound'
 import { setShowSharedTasks } from '../features/settings/settingsAction'
 import { isEvent } from '../features/tasks/kinds'
 import { dateKey, minutesOfDay } from '../features/calendar/calendar'
@@ -75,8 +76,9 @@ export default function TaskContainer(props){
         const step = CASCADE_STEP[motionLevel];
         return { ...preset, transition: { ...preset.transition, delay: Math.min(index, 12) * step } };
     };
-    // a finished task earns confetti on "normal" (a little) and "extreme"
+    // a finished task earns its sound, and confetti on "normal" (a little) and "extreme"
     const celebrate = (e) => {
+        playSound('done');
         if (motionLevel !== 'minimal') burstFrom(e.currentTarget, extreme ? undefined : 12);
     };
     const reportError = () => dispatch(showToast(t('friendError_generic'), 'error'));
@@ -153,7 +155,7 @@ export default function TaskContainer(props){
             .then(() => {
                 if (task.repeat) return;
                 dispatch(showToast(fill(t('taskDoneToast'), { name: task.name }), 'info', {
-                    action: { label: t('toastUndo'), run: () => update(task, { done: false }) },
+                    action: { label: t('toastUndo'), run: () => { playSound('undo'); return update(task, { done: false }); } },
                 }));
             })
             .catch(reportError);
@@ -199,7 +201,10 @@ export default function TaskContainer(props){
             ...base,
             hidden: draggedTask?.id === task.id,
             onToggleDone: (e) => {
-                if (task.done) return update(task, { done: false });
+                if (task.done) {
+                    playSound('undo');
+                    return update(task, { done: false });
+                }
                 celebrate(e);
                 tickOff(task);
             },

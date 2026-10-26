@@ -384,7 +384,7 @@ function Privacy() {
                 <li>dein Anmelde-Token (7 Tage gültig, wird beim Abmelden gelöscht). Meldest du auf demselben Gerät
                     mehrere Konten an, um zwischen ihnen zu wechseln, liegen für jedes davon Token, Benutzer- und
                     Anzeigename (höchstens fünf Konten); beim Abmelden eines Kontos wird sein Eintrag gelöscht;</li>
-                <li>deine Einstellungen: Sprache, Design, Farbpalette, Akzentfarbe, Animationen, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer oder Stoppuhr, Kalenderansicht, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
+                <li>deine Einstellungen: Sprache, Design, Farbpalette, Akzentfarbe, Animationen, Töne, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer oder Stoppuhr, Kalenderansicht, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
                 <li>bei einem neuen Konto, wie viele Dinge du schon erledigt oder angelegt hast und ob Quidey dich schon
                     gefragt hat, ob du es installieren möchtest und ob es dir gefällt (nur eine Zahl und zwei Merker,
                     keine Inhalte);</li>

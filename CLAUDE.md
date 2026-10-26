@@ -28,6 +28,12 @@ Three repositories, side by side on this machine:
   (`src/features/settings/motion.js`, `MOTION` presets, confetti `burst`). Remotion
   (`@remotion/player`) renders the intro (`src/components/intro/`, only when the app is opened
   fresh on `/`: not on reload, back/forward or a deep link).
+- Sound: `src/features/settings/sound.js`, synthesised with the Web Audio API (no files), one
+  voice (sine bell + octave + glassy tine, a short echo, A major pentatonic, motif E → A).
+  `playSound(name)` (`SOUND_NAMES`: done, undo, focusStart, pause, focusEnd, challenge, streak,
+  milestone, levelUp, message, notify, reminder, cheer, error); levels `off | soft | full`
+  (`settings.sound`, `setSound`, Settings → Darstellung → Töne with a "Probehören" row). Silent
+  in a background tab and before the first click; error toasts play `error` by themselves.
 - Realtime: `socket.io-client` (`src/features/realtime/socket.js`, `useRealtime(event, handler)`),
   loaded with a dynamic import only once signed in.
 - Icons: one outline set, `src/components/icons.jsx` (`<Icon name size? />`, 24px grid, 1.7
@@ -360,7 +366,7 @@ Client-side storage: only `localStorage` (no cookies), plus the service worker's
 for the app's own files: `token` (JWT), `accounts` (several accounts on one device:
 `[{ username, displayName, token }]`, max 5, `src/features/auth/accounts.js`; switching reloads
 the app as the other one, signing out takes over the next remembered account), `language`, `accent`,
-`theme`, `palette`, `motion`, `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
+`theme`, `palette`, `motion`, `sound`, `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
 `teamSessionId`, `streakNudge` (day of the last streak reminder), `uiVariant` and `uiColors`
 (testers' interface variant and the colours picked per variant), `push`, `pushEndpoint`,
 `pushAsked` (push notifications on this device), `onboarding:<username>` (a new account's action
