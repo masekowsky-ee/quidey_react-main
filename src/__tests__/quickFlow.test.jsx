@@ -14,6 +14,7 @@ import TaskForm from '../components/TaskForm'
 import Toaster from '../components/Toaster'
 import CommandPalette from '../components/variants/CommandPalette'
 import ShortcutsDialog from '../components/ShortcutsDialog'
+import Settings from '../components/Settings'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
     ...(await importOriginal()),
@@ -38,7 +39,8 @@ function makeStore({ tasks = [], isTester = false, language = 'en' } = {}) {
 }
 
 function Where() {
-    return <output data-testid="where">{useLocation().pathname}</output>
+    const { pathname, search, hash } = useLocation()
+    return <output data-testid="where">{pathname + search + hash}</output>
 }
 
 function wrap(ui, store) {
@@ -197,6 +199,49 @@ describe('the command bar for everybody and the keyboard shortcuts', () => {
         const overview = screen.getByRole('dialog', { name: 'Keyboard shortcuts' })
         expect(overview).toHaveTextContent('Go to the calendar')
         await act(async () => { fireEvent.keyDown(window, { key: 'Escape' }) })
+        expect(screen.queryByRole('dialog')).toBeNull()
+    })
+
+    it('finds tabs and settings once something is typed, with where they sit', async () => {
+        app(makeStore())
+        await act(async () => { fireEvent.keyDown(window, { key: 'k', ctrlKey: true }) })
+        expect(screen.queryByRole('option', { name: /Accent colour/ })).toBeNull()
+        const input = screen.getByRole('combobox')
+        // the same name on two pages, told apart by where it sits
+        fireEvent.change(input, { target: { value: 'requests' } })
+        expect(screen.getByRole('option', { name: 'Requests, Inbox' })).toBeInTheDocument()
+        expect(screen.getByRole('option', { name: 'Requests, Friends' })).toBeInTheDocument()
+        // the admin's tabs only for admins
+        expect(screen.getAllByRole('option')).toHaveLength(2)
+        // where it sits is searched too
+        fireEvent.change(input, { target: { value: 'statistics sessions' } })
+        expect(screen.getAllByRole('option')).toHaveLength(1)
+        fireEvent.change(input, { target: { value: 'accent' } })
+        expect(screen.getByRole('option', { name: 'Accent colour, Settings · Appearance' })).toBeInTheDocument()
+        await act(async () => { fireEvent.keyDown(input, { key: 'Enter' }) })
+        expect(screen.getByTestId('where')).toHaveTextContent('/settings#appearance')
+    })
+
+    it('opens the area of a setting while the settings are open', async () => {
+        render(
+            <Provider store={makeStore()}>
+                <MemoryRouter initialEntries={['/settings']}>
+                    <Routes><Route path="*" element={<><CommandPalette /><Settings /></>} /></Routes>
+                </MemoryRouter>
+            </Provider>
+        )
+        expect(screen.getByRole('tab', { name: 'Appearance' })).toHaveAttribute('aria-selected', 'true')
+        await act(async () => { fireEvent.keyDown(window, { key: 'k', ctrlKey: true }) })
+        fireEvent.change(screen.getByRole('combobox'), { target: { value: 'notifications' } })
+        await act(async () => { fireEvent.keyDown(screen.getByRole('combobox'), { key: 'Enter' }) })
+        expect(screen.getByRole('tab', { name: 'App' })).toHaveAttribute('aria-selected', 'true')
+        expect(screen.getByRole('heading', { name: 'Notifications' })).toBeInTheDocument()
+    })
+
+    it('closes with its cross', async () => {
+        app(makeStore())
+        await act(async () => { fireEvent.keyDown(window, { key: 'k', ctrlKey: true }) })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Close' })) })
         expect(screen.queryByRole('dialog')).toBeNull()
     })
 

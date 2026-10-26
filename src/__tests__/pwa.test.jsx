@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { render, screen, fireEvent, act } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
@@ -56,7 +57,7 @@ describe('web app manifest', () => {
 
 describe('install as app (settings)', () => {
     const makeStore = () => configureStore({ reducer: rootReducer })
-    const renderSettings = () => render(<Provider store={makeStore()}><Settings /></Provider>)
+    const renderSettings = () => render(<Provider store={makeStore()}><MemoryRouter><Settings /></MemoryRouter></Provider>)
 
     beforeAll(() => listenForInstallPrompt())
     beforeEach(() => {

@@ -259,9 +259,8 @@ describe('events in a shared session', () => {
 
 describe('fewer choices at once', () => {
     it('settings come in areas; the link from the editor to the event types opens "planning"', () => {
-        window.history.replaceState(null, '', '/settings#event-types')
         const store = makeStore()
-        render(<Provider store={store}><Settings /></Provider>)
+        render(<Provider store={store}><MemoryRouter initialEntries={['/settings#event-types']}><Settings /></MemoryRouter></Provider>)
         expect(screen.getByRole('tab', { name: 'Planning' })).toHaveAttribute('aria-selected', 'true')
         expect(screen.getByRole('heading', { name: 'Event types' })).toBeInTheDocument()
         expect(screen.queryByRole('button', { name: 'Ocean' })).not.toBeInTheDocument()

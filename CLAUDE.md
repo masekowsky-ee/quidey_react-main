@@ -108,8 +108,13 @@ Order of checks on every render:
    "Ignorieren" keeps the name as typed.
    Row actions in lists appear on hover/focus with a mouse (always on touch).
    Quick ways through the app, for everybody: the command bar (`variants/CommandPalette.jsx`,
-   Ctrl/⌘ K, "/" or the header's search button; finds my open tasks and opens their editor,
-   jumps to places, new task, light/dark, shortcuts; variants and `/tester` only for testers)
+   Ctrl/⌘ K, "/" or the header's search button, a cross or Escape closes it; finds my open tasks
+   and opens their editor, jumps to places, new task, light/dark, shortcuts; once something is
+   typed also every named tab, calendar view, setting and profile section with where it sits
+   (`features/search/places.js`) and the tour / "Profil gestalten"; variants and `/tester` only
+   for testers). A section's id in the hash (`/settings#appearance`, `/profile#password`) is
+   scrolled to by `useHashTarget` (`features/layout/hashTarget.js`), also when only the hash
+   changes; Settings opens the section's area (`SECTION_AREAS`), `/profile#customize` the editor
    and keyboard shortcuts (`features/shortcuts/shortcuts.js`, overview `ShortcutsDialog.jsx` on
    "?": N new task, G then H/K/G/P/S to Start/Kalender/Gemeinschaft/Postfach/Statistiken; never
    while typing or with a dialog open). Ticking off a task on Home shows a toast with

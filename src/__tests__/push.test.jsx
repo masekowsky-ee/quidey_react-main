@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
@@ -111,7 +112,7 @@ function respond() {
 
 const makeStore = () => configureStore({ reducer: rootReducer })
 function renderApp() {
-    return render(<Provider store={makeStore()}><Settings /><PushOffer /></Provider>)
+    return render(<Provider store={makeStore()}><MemoryRouter><Settings /></MemoryRouter><PushOffer /></Provider>)
 }
 const openAppArea = () => fireEvent.click(screen.getByRole('tab', { name: 'App' }))
 

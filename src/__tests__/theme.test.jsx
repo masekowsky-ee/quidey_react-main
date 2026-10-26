@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, renderHook, act } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
@@ -133,7 +134,7 @@ describe('Settings page', () => {
     it('shows the current theme and switches it', () => {
         mockSystemTheme(false)
         const store = makeStore()
-        render(<Provider store={store}><Settings /></Provider>)
+        render(<Provider store={store}><MemoryRouter><Settings /></MemoryRouter></Provider>)
 
         expect(screen.getByRole('button', { name: 'Dunkel' })).toHaveAttribute('aria-pressed', 'true')
 

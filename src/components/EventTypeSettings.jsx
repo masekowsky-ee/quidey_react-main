@@ -1,5 +1,5 @@
 import styles from './Settings.module.css';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
 import { fill } from '../features/helperFunction';
@@ -58,12 +58,6 @@ export default function EventTypeSettings({ embedded = false }) {
     const tasks = useSelector(state => state.task.tasks);
     const [draft, setDraft] = useState('');
     const [busy, setBusy] = useState(false);
-    const ref = useRef(null);
-
-    // opened from a link to this card (/settings#event-types): it comes into view
-    useEffect(() => {
-        if (window.location.hash === '#event-types') ref.current?.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
-    }, []);
 
     const fail = (err) => dispatch(showToast(eventTypeErrorText(t, err), 'error'));
     const eventsOf = (type) => tasks.filter(task => task.kind === 'event' && task.event_type_id === type.id).length;
@@ -110,7 +104,7 @@ export default function EventTypeSettings({ embedded = false }) {
     const Wrapper = embedded ? 'div' : 'section';
 
     return (
-        <Wrapper {...(embedded ? { className: styles.embedded, ref } : { className: styles.card, id: 'event-types', ref, 'aria-labelledby': 'event-types-title' })}>
+        <Wrapper {...(embedded ? { className: styles.embedded } : { className: styles.card, id: 'event-types', 'aria-labelledby': 'event-types-title' })}>
             {!embedded && <h2 id="event-types-title" className={styles.cardTitle}>{t('eventTypes')}</h2>}
             {!embedded && <p className={styles.rowHint}>{t('eventTypesHint')}</p>}
 

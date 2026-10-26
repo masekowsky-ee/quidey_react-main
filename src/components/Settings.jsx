@@ -14,6 +14,9 @@ import { PUSH_KINDS, disablePush, enablePush, refreshPush, sendTestPush, setPush
 import { fill } from '../features/helperFunction';
 import { saveAllDayTime, selectAllDayTime } from '../features/tasks/reminders';
 import EventTypeSettings from './EventTypeSettings.jsx';
+import { useLocation } from 'react-router-dom';
+import { useHashTarget } from '../features/layout/hashTarget';
+import { SECTION_AREAS } from '../features/search/places';
 
 const LANGUAGES = [
     { code: 'de', label: 'german' },
@@ -27,13 +30,13 @@ const THEME_OPTIONS = [
 ];
 
 // The settings come in three areas, one view each, so only a few choices are in sight at a
-// time. The area is in the address's hash (#plan, #app; the editor's #event-types opens "plan").
+// time. The area is in the address's hash (#plan, #app); a section's id opens its area and
+// scrolls to it (#event-types from the editor, #appearance … from the command bar).
 // "App": notifications on this device, the intro tour and, where the browser can, installing Quidey.
 const AREAS = ['look', 'plan', 'app'];
-const areaFromHash = () => {
-    const hash = typeof window === 'undefined' ? '' : window.location.hash.slice(1);
-    if (hash === 'event-types') return 'plan';
-    return AREAS.includes(hash) ? hash : 'look';
+const areaFromHash = (hash) => {
+    const name = hash.slice(1);
+    return AREAS.includes(name) ? name : SECTION_AREAS[name] ?? 'look';
 };
 
 // A segmented control of options: [{ value, label }], the current value, and what a click does
@@ -214,7 +217,15 @@ export default function Settings(){
     const showSharedTasks = useSelector((state) => state.settings.showSharedTasks);
     const installState = useInstallState();
     const dispatch = useDispatch();
-    const [chosenArea, setArea] = useState(areaFromHash);
+    const { hash, key } = useLocation();
+    const [chosenArea, setArea] = useState(() => areaFromHash(hash));
+    // a new address while the page is open (the command bar) opens its area
+    const [shownKey, setShownKey] = useState(key);
+    if (shownKey !== key) {
+        setShownKey(key);
+        setArea(areaFromHash(hash));
+    }
+    useHashTarget();
     const areas = AREAS;
     const area = areas.includes(chosenArea) ? chosenArea : 'look';
 

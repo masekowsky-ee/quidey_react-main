@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, renderHook, act } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
@@ -122,7 +123,7 @@ describe('Settings page', () => {
         // the open area lives in the address's hash: every test starts on the first one
         window.history.replaceState(null, '', '/settings')
         const store = makeStore()
-        render(<Provider store={store}><Settings /></Provider>)
+        render(<Provider store={store}><MemoryRouter><Settings /></MemoryRouter></Provider>)
         return store
     }
 

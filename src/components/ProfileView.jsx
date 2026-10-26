@@ -5,7 +5,8 @@ import { useTranslation } from '../i18n/useTranslation';
 import { formatDate, formatDuration } from '../features/helperFunction';
 import { updateProfile, changePassword, logoutEverywhere, resendVerificationMail, deleteAccount } from '../features/auth/authAction';
 import { fetchFriends } from '../features/friends/friendsAction';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { useHashTarget } from '../features/layout/hashTarget';
 import { fetchOwnProfile } from '../features/profile/profileOptions';
 import ProfileCard from './profile/ProfileCard.jsx';
 import ProfileEditor from './profile/ProfileEditor.jsx';
@@ -39,6 +40,18 @@ export default function ProfileView({ onSignOut }) {
     const [customizing, setCustomizing] = useState(false);
     const [draft, setDraft] = useState(null); // live preview while customizing
     const [customMessage, setCustomMessage] = useState(null);
+    // /profile#customize (the command bar's "Profil gestalten") opens the editor, the other
+    // sections' ids are scrolled to
+    const { hash, key } = useLocation();
+    const [shownKey, setShownKey] = useState(null);
+    if (shownKey !== key) {
+        setShownKey(key);
+        if (hash === '#customize') {
+            setCustomMessage(null);
+            setCustomizing(true);
+        }
+    }
+    useHashTarget();
 
     // fresh numbers whenever my sessions change (a finished session shows up right away)
     useEffect(() => {
@@ -234,7 +247,7 @@ export default function ProfileView({ onSignOut }) {
                 </div>
             </section>
 
-            <section className={styles.card}>
+            <section className={styles.card} id="account">
                 <div className={styles.cardHead}>
                     <h2 className={styles.cardTitle}>{t('account')}</h2>
                     {!editing && <button className={styles.quietBtn} onClick={startEditing}>{t('editProfile')}</button>}
@@ -288,7 +301,7 @@ export default function ProfileView({ onSignOut }) {
                 )}
             </section>
 
-            <section className={styles.card}>
+            <section className={styles.card} id="password">
                 <h2 className={styles.cardTitle}>{t('changePassword')}</h2>
                 <form className={styles.form} onSubmit={submitPassword}>
                     {/* hidden username helps password managers update the right entry */}
@@ -318,7 +331,7 @@ export default function ProfileView({ onSignOut }) {
                 </form>
             </section>
 
-            <div className={styles.signOutRow}>
+            <div className={styles.signOutRow} id="sign-out">
                 <button className={styles.signOutBtn} onClick={onSignOut}>{t('signOut')}</button>
                 {confirmEverywhere ? (
                     <span className={styles.confirmEverywhere}>
@@ -333,7 +346,7 @@ export default function ProfileView({ onSignOut }) {
                 )}
             </div>
 
-            <section className={`${styles.card} ${styles.dangerCard}`}>
+            <section className={`${styles.card} ${styles.dangerCard}`} id="delete-account">
                 <h2 className={styles.cardTitle}>{t('deleteAccount')}</h2>
                 <p className={styles.hint}>{t('deleteAccountHint')}</p>
                 {deleteOpen ? (

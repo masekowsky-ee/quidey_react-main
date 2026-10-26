@@ -288,7 +288,7 @@ describe('the command bar', () => {
         expect(store.getState().settings.uiVariant).toBe('tafel')
         await act(async () => { openCommands() })
         fireEvent.change(screen.getByRole('combobox'), { target: { value: 'ubersi' } })
-        expect(screen.getByRole('option', { name: /Übersicht/ })).toBeInTheDocument()
+        expect(screen.getByRole('option', { name: /Variante wechseln: Übersicht/ })).toBeInTheDocument()
         fireEvent.change(screen.getByRole('combobox'), { target: { value: 'xyz' } })
         expect(screen.getByText('Nichts gefunden für „xyz“.')).toBeInTheDocument()
     })

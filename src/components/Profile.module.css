@@ -10,6 +10,12 @@
     composes: card from './ui.module.css';
 }
 
+/* a jump to a section (/profile#password) stops below the fixed header */
+.card,
+.signOutRow{
+    scroll-margin-top: calc(var(--header-h, 4rem) + 1rem);
+}
+
 .cardTitle{
     composes: cardTitle from './ui.module.css';
 }

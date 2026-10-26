@@ -38,6 +38,8 @@ div.page{
 /* A group: name and sentence on the left (a third), its settings in a panel on the right.
    Groups are split by one full-width rule. */
 .section{
+    /* a jump to it (/settings#appearance) stops below the fixed header */
+    scroll-margin-top: calc(var(--header-h, 4rem) + 1rem);
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
     gap: 1.5rem 2.5rem;

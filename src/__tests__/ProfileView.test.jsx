@@ -17,13 +17,13 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 const me = { username: 'jo', display_name: 'Jo Berg', email: 'jo@example.com', birth_date: '2000-01-01T00:00:00Z', created_at: '2026-08-15T12:00:00Z' }
 const apiError = (status, code) => Object.assign(new Error(code), { status, code })
 
-async function renderProfile() {
+async function renderProfile(path = '/profile') {
     const store = configureStore({ reducer: rootReducer })
     store.dispatch({ type: SET_USER, payload: [me] })
     store.dispatch({ type: SET_WORKED_SESSIONS, payload: [{ id: 1, totalTime: 1500 }, { id: 2, totalTime: 2100 }] })
     const onSignOut = vi.fn()
     await act(async () => {
-        render(<Provider store={store}><MemoryRouter><ProfileView onSignOut={onSignOut} /></MemoryRouter></Provider>)
+        render(<Provider store={store}><MemoryRouter initialEntries={[path]}><ProfileView onSignOut={onSignOut} /></MemoryRouter></Provider>)
     })
     return { store, onSignOut }
 }
@@ -45,6 +45,17 @@ describe('ProfileView', () => {
         expect(screen.getByText('2')).toBeInTheDocument()       // sessions
         expect(screen.getByText('1 h 0 min')).toBeInTheDocument() // 25 + 35 minutes
         expect(screen.getByText('1')).toBeInTheDocument()       // friends
+    })
+
+    it('opens the profile editor for #customize (the command bar)', async () => {
+        await renderProfile('/profile#customize')
+        expect(screen.queryByRole('button', { name: 'Profil gestalten' })).toBeNull()
+    })
+
+    it('has the sections the command bar jumps to', async () => {
+        await renderProfile()
+        expect(screen.getByRole('button', { name: 'Profil gestalten' })).toBeInTheDocument()
+        for (const id of ['account', 'password', 'sign-out', 'delete-account']) expect(document.getElementById(id)).not.toBeNull()
     })
 
     describe('editing the profile', () => {

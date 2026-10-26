@@ -53,14 +53,14 @@
   outline: none;
 }
 
-.kbd {
+/* the cross that closes it (Escape does too); also for touch, where there is no Escape */
+.close {
+  composes: iconBtn from '../ui.module.css';
   flex-shrink: 0;
-  padding: 0.1rem 0.4rem;
-  font: inherit;
-  font-size: 0.75rem;
+  width: 2rem;
+  height: 2rem;
+  margin-right: -0.35rem;
   color: var(--text-muted);
-  border: 1px solid var(--control-border);
-  border-radius: 4px;
 }
 
 .list {
