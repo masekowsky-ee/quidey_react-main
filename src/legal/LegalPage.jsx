@@ -320,6 +320,29 @@ function Privacy() {
                 Aufgaben bekommt nur die Person die Mail, der die Aufgabe gehört. Du kannst die Mail-Erinnerung jederzeit
                 in der Aufgabe wieder ausschalten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
             </p>
+            <p>
+                <strong>Benachrichtigungen auf deinem Gerät (Push):</strong> Nur wenn du sie einschaltest (in den
+                Einstellungen unter „App“ oder auf die Frage nach deiner ersten Aufgabe) und dein Browser es erlaubt,
+                meldet sich Quidey auch bei geschlossener App: zur Erinnerung oder zum Beginn deiner Aufgaben und Termine
+                mit Uhrzeit, morgens mit einem Überblick über deinen Tag, bei Nachrichten, Freundschaftsanfragen,
+                Einladungen, geteilten oder zugewiesenen Aufgaben und Meldungen des Quidey-Teams. Welche Arten du
+                bekommst, stellst du je Gerät ein. Dafür erzeugt dein Browser bei seinem Push-Dienst eine Adresse; welcher
+                Dienst das ist, bestimmt der Hersteller deines Browsers bzw. Betriebssystems (z. B. Google bei Chrome und
+                Android, Apple bei Safari und auf iPhone/iPad, Mozilla bei Firefox), nicht Quidey. Gespeichert werden je
+                Gerät diese Adresse, zwei Schlüssel zum Verschlüsseln, die gewählten Arten und wann das Gerät angemeldet
+                bzw. zuletzt bestätigt wurde, zusammen mit deinem Konto; außerdem, für welchen Zeitpunkt eine Aufgabe schon
+                gemeldet wurde und an welchem Tag der Tagesüberblick kam, damit nichts doppelt kommt. Eine Benachrichtigung
+                enthält je nach Art den Namen und die Uhrzeit der Aufgabe (und den Ort), den Namen der Person, die dir
+                schreibt oder dich einlädt, den Anfang der Nachricht bzw. den Namen der Sitzung, Family oder Aufgabe. Sie
+                wird Ende-zu-Ende verschlüsselt (RFC 8291) übermittelt: Der Push-Dienst sieht nur verschlüsselte Daten
+                und technische Angaben wie Adresse, Zeitpunkt und Größe; er kann sie auch in den USA verarbeiten.
+                Benachrichtigungen erscheinen je nach Einstellung deines Geräts auch auf dem Sperrbildschirm. Ausschalten
+                kannst du sie jederzeit in den Einstellungen oder in deinem Browser; der Eintrag des Geräts wird gelöscht,
+                wenn du sie ausschaltest, dich abmeldest, dein Passwort änderst, dich überall abmeldest, dein Konto
+                löschst oder der Push-Dienst die Adresse für ungültig erklärt. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b
+                DSGVO; das Speichern auf deinem Gerät ist für diese von dir ausdrücklich gewünschte Funktion unbedingt
+                erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG).
+            </p>
 
             <h2>7. Kontaktformular, Feedback und E-Mail</h2>
             <p>
@@ -355,6 +378,7 @@ function Privacy() {
                     Anzeigename (höchstens fünf Konten); beim Abmelden eines Kontos wird sein Eintrag gelöscht;</li>
                 <li>deine Einstellungen: Sprache, Design, Farbpalette, Akzentfarbe, Animationen, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer oder Stoppuhr, Kalenderansicht, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
                 <li>ob du die Einführung gesehen hast, welche Erinnerungen schon angezeigt wurden, an welchem Tag dich Quidey zuletzt an deine Serie erinnert hat und welche gemeinsame Sitzung gerade gestoppt wird;</li>
+                <li>ob auf diesem Gerät Benachrichtigungen an sind, die Adresse dafür beim Push-Dienst (siehe Abschnitt 6) und ob Quidey dich danach schon gefragt hat;</li>
                 <li>Schwierigkeit und Bestwerte der Spiele.</li>
             </ul>
             <p>
@@ -362,7 +386,8 @@ function Privacy() {
                 Service Worker die Programmdateien der App (Seite, Skripte, Stylesheets, Schrift, Icons) im Cache-Speicher
                 deines Browsers ab. Darin liegen keine personenbezogenen Daten: Deine Aufgaben, Nachrichten und
                 Kontodaten werden immer direkt vom Server geladen und nicht zwischengespeichert. Bei jeder neuen
-                Version werden die alten Dateien ersetzt.
+                Version werden die alten Dateien ersetzt. Derselbe Service Worker zeigt die Benachrichtigungen an, wenn
+                du sie eingeschaltet hast; er speichert sie nicht.
             </p>
             <p>
                 Das ist für die von dir gewünschten Funktionen unbedingt erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG);
@@ -376,7 +401,7 @@ function Privacy() {
             <p>
                 Deine Konto- und Inhaltsdaten speichere ich, solange dein Konto besteht. Löschst du dein Konto, werden
                 Konto, Aufgaben, Events, Event-Typen, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen,
-                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen, deine Bewertungen als Tester und alle
+                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen, deine Bewertungen als Tester, die für Benachrichtigungen angemeldeten Geräte und alle
                 Nachrichten, die du geschrieben oder bekommen hast, sofort gelöscht – auch beim Gegenüber, auch deine
                 Nachrichten in Family-Chats. Einträge in Protokollen (Verlauf gemeinsamer Sitzungen, Admin-Protokoll)
                 und von dir angelegte Einträge in Family-Kalendern verlieren den Bezug zu deinem Konto. Hast du eine
@@ -390,8 +415,9 @@ function Privacy() {
             <h2>10. Empfänger</h2>
             <p>
                 Daten erhalten nur die oben genannten Auftragsverarbeiter (Hosting, E-Mail-Versand) sowie – soweit du
-                es veranlasst – deine Freunde (auch als Empfänger deiner Nachrichten) und Mitglieder gemeinsamer
-                Sitzungen und Families. Ich verkaufe keine Daten und gebe
+                es veranlasst – deine Freunde (auch als Empfänger deiner Nachrichten), Mitglieder gemeinsamer
+                Sitzungen und Families und, wenn du Benachrichtigungen eingeschaltet hast, der Push-Dienst deines
+                Browsers (nur verschlüsselt, siehe Abschnitt 6). Ich verkaufe keine Daten und gebe
                 sie nicht für Werbung weiter. Eine automatisierte Entscheidungsfindung oder Profilbildung
                 (Art. 22 DSGVO) findet nicht statt.
             </p>

@@ -1,6 +1,7 @@
 import { LOGIN_SUCCESS, LOGOUT, SET_USER, SET_ACCESS } from "./authActionTypes";
 import { apiFetch, apiUrl } from '../helperFunction';
 import { forgetAccount, forgetToken, listAccounts, rememberAccount, switchAccount } from './accounts';
+import { forgetPushOnSignOut, refreshPush } from '../pwa/push';
 
 // Signs in with the username or the email address (the server tells them apart by the "@")
 export const loginSuccess = (username, password) => {
@@ -53,6 +54,9 @@ export const logout = () => {
         forgetToken(token);
         forgetAccount(getState().auth.user?.username);
         const next = listAccounts()[0];
+        // no more push notifications for this account here (with another one taking over,
+        // they go over to that one on its start)
+        forgetPushOnSignOut(token, Boolean(next));
         if (next) {
             switchAccount(next.username);
             return;
@@ -165,6 +169,8 @@ export const changePassword = (currentPassword, newPassword) => {
             rememberAccount({ username: getState().auth.user?.username, token: data.token });
             dispatch({ type: LOGIN_SUCCESS, payload: { token: data.token, username: getState().auth.user?.username } });
         }
+        // the server forgot the devices of the other logins, this one signs up again
+        refreshPush();
     };
 }
 

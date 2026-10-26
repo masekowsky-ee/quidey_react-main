@@ -12,6 +12,9 @@
 // - Each build has its own cache; the old one is deleted once the new service worker takes
 //   over. It doesn't skip waiting: a running focus timer must not be reloaded underneath the
 //   user. Pages are network-first anyway, so the newest app is loaded even before that.
+// - It shows push notifications (src/features/pwa/push.js, the backend's utils/push.js) and
+//   opens the app on a click. In dev, Vite serves a worker with only that part (no cache), so
+//   notifications can be tried locally without getting in the way of hot reload.
 import { createHash } from 'node:crypto';
 
 // Files from public/ the app needs to start
@@ -25,6 +28,55 @@ export const PUBLIC_FILES = [
     '/icons/icon-512.png',
     '/icons/apple-touch-icon.png',
 ];
+
+// Push notifications: { title, body, url, tag, renotify, kind } from the server.
+// While Quidey is open and in front it already shows what's new (toasts, badges, live lists), so
+// nothing pops up then, except the test from the settings. Safari (iPhone, iPad, Mac) gives up a
+// subscription that gets pushes without a notification, so there it always shows.
+// A click focuses an open window and lets the app go to the address itself (no reload, which
+// would stop a running timer), or opens a new one.
+const PUSH_HANDLERS = `
+const ALWAYS_SHOW = /iPhone|iPad|iPod|Macintosh/.test(self.navigator.userAgent) && !/Chrome|Chromium|CriOS|Edg|Firefox|FxiOS/.test(self.navigator.userAgent);
+
+self.addEventListener('push', (event) => {
+    let message = {};
+    try {
+        message = event.data ? event.data.json() : {};
+    } catch {
+        message = { body: event.data ? event.data.text() : '' };
+    }
+    event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+        const inFront = windows.some((client) => client.focused && client.visibilityState === 'visible');
+        if (inFront && !ALWAYS_SHOW && message.tag !== 'test') return undefined;
+        return self.registration.showNotification(message.title || 'Quidey', {
+            body: message.body || '',
+            tag: message.tag || undefined,
+            renotify: Boolean(message.tag && message.renotify),
+            icon: '/icons/icon-192.png',
+            data: { url: message.url || '/' },
+        });
+    }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const url = new URL((event.notification.data && event.notification.data.url) || '/', self.location.origin);
+    if (url.origin !== self.location.origin) return;
+    event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+        const open = windows.find((client) => new URL(client.url).origin === self.location.origin);
+        if (!open) return self.clients.openWindow(url.href);
+        return open.focus().then((client) => (client || open).postMessage({ type: 'quidey:open', url: url.pathname + url.search + url.hash }));
+    }));
+});
+`;
+
+// The worker in dev: only the notifications, nothing cached
+export function devServiceWorkerSource() {
+    return `// Served by pwa.js in dev only — the built app has the full worker.
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+${PUSH_HANDLERS}`;
+}
 
 // The service worker's source for one build: `files` are the paths to store on install
 export function serviceWorkerSource(files) {
@@ -73,14 +125,21 @@ self.addEventListener('fetch', (event) => {
     // other files from public/: fresh when online, the stored copy when not
     event.respondWith(fetch(request).catch(() => caches.match(request, { cacheName: CACHE }).then((hit) => hit || Response.error())));
 });
-`;
+${PUSH_HANDLERS}`;
 }
 
-// Vite plugin: adds sw.js to the build output, precaching every built file plus PUBLIC_FILES
+// Vite plugin: adds sw.js to the build output, precaching every built file plus PUBLIC_FILES;
+// in dev it serves the notifications-only worker under /sw.js
 export function pwa() {
     return {
         name: 'quidey-pwa',
-        apply: 'build',
+        configureServer(server) {
+            server.middlewares.use('/sw.js', (_req, res) => {
+                res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
+                res.setHeader('Cache-Control', 'no-cache');
+                res.end(devServiceWorkerSource());
+            });
+        },
         generateBundle(_options, bundle) {
             const built = Object.keys(bundle)
                 .filter((fileName) => fileName.startsWith('assets/'))

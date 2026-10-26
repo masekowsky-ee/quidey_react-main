@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { MotionConfig, motion } from 'motion/react'
 import Header from './components/Header.jsx';
 import Home from './components/Home.jsx'
@@ -18,6 +18,7 @@ import { fetchTaskState, fetchTaskInvites, refreshTasks } from "./features/tasks
 import { useTaskReminders } from "./features/tasks/reminders.js"
 import { useEventEnds } from "./features/tasks/kinds.js"
 import { useAccountLocale } from "./features/settings/accountLocale.js"
+import { usePushSync } from "./features/pwa/push.js"
 import { fetchSessions } from "./features/session/sessionAction.js"
 import { fetchFriendRequests, fetchFriends } from "./features/friends/friendsAction.js"
 import { usePresenceRealtime } from "./features/presence/presence.js"
@@ -26,6 +27,7 @@ import { useWorkReporter } from './features/together/work.js'
 import Toaster from './components/Toaster.jsx';
 import Tutorial from './components/Tutorial.jsx';
 import DeleteScopeDialog from './components/task/DeleteScopeDialog.jsx';
+import PushOffer from './components/PushOffer.jsx';
 import QuickAdd from './components/QuickAdd.jsx';
 import { fetchInboxUnread } from './features/inbox/inbox.js';
 import { useInboxRealtime } from './features/inbox/useInboxRealtime.js';
@@ -198,6 +200,9 @@ function App(){
   useAccountLocale(allowed);
   // an event that ends while the app is open shows as done right then
   useEventEnds(allowed);
+  // push notifications on this device: checked on every start, a click opens their page
+  const navigate = useNavigate();
+  usePushSync(allowed, token, navigate);
 
   useEffect(() => { if (allowed) return preloadPages(); }, [allowed]);
 
@@ -240,6 +245,7 @@ function App(){
         <Toaster/>
         <Tutorial/>
         <DeleteScopeDialog/>
+        <PushOffer/>
         <QuickAdd/>
         {/* Ctrl/⌘ K or "/": search tasks, jump, do; "?": the keyboard shortcuts */}
         <CommandPalette/>

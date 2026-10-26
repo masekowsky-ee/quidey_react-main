@@ -28,7 +28,7 @@ export const PROCESSORS = {
 };
 
 // Date of the current version of the legal texts
-export const LEGAL_VERSION_DATE = '25.10.2026 (Online-Status, Serien, Family-Pinnwand und -Liste, Bewertungen als Tester)';
+export const LEGAL_VERSION_DATE = '26.10.2026 (Benachrichtigungen auf dem Gerät)';
 
 export const COPYRIGHT_YEAR = 2026;
 

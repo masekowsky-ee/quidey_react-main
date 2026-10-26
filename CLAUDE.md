@@ -292,13 +292,29 @@ production build (`src/features/pwa/registerServiceWorker.js`); `_headers` sends
 startup and offers it as a button (Chrome/Edge/Android), explains the share menu on iOS Safari,
 says "installed" when running standalone, and hides the row everywhere else.
 
+Push notifications (Web Push, VAPID): Settings → App → "Benachrichtigungen" per device (on/off,
+then four kinds `plan` (tasks/events with a time: at the reminder, else at the start), `digest`
+(morning overview 07:30–11:00 local), `messages`, `social` (friend requests, session/family
+invites, shared/assigned tasks, broadcasts), and "Test senden"). `src/features/pwa/push.js`
+(external store, `usePushState`; `refreshPush` on every start via `usePushSync` in App re-PUTs the
+subscription, so a renewed address or another account is picked up and a revoked permission turns
+it off; `enablePush` asks for the permission first, from the click). After creating a task
+(`addTask` → `offerPushAfterTask`) `PushOffer.jsx` asks once per device while it's off.
+localStorage `push` ('on'|'off'), `pushEndpoint`, `pushAsked`. Sign-out DELETEs the device with
+the old token (keepalive); another remembered account taking over keeps it on. The service
+worker (`pwa.js`, `PUSH_HANDLERS`) shows a push unless the app is focused (the test and Safari
+always show: Safari revokes silent pushes); a click focuses the app and posts `quidey:open`, the app
+navigates (no reload). In dev Vite serves a push-only `/sw.js` (no caching), registered in dev too.
+With push on, the in-app reminders (`reminders.js`) only toast. iPhone/iPad: only as installed app.
+
 Client-side storage: only `localStorage` (no cookies), plus the service worker's Cache Storage
 for the app's own files: `token` (JWT), `accounts` (several accounts on one device:
 `[{ username, displayName, token }]`, max 5, `src/features/auth/accounts.js`; switching reloads
 the app as the other one, signing out takes over the next remembered account), `language`, `accent`,
 `theme`, `palette`, `motion`, `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
 `teamSessionId`, `streakNudge` (day of the last streak reminder), `uiVariant` and `uiColors`
-(testers' interface variant and the colours picked per variant). `public/theme-init.js` applies
+(testers' interface variant and the colours picked per variant), `push`, `pushEndpoint`,
+`pushAsked` (push notifications on this device). `public/theme-init.js` applies
 the theme before React loads.
 
 ## API access
@@ -315,7 +331,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment, 028: push_subscriptions, tasks.push_sent_for, users.push_digest_on). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.
@@ -338,6 +354,16 @@ the theme before React loads.
   { familyId, message } (to the members' user rooms), for the feed `feed:changed` (author and
   friends) and `feed:cheered` { user, entryId }. Plain time reports (`/activity` every 30 s, online window 75 s) send nothing unless what the
   others see changed (started / stopped / switched task).
+- Push (`utils/push.js`, `web-push`): `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT`
+  (`npx web-push generate-vapid-keys`; without keys pushes are only logged `[DEV] Push to user …`).
+  Table `push_subscriptions` (one row per endpoint, owned by the account that signed it up last,
+  booleans `plan`/`digest`/`messages`/`social`, max 10 per account), `tasks.push_sent_for`,
+  `users.push_digest_on` (migration 028). Routes behind `requirePro`: `GET /api/push/key`,
+  `PUT|DELETE /api/push/subscription`, `POST /api/push/test`. `startPushSchedule` (every
+  `REMINDER_CHECK_MS`) pushes due entries (SKIP LOCKED, once per time; events also when already
+  ticked off) and the digest; routes call `pushLater`/`pushInvite` (messages, friend requests,
+  session/family invites, task shares, assignments, broadcasts). 404/410 from the push service
+  deletes the row; password change / logout-all delete all of the account's rows.
 - Mail via SMTP (Resend, `smtp.resend.com`): verification links, task reminders, contact form and
   feedback to `CONTACT_TO`. Without `SMTP_HOST` mails are only logged. All mails share one HTML
   layout (`utils/mailTemplate.js`: tables + inline styles; user text always through `escapeHtml`).
@@ -361,7 +387,7 @@ the theme before React loads.
 - CLI: `npm run pro -- list|requests|grant|revoke|decline|admin|unadmin|tester|untester <username>`.
 - Tests: `npm test` (`test/api.test.mjs`, node:test, creates/drops its own DB). Extend for every new route.
 - Config via `.env` (see `.env.example`): `NODE_ENV`, `DB_*`, `JWT_SECRET` (≥32 chars), `PORT`,
-  `CORS_ORIGINS`, `TRUST_PROXY`, `SMTP_*`, `MAIL_FROM`, `CONTACT_TO`, `FRONTEND_URL`.
+  `CORS_ORIGINS`, `TRUST_PROXY`, `SMTP_*`, `MAIL_FROM`, `CONTACT_TO`, `FRONTEND_URL`, `VAPID_*`.
 
 ## Deployment
 

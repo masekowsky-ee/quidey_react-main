@@ -4,9 +4,12 @@ import { showToast } from '../toast/toast';
 import { fill } from '../helperFunction';
 import { translate } from '../../i18n/useTranslation';
 import { dateKey, taskStart, timeText } from '../calendar/calendar';
+import { pushCovers } from '../pwa/push';
 
 // Reminders work while the app is open: a toast, and a system notification when allowed.
 // A reminder still shows when the app is opened late, until an hour after the task started.
+// With push notifications on (features/pwa/push.js) the server's push is the system
+// notification, so only the toast comes from here.
 const CHECK_EVERY_MS = 20 * 1000;
 const LATE_LIMIT_MS = 60 * 60 * 1000;
 const STORAGE_KEY = 'shownReminders';
@@ -52,6 +55,7 @@ export function askForReminderPermission() {
 }
 
 function notify(title, body, tag) {
+    if (pushCovers('plan')) return;
     try {
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted') new Notification(title, { body, tag });
     } catch { /* not supported (e.g. some mobile browsers need a service worker) */ }

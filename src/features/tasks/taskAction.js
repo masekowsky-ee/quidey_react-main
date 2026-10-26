@@ -2,6 +2,7 @@ import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, ADD_
 import { apiFetch, toInputDate } from '../helperFunction';
 import { askDeleteScope, isRepeating } from './deleteScope';
 import { dateKey } from '../calendar/calendar';
+import { offerPushAfterTask } from '../pwa/push';
 
 
 // Action creators for task management
@@ -53,6 +54,8 @@ export const addTask = (name, due, description, prio, activeGroupId = null, user
             payload: task,
         });
         if (nextTask) dispatch({ type: ADD_TASK, payload: { ...nextTask, group_ids: task.group_ids } });
+        // the first task on this device: whether reminders should come as notifications
+        offerPushAfterTask();
         return task;
     };
 }

@@ -1,8 +1,8 @@
-// Registers the service worker that makes Quidey installable and lets it open offline
-// (written by pwa.js at build time). Only in the built app: in dev there is no sw.js, and a
-// cached app would get in the way of Vite's hot reload.
+// Registers the service worker that makes Quidey installable, lets it open offline and shows
+// push notifications (written by pwa.js at build time). In dev, Vite serves a worker with only
+// the notifications (pwa.js): a cached app would get in the way of hot reload.
 export function registerServiceWorker() {
-    if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
+    if (!('serviceWorker' in navigator)) return;
     const register = () => navigator.serviceWorker.register('/sw.js').catch(() => {
         // no service worker (blocked, private mode): the site simply works as before
     });

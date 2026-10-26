@@ -172,6 +172,18 @@ div.page{
     composes: segmentActive from './ui.module.css';
 }
 
+.segmented button:disabled{
+    cursor: progress;
+    opacity: 0.6;
+}
+
+/* a notification setting that didn't go through */
+.pushError{
+    margin: 0.9rem 0 0;
+    font-size: 0.85rem;
+    color: var(--danger);
+}
+
 /* Label with a short explanation under it */
 .rowText{
     display: flex;
@@ -182,6 +194,12 @@ div.page{
 .rowHint{
     font-size: 0.8rem;
     color: var(--text-muted);
+}
+
+/* beside its control a longer hint wraps, so the controls stay in one column on the right */
+.row > .rowText{
+    flex: 1 1 14rem;
+    min-width: 0;
 }
 
 /* ---------- accent color swatches ---------- */

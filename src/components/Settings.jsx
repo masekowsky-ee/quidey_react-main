@@ -1,5 +1,5 @@
 import styles from './Settings.module.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {useTranslation} from '../i18n/useTranslation'
 import {useSelector, useDispatch} from 'react-redux';
 import {setLanguage, setTheme, setAccent, setPalette, setDefaultSessionMinutes, setMotion, setShowSharedTasks, setShowTutorial} from '../features/settings/settingsAction';
@@ -9,6 +9,7 @@ import {SESSION_LENGTHS, PALETTES, ACCENT_SWATCHES as ACCENT_OPTIONS} from '../f
 import { DEFAULT_UI_VARIANT, OWN_COLORS, VARIANT_COLORS, setUiColors, useColorChoice } from '../features/tester/variants';
 import HomeLayoutSwitch from './together/HomeLayoutSwitch';
 import {useInstallState, promptInstall} from '../features/pwa/install';
+import { PUSH_KINDS, disablePush, enablePush, refreshPush, sendTestPush, setPushKind, usePushState } from '../features/pwa/push';
 import { fill } from '../features/helperFunction';
 import EventTypeSettings from './EventTypeSettings.jsx';
 
@@ -25,7 +26,7 @@ const THEME_OPTIONS = [
 
 // The settings come in three areas, one view each, so only a few choices are in sight at a
 // time. The area is in the address's hash (#plan, #app; the editor's #event-types opens "plan").
-// "App": the intro tour and, where the browser can, installing Quidey.
+// "App": notifications on this device, the intro tour and, where the browser can, installing Quidey.
 const AREAS = ['look', 'plan', 'app'];
 const areaFromHash = () => {
     const hash = typeof window === 'undefined' ? '' : window.location.hash.slice(1);
@@ -34,12 +35,12 @@ const areaFromHash = () => {
 };
 
 // A segmented control of options: [{ value, label }], the current value, and what a click does
-function Choice({ label, options, value, onChange }) {
+function Choice({ label, options, value, onChange, disabled = false }) {
     const { t } = useTranslation();
     return (
         <div className={styles.segmented} role="group" aria-label={label}>
             {options.map(option => (
-                <button key={String(option.value)} type="button"
+                <button key={String(option.value)} type="button" disabled={disabled}
                     className={value === option.value ? styles.segmentActive : undefined}
                     aria-pressed={value === option.value}
                     onClick={() => onChange(option.value)}>
@@ -73,6 +74,51 @@ function SettingSection({ title, description, children, id }) {
             </div>
             <div className={styles.sectionPanel}>{children}</div>
         </section>
+    );
+}
+
+const ON_OFF = [{ value: true, label: 'pushOn' }, { value: false, label: 'pushOff' }];
+const PUSH_HINTS = {
+    unknown: 'pushChecking', unsupported: 'pushUnsupported', install: 'pushInstallFirst', denied: 'pushDenied',
+    unavailable: 'pushUnavailable', off: 'pushOffHint', on: 'pushOnHint',
+};
+
+// Push notifications on this device (features/pwa/push.js): on / off, then which kinds and a
+// test. Looked at again whenever this opens, so a permission taken back in the browser shows.
+function PushSettings() {
+    const { t } = useTranslation();
+    const push = usePushState();
+    const [tested, setTested] = useState(false);
+    useEffect(() => { refreshPush(); }, []);
+    const on = push.status === 'on';
+
+    return (
+        <>
+            <SettingRow title={t('pushDevice')} hint={t(PUSH_HINTS[push.status])}>
+                {(on || push.status === 'off') && (
+                    <Choice label={t('pushDevice')} value={on} disabled={push.busy} options={ON_OFF}
+                        onChange={(next) => {
+                            if (next === on) return;
+                            setTested(false);
+                            if (next) enablePush(); else disablePush();
+                        }} />
+                )}
+            </SettingRow>
+            {on && push.kinds && PUSH_KINDS.map(kind => (
+                <SettingRow key={kind} title={t(`pushKind_${kind}`)} hint={t(`pushKindHint_${kind}`)}>
+                    <Choice label={t(`pushKind_${kind}`)} value={push.kinds[kind] !== false} disabled={push.busy} options={ON_OFF}
+                        onChange={(next) => { if (next !== (push.kinds[kind] !== false)) setPushKind(kind, next); }} />
+                </SettingRow>
+            ))}
+            {on && (
+                <SettingRow title={t('pushTest')} hint={t(tested ? 'pushTestSent' : 'pushTestHint')}>
+                    <button type="button" className={styles.tourButton} onClick={async () => setTested(await sendTestPush())}>
+                        {t('pushTestButton')}
+                    </button>
+                </SettingRow>
+            )}
+            {push.error && <p className={styles.pushError} role="alert">{t(push.error)}</p>}
+        </>
     );
 }
 
@@ -219,6 +265,9 @@ export default function Settings(){
                 </>}
 
                 {area === 'app' && <>
+                    <SettingSection id="notifications" title={t('pushTitle')} description={t('pushHint')}>
+                        <PushSettings />
+                    </SettingSection>
                     <SettingSection id="tour" title={t('tutorial')} description={t('settingsTourHint')}>
                         <SettingRow title={t('settingsTourRow')} hint={t('settingsTourRowHint')}>
                             <button type="button" className={styles.tourButton} onClick={() => dispatch(setShowTutorial(true))}>
