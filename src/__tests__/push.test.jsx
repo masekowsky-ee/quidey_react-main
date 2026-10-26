@@ -62,7 +62,8 @@ describe('push helpers', () => {
 })
 
 // A browser that can do push: a worker, a push manager and the permission
-function fakeBrowser({ permission = 'default', answer = 'granted' } = {}) {
+// pushPermission: what pushManager.permissionState answers (else the same as the plain permission)
+function fakeBrowser({ permission = 'default', answer = 'granted', pushPermission = null } = {}) {
     let current = null
     const subscription = {
         endpoint: 'https://push.example.com/send/abc',
@@ -73,6 +74,7 @@ function fakeBrowser({ permission = 'default', answer = 'granted' } = {}) {
     const pushManager = {
         getSubscription: vi.fn(async () => current),
         subscribe: vi.fn(async () => { current = subscription; return subscription }),
+        permissionState: vi.fn(async () => browser.pushPermission ?? ({ default: 'prompt' }[notification.permission] ?? notification.permission)),
     }
     const registration = { pushManager }
     Object.defineProperty(navigator, 'serviceWorker', {
@@ -90,7 +92,8 @@ function fakeBrowser({ permission = 'default', answer = 'granted' } = {}) {
         requestPermission: vi.fn(async () => { notification.permission = answer; return answer }),
     }
     globalThis.Notification = notification
-    return { subscription, pushManager, notification, subscribed: () => current }
+    const browser = { subscription, pushManager, notification, pushPermission, subscribed: () => current }
+    return browser
 }
 
 function respond() {
@@ -181,6 +184,51 @@ describe('notifications on this device', () => {
         expect(screen.queryByRole('group', { name: 'Auf diesem Gerät' })).not.toBeInTheDocument()
     })
 
+    it('a reload never turns them off when the phone reads the permission late', async () => {
+        const browser = fakeBrowser({ permission: 'granted' })
+        await act(() => enablePush())
+        // right after a reload of an installed app some phones say "default" for a moment
+        browser.notification.permission = 'default'
+        browser.pushPermission = 'prompt'
+        apiFetch.mockClear()
+        await act(() => refreshPush())
+        expect(localStorage.getItem('push')).toBe('on')
+        expect(browser.subscription.unsubscribe).not.toHaveBeenCalled()
+        expect(callsTo('/api/push/subscription', 'DELETE')).toHaveLength(0)
+        expect(callsTo('/api/push/subscription', 'PUT')).toHaveLength(1)
+        expect(pushCovers('plan')).toBe(true)
+    })
+
+    it('the push permission counts where the plain one lags behind', async () => {
+        const browser = fakeBrowser({ permission: 'default', pushPermission: 'granted' })
+        localStorage.setItem('push', 'on')
+        await act(() => refreshPush())
+        expect(browser.pushManager.subscribe).toHaveBeenCalled()
+        expect(localStorage.getItem('push')).toBe('on')
+        expect(pushCovers('plan')).toBe(true)
+    })
+
+    it('a lost choice with the address still in the browser stays on', async () => {
+        const browser = fakeBrowser({ permission: 'granted' })
+        await act(() => enablePush())
+        localStorage.removeItem('push')
+        await act(() => refreshPush())
+        expect(localStorage.getItem('push')).toBe('on')
+        expect(browser.subscription.unsubscribe).not.toHaveBeenCalled()
+        expect(pushCovers('plan')).toBe(true)
+    })
+
+    it('after signing out, the next start takes the address out of the browser too', async () => {
+        const browser = fakeBrowser({ permission: 'granted' })
+        await act(() => enablePush())
+        vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}'))
+        forgetPushOnSignOut('old-token')
+        await act(() => refreshPush())
+        expect(browser.subscription.unsubscribe).toHaveBeenCalled()
+        expect(pushCovers('plan')).toBe(false)
+        vi.restoreAllMocks()
+    })
+
     it('every start hands the address over again, for whoever is signed in', async () => {
         fakeBrowser({ permission: 'granted' })
         await act(() => enablePush())
@@ -268,7 +316,7 @@ describe('notifications on this device', () => {
         expect(url).toBe('/api/push/subscription')
         expect(options).toMatchObject({ method: 'DELETE', keepalive: true, body: JSON.stringify({ endpoint: 'https://push.example.com/send/abc' }) })
         expect(options.headers.Authorization).toBe('Bearer old-token')
-        expect(localStorage.getItem('push')).toBeNull()
+        expect(localStorage.getItem('push')).toBe('off')
 
         // another account takes over: the device stays on and goes over to that one
         localStorage.setItem('push', 'on')

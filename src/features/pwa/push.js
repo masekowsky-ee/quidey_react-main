@@ -144,28 +144,52 @@ export function refreshPush() {
     return inTurn(checkPush);
 }
 
+// Whether this browser lets the site show notifications: 'granted' | 'denied' | 'default'.
+// Notification.permission alone isn't enough: some phones read it as "default" right after a
+// reload of an installed app, while the push permission (pushManager.permissionState) is there.
+async function permissionOf(registration) {
+    const plain = Notification.permission;
+    let push = null;
+    try {
+        push = (await registration?.pushManager.permissionState?.({ userVisibleOnly: true })) ?? null;
+    } catch { /* older browsers: only the plain one */ }
+    if (plain === 'granted' || push === 'granted') return 'granted';
+    if (plain === 'denied' || push === 'denied') return 'denied';
+    return 'default';
+}
+
 async function checkPush() {
     const support = pushSupport();
     if (support !== 'supported') return set({ status: support, kinds: null });
+    // 'on' | 'off' (chosen here, or signed out) | null (nothing stored, e.g. storage was cleared)
+    const wanted = read(WANTED_KEY);
+    let subscription = null;
     try {
-        const permission = Notification.permission;
-        if (!pushWanted() || permission !== 'granted') {
+        const registration = await navigator.serviceWorker.getRegistration();
+        subscription = (await registration?.pushManager.getSubscription()) ?? null;
+        const permission = await permissionOf(registration);
+        // The browser keeps a subscription only while it may show notifications, so one that is
+        // there counts as on and allowed (unless the browser says "blocked" outright). Only a
+        // clear "off" or "blocked" takes it down: a reload must never turn them off by itself.
+        const on = wanted === 'on' || (wanted === null && subscription !== null);
+        const allowed = permission === 'granted' || (subscription !== null && permission !== 'denied');
+        if (!on || !allowed) {
             // off here, or the browser no longer allows it: nothing may stay behind on the server
-            const subscription = await currentSubscription();
-            if (pushWanted() || subscription) {
+            if (subscription || read(ENDPOINT_KEY)) {
                 await removeFromServer(subscription?.endpoint ?? read(ENDPOINT_KEY));
                 await subscription?.unsubscribe().catch(() => {});
             }
-            if (pushWanted()) write(WANTED_KEY, 'off');
+            if (wanted === 'on') write(WANTED_KEY, 'off');
             return set({ status: permission === 'denied' ? 'denied' : 'off', kinds: null });
         }
         const key = await serverKey();
         if (!key) return set({ status: 'unavailable', kinds: null });
         const kinds = await save(await subscribe(key));
+        write(WANTED_KEY, 'on');
         set({ status: 'on', kinds, error: null });
     } catch {
         // offline or the worker didn't come up: shown as it was chosen, checked again next start
-        set({ status: pushWanted() ? 'on' : 'off' });
+        set({ status: wanted === 'on' || subscription ? 'on' : 'off' });
     }
 }
 
@@ -268,7 +292,9 @@ export function forgetPushOnSignOut(token, keep = false) {
         }).catch(() => {});
     }
     if (!keep) {
-        write(WANTED_KEY, null);
+        // "off", not nothing: the browser still holds the address, and the next start would
+        // otherwise take that as on (see checkPush) and sign it up for whoever comes next
+        write(WANTED_KEY, 'off');
         write(ENDPOINT_KEY, null);
     }
 }
