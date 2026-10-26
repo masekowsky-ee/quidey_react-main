@@ -17,6 +17,7 @@ import {
 } from '../features/calendar/calendar';
 import { useTaskDrag } from '../features/calendar/useTaskDrag';
 import { matchEventType } from '../features/tasks/kinds';
+import { defaultReminders, selectAllDayTime } from '../features/tasks/reminders';
 import MonthView from './calendar/MonthView.jsx';
 import WeekView from './calendar/WeekView.jsx';
 import AgendaView from './calendar/AgendaView.jsx';
@@ -54,6 +55,7 @@ export default function Calendar() {
     // a shared session's calendar holds events too (a family's only tasks)
     const sharedEvents = source.kind === 'session';
     const eventTypes = useSelector(state => state.task.eventTypes);
+    const allDayTime = useSelector(selectAllDayTime);
     const tasks = isShared ? shared.tasks : ownTasks;
     // my focus sessions belong to my own calendar only
     const sessions = isShared ? null : ownSessions;
@@ -192,7 +194,8 @@ export default function Calendar() {
             if (isShared) await shared.add({ name, due: key, ...(time ? { due_time: time } : {}), ...(sharedEvents && kind === 'event' ? { kind } : {}) });
             // a new event of mine takes the type its name points to (a keyword of the type)
             else await dispatch(addTask(name, key, '', kind === 'event' ? null : NEW_TASK_PRIO, newTaskGroup?.id ?? null, undefined,
-                { ...(time ? { due_time: time } : {}), ...(kind === 'event' ? { kind, event_type_id: matchEventType(name, eventTypes)?.type.id ?? null } : {}) }));
+                // with notifications on, it reminds at its start (or at my all-day time on the day)
+                { ...(time ? { due_time: time } : {}), reminders: defaultReminders(), ...(kind === 'event' ? { kind, event_type_id: matchEventType(name, eventTypes)?.type.id ?? null } : {}) }));
             return true;
         } catch (err) {
             reportError(err);
@@ -259,7 +262,7 @@ export default function Calendar() {
             .map(id => groups.find(group => group.id === id)?.name)
             .filter(Boolean)
             .join(', ');
-        downloadFile(isShared ? `quidey-${source.kind}-${source.id}.ics` : 'quidey-tasks.ics', toIcs(withDay, { groupName }), 'text/calendar');
+        downloadFile(isShared ? `quidey-${source.kind}-${source.id}.ics` : 'quidey-tasks.ics', toIcs(withDay, { groupName, allDayTime }), 'text/calendar');
     };
 
     // ---------- choosing the calendar ----------

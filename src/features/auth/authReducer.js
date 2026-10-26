@@ -1,4 +1,4 @@
-import { LOGIN_SUCCESS, LOGOUT, SET_USER, SET_ACCESS } from "./authActionTypes";
+import { LOGIN_SUCCESS, LOGOUT, SET_USER, SET_ACCESS, TOUR_SEEN } from "./authActionTypes";
 
 const initialState = {
     token: localStorage.getItem('token') || null,
@@ -12,7 +12,9 @@ const initialState = {
     // betaRequest: my request for access, { status: 'pending' | 'approved' | 'declined', reason, createdAt } or null
     // isAdmin: sees the admin panel; adminPendingCount: open beta requests (admins only)
     // isTester: sees features not released to everyone yet (see features/auth/tester.js)
-    access: { checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null },
+    // allDayReminderTime: "HH:MM", where tasks without a time count their reminders from (tasks/reminders.js)
+    // tourSeen: false only for a new account that hasn't closed the intro tour yet (it opens by itself then)
+    access: { checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null, allDayReminderTime: '12:00', tourSeen: true },
 };
 
 const authReducer = (state = initialState, action) => {
@@ -43,8 +45,12 @@ const authReducer = (state = initialState, action) => {
                     isTester: Boolean(action.payload.isTester),
                     adminPendingCount: action.payload.adminPendingCount ?? 0,
                     betaRequest: action.payload.betaRequest ?? null,
+                    allDayReminderTime: action.payload.allDayReminderTime ?? initialState.access.allDayReminderTime,
+                    tourSeen: action.payload.tourSeen !== false,
                 },
             };
+        case TOUR_SEEN:
+            return { ...state, access: { ...state.access, tourSeen: true } };
         case SET_USER:
             return {
                 ...state,

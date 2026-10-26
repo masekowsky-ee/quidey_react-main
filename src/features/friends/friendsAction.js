@@ -1,5 +1,6 @@
 import { SET_FRIENDS, SET_FRIEND_REQUESTS, FRIEND_REQUEST_SENT, FRIEND_ADDED, FRIEND_REQUEST_REMOVED, FRIEND_REMOVED } from './friendsActionTypes';
 import { apiFetch } from '../helperFunction';
+import { noteAction } from '../onboarding/onboarding';
 
 export const fetchFriends = () => {
     return async (dispatch) => {
@@ -28,6 +29,7 @@ export const sendFriendRequest = (username) => {
         } else {
             dispatch({ type: FRIEND_REQUEST_SENT, payload: data.request });
         }
+        noteAction(data.status === 'accepted' ? 'friend' : 'friendRequest');
         return data.status;
     };
 };
@@ -36,6 +38,7 @@ export const acceptFriendRequest = (requestId) => {
     return async (dispatch) => {
         const data = await apiFetch(`/api/friends/requests/${requestId}/accept`, { method: 'POST' });
         dispatch({ type: FRIEND_ADDED, payload: { friend: data.friend, requestId } });
+        noteAction('friend');
     };
 };
 

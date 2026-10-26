@@ -13,9 +13,10 @@ import Icon from '../calendar/icons.jsx';
 // The calendar's task editor as a dialog (a sheet from the bottom on phones), for the task
 // list on Home: every option (time, reminder, repeat, colour, sharing, groups) in one place.
 // Escape, the close button or a click next to it closes without saving.
-// shared: { sessionId, canRemove } for a task in a shared session (its own fields, no groups).
-// handlers: { save(changes), remove? } (promises) for a task kept somewhere else, e.g. a family's
-// calendar: the same fields as a shared session's task; without remove there is no delete button.
+// shared: { sessionId, canRemove, subGroups? } for a task in a shared session (its own fields, no groups).
+// handlers: { save(changes), remove?, subGroups? } (promises) for a task kept somewhere else, e.g. a
+// family's calendar: the same fields as a shared session's task; without remove there is no delete
+// button. subGroups (testers): the session's / family's sub-groups to move it between.
 export default function TaskEditDialog({ task, onClose, shared, handlers }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
@@ -72,6 +73,7 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
                     ? <TaskEditor
                         task={task}
                         personal={false}
+                        subGroups={handlers.subGroups}
                         onSave={(changes) => run(handlers.save(changes))}
                         onCancel={onClose}
                         onDelete={handlers.remove ? () => run(handlers.remove(), t('taskDeleted')) : undefined}
@@ -81,6 +83,7 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
                         task={task}
                         personal={false}
                         allowEvents
+                        subGroups={shared.subGroups}
                         onSave={(changes) => run(updateSharedTask(shared.sessionId, task.id, changes))}
                         onCancel={onClose}
                         onDelete={shared.canRemove ? () => run(removeSharedTask(shared.sessionId, task.id), t('taskDeleted')) : undefined}

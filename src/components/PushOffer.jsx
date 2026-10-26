@@ -42,7 +42,9 @@ function Question() {
                 <span className={styles.badge} aria-hidden="true"><Icon name="bell" size={20} /></span>
                 <h2 id={titleId} className={styles.title}>{t('pushOfferTitle')}</h2>
                 <p id={textId} className={styles.text}>{t('pushOfferText')}</p>
-                <button ref={yesRef} type="button" className={styles.yes} onClick={() => answerPushOffer(true)}>{t('pushOfferYes')}</button>
+                <button ref={yesRef} type="button" className={styles.yes} onClick={() => answerPushOffer(true)}>
+                    <Icon name="bell" size={18} />{t('pushOfferYes')}
+                </button>
                 <button type="button" className={styles.later} onClick={() => answerPushOffer(false)}>{t('pushOfferLater')}</button>
             </div>
         </div>,

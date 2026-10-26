@@ -431,7 +431,8 @@
 }
 
 .field input:not([type='range']),
-.field textarea{
+.field textarea,
+.field select{
     width: 100%;
     font-weight: 400;
     letter-spacing: normal;
@@ -574,6 +575,14 @@
 .sharedNote{
     font-size: 0.82rem;
     color: var(--text-muted);
+}
+
+/* when and by whom it was made: a footnote, quieter than the fields */
+.createdNote{
+    margin: 0;
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
 }
 
 .moreLabel{

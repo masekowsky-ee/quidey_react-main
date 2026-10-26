@@ -11,6 +11,7 @@ import HomeLayoutSwitch from './together/HomeLayoutSwitch';
 import {useInstallState, promptInstall} from '../features/pwa/install';
 import { PUSH_KINDS, disablePush, enablePush, refreshPush, sendTestPush, setPushKind, usePushState } from '../features/pwa/push';
 import { fill } from '../features/helperFunction';
+import { saveAllDayTime, selectAllDayTime } from '../features/tasks/reminders';
 import EventTypeSettings from './EventTypeSettings.jsx';
 
 const LANGUAGES = [
@@ -117,8 +118,44 @@ function PushSettings() {
                     </button>
                 </SettingRow>
             )}
-            {push.error && <p className={styles.pushError} role="alert">{t(push.error)}</p>}
+            {push.error &&
+                <p className={styles.pushError} role="alert">
+                    {t(push.error)}
+                    {/* the browser's own words, so a device that can't be signed up says why */}
+                    {push.detail && <small className={styles.pushDetail}>{push.detail}</small>}
+                </p>}
         </>
+    );
+}
+
+// When tasks without a time of day remind me (for the account: pushes, mails and the app).
+// Saved on every change; put back when that fails.
+function AllDayTimeSetting() {
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const saved = useSelector(selectAllDayTime);
+    // what is typed until it's saved (null: the saved time)
+    const [draft, setDraft] = useState(null);
+    const [failed, setFailed] = useState(false);
+    const value = draft ?? saved;
+
+    const change = async (next) => {
+        setDraft(next);
+        setFailed(false);
+        if (!/^\d{2}:\d{2}$/.test(next) || next === saved) return;
+        try {
+            await dispatch(saveAllDayTime(next));
+        } catch {
+            setFailed(true);
+        }
+        setDraft(null);
+    };
+
+    return (
+        <SettingRow title={t('allDayReminderTime')} hint={t(failed ? 'pushErrorSave' : 'allDayReminderTimeHint')}>
+            <input type="time" className={styles.timeInput} value={value} aria-label={t('allDayReminderTime')}
+                onChange={(e) => change(e.target.value)} />
+        </SettingRow>
     );
 }
 
@@ -267,6 +304,7 @@ export default function Settings(){
                 {area === 'app' && <>
                     <SettingSection id="notifications" title={t('pushTitle')} description={t('pushHint')}>
                         <PushSettings />
+                        <AllDayTimeSetting />
                     </SettingSection>
                     <SettingSection id="tour" title={t('tutorial')} description={t('settingsTourHint')}>
                         <SettingRow title={t('settingsTourRow')} hint={t('settingsTourRowHint')}>

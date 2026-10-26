@@ -168,6 +168,12 @@ div.page{
     white-space: nowrap;
 }
 
+/* the all-day reminder time */
+.timeInput{
+    flex-shrink: 0;
+    width: 7.5rem;
+}
+
 .segmentActive{
     composes: segmentActive from './ui.module.css';
 }
@@ -182,6 +188,14 @@ div.page{
     margin: 0.9rem 0 0;
     font-size: 0.85rem;
     color: var(--danger);
+}
+
+.pushDetail{
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text);
+    overflow-wrap: anywhere;
 }
 
 /* Label with a short explanation under it */

@@ -214,7 +214,65 @@
     box-shadow: var(--shadow-float);
 }
 
-/* "Also by mail" under the reminder */
+/* ---------- Reminders: any number of them, each a toggle ---------- */
+
+.reminders{
+    margin: 0;
+    padding: 0;
+    border: none;
+    min-width: 0;
+}
+
+.remindersLegend{
+    padding: 0;
+    margin-bottom: 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.reminderChoices{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.reminderChoices > button{
+    padding: 0.25rem 0.75rem;
+    font-size: 0.82rem;
+    color: var(--text);
+    background: var(--surface-inset);
+    border: 1px solid var(--btn-border);
+    border-radius: 999px;
+    box-shadow: none;
+}
+
+.reminderChoices > button:hover{
+    border-color: var(--border-strong);
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+/* picked: brighter ink on a stronger ground, with a tick */
+.reminderChoices > button[aria-pressed="true"],
+.reminderChoices > button[aria-pressed="true"]:hover{
+    color: var(--text-h);
+    background: var(--surface-strong);
+    border-color: var(--border-strong);
+}
+
+.reminderChoices > button[aria-pressed="true"]::before{
+    content: '✓ ';
+}
+
+.reminderChoices > button:disabled{
+    opacity: 0.45;
+    cursor: default;
+}
+
+/* "Also by mail" under the reminders */
 .checkRow{
     display: flex;
     align-items: center;

@@ -11,7 +11,11 @@ import Icon from './icons.jsx'
 import { createPortal } from 'react-dom';
 import {useTranslation} from '../i18n/useTranslation'
 import { fill } from '../features/helperFunction'
-import { selectSharedGroups, selectSharedSoloTasks, setSharedTaskDone, togetherErrorText } from '../features/together/togetherAction'
+import { selectSharedGroups, selectSharedSoloTasks, setSharedTaskDone, togetherErrorText, addSessionSubGroup, removeSessionSubGroup } from '../features/together/togetherAction'
+import { EDIT_DISPLAYGROUP } from '../features/tasks/taskActionTypes'
+import { useIsTester } from '../features/auth/tester'
+import { inSubGroup, openCounts, shownSubGroup } from '../features/tasks/subGroups'
+import SubGroupBar from './subgroups/SubGroupBar.jsx'
 import { showToast } from '../features/toast/toast'
 import TaskEditDialog from './task/TaskEditDialog.jsx'
 import { AnimatePresence } from 'motion/react'
@@ -100,8 +104,19 @@ export default function TaskContainer(props){
     const toggleSharedTasks = () => dispatch(setShowSharedTasks(!showSharedTasks));
     // the shown group as stored (one of my own, not "all" or a session's), or undefined
     const shownGroupRow = showingAll || shownGroup?.shared ? undefined : groups.find(g => g.id === shownGroup.id);
+    // a session's group: testers also pick one of its sub-groups (kept on the shown group, so
+    // the new-task form puts new tasks there too; picking the session's chip again starts at all)
+    const isTester = useIsTester();
+    const shownShared = shownGroup?.shared ? sharedGroups.find(group => group.sessionId === shownGroup.sessionId) : undefined;
+    const subGroups = shownShared?.subGroups ?? [];
+    const subGroup = isTester && shownShared ? shownSubGroup(subGroups, shownGroup.subGroupId ?? null) : null;
+    const pickSubGroup = (id) => dispatch({ type: EDIT_DISPLAYGROUP, payload: { group: { ...shownGroup, subGroupId: id }, tasks: [] } });
+    const runShared = (action) => dispatch(action).catch(err => {
+        dispatch(showToast(togetherErrorText(t, err), 'error'));
+        return null;
+    });
     const groupTasks = shownGroup?.shared
-        ? (sharedGroups.find(group => group.sessionId === shownGroup.sessionId)?.tasks ?? [])
+        ? inSubGroup(shownShared?.tasks ?? [], subGroup)
         : showingAll ? [...groupToDisplay.tasks, ...sharedInAll] : groupToDisplay.tasks;
     // tasks put back from the work area go to the end, in the order they were put back
     const releasedRank = (task) => releasedIds.indexOf(task.id);
@@ -250,6 +265,11 @@ export default function TaskContainer(props){
                 <p className={styles.groupNote}>
                     {t('sharedGroupHint')} <Link to={`/together/${shownGroup.sessionId}`}>{t('openSession')} →</Link>
                 </p>}
+            {isTester && shownShared &&
+                <SubGroupBar groups={subGroups} value={subGroup} onChange={pickSubGroup}
+                    counts={openCounts(shownShared.tasks)}
+                    onAdd={(name) => runShared(addSessionSubGroup(shownShared.sessionId, name))}
+                    onRemove={(groupId) => runShared(removeSessionSubGroup(shownShared.sessionId, groupId))} />}
             {groupDescription && (editGroupDescription
                 ? <input className={styles.groupDescriptionInput} autoFocus defaultValue={groupDescription} aria-label={t('description')}
                     onBlur={(e) => setGroupDescriptionHandler(e.target.value)}

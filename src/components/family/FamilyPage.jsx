@@ -10,8 +10,12 @@ import { dateKey, taskTimeText } from '../../features/calendar/calendar';
 import { fetchFriends } from '../../features/friends/friendsAction';
 import {
     addFamilyTask, removeFamilyTask, updateFamilyTask, deleteFamily, fetchFamily, fetchFamilyMessages, inviteToFamily, removeFamilyMember,
-    renameFamily, sendFamilyMessage, updateFamily, FAMILY_EMOJIS,
+    renameFamily, sendFamilyMessage, updateFamily, FAMILY_EMOJIS, addFamilySubGroup, removeFamilySubGroup,
 } from '../../features/family/family';
+import { useIsTester } from '../../features/auth/tester';
+import { createdText } from '../../features/tasks/created';
+import { inSubGroup, openCounts, shownSubGroup } from '../../features/tasks/subGroups';
+import SubGroupBar from '../subgroups/SubGroupBar.jsx';
 import { TASK_COLORS } from '../../features/tasks/taskColors';
 import { rememberPresence } from '../../features/presence/presence';
 import { OnlineLabel } from '../presence/OnlineDot';
@@ -196,15 +200,17 @@ function FamilyBoard({ family, onChanged }) {
 }
 
 // The family's list: entries without a day (shopping, chores), ticked off by anybody, each
-// with whoever takes care of it; done ones folded away under the open ones
-function FamilyList({ family, onChanged }) {
-    const { t } = useTranslation();
+// with whoever takes care of it; done ones folded away under the open ones.
+// subGroup: the shown sub-group (testers, null: all), which new items go into too.
+function FamilyList({ family, onChanged, subGroup }) {
+    const { t, language } = useTranslation();
     const run = useFamilyRun();
+    const myUsername = useSelector(state => state.auth.user?.username);
     const [name, setName] = useState('');
     const [assignee, setAssignee] = useState(null);
     const [busy, setBusy] = useState(false);
     const [showDone, setShowDone] = useState(false);
-    const items = family.tasks.filter(task => !task.due);
+    const items = inSubGroup(family.tasks, subGroup).filter(task => !task.due);
     const open = items.filter(task => !task.done);
     const done = items.filter(task => task.done);
 
@@ -213,14 +219,16 @@ function FamilyList({ family, onChanged }) {
         e.preventDefault();
         if (!name.trim()) return;
         setBusy(true);
-        const changed = await run(addFamilyTask(family.id, { name: name.trim(), ...(assignee ? { assignee_id: assignee } : {}) }));
+        const changed = await run(addFamilyTask(family.id, {
+            name: name.trim(), ...(assignee ? { assignee_id: assignee } : {}), ...(subGroup ? { group_id: subGroup } : {}),
+        }));
         setBusy(false);
         if (changed) { onChanged(changed); setName(''); }
     };
     const canRemove = (task) => family.isOwner || task.addedBy?.id === family.me;
 
     const row = (task) => (
-        <li key={task.id} className={own.listItem} data-done={task.done}>
+        <li key={task.id} className={own.listItem} data-done={task.done} title={createdText(task, t, language, myUsername) || undefined}>
             <button type="button" className={own.entryCheck} aria-pressed={task.done}
                 onClick={() => run(change(updateFamilyTask(family.id, task.id, { done: !task.done })), task.done ? null : 'toast_entryDone')}
                 aria-label={`${t(task.done ? 'markUndone' : 'markDone')}: ${task.name}`} title={t(task.done ? 'markUndone' : 'markDone')}>
@@ -289,11 +297,13 @@ function FamilyTitle({ family, onChanged }) {
 }
 
 // What's coming up in the family calendar: tick entries off, edit or delete them (who added one,
-// or the owner, may delete it), and add new ones
-function Upcoming({ family, onChanged }) {
+// or the owner, may delete it), and add new ones. subGroup / subGroups: the shown sub-group and
+// all of them (testers; subGroups undefined for everybody else).
+function Upcoming({ family, onChanged, subGroup, subGroups }) {
     const { t, language } = useTranslation();
     const locale = language === 'de' ? 'de-DE' : 'en-GB';
     const run = useFamilyRun();
+    const myUsername = useSelector(state => state.auth.user?.username);
     const today = toDateOnly(new Date());
     const todayKey = dateKey(today);
     const [name, setName] = useState('');
@@ -311,7 +321,7 @@ function Upcoming({ family, onChanged }) {
         task.done ? null : 'toast_entryDone');
 
     // the server sends them by day and time; "YYYY-MM-DD" compares like dates
-    const upcoming = family.tasks
+    const upcoming = inSubGroup(family.tasks, subGroup)
         .filter(task => !task.done && task.due && dateKey(task.due) >= todayKey)
         .filter(task => !onlyMine || task.assignee?.id === family.me)
         .slice(0, UPCOMING_MAX);
@@ -322,6 +332,7 @@ function Upcoming({ family, onChanged }) {
         setBusy(true);
         const changed = await run(addFamilyTask(family.id, {
             name: name.trim(), due: day, ...(time ? { due_time: time } : {}), ...(assignee ? { assignee_id: assignee } : {}),
+            ...(subGroup ? { group_id: subGroup } : {}),
         }));
         setBusy(false);
         if (changed) {
@@ -351,7 +362,7 @@ function Upcoming({ family, onChanged }) {
                 ? <p className={styles.emptyLine}>{t(onlyMine ? 'familyNothingMine' : 'familyNothingPlanned')}</p>
                 : <ul className={own.upcoming}>
                     {upcoming.map(task => (
-                        <li key={task.id} className={own.entry}>
+                        <li key={task.id} className={own.entry} title={createdText(task, t, language, myUsername) || undefined}>
                             <button type="button" className={own.entryCheck} aria-pressed={false} onClick={() => toggleDone(task)}
                                 aria-label={`${t('markDone')}: ${task.name}`} title={t('markDone')}>
                                 <Icon name="check" size={14} />
@@ -387,6 +398,7 @@ function Upcoming({ family, onChanged }) {
                         remove: family.isOwner || editing.addedBy?.id === family.me
                             ? () => change(removeFamilyTask(family.id, editing.id))
                             : undefined,
+                        subGroups,
                     }}
                 />}
             <form className={own.quickAdd} onSubmit={add}>
@@ -595,6 +607,10 @@ export default function FamilyPage() {
     const dispatch = useDispatch();
     const id = Number(useParams().id);
     const { family, missing, show } = useFamily(id);
+    // sub-groups (experimental, testers): one choice for the calendar entries and the list
+    const isTester = useIsTester();
+    const run = useFamilyRun();
+    const [subGroupPick, setSubGroupPick] = useState(null);
 
     // who of them has the app open (kept current live afterwards)
     useEffect(() => { if (family) dispatch(rememberPresence(family.people)); }, [family, dispatch]);
@@ -613,6 +629,14 @@ export default function FamilyPage() {
     if (!family) return <div className={styles.page} aria-busy="true" />;
 
     const memberCount = family.people.filter(person => person.status === 'joined').length;
+    const subGroups = family.groups ?? [];
+    const subGroup = isTester ? shownSubGroup(subGroups, subGroupPick) : null;
+    // every change answers with the whole family, which is shown right away
+    const changeSubGroups = async (request) => {
+        const changed = await run(request);
+        if (changed) show(changed);
+        return changed;
+    };
     return (
         <div className={`${styles.pageWide} ${own.familyPage}`} data-task-color={family.color ?? undefined}>
             <Link to={COMMUNITY_PATHS.family} className={styles.back}>← {t('family')}</Link>
@@ -625,11 +649,15 @@ export default function FamilyPage() {
                     </p>
                 </div>
             </div>
+            {isTester &&
+                <SubGroupBar groups={subGroups} value={subGroup} onChange={setSubGroupPick} counts={openCounts(family.tasks)}
+                    onAdd={(name) => changeSubGroups(addFamilySubGroup(family.id, name))}
+                    onRemove={(groupId) => changeSubGroups(removeFamilySubGroup(family.id, groupId))} />}
             <div className={styles.roomGrid}>
                 <div className={styles.roomMain}>
                     <FamilyBoard family={family} onChanged={show} />
-                    <Upcoming family={family} onChanged={show} />
-                    <FamilyList family={family} onChanged={show} />
+                    <Upcoming family={family} onChanged={show} subGroup={subGroup} subGroups={isTester ? subGroups : undefined} />
+                    <FamilyList family={family} onChanged={show} subGroup={subGroup} />
                     <Members family={family} onChanged={show} />
                 </div>
                 <div className={styles.roomSide}>

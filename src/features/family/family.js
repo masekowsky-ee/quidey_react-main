@@ -3,6 +3,7 @@ import { COMMUNITY_PATHS } from '../community/paths';
 import { apiFetch, displayName, fill } from '../helperFunction';
 import { LOGOUT } from '../auth/authActionTypes';
 import { showToast } from '../toast/toast';
+import { noteAction } from '../onboarding/onboarding';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useRealtimeRefresh, useSafetyPoll } from '../realtime/socket';
 
@@ -62,7 +63,11 @@ const familyChange = (url, options) => async (dispatch) => {
 //   people: [{ user, status, isOwner, joinedAt, online }], tasks (with assignee),
 //   week: { weekStart, people: [{ userId, xp, focusMin, streak }] } }
 export const fetchFamily = (id) => apiFetch(familyUrl(id));
-export const createFamily = (name, friendIds = []) => familyChange(base, send('POST', { name, friendIds }));
+export const createFamily = (name, friendIds = []) => async (dispatch) => {
+    const family = await dispatch(familyChange(base, send('POST', { name, friendIds })));
+    noteAction('family');
+    return family;
+};
 export const renameFamily = (id, name) => familyChange(familyUrl(id), send('PATCH', { name }));
 // changes: { emoji?, color? } (owner), { note? } (any member; '' clears it)
 export const updateFamily = (id, changes) => familyChange(familyUrl(id), send('PATCH', changes));
@@ -84,10 +89,14 @@ export const deleteFamily = (id) => async (dispatch) => {
 // ---------- the shared calendar (answers with the whole family) ----------
 
 // task: { name, and optionally due, due_time, prio, description, duration_minutes, location, link, details, color,
-// assignee_id (a joined member, or null) }. Without a day it is an item on the family's list.
+// assignee_id (a joined member, or null), group_id (a sub-group, testers) }. Without a day it is an item on the family's list.
 export const addFamilyTask = (id, task) => apiFetch(`${familyUrl(id)}/tasks`, send('POST', task));
 export const updateFamilyTask = (id, taskId, changes) => apiFetch(`${familyUrl(id)}/tasks/${taskId}`, send('PATCH', changes));
 export const removeFamilyTask = (id, taskId) => apiFetch(`${familyUrl(id)}/tasks/${taskId}`, send('DELETE'));
+
+// Sub-groups (experimental, testers); deleting one keeps its entries
+export const addFamilySubGroup = (id, name) => apiFetch(`/api/tester/families/${id}/groups`, send('POST', { name }));
+export const removeFamilySubGroup = (id, groupId) => apiFetch(`/api/tester/families/${id}/groups/${groupId}`, send('DELETE'));
 
 // ---------- the chat ----------
 

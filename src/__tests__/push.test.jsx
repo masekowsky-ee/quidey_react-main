@@ -189,6 +189,39 @@ describe('notifications on this device', () => {
         expect(callsTo('/api/push/subscription', 'PUT')).toHaveLength(1)
     })
 
+    it('a check running at the same time never undoes turning on', async () => {
+        const browser = fakeBrowser({ permission: 'granted' })
+        await act(async () => { await Promise.all([refreshPush(), enablePush(), refreshPush()]) })
+        expect(localStorage.getItem('push')).toBe('on')
+        expect(browser.subscribed()).not.toBeNull()
+        expect(browser.subscription.unsubscribe).not.toHaveBeenCalled()
+        expect(callsTo('/api/push/subscription', 'DELETE')).toHaveLength(0)
+        expect(pushCovers('plan')).toBe(true)
+    })
+
+    it('a question nobody answered says where to allow it', async () => {
+        fakeBrowser({ answer: 'default' })
+        renderApp()
+        openAppArea()
+        const device = await screen.findByRole('group', { name: 'Auf diesem Gerät' })
+        fireEvent.click(device.querySelector('button[aria-pressed="false"]'))
+        expect(await screen.findByText(/kleine Glocke neben der Adresse/)).toBeInTheDocument()
+        expect(localStorage.getItem('push')).not.toBe('on')
+    })
+
+    it('a push service that refuses says so, in the browser\'s own words', async () => {
+        const browser = fakeBrowser({ permission: 'granted' })
+        browser.pushManager.subscribe.mockRejectedValueOnce(Object.assign(new Error('Registration failed - push service error'), { name: 'AbortError' }))
+        renderApp()
+        openAppArea()
+        const device = await screen.findByRole('group', { name: 'Auf diesem Gerät' })
+        fireEvent.click(device.querySelector('button[aria-pressed="false"]'))
+        expect(await screen.findByText(/Push-Dienst dieses Browsers hat abgelehnt/)).toBeInTheDocument()
+        expect(screen.getByText('AbortError: Registration failed - push service error')).toBeInTheDocument()
+        expect(localStorage.getItem('push')).not.toBe('on')
+        expect(callsTo('/api/push/subscription', 'PUT')).toHaveLength(0)
+    })
+
     it('asks once after a new task, and yes turns them on', async () => {
         const browser = fakeBrowser()
         await act(() => refreshPush())

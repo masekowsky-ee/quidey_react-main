@@ -13,8 +13,8 @@ import {
 import { REALTIME_RECONNECT, useRealtime } from '../features/realtime/socket';
 import { acceptFriendRequest, removeFriendRequest, fetchFriends } from '../features/friends/friendsAction';
 import { joinSharedSession, removeSharedMember } from '../features/together/togetherAction';
-import { reminderAt } from '../features/tasks/reminders';
-import { dateKey, taskStart, timeText } from '../features/calendar/calendar';
+import { reminderBase, reminderTimes, selectAllDayTime } from '../features/tasks/reminders';
+import { dateKey, timeText } from '../features/calendar/calendar';
 import { showToast } from '../features/toast/toast';
 import TaskInvites from './task/TaskInvites.jsx';
 import { Bone, Skeleton, SkeletonRows } from './skeleton/Skeleton.jsx';
@@ -370,13 +370,16 @@ function Notices() {
 function Reminders() {
     const { t } = useTranslation();
     const tasks = useSelector(state => state.task.tasks);
+    const allDayTime = useSelector(selectAllDayTime);
     const when = useWhen();
     // read the clock once per visit of the tab
     const [now] = useState(() => Date.now());
 
-    const withReminder = tasks
-        .map(task => ({ task, at: reminderAt(task), start: taskStart(task) }))
-        .filter(({ at }) => at);
+    // one row per reminder (a task can have several); a task without a time counts from my all-day time
+    const withReminder = tasks.flatMap(task => {
+        const start = reminderBase(task, allDayTime);
+        return reminderTimes(task, allDayTime).map(({ minutes, at }) => ({ task, minutes, at, start }));
+    });
     const due = withReminder.filter(({ at, start }) => at.getTime() <= now && start.getTime() > now - REMINDER_WINDOW_MS)
         .sort((a, b) => b.at - a.at);
     const coming = withReminder.filter(({ at }) => at.getTime() > now && at.getTime() <= now + REMINDER_WINDOW_MS)
@@ -384,17 +387,17 @@ function Reminders() {
 
     if (due.length === 0 && coming.length === 0) return <p className={styles.empty}>{t('inboxNoReminders')}</p>;
 
-    const item = ({ task, at, start }) => {
+    const item = ({ task, minutes, at, start }) => {
         const key = dateKey(task.due);
         return (
-            <li key={task.id} className={styles.row}>
+            <li key={`${task.id}-${minutes}`} className={styles.row}>
                 <span className={styles.avatar} aria-hidden="true">⏰</span>
                 <span className={styles.rowText}>
                     <Link to={`/calendar?date=${key}&day=${key}`} className={styles.rowTitle}>{task.name}</Link>
                     <span className={styles.rowMeta}>
                         {fill(t('inboxReminderLine'), {
                             day: formatDate(task.due),
-                            time: timeText(start.getHours() * 60 + start.getMinutes()),
+                            time: task.due_time ? timeText(start.getHours() * 60 + start.getMinutes()) : t('allDay'),
                             remind: when(at),
                         })}
                     </span>

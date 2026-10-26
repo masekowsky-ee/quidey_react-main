@@ -3,6 +3,7 @@ import { apiFetch, toInputDate } from '../helperFunction';
 import { askDeleteScope, isRepeating } from './deleteScope';
 import { dateKey } from '../calendar/calendar';
 import { offerPushAfterTask } from '../pwa/push';
+import { noteAction } from '../onboarding/onboarding';
 
 
 // Action creators for task management
@@ -18,10 +19,10 @@ export const fetchTaskState = () => {
 }
 
 // The optional task fields (see the api): time of day, duration (an event's length, a task's
-// planned time) and reminder in minutes, location, link and extra details, colour, whether the
-// reminder also comes by mail, and task or event (kind) with the event's type; repeat_left: how
+// planned time) and reminders (minutes before the start, a list), location, link and extra
+// details, colour, whether the reminders also come by mail, and task or event (kind) with the event's type; repeat_left: how
 // many more times a repeating task comes back (null: no end)
-export const TASK_EXTRA_FIELDS = ['due_time', 'duration_minutes', 'reminder_minutes', 'location', 'link', 'details', 'repeat', 'repeat_left', 'color', 'reminder_email', 'kind', 'event_type_id'];
+export const TASK_EXTRA_FIELDS = ['due_time', 'duration_minutes', 'reminders', 'location', 'link', 'details', 'repeat', 'repeat_left', 'color', 'reminder_email', 'kind', 'event_type_id'];
 const extrasOf = (source) => Object.fromEntries(TASK_EXTRA_FIELDS
     .filter(field => source?.[field] !== undefined)
     .map(field => [field, source[field] === '' ? null : source[field]]));
@@ -56,6 +57,7 @@ export const addTask = (name, due, description, prio, activeGroupId = null, user
         if (nextTask) dispatch({ type: ADD_TASK, payload: { ...nextTask, group_ids: task.group_ids } });
         // the first task on this device: whether reminders should come as notifications
         offerPushAfterTask();
+        noteAction('task');
         return task;
     };
 }
@@ -113,6 +115,7 @@ export const updateTaskProps = (taskPropObject, task) => {
         })
         // a repeating task that was just done: the server made the next one
         if (nextTask) dispatch({ type: ADD_TASK, payload: nextTask });
+        if (task.done && !defaults.done) noteAction('done');
     };
 }
 
@@ -222,6 +225,7 @@ export const addGroup = (name, description, color = null) => {
             type: ADD_GROUP,
             payload: data,
         });
+        noteAction('group');
         return data;
     };
 }

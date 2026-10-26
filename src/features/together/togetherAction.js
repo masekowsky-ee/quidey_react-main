@@ -1,6 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { SET_SHARED_SESSIONS, SET_SHARED_SESSION, SHARED_SESSION_GONE, SET_MY_SHARED_TASKS, SET_SHARED_HISTORY } from './togetherActionTypes';
 import { apiFetch } from '../helperFunction';
+import { noteAction } from '../onboarding/onboarding';
 
 const base = (id) => `/api/shared-sessions/${id}`;
 
@@ -17,6 +18,7 @@ export function normalizeSession(session) {
         receivedAt: Date.now(),
         people: session.people ?? [],
         events: session.events ?? [],
+        groups: session.groups ?? [],
         tasks: (session.tasks ?? []).map(task => ({ ...task, assignee: task.assignee ?? null, time: task.time ?? [] })),
     };
 }
@@ -52,8 +54,11 @@ export const fetchSharedSession = (id) => {
     };
 };
 
-export const createSharedSession = (name, friendIds = []) =>
-    sessionRequest('/api/shared-sessions', post({ name, friendIds }));
+export const createSharedSession = (name, friendIds = []) => async (dispatch) => {
+    const session = await dispatch(sessionRequest('/api/shared-sessions', post({ name, friendIds })));
+    noteAction('session');
+    return session;
+};
 
 export const joinSharedSession = (id) => sessionRequest(`${base(id)}/join`, post());
 
@@ -77,6 +82,12 @@ export const renameSharedSession = (id, name) =>
 
 export const removeSharedTask = (id, taskId) =>
     sessionRequest(`${base(id)}/tasks/${taskId}`, { method: 'DELETE' });
+
+// Sub-groups (experimental, testers): made and deleted by testers, entries go in with group_id
+// on addSharedTask / updateSharedTask. Deleting one keeps its entries.
+export const addSessionSubGroup = (id, name) => sessionRequest(`/api/tester/shared-sessions/${id}/groups`, post({ name }));
+export const removeSessionSubGroup = (id, groupId) =>
+    sessionRequest(`/api/tester/shared-sessions/${id}/groups/${groupId}`, { method: 'DELETE' });
 
 // currentTaskId: what I'm working on now (null = nothing); time: { taskId, ms } worked since the last report.
 // keepalive lets the last report finish while the page is closing.
@@ -128,7 +139,8 @@ export const sharedTaskIdOf = (id) => Number(String(id).slice(SHARED_TASK_PREFIX
 export const sharedGroupId = (sessionId) => `session-${sessionId}`;
 
 // A shared task in the shape of an own task, plus where it belongs:
-// shared: { sessionId, sessionName, taskId }, assignee, myMs (my time on it so far)
+// shared: { sessionId, sessionName, taskId }, assignee, myMs (my time on it so far),
+// addedBy / createdAt (who made it when), groupId (its sub-group in the session, or null)
 export const toSoloTask = (session, task) => ({
     id: `${SHARED_TASK_PREFIX}${task.id}`,
     name: task.name,
@@ -137,12 +149,15 @@ export const toSoloTask = (session, task) => ({
     due: null,
     prio: null,
     assignee: task.assignee,
+    addedBy: task.addedBy ?? null,
+    createdAt: task.createdAt ?? null,
+    groupId: task.groupId ?? null,
     myMs: task.myMs,
     shared: { sessionId: session.id, sessionName: session.name, taskId: task.id },
 });
 
-// One group per running session I'm in: { id: 'session-5', name, sessionId, shared: true, tasks }.
-// They can't be deleted; they go away when I leave or the session ends.
+// One group per running session I'm in: { id: 'session-5', name, sessionId, shared: true, tasks,
+// subGroups: [{ id, name }] }. They can't be deleted; they go away when I leave or the session ends.
 export const selectSharedGroups = createSelector(
     [(state) => state.together.mine],
     (mine) => mine.map(session => ({
@@ -150,6 +165,7 @@ export const selectSharedGroups = createSelector(
         name: session.name,
         sessionId: session.id,
         shared: true,
+        subGroups: session.groups ?? [],
         tasks: session.tasks.map(task => toSoloTask(session, task)),
     })),
 );

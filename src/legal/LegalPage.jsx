@@ -186,8 +186,12 @@ function Privacy() {
                 <li><strong>Passwort</strong> – nur als sicherer Hash (bcrypt) gespeichert, nie im Klartext;</li>
                 <li>Zeitpunkt der Registrierung, Bestätigungsstatus der E-Mail-Adresse und Zugangsstatus (Beta,
                     Tester – Tester sehen neue Funktionen vor allen anderen und erhalten eigene Meldungen);</li>
+                <li>wann du die Einführung geschlossen hast – damit sie neuen Konten einmal von selbst erscheint,
+                    auf keinem Gerät ein zweites Mal;</li>
                 <li><strong>Sprache und Zeitzone</strong> deines Geräts (z. B. „Europe/Berlin“) – die App meldet sie beim
-                    Öffnen, damit Mails in deiner Sprache kommen und Erinnerungen zur richtigen Uhrzeit.</li>
+                    Öffnen, damit Mails in deiner Sprache kommen und Erinnerungen zur richtigen Uhrzeit;</li>
+                <li><strong>Uhrzeit für Erinnerungen ohne Uhrzeit</strong> (Einstellungen, anfangs 12:00) – zu ihr
+                    erinnert Quidey an Aufgaben und Termine, die keine Uhrzeit haben.</li>
             </ul>
             <p>
                 Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Bereitstellung der App, die du nutzen möchtest).
@@ -228,7 +232,9 @@ function Privacy() {
                 Wenn du Freundschaftsanfragen sendest oder annimmst, sehen deine Freunde deinen Benutzernamen und
                 Anzeigenamen. In gemeinsamen Sitzungen sehen alle Mitglieder deinen Namen, die Aufgaben der Sitzung
                 mit allem, was ihr dazu eintragt (z. B. Tag, Uhrzeit, Priorität, Dauer, Ort, Link, Beschreibung, weitere
-                Infos, Farbe), Nachrichten, wer woran wie lange gearbeitet hat und den Verlauf der Sitzung. Fügst du
+                Infos, Farbe, wer die Aufgabe wann angelegt hat, Untergruppe), Nachrichten, wer woran wie lange
+                gearbeitet hat und den Verlauf der Sitzung. Untergruppen (derzeit nur im Test) speichern ihren Namen,
+                wer sie angelegt hat und wann. Fügst du
                 eine eigene Aufgabe zu einer Sitzung hinzu, werden diese Angaben in die Sitzung übernommen; deine
                 Erinnerungen, Wiederholungen und Gruppen bleiben privat. Aufgaben, die du mit
                 Freunden teilst, sehen diese Freunde. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
@@ -241,7 +247,8 @@ function Privacy() {
                 Freunde einlädst. Gespeichert werden Name der Family, wer sie gegründet hat, wer eingeladen wurde
                 (von wem, wann) und wer beigetreten ist. Alle Mitglieder sehen die Namen der anderen Mitglieder, den
                 gemeinsamen Kalender mit allem, was ihr eintragt (z. B. Tag, Uhrzeit, Priorität, Dauer, Ort, Link,
-                Beschreibung, weitere Infos, Farbe, erledigt, wer den Eintrag angelegt hat), und den Chat der Family
+                Beschreibung, weitere Infos, Farbe, erledigt, wer den Eintrag wann angelegt hat, Untergruppe – diese
+                speichern ihren Namen, wer sie angelegt hat und wann), und den Chat der Family
                 (Text, Absender, Zeitpunkt). Dazu kommen die Pinnwand der Family (ein kurzer Text, den alle Mitglieder
                 ändern können, mit wer ihn zuletzt geändert hat und wann), Emoji und Farbe der Family, die Liste
                 (Einträge ohne Tag) und bei Einträgen, wer sie übernimmt. Mitglieder, die ihre Statistiken im Profil
@@ -323,8 +330,8 @@ function Privacy() {
             <p>
                 <strong>Benachrichtigungen auf deinem Gerät (Push):</strong> Nur wenn du sie einschaltest (in den
                 Einstellungen unter „App“ oder auf die Frage nach deiner ersten Aufgabe) und dein Browser es erlaubt,
-                meldet sich Quidey auch bei geschlossener App: zur Erinnerung oder zum Beginn deiner Aufgaben und Termine
-                mit Uhrzeit, morgens mit einem Überblick über deinen Tag, bei Nachrichten, Freundschaftsanfragen,
+                meldet sich Quidey auch bei geschlossener App: zu den Erinnerungen deiner Aufgaben und Termine (neue
+                bekommen dann von selbst eine zum Beginn), morgens mit einem Überblick über deinen Tag, bei Nachrichten, Freundschaftsanfragen,
                 Einladungen, geteilten oder zugewiesenen Aufgaben und Meldungen des Quidey-Teams. Welche Arten du
                 bekommst, stellst du je Gerät ein. Dafür erzeugt dein Browser bei seinem Push-Dienst eine Adresse; welcher
                 Dienst das ist, bestimmt der Hersteller deines Browsers bzw. Betriebssystems (z. B. Google bei Chrome und
@@ -351,7 +358,8 @@ function Privacy() {
                 deine Nachricht, die gewählte Art (Idee, Fehler, Lob, Sonstiges), dein Benutzer- und Anzeigename und
                 die E-Mail-Adresse für die Antwort an mich (vorausgefüllt mit der deines Kontos, du kannst eine andere
                 angeben), damit ich nachfragen oder antworten kann; gespeichert wird das Feedback in Quidey selbst
-                nicht. Bist du angemeldet, füllt das Kontaktformular Name und E-Mail-Adresse aus deinem Konto vor;
+                nicht. Dasselbe gilt, wenn du auf die Frage „Gefällt dir Quidey?“ antwortest und deine Antwort
+                abschickst: dann gehen mit diesen Angaben auch Ja oder Nein und deine Sterne (1–5) an mich. Bist du angemeldet, füllt das Kontaktformular Name und E-Mail-Adresse aus deinem Konto vor;
                 gesendet wird erst, was du abschickst. Formular und Feedback werden über
                 {' '}<V>{PROCESSORS.mailProvider}</V> an mein Postfach weitergeleitet. Rechtsgrundlage ist
                 Art. 6 Abs. 1 lit. f DSGVO (Beantwortung deiner Anfrage), bei Fragen zu deinem Konto Art. 6 Abs. 1
@@ -377,7 +385,10 @@ function Privacy() {
                     mehrere Konten an, um zwischen ihnen zu wechseln, liegen für jedes davon Token, Benutzer- und
                     Anzeigename (höchstens fünf Konten); beim Abmelden eines Kontos wird sein Eintrag gelöscht;</li>
                 <li>deine Einstellungen: Sprache, Design, Farbpalette, Akzentfarbe, Animationen, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer oder Stoppuhr, Kalenderansicht, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
-                <li>ob du die Einführung gesehen hast, welche Erinnerungen schon angezeigt wurden, an welchem Tag dich Quidey zuletzt an deine Serie erinnert hat und welche gemeinsame Sitzung gerade gestoppt wird;</li>
+                <li>bei einem neuen Konto, wie viele Dinge du schon erledigt oder angelegt hast und ob Quidey dich schon
+                    gefragt hat, ob du es installieren möchtest und ob es dir gefällt (nur eine Zahl und zwei Merker,
+                    keine Inhalte);</li>
+                <li>welche Erinnerungen schon angezeigt wurden, an welchem Tag dich Quidey zuletzt an deine Serie erinnert hat und welche gemeinsame Sitzung gerade gestoppt wird;</li>
                 <li>ob auf diesem Gerät Benachrichtigungen an sind, die Adresse dafür beim Push-Dienst (siehe Abschnitt 6) und ob Quidey dich danach schon gefragt hat;</li>
                 <li>Schwierigkeit und Bestwerte der Spiele.</li>
             </ul>

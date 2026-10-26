@@ -1,6 +1,7 @@
 import { forwardRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { useSelector } from 'react-redux';
 import styles from './TaskRow.module.css';
 import Icon from '../icons';
 import TaskMeta from './TaskMeta.jsx';
@@ -12,6 +13,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { dueText, formatDate, formatDuration, isOverdue, toInputDate } from '../../features/helperFunction';
 import { prioLevel } from '../../features/calendar/calendar';
 import { taskColorAttr } from '../../features/tasks/taskColors';
+import { createdText } from '../../features/tasks/created';
 import { Bone } from '../skeleton/Skeleton.jsx';
 
 // While my tasks are on their way: a row's shape, its name and line of details grey
@@ -70,7 +72,8 @@ const TaskRow = forwardRef(function TaskRow({
     onToggleDone, onRename, onChangeDue, onEdit, onDelete, deleteLabel,
     onFocus, onDragStart, onRemoveFromGroup, onOpenGroup,
 }, ref) {
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
+    const myUsername = useSelector(state => state.auth.user?.username);
     const [editing, setEditing] = useState(null); // 'name' | 'due' | null
     const shared = Boolean(task.shared);
     const overdue = !task.done && isOverdue(task);
@@ -116,6 +119,7 @@ const TaskRow = forwardRef(function TaskRow({
         <motion.li ref={ref} {...motionProps}
             className={`${styles.row} ${shared ? styles.sharedRow : ''} ${task.done ? styles.doneRow : ''}`}
             data-task-color={shared ? undefined : taskColorAttr(task)} data-part="task-row"
+            title={createdText(task, t, language, myUsername) || undefined}
             style={hidden ? { visibility: 'hidden' } : undefined}>
             {onDragStart && !task.done ? <DragHandle onPointerDown={onDragStart} label={t('dragATask')} /> : <span className={styles.drag} />}
             <Check done={task.done} onToggle={onToggleDone}

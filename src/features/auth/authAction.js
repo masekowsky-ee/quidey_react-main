@@ -1,4 +1,4 @@
-import { LOGIN_SUCCESS, LOGOUT, SET_USER, SET_ACCESS } from "./authActionTypes";
+import { LOGIN_SUCCESS, LOGOUT, SET_USER, SET_ACCESS, TOUR_SEEN } from "./authActionTypes";
 import { apiFetch, apiUrl } from '../helperFunction';
 import { forgetAccount, forgetToken, listAccounts, rememberAccount, switchAccount } from './accounts';
 import { forgetPushOnSignOut, refreshPush } from '../pwa/push';
@@ -31,6 +31,15 @@ export const fetchAccess = () => {
         const me = await apiFetch('/api/me');
         dispatch({ type: SET_ACCESS, payload: me });
         return me;
+    };
+};
+
+// The intro tour was closed (finished or skipped): it won't open by itself again, on any device.
+// Shown at once; if the server can't be reached, it opens again on the next start.
+export const markTourSeen = () => {
+    return (dispatch) => {
+        dispatch({ type: TOUR_SEEN });
+        apiFetch('/api/users/tour-seen', { method: 'PUT' }).catch(() => {});
     };
 };
 

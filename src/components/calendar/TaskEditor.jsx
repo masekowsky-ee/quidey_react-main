@@ -3,8 +3,9 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
 import { displayName, fill, toInputDate } from '../../features/helperFunction';
-import { durationText, minutesOfDay, timeText } from '../../features/calendar/calendar';
+import { dateKey, durationText, minutesOfDay, timeText } from '../../features/calendar/calendar';
 import TaskOptionsFields from '../task/TaskOptionsFields.jsx';
+import { reminderLabel, remindersOf } from '../../features/tasks/reminders';
 import { linkIsValid } from '../../features/tasks/taskFields';
 import { selectFocusByTask } from '../../features/tasks/plannedTime';
 import TaskSharing from '../task/TaskSharing.jsx';
@@ -12,13 +13,14 @@ import TaskColorPicker from '../task/TaskColorPicker.jsx';
 import DurationField from '../task/DurationWheel.jsx';
 import { EventTypePicker, KindSwitch } from '../task/KindFields.jsx';
 import { matchEventType } from '../../features/tasks/kinds';
+import { createdText } from '../../features/tasks/created';
 import Icon from './icons.jsx';
 
 // What is set under "More options", for the line next to the (closed) toggle:
-// "Weekly · 15 min before · Luigi's · Link · Bob"
-function optionsSummary(t, extras, hasTime, task) {
-    const reminder = hasTime && extras.reminder_minutes !== null && extras.reminder_minutes !== undefined
-        ? (extras.reminder_minutes === 0 ? t('reminderAtStart') : fill(t('reminderBefore'), { time: durationText(extras.reminder_minutes) }))
+// "Weekly · At the start, 15 min before · Luigi's · Link · Bob"
+function optionsSummary(t, extras, hasDate, hasTime, task) {
+    const reminder = hasDate && extras.reminders.length > 0
+        ? extras.reminders.map(minutes => reminderLabel(t, minutes, hasTime)).join(', ')
             + (extras.reminder_email ? ` (${t('reminderEmailShort')})` : '')
         : '';
     const people = (task.sharedWith ?? []).map(share => displayName(share.user));
@@ -34,20 +36,25 @@ function optionsSummary(t, extras, hasTime, task) {
 
 // Edits one task or event in the day panel: task or event, name, day and optional time,
 // priority (tasks), a task's planned time or an event's length and type (both on wheels),
-// description, colour, and under "More options" reminder, repeating, location, link, extra
+// description, colour, and under "More options" reminders, repeating, location, link, extra
 // info and sharing. Enter saves (Ctrl+Enter in the text fields), Escape cancels without
 // closing the panel. A task's day is optional (then no time, reminder or repeating either);
-// an event needs one.
+// an event needs one. Picking a time before a day takes today.
 // personal: false for a task in a shared session or a family: reminders, repeating, sharing,
 // groups and event types (all personal) are left out. allowEvents: it can still be a task or an
 // event (a shared session's). Without onDelete / onLeave / onPickGroups their buttons are left out.
 // An event's type follows its name by the types' keywords (matchEventType) until one is picked by
 // hand, also "none"; a task whose name fits a type offers to become such an event.
-export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, onPickGroups, personal = true, allowEvents = false }) {
-    const { t } = useTranslation();
+// subGroups: [{ id, name }] of a session or family (experimental, testers): a field to move the
+// entry between them (group_id). Under the fields a quiet line says when and by whom it was made.
+export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, onPickGroups, personal = true, allowEvents = false, subGroups }) {
+    const { t, language } = useTranslation();
     const id = useId();
     const nameRef = useRef(null);
     const isOwner = task.isOwner !== false;
+    const myUsername = useSelector(state => state.auth.user?.username);
+    const created = createdText(task, t, language, myUsername);
+    const [groupId, setGroupId] = useState(task.groupId ?? null);
     // only the owner makes a task an event or back and picks its type, from their own list
     // (in a shared session everybody can, without types)
     const canPickType = personal && isOwner;
@@ -74,6 +81,8 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
     };
     const [due, setDue] = useState(toInputDate(task.due));
     const [time, setTime] = useState(task.due_time ?? '');
+    // a time of day needs a day: picking one first takes today
+    const dayForTime = () => { if (!due) setDue(dateKey(new Date())); };
     // kept as it is (also empty, or above 100 from older tasks) until the slider is moved
     const [prio, setPrio] = useState(task.prio ?? null);
     const sliderValue = Math.min(100, Math.max(0, Number(prio ?? 50)));
@@ -82,7 +91,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
     // a task's planned time, an event's length
     const [duration, setDuration] = useState(task.duration_minutes ?? null);
     const [extras, setExtras] = useState({
-        reminder_minutes: task.reminder_minutes ?? null,
+        reminders: remindersOf(task),
         reminder_email: Boolean(task.reminder_email),
         location: task.location ?? '',
         link: task.link ?? '',
@@ -125,6 +134,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             location: extras.location.trim(),
             link: extras.link.trim(),
             details: extras.details.trim(),
+            ...(subGroups ? { group_id: groupId } : {}),
         } : {
             name: name.trim(),
             // the day is optional; a time of day, a reminder and repeating need one
@@ -133,11 +143,11 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             description: description.trim(),
             due_time: due ? time || null : null,
             duration_minutes: duration,
-            // a reminder counts from the start time
-            reminder_minutes: due && time ? extras.reminder_minutes : null,
+            // reminders count from the start, or from my all-day time on the day
+            reminders: due ? extras.reminders : [],
             // only the owner's (the server ignores them from others)
             ...(isOwner ? {
-                reminder_email: Boolean(due && time && extras.reminder_minutes !== null && extras.reminder_email),
+                reminder_email: Boolean(due && extras.reminders.length > 0 && extras.reminder_email),
                 kind,
                 event_type_id: event ? eventTypeId : null,
             } : {}),
@@ -190,7 +200,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
                 <label className={`${styles.field} ${styles.timeField}`}>
                     <span>{t(event ? 'eventStart' : 'taskTime')}</span>
                     <span className={styles.timeInput}>
-                        <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+                        <input type="time" value={time} onPointerDown={dayForTime} onChange={(e) => { dayForTime(); setTime(e.target.value); }} />
                         {time &&
                             <button type="button" className={styles.clearTime} onClick={() => setTime('')} title={t('allDay')} aria-label={t('allDay')}>
                                 <Icon name="close" size={16} />
@@ -218,13 +228,21 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
                 <textarea rows={2} value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)} />
             </label>
             <TaskColorPicker value={color} onChange={setColor} />
+            {subGroups && !personal &&
+                <label className={styles.field}>
+                    <span>{t('subGroup')}</span>
+                    <select value={groupId ?? ''} onChange={(e) => setGroupId(e.target.value ? Number(e.target.value) : null)}>
+                        <option value="">{t('subGroupNone')}</option>
+                        {subGroups.map(group => <option key={group.id} value={group.id}>{group.name}</option>)}
+                    </select>
+                </label>}
 
             {!isOwner && task.owner && !showMore &&
                 <p className={styles.sharedNote}>{fill(t('sharedTaskHint'), { name: displayName(task.owner) })}</p>}
             <button type="button" ref={moreRef} className={styles.moreToggle} aria-expanded={showMore} onClick={toggleMore}>
                 <span className={`${styles.moreChevron} ${showMore ? styles.moreChevronOpen : ''}`} aria-hidden="true"><Icon name="next" size={18} /></span>
                 <span className={styles.moreLabel}>{showMore ? t('fewerOptions') : t('moreOptions')}</span>
-                {!showMore && <span className={styles.moreSummary}>{optionsSummary(t, extras, Boolean(time), task)}</span>}
+                {!showMore && <span className={styles.moreSummary}>{optionsSummary(t, extras, Boolean(due), Boolean(time), task)}</span>}
             </button>
             {showMore &&
                 <div className={styles.more}>
@@ -232,6 +250,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
                     {personal && <TaskSharing task={task} />}
                 </div>}
 
+            {created && <p className={styles.createdNote}>{created}</p>}
             {error && <p className={styles.error} role="alert">{error}</p>}
             <div className={styles.editorActions}>
                 {onPickGroups && <button type="button" className={styles.groupsBtn} onClick={() => onPickGroups(task)}>{t('assignGroup')}</button>}

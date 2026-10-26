@@ -28,6 +28,9 @@ const toMineTask = (task, me) => ({
     description: task.description,
     done: task.done,
     assignee: task.assignee ?? null,
+    addedBy: task.addedBy ?? null,
+    createdAt: task.createdAt ?? null,
+    groupId: task.groupId ?? null,
     myMs: task.time.find(t => t.userId === me)?.ms ?? 0,
     totalMs: task.totalMs,
 });
@@ -37,7 +40,7 @@ function updateMine(mine, session) {
     if (!mine.some(s => s.id === session.id)) return mine;
     if (session.endedAt) return mine.filter(s => s.id !== session.id);
     return mine.map(s => s.id === session.id
-        ? { ...s, name: session.name, tasks: session.tasks.map(task => toMineTask(task, session.me)) }
+        ? { ...s, name: session.name, groups: session.groups, tasks: session.tasks.map(task => toMineTask(task, session.me)) }
         : s);
 }
 

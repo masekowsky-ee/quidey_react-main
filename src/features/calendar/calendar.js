@@ -76,6 +76,14 @@ export function taskStart(task) {
     return new Date(day.getFullYear(), day.getMonth(), day.getDate(), Math.floor(minutes / 60), minutes % 60);
 }
 
+// A task's reminders, minutes before its start, sorted (also from an older answer of the api
+// that only had reminder_minutes)
+export function remindersOf(task) {
+    if (Array.isArray(task?.reminders)) return [...task.reminders].sort((a, b) => a - b);
+    const one = task?.reminder_minutes;
+    return one === null || one === undefined ? [] : [Number(one)];
+}
+
 // "12:30", for an event with a length "12:30–14:00"; '' without a time. A task's duration is
 // only the time planned for it, so a task shows its start alone.
 export function taskTimeText(task) {
@@ -243,9 +251,10 @@ const icsLocalTime = (date) => `${icsDay(date)}T${timeText(date.getHours() * 60 
 const DEFAULT_EVENT_MINUTES = 30;
 
 // Tasks with a day as events, for Google Calendar, Outlook or Apple Calendar: all-day without
-// a time, otherwise from the time for its duration, with location, link and its reminder.
+// a time, otherwise from the time for its duration, with location, link and its reminders (an
+// all-day one's count from my all-day time, allDayTime "HH:MM").
 // Done tasks keep their day and get a tick in front of the name.
-export function toIcs(tasks, { now = new Date(), groupName } = {}) {
+export function toIcs(tasks, { now = new Date(), groupName, allDayTime = '12:00' } = {}) {
     const lines = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
@@ -265,7 +274,12 @@ export function toIcs(tasks, { now = new Date(), groupName } = {}) {
             ]
             : [`DTSTART;VALUE=DATE:${icsDay(day)}`, `DTEND;VALUE=DATE:${icsDay(addDays(day, 1))}`];
         const summary = icsText(`${task.done ? '✓ ' : ''}${task.name}`);
-        const hasReminder = start && !task.done && task.reminder_minutes !== null && task.reminder_minutes !== undefined;
+        // an alarm counts from DTSTART, for an all-day one midnight: my all-day time is added
+        const offset = start ? 0 : minutesOfDay(allDayTime) ?? 720;
+        const alarms = task.done ? [] : remindersOf(task).flatMap(minutes => {
+            const trigger = offset - minutes;
+            return ['BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${summary}`, `TRIGGER:${trigger < 0 ? '-' : ''}PT${Math.abs(trigger)}M`, 'END:VALARM'];
+        });
         lines.push(
             'BEGIN:VEVENT',
             `UID:quidey-task-${task.id}@quidey`,
@@ -276,9 +290,7 @@ export function toIcs(tasks, { now = new Date(), groupName } = {}) {
             ...(task.location ? [`LOCATION:${icsText(task.location)}`] : []),
             ...(task.link ? [`URL:${task.link}`] : []),
             start ? 'TRANSP:OPAQUE' : 'TRANSP:TRANSPARENT',
-            ...(hasReminder
-                ? ['BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${summary}`, `TRIGGER:-PT${Number(task.reminder_minutes)}M`, 'END:VALARM']
-                : []),
+            ...alarms,
             'END:VEVENT',
         );
     }

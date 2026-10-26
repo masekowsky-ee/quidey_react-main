@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { COMMUNITY_PATHS } from '../features/community/paths';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTask, shareTask } from '../features/tasks/taskAction'
 import styles from './Form.module.css';
@@ -18,16 +18,25 @@ import { matchEventType } from '../features/tasks/kinds';
 import { dueText, fill } from '../features/helperFunction';
 import { parseQuickEntry, stripFound } from '../features/tasks/quickParse';
 import { prioLevel } from '../features/calendar/calendar';
-import { minutesOfDay, timeText } from '../features/calendar/calendar';
+import { dateKey, minutesOfDay, timeText } from '../features/calendar/calendar';
+import { defaultReminders } from '../features/tasks/reminders';
+import { addSharedTask, selectSharedGroups, togetherErrorText } from '../features/together/togetherAction';
+import { useIsTester } from '../features/auth/tester';
+import { shownSubGroup } from '../features/tasks/subGroups';
 
 import Icon from './icons';
-const EMPTY_EXTRAS = { reminder_minutes: null, reminder_email: false, location: '', link: '', details: '', repeat: null, repeat_left: null };
+const EMPTY_EXTRAS = { reminders: [], reminder_email: false, location: '', link: '', details: '', repeat: null, repeat_left: null };
 
 // New task or event. A task needs only its name; optionally a day and time (no time: the whole
 // day, no day: whenever), the time planned for it, description and priority (none until the
 // slider is touched). An event needs a day; it has a length and a type instead of a priority.
-// "More options" adds reminder, repeating, location, link, extra info and friends to share it
-// with (they get an invite once it's created).
+// "More options" adds reminders, repeating, location, link, extra info and friends to share it
+// with (they get an invite once it's created). With notifications on for this device a new
+// task starts with a reminder at its start (or at my all-day time on its day). Picking a time
+// before a day takes today.
+// While a shared session's group is shown on Home (and the form is opened there), the new task
+// goes into that session (and, for testers, into its shown sub-group): then only the session's
+// fields, nothing personal (reminders, repeating, event types, sharing with friends).
 export default function TaskForm(props){
     const {setCreateTask} = props;
 
@@ -36,6 +45,14 @@ export default function TaskForm(props){
     const { t } = useTranslation();
 
     const groupToDisplay = useSelector((state)=>state.task.groupToDisplay)
+    const isTester = useIsTester();
+    const sharedGroups = useSelector(selectSharedGroups);
+    const onHome = useLocation().pathname === '/';
+    const session = onHome && groupToDisplay.group?.shared
+        ? sharedGroups.find(group => group.sessionId === groupToDisplay.group.sessionId)
+        : undefined;
+    const subGroupId = session && isTester ? shownSubGroup(session.subGroups, groupToDisplay.group.subGroupId ?? null) : null;
+    const subGroupName = session?.subGroups.find(group => group.id === subGroupId)?.name;
 
     const [kind, setKind] = useState('task');
     const event = kind === 'event';
@@ -53,11 +70,13 @@ export default function TaskForm(props){
     };
     const [due, setDue] = useState('');
     const [time, setTime] = useState('');
+    // a time of day needs a day: picking one first takes today
+    const dayForTime = () => { if (!due) setDue(dateKey(new Date())); };
     const [description, setDescription] = useState('');
     const [prio, setPrio] = useState(null);
     const [color, setColor] = useState(null);
     const [showMore, setShowMore] = useState(false);
-    const [extras, setExtras] = useState(EMPTY_EXTRAS);
+    const [extras, setExtras] = useState(() => ({ ...EMPTY_EXTRAS, reminders: defaultReminders() }));
     const [shareWith, setShareWith] = useState([]);
     const [busy, setBusy] = useState(false);
     // a day, time or priority written into the name ("morgen 14 Uhr !hoch") is taken over on
@@ -100,6 +119,31 @@ export default function TaskForm(props){
             setShowMore(true);
             return;
         }
+        if (session) {
+            setBusy(true);
+            try {
+                await dispatch(addSharedTask(session.sessionId, {
+                    name: name.trim(),
+                    kind,
+                    due: due || null,
+                    // a time of day needs a day
+                    due_time: due && time ? time : null,
+                    prio: event ? null : prio,
+                    description: description.trim(),
+                    duration_minutes: duration,
+                    color,
+                    location: extras.location.trim(),
+                    link: extras.link.trim(),
+                    details: extras.details.trim(),
+                    ...(subGroupId ? { group_id: subGroupId } : {}),
+                }));
+                setCreateTask(false);
+            } catch (err) {
+                dispatch(setCustomError({ bool: true, message: togetherErrorText(t, err) }));
+                setBusy(false);
+            }
+            return;
+        }
         // the shown group gets the new task (not a shared session's group: those aren't real groups)
         const groupId = groupToDisplay.group?.id;
         const activeGroupId = typeof groupId === 'number' && groupToDisplay.group.name !== 'all' ? groupId : null;
@@ -111,9 +155,10 @@ export default function TaskForm(props){
                 // a time of day needs a day
                 due_time: due && time ? time : null,
                 duration_minutes: duration,
-                reminder_minutes: due && time ? extras.reminder_minutes : null,
+                // reminders need a day (without a time they count from my all-day time)
+                reminders: due ? extras.reminders : [],
                 // only a reminder can come by mail
-                reminder_email: Boolean(due && time && extras.reminder_minutes !== null && extras.reminder_email),
+                reminder_email: Boolean(due && extras.reminders.length > 0 && extras.reminder_email),
                 color,
                 location: extras.location.trim(),
                 link: extras.link.trim(),
@@ -139,6 +184,10 @@ export default function TaskForm(props){
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
             </button>
             <h2>{t(event ? 'createEventH2' : 'createTaskH2')}</h2>
+            {session &&
+                <p className={styles.shareHint}>
+                    {fill(t('createInSession'), { name: subGroupName ? `${session.name} · ${subGroupName}` : session.name })}
+                </p>}
             <form className={`${styles.form}`} onSubmit={handleSubmit} noValidate>
                 <KindSwitch value={kind} onChange={(next) => { setKind(next); followName(name, next); }} />
                 {/* the form opens to be typed into: the name has the focus */}
@@ -154,7 +203,7 @@ export default function TaskForm(props){
                         <button type="button" className={styles.quickIgnore} onClick={() => setIgnoreQuick(true)}>{t('quickAddIgnore')}</button>
                     </p>}
                 {/* a task whose name fits a type: one tap makes it such an event */}
-                {!event && match &&
+                {!event && !session && match &&
                     <button type="button" className={styles.typeHint} data-task-color={match.type.color ?? undefined}
                         onClick={() => { setKind('event'); setEventTypeId(match.type.id); }}>
                         <span className={styles.typeHintDot} aria-hidden="true" />
@@ -164,12 +213,12 @@ export default function TaskForm(props){
                     <input className={`${styles.input} ${styles.grow}`} type="date" aria-label={t(event ? 'eventDay' : 'dueDate')}
                         required={event} value={due} onChange={(e) => setDue(e.target.value)} />
                     <input className={styles.input} type="time" aria-label={`${t(event ? 'eventStart' : 'taskTime')} (${t('allDay')}: –)`} title={t(event ? 'eventStart' : 'taskTime')}
-                        value={time} disabled={!due} onChange={(e) => setTime(e.target.value)} />
+                        value={time} onPointerDown={dayForTime} onChange={(e) => { dayForTime(); setTime(e.target.value); }} />
                 </div>
                 <DurationField label={t(event ? 'eventDuration' : 'plannedTime')} value={duration} onChange={setDuration}
                     maxHours={event ? 168 : 99}
                     hint={event && duration && due && time ? fill(t('eventUntil'), { time: timeText(minutesOfDay(time) + duration) }) : t(event ? 'eventDurationHint' : 'plannedTimeHint')} />
-                {event && <EventTypePicker value={eventTypeId} onChange={(id) => { setEventTypeId(id); setTypeByHand(true); }}
+                {event && !session && <EventTypePicker value={eventTypeId} onChange={(id) => { setEventTypeId(id); setTypeByHand(true); }}
                     autoNote={!typeByHand && match && eventTypeId === match.type.id ? fill(t('keywordAutoNote'), { keyword: match.keyword }) : null} />}
                 <input className={styles.input} type="text" placeholder={t('description')} aria-label={t('description')}
                     value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)} />
@@ -192,8 +241,8 @@ export default function TaskForm(props){
                 </button>
                 {showMore &&
                     <div className={styles.more}>
-                        <TaskOptionsFields value={extras} hasTime={Boolean(due && time)} hasDate={Boolean(due)} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
-                        <div className={styles.shareBlock}>
+                        <TaskOptionsFields value={extras} hasTime={Boolean(saved.due && saved.time)} hasDate={Boolean(saved.due)} personal={!session} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
+                        {!session && <div className={styles.shareBlock}>
                             <span className={styles.shareLabel}>{t('shareWithFriends')}</span>
                             {friends.length > 0
                                 ? <>
@@ -201,7 +250,7 @@ export default function TaskForm(props){
                                     {shareWith.length > 0 && <p className={styles.shareHint}>{t('shareOnCreateHint')}</p>}
                                 </>
                                 : <p className={styles.shareHint}>{t('noFriendsToShare')} <Link to={COMMUNITY_PATHS.friends}>{t('findFriends')} →</Link></p>}
-                        </div>
+                        </div>}
                     </div>}
 
                 <button type="submit" className={styles.createBtn} disabled={busy}>{t('createBtn')}</button>

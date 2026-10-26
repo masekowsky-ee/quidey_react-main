@@ -209,6 +209,64 @@
     box-shadow: none;
 }
 
+/* A question's yes (install? notifications? do you like it?): the primary pill, full width, a bit
+   taller, with an icon before the label; it lifts under the pointer */
+.btnYes {
+    composes: btnPrimary;
+    width: 100%;
+    height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    box-shadow: 0 8px 20px -12px color-mix(in srgb, var(--contrast-top) 70%, transparent);
+    transition: transform var(--ease), background-color var(--ease), box-shadow var(--ease);
+}
+
+.btnYes:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -12px color-mix(in srgb, var(--contrast-top) 80%, transparent);
+}
+
+.btnYes:active {
+    transform: scale(0.98);
+}
+
+/* ...and its no: grey and quiet, the same size, so it's clearly the other way out */
+.btnNo {
+    width: 100%;
+    height: 2.75rem;
+    padding: 0 1.25rem;
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 550;
+    color: var(--text-muted);
+    background: var(--surface-strong);
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: color var(--ease), background-color var(--ease);
+}
+
+.btnNo:hover {
+    color: var(--text);
+    background: color-mix(in srgb, var(--surface-strong) 85%, var(--text-muted));
+}
+
+.btnYes:focus-visible,
+.btnNo:focus-visible {
+    outline: 2px solid var(--primary-fg);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btnYes:hover,
+    .btnYes:active {
+        transform: none;
+    }
+}
+
 /* Selected tab or filter: a neutral raised pill with the label in full ink */
 .btnLight {
     background: var(--surface-strong);

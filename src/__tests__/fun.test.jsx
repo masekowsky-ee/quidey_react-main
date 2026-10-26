@@ -4,7 +4,8 @@ import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
-import { LOGIN_SUCCESS } from '../features/auth/authActionTypes'
+import { LOGIN_SUCCESS, SET_ACCESS } from '../features/auth/authActionTypes'
+import { resetOnboarding, useOnboarding } from '../features/onboarding/onboarding'
 import { DAILY_LINES, LINE_TYPES, lineOfDay, dayNumber, yearText } from '../features/fun/dailyLines'
 import { GUESS_WORDS, SCRAMBLE_WORDS } from '../features/fun/words'
 import {
@@ -188,6 +189,16 @@ describe('best scores and difficulty', () => {
 })
 
 describe('tutorial', () => {
+    beforeEach(() => resetOnboarding())
+
+    // signed in as ann; `fresh`: a new account that hasn't closed the tour yet
+    const signIn = ({ fresh = false } = {}) => {
+        const store = makeStore()
+        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        store.dispatch({ type: SET_ACCESS, payload: { isPro: true, tourSeen: !fresh } })
+        return store
+    }
+
     const renderTutorial = (store) => render(
         <Provider store={store}>
             <MemoryRouter>
@@ -197,16 +208,27 @@ describe('tutorial', () => {
         </Provider>
     )
 
-    it('opens by itself for a user who has not seen it, and only once', () => {
-        const store = makeStore()
-        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
-        const { unmount } = renderTutorial(store)
+    it('opens by itself for a new account, and only once', () => {
+        const store = signIn({ fresh: true })
+        let asking = null
+        const Probe = () => { asking = useOnboarding().asking; return null }
+        const { unmount } = render(
+            <Provider store={store}>
+                <MemoryRouter>
+                    <Tutorial />
+                    <Probe />
+                </MemoryRouter>
+            </Provider>
+        )
 
         expect(screen.getByRole('dialog')).toBeInTheDocument()
         expect(screen.getByRole('heading', { name: 'Willkommen bei Quidey!' })).toBeInTheDocument()
 
         fireEvent.click(screen.getByRole('button', { name: 'Überspringen' }))
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+        // the server is told, and skipping still asks what to do first
+        expect(store.getState().auth.access.tourSeen).toBe(true)
+        expect(asking).toBe('next')
         unmount()
 
         // next visit: stays closed
@@ -214,27 +236,27 @@ describe('tutorial', () => {
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     })
 
-    it('a different account on the same device still gets it', () => {
-        localStorage.setItem('tutorialSeen:ann', '1')
-        const store = makeStore()
-        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'bob' } })
+    it('an account that existed before (tour seen) never gets it by itself', () => {
+        const store = signIn()
         renderTutorial(store)
-        expect(screen.getByRole('dialog')).toBeInTheDocument()
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+        // nor before the server has answered
+        const early = makeStore()
+        early.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'bob' } })
+        renderTutorial(early)
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+        expect(localStorage.getItem('onboarding:ann')).toBeNull()
     })
 
     it('is no longer in the account menu', () => {
-        localStorage.setItem('tutorialSeen:ann', '1')
-        const store = makeStore()
-        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        const store = signIn()
         renderTutorial(store)
         fireEvent.click(screen.getByRole('button', { name: /Konten öffnen/ }))
         expect(screen.queryByRole('menuitem', { name: 'Einführung' })).not.toBeInTheDocument()
     })
 
     it('walks through the steps and can be reopened from the settings', () => {
-        localStorage.setItem('tutorialSeen:ann', '1')
-        const store = makeStore()
-        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        const store = signIn()
         render(
             <Provider store={store}>
                 <MemoryRouter>
@@ -263,8 +285,7 @@ describe('tutorial', () => {
     })
 
     it('greets by name, shows tips and opens the page a step is about', () => {
-        const store = makeStore()
-        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        const store = signIn({ fresh: true })
         render(
             <Provider store={store}>
                 <MemoryRouter>
@@ -287,12 +308,11 @@ describe('tutorial', () => {
         fireEvent.click(screen.getByRole('button', { name: /Kalender öffnen/ }))
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
         expect(screen.getByText('calendar page')).toBeInTheDocument()
-        expect(localStorage.getItem('tutorialSeen:ann')).toBe('1')
+        expect(store.getState().auth.access.tourSeen).toBe(true)
     })
 
     it('jumps to a chapter from the welcome card', () => {
-        const store = makeStore()
-        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        const store = signIn({ fresh: true })
         renderTutorial(store)
         const chapters = screen.getByRole('navigation', { name: 'Spring direkt zu einem Kapitel' })
         fireEvent.click(within(chapters).getByRole('button', { name: 'Wachsen' }))
@@ -300,19 +320,17 @@ describe('tutorial', () => {
     })
 
     it('opens the new-task form from the planning step', () => {
-        const store = makeStore()
-        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        const store = signIn({ fresh: true })
         renderTutorial(store)
         fireEvent.keyDown(window, { key: 'ArrowRight' })
         fireEvent.click(screen.getByRole('button', { name: 'Erste Aufgabe anlegen' }))
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
         expect(store.getState().settings.showForms).toBe(true)
-        expect(localStorage.getItem('tutorialSeen:ann')).toBe('1')
+        expect(store.getState().auth.access.tourSeen).toBe(true)
     })
 
     it('changes the accent and the theme right in the tour', () => {
-        const store = makeStore()
-        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        const store = signIn({ fresh: true })
         renderTutorial(store)
         fireEvent.click(within(screen.getByRole('navigation', { name: 'Spring direkt zu einem Kapitel' })).getByRole('button', { name: 'Dein Stil' }))
         fireEvent.click(screen.getByRole('button', { name: 'Ozean' }))
@@ -323,8 +341,7 @@ describe('tutorial', () => {
     })
 
     it('ends with where the navigation is and first steps', () => {
-        const store = makeStore()
-        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        const store = signIn({ fresh: true })
         renderTutorial(store)
         fireEvent.keyDown(window, { key: 'End' })
         expect(screen.getByRole('heading', { name: 'Alles griffbereit' })).toBeInTheDocument()
@@ -348,12 +365,11 @@ describe('tutorial', () => {
     })
 
     it('closes with Escape', () => {
-        const store = makeStore()
-        store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
+        const store = signIn({ fresh: true })
         renderTutorial(store)
         fireEvent.keyDown(window, { key: 'Escape' })
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-        expect(localStorage.getItem('tutorialSeen:ann')).toBe('1')
+        expect(store.getState().auth.access.tourSeen).toBe(true)
     })
 })
 

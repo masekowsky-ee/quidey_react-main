@@ -28,6 +28,7 @@ import Toaster from './components/Toaster.jsx';
 import Tutorial from './components/Tutorial.jsx';
 import DeleteScopeDialog from './components/task/DeleteScopeDialog.jsx';
 import PushOffer from './components/PushOffer.jsx';
+import OnboardingPrompts from './components/onboarding/OnboardingPrompts.jsx';
 import QuickAdd from './components/QuickAdd.jsx';
 import { fetchInboxUnread } from './features/inbox/inbox.js';
 import { useInboxRealtime } from './features/inbox/useInboxRealtime.js';
@@ -246,6 +247,7 @@ function App(){
         <Tutorial/>
         <DeleteScopeDialog/>
         <PushOffer/>
+        <OnboardingPrompts/>
         <QuickAdd/>
         {/* Ctrl/⌘ K or "/": search tasks, jump, do; "?": the keyboard shortcuts */}
         <CommandPalette/>

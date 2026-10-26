@@ -52,33 +52,14 @@
     color: var(--text-muted);
 }
 
+/* the yes stands out, the no is grey (shared with the onboarding questions) */
 .yes{
-    composes: btnPrimary from './ui.module.css';
-    width: 100%;
-    height: 2.6rem;
+    composes: btnYes from './ui.module.css';
 }
 
 .later{
-    align-self: stretch;
+    composes: btnNo from './ui.module.css';
     margin-top: 0.3rem;
-    padding: 0.6rem;
-    font: inherit;
-    font-weight: 550;
-    color: var(--text);
-    background: transparent;
-    border: 0;
-    border-radius: var(--radius-pill);
-    cursor: pointer;
-}
-
-.later:hover{
-    background: var(--hover-wash);
-}
-
-.yes:focus-visible,
-.later:focus-visible{
-    outline: 2px solid var(--primary-fg);
-    outline-offset: 2px;
 }
 
 @keyframes fadeIn{

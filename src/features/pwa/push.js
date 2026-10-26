@@ -25,7 +25,9 @@ export const PUSH_KINDS = ['plan', 'digest', 'messages', 'social'];
 // iPad: only as an app on the home screen) | 'denied' (blocked in the browser's settings) |
 // 'unavailable' (the server sends none) | 'off' | 'on'.
 // kinds: what this device gets, while on. asking: the question after the first task is open.
-let state = { status: 'unknown', kinds: null, busy: false, error: null, asking: false };
+// error: the text key of what went wrong last; detail: the browser's own words for it (shown
+// small under it, so a phone that can't be signed up says why).
+let state = { status: 'unknown', kinds: null, busy: false, error: null, detail: null, asking: false };
 const listeners = new Set();
 const set = (changes) => {
     state = { ...state, ...changes };
@@ -47,6 +49,10 @@ export const pushWanted = () => read(WANTED_KEY) === 'on';
 // Whether a push of this kind reaches this device (then the app shows no system notification
 // of its own for it, see tasks/reminders.js)
 export const pushCovers = (kind) => pushWanted() && state.status === 'on' && state.kinds?.[kind] !== false;
+
+// Whether new tasks start with a reminder: notifications are on for this device and it wants
+// my tasks and events (also before the check at startup has answered)
+export const pushRemindsByDefault = () => pushWanted() && ['on', 'unknown'].includes(state.status) && state.kinds?.plan !== false;
 
 // 'supported', 'install' (Safari on iPhone / iPad outside the home screen) or 'unsupported'
 export function pushSupport() {
@@ -112,6 +118,21 @@ async function subscribe(key) {
     return subscription ?? registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: bytes });
 }
 
+// One step after the other: the check at startup (or when the settings open) must never run
+// beside turning them on or off, or it undoes what was just signed up (it read "off" before)
+let queue = Promise.resolve();
+function inTurn(work) {
+    const run = queue.then(work, work);
+    queue = run.catch(() => {});
+    return run;
+}
+
+// What failed, for the person: the step decides the text, the browser's error is the detail
+const failure = (step, err) => ({
+    error: step === 'server' ? 'pushErrorServer' : step === 'subscribe' ? 'pushErrorService' : 'pushErrorOn',
+    detail: err ? `${err.name || 'Error'}: ${err.message || err}`.slice(0, 200) : null,
+});
+
 async function removeFromServer(endpoint) {
     if (endpoint) await apiFetch('/api/push/subscription', { method: 'DELETE', body: JSON.stringify({ endpoint }) }).catch(() => {});
     write(ENDPOINT_KEY, null);
@@ -119,7 +140,11 @@ async function removeFromServer(endpoint) {
 
 // Looks at how things stand and puts them right: called on every start of the app (signed in,
 // with access) and when the settings open
-export async function refreshPush() {
+export function refreshPush() {
+    return inTurn(checkPush);
+}
+
+async function checkPush() {
     const support = pushSupport();
     if (support !== 'supported') return set({ status: support, kinds: null });
     try {
@@ -145,44 +170,60 @@ export async function refreshPush() {
 }
 
 // Turns them on for this device. Call it right from a click: browsers only ask for the
-// permission then (Safari in particular), so that comes first.
+// permission then (Safari in particular), so that comes first, before waiting for anything.
 export async function enablePush() {
     if (pushSupport() !== 'supported') return false;
-    set({ busy: true, error: null });
+    set({ busy: true, error: null, detail: null });
+    let permission;
     try {
-        const permission = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
-        if (permission !== 'granted') {
-            set({ status: permission === 'denied' ? 'denied' : 'off' });
-            return false;
-        }
-        const key = await serverKey();
-        if (!key) {
-            set({ status: 'unavailable' });
-            return false;
-        }
-        const kinds = await save(await subscribe(key));
-        write(WANTED_KEY, 'on');
-        set({ status: 'on', kinds });
-        return true;
-    } catch {
-        set({ error: 'pushErrorOn' });
+        permission = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+    } catch (err) {
+        set({ ...failure('permission', err), busy: false });
         return false;
-    } finally {
-        set({ busy: false });
     }
+    if (permission !== 'granted') {
+        // 'default': the question was closed, or the browser only showed a small bell next to
+        // the address (Chrome on Android does that for many sites) and nobody answered it
+        set({ status: permission === 'denied' ? 'denied' : 'off', error: permission === 'denied' ? null : 'pushErrorNoAnswer', busy: false });
+        return false;
+    }
+    return inTurn(async () => {
+        let step = 'server';
+        try {
+            const key = await serverKey();
+            if (!key) {
+                set({ status: 'unavailable' });
+                return false;
+            }
+            step = 'subscribe';
+            const subscription = await subscribe(key);
+            step = 'server';
+            const kinds = await save(subscription);
+            write(WANTED_KEY, 'on');
+            set({ status: 'on', kinds });
+            return true;
+        } catch (err) {
+            set(failure(step, err));
+            return false;
+        } finally {
+            set({ busy: false });
+        }
+    });
 }
 
 // Turns them off for this device: gone from the server, and the browser drops the address
-export async function disablePush() {
-    set({ busy: true, error: null });
+export function disablePush() {
+    set({ busy: true, error: null, detail: null });
     write(WANTED_KEY, 'off');
-    try {
-        const subscription = await currentSubscription().catch(() => null);
-        await removeFromServer(subscription?.endpoint ?? read(ENDPOINT_KEY));
-        await subscription?.unsubscribe().catch(() => {});
-    } finally {
-        set({ status: Notification.permission === 'denied' ? 'denied' : 'off', kinds: null, busy: false });
-    }
+    return inTurn(async () => {
+        try {
+            const subscription = await currentSubscription().catch(() => null);
+            await removeFromServer(subscription?.endpoint ?? read(ENDPOINT_KEY));
+            await subscription?.unsubscribe().catch(() => {});
+        } finally {
+            set({ status: Notification.permission === 'denied' ? 'denied' : 'off', kinds: null, busy: false });
+        }
+    });
 }
 
 // One kind on or off for this device ({ plan: false }); shown at once, put back if it fails
@@ -206,8 +247,8 @@ export async function sendTestPush() {
         if (!subscription) throw new Error('Not subscribed');
         await apiFetch('/api/push/test', { method: 'POST', body: JSON.stringify({ endpoint: subscription.endpoint }) });
         return true;
-    } catch {
-        set({ error: 'pushErrorTest' });
+    } catch (err) {
+        set({ error: 'pushErrorTest', detail: failure('test', err).detail });
         return false;
     }
 }
@@ -240,6 +281,9 @@ export function offerPushAfterTask() {
     write(ASKED_KEY, '1');
     set({ asking: true });
 }
+
+// Whether that question is open right now (onboarding waits with its own until it's answered)
+export const pushAsking = () => state.asking;
 
 // The answer to that question; yes comes from a click, so it can ask for the permission
 export function answerPushOffer(yes) {
@@ -278,5 +322,6 @@ export function usePushSync(enabled, account, navigate) {
 // Only for tests: back to the start
 export function resetPushState() {
     publicKey = undefined;
-    state = { status: 'unknown', kinds: null, busy: false, error: null, asking: false };
+    queue = Promise.resolve();
+    state = { status: 'unknown', kinds: null, busy: false, error: null, detail: null, asking: false };
 }

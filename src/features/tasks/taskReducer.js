@@ -7,7 +7,7 @@ const withGroupIds = (task, change) => ({ ...task, group_ids: change(task.group_
 // or date), a field that wasn't sent keeps its old value.
 const UPDATABLE = [
     'name', 'due', 'description', 'prio', 'done',
-    'due_time', 'duration_minutes', 'reminder_minutes', 'location', 'link', 'details',
+    'due_time', 'duration_minutes', 'reminders', 'location', 'link', 'details',
     'repeat', 'repeat_left', 'repeat_skip', 'completed_at', 'color', 'reminder_email', 'kind', 'event_type_id', 'event_type',
     'group_ids', 'isOwner', 'owner', 'shareId', 'sharedWith',
 ];

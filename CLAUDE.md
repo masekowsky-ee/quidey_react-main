@@ -76,10 +76,23 @@ Order of checks on every render:
    `AccountSwitcher` (profile, switch account, add account, sign out). Under Gemeinschaft a row of
    the friends online right now (faces + "N Freunde online", `useOnlineFriends`); the tab bar puts
    a green dot on Gemeinschaft while any friend is online. The tour ("Einführung", `Tutorial.jsx`)
-   opens once per account and device and again from Settings → App: 9 chapters (welcome, plan,
+   opens by itself only for a new account (`access.tourSeen` from `/api/me` = `users.tour_seen_at`;
+   migration 031 set it for every account that existed; closing calls `markTourSeen` →
+   `PUT /api/users/tour-seen`, so no device shows it again) and any time from Settings → App: 9 chapters (welcome, plan,
    focus, calendar, grow, together, stats, yours, ready), each with a small animated scene
    (`tour/TourPreview.jsx`; "yours" really switches accent/theme, "ready" shows where the nav is
-   at this width) and one way out (open the page / new-task form); texts in `i18n/tourTexts.js`. The header has a streak pill (flame + days, filled once today counts). The active entry is
+   at this width) and one way out (open the page / new-task form); texts in `i18n/tourTexts.js`.
+   Onboarding of a new account (`features/onboarding/onboarding.js`, dialogs
+   `components/onboarding/OnboardingPrompts.jsx`, one at a time, never while the push question is
+   open): closing that first tour without picking a way out asks "Was möchtest du als Erstes
+   machen?" (first task, friends, shared session, calendar, profile, or look around). Thunks call
+   `noteAction(kind)` (task created / ticked off, group, friend request, friend, shared session,
+   family); from the 3rd it asks once to install Quidey (only where `installState()` is `prompt` or
+   `ios`; yes → `/settings#app`); the first success (`done`, `friend`) after 10 asks "Gefällt dir
+   Quidey?" (yes → 1–5 stars + optional words, "Nicht wirklich" → what could be better; sent as
+   feedback category `rating`). Counted per device in localStorage `onboarding:<username>`.
+   Yes/no questions use `btnYes` (lifted primary with an icon) / `btnNo` (grey) from
+   `ui.module.css` (also `PushOffer`). The header has a streak pill (flame + days, filled once today counts). The active entry is
    brighter ink, no fill; count badges are neutral (the accent stays on data, never on nav,
    tabs or buttons; one filled inverted primary per screen). The header's "Neu" opens the
    new-task form over any page (`QuickAdd`, `settings.showForms` via `showForms(true|false)`).
@@ -128,7 +141,12 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   first and the timer is the corner button. Colour, groups, description and priority are set in
   the editor (`TaskEditDialog`); a shown group's colour and deletion sit in the list's title row.
   Tasks of shared sessions can be taken out of "Alle" (`settings.showSharedTasks`, eye button in
-  the list's title row and in Settings); a session's own group always shows them.
+  the list's title row and in Settings); a session's own group always shows them. While a
+  session's group is shown, the new-task form (opened on `/`) creates the task in that session
+  (`addSharedTask`, only the session's fields; a line says where it goes); elsewhere it stays mine.
+  Every task row has a tooltip "Erstellt am … um … von …" and the editor (`TaskEditor`) the same
+  line under its fields (`features/tasks/created.js`: own tasks `created_at` + `owner`, session /
+  family entries `createdAt` + `addedBy`; compared with my username).
 - `/calendar` — month / week / agenda views, drag tasks between days, keyboard grid,
   `TaskEditor` (times, reminders, repeat weekly/monthly/yearly, notes, groups/labels, sharing).
   Several calendars: `?cal=session-<id>` shows a shared session's tasks, `?cal=family-<id>` a
@@ -222,9 +240,22 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   (`shared_session_tasks.kind`): they need a day, are done once over (session owner's time zone,
   `syncSessionEvents`), have no tick, assignee or stopwatch and stay out of Home's list. Reminders, repeating, groups and sharing stay personal; adding
   an own task copies its details, later edits don't sync back (only `done` does).
+- Sub-groups in sessions and families — **experimental, testers only**: a session's or family's
+  entries sorted into named groups (`shared_session_groups` / `family_groups`, entries'
+  `group_id`, migration 030; max 20, name ≤ 40, unique per session/family; deleting one keeps its
+  entries). `components/subgroups/SubGroupBar.jsx` ("Alle" + chips with open counts, "+", delete
+  the shown one) above `SharedTaskList`, on the family page (filters calendar entries and list),
+  and on Home under a session's group (the pick is `groupToDisplay.group.subGroupId`, so the
+  new-task form files into it); the editor gets a "Untergruppe" select (`subGroups` on
+  `TaskEditDialog shared/handlers`). Helpers in `features/tasks/subGroups.js`. Everybody gets
+  `groups` / `groupId` in the data, non-testers just see the flat list. API:
+  `POST|DELETE /api/tester/shared-sessions/:id/groups[/:groupId]`, same under
+  `/api/tester/families/:id/groups`; `group_id` on the entry POST/PATCH only from testers (403
+  `TESTER_REQUIRED`), checked to belong to that session/family.
 - `/inbox` — direct messages between friends + notifications/admin broadcasts (realtime).
   From 1100px the messages tab is split: conversations beside the open one (`?with=<userId>`).
-- `/feedback` — feedback form (mailed to the owner).
+- `/feedback` — feedback form (mailed to the owner). `POST /api/feedback` also takes category
+  `rating` ({ liked, stars 1–5 when liked, message }) from the onboarding question.
 - `/admin` — only for `isAdmin`: overview, beta requests (approve/decline), users (pro/admin
   toggles), broadcasts, tester feedback (`?tab=testers`, `tester/AdminTesterFeedback.jsx`:
   average, star spread, "favourite of N", comments per topic), admin action log.
@@ -293,7 +324,7 @@ startup and offers it as a button (Chrome/Edge/Android), explains the share menu
 says "installed" when running standalone, and hides the row everywhere else.
 
 Push notifications (Web Push, VAPID): Settings → App → "Benachrichtigungen" per device (on/off,
-then four kinds `plan` (tasks/events with a time: at the reminder, else at the start), `digest`
+then four kinds `plan` (tasks/events at each of their reminders), `digest`
 (morning overview 07:30–11:00 local), `messages`, `social` (friend requests, session/family
 invites, shared/assigned tasks, broadcasts), and "Test senden"). `src/features/pwa/push.js`
 (external store, `usePushState`; `refreshPush` on every start via `usePushSync` in App re-PUTs the
@@ -306,6 +337,24 @@ worker (`pwa.js`, `PUSH_HANDLERS`) shows a push unless the app is focused (the t
 always show: Safari revokes silent pushes); a click focuses the app and posts `quidey:open`, the app
 navigates (no reload). In dev Vite serves a push-only `/sw.js` (no caching), registered in dev too.
 With push on, the in-app reminders (`reminders.js`) only toast. iPhone/iPad: only as installed app.
+Turning on runs strictly after any running check (`inTurn` queue in push.js: a startup check used
+to undo a fresh sign-up), asks the permission first, from the click; a failure keeps the step's
+text (`pushErrorNoAnswer` — the question was closed or only shown as Chrome's bell,
+`pushErrorService` — the browser's push service refused, e.g. Brave or no Google services,
+`pushErrorServer`) plus the browser's own error as `detail`, shown under it in Settings.
+
+Reminders: a task has a list `tasks.reminders` (minutes before the start, 0 = at the start, up to
+5, migration 029; the API still reads/answers a single `reminder_minutes` for older apps). A task
+without a time of day "starts" at the account's all-day time (`users.allday_reminder_time`,
+default 12:00, Settings → App, `PUT /api/users/reminder-time`, `/api/me` → `allDayReminderTime`,
+`state.auth.access.allDayReminderTime`): "Am Tag" is that time on its day, "1 Tag vorher" the day
+before. The editor (`TaskOptionsFields`) offers toggles (timed: start … 1 day before; all-day: on
+the day, 1/2 days, 1 week before) and needs a day; picking a time before a day takes today.
+New tasks start with `[0]` while push is on for this device (`defaultReminders()` /
+`pushRemindsByDefault()`; TaskForm and the calendar's quick add). Pushes, mails, in-app toasts,
+the inbox's reminder tab and the .ics export all use the same rule; of several due at once only
+the latest goes out (`push_sent_for` / `reminder_mailed_at` = the reminder time sent for; a later
+one follows, a task moved before that time reminds again).
 
 Client-side storage: only `localStorage` (no cookies), plus the service worker's Cache Storage
 for the app's own files: `token` (JWT), `accounts` (several accounts on one device:
@@ -314,7 +363,8 @@ the app as the other one, signing out takes over the next remembered account), `
 `theme`, `palette`, `motion`, `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
 `teamSessionId`, `streakNudge` (day of the last streak reminder), `uiVariant` and `uiColors`
 (testers' interface variant and the colours picked per variant), `push`, `pushEndpoint`,
-`pushAsked` (push notifications on this device). `public/theme-init.js` applies
+`pushAsked` (push notifications on this device), `onboarding:<username>` (a new account's action
+count, whether install / rating were asked). `public/theme-init.js` applies
 the theme before React loads.
 
 ## API access
@@ -331,7 +381,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment, 028: push_subscriptions, tasks.push_sent_for, users.push_digest_on). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment, 028: push_subscriptions, tasks.push_sent_for, users.push_digest_on, 029: tasks.reminders (replaces reminder_minutes), 030: sub-groups — shared_session_groups, family_groups, shared_session_tasks.group_id, family_tasks.group_id, 031: users.tour_seen_at, users.allday_reminder_time). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.
@@ -369,7 +419,8 @@ the theme before React loads.
   layout (`utils/mailTemplate.js`: tables + inline styles; user text always through `escapeHtml`).
 - Reminder mails: `utils/reminderMails.js` checks every minute (`REMINDER_CHECK_MS`) for open tasks
   with `reminder_email`, computes the start in `users.timezone` (sent by the app via
-  `PUT /api/users/locale`, default Europe/Berlin) and mails the owner once per reminder time
+  `PUT /api/users/locale`, default Europe/Berlin; without a time of day at
+  `users.allday_reminder_time`) and mails the owner once per reminder time
   (`reminder_mailed_at`). Only the owner can switch it on.
 - Profiles: `GET /api/profile` (mine), `PUT /api/profile` (only the fields sent: bio, status,
   study, interests, color, banner, emoji, frame, title, showcase, showStats, shareActivity; choices

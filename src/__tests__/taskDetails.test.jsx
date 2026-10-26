@@ -13,7 +13,9 @@ import {
 import {
     minutesOfDay, taskTimeText, durationText, taskStart, compareTasks, filterTasks, toIcs,
 } from '../features/calendar/calendar'
-import { reminderAt, dueReminders, reminderKey } from '../features/tasks/reminders'
+import { reminderTimes, dueReminders, reminderKey, defaultReminders, saveAllDayTime, selectAllDayTime } from '../features/tasks/reminders'
+import { resetPushState } from '../features/pwa/push'
+import { dateKey } from '../features/calendar/calendar'
 import { linkIsValid } from '../features/tasks/taskFields'
 import { taskColorAttr } from '../features/tasks/taskColors'
 import { useAccountLocale } from '../features/settings/accountLocale'
@@ -93,10 +95,10 @@ describe('time of day', () => {
 })
 
 describe('iCalendar export with times', () => {
-    it('writes start and end, location, link and the reminder', () => {
+    it('writes start and end, location, link and the reminders', () => {
         const ics = toIcs([{
             id: 3, name: 'Lunch', due: apiDate(2026, 10, 22), due_time: '12:30', duration_minutes: 90,
-            reminder_minutes: 15, location: 'Luigi, Main St', link: 'https://example.com/', details: 'Table 4',
+            reminders: [15, 0], location: 'Luigi, Main St', link: 'https://example.com/', details: 'Table 4',
         }], { now: new Date(Date.UTC(2026, 9, 19)) })
         const lines = ics.split('\r\n')
         expect(lines).toContain('DTSTART:20261022T123000')
@@ -105,39 +107,86 @@ describe('iCalendar export with times', () => {
         expect(lines).toContain('URL:https://example.com/')
         expect(lines).toContain('DESCRIPTION:Table 4')
         expect(lines).toContain('TRIGGER:-PT15M')
+        expect(lines).toContain('TRIGGER:PT0M')
+    })
+
+    it('the alarms of an all-day task count from my all-day time', () => {
+        const ics = toIcs([{ id: 5, name: 'Essay', due: '2026-10-22', reminders: [0, 1440] }], { allDayTime: '09:00' })
+        expect(ics).toContain('TRIGGER:PT540M')
+        expect(ics).toContain('TRIGGER:-PT900M')
     })
 
     it('a timed task without a duration lasts 30 minutes, done ones get no alarm', () => {
-        const ics = toIcs([{ id: 4, name: 'Call', due: '2026-10-22', due_time: '23:45', reminder_minutes: 5, done: true }])
+        const ics = toIcs([{ id: 4, name: 'Call', due: '2026-10-22', due_time: '23:45', reminders: [5], done: true }])
         expect(ics).toContain('DTEND:20261023T001500')
         expect(ics).not.toContain('VALARM')
     })
 })
 
 describe('reminders', () => {
-    const task = { id: 7, name: 'Lunch', due: apiDate(2026, 10, 22), due_time: '12:30', reminder_minutes: 15, done: false }
+    const task = { id: 7, name: 'Lunch', due: apiDate(2026, 10, 22), due_time: '12:30', reminders: [15], done: false }
+    const tasksOf = (due) => due.map(({ task }) => task)
 
     it('are due from the reminder time until an hour after the start', () => {
-        expect(reminderAt(task)).toEqual(new Date(2026, 9, 22, 12, 15))
+        expect(reminderTimes(task)).toEqual([{ minutes: 15, at: new Date(2026, 9, 22, 12, 15) }])
         const none = new Set()
         expect(dueReminders([task], new Date(2026, 9, 22, 12, 14), none)).toEqual([])
-        expect(dueReminders([task], new Date(2026, 9, 22, 12, 15), none)).toEqual([task])
-        expect(dueReminders([task], new Date(2026, 9, 22, 13, 29), none)).toEqual([task])
+        expect(tasksOf(dueReminders([task], new Date(2026, 9, 22, 12, 15), none))).toEqual([task])
+        expect(tasksOf(dueReminders([task], new Date(2026, 9, 22, 13, 29), none))).toEqual([task])
         expect(dueReminders([task], new Date(2026, 9, 22, 13, 31), none)).toEqual([])
     })
 
     it('show once, but again after the time was changed', () => {
-        const shown = new Set([reminderKey(task)])
+        const shown = new Set([reminderKey(task, 15)])
         expect(dueReminders([task], new Date(2026, 9, 22, 12, 20), shown)).toEqual([])
         const moved = { ...task, due_time: '12:35' }
-        expect(dueReminders([moved], new Date(2026, 9, 22, 12, 21), shown)).toEqual([moved])
+        expect(tasksOf(dueReminders([moved], new Date(2026, 9, 22, 12, 21), shown))).toEqual([moved])
     })
 
-    it('none without a time, without a reminder, or when done', () => {
-        expect(reminderAt({ ...task, due_time: null })).toBeNull()
-        expect(reminderAt({ ...task, reminder_minutes: null })).toBeNull()
-        expect(reminderAt({ ...task, done: true })).toBeNull()
-        expect(reminderAt({ ...task, reminder_minutes: 0 })).toEqual(new Date(2026, 9, 22, 12, 30))
+    it('of several due at once only the latest shows, the earlier ones count as shown with it', () => {
+        const twice = { ...task, reminders: [60, 15] }
+        const [due] = dueReminders([twice], new Date(2026, 9, 22, 12, 20), new Set())
+        expect(due.minutes).toBe(15)
+        expect(due.keys).toEqual([reminderKey(twice, 60), reminderKey(twice, 15)])
+        // only the earlier one so far: that one, then the later one on its own
+        expect(dueReminders([twice], new Date(2026, 9, 22, 11, 40), new Set())[0].minutes).toBe(60)
+        expect(dueReminders([twice], new Date(2026, 9, 22, 12, 16), new Set([reminderKey(twice, 60)]))[0].minutes).toBe(15)
+    })
+
+    it('a task without a time counts from my all-day time', () => {
+        const essay = { id: 8, name: 'Essay', due: apiDate(2026, 10, 22), due_time: null, reminders: [1440, 0], done: false }
+        expect(reminderTimes(essay, '09:00')).toEqual([
+            { minutes: 1440, at: new Date(2026, 9, 21, 9, 0) },
+            { minutes: 0, at: new Date(2026, 9, 22, 9, 0) },
+        ])
+        expect(reminderTimes(essay)[1].at).toEqual(new Date(2026, 9, 22, 12, 0))
+    })
+
+    it('none without a day, without a reminder, or when done; an older answer with a single one still counts', () => {
+        expect(reminderTimes({ ...task, due: null })).toEqual([])
+        expect(reminderTimes({ ...task, reminders: [] })).toEqual([])
+        expect(reminderTimes({ ...task, done: true })).toEqual([])
+        const { reminders, ...old } = task
+        expect(reminders).toEqual([15])
+        expect(reminderTimes({ ...old, reminder_minutes: 0 })).toEqual([{ minutes: 0, at: new Date(2026, 9, 22, 12, 30) }])
+    })
+
+    it('new tasks remind at their start while notifications are on for this device', () => {
+        resetPushState()
+        expect(defaultReminders()).toEqual([])
+        localStorage.setItem('push', 'on')
+        expect(defaultReminders()).toEqual([0])
+        localStorage.setItem('push', 'off')
+        expect(defaultReminders()).toEqual([])
+    })
+
+    it('my all-day time comes with /api/me and is saved for the account', async () => {
+        const store = makeStore()
+        expect(selectAllDayTime(store.getState())).toBe('12:00')
+        apiFetch.mockResolvedValueOnce({ allDayReminderTime: '08:30' })
+        await store.dispatch(saveAllDayTime('08:30'))
+        expect(bodyOf('/api/users/reminder-time', 'PUT')).toEqual({ time: '08:30' })
+        expect(selectAllDayTime(store.getState())).toBe('08:30')
     })
 })
 
@@ -268,11 +317,15 @@ describe('calendar with times and sharing', () => {
         fireEvent.click(screen.getByRole('button', { name: '1 h', pressed: false }))
         fireEvent.click(toggle)
         fireEvent.change(screen.getByLabelText('Time'), { target: { value: '13:00' } })
-        fireEvent.change(screen.getByRole('combobox', { name: 'Reminder' }), { target: { value: '15' } })
+        // reminders are toggles: any number of them
+        const reminders = within(screen.getByRole('group', { name: 'Reminders' }))
+        fireEvent.click(reminders.getByRole('button', { name: '15 min before', pressed: false }))
+        fireEvent.click(reminders.getByRole('button', { name: 'At the start', pressed: false }))
+        expect(reminders.getByRole('button', { name: '15 min before' })).toHaveAttribute('aria-pressed', 'true')
         fireEvent.change(screen.getByRole('textbox', { name: 'Location' }), { target: { value: 'Pizza place' } })
-        apiFetch.mockResolvedValueOnce({ ...lunch, due_time: '13:00', duration_minutes: 60, reminder_minutes: 15, location: 'Pizza place' })
+        apiFetch.mockResolvedValueOnce({ ...lunch, due_time: '13:00', duration_minutes: 60, reminders: [0, 15], location: 'Pizza place' })
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
-        expect(bodyOf('/api/tasks/5', 'PUT')).toMatchObject({ due_time: '13:00', duration_minutes: 60, reminder_minutes: 15, location: 'Pizza place' })
+        expect(bodyOf('/api/tasks/5', 'PUT')).toMatchObject({ due_time: '13:00', duration_minutes: 60, reminders: [0, 15], location: 'Pizza place' })
     })
 
     it('refuses a link that is not http(s)', async () => {
@@ -360,15 +413,42 @@ describe('create task form', () => {
         expect(setCreateTask).toHaveBeenCalledWith(false)
     })
 
-    it('a reminder needs a time', () => {
+    it('reminders need a day; picking a time first takes today', () => {
         render(<Provider store={makeStore()}><MemoryRouter><TaskForm setCreateTask={() => {}} /></MemoryRouter></Provider>)
         fireEvent.click(screen.getByRole('button', { name: /More options/ }))
-        expect(screen.getByRole('combobox', { name: 'Reminder' })).toBeDisabled()
-        // a time needs a day first
-        expect(screen.getByLabelText(/^Time/)).toBeDisabled()
-        fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: '2026-10-22' } })
+        const atTheStart = () => within(screen.getByRole('group', { name: 'Reminders' })).getByRole('button', { name: /^(At the start|On the day)$/ })
+        expect(atTheStart()).toBeDisabled()
+        expect(screen.getByText('Reminders need the task to have a day.')).toBeInTheDocument()
+        // the time field is open without a day: a time takes today
+        fireEvent.pointerDown(screen.getByLabelText(/^Time/))
+        expect(screen.getByLabelText('Due Date')).toHaveValue(dateKey(new Date()))
+        expect(atTheStart()).toBeEnabled()
+        // without a time, reminders count from my all-day time
+        expect(screen.getByText(/Without a time, Quidey reminds you at 12:00/)).toBeInTheDocument()
+        expect(atTheStart()).toHaveTextContent('On the day')
         fireEvent.change(screen.getByLabelText(/^Time/), { target: { value: '09:00' } })
-        expect(screen.getByRole('combobox', { name: 'Reminder' })).toBeEnabled()
+        expect(atTheStart()).toHaveTextContent('At the start')
+    })
+
+    it('with notifications on, a new task reminds at its start; without, it has none', async () => {
+        localStorage.setItem('push', 'on')
+        resetPushState()
+        const { unmount } = render(<Provider store={makeStore()}><MemoryRouter><TaskForm setCreateTask={() => {}} /></MemoryRouter></Provider>)
+        fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Essay' } })
+        fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: '2026-10-22' } })
+        apiFetch.mockResolvedValueOnce({ id: 32, name: 'Essay' })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Create' })) })
+        expect(bodyOf('/api/tasks')).toMatchObject({ name: 'Essay', due: '2026-10-22', due_time: null, reminders: [0] })
+        unmount()
+
+        apiFetch.mockClear()
+        localStorage.setItem('push', 'off')
+        render(<Provider store={makeStore()}><MemoryRouter><TaskForm setCreateTask={() => {}} /></MemoryRouter></Provider>)
+        fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Read' } })
+        fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: '2026-10-22' } })
+        apiFetch.mockResolvedValueOnce({ id: 33, name: 'Read' })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Create' })) })
+        expect(bodyOf('/api/tasks')).toMatchObject({ name: 'Read', reminders: [] })
     })
 })
 
@@ -379,7 +459,7 @@ describe('task colours and reminders by mail', () => {
     })
     afterEach(() => vi.useRealTimers())
 
-    const lunch = { id: 5, name: 'Lunch', due: apiDate(2026, 10, 22), due_time: '12:30', reminder_minutes: 15, prio: 50, done: false, isOwner: true, sharedWith: [], group_ids: [] }
+    const lunch = { id: 5, name: 'Lunch', due: apiDate(2026, 10, 22), due_time: '12:30', reminders: [15], prio: 50, done: false, isOwner: true, sharedWith: [], group_ids: [] }
     const renderCalendar = (path, store) => render(
         <Provider store={store}><MemoryRouter initialEntries={[path]}><Calendar /></MemoryRouter></Provider>
     )
@@ -404,14 +484,14 @@ describe('task colours and reminders by mail', () => {
         fireEvent.click(screen.getByRole('checkbox', { name: 'Also remind me by email' }))
         apiFetch.mockResolvedValueOnce({ ...lunch, color: 'blue', reminder_email: true })
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
-        expect(bodyOf('/api/tasks/5', 'PUT')).toMatchObject({ color: 'blue', reminder_email: true, reminder_minutes: 15 })
+        expect(bodyOf('/api/tasks/5', 'PUT')).toMatchObject({ color: 'blue', reminder_email: true, reminders: [15] })
     })
 
     it('the mail switch needs a reminder and is only for the owner', () => {
-        const { unmount } = renderCalendar('/calendar?date=2026-10-22&day=2026-10-22&task=5', makeStore([{ ...lunch, reminder_minutes: null }]))
+        const { unmount } = renderCalendar('/calendar?date=2026-10-22&day=2026-10-22&task=5', makeStore([{ ...lunch, reminders: [] }]))
         fireEvent.click(screen.getByRole('button', { name: /More options/ }))
         expect(screen.queryByRole('checkbox', { name: 'Also remind me by email' })).not.toBeInTheDocument()
-        fireEvent.change(screen.getByRole('combobox', { name: 'Reminder' }), { target: { value: '30' } })
+        fireEvent.click(screen.getByRole('button', { name: '30 min before' }))
         expect(screen.getByRole('checkbox', { name: 'Also remind me by email' })).not.toBeChecked()
         unmount()
 

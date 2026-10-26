@@ -6,7 +6,8 @@ import { motion } from 'motion/react';
 import styles from './Tutorial.module.css';
 import { useTranslation } from '../i18n/useTranslation';
 import { setShowTutorial, showForms } from '../features/settings/settingsAction';
-import { hasSeenTutorial, storeTutorialSeen } from '../features/settings/preferences';
+import { markTourSeen } from '../features/auth/authAction';
+import { askNextSteps, startOnboarding } from '../features/onboarding/onboarding';
 import { MOTION, useCelebrate, useMotionLevel } from '../features/settings/motion';
 import { useIsTester } from '../features/auth/tester';
 import { PHONE_QUERY, useMediaQuery } from '../features/layout/breakpoints';
@@ -55,8 +56,9 @@ function useNavPlace() {
 }
 
 // The intro tour: one card per chapter, each with a small scene of the page it is about, a few
-// tips and a way straight there. Opens by itself the first time an account signs in on this
-// device, and any time from Settings → App. Arrow keys, the dots, the chapter chips or a swipe
+// tips and a way straight there. Opens by itself once for a new account (access.tourSeen is false
+// until it is closed, on any device), and any time from Settings → App. Closing that first one
+// without picking a way out asks what to do first (onboarding/NextSteps). Arrow keys, the dots, the chapter chips or a swipe
 // move through it.
 export default function Tutorial() {
     const dispatch = useDispatch();
@@ -65,6 +67,7 @@ export default function Tutorial() {
     const open = useSelector((state) => state.settings.showTutorial);
     const user = useSelector((state) => state.auth.user);
     const username = user?.username;
+    const tourSeen = useSelector((state) => state.auth.access.tourSeen);
     const isTester = useIsTester();
     const nav = useNavPlace();
     const level = useMotionLevel();
@@ -76,16 +79,21 @@ export default function Tutorial() {
     const dialogRef = useRef(null);
     // where the focus was before the tour opened, it goes back there afterwards
     const returnFocus = useRef(null);
+    // this one opened by itself for a new account
+    const firstTour = useRef(false);
 
     const steps = STEPS;
     const current = Math.min(index, steps.length - 1);
     const step = steps[current];
     const last = current === steps.length - 1;
 
-    // first sign-in of this account here: show the tour once
+    // a new account: show the tour once
     useEffect(() => {
-        if (username && !hasSeenTutorial(username)) dispatch(setShowTutorial(true));
-    }, [username, dispatch]);
+        if (!username || tourSeen) return;
+        firstTour.current = true;
+        startOnboarding(username);
+        dispatch(setShowTutorial(true));
+    }, [username, tourSeen, dispatch]);
 
     // focus goes to the main button, so Enter walks through the tour
     useEffect(() => {
@@ -94,8 +102,13 @@ export default function Tutorial() {
         nextRef.current?.focus();
     }, [open]);
 
-    const close = ({ restoreFocus = true } = {}) => {
-        if (username) storeTutorialSeen(username);
+    // nextSteps: after the first tour, ask what to do first (not when a way out was just picked)
+    const close = ({ restoreFocus = true, nextSteps = true } = {}) => {
+        if (firstTour.current) {
+            firstTour.current = false;
+            dispatch(markTourSeen());
+            if (nextSteps) askNextSteps();
+        }
         dispatch(setShowTutorial(false));
         // the next tour starts at the beginning
         setIndex(0);
@@ -110,7 +123,7 @@ export default function Tutorial() {
 
     // out of the tour, to a page or into the new-task form; the tour is done then
     const act = (go) => {
-        close({ restoreFocus: false });
+        close({ restoreFocus: false, nextSteps: false });
         if (go.newTask) dispatch(showForms(true));
         else navigate(go.to);
     };

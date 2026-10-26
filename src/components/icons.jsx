@@ -51,6 +51,7 @@ const PATHS = {
     flask: <><path d="M9.5 3.5h5M10.5 3.5v5.2L5 18.2a1.5 1.5 0 0 0 1.3 2.3h11.4a1.5 1.5 0 0 0 1.3-2.3l-5.5-9.5V3.5" /><path d="M7.6 14h8.8" /></>,
     search: <><circle cx="10.5" cy="10.5" r="6" /><path d="M15 15l5 5" /></>,
     arrowRight: <path d="M5 12h14M13.5 6.5L19 12l-5.5 5.5" />,
+    download: <path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14" />,
 };
 
 // size: width and height in px; without it, CSS (className) decides

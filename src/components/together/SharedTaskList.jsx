@@ -6,8 +6,12 @@ import { formatDuration, displayName, formatDate, toInputDate } from '../../feat
 import { isEvent } from '../../features/tasks/kinds';
 import { fetchTaskState } from '../../features/tasks/taskAction';
 import {
-    addSharedTask, setSharedTaskDone, removeSharedTask, assignSharedTask,
+    addSharedTask, setSharedTaskDone, removeSharedTask, assignSharedTask, addSessionSubGroup, removeSessionSubGroup,
 } from '../../features/together/togetherAction';
+import { useIsTester } from '../../features/auth/tester';
+import { createdText } from '../../features/tasks/created';
+import { inSubGroup, openCounts, shownSubGroup } from '../../features/tasks/subGroups';
+import SubGroupBar from '../subgroups/SubGroupBar.jsx';
 import { selectWork, startWork, stopWork, localMs, othersRunningMs, othersWorking, useNow } from '../../features/together/work';
 import { useTogetherRun } from '../../features/together/hooks';
 import { taskColorAttr } from '../../features/tasks/taskColors';
@@ -21,13 +25,21 @@ const FILTERS = ['all', 'mine', 'free'];
 // The session's tasks and events: add new ones or my own, mark tasks done, assign, edit their
 // details (day, time, priority, colour, ... all optional) and work on them. An event needs a day
 // and is done once it's over (the server ticks it off); nobody works on it or is assigned to it.
+// Testers also sort them into sub-groups (experimental): a row of chips filters the list, and
+// what is added while one is shown goes into it.
 export default function SharedTaskList({ session, showShareSelect = true }) {
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
     const dispatch = useDispatch();
     const run = useTogetherRun();
     const work = useSelector(selectWork);
     const myTasks = useSelector(state => state.task.tasks);
+    const myUsername = useSelector(state => state.auth.user?.username);
     const now = useNow(Boolean(work.taskId) || othersWorking(session));
+    const isTester = useIsTester();
+    const subGroups = session.groups ?? [];
+    const [subGroupPick, setSubGroupPick] = useState(null);
+    const subGroup = isTester ? shownSubGroup(subGroups, subGroupPick) : null;
+    const intoSubGroup = subGroup ? { group_id: subGroup } : {};
 
     const [newTask, setNewTask] = useState('');
     // what the field adds: a task, or an event on a day (today unless another is picked)
@@ -58,8 +70,8 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
         const name = newTask.trim();
         if (!name) return;
         const fields = newKind === 'event'
-            ? { name, kind: 'event', due: newDay || toInputDate(new Date()), ...(newTime ? { due_time: newTime } : {}) }
-            : { name };
+            ? { name, kind: 'event', due: newDay || toInputDate(new Date()), ...(newTime ? { due_time: newTime } : {}), ...intoSubGroup }
+            : { name, ...intoSubGroup };
         if (await run(addSharedTask(id, fields))) {
             setNewTask('');
             setNewTime('');
@@ -72,7 +84,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
         const taskId = Number(e.target.value);
         e.target.value = '';
         setPickOwn(false);
-        if (taskId) run(addSharedTask(id, { taskId }), 'toast_taskShared');
+        if (taskId) run(addSharedTask(id, { taskId, ...intoSubGroup }), 'toast_taskShared');
     };
 
     const handleDone = async (task) => {
@@ -86,12 +98,13 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
     // events belong to everybody: they stay in every filter
     const matches = (task) =>
         filter === 'all' || isEvent(task) || (filter === 'mine' ? task.assignee?.id === me : !task.assignee);
-    const open = session.tasks.filter(task => !task.done && matches(task));
-    const done = session.tasks.filter(task => task.done);
+    const shownTasks = inSubGroup(session.tasks, subGroup);
+    const open = shownTasks.filter(task => !task.done && matches(task));
+    const done = shownTasks.filter(task => task.done);
     const counts = {
-        all: session.tasks.filter(task => !task.done).length,
-        mine: session.tasks.filter(task => !task.done && task.assignee?.id === me).length,
-        free: session.tasks.filter(task => !task.done && !task.assignee).length,
+        all: shownTasks.filter(task => !task.done).length,
+        mine: shownTasks.filter(task => !task.done && task.assignee?.id === me).length,
+        free: shownTasks.filter(task => !task.done && !task.assignee).length,
     };
 
     const canRemove = (task) => isOpen && totalOn(task) === 0 && (session.isOwner || task.addedBy?.id === me);
@@ -104,7 +117,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
         const event = isEvent(task);
         return (
             <li key={task.id} className={`${styles.taskRow} ${task.done ? styles.taskDone : ''} ${mine ? styles.taskMine : ''} ${event ? styles.taskEvent : ''}`}
-                data-task-color={taskColorAttr(task)}>
+                data-task-color={taskColorAttr(task)} title={createdText(task, t, language, myUsername) || undefined}>
                 {/* an event isn't ticked off: it's done once it's over */}
                 {event
                     ? <span className={styles.eventMark} title={t(task.done ? 'eventOver' : 'kind_event')}>
@@ -190,6 +203,13 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                 )}
             </div>
 
+            {isTester && (isOpen || subGroups.length > 0) && (
+                <SubGroupBar groups={subGroups} value={subGroup} onChange={setSubGroupPick}
+                    counts={openCounts(session.tasks)}
+                    onAdd={isOpen ? (name) => run(addSessionSubGroup(id, name)) : undefined}
+                    onRemove={isOpen ? (groupId) => run(removeSessionSubGroup(id, groupId)) : undefined} />
+            )}
+
             {isOpen && (
                 <div className={styles.addTask}>
                     <form className={styles.addRow} onSubmit={handleAdd}>
@@ -247,7 +267,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
             {taskInEditor && (
                 <TaskEditDialog
                     task={taskInEditor}
-                    shared={{ sessionId: id, canRemove: canRemove(taskInEditor) }}
+                    shared={{ sessionId: id, canRemove: canRemove(taskInEditor), subGroups: isTester ? subGroups : undefined }}
                     onClose={() => setEditTaskId(null)}
                 />
             )}

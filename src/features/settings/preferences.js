@@ -66,8 +66,3 @@ export const storeTimerMode = (mode) => store('timerMode', mode);
 // a session's own group still shows them
 export const readStoredShowSharedTasks = () => readStored('showSharedTasks', ['0', '1'], '1') === '1';
 export const storeShowSharedTasks = (show) => store('showSharedTasks', show ? '1' : '0');
-
-// Whether this account has seen the intro tour on this device (shown once to new users)
-const tutorialKey = (username) => `tutorialSeen:${username}`;
-export const hasSeenTutorial = (username) => readStored(tutorialKey(username), ['1'], null) === '1';
-export const storeTutorialSeen = (username) => store(tutorialKey(username), '1');

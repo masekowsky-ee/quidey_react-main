@@ -1,61 +1,80 @@
 import styles from './TaskOptions.module.css';
 import { useId } from 'react';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
 import { fill } from '../../features/helperFunction';
-import { durationText, REPEATS } from '../../features/calendar/calendar';
-import { askForReminderPermission } from '../../features/tasks/reminders';
+import { REPEATS } from '../../features/calendar/calendar';
+import { askForReminderPermission, reminderLabel, REMINDERS_MAX, selectAllDayTime } from '../../features/tasks/reminders';
 import { linkIsValid } from '../../features/tasks/taskFields';
+import { usePushState } from '../../features/pwa/push';
 
-const REMINDERS = [0, 5, 10, 15, 30, 60, 120, 1440];
+// minutes before the start; a task without a time of day starts at my all-day time
+const TIMED_REMINDERS = [0, 5, 10, 15, 30, 60, 120, 1440];
+const ALL_DAY_REMINDERS = [0, 1440, 2880, 10080];
 
-// The value of a select: '' for none, otherwise the number; keeps an unusual value as an option
-const withCurrent = (list, current) =>
-    current === null || current === undefined || list.includes(Number(current)) ? list : [...list, Number(current)].sort((a, b) => a - b);
-
-const toNumberOrNull = (value) => (value === '' ? null : Number(value));
+// The choices, plus any unusual value the task already has
+const withCurrent = (list, current) => [...new Set([...list, ...current])].sort((a, b) => a - b);
 
 // how often a repeating task comes back at most (like the server)
 const REPEAT_LEFT_MAX = 1000;
 // what "ends after …" starts with
 const REPEAT_LEFT_DEFAULT = 10;
 
-// The optional details of a task: reminder, repeating, location, link and extra info (a task's
+// The optional details of a task: reminders, repeating, location, link and extra info (a task's
 // planned time and an event's length are on the wheels, see DurationWheel).
-// value: { reminder_minutes, reminder_email, location, link, details, repeat, repeat_left };
+// value: { reminders, reminder_email, location, link, details, repeat, repeat_left };
+// reminders: minutes before the start, any number up to REMINDERS_MAX, picked one by one;
 // repeat_left: how many more times it comes back after this one (null: no end).
 // onChange gets the changed fields.
-// hasTime: reminders count from the start time, so without one they are off.
-// hasDate: repeating counts from the day, so without one it is off too.
+// hasTime: reminders count from the start time; without one from my all-day time (Settings).
+// hasDate: reminders and repeating count from the day, so without one they are off.
 // canMail: "also by mail" (value.reminder_email) is offered, only to the task's owner.
 // personal: false for a task in a shared session, which has no reminder and no repeating.
 export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = true, canMail = true, personal = true }) {
     const { t } = useTranslation();
     const id = useId();
+    const allDayTime = useSelector(selectAllDayTime);
+    const push = usePushState();
     const linkOk = linkIsValid(value.link);
-    const hasReminder = hasTime && value.reminder_minutes !== null && value.reminder_minutes !== undefined;
+    const reminders = value.reminders ?? [];
+    const hasReminder = hasDate && reminders.length > 0;
+    const choices = withCurrent(hasTime ? TIMED_REMINDERS : ALL_DAY_REMINDERS, reminders);
+    const pushOff = hasReminder && !['on', 'unknown'].includes(push.status);
+    const hint = !hasDate || !hasTime || pushOff;
 
-    const reminderLabel = (minutes) => minutes === 0 ? t('reminderAtStart') : fill(t('reminderBefore'), { time: durationText(minutes) });
+    const toggleReminder = (minutes) => {
+        const on = reminders.includes(minutes);
+        if (!on) askForReminderPermission();
+        onChange({ reminders: on ? reminders.filter(item => item !== minutes) : [...reminders, minutes].sort((a, b) => a - b) });
+    };
 
     return (
         <div className={styles.options}>
             {personal &&
-            <div className={styles.row}>
-                <label className={styles.field}>
-                    <span>{t('reminder')}</span>
-                    <select value={hasTime ? (value.reminder_minutes ?? '') : ''} disabled={!hasTime}
-                        aria-describedby={hasTime ? undefined : `${id}-reminder-hint`}
-                        onChange={(e) => {
-                            if (e.target.value !== '') askForReminderPermission();
-                            onChange({ reminder_minutes: toNumberOrNull(e.target.value) });
-                        }}>
-                        <option value="">{t('reminderNone')}</option>
-                        {withCurrent(REMINDERS, value.reminder_minutes).map(minutes => (
-                            <option key={minutes} value={minutes}>{reminderLabel(minutes)}</option>
-                        ))}
-                    </select>
-                </label>
-            </div>}
-            {personal && !hasTime && <p id={`${id}-reminder-hint`} className={styles.hint}>{t('reminderNeedsTime')}</p>}
+            <fieldset className={styles.reminders} disabled={!hasDate} aria-describedby={hint ? `${id}-reminder-hint` : undefined}>
+                <legend className={styles.remindersLegend}>{t('reminders')}</legend>
+                <div className={styles.reminderChoices}>
+                    {choices.map(minutes => {
+                        const on = hasDate && reminders.includes(minutes);
+                        return (
+                            <button key={minutes} type="button" aria-pressed={on}
+                                disabled={!on && reminders.length >= REMINDERS_MAX} onClick={() => toggleReminder(minutes)}>
+                                {reminderLabel(t, minutes, hasTime)}
+                            </button>
+                        );
+                    })}
+                </div>
+            </fieldset>}
+            {personal && hint &&
+                <p id={`${id}-reminder-hint`} className={styles.hint}>
+                    {!hasDate ? t('reminderNeedsDate')
+                        : <>
+                            {!hasTime && fill(t('reminderAllDayAt'), { time: allDayTime })}
+                            {/* the phone only rings with notifications on for this device */}
+                            {pushOff && <> {t('reminderPushOff')} <Link to="/settings#app">{t('reminderPushOffLink')}</Link></>}
+                        </>}
+                </p>}
             {/* mails go to the task's owner, so only they see the switch */}
             {personal && canMail && hasReminder &&
                 <label className={styles.checkRow}>
