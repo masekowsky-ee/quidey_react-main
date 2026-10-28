@@ -52,6 +52,19 @@ const PATHS = {
     search: <><circle cx="10.5" cy="10.5" r="6" /><path d="M15 15l5 5" /></>,
     arrowRight: <path d="M5 12h14M13.5 6.5L19 12l-5.5 5.5" />,
     download: <path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14" />,
+    // the Fokusraum, Pomodoro, routines, notes
+    expand: <path d="M14.5 4.5h5v5M19.5 4.5L13 11M9.5 19.5h-5v-5M4.5 19.5L11 13" />,
+    skip: <path d="M6 5.5l9 6.5-9 6.5v-13zM18 5.5v13" />,
+    coffee: <><path d="M5 9.5h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5v-5z" /><path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16M8.5 3.5v3M12 3.5v3" /></>,
+    sound: <><path d="M4.5 9.5h3.5l4.5-4v13l-4.5-4H4.5v-5z" /><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" /></>,
+    soundOff: <><path d="M4.5 9.5h3.5l4.5-4v13l-4.5-4H4.5v-5z" /><path d="M16 9.5l5 5M21 9.5l-5 5" /></>,
+    routine: <><path d="M5 7.5h1.5M5 12h1.5M5 16.5h1.5M10 7.5h9M10 12h9M10 16.5h5" /><path d="M17 15l1.8 1.8L21.5 14" /></>,
+    pin: <path d="M14.5 3.5l6 6-3 1.5-3.5 3.5-.5 4-3-3-5 5M9.5 12l-3-3 4-.5 3.5-3.5 1.5-3" />,
+    link: <><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" /><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></>,
+    image: <><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="9.5" r="1.6" /><path d="M20.5 15.5l-5-5-9 9" /></>,
+    checklist: <><rect x="4" y="4.5" width="5" height="5" rx="1" /><rect x="4" y="14.5" width="5" height="5" rx="1" /><path d="M5.5 17l1 1 2-2.2M12 7h8M12 17h8" /></>,
+    brain: <><path d="M9 4.5a3 3 0 0 0-3 3 3 3 0 0 0-2 5.2A3 3 0 0 0 7 17.5a3 3 0 0 0 5 1.5V6a3 3 0 0 0-3-1.5z" /><path d="M15 4.5a3 3 0 0 1 3 3 3 3 0 0 1 2 5.2 3 3 0 0 1-3 4.8 3 3 0 0 1-5 1.5" /></>,
+    lightbulb: <><path d="M9 17.5h6M10 20.5h4M12 3.5a6 6 0 0 0-3.5 10.9c.4.3.5.7.5 1.1v.5h6v-.5c0-.4.2-.8.5-1.1A6 6 0 0 0 12 3.5z" /></>,
 };
 
 // size: width and height in px; without it, CSS (className) decides

@@ -226,6 +226,20 @@ function Privacy() {
                 Abs. 1 lit. b DSGVO. Bitte gib in Aufgaben, Events und Event-Typen keine besonders sensiblen Daten ein
                 (z. B. Gesundheitsdaten), die die App nicht braucht.
             </p>
+            <p>
+                <strong>Fokusraum, Notizbuch und Routinen:</strong> Im Notizbuch speichert Quidey deine Notizen mit
+                Titel, Text, ob sie angeheftet sind, zu welcher deiner Aufgaben sie gehören, wann sie angelegt und
+                zuletzt geändert wurden, und ihre Anhänge: Links (Adresse und Titel) und Bilder, die du einfügst oder
+                auswählst. Bilder werden vorher auf deinem Gerät verkleinert und dann als Teil der Notiz auf dem Server
+                gespeichert; achte darauf, keine Bilder mit Daten anderer Personen hochzuladen, die das nicht möchten.
+                Von deinen Routinen speichert Quidey Name, Symbol, die Schritte (Text und Minuten), an welchen
+                Wochentagen und zu welcher Uhrzeit du sie eingeplant hast, ob du erinnert werden möchtest und an welchem
+                Tag zuletzt erinnert wurde, sowie jeden Durchgang (Beginn, Ende, wie viele Schritte geschafft wurden und
+                wie lange es dauerte). Läuft der Fokus-Timer, speichert der Server, wann er endet und welche Phase
+                (Timer, Fokus, kurze oder lange Pause) es ist, damit er dir dann eine Benachrichtigung schicken kann,
+                auch wenn dein Handy aus ist; der Eintrag wird beim Pausieren, Beenden oder nach der Benachrichtigung
+                gelöscht. Diese Inhalte sieht nur du. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+            </p>
 
             <h2>6. Freunde und gemeinsame Funktionen</h2>
             <p>
@@ -331,7 +345,8 @@ function Privacy() {
                 <strong>Benachrichtigungen auf deinem Gerät (Push):</strong> Nur wenn du sie einschaltest (in den
                 Einstellungen unter „App“ oder auf die Frage nach deiner ersten Aufgabe) und dein Browser es erlaubt,
                 meldet sich Quidey auch bei geschlossener App: zu den Erinnerungen deiner Aufgaben und Termine (neue
-                bekommen dann von selbst eine zum Beginn), morgens mit einem Überblick über deinen Tag, bei Nachrichten, Freundschaftsanfragen,
+                bekommen dann von selbst eine zum Beginn), wenn dein Fokus-Timer oder eine Pomodoro-Pause abgelaufen ist,
+                zur geplanten Uhrzeit deiner Routinen, morgens mit einem Überblick über deinen Tag, bei Nachrichten, Freundschaftsanfragen,
                 Einladungen, geteilten oder zugewiesenen Aufgaben und Meldungen des Quidey-Teams. Welche Arten du
                 bekommst, stellst du je Gerät ein. Dafür erzeugt dein Browser bei seinem Push-Dienst eine Adresse; welcher
                 Dienst das ist, bestimmt der Hersteller deines Browsers bzw. Betriebssystems (z. B. Google bei Chrome und
@@ -384,10 +399,17 @@ function Privacy() {
                 <li>dein Anmelde-Token (7 Tage gültig, wird beim Abmelden gelöscht). Meldest du auf demselben Gerät
                     mehrere Konten an, um zwischen ihnen zu wechseln, liegen für jedes davon Token, Benutzer- und
                     Anzeigename (höchstens fünf Konten); beim Abmelden eines Kontos wird sein Eintrag gelöscht;</li>
-                <li>deine Einstellungen: Sprache, Design, Farbpalette, Akzentfarbe, Animationen, Töne, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer oder Stoppuhr, Kalenderansicht, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
+                <li>deine Einstellungen: Sprache, Design, Farbpalette, Akzentfarbe, Animationen, Töne, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer, Pomodoro oder Stoppuhr und die Pomodoro-Längen, dein Tagesziel für die Fokuszeit, im Fokusraum gewähltes Fokus-Geräusch, Lautstärke und Lernmethode, Kalenderansicht, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
                 <li>bei einem neuen Konto, wie viele Dinge du schon erledigt oder angelegt hast und ob Quidey dich schon
                     gefragt hat, ob du es installieren möchtest und ob es dir gefällt (nur eine Zahl und zwei Merker,
                     keine Inhalte);</li>
+                <li>eine laufende Fokus-Sitzung, damit sie weiterläuft, auch wenn das Handy aus ist oder die App
+                    geschlossen wird: Stand und Startzeitpunkt des Timers, Pomodoro-Phase und Runde, die Aufgabe im Fokus
+                    (Nummer und Name) und die bisher gebuchte Zeit (wird nach 18 Stunden und beim Abmelden verworfen);
+                    ebenso ein laufender Durchgang einer Routine (welche Routine, welcher Schritt, seit wann);</li>
+                <li>was du im Fokusraum nur für dich notierst: das Ziel der Sitzung und die Gedanken auf dem
+                    Gedankenparkplatz (sie bleiben auf diesem Gerät und werden nicht an den Server geschickt, außer du
+                    machst eine Aufgabe daraus);</li>
                 <li>welche Erinnerungen schon angezeigt wurden, an welchem Tag dich Quidey zuletzt an deine Serie erinnert hat und welche gemeinsame Sitzung gerade gestoppt wird;</li>
                 <li>ob auf diesem Gerät Benachrichtigungen an sind, die Adresse dafür beim Push-Dienst (siehe Abschnitt 6) und ob Quidey dich danach schon gefragt hat;</li>
                 <li>Schwierigkeit und Bestwerte der Spiele.</li>
@@ -412,7 +434,7 @@ function Privacy() {
             <p>
                 Deine Konto- und Inhaltsdaten speichere ich, solange dein Konto besteht. Löschst du dein Konto, werden
                 Konto, Aufgaben, Events, Event-Typen, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen,
-                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen, deine Bewertungen als Tester, die für Benachrichtigungen angemeldeten Geräte und alle
+                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen, deine Bewertungen als Tester, die für Benachrichtigungen angemeldeten Geräte, deine Notizen (mit ihren Bildern), Routinen und ihre Durchgänge, der Wecker deines Fokus-Timers und alle
                 Nachrichten, die du geschrieben oder bekommen hast, sofort gelöscht – auch beim Gegenüber, auch deine
                 Nachrichten in Family-Chats. Einträge in Protokollen (Verlauf gemeinsamer Sitzungen, Admin-Protokoll)
                 und von dir angelegte Einträge in Family-Kalendern verlieren den Bezug zu deinem Konto. Hast du eine

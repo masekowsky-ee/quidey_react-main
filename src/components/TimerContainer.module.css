@@ -337,3 +337,73 @@
 .inlinePanel .timerNav{
     grid-area: nav;
 }
+
+/* ---------- Pomodoro: the phase and the rounds of this cycle ---------- */
+.phaseLine{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* a break is a different moment: its name in the accent */
+.phaseLine[data-phase="short"],
+.phaseLine[data-phase="long"]{
+    color: var(--primary);
+}
+
+.rounds{
+    display: inline-flex;
+    gap: 0.25rem;
+}
+
+.round,
+.roundDone{
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--text-muted);
+    box-sizing: border-box;
+}
+
+.roundDone{
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.inlinePanel .div:has(.phaseLine){
+    grid-template-areas:
+        "phase phase"
+        "time time"
+        "bar  nav";
+}
+
+.inlinePanel .phaseLine{
+    grid-area: phase;
+}
+
+/* three modes and two buttons: the panel head may wrap on narrow phones */
+.panelHead > a.foldBtn{
+    margin-left: auto;
+}
+
+@media (max-width: 420px) {
+    .mode,
+    .modeOn{
+        padding: 0 0.55rem;
+    }
+}
+
+/* the corner panel: the phase on its own line above time, bar and controls */
+.panel .div:has(.phaseLine){
+    flex-wrap: wrap;
+    row-gap: 0.2rem;
+}
+
+.panel .phaseLine{
+    flex-basis: 100%;
+}

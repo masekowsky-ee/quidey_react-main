@@ -3,6 +3,7 @@ import flowTexts from './flowTexts';
 import moreTexts from './moreTexts';
 import testerTexts from './testerTexts';
 import tourTexts from './tourTexts';
+import focusTexts from './focusTexts';
 
 const translations = {
     de: {
@@ -2293,6 +2294,6 @@ const translations = {
 
 // Gemeinschaft (feed, challenges, levels), the tour, the command bar and shortcuts and others
 // live in their own files
-for (const language of ['de', 'en']) Object.assign(translations[language], communityTexts[language], moreTexts[language], testerTexts[language], tourTexts[language], flowTexts[language]);
+for (const language of ['de', 'en']) Object.assign(translations[language], communityTexts[language], moreTexts[language], testerTexts[language], tourTexts[language], flowTexts[language], focusTexts[language]);
 
 export default translations;

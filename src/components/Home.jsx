@@ -12,11 +12,11 @@ import TimerContainer, { TimerSkeleton } from './TimerContainer.jsx';
 import SoloTogetherStrip from './together/SoloTogetherStrip.jsx';
 import TaskInvites from './task/TaskInvites.jsx';
 import Momentum, { MomentumSkeleton } from './home/Momentum.jsx';
-import { updateCurrentSessionData, addWorkedTask } from '../features/session/sessionAction.js'
+import { addWorkedTask, setFocusTask, selectFocusTask } from '../features/session/sessionAction.js'
 import { fetchMySharedTasks, selectSharedSoloTasks } from '../features/together/togetherAction.js'
 import { selectTasksLoaded } from '../features/tasks/taskAction.js'
 import { Bone } from './skeleton/Skeleton.jsx'
-import { useSoloSharedWork } from '../features/together/useSoloSharedWork.js'
+import Today from './home/Today.jsx'
 import { DESKTOP_QUERY, useMediaQuery } from '../features/layout/breakpoints.js'
 import { fill, isOverdue, sameDay, parseDate } from '../features/helperFunction.js'
 import { isEvent } from '../features/tasks/kinds.js'
@@ -106,7 +106,7 @@ export function HomeSkeleton() {
 // (the task being worked on and the timer). Wide screens put the focus column beside the list,
 // where it stays in view; narrower ones show the task in focus above the list and fold the
 // timer into a button in the corner.
-export default function Home({ setActiveTimer }){
+export default function Home(){
     const dispatch = useDispatch();
     const { t } = useTranslation();
     const desktop = useMediaQuery(DESKTOP_QUERY);
@@ -122,31 +122,28 @@ export default function Home({ setActiveTimer }){
     const setCreateTask = useCallback((open) => dispatch(showForms(Boolean(open))), [dispatch]);
     const [createGroup, setCreateGroup] = useState(false);
 
-    const sessionParams = useSelector(state => state.session.sessionParams)
-    const [timer, setTimer] = useState({time: sessionParams.time, active: false});
-    const [workedTime, setWorkedTime] = useState(0);
-
     // --- task in focus, drag & drop ---
-    // an open task to start with, never one that's already done
-    const starterTask = tasks.find(task => !task.done && !isEvent(task)) || null;
-    const [chosenTask, setActiveTask] = useState(starterTask);
-    // tasks put back from the work area (not done): shown at the end of the list, latest last
-    const [releasedIds, setReleasedIds] = useState([]);
+    // The task in focus lives in the store (the Fokusraum and the timer on every page use it):
     // a task from a shared session is read live, so done/assignee changes show up; it's gone
     // (nothing active) when I left the session or it ended. One of my own leaves the work area
     // as soon as the list says it's done or gone (finished in the calendar, on another device).
-    const ownTask = chosenTask && !chosenTask.shared ? tasks.find(task => task.id === chosenTask.id) : null;
-    const activeTask = chosenTask?.shared
-        ? sharedTasks.find(task => task.id === chosenTask.id) ?? null
-        : (ownTask && !ownTask.done ? chosenTask : null);
+    const activeTask = useSelector(selectFocusTask);
+    const focusTask = useSelector(state => state.session.focusTask);
+    const focusPicked = useSelector(state => state.session.focusPicked);
+    const setActiveTask = useCallback((next) =>
+        dispatch(setFocusTask(typeof next === 'function' ? next(focusTask) : next)), [dispatch, focusTask]);
+    // an open task to start with (only before one was ever chosen), never one that's already done
+    const starterTask = tasks.find(task => !task.done && !isEvent(task)) || null;
+    useEffect(() => {
+        if (!focusPicked && starterTask) dispatch(setFocusTask(starterTask));
+    }, [focusPicked, starterTask, dispatch]);
+    // tasks put back from the work area (not done): shown at the end of the list, latest last
+    const [releasedIds, setReleasedIds] = useState([]);
 
     // the shared sessions' tasks; changes arrive live afterwards (useLiveLists in App)
     useEffect(() => {
         dispatch(fetchMySharedTasks()).catch(() => {});
     }, [dispatch]);
-
-    // time on a shared task goes to its session
-    useSoloSharedWork(activeTask);
 
     const releaseActiveTask = () => {
         if (!activeTask) return;
@@ -157,9 +154,9 @@ export default function Home({ setActiveTimer }){
     // the button on a task row: the same as dropping it into the work area, which then comes
     // into view (on a phone it is far above the list)
     const activateTask = useCallback((task) => {
-        setActiveTask(task);
+        dispatch(setFocusTask(task));
         requestAnimationFrame(() => dropZoneRef.current?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }));
-    }, []);
+    }, [dispatch]);
 
     const [draggedTask, setDraggedTask] = useState(null);
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -168,10 +165,6 @@ export default function Home({ setActiveTimer }){
     const dropZoneRef = useRef(null);
     const draggedTaskRef = useRef(null);
     const dragPositionRef = useRef({ x: 0, y: 0 });
-
-    useEffect(()=>{
-        dispatch(updateCurrentSessionData({totalTime: workedTime}));
-    }, [timer.time, dispatch, workedTime]);
 
     useEffect(() => {
         if (activeTask) dispatch(addWorkedTask(activeTask));
@@ -205,12 +198,12 @@ export default function Home({ setActiveTimer }){
                 currentPos.x <= dropRect.right &&
                 currentPos.y >= dropRect.top &&
                 currentPos.y <= dropRect.bottom;
-            if (isOverDropZone) setActiveTask(currentTask);
+            if (isOverDropZone) dispatch(setFocusTask(currentTask));
         }
 
         draggedTaskRef.current = null;
         setDraggedTask(null);
-    }, []);
+    }, [dispatch]);
 
     useEffect(() => {
         if (!draggedTask) return;
@@ -225,8 +218,7 @@ export default function Home({ setActiveTimer }){
     }, [draggedTask, handlePointerMove, handlePointerUp]);
 
     // one timer at any time: in the focus column on wide screens, in the corner otherwise
-    const timerPanel = <TimerContainer inline={desktop} setActiveTimer={setActiveTimer} setWorkedTime={setWorkedTime}
-        timer={timer} setTimer={setTimer} activeTask={activeTask} />;
+    const timerPanel = <TimerContainer inline={desktop} />;
 
     const listedTasks = showSharedTasks ? [...tasks, ...sharedTasks] : tasks;
     return (
@@ -237,6 +229,8 @@ export default function Home({ setActiveTimer }){
             <div data-part="home-momentum" data-label={t('momentumTitle')}>
                 <Momentum />
             </div>
+            {/* the day at a glance: focus goal, routines, what's next, a quick note */}
+            <Today tasks={listedTasks} />
             <TaskInvites />
             <div data-part="home-week" data-label={t('calendar')}>
                 <WeekDaysContainer />

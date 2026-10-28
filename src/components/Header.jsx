@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { setShowMenu, showForms } from '../features/settings/settingsAction'
 import Icon from './icons'
-import { selectTimerProgress } from '../features/session/sessionAction'
+import { selectTimerProgress, selectTimerInProgress } from '../features/session/sessionAction'
 import TeamWorkPill from './together/TeamWorkPill'
 import TeamQuickPanel from './together/TeamQuickPanel'
 import DailyTicker from './DailyTicker'
@@ -39,8 +39,8 @@ function StreakPill() {
     );
 }
 
-export default function Header(props){
-    const {activeTimer} = props;
+export default function Header(){
+    const activeTimer = useSelector(selectTimerInProgress);
     const percentWidth = useSelector(selectTimerProgress);
     const dispatch = useDispatch();
     const showMenu = () => {
@@ -72,14 +72,14 @@ export default function Header(props){
                     </Link>
                     <div className={styles.center}>
                         {activeTimer &&
-                            <div className={styles.timerChip} title={timer.active ? 'running' : 'paused'}>
+                            <Link to="/focus" className={styles.timerChip} title={timer.active ? 'running' : 'paused'}>
                                 <span className={`${styles.timerDot} ${timer.active ? styles.timerDotLive : ''}`}></span>
                                 <span className={styles.timerTime}>{formatTime(timer.time)}</span>
                                 {/* a stopwatch has no end to measure against */}
                                 {timerMode !== 'stopwatch' && <div className={styles.timerTrack}>
                                     <div className={styles.timerFill} style={{width: `${percentWidth}%`}}></div>
                                 </div>}
-                            </div>}
+                            </Link>}
                         <TeamWorkPill />
                         {commandBar &&
                             <button type="button" className={styles.commandBtn} onClick={openCommands}

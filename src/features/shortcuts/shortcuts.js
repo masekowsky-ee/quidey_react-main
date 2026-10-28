@@ -17,6 +17,8 @@ export const openShortcuts = () => window.dispatchEvent(new Event(OPEN_SHORTCUTS
 export const GO_KEYS = {
     h: { to: '/', label: 'shortcut_goHome' },
     k: { to: '/calendar', label: 'shortcut_goCalendar' },
+    f: { to: '/focus', label: 'shortcut_goFocus' },
+    r: { to: '/routines', label: 'shortcut_goRoutines' },
     g: { to: COMMUNITY_PATHS.feed, label: 'shortcut_goCommunity' },
     p: { to: '/inbox', label: 'shortcut_goInbox' },
     s: { to: '/stats', label: 'shortcut_goStats' },
