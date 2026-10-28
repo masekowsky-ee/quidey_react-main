@@ -8,7 +8,6 @@ import { fetchTaskState } from '../../features/tasks/taskAction';
 import {
     addSharedTask, setSharedTaskDone, removeSharedTask, assignSharedTask, addSessionSubGroup, removeSessionSubGroup,
 } from '../../features/together/togetherAction';
-import { useIsTester } from '../../features/auth/tester';
 import { createdText } from '../../features/tasks/created';
 import { inSubGroup, openCounts, shownSubGroup } from '../../features/tasks/subGroups';
 import SubGroupBar from '../subgroups/SubGroupBar.jsx';
@@ -35,10 +34,9 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
     const myTasks = useSelector(state => state.task.tasks);
     const myUsername = useSelector(state => state.auth.user?.username);
     const now = useNow(Boolean(work.taskId) || othersWorking(session));
-    const isTester = useIsTester();
     const subGroups = session.groups ?? [];
     const [subGroupPick, setSubGroupPick] = useState(null);
-    const subGroup = isTester ? shownSubGroup(subGroups, subGroupPick) : null;
+    const subGroup = shownSubGroup(subGroups, subGroupPick);
     const intoSubGroup = subGroup ? { group_id: subGroup } : {};
 
     const [newTask, setNewTask] = useState('');
@@ -203,7 +201,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                 )}
             </div>
 
-            {isTester && (isOpen || subGroups.length > 0) && (
+            {(isOpen || subGroups.length > 0) && (
                 <SubGroupBar groups={subGroups} value={subGroup} onChange={setSubGroupPick}
                     counts={openCounts(session.tasks)}
                     onAdd={isOpen ? (name) => run(addSessionSubGroup(id, name)) : undefined}
@@ -267,7 +265,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
             {taskInEditor && (
                 <TaskEditDialog
                     task={taskInEditor}
-                    shared={{ sessionId: id, canRemove: canRemove(taskInEditor), subGroups: isTester ? subGroups : undefined }}
+                    shared={{ sessionId: id, canRemove: canRemove(taskInEditor), subGroups }}
                     onClose={() => setEditTaskId(null)}
                 />
             )}

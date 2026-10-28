@@ -57,16 +57,27 @@ function NoteEditor({ note, focusTask, onChange, onDelete, onClose }) {
         fetchNote(note.id).then(full => setDraft(prev => ({ ...prev, attachments: full.attachments }))).catch(() => {});
     }, [note.id, note.attachments]);
 
+    // what the server has, to go back to when it refuses attachments (no room for more pictures)
+    const lastSaved = useRef(note);
     const save = useCallback(async (change) => {
         setStatus('saving');
         try {
             const saved = await updateNote(note.id, change);
+            lastSaved.current = { ...lastSaved.current, ...saved, attachments: saved.attachments ?? lastSaved.current.attachments };
             setStatus('saved');
             onChange(saved);
-        } catch {
+        } catch (err) {
+            if (err.code === 'NOTEBOOK_STORAGE_FULL') {
+                setDraft(prev => ({ ...prev, attachments: lastSaved.current.attachments }));
+                dispatch(showToast(t('noteStorageFull'), 'error'));
+                setStatus('saved');
+                return;
+            }
             setStatus('error');
         }
-    }, [note.id, onChange]);
+    // t only changes with the language
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [note.id, onChange, dispatch]);
 
     // text and title: saved a moment after the last key; the rest at once
     const edit = (change, now = false) => {
@@ -265,7 +276,7 @@ export default function Notebook({ focusTask }) {
             setNotes(prev => [note, ...(prev ?? [])]);
             setOpenId(note.id);
         } catch (err) {
-            dispatch(showToast(err.code === 'NOTEBOOK_LIMIT' ? t('noteLimit') : t('noteSaveFailed'), 'error'));
+            dispatch(showToast(err.code === 'NOTEBOOK_LIMIT' ? t('noteLimit') : err.code === 'NOTEBOOK_STORAGE_FULL' ? t('noteStorageFull') : t('noteSaveFailed'), 'error'));
         }
     };
     // an empty note isn't allowed by the server: a new one is called after its day, to write over

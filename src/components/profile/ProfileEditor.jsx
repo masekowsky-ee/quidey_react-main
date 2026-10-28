@@ -10,6 +10,8 @@ import {
 } from '../../features/profile/profileOptions';
 import { PROFILE_TITLES, SHOWCASE_LEVEL, SHOWCASE_MAX, TITLES_FROM, requiredLevel } from '../../features/progress/progress';
 import { badgesFor } from '../../features/profile/badges';
+import TesterOnly from '../TesterOnly.jsx';
+import AvatarUpload from './AvatarUpload.jsx';
 
 // The fields of a profile the editor works on
 const draftOf = (profile) => ({
@@ -113,6 +115,9 @@ export default function ProfileEditor({ profile, onChange, onSaved, onClose }) {
                 <h2>{t('profileCustomize')}</h2>
             </div>
             <p className={styles.hint}>{t('profileVisibilityHint')} {fill(t('profileLevelHint'), { level })}</p>
+
+            {/* profile pictures are in test */}
+            <TesterOnly><AvatarUpload /></TesterOnly>
 
             <fieldset className={styles.field}>
                 <legend>{t('profileAvatar')}</legend>

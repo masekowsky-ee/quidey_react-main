@@ -11,6 +11,7 @@ import {
     decideBetaRequest, resetBetaRequest, updateAdminUser,
 } from '../features/admin/adminAction';
 import AdminTesterFeedback from './tester/AdminTesterFeedback';
+import { removeAvatarOf } from '../features/profile/avatars';
 import { Bone, Skeleton, SkeletonRows } from './skeleton/Skeleton.jsx';
 
 const TABS = ['requests', 'users', 'broadcast', 'testers', 'overview'];
@@ -204,6 +205,11 @@ function UsersTab() {
                                             {user.isAdmin && <span className={styles.chip_admin}>{t('adminRoleAdmin')}</span>}
                                             {user.isTester && <span className={styles.chip_tester}>{t('adminRoleTester')}</span>}
                                             {user.request && <StatusChip status={user.request.status} t={t} />}
+                                            {user.hasAvatar &&
+                                                <button type="button" className={styles.quietBtn} disabled={busy}
+                                                    onClick={() => run(async () => { await removeAvatarOf(user.id); setUsers(prev => prev.map(u => u.id === user.id ? { ...u, hasAvatar: false } : u)); }, 'adminToastAvatarRemoved')}>
+                                                    {t('adminRemoveAvatar')}
+                                                </button>}
                                             <span className={styles.meta}>{t('adminJoined')} {formatDate(user.createdAt)}</span>
                                         </div>
                                         {isMe ? <span className={styles.meta}>{t('adminThisIsYou')}</span> : confirm?.id === user.id ? (

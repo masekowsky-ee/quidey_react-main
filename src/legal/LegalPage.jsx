@@ -223,8 +223,8 @@ function Privacy() {
                 Event-Zeit pro Typ, Fokuszeit pro Gruppe, erledigte Aufgaben); sie werden bei jedem Aufruf berechnet
                 und nicht zusätzlich gespeichert. Die Event-Zeit pro Typ siehst nur du, auch deine Freunde nicht.
                 Diese Inhalte sieht nur du – außer du teilst sie bewusst (Abschnitt 6). Rechtsgrundlage ist Art. 6
-                Abs. 1 lit. b DSGVO. Bitte gib in Aufgaben, Events und Event-Typen keine besonders sensiblen Daten ein
-                (z. B. Gesundheitsdaten), die die App nicht braucht.
+                Abs. 1 lit. b DSGVO. Bitte gib in Aufgaben, Events, Event-Typen, Notizen und Bildern keine besonders
+                sensiblen Daten ein (z. B. Gesundheitsdaten), die die App nicht braucht.
             </p>
             <p>
                 <strong>Fokusraum, Notizbuch und Routinen:</strong> Im Notizbuch speichert Quidey deine Notizen mit
@@ -247,7 +247,7 @@ function Privacy() {
                 Anzeigenamen. In gemeinsamen Sitzungen sehen alle Mitglieder deinen Namen, die Aufgaben der Sitzung
                 mit allem, was ihr dazu eintragt (z. B. Tag, Uhrzeit, Priorität, Dauer, Ort, Link, Beschreibung, weitere
                 Infos, Farbe, wer die Aufgabe wann angelegt hat, Untergruppe), Nachrichten, wer woran wie lange
-                gearbeitet hat und den Verlauf der Sitzung. Untergruppen (derzeit nur im Test) speichern ihren Namen,
+                gearbeitet hat und den Verlauf der Sitzung. Untergruppen speichern ihren Namen,
                 wer sie angelegt hat und wann. Fügst du
                 eine eigene Aufgabe zu einer Sitzung hinzu, werden diese Angaben in die Sitzung übernommen; deine
                 Erinnerungen, Wiederholungen und Gruppen bleiben privat. Aufgaben, die du mit
@@ -285,6 +285,17 @@ function Privacy() {
                 sehen sie, solange du das im Profil nicht ausschaltest. Alle freiwilligen Angaben kannst du jederzeit
                 ändern oder löschen; bitte trage dort keine besonders sensiblen Daten ein. Rechtsgrundlage ist
                 Art. 6 Abs. 1 lit. b DSGVO.
+            </p>
+            <p>
+                <strong>Profilbild</strong> (derzeit nur für Tester): Lädst du freiwillig ein Profilbild hoch, wird es
+                auf deinem Gerät quadratisch zugeschnitten und verkleinert (dabei fallen Angaben wie Aufnahmeort und
+                Kamera weg) und dann mit dem Zeitpunkt der letzten Änderung zu deinem Konto gespeichert. Es sehen nur
+                Personen, die auch deinen Online-Status sehen können: deine Freunde und die Mitglieder deiner laufenden
+                gemeinsamen Sitzungen und Families; solange die Funktion im Test ist, wird es nur Testern angezeigt.
+                Du kannst es jederzeit unter „Profil gestalten“ entfernen; es wird auch gelöscht, wenn du dein Konto
+                löschst. Verstößt ein Bild gegen die Nutzungsbedingungen, kann der Betreiber es entfernen (das wird
+                im Admin-Protokoll vermerkt). Lade bitte nur Bilder hoch, an denen du die Rechte hast, und keine Bilder
+                anderer Personen ohne deren Einverständnis. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
             </p>
             <p>
                 <strong>Level, XP und Challenges:</strong> Aus deiner Fokuszeit (eigene und gemeinsame Sitzungen,
@@ -434,7 +445,7 @@ function Privacy() {
             <p>
                 Deine Konto- und Inhaltsdaten speichere ich, solange dein Konto besteht. Löschst du dein Konto, werden
                 Konto, Aufgaben, Events, Event-Typen, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen,
-                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen, deine Bewertungen als Tester, die für Benachrichtigungen angemeldeten Geräte, deine Notizen (mit ihren Bildern), Routinen und ihre Durchgänge, der Wecker deines Fokus-Timers und alle
+                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen, deine Bewertungen als Tester, die für Benachrichtigungen angemeldeten Geräte, deine Notizen (mit ihren Bildern), dein Profilbild, Routinen und ihre Durchgänge, der Wecker deines Fokus-Timers und alle
                 Nachrichten, die du geschrieben oder bekommen hast, sofort gelöscht – auch beim Gegenüber, auch deine
                 Nachrichten in Family-Chats. Einträge in Protokollen (Verlauf gemeinsamer Sitzungen, Admin-Protokoll)
                 und von dir angelegte Einträge in Family-Kalendern verlieren den Bezug zu deinem Konto. Hast du eine
@@ -539,8 +550,10 @@ function Terms() {
 
             <h2>6. Verhalten</h2>
             <p>
-                Belästigung, Beleidigung, Spam und rechtswidrige Inhalte in Nachrichten, Feed-Beiträgen, Namen oder
-                geteilten Aufgaben sind verboten. XP, Level und Challenges sind ein Spiel ohne Geldwert; wer sie mit
+                Belästigung, Beleidigung, Spam und rechtswidrige Inhalte in Nachrichten, Feed-Beiträgen, Namen,
+                Profilbildern oder geteilten Aufgaben sind verboten. Als Profilbild sind nur Bilder erlaubt, an denen du
+                die Rechte hast; Bilder anderer Personen nur mit deren Einverständnis, keine pornografischen,
+                gewaltverherrlichenden oder diskriminierenden Darstellungen. XP, Level und Challenges sind ein Spiel ohne Geldwert; wer sie mit
                 künstlich erzeugten Sitzungen oder Aufgaben in die Höhe treibt, kann sie zurückgesetzt bekommen. Bei Verstößen kann der Betreiber Inhalte entfernen und den Zugang sperren oder das Konto
                 löschen; bei schweren Verstößen ohne vorherige Warnung.
             </p>

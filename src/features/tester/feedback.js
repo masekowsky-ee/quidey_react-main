@@ -6,9 +6,17 @@ import { UI_VARIANT_IDS } from './variants';
 // Topics: 'ui:<variant>' for the interface variants, 'feature:<id>' for the features below.
 
 // The features in test right now, newest first; the Tester page lists them with a way to try
-// each. Add one here when it goes to the testers (texts: testerFeature_<id>, _<id>Hint in
-// i18n/testerTexts.js), take it out once it's settled. No change on the server needed.
+// each, the admin panel shows what is live for testers (Admin → Tester-Feedback, "Gerade im
+// Test"). testerOnly: only testers see it at all (the app hides it from everybody else, the
+// server's /api/tester routes are closed to them); otherwise it is out for everybody and testers
+// still rate it. since: the day it went to the testers. Add one here when it goes to the testers
+// (texts: testerFeature_<id>, _<id>Hint in i18n/testerTexts.js), take it out once it's settled.
+// No change on the server needed.
 export const TEST_FEATURES = [
+    { id: 'avatars', to: '/profile#customize', testerOnly: true, since: '2026-10-28' },
+    { id: 'focusroom', to: '/focus', since: '2026-10-28' },
+    { id: 'routines', to: '/routines', since: '2026-10-28' },
+    { id: 'subgroups', to: '/community/sessions', since: '2026-10-28' },
     { id: 'presence', to: '/community/friends' },
     { id: 'streaks', to: '/' },
     { id: 'progress', to: '/community/progress' },

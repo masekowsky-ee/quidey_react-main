@@ -14,7 +14,7 @@ const initialState = {
     // isTester: sees features not released to everyone yet (see features/auth/tester.js)
     // allDayReminderTime: "HH:MM", where tasks without a time count their reminders from (tasks/reminders.js)
     // tourSeen: false only for a new account that hasn't closed the intro tour yet (it opens by itself then)
-    access: { checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null, allDayReminderTime: '12:00', tourSeen: true },
+    access: { checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null, allDayReminderTime: '12:00', tourSeen: true, userId: null },
 };
 
 const authReducer = (state = initialState, action) => {
@@ -43,6 +43,8 @@ const authReducer = (state = initialState, action) => {
                     isPro: Boolean(action.payload.isPro),
                     isAdmin: Boolean(action.payload.isAdmin),
                     isTester: Boolean(action.payload.isTester),
+                    // my own id (my profile picture, for one)
+                    userId: action.payload.userId ?? null,
                     adminPendingCount: action.payload.adminPendingCount ?? 0,
                     betaRequest: action.payload.betaRequest ?? null,
                     allDayReminderTime: action.payload.allDayReminderTime ?? initialState.access.allDayReminderTime,
