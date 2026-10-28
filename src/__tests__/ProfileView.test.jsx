@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
@@ -50,6 +50,26 @@ describe('ProfileView', () => {
     it('opens the profile editor for #customize (the command bar)', async () => {
         await renderProfile('/profile#customize')
         expect(screen.queryByRole('button', { name: 'Profil gestalten' })).toBeNull()
+    })
+
+    describe('scrolling to the profile editor', () => {
+        // jsdom has no scrollIntoView
+        const scrolled = vi.fn()
+        beforeEach(() => { scrolled.mockReset(); Element.prototype.scrollIntoView = scrolled })
+        afterEach(() => { delete Element.prototype.scrollIntoView })
+
+        it('when "Profil gestalten" is pressed (it opens below the plant)', async () => {
+            await renderProfile()
+            await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Profil gestalten' })) })
+            const editor = document.getElementById('customize')
+            expect(editor).not.toBeNull()
+            expect(scrolled.mock.contexts.at(-1)).toBe(editor)
+        })
+
+        it('when the address is /profile#customize', async () => {
+            await renderProfile('/profile#customize')
+            expect(scrolled.mock.contexts.at(-1)).toBe(document.getElementById('customize'))
+        })
     })
 
     it('has the sections the command bar jumps to', async () => {

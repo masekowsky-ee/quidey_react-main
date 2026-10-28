@@ -57,8 +57,8 @@ describe('resolveTheme', () => {
 })
 
 describe('readStoredTheme', () => {
-    it('is dark when nothing is saved, so existing users keep their look', () => {
-        expect(readStoredTheme()).toBe('dark')
+    it('follows the system when nothing is saved', () => {
+        expect(readStoredTheme()).toBe('system')
     })
 
     it('returns a saved valid choice', () => {
@@ -68,12 +68,12 @@ describe('readStoredTheme', () => {
 
     it('ignores invalid saved values', () => {
         localStorage.setItem('theme', 'purple')
-        expect(readStoredTheme()).toBe('dark')
+        expect(readStoredTheme()).toBe('system')
     })
 
     it('still works when localStorage throws (private mode, blocked storage)', () => {
         const spy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked') })
-        expect(readStoredTheme()).toBe('dark')
+        expect(readStoredTheme()).toBe('system')
         spy.mockRestore()
     })
 })
@@ -136,12 +136,13 @@ describe('Settings page', () => {
         const store = makeStore()
         render(<Provider store={store}><MemoryRouter><Settings /></MemoryRouter></Provider>)
 
-        expect(screen.getByRole('button', { name: 'Dunkel' })).toHaveAttribute('aria-pressed', 'true')
+        // nothing chosen yet: the device's
+        expect(screen.getByRole('button', { name: 'System' })).toHaveAttribute('aria-pressed', 'true')
 
         fireEvent.click(screen.getByRole('button', { name: 'Hell' }))
 
         expect(store.getState().settings.theme).toBe('light')
         expect(screen.getByRole('button', { name: 'Hell' })).toHaveAttribute('aria-pressed', 'true')
-        expect(screen.getByRole('button', { name: 'Dunkel' })).toHaveAttribute('aria-pressed', 'false')
+        expect(screen.getByRole('button', { name: 'System' })).toHaveAttribute('aria-pressed', 'false')
     })
 })

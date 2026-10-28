@@ -253,12 +253,14 @@
     box-shadow: 0 0 0 4px var(--surface), 0 0 0 6px color-mix(in srgb, var(--tint) 55%, var(--surface));
 }
 
+/* the moon (4px) sits 6px outside the avatar, 5px inside its own box: drawn nearer that box's
+   edge, its outer side was cut off flat */
 .avatarLarge[data-frame="orbit"]::after{
     content: '';
     position: absolute;
-    inset: -9px;
+    inset: -11px;
     border-radius: 50%;
-    background: radial-gradient(circle at 50% 3px, var(--tint) 3.5px, transparent 4px);
+    background: radial-gradient(circle at 50% 5px, var(--tint) 3.5px, transparent 4px);
     animation: orbit 14s linear infinite;
     pointer-events: none;
 }
@@ -724,6 +726,8 @@
     display: flex;
     flex-direction: column;
     gap: 1.1rem;
+    /* opening it scrolls it to just below the fixed header */
+    scroll-margin-top: calc(var(--header-h, 4rem) + 1rem);
 }
 
 .editorHead{
@@ -1077,7 +1081,8 @@
     }
 }
 
-/* a profile picture fills the circle (the frame of a large avatar stays around it) */
+/* a profile picture fills the circle (the frame of a large avatar stays around it); round like
+   the avatar, not the squircle every element gets (index.css), whose corners stuck out */
 .avatarPicture{
     display: block;
     flex: none;
@@ -1085,6 +1090,7 @@
     height: 100%;
     object-fit: cover;
     border-radius: inherit;
+    corner-shape: round;
 }
 
 /* ---------- the profile picture (testers) ---------- */
@@ -1121,6 +1127,7 @@
     height: 4rem;
     overflow: hidden;
     border-radius: 50%;
+    corner-shape: round;
     color: var(--text-muted);
     background: var(--surface-inset);
     border: 1px dashed var(--control-border);

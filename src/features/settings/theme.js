@@ -16,14 +16,14 @@ function applyBarColor(resolved) {
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', fromCss || BAR_COLORS[resolved]);
 }
 
-// The saved choice, or 'dark' (the app's original look) when nothing valid is saved.
+// The saved choice, or 'system' (the device's light or dark) when nothing valid is saved.
 // localStorage can throw (private mode, blocked storage), so this never assumes it works.
 export function readStoredTheme() {
     try {
         const stored = localStorage.getItem(STORAGE_KEY);
-        return THEMES.includes(stored) ? stored : 'dark';
+        return THEMES.includes(stored) ? stored : 'system';
     } catch {
-        return 'dark';
+        return 'system';
     }
 }
 

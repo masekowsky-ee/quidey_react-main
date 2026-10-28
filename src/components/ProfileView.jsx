@@ -5,7 +5,7 @@ import { useTranslation } from '../i18n/useTranslation';
 import { formatDate, formatDuration } from '../features/helperFunction';
 import { updateProfile, changePassword, logoutEverywhere, resendVerificationMail, deleteAccount } from '../features/auth/authAction';
 import { fetchFriends } from '../features/friends/friendsAction';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useHashTarget } from '../features/layout/hashTarget';
 import { fetchOwnProfile } from '../features/profile/profileOptions';
 import ProfileCard from './profile/ProfileCard.jsx';
@@ -40,9 +40,10 @@ export default function ProfileView({ onSignOut }) {
     const [customizing, setCustomizing] = useState(false);
     const [draft, setDraft] = useState(null); // live preview while customizing
     const [customMessage, setCustomMessage] = useState(null);
-    // /profile#customize (the command bar's "Profil gestalten") opens the editor, the other
-    // sections' ids are scrolled to
+    // /profile#customize (the command bar's "Profil gestalten", and the button on the card) opens
+    // the editor and scrolls to it, below the plant; the other sections' ids are scrolled to
     const { hash, key } = useLocation();
+    const navigate = useNavigate();
     const [shownKey, setShownKey] = useState(null);
     if (shownKey !== key) {
         setShownKey(key);
@@ -202,7 +203,7 @@ export default function ProfileView({ onSignOut }) {
 
             <ProfileCard profile={shown}>
                 {!customizing && (
-                    <button className={styles.quietBtn} onClick={() => { setCustomMessage(null); setCustomizing(true); }}>
+                    <button className={styles.quietBtn} onClick={() => navigate({ hash: '#customize' }, { replace: true })}>
                         {t('profileCustomize')}
                     </button>
                 )}

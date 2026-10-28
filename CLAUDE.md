@@ -265,7 +265,8 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
 - `/profile`, `/settings` — profile, password, "sign out everywhere", delete account; settings in
   areas (Darstellung | Planen | App, the area in the URL hash, `#event-types` opens Planen),
   each section a label column beside a panel; language,
-  theme (dark/light/system), colour palette (the ground: warm (default), graphite, nord, forest,
+  theme (dark/light/system; system when nothing is saved, also in `theme-init.js`; the app saves the
+  choice on every start, so devices that had used it keep `dark`), colour palette (the ground: warm (default), graphite, nord, forest,
   plum, mono — `<html data-palette>`, values in `index.css`, swatches in `preferences.js`
   `PALETTES`), accent colour (green, ocean, violet, sunset (default), rose, gold — also recolours
   the favicon), motion level, home layout. "App": the tour and (where possible) installing.
@@ -273,7 +274,8 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
 - Friends tab (`Social.jsx`) — friends and friend requests; names link to `/u/:username`, the Add
   tab can open a profile before sending a request.
 - Profiles: `/profile` shows my profile card (banner, avatar, status, bio, study, interests),
-  "Profil gestalten" (`components/profile/ProfileEditor.jsx`, live preview) and my numbers in short
+  "Profil gestalten" (`components/profile/ProfileEditor.jsx`, live preview; the card's button goes to
+  `#customize`, the editor's id, which opens it below the plant and scrolls there) and my numbers in short
   (the full statistics are on `/stats`).
   `/u/:username` (`UserProfile.jsx`) shows somebody else: non-friends only see display name and
   username (plus add / accept / withdraw), friends see the whole profile, mutual friends and the

@@ -35,6 +35,29 @@
     gap: 0.45rem;
 }
 
+/* five long names don't fit a phone in equal columns (they ran into each other): there the
+   bar scrolls sideways, each tab as wide as its name, the count back beside the name.
+   Under .page: every module composing tabBar brings its own copy of its phone rules, and a
+   copy loaded later would win against a single class whatever the order here */
+@media (max-width: 640px) {
+    .page .tabs{
+        grid-auto-columns: max-content;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+    }
+
+    .page .tabs > button{
+        padding-inline: 0.85rem;
+        font-size: 0.8125rem;
+    }
+
+    .page .tabs > button > span{
+        position: static;
+        box-shadow: none;
+    }
+}
+
 .tabActive{
     composes: segmentActive from './ui.module.css';
 }

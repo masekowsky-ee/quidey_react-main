@@ -110,7 +110,7 @@ export default function ProfileEditor({ profile, onChange, onSaved, onClose }) {
     });
 
     return (
-        <form className={styles.editor} onSubmit={submit}>
+        <form id="customize" className={styles.editor} onSubmit={submit}>
             <div className={styles.editorHead}>
                 <h2>{t('profileCustomize')}</h2>
             </div>

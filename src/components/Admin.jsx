@@ -1,6 +1,6 @@
 import styles from './Admin.module.css';
 import { fetchBroadcasts, sendBroadcast } from '../features/inbox/inbox';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
@@ -450,11 +450,16 @@ export default function Admin() {
     const [searchParams, setSearchParams] = useSearchParams();
     const tab = TABS.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'requests';
     const setTab = (next) => setSearchParams(next === 'requests' ? {} : { tab: next }, { replace: true });
+    // on a phone the tabs scroll sideways: the open one is moved into view
+    const tabList = useRef(null);
+    useEffect(() => {
+        tabList.current?.querySelector('[aria-selected="true"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+    }, [tab]);
 
     return (
         <div className={styles.page}>
             <h1 className={styles.title}>{t('admin')}</h1>
-            <div className={styles.tabs} role="tablist" aria-label={t('admin')}>
+            <div className={styles.tabs} role="tablist" aria-label={t('admin')} ref={tabList}>
                 {TABS.map(key => (
                     <button key={key} role="tab" aria-selected={tab === key} className={tab === key ? styles.tabActive : undefined} onClick={() => setTab(key)}>
                         {t({ requests: 'adminRequests', users: 'adminUsers', broadcast: 'adminBroadcast', testers: 'adminTesterFeedback', overview: 'adminOverview' }[key])}

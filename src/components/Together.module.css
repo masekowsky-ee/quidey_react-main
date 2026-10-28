@@ -143,6 +143,7 @@
     background: var(--surface-strong);
     border: none;
     border-radius: 50%;
+    corner-shape: round;
     user-select: none;
 }
 
@@ -1490,4 +1491,5 @@ a.primaryBtn{
     height: 100%;
     object-fit: cover;
     border-radius: inherit;
+    corner-shape: round;
 }

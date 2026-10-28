@@ -208,7 +208,7 @@ export default function TaskForm(props){
                         <span className={styles.typeHintDot} aria-hidden="true" />
                         {fill(t('keywordSuggestEvent'), { type: match.type.name })}
                     </button>}
-                <div className={styles.rowDiv}>
+                <div className={event ? styles.eventWhen : styles.rowDiv}>
                     <input className={`${styles.input} ${styles.grow}`} type="date" aria-label={t(event ? 'eventDay' : 'dueDate')}
                         required={event} value={due} onChange={(e) => setDue(e.target.value)} />
                     <input className={styles.input} type="time" aria-label={`${t(event ? 'eventStart' : 'taskTime')} (${t('allDay')}: –)`} title={t(event ? 'eventStart' : 'taskTime')}

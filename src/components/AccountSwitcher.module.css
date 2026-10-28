@@ -48,6 +48,7 @@
     color: var(--primary-text);
     background: var(--primary);
     border-radius: 50%;
+    corner-shape: round;
 }
 
 .avatarSmall{
@@ -200,4 +201,5 @@
     height: 100%;
     object-fit: cover;
     border-radius: inherit;
+    corner-shape: round;
 }

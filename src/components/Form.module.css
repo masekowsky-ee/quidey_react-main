@@ -36,7 +36,7 @@
 
 /* task or event, the planned time / length and the event's type: the same space as the inputs */
 .form > fieldset,
-.form > div:not(.rowDiv):not(.prioHead):not(.more){
+.form > div:not(.rowDiv):not(.eventWhen):not(.prioHead):not(.more){
     margin-bottom: 0.75rem;
 }
 
@@ -247,8 +247,33 @@
     transform: rotate(-90deg);
 }
 
-/* an event's start – end */
+/* an event's start – end (the margin as under the inputs, so the dash sits at their middle) */
 .timeDash{
     align-self: center;
+    margin-bottom: 0.5rem;
     color: var(--text-muted);
+}
+
+/* an event's day, start – end: one row; on a phone the four didn't fit and pushed the whole
+   form out of its dialog, so there the day goes above start – end */
+.eventWhen{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    column-gap: 0.5rem;
+}
+
+.eventWhen > input{
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 34rem) {
+    .eventWhen{
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    }
+
+    .eventWhen > input[type='date']{
+        grid-column: 1 / -1;
+    }
 }

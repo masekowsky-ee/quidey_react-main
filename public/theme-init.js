@@ -3,9 +3,10 @@
 // Sets the saved theme before the first paint, so light mode doesn't flash dark on load.
 // Same rules as src/features/settings/theme.js.
 try {
+  // nothing (valid) saved = 'system': the device's light or dark
   var theme = localStorage.getItem('theme');
   var light = theme === 'light' ||
-    (theme === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches);
+    (theme !== 'dark' && window.matchMedia('(prefers-color-scheme: light)').matches);
   document.documentElement.dataset.theme = light ? 'light' : 'dark';
   // accent color palette; unknown values simply fall back to the CSS default, Abendrot (sunset)
   document.documentElement.dataset.accent = localStorage.getItem('accent') || 'sunset';
@@ -26,6 +27,8 @@ try {
   document.documentElement.dataset.boot = !localStorage.getItem('token') ? 'gate'
     : window.location.pathname === '/' ? 'home' : 'page';
 } catch {
-  // storage blocked (private mode): the CSS default, dark Abendrot, stays; no account to show
+  // storage blocked (private mode): the device's light or dark, otherwise the CSS default
+  // (Abendrot on the warm ground) stays; no account to show
+  document.documentElement.dataset.theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   document.documentElement.dataset.boot = 'gate';
 }
