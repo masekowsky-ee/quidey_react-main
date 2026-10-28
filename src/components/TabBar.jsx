@@ -59,6 +59,7 @@ export default function TabBar() {
             <Tab to="/" end icon="home" label={t('home')} />
             <Tab to="/calendar" icon="calendar" label={t('calendar')}
                 count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
+            <Tab to="/focus" icon="focus" label={t('focusTab')} />
             <Tab to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')}
                 count={inviteCount + friendRequests + familyInvites} countLabel={t('communityCount')}
                 news={news.together || news.social || news.feed} newsLabel={t('menuNews')}

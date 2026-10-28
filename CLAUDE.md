@@ -158,6 +158,29 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   Every task row has a tooltip "Erstellt am … um … von …" and the editor (`TaskEditor`) the same
   line under its fields (`features/tasks/created.js`: own tasks `created_at` + `owner`, session /
   family entries `createdAt` + `addedBy`; compared with my username).
+- **Focus timer** (one for the whole app): `state.session` holds `timerMode` (`timer | pomodoro | stopwatch`),
+  `timer` {time, active}, `runningSince` (wall-clock ms the running time is counted from), `pomodoro`
+  {phase focus|short|long, round, config from localStorage `pomodoro`}, `focusTask` (+ `focusPicked`) and the
+  current session. `useFocusClock` (`features/session/useFocusClock.js`, mounted in App and in the timer panel,
+  only one counts) never counts ticks: every 250 ms and on visibilitychange/focus/pageshow it moves the timer by
+  the whole seconds since `runningSince` (CLOCK_TICK books them on `selectFocusTask` and the total), so a
+  phone that froze the app loses nothing. A countdown that ran out ends then (`countdownEnded`: sound, session
+  saved, next Pomodoro phase ready, toast). The run is kept in localStorage `focusRun` (`focusRun.js`, 18 h,
+  cleared on sign-out / account switch) and taken up on the next start. Controls are thunks (`startFocus`,
+  `pauseFocus`, `stopFocus`, `skipPhase`); start sets `PUT /api/focus/alarm` {endsAt, phase}, pause/stop
+  `DELETE`: the server pushes the end (kind `plan`) even with the phone off. The header's chip links to /focus.
+- `/focus` — **Fokusraum** (`components/focus/`): big ring timer (`FocusTimer`, mode switch, Pomodoro lengths),
+  session goal, task in focus (pick / done), recap after a Pomodoro (into the notebook), thought parking lot
+  (→ task via `parseQuickEntry`), focus sounds (`features/focus/noise.js`, Web Audio brown/pink/rain), study
+  methods, full screen; the **notebook** beside it (`Notebook.jsx`, `features/focus/notebook.js`, API
+  `/api/notebook`): notes with `- [ ]` checklists, `# ` headings, link and picture attachments (pictures shrunk
+  in the browser, at most 4 per note), "plan as task" for the cursor's line, autosave.
+- `/routines`, `/routines/:id/run` — **Routinen** (`components/routines/`, slice `routines` in
+  `features/routines/routines.js`, API `/api/routines`): steps with minutes, weekdays + time (push at the time,
+  and an in-app toast via `useRoutineReminders`), templates (texts `routineTpl_*`), guided run by the wall clock
+  (localStorage `routineRun`), runs booked. Home's dashboard (`home/Today.jsx`, under the motivation strip):
+  focus today vs. the daily goal (localStorage `focusGoal`), today's routines, up next, quick note (→ notebook).
+  Texts of all of this in `i18n/focusTexts.js`. Menu and tab bar (6 tabs) have Fokusraum; shortcuts G F / G R.
 - `/calendar` — month / week / agenda views, drag tasks between days, keyboard grid,
   `TaskEditor` (times, reminders, repeat weekly/monthly/yearly, notes, groups/labels, sharing).
   Several calendars: `?cal=session-<id>` shows a shared session's tasks, `?cal=family-<id>` a

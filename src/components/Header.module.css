@@ -805,3 +805,20 @@ a.quickRowBtn{
         display: none;
     }
 }
+
+/* the running timer leads to the Fokusraum */
+a.timerChip {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* a narrow phone with a running timer: the logo without the word, so time and buttons all fit */
+@media (max-width: 420px) {
+    .div:has(.timerChip) .brandText {
+        display: none;
+    }
+
+    .timerChip {
+        flex-shrink: 0;
+    }
+}

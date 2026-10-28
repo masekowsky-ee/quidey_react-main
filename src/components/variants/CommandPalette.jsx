@@ -83,6 +83,8 @@ export default function CommandPalette() {
         return [
             go('/', t('home'), 'home'),
             go('/calendar', t('calendar'), 'calendar'),
+            go('/focus', t('focusRoom'), 'focus'),
+            go('/routines', t('routines'), 'routine'),
             go(COMMUNITY_PATHS.feed, t('community'), 'together'),
             go(COMMUNITY_PATHS.sessions, t('communityTab_sessions'), 'focus'),
             go(COMMUNITY_PATHS.friends, t('communityTab_friends'), 'social'),

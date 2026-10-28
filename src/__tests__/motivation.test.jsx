@@ -55,7 +55,7 @@ describe('menu', () => {
     it('lists the statistics with the other places, without a "More" heading', () => {
         renderWith(makeStore(), <Menu />)
         const nav = screen.getByRole('navigation', { name: 'Menü' })
-        expect(within(nav).getAllByRole('link').map(link => link.textContent)).toEqual(['Start', 'Kalender', 'Gemeinschaft', 'Postfach', 'Statistiken'])
+        expect(within(nav).getAllByRole('link').map(link => link.textContent)).toEqual(['Start', 'Kalender', 'Fokusraum', 'Routinen', 'Gemeinschaft', 'Postfach', 'Statistiken'])
         expect(within(nav).queryByText('Mehr')).not.toBeInTheDocument()
     })
 })

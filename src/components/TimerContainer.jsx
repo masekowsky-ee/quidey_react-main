@@ -1,13 +1,15 @@
-import {useState, useEffect, useRef} from 'react'
+import {useState} from 'react'
+import { Link } from 'react-router-dom'
 import styles from './TimerContainer.module.css'
 import { useSelector, useDispatch } from 'react-redux';
-import { setSessionParams, setTimer, selectTimerProgress, setTimerMode } from '../features/session/sessionAction';
-import {saveSessionData} from '../features/session/sessionAction'
-import { addWorkedTask, addTaskTime } from '../features/session/sessionAction.js'
+import { setSessionParams, selectTimerProgress, setTimerMode, selectTimerInProgress, startFocus, pauseFocus, stopFocus, skipPhase, PHASE_LABEL } from '../features/session/sessionAction';
+import { useFocusClock } from '../features/session/useFocusClock';
 import { formatClock } from '../features/helperFunction';
 import { useTranslation } from '../i18n/useTranslation';
 import Icon from './icons.jsx';
-import { playSound } from '../features/settings/sound';
+
+const MODES = ['timer', 'pomodoro', 'stopwatch'];
+const MODE_LABEL = { timer: 'timerModeTimer', pomodoro: 'timerModePomodoro', stopwatch: 'timerModeStopwatch' };
 
 // The inline timer as it will look, for the start screen (AppSkeleton): its mode and time come
 // from this device, so they are shown as they are; nothing in it works yet
@@ -18,9 +20,9 @@ export function TimerSkeleton() {
         <div className={styles.inlinePanel} data-part="timer">
             <div className={styles.panelHead}>
                 <div className={styles.modeSwitch} aria-hidden="true">
-                    {['timer', 'stopwatch'].map(mode =>
+                    {MODES.map(mode =>
                         <button key={mode} type="button" tabIndex={-1} className={timerMode === mode ? styles.modeOn : styles.mode}>
-                            {t(mode === 'timer' ? 'timerModeTimer' : 'timerModeStopwatch')}
+                            {t(MODE_LABEL[mode])}
                         </button>)}
                 </div>
             </div>
@@ -37,19 +39,41 @@ export function TimerSkeleton() {
     );
 }
 
+// Pomodoro: which phase is on and the rounds of this cycle as dots (filled = done)
+export function PomodoroLine({ className }) {
+    const { t } = useTranslation();
+    const { phase, round, config } = useSelector(state => state.session.pomodoro);
+    const inCycle = round % config.every;
+    return (
+        <p className={`${styles.phaseLine} ${className ?? ''}`} data-phase={phase}>
+            <span>{t(PHASE_LABEL[phase])}</span>
+            <span className={styles.rounds} aria-label={`${round} ${t('pomodoroRoundsDone')}`}>
+                {Array.from({ length: config.every }, (_, i) =>
+                    <span key={i} className={i < inCycle || (inCycle === 0 && round > 0 && phase === 'long') ? styles.roundDone : styles.round} />)}
+            </span>
+        </p>
+    );
+}
+
 // The focus timer. inline: a panel in the page (Home's focus column on wide screens); otherwise
 // folded into a round button at the bottom right until it's opened (then a small panel there).
-// Two modes: "timer" counts the session length down, "stopwatch" counts up
-// from zero until stopped. Either way every running second is booked on the task in focus.
+// Three modes: "timer" counts the session length down, "pomodoro" counts focus and breaks down
+// in turns, "stopwatch" counts up from zero until stopped. Every second of focus is booked on
+// the task in focus. The counting itself happens in useFocusClock, by the wall clock, so it goes
+// on on every page and while the phone is off; this panel only shows it and has the controls
+// (the Fokusraum has a big one of its own).
 
 export default function TimerContainer(props){
-    const { setWorkedTime, setActiveTimer, activeTask, inline = false } = props;
+    const { inline = false } = props;
 
     const {sessionParams, timer, timerMode} = useSelector(state => state.session);
     const percentWidth = useSelector(selectTimerProgress);
+    const inProgress = useSelector(selectTimerInProgress);
     const dispatch = useDispatch();
     const { t } = useTranslation();
     const stopwatch = timerMode === 'stopwatch';
+    const pomodoro = timerMode === 'pomodoro';
+    useFocusClock();
 
     // folded away at first; it keeps running while folded
     const [open, setOpen] = useState(false);
@@ -119,57 +143,18 @@ export default function TimerContainer(props){
         setNewS(Math.floor((ms % 60000) / 1000));
     }
 
-    const timeoutRef = useRef(null);
-
-    // Read inside the tick instead of being an effect dependency: switching tasks must not
-    // restart the running second, or the countdown would drift with every drop
-    const activeTaskRef = useRef(activeTask);
-    useEffect(() => { activeTaskRef.current = activeTask; }, [activeTask]);
-
-    // Ticks the running timer down (a stopwatch up) once per second and books that second on the
-    // active task; display and progress are derived above
-    useEffect(() => {
-        if (timer.active && (stopwatch || timer.time >= 1000)) {
-            timeoutRef.current = setTimeout(() => {
-                dispatch(setTimer(timer.time + (stopwatch ? 1000 : -1000), timer.active));
-                // the countdown just ran out
-                if (!stopwatch && timer.time < 2000) playSound('focusEnd');
-                setWorkedTime(prev => prev + 1);
-                if (activeTaskRef.current) dispatch(addTaskTime(activeTaskRef.current, 1));
-            }, 1000);
-        }
-
-        return () => clearTimeout(timeoutRef.current);
-    }, [timer, stopwatch, dispatch, setWorkedTime]);
-
-    // started and not stopped yet (also paused): the mode can't be switched now
-    const inProgress = timer.active || (stopwatch ? timer.time > 0 : timer.time > 0 && timer.time !== sessionParams.time);
-
     const timerAction = (action) => {
         if (action === 'start'){
-            if (!stopwatch && timer.time <= 1000) return;
             if (editTimer){
                 const newTime = getEditTime();
                 dispatch(setSessionParams({...sessionParams, time: newTime}));
-                dispatch(setTimer(newTime, true));
-            } else {
-                dispatch(setTimer(timer.time, true));
             }
             setEditTimer(false);
-            setActiveTimer(true);
-            playSound('focusStart');
-            if (!activeTask) return;
-            dispatch(addWorkedTask(activeTask))
+            dispatch(startFocus());
         } else if (action === 'pause'){
-            if (timer.active) playSound('pause');
-            dispatch(setTimer(timer.time, false));
+            dispatch(pauseFocus());
         } else if (action === 'terminate'){
-            playSound('pause');
-            clearTimeout(timeoutRef.current);
-            dispatch(setTimer(0, false));
-            setActiveTimer(false);
-
-            dispatch(saveSessionData()).catch(err => console.error("Saving session failed:", err));
+            dispatch(stopFocus());
         }
     }
 
@@ -193,25 +178,32 @@ export default function TimerContainer(props){
         );
     }
 
+    // the countdown can be set by clicking its time (Pomodoro's lengths are set in the Fokusraum)
+    const canEdit = timerMode === 'timer';
+
     return(
         <div className={inline ? styles.inlinePanel : styles.panel} data-part="timer">
             <div className={styles.panelHead}>
                 <div className={styles.modeSwitch} role="group" aria-label={t('timerMode')}>
-                    {['timer', 'stopwatch'].map(mode =>
+                    {MODES.map(mode =>
                         <button key={mode} type="button" aria-pressed={timerMode === mode} disabled={inProgress && timerMode !== mode}
                             className={timerMode === mode ? styles.modeOn : styles.mode}
                             onClick={() => { if (timerMode !== mode) { setEditTimer(false); dispatch(setTimerMode(mode)); } }}>
-                            {t(mode === 'timer' ? 'timerModeTimer' : 'timerModeStopwatch')}
+                            {t(MODE_LABEL[mode])}
                         </button>)}
                 </div>
+                <Link to="/focus" className={styles.foldBtn} title={t('focusRoomOpen')} aria-label={t('focusRoomOpen')}>
+                    <Icon name="expand" className={styles.foldIcon} />
+                </Link>
                 {!inline &&
                 <button className={styles.foldBtn} onClick={() => setOpen(false)} title={t('collapseTimer')} aria-label={t('collapseTimer')}>
                     <Icon name="chevronDown" className={styles.foldIcon} />
                 </button>}
             </div>
             <div className={styles.div}>
-                {!editTimer ? 
-                    <h2 onClick={stopwatch ? undefined : ()=>{editTimerFunc(timer.time); timerAction('pause')}} className={stopwatch ? styles.stopwatchH2 : styles.timerH2}>{timeToDisplay}</h2>
+                {pomodoro && <PomodoroLine />}
+                {!editTimer ?
+                    <h2 onClick={canEdit ? ()=>{editTimerFunc(timer.time); timerAction('pause')} : undefined} className={stopwatch ? styles.stopwatchH2 : styles.timerH2}>{timeToDisplay}</h2>
                     :
                         <div className={styles.editTimerDiv}>
                             <div>
@@ -253,12 +245,17 @@ export default function TimerContainer(props){
                             <Icon name="pause" className={styles.ctrlIcon} strokeWidth={2.2} />
                         </button>
                     }
-                    {(timer.active || (stopwatch && timer.time > 0)) &&
+                    {(timer.active || (stopwatch && timer.time > 0) || (pomodoro && inProgress)) &&
                         <button className={styles.btnStop} onClick={()=>timerAction('terminate')} aria-label="stop timer">
                             <Icon name="stop" className={styles.ctrlIcon} strokeWidth={2} />
                         </button>
                     }
-                    {!stopwatch && !timer.active && timer.time === 0 && !editTimer &&
+                    {pomodoro &&
+                        <button className={styles.btn} onClick={() => dispatch(skipPhase())} aria-label={t('pomodoroSkip')} title={t('pomodoroSkip')}>
+                            <Icon name="skip" className={styles.ctrlIcon} strokeWidth={2} />
+                        </button>
+                    }
+                    {canEdit && !timer.active && timer.time === 0 && !editTimer &&
                         <button className={styles.btn} onClick={()=>editTimerFunc(sessionParams.time)} aria-label="set timer">
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M400-840q-17 0-28.5-11.5T360-880q0-17 11.5-28.5T400-920h160q17 0 28.5 11.5T600-880q0 17-11.5 28.5T560-840H400Zm108.5 428.5Q520-423 520-440v-160q0-17-11.5-28.5T480-640q-17 0-28.5 11.5T440-600v160q0 17 11.5 28.5T480-400q17 0 28.5-11.5Zm-168 303Q275-137 226-186t-77.5-114.5Q120-366 120-440t28.5-139.5Q177-645 226-694t114.5-77.5Q406-800 480-800q62 0 119 20t107 58l28-28q11-11 28-11t28 11q11 11 11 28t-11 28l-28 28q38 50 58 107t20 119q0 74-28.5 139.5T734-186q-49 49-114.5 77.5T480-80q-74 0-139.5-28.5ZM678-242q82-82 82-198t-82-198q-82-82-198-82t-198 82q-82 82-82 198t82 198q82 82 198 82t198-82ZM480-440Z"/></svg>
                         </button>

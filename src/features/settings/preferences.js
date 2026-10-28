@@ -57,10 +57,40 @@ export const readStoredSessionMinutes = () =>
     Number(readStored('sessionMinutes', SESSION_LENGTHS.map(String), '30'));
 export const storeSessionMinutes = (minutes) => store('sessionMinutes', String(minutes));
 
-// How the focus time is measured: a countdown ("timer") or counting up from zero ("stopwatch")
-export const TIMER_MODES = ['timer', 'stopwatch'];
+// How the focus time is measured: a countdown ("timer"), counting up from zero ("stopwatch"),
+// or Pomodoro (focus and breaks taking turns)
+export const TIMER_MODES = ['timer', 'stopwatch', 'pomodoro'];
 export const readStoredTimerMode = () => readStored('timerMode', TIMER_MODES, 'timer');
 export const storeTimerMode = (mode) => store('timerMode', mode);
+
+// Pomodoro lengths in minutes and after how many focus rounds the long break comes
+export const POMODORO_DEFAULTS = { focus: 25, short: 5, long: 15, every: 4 };
+export const POMODORO_CHOICES = {
+    focus: [15, 20, 25, 30, 45, 50, 60, 90],
+    short: [3, 5, 10],
+    long: [10, 15, 20, 30],
+    every: [2, 3, 4, 5, 6],
+};
+export function readStoredPomodoro() {
+    try {
+        const stored = JSON.parse(localStorage.getItem('pomodoro') ?? 'null') ?? {};
+        return Object.fromEntries(Object.entries(POMODORO_DEFAULTS).map(([key, fallback]) =>
+            [key, POMODORO_CHOICES[key].includes(stored[key]) ? stored[key] : fallback]));
+    } catch {
+        return { ...POMODORO_DEFAULTS };
+    }
+}
+export const storePomodoro = (config) => store('pomodoro', JSON.stringify(config));
+
+// Focus sound in the Fokusraum: off or one of the noises made with the Web Audio API
+export const FOCUS_NOISES = ['off', 'brown', 'pink', 'rain'];
+export const readStoredFocusNoise = () => readStored('focusNoise', FOCUS_NOISES, 'off');
+export const storeFocusNoise = (noise) => store('focusNoise', noise);
+
+// The daily focus goal in minutes (Home's dashboard ring)
+export const FOCUS_GOALS = [30, 60, 90, 120, 180, 240];
+export const readStoredFocusGoal = () => Number(readStored('focusGoal', FOCUS_GOALS.map(String), '120'));
+export const storeFocusGoal = (minutes) => store('focusGoal', String(minutes));
 
 // Whether Home's task list shows the tasks of my shared sessions among my own (in "All");
 // a session's own group still shows them

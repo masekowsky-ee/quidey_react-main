@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { MotionConfig, motion } from 'motion/react'
 import Header from './components/Header.jsx';
@@ -24,6 +24,10 @@ import { fetchFriendRequests, fetchFriends } from "./features/friends/friendsAct
 import { usePresenceRealtime } from "./features/presence/presence.js"
 import { fetchSharedSessions, fetchMySharedTasks } from './features/together/togetherAction.js'
 import { useWorkReporter } from './features/together/work.js'
+import { useSoloSharedWork } from './features/together/useSoloSharedWork.js'
+import { useFocusClock } from './features/session/useFocusClock.js'
+import { selectFocusTask } from './features/session/sessionAction.js'
+import { useRoutineReminders } from './features/routines/routines.js'
 import Toaster from './components/Toaster.jsx';
 import Tutorial from './components/Tutorial.jsx';
 import DeleteScopeDialog from './components/task/DeleteScopeDialog.jsx';
@@ -71,6 +75,8 @@ const PAGES = {
   FamilyPage: () => import('./components/family/FamilyPage.jsx'),
   FunPage: () => import('./components/fun/FunPage.jsx'),
   Tester: () => import('./components/tester/Tester.jsx'),
+  FocusRoom: () => import('./components/focus/FocusRoom.jsx'),
+  Routines: () => import('./components/routines/Routines.jsx'),
 };
 const SignIn = lazy(PAGES.SignIn);
 const LegalPage = lazy(PAGES.LegalPage);
@@ -89,6 +95,8 @@ const Admin = lazy(PAGES.Admin);
 const FamilyPage = lazy(PAGES.FamilyPage);
 const FunPage = lazy(PAGES.FunPage);
 const Tester = lazy(PAGES.Tester);
+const FocusRoom = lazy(PAGES.FocusRoom);
+const Routines = lazy(PAGES.Routines);
 
 // the app's pages (not the sign-in or legal texts) in the background, when nothing else runs
 function preloadPages() {
@@ -114,6 +122,10 @@ function App(){
   const motionLevel = useMotionLevel();
   // the team stopwatch keeps running on every page
   useWorkReporter();
+  // the focus timer runs on every page, by the wall clock (also while the phone is off); time on
+  // a task from a shared session is booked in that session too
+  useFocusClock();
+  useSoloSharedWork(useSelector(selectFocusTask));
   const homeLayout = useSelector((state) => state.settings.homeLayout);
 
   useEffect(() => {
@@ -204,10 +216,11 @@ function App(){
   // push notifications on this device: checked on every start, a click opens their page
   const navigate = useNavigate();
   usePushSync(allowed, token, navigate);
+  // routines planned for a time of day: a toast while the app is open
+  useRoutineReminders(allowed);
 
   useEffect(() => { if (allowed) return preloadPages(); }, [allowed]);
 
-  const [activeTimer, setActiveTimer] = useState(false);
   const location = useLocation();
   // while a page's code is on its way (only the first time, and briefly): that page's shape
   const pageLoading = <RouteSkeleton pathname={location.pathname} fade />;
@@ -239,7 +252,7 @@ function App(){
     <MotionConfig reducedMotion="never">
     {/* the frame: sidebar (desktop) or drawer, header, tab bar (phones); see AppShell.module.css */}
     <div className={shell.shell} data-nav={navModel} data-part="shell">
-        <Header activeTimer={activeTimer}/>
+        <Header/>
         <Menu/>
         <TabBar/>
         <CustomError/>
@@ -258,8 +271,12 @@ function App(){
         <motion.div key={location.pathname.startsWith(COMMUNITY_PATHS.feed) ? COMMUNITY_PATHS.feed : location.pathname} {...MOTION.page[motionLevel]}>
         <Suspense fallback={pageLoading}>
         <Routes location={location}>
-          <Route path="/" element={homeLayout === 'team' ? <TeamHome/> : <Home setActiveTimer={setActiveTimer}/>} />
+          <Route path="/" element={homeLayout === 'team' ? <TeamHome/> : <Home/>} />
           <Route path="/calendar" element={<Calendar/>} />
+          {/* Fokusraum: the big timer, Pomodoro, notes and study tools */}
+          <Route path="/focus" element={<FocusRoom/>} />
+          <Route path="/routines" element={<Routines/>} />
+          <Route path="/routines/:id/run" element={<Routines/>} />
           <Route path="/stats" element={<Stats />} />
           {/* the old address of the statistics (bookmarks, ?tab=done links) */}
           <Route path="/history" element={<Navigate to={{ pathname: '/stats', search: location.search }} replace />} />

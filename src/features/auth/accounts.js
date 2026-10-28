@@ -2,6 +2,7 @@
 // token in localStorage 'accounts' as [{ username, displayName, token }]; 'token' is the one in
 // use (the rest of the app only knows that one). Nothing leaves the device.
 // Switching loads the app again, so no list, socket or timer of the other account stays behind.
+import { clearFocusRun } from '../session/focusRun';
 
 const KEY = 'accounts';
 export const MAX_ACCOUNTS = 5;
@@ -57,6 +58,8 @@ export const currentToken = () => {
 export const otherAccounts = (username) => listAccounts().filter(account => !sameName(account.username, username));
 
 function reloadAs(token) {
+    // a focus session running here belongs to the account that started it
+    clearFocusRun({ freeze: true });
     try {
         if (token) localStorage.setItem('token', token);
         else localStorage.removeItem('token');

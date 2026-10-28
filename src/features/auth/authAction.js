@@ -2,6 +2,8 @@ import { LOGIN_SUCCESS, LOGOUT, SET_USER, SET_ACCESS, TOUR_SEEN } from "./authAc
 import { apiFetch, apiUrl } from '../helperFunction';
 import { forgetAccount, forgetToken, listAccounts, rememberAccount, switchAccount } from './accounts';
 import { forgetPushOnSignOut, refreshPush } from '../pwa/push';
+import { resetFocus } from '../session/sessionAction';
+import { clearFocusRun } from '../session/focusRun';
 
 // Signs in with the username or the email address (the server tells them apart by the "@")
 export const loginSuccess = (username, password) => {
@@ -71,6 +73,8 @@ export const logout = () => {
             return;
         }
         localStorage.removeItem('token');
+        dispatch(resetFocus());
+        clearFocusRun();
         dispatch({ type: LOGOUT });
     };
 };

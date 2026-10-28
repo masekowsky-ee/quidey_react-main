@@ -12,7 +12,7 @@
     bottom: 0;
     z-index: var(--z-header);
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
     padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
     box-sizing: border-box;
@@ -127,4 +127,12 @@
   background-color: var(--primary);
   border-radius: 999px;
   box-shadow: 0 0 0 2px var(--surface-bar);
+}
+
+/* six tabs on a narrow phone: the labels a little smaller, so "Gemeinschaft" still fits */
+@media (max-width: 420px) {
+  .label {
+    font-size: 0.625rem;
+    letter-spacing: -0.03em;
+  }
 }

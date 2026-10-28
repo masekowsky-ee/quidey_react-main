@@ -145,6 +145,9 @@ export default function Menu(){
                         <MenuLink to="/" end icon="home" label={t('home')} onClick={onClose} />
                         <MenuLink to="/calendar" icon="calendar" label={t('calendar')} onClick={onClose}
                             count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
+                        {/* the place to work and study (Pomodoro, notes), and guided routines */}
+                        <MenuLink to="/focus" icon="focus" label={t('focusRoom')} onClick={onClose} />
+                        <MenuLink to="/routines" icon="routine" label={t('routines')} onClick={onClose} />
                         {/* friends, shared sessions, families and the feed: one place for other people */}
                         <MenuLink to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} onClick={onClose}
                             count={inviteCount + incomingCount + familyInviteCount} countLabel={t('communityCount')}

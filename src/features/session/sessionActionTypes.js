@@ -6,3 +6,7 @@ export const ADD_WORKED_TASK = "ADD_WORKED_TASK";
 export const ADD_TASK_TIME = "ADD_TASK_TIME";
 export const SET_WORKED_SESSIONS = "SET_WORKED_SESSIONS";
 export const SET_TIMER_MODE = "SET_TIMER_MODE";
+export const CLOCK_TICK = "CLOCK_TICK";
+export const SET_FOCUS_TASK = "SET_FOCUS_TASK";
+export const SET_POMODORO = "SET_POMODORO";
+export const RESET_FOCUS = "RESET_FOCUS";

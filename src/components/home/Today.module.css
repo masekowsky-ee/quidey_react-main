@@ -1,0 +1,230 @@
+/* Home's dashboard: four cards. Wide: one row; tablets: two by two; phones: a row to swipe
+   through (each card most of the screen wide, snapping) */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 1099px) {
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .grid {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        margin: 0 calc(-1 * var(--page-gutter, 1rem));
+        padding: 0 var(--page-gutter, 1rem) 0.25rem;
+        scrollbar-width: none;
+        gap: 0.75rem;
+    }
+
+    .grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .grid > * {
+        flex: 0 0 82%;
+        scroll-snap-align: start;
+    }
+}
+
+.card {
+    composes: panel from '../ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 0;
+    padding: 0.9rem 1rem;
+    box-sizing: border-box;
+}
+
+.cardTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.cardAction,
+.cardActionInline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-h);
+    text-decoration: none;
+}
+
+.cardAction {
+    margin-top: auto;
+}
+
+.cardAction:hover,
+.cardActionInline:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.warn {
+    color: var(--danger);
+}
+
+.muted {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.goalRow {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.ring {
+    flex: none;
+    width: 3.5rem;
+    height: 3.5rem;
+    transform: rotate(-90deg);
+}
+
+.ringTrack,
+.ringFill {
+    fill: none;
+    stroke-width: 6;
+}
+
+.ringTrack {
+    stroke: var(--surface-strong);
+}
+
+.ringFill {
+    stroke: var(--primary);
+    stroke-linecap: round;
+    transition: stroke-dashoffset var(--ease);
+}
+
+.big {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-h);
+    font-variant-numeric: tabular-nums;
+}
+
+.goalPick {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.goalPick select {
+    height: 1.75rem;
+    padding: 0 0.4rem;
+    font-size: 0.75rem;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.list li {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-width: 0;
+}
+
+.list li[data-done] {
+    opacity: 0.6;
+}
+
+.emoji {
+    flex: none;
+    font-size: 1.1rem;
+}
+
+.kindDot {
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--text-muted);
+}
+
+.kindDot[data-event] {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.itemText {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.itemName {
+    font-size: 0.875rem;
+    color: var(--text-h);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.itemMeta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.startBtn {
+    composes: iconBtnRound from '../ui.module.css';
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+}
+
+.note {
+    width: 100%;
+    box-sizing: border-box;
+    resize: none;
+    font-family: var(--sans);
+    font-size: 0.875rem;
+    min-height: 4.5rem;
+}
+
+.noteFoot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: auto;
+}
+
+.saveBtn {
+    height: 2rem;
+    padding: 0 0.85rem;
+    font-size: 0.8rem;
+    border-radius: var(--radius-pill);
+}
+
+.saveBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
