@@ -28,6 +28,7 @@ import { useSoloSharedWork } from './features/together/useSoloSharedWork.js'
 import { useFocusClock } from './features/session/useFocusClock.js'
 import { selectFocusTask } from './features/session/sessionAction.js'
 import { useRoutineReminders } from './features/routines/routines.js'
+import { useAvatarRealtime } from './features/profile/avatars.js'
 import Toaster from './components/Toaster.jsx';
 import Tutorial from './components/Tutorial.jsx';
 import DeleteScopeDialog from './components/task/DeleteScopeDialog.jsx';
@@ -201,6 +202,8 @@ function App(){
   // the feed reloads when a friend's entry comes
   useProgressWatcher(allowed);
   useFeedRealtime();
+  // profile pictures that changed are loaded again
+  useAvatarRealtime();
 
   // tasks shared with friends change on their side (announced live, see useLiveLists), my own
   // ones maybe on another device: read again as a safety net (not right at the start,

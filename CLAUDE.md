@@ -158,6 +158,16 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   Every task row has a tooltip "Erstellt am … um … von …" and the editor (`TaskEditor`) the same
   line under its fields (`features/tasks/created.js`: own tasks `created_at` + `owner`, session /
   family entries `createdAt` + `addedBy`; compared with my username).
+- **Profile pictures — testers only** (`features/profile/avatars.js`, `profile/AvatarUpload.jsx` in
+  "Profil gestalten"): a square picture made in the browser (WebP, ≤ 110 KB, metadata dropped),
+  `PUT /api/tester/avatar`, `DELETE /api/profile/avatar`, admins `DELETE /api/admin/users/:id/avatar`
+  (users list "Profilbild entfernen", `hasAvatar`). Only testers see pictures: `useAvatarUrl(userId)`
+  is null for everybody else and asks nothing. For testers it batches `GET /api/avatars?ids=` (→
+  { id: version }, only people who also see my online status), then loads `/api/avatars/:id?v=` with
+  the token into an object URL; `avatars:changed` (live, `useAvatarRealtime` in App) forgets one.
+  `ProfileAvatar` and `together/Avatar` show it instead of emoji / initials. `access.userId` = my id.
+- **Admin → Tester-Feedback → "Gerade im Test"**: what is live for testers, from `TEST_FEATURES`
+  (`testerOnly`, `since`) and the interface variants, with the ratings so far.
 - **Focus timer** (one for the whole app): `state.session` holds `timerMode` (`timer | pomodoro | stopwatch`),
   `timer` {time, active}, `runningSince` (wall-clock ms the running time is counted from), `pomodoro`
   {phase focus|short|long, round, config from localStorage `pomodoro`}, `focusTask` (+ `focusPicked`) and the
@@ -173,7 +183,8 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   session goal, task in focus (pick / done), recap after a Pomodoro (into the notebook), thought parking lot
   (→ task via `parseQuickEntry`), focus sounds (`features/focus/noise.js`, Web Audio brown/pink/rain), study
   methods, full screen; the **notebook** beside it (`Notebook.jsx`, `features/focus/notebook.js`, API
-  `/api/notebook`): notes with `- [ ]` checklists, `# ` headings, link and picture attachments (pictures shrunk
+  `/api/notebook`; the server reads its bigger bodies only after sign-in, checks pictures by their
+  magic bytes and keeps all pictures of an account under 25 MB, `NOTEBOOK_STORAGE_FULL`): notes with `- [ ]` checklists, `# ` headings, link and picture attachments (pictures shrunk
   in the browser, at most 4 per note), "plan as task" for the cursor's line, autosave.
 - `/routines`, `/routines/:id/run` — **Routinen** (`components/routines/`, slice `routines` in
   `features/routines/routines.js`, API `/api/routines`): steps with minutes, weekdays + time (push at the time,
@@ -274,18 +285,17 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   (`shared_session_tasks.kind`): they need a day, are done once over (session owner's time zone,
   `syncSessionEvents`), have no tick, assignee or stopwatch and stay out of Home's list. Reminders, repeating, groups and sharing stay personal; adding
   an own task copies its details, later edits don't sync back (only `done` does).
-- Sub-groups in sessions and families — **experimental, testers only**: a session's or family's
+- Sub-groups in sessions and families — **for everybody** (testers only until 2026-10-28): a session's or family's
   entries sorted into named groups (`shared_session_groups` / `family_groups`, entries'
   `group_id`, migration 030; max 20, name ≤ 40, unique per session/family; deleting one keeps its
   entries). `components/subgroups/SubGroupBar.jsx` ("Alle" + chips with open counts, "+", delete
   the shown one) above `SharedTaskList`, on the family page (filters calendar entries and list),
   and on Home under a session's group (the pick is `groupToDisplay.group.subGroupId`, so the
   new-task form files into it); the editor gets a "Untergruppe" select (`subGroups` on
-  `TaskEditDialog shared/handlers`). Helpers in `features/tasks/subGroups.js`. Everybody gets
-  `groups` / `groupId` in the data, non-testers just see the flat list. API:
-  `POST|DELETE /api/tester/shared-sessions/:id/groups[/:groupId]`, same under
-  `/api/tester/families/:id/groups`; `group_id` on the entry POST/PATCH only from testers (403
-  `TESTER_REQUIRED`), checked to belong to that session/family.
+  `TaskEditDialog shared/handlers`). Helpers in `features/tasks/subGroups.js`. API:
+  `POST|DELETE /api/shared-sessions/:id/groups[/:groupId]`, same under `/api/families/:id/groups`
+  (the old `/api/tester/...` addresses still answer testers); `group_id` on the entry POST/PATCH from
+  any member, checked to belong to that session/family.
 - `/inbox` — direct messages between friends + notifications/admin broadcasts (realtime).
   From 1100px the messages tab is split: conversations beside the open one (`?with=<userId>`).
 - `/feedback` — feedback form (mailed to the owner). `POST /api/feedback` also takes category

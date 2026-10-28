@@ -12,7 +12,6 @@ import {
     addFamilyTask, removeFamilyTask, updateFamilyTask, deleteFamily, fetchFamily, fetchFamilyMessages, inviteToFamily, removeFamilyMember,
     renameFamily, sendFamilyMessage, updateFamily, FAMILY_EMOJIS, addFamilySubGroup, removeFamilySubGroup,
 } from '../../features/family/family';
-import { useIsTester } from '../../features/auth/tester';
 import { createdText } from '../../features/tasks/created';
 import { inSubGroup, openCounts, shownSubGroup } from '../../features/tasks/subGroups';
 import SubGroupBar from '../subgroups/SubGroupBar.jsx';
@@ -607,8 +606,7 @@ export default function FamilyPage() {
     const dispatch = useDispatch();
     const id = Number(useParams().id);
     const { family, missing, show } = useFamily(id);
-    // sub-groups (experimental, testers): one choice for the calendar entries and the list
-    const isTester = useIsTester();
+    // sub-groups: one choice for the calendar entries and the list
     const run = useFamilyRun();
     const [subGroupPick, setSubGroupPick] = useState(null);
 
@@ -630,7 +628,7 @@ export default function FamilyPage() {
 
     const memberCount = family.people.filter(person => person.status === 'joined').length;
     const subGroups = family.groups ?? [];
-    const subGroup = isTester ? shownSubGroup(subGroups, subGroupPick) : null;
+    const subGroup = shownSubGroup(subGroups, subGroupPick);
     // every change answers with the whole family, which is shown right away
     const changeSubGroups = async (request) => {
         const changed = await run(request);
@@ -649,14 +647,13 @@ export default function FamilyPage() {
                     </p>
                 </div>
             </div>
-            {isTester &&
-                <SubGroupBar groups={subGroups} value={subGroup} onChange={setSubGroupPick} counts={openCounts(family.tasks)}
-                    onAdd={(name) => changeSubGroups(addFamilySubGroup(family.id, name))}
-                    onRemove={(groupId) => changeSubGroups(removeFamilySubGroup(family.id, groupId))} />}
+            <SubGroupBar groups={subGroups} value={subGroup} onChange={setSubGroupPick} counts={openCounts(family.tasks)}
+                onAdd={(name) => changeSubGroups(addFamilySubGroup(family.id, name))}
+                onRemove={(groupId) => changeSubGroups(removeFamilySubGroup(family.id, groupId))} />
             <div className={styles.roomGrid}>
                 <div className={styles.roomMain}>
                     <FamilyBoard family={family} onChanged={show} />
-                    <Upcoming family={family} onChanged={show} subGroup={subGroup} subGroups={isTester ? subGroups : undefined} />
+                    <Upcoming family={family} onChanged={show} subGroup={subGroup} subGroups={subGroups} />
                     <FamilyList family={family} onChanged={show} subGroup={subGroup} />
                     <Members family={family} onChanged={show} />
                 </div>

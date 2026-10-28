@@ -13,7 +13,6 @@ import {useTranslation} from '../i18n/useTranslation'
 import { fill } from '../features/helperFunction'
 import { selectSharedGroups, selectSharedSoloTasks, setSharedTaskDone, togetherErrorText, addSessionSubGroup, removeSessionSubGroup } from '../features/together/togetherAction'
 import { EDIT_DISPLAYGROUP } from '../features/tasks/taskActionTypes'
-import { useIsTester } from '../features/auth/tester'
 import { inSubGroup, openCounts, shownSubGroup } from '../features/tasks/subGroups'
 import SubGroupBar from './subgroups/SubGroupBar.jsx'
 import { showToast } from '../features/toast/toast'
@@ -106,12 +105,11 @@ export default function TaskContainer(props){
     const toggleSharedTasks = () => dispatch(setShowSharedTasks(!showSharedTasks));
     // the shown group as stored (one of my own, not "all" or a session's), or undefined
     const shownGroupRow = showingAll || shownGroup?.shared ? undefined : groups.find(g => g.id === shownGroup.id);
-    // a session's group: testers also pick one of its sub-groups (kept on the shown group, so
+    // a session's group: one of its sub-groups can be picked too (kept on the shown group, so
     // the new-task form puts new tasks there too; picking the session's chip again starts at all)
-    const isTester = useIsTester();
     const shownShared = shownGroup?.shared ? sharedGroups.find(group => group.sessionId === shownGroup.sessionId) : undefined;
     const subGroups = shownShared?.subGroups ?? [];
-    const subGroup = isTester && shownShared ? shownSubGroup(subGroups, shownGroup.subGroupId ?? null) : null;
+    const subGroup = shownShared ? shownSubGroup(subGroups, shownGroup.subGroupId ?? null) : null;
     const pickSubGroup = (id) => dispatch({ type: EDIT_DISPLAYGROUP, payload: { group: { ...shownGroup, subGroupId: id }, tasks: [] } });
     const runShared = (action) => dispatch(action).catch(err => {
         dispatch(showToast(togetherErrorText(t, err), 'error'));
@@ -270,7 +268,7 @@ export default function TaskContainer(props){
                 <p className={styles.groupNote}>
                     {t('sharedGroupHint')} <Link to={`/together/${shownGroup.sessionId}`}>{t('openSession')} →</Link>
                 </p>}
-            {isTester && shownShared &&
+            {shownShared &&
                 <SubGroupBar groups={subGroups} value={subGroup} onChange={pickSubGroup}
                     counts={openCounts(shownShared.tasks)}
                     onAdd={(name) => runShared(addSessionSubGroup(shownShared.sessionId, name))}

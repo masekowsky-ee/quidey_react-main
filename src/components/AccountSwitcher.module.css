@@ -192,3 +192,12 @@
     width: 16rem;
     transform-origin: bottom left;
 }
+
+/* my profile picture fills the circle */
+.avatarPicture{
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}

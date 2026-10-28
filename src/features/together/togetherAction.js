@@ -85,9 +85,9 @@ export const removeSharedTask = (id, taskId) =>
 
 // Sub-groups (experimental, testers): made and deleted by testers, entries go in with group_id
 // on addSharedTask / updateSharedTask. Deleting one keeps its entries.
-export const addSessionSubGroup = (id, name) => sessionRequest(`/api/tester/shared-sessions/${id}/groups`, post({ name }));
+export const addSessionSubGroup = (id, name) => sessionRequest(`/api/shared-sessions/${id}/groups`, post({ name }));
 export const removeSessionSubGroup = (id, groupId) =>
-    sessionRequest(`/api/tester/shared-sessions/${id}/groups/${groupId}`, { method: 'DELETE' });
+    sessionRequest(`/api/shared-sessions/${id}/groups/${groupId}`, { method: 'DELETE' });
 
 // currentTaskId: what I'm working on now (null = nothing); time: { taskId, ms } worked since the last report.
 // keepalive lets the last report finish while the page is closing.

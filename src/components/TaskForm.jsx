@@ -21,7 +21,6 @@ import { prioLevel } from '../features/calendar/calendar';
 import { dateKey, minutesOfDay, timeText } from '../features/calendar/calendar';
 import { defaultReminders } from '../features/tasks/reminders';
 import { addSharedTask, selectSharedGroups, togetherErrorText } from '../features/together/togetherAction';
-import { useIsTester } from '../features/auth/tester';
 import { shownSubGroup } from '../features/tasks/subGroups';
 
 import Icon from './icons';
@@ -45,13 +44,12 @@ export default function TaskForm(props){
     const { t } = useTranslation();
 
     const groupToDisplay = useSelector((state)=>state.task.groupToDisplay)
-    const isTester = useIsTester();
     const sharedGroups = useSelector(selectSharedGroups);
     const onHome = useLocation().pathname === '/';
     const session = onHome && groupToDisplay.group?.shared
         ? sharedGroups.find(group => group.sessionId === groupToDisplay.group.sessionId)
         : undefined;
-    const subGroupId = session && isTester ? shownSubGroup(session.subGroups, groupToDisplay.group.subGroupId ?? null) : null;
+    const subGroupId = session ? shownSubGroup(session.subGroups, groupToDisplay.group.subGroupId ?? null) : null;
     const subGroupName = session?.subGroups.find(group => group.id === subGroupId)?.name;
 
     const [kind, setKind] = useState('task');

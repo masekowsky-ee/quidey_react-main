@@ -95,8 +95,8 @@ export const updateFamilyTask = (id, taskId, changes) => apiFetch(`${familyUrl(i
 export const removeFamilyTask = (id, taskId) => apiFetch(`${familyUrl(id)}/tasks/${taskId}`, send('DELETE'));
 
 // Sub-groups (experimental, testers); deleting one keeps its entries
-export const addFamilySubGroup = (id, name) => apiFetch(`/api/tester/families/${id}/groups`, send('POST', { name }));
-export const removeFamilySubGroup = (id, groupId) => apiFetch(`/api/tester/families/${id}/groups/${groupId}`, send('DELETE'));
+export const addFamilySubGroup = (id, name) => apiFetch(`/api/families/${id}/groups`, send('POST', { name }));
+export const removeFamilySubGroup = (id, groupId) => apiFetch(`/api/families/${id}/groups/${groupId}`, send('DELETE'));
 
 // ---------- the chat ----------
 

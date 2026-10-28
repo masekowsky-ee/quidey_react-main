@@ -130,8 +130,8 @@ describe('a new task while a session’s group is shown on Home', () => {
         expect(setCreateTask).toHaveBeenCalledWith(false)
     })
 
-    it('for a tester, into the shown sub-group too', async () => {
-        const store = makeStore({ isTester: true })
+    it('into the shown sub-group too (for everybody)', async () => {
+        const store = makeStore()
         showSession(store, 7)
         wrap(<TaskForm setCreateTask={vi.fn()} />, store)
         expect(screen.getByText(/“Lerngruppe · Kapitel 1”/)).toBeInTheDocument()
@@ -169,8 +169,8 @@ describe('sub-groups in a family', () => {
         await screen.findByText('Milch')
     }
 
-    it('a tester picks one: the list shows its entries and new ones go into it', async () => {
-        await open(true)
+    it('a member picks one: the list shows its entries and new ones go into it', async () => {
+        await open(false)
         expect(screen.getByText('Milch').closest('li')).toHaveAttribute('title', expect.stringMatching(/by Ben$/))
         fireEvent.click(within(screen.getByRole('group', { name: 'Sub-groups' })).getByRole('button', { name: /Einkauf/ }))
         expect(screen.queryByText('Bad putzen')).toBeNull()
@@ -180,17 +180,18 @@ describe('sub-groups in a family', () => {
         expect(bodyOf('/api/families/3/tasks')).toEqual({ name: 'Brot', group_id: 4 })
     })
 
-    it('everybody else sees the whole list as before', async () => {
-        await open(false)
-        expect(screen.queryByRole('group', { name: 'Sub-groups' })).toBeNull()
+    it('without a pick the whole list shows; testers see the same', async () => {
+        await open(true)
+        expect(screen.getByRole('group', { name: 'Sub-groups' })).toBeInTheDocument()
         expect(screen.getByText('Bad putzen')).toBeInTheDocument()
+        expect(screen.getByText('Milch')).toBeInTheDocument()
     })
 })
 
 describe('sub-groups in a session’s task list', () => {
-    it('only testers see them; everybody sees every task and who made it when', () => {
+    it('everybody sees them, and every task and who made it when', () => {
         wrap(<SharedTaskList session={session()} />, makeStore())
-        expect(screen.queryByRole('group', { name: 'Sub-groups' })).toBeNull()
+        expect(screen.getByRole('group', { name: 'Sub-groups' })).toBeInTheDocument()
         expect(screen.getByText('Lesen')).toBeInTheDocument()
         expect(screen.getByText('Lose')).toBeInTheDocument()
         expect(screen.getByText('Lesen').closest('li')).toHaveAttribute('title', expect.stringMatching(/^Created on 20 Oct 2026 at .* by Ben$/))
@@ -198,8 +199,8 @@ describe('sub-groups in a session’s task list', () => {
         expect(screen.getByText('Lose').closest('li')).not.toHaveAttribute('title')
     })
 
-    it('a tester filters by one, adds into it and makes new ones', async () => {
-        wrap(<SharedTaskList session={session()} />, makeStore({ isTester: true }))
+    it('a member filters by one, adds into it and makes new ones', async () => {
+        wrap(<SharedTaskList session={session()} />, makeStore())
         const bar = screen.getByRole('group', { name: 'Sub-groups' })
         fireEvent.click(within(bar).getByRole('button', { name: /Kapitel 1/ }))
         expect(screen.getByText('Lesen')).toBeInTheDocument()
@@ -215,6 +216,6 @@ describe('sub-groups in a session’s task list', () => {
         fireEvent.change(screen.getByRole('textbox', { name: 'Sub-group name' }), { target: { value: 'Kapitel 3' } })
         apiFetch.mockResolvedValueOnce(session())
         await act(async () => { fireEvent.submit(screen.getByRole('textbox', { name: 'Sub-group name' })) })
-        expect(bodyOf('/api/tester/shared-sessions/5/groups')).toEqual({ name: 'Kapitel 3' })
+        expect(bodyOf('/api/shared-sessions/5/groups')).toEqual({ name: 'Kapitel 3' })
     })
 })
