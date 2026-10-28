@@ -28,7 +28,7 @@ export const PROCESSORS = {
 };
 
 // Date of the current version of the legal texts
-export const LEGAL_VERSION_DATE = '28.10.2026 (Fokusraum mit Notizbuch, Routinen, Fokus-Timer im Hintergrund, Profilbilder im Test, Untergruppen für alle)';
+export const LEGAL_VERSION_DATE = '28.10.2026 (Fokusraum mit Notizbuch, Routinen, Fokus-Timer im Hintergrund, Profilbilder im Test, Untergruppen für alle, Sprache des Geräts)';
 
 export const COPYRIGHT_YEAR = 2026;
 

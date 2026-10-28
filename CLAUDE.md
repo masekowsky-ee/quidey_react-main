@@ -53,7 +53,11 @@ Three repositories, side by side on this machine:
   any JS: `index.html` carries a skeleton in `#root` styled by `public/boot.css` (theme colours
   copied from `index.css`, a test compares them; classes only, the CSP forbids style
   attributes); `theme-init.js` picks it via `<html data-boot="home|page|gate">`.
-- i18n: `src/i18n/translations.js` (de/en dictionaries) + `useTranslation()` → `t(key)`.
+- i18n: `src/i18n/translations.js` (de/en dictionaries) + `useTranslation()` → `t(key)`. The language
+  is the one picked in Settings (localStorage `language`), else the device's: German on a German
+  device, English on every other (`deviceLanguage()` in preferences.js, the same rule in
+  `public/theme-init.js` for `<html lang>`; App keeps `<html lang>` in step). Tests run on a German
+  "device" (setupTests.js).
 - Tests: Vitest + jsdom + Testing Library, all in `src/__tests__/` (`npm test`).
   Lint: ESLint 10 flat config (`npm run lint`).
 
@@ -349,7 +353,9 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   event needs a day and is done once it's over — the server ticks it off (every minute, on
   `GET /api/tasks`, on save; repeating ones get their next one), `useEventEnds` reloads the list
   when one ends. `duration_minutes` = a task's planned time (shown against focus time,
-  `plannedTime.js`) or an event's length; both set on wheels (`task/DurationWheel.jsx`). Events
+  `plannedTime.js`) or an event's length; both set on wheels (`task/DurationWheel.jsx`). An event also
+  has an end field beside its start (TaskEditor, TaskForm): start + length = end, setting the end
+  changes the length (`features/tasks/eventTimes.js`, an end at/before the start is the next day). Events
   have a type from my own list (`event_types`, `state.task.eventTypes`, managed in Settings →
   Event-Typen, `EventTypeSettings.jsx`; picker `task/KindFields.jsx`). Home's list holds tasks
   only; today's events sit above it (`task/TodayEvents.jsx`). Events can't be focused or overdue; shared

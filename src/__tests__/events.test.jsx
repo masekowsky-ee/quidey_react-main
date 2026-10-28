@@ -284,3 +284,48 @@ describe('event types in the settings', () => {
         expect(bodyOf('/api/event-types/7', 'PUT')).toEqual({ name: 'Job' })
     })
 })
+
+describe("an event's start, end and length", () => {
+    it('start + length gives the end; the end sets the length; past midnight is the next day', async () => {
+        const { endOf, fromEnd, endDayOffset } = await import('../features/tasks/eventTimes')
+        expect(endOf('14:00', 120)).toBe('16:00')
+        expect(endOf('14:00', null)).toBe('')
+        expect(fromEnd('16:00', '14:00', null)).toEqual({ time: '14:00', duration: 120 })
+        expect(fromEnd('02:00', '22:00', 60)).toEqual({ time: '22:00', duration: 240 })
+        expect(endDayOffset('22:00', 240)).toBe(1)
+        // a trip over several days keeps its days, only the end's time changes
+        expect(fromEnd('17:00', '14:00', 26 * 60)).toEqual({ time: '14:00', duration: 27 * 60 })
+        // no start yet: it goes back from the end by an hour (or the length there is)
+        expect(fromEnd('11:00', '', null)).toEqual({ time: '10:00', duration: 60 })
+        expect(fromEnd('11:00', '', 30)).toEqual({ time: '10:30', duration: 30 })
+        expect(fromEnd('', '14:00', 120)).toEqual({ time: '14:00', duration: null })
+    })
+
+    it('in the form: 14:00 for 2 h ends at 16:00, an end at 17:00 makes it 3 h, a new start moves the end', async () => {
+        const store = makeStore()
+        wrap(store, <TaskForm setCreateTask={vi.fn()} />)
+        fireEvent.click(screen.getByRole('radio', { name: /^Event/ }))
+        fireEvent.change(screen.getByRole('textbox', { name: 'Event name' }), { target: { value: 'Seminar' } })
+        fireEvent.change(screen.getByLabelText('Day'), { target: { value: '2026-10-19' } })
+        fireEvent.change(screen.getByLabelText(/^Start/), { target: { value: '14:00' } })
+        fireEvent.click(screen.getByRole('button', { name: 'None' }))
+        fireEvent.click(screen.getByRole('button', { name: '2 h' }))
+        const end = screen.getByLabelText('End')
+        expect(end).toHaveValue('16:00')
+
+        fireEvent.change(end, { target: { value: '17:00' } })
+        expect(screen.getByRole('spinbutton', { name: /Hours/ })).toHaveAttribute('aria-valuenow', '3')
+
+        fireEvent.change(screen.getByLabelText(/^Start/), { target: { value: '15:30' } })
+        expect(screen.getByLabelText('End')).toHaveValue('18:30')
+
+        routes({ 'POST /api/tasks': { id: 50, name: 'Seminar', kind: 'event', done: false } })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Create' })) })
+        expect(bodyOf('/api/tasks', 'POST')).toMatchObject({ due_time: '15:30', duration_minutes: 180 })
+    })
+
+    it('a task has no end field', () => {
+        wrap(makeStore(), <TaskForm setCreateTask={vi.fn()} />)
+        expect(screen.queryByLabelText('End')).toBeNull()
+    })
+})

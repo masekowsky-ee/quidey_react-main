@@ -15,6 +15,13 @@ try {
   var motion = localStorage.getItem('motion');
   document.documentElement.dataset.motion = ['minimal', 'normal', 'extreme'].indexOf(motion) >= 0 ? motion
     : (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'minimal' : 'normal');
+  // the page's language: the one picked in the settings, else the device's (German or English),
+  // like readStoredLanguage in src/features/settings/preferences.js
+  var language = localStorage.getItem('language');
+  if (language !== 'de' && language !== 'en') {
+    language = String((navigator.languages && navigator.languages[0]) || navigator.language || '').toLowerCase().indexOf('de') === 0 ? 'de' : 'en';
+  }
+  document.documentElement.lang = language;
   // which skeleton the first paint shows (public/boot.css): Home, another page, or the sign-in
   document.documentElement.dataset.boot = !localStorage.getItem('token') ? 'gate'
     : window.location.pathname === '/' ? 'home' : 'page';
