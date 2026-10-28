@@ -6,6 +6,7 @@ import { useTranslation } from '../i18n/useTranslation';
 import { logout } from '../features/auth/authAction';
 import { addAnotherAccount, MAX_ACCOUNTS, otherAccounts, switchAccount, listAccounts } from '../features/auth/accounts';
 import Icon from './icons';
+import { useAvatarUrl } from '../features/profile/avatars';
 
 const initialOf = (name) => (String(name ?? '?').trim()[0] ?? '?').toUpperCase();
 
@@ -17,6 +18,7 @@ export default function AccountSwitcher({ onNavigate, compact = false }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const user = useSelector(state => state.auth.user);
+    const myPicture = useAvatarUrl(useSelector(state => state.auth.access.userId));
     const [open, setOpen] = useState(false);
     const wrapRef = useRef(null);
     const menuId = useId();
@@ -44,6 +46,8 @@ export default function AccountSwitcher({ onNavigate, compact = false }) {
         };
     }, [open]);
 
+    // my profile picture (testers, see avatars.js)
+    const picture = myPicture;
     if (!username) return null;
 
     return (
@@ -51,7 +55,7 @@ export default function AccountSwitcher({ onNavigate, compact = false }) {
             {open &&
                 <div className={styles.menu} id={menuId} role="menu" aria-label={t('accounts')}>
                     <div className={styles.current}>
-                        <span className={styles.avatar} aria-hidden="true">{initialOf(name)}</span>
+                        <span className={styles.avatar} aria-hidden="true">{picture ? <img className={styles.avatarPicture} src={picture} alt="" /> : initialOf(name)}</span>
                         <span className={styles.names}>
                             <span className={styles.name}>{name}</span>
                             <span className={styles.handle}>@{username}</span>
@@ -87,7 +91,7 @@ export default function AccountSwitcher({ onNavigate, compact = false }) {
             <button type="button" className={`${styles.trigger} ${open ? styles.triggerOpen : ''}`}
                 aria-haspopup="menu" aria-expanded={open} aria-controls={open ? menuId : undefined}
                 onClick={() => setOpen(o => !o)}>
-                <span className={styles.avatar} aria-hidden="true">{initialOf(name)}</span>
+                <span className={styles.avatar} aria-hidden="true">{picture ? <img className={styles.avatarPicture} src={picture} alt="" /> : initialOf(name)}</span>
                 <span className={styles.names}>
                     <span className={styles.name}>{name}</span>
                     <span className={styles.handle}>@{username}</span>

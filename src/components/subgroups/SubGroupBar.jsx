@@ -5,7 +5,7 @@ import { fill } from '../../features/helperFunction';
 import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
 import Icon from '../icons';
 
-// Sub-groups of a shared session or a family (experimental, only shown to testers): "All", one
+// Sub-groups of a shared session or a family (for everybody since 2026-10-28): "All", one
 // chip per group, "+" names a new one. The shown group can be deleted; its entries stay.
 // value: the shown group's id, or null for all. counts: open entries per group id (and `all`).
 // onAdd(name) / onRemove(id) resolve to something truthy once it worked; without them the
@@ -46,7 +46,6 @@ export default function SubGroupBar({ groups, value, onChange, onAdd, onRemove, 
             <div className={styles.bar} role="group" aria-label={t('subGroups')} data-part="sub-groups">
                 <span className={styles.label}>
                     {t('subGroups')}
-                    <span className={styles.tag} title={t('subGroupsTesterHint')}>{t('experimental')}</span>
                 </span>
                 {chip(null, t('all'))}
                 {groups.map(group => chip(group.id, group.name))}
