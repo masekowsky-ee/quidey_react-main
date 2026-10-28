@@ -16,7 +16,17 @@ function store(key, value) {
 }
 
 export const LANGUAGES = ['de', 'en'];
-export const readStoredLanguage = () => readStored('language', LANGUAGES, 'de');
+// The device's language: German on a German device, English on every other. Used until a
+// language is picked in the settings (that choice is remembered and wins).
+export function deviceLanguage() {
+    try {
+        const tag = String(navigator.languages?.[0] || navigator.language || '').toLowerCase();
+        return tag.startsWith('de') ? 'de' : 'en';
+    } catch {
+        return 'en';
+    }
+}
+export const readStoredLanguage = () => readStored('language', LANGUAGES, deviceLanguage());
 export const storeLanguage = (language) => store('language', language);
 
 // Accent color palettes; the values live in index.css under [data-accent]

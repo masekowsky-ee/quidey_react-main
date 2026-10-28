@@ -230,6 +230,11 @@ const focusTexts = {
         dashNoteSaved: 'Im Notizbuch gespeichert',
         dashNoteAll: 'Notizbuch',
 
+        // ---------- an event's end ----------
+        eventEnd: 'Ende',
+        eventEndNextDay: 'am nächsten Tag',
+        eventEndDaysLater: '{days} Tage später',
+
         // ---------- shortcuts ----------
         shortcut_goFocus: 'Zum Fokusraum',
         shortcut_goRoutines: 'Zu den Routinen',
@@ -457,6 +462,10 @@ const focusTexts = {
         dashNotePlaceholder: 'Thought, idea, formula … (Ctrl+Enter saves)',
         dashNoteSaved: 'Saved in the notebook',
         dashNoteAll: 'Notebook',
+
+        eventEnd: 'End',
+        eventEndNextDay: 'the next day',
+        eventEndDaysLater: '{days} days later',
 
         shortcut_goFocus: 'To the focus room',
         shortcut_goRoutines: 'To the routines',

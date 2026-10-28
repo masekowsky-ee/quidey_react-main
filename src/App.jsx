@@ -117,6 +117,9 @@ function App(){
   const dispatch = useDispatch();
   useApplyTheme();
   useApplyMotion();
+  // <html lang>: German or English, as the app speaks (screen readers, hyphenation)
+  const language = useSelector((state) => state.settings.language);
+  useEffect(() => { document.documentElement.lang = language; }, [language]);
   // testers: the interface variant they picked (<html data-ui>), its way of navigating
   useApplyUiVariant();
   const navModel = useNavModel();

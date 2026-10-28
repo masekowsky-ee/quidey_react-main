@@ -246,3 +246,9 @@
 .moreIcon{
     transform: rotate(-90deg);
 }
+
+/* an event's start – end */
+.timeDash{
+    align-self: center;
+    color: var(--text-muted);
+}

@@ -11,6 +11,7 @@ import { selectFocusByTask } from '../../features/tasks/plannedTime';
 import TaskSharing from '../task/TaskSharing.jsx';
 import TaskColorPicker from '../task/TaskColorPicker.jsx';
 import DurationField from '../task/DurationWheel.jsx';
+import { endOf, endDayOffset, fromEnd } from '../../features/tasks/eventTimes';
 import { EventTypePicker, KindSwitch } from '../task/KindFields.jsx';
 import { matchEventType } from '../../features/tasks/kinds';
 import { createdText } from '../../features/tasks/created';
@@ -171,6 +172,13 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && e.target.tagName === 'TEXTAREA') submit(e);
     };
 
+    // an event's end: worked out from start and length, setting it changes the length
+    const endDays = endDayOffset(time, duration);
+    const setEnd = (value) => {
+        const next = fromEnd(value, time, duration);
+        if (next.time !== time) { dayForTime(); setTime(next.time); }
+        setDuration(next.duration);
+    };
     const start = minutesOfDay(time);
     const durationHint = event
         ? (duration && start !== null ? fill(t('eventUntil'), { time: timeText(start + duration) }) : t('eventDurationHint'))
@@ -208,6 +216,12 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
                     </span>
                     {!time && <small className={styles.allDayNote}>{t('allDay')}</small>}
                 </label>
+                {event &&
+                    <label className={`${styles.field} ${styles.timeField}`}>
+                        <span>{t('eventEnd')}</span>
+                        <input type="time" value={endOf(time, duration)} onPointerDown={dayForTime} onChange={(e) => setEnd(e.target.value)} />
+                        {endDays > 0 && <small className={styles.allDayNote}>{fill(t(endDays === 1 ? 'eventEndNextDay' : 'eventEndDaysLater'), { days: endDays })}</small>}
+                    </label>}
                 {!event &&
                     <label className={`${styles.field} ${styles.prioField}`} htmlFor={`${id}-prio`}>
                         <span>{t('prioritise')} <output className={styles.prioValue} htmlFor={`${id}-prio`}>{prio ?? '–'}</output></span>

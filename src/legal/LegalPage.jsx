@@ -154,8 +154,12 @@ function Privacy() {
                 Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO).
             </p>
             <p>
-                Die Startseite quidey.com setzt keine Cookies, speichert nichts in deinem Browser, lädt nichts von
-                Dritten und sendet keine Daten an die API. Anmelden und Registrieren finden in der App statt. Gibst du
+                Die Startseite quidey.com setzt keine Cookies, lädt nichts von Dritten und sendet keine Daten an die
+                API. Sie zeigt sich in der Sprache deines Geräts (Deutsch, sonst Englisch); dafür liest dein Browser
+                die eingestellte Sprache, gespeichert wird dabei nichts. Nur wenn du die Sprache selbst umschaltest,
+                merkt sich dein Browser diese Wahl im lokalen Speicher (localStorage, „quidey-lang“), damit die
+                Startseite dich nicht wieder umleitet; das ist für diese von dir gewünschte Funktion unbedingt
+                erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG) und verlässt dein Gerät nicht. Anmelden und Registrieren finden in der App statt. Gibst du
                 auf der Startseite deine E-Mail-Adresse ein, reicht dein Browser sie nur an das Registrierungsformular
                 der App weiter (im Teil der Adresse nach „#“, der nicht an einen Server übertragen wird); gespeichert
                 wird sie erst, wenn du dich registrierst.
@@ -410,7 +414,7 @@ function Privacy() {
                 <li>dein Anmelde-Token (7 Tage gültig, wird beim Abmelden gelöscht). Meldest du auf demselben Gerät
                     mehrere Konten an, um zwischen ihnen zu wechseln, liegen für jedes davon Token, Benutzer- und
                     Anzeigename (höchstens fünf Konten); beim Abmelden eines Kontos wird sein Eintrag gelöscht;</li>
-                <li>deine Einstellungen: Sprache, Design, Farbpalette, Akzentfarbe, Animationen, Töne, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer, Pomodoro oder Stoppuhr und die Pomodoro-Längen, dein Tagesziel für die Fokuszeit, im Fokusraum gewähltes Fokus-Geräusch, Lautstärke und Lernmethode, Kalenderansicht, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
+                <li>deine Einstellungen: Sprache (bis du eine wählst, nimmt Quidey die deines Geräts), Design, Farbpalette, Akzentfarbe, Animationen, Töne, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer, Pomodoro oder Stoppuhr und die Pomodoro-Längen, dein Tagesziel für die Fokuszeit, im Fokusraum gewähltes Fokus-Geräusch, Lautstärke und Lernmethode, Kalenderansicht, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
                 <li>bei einem neuen Konto, wie viele Dinge du schon erledigt oder angelegt hast und ob Quidey dich schon
                     gefragt hat, ob du es installieren möchtest und ob es dir gefällt (nur eine Zahl und zwei Merker,
                     keine Inhalte);</li>

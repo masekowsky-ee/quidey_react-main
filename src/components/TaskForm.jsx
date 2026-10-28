@@ -13,6 +13,7 @@ import { useFriends } from '../features/friends/useFriends';
 import FriendPicker from './together/FriendPicker.jsx';
 import TaskColorPicker from './task/TaskColorPicker.jsx';
 import DurationField from './task/DurationWheel.jsx';
+import { endOf, fromEnd } from '../features/tasks/eventTimes';
 import { EventTypePicker, KindSwitch } from './task/KindFields.jsx';
 import { matchEventType } from '../features/tasks/kinds';
 import { dueText, fill } from '../features/helperFunction';
@@ -212,6 +213,12 @@ export default function TaskForm(props){
                         required={event} value={due} onChange={(e) => setDue(e.target.value)} />
                     <input className={styles.input} type="time" aria-label={`${t(event ? 'eventStart' : 'taskTime')} (${t('allDay')}: –)`} title={t(event ? 'eventStart' : 'taskTime')}
                         value={time} onPointerDown={dayForTime} onChange={(e) => { dayForTime(); setTime(e.target.value); }} />
+                    {/* an event's end: follows start and length, setting it changes the length */}
+                    {event && <span className={styles.timeDash} aria-hidden="true">–</span>}
+                    {event &&
+                        <input className={styles.input} type="time" aria-label={t('eventEnd')} title={t('eventEnd')}
+                            value={endOf(time, duration)} onPointerDown={dayForTime}
+                            onChange={(e) => { const next = fromEnd(e.target.value, time, duration); if (next.time !== time) { dayForTime(); setTime(next.time); } setDuration(next.duration); }} />}
                 </div>
                 <DurationField label={t(event ? 'eventDuration' : 'plannedTime')} value={duration} onChange={setDuration}
                     maxHours={event ? 168 : 99}
