@@ -17,6 +17,7 @@ import EventTypeSettings from './EventTypeSettings.jsx';
 import { useLocation } from 'react-router-dom';
 import { useHashTarget } from '../features/layout/hashTarget';
 import { SECTION_AREAS } from '../features/search/places';
+import { isNativeApp } from '../features/native/native';
 
 const LANGUAGES = [
     { code: 'de', label: 'german' },
@@ -108,7 +109,7 @@ function PushSettings() {
 
     return (
         <>
-            <SettingRow title={t('pushDevice')} hint={t(PUSH_HINTS[push.status])}>
+            <SettingRow title={t('pushDevice')} hint={t(isNativeApp() && push.status === 'unsupported' ? 'pushUnsupportedApp' : PUSH_HINTS[push.status])}>
                 {(on || push.status === 'off') && (
                     <Choice label={t('pushDevice')} value={on} disabled={push.busy} options={ON_OFF}
                         onChange={(next) => {

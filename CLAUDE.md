@@ -5,15 +5,39 @@ with live. German-first (de default, en available), currently a **closed beta** 
 with `is_pro` or `is_tester` (admins always) get into the app. The app runs on **app.quidey.com**;
 the public landing page on **quidey.com** is a separate static site (repo `quidey_landing`).
 
-Three repositories, side by side on this machine:
+Four repositories, side by side on this machine in `C:\Users\eesge\Quidey\`:
 
 | Repo | Path | GitHub |
 |---|---|---|
-| Frontend (this one) | `C:\Users\eesge\quidey_react-main` | masekowsky-ee/quidey_react-main |
-| Backend | `C:\Users\eesge\quidey_react-backend` | masekowsky-ee/quidey_react-backend |
-| Landing page (Astro, static) | `C:\Users\eesge\quidey_landing` | not on GitHub yet |
+| **Android app (this one)** | `C:\Users\eesge\Quidey\quidey_android` | not on GitHub yet |
+| Frontend (web app) | `C:\Users\eesge\Quidey\quidey_react-main` | masekowsky-ee/quidey_react-main |
+| Backend | `C:\Users\eesge\Quidey\quidey_react-backend` | masekowsky-ee/quidey_react-backend |
+| Landing page (Astro, static) | `C:\Users\eesge\Quidey\quidey_landing` | not on GitHub yet |
 
 `README.md` is still the untouched Vite template; this file is the real description.
+
+## This repo: the Android app (Capacitor 8)
+
+A clone of the web app (git remote `web` = `../quidey_react-main`; take its changes over with
+`git pull web <branch>`) plus a Capacitor shell; everything below about the web app holds here
+too. Build and release steps: `README-android.md`. In short:
+
+- `npm run apk` = `vite build --mode android` (`.env.android`: `VITE_API_URL=https://api.quidey.com`)
+  → `cap sync android` → `scripts/apk.mjs` (Gradle `assembleDebug` with a JDK 21+, else
+  Android Studio's `jbr`). `npm run apk:release` signs with `android/keystore.properties` (git-ignored).
+- `capacitor.config.json`: app id `com.quidey.app`, `server.hostname: app.quidey.com` (the WebView's
+  origin is the web app's, so the API's CORS and the password autofill work unchanged),
+  SystemBars `insetsHandling: css` (the existing `env(safe-area-inset-*)` CSS applies).
+- Native-only code stays in `src/features/native/native.js` (`isNativeApp()`, `setupNativeApp(store)`
+  in main.jsx: Android back = Escape on an open dialog/drawer/form, else history back, else
+  minimise; system bar icons follow `<html data-theme>`; `resume` → a window `focus` event). The
+  shared files only get guards: no service worker, `installState()` = installed, `pushSupport()` =
+  unsupported (Settings shows `pushUnsupportedApp`). Keep further changes like that, so merges
+  from `web` stay small and the web build here still behaves as the web app.
+- `android/`: launcher icon + splash are the logo as vector drawables (`drawable/ic_launcher_foreground.xml`,
+  `_monochrome`, `splash.xml`), legacy PNGs from `public/icons/icon-512.png`; `allowBackup="false"` +
+  `xml/data_extraction_rules.xml` (the WebView storage holds the token).
+- Not yet: native push (would need FCM + backend), Android App Links for app.quidey.com.
 
 ## Frontend stack
 

@@ -12,6 +12,7 @@
 import { useEffect, useSyncExternalStore } from 'react';
 import { apiFetch, apiUrl } from '../helperFunction';
 import { installState } from './install';
+import { isNativeApp } from '../native/native';
 
 const WANTED_KEY = 'push';
 const ENDPOINT_KEY = 'pushEndpoint';
@@ -64,9 +65,10 @@ export const pushCovers = (kind) => pushWanted() && state.status === 'on' && sta
 // my tasks and events (also before the check at startup has answered)
 export const pushRemindsByDefault = () => pushWanted() && ['on', 'unknown'].includes(state.status) && state.kinds?.plan !== false;
 
-// 'supported', 'install' (Safari on iPhone / iPad outside the home screen) or 'unsupported'
+// 'supported', 'install' (Safari on iPhone / iPad outside the home screen) or 'unsupported'.
+// The Android app has no service worker, so no Web Push (that would need Firebase Cloud Messaging).
 export function pushSupport() {
-    if (typeof window === 'undefined' || typeof navigator === 'undefined') return 'unsupported';
+    if (typeof window === 'undefined' || typeof navigator === 'undefined' || isNativeApp()) return 'unsupported';
     if ('serviceWorker' in navigator && 'PushManager' in window && typeof Notification !== 'undefined') return 'supported';
     return installState() === 'ios' ? 'install' : 'unsupported';
 }

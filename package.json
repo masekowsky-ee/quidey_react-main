@@ -1,5 +1,5 @@
 {
-  "name": "quidey_react",
+  "name": "quidey_android",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,9 +10,16 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:android": "vite build --mode android && cap sync android",
+    "apk": "npm run build:android && node scripts/apk.mjs",
+    "apk:release": "npm run build:android && node scripts/apk.mjs release",
+    "android:open": "cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.0",
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/lexend": "^5.3.0",
     "@fontsource-variable/m-plus-1": "^5.3.1",
@@ -32,6 +39,7 @@
     "socket.io-client": "^4.8.4"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
     "@eslint/js": "^10.0.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
