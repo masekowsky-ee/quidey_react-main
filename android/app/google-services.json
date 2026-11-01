@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "148251348873",
+    "project_id": "quidey-9e63c",
+    "storage_bucket": "quidey-9e63c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:148251348873:android:118661985290bf6eab5b58",
+        "android_client_info": {
+          "package_name": "com.quidey.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXW7kLXK4qbQNTa1gMIOl4Tec-9ruW-kI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
