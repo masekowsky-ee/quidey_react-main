@@ -67,6 +67,17 @@ export function readGoogleReturn() {
     return googleReturn;
 }
 
+// The token of that answer, handed out once: the server takes it only once (its nonce is used up
+// then), so a second try (React running effects twice in development, the card mounted again)
+// would only fail and show an error over the app that is already signed in.
+let tokenClaimed = false;
+export function claimGoogleToken() {
+    const idToken = readGoogleReturn()?.idToken;
+    if (!idToken || tokenClaimed) return null;
+    tokenClaimed = true;
+    return idToken;
+}
+
 function takeGoogleReturn() {
     const hash = new URLSearchParams(window.location.hash.slice(1));
     if (!hash.has('id_token') && !hash.has('error')) return null;
