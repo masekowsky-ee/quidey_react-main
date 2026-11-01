@@ -19,6 +19,7 @@ import { useHashTarget } from '../features/layout/hashTarget';
 import { SECTION_AREAS } from '../features/search/places';
 import { isNativeApp } from '../features/native/native';
 import { APK_URL, apkOffer, formatSize } from '../features/native/androidApk';
+import { setAnalyticsConsent, useAnalytics } from '../features/native/analytics';
 
 const LANGUAGES = [
     { code: 'de', label: 'german' },
@@ -158,6 +159,20 @@ function PushSettings() {
     );
 }
 
+// Google Analytics for Firebase in the Android app (features/native/analytics.js): the answer to
+// the question at the start, changed here. Only where the app has Firebase.
+function AnalyticsSetting() {
+    const { t } = useTranslation();
+    const { choice } = useAnalytics();
+    const on = choice === 'granted';
+    return (
+        <SettingRow title={t('analyticsRow')} hint={t(on ? 'analyticsRowOn' : 'analyticsRowOff')}>
+            <Choice label={t('analyticsRow')} value={on} options={ON_OFF}
+                onChange={(next) => { if (next !== on) setAnalyticsConsent(next); }} />
+        </SettingRow>
+    );
+}
+
 // When tasks without a time of day remind me (for the account: pushes, mails and the app).
 // Saved on every change; put back when that fails.
 function AllDayTimeSetting() {
@@ -221,6 +236,8 @@ export default function Settings(){
     const installState = useInstallState();
     // Android in the browser: the app as a file (features/native/androidApk.js)
     const apk = apkOffer();
+    // the Android app with Firebase: may it count how it is used
+    const analytics = useAnalytics();
     const dispatch = useDispatch();
     const { hash, key } = useLocation();
     const [chosenArea, setArea] = useState(() => areaFromHash(hash));
@@ -373,6 +390,10 @@ export default function Settings(){
                             </button>
                         </SettingRow>
                     </SettingSection>
+                    {analytics.available &&
+                        <SettingSection id="analytics" title={t('analyticsSetting')} description={t('analyticsSettingHint')}>
+                            <AnalyticsSetting />
+                        </SettingSection>}
                     {/* Android phones: the real app to download (with notifications through Android) */}
                     {apk &&
                         <SettingSection id="android" title={t('androidApp')} description={t('androidAppHint')}>

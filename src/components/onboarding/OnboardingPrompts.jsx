@@ -2,7 +2,7 @@ import styles from './Onboarding.module.css';
 import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
 import { closeOnboarding, sendRating, setOnboardingAccount, useOnboarding } from '../../features/onboarding/onboarding';
 import { COMMUNITY_PATHS, friendsPath } from '../../features/community/paths';
@@ -11,29 +11,47 @@ import { fill } from '../../features/helperFunction';
 import Icon from '../icons';
 import SheetGrabber from '../SheetGrabber.jsx';
 import { useSheet } from '../../features/layout/dragDismiss';
+import { analyticsQuestionDue, askAnalyticsLater, setAnalyticsConsent, useAnalytics } from '../../features/native/analytics';
+import { usePushState } from '../../features/pwa/push';
+
+// the analytics question waits a moment after the app is there (and after any other question)
+export const ANALYTICS_DELAY_MS = 1500;
 
 // The questions of a new account's first days (features/onboarding/onboarding.js): what first,
 // after the tour; install Quidey?, after a few things done; do you like it?, after about ten.
 // Mounted once in the app shell. Every yes is the lifted primary, every no grey (ui.module.css).
+// Also, once per device in the Android app: may Quidey count how the app is used (consent for
+// Google Analytics for Firebase, features/native/analytics.js); its two answers weigh the same.
 export default function OnboardingPrompts() {
     const username = useSelector((state) => state.auth.user?.username);
+    const tourOpen = useSelector((state) => state.settings.showTutorial);
     const { asking } = useOnboarding();
+    const pushAsking = usePushState().asking;
+    useAnalytics();
+    const analyticsDue = analyticsQuestionDue() && !asking && !pushAsking && !tourOpen;
+    const [analyticsReady, setAnalyticsReady] = useState(false);
 
     useEffect(() => { setOnboardingAccount(username); }, [username]);
+    useEffect(() => {
+        if (!analyticsDue) return;
+        const timer = setTimeout(() => setAnalyticsReady(true), ANALYTICS_DELAY_MS);
+        return () => { clearTimeout(timer); setAnalyticsReady(false); };
+    }, [analyticsDue]);
 
     if (asking === 'next') return <NextSteps />;
     if (asking === 'install') return <InstallQuestion />;
     if (asking === 'rating') return <RatingQuestion />;
+    if (analyticsDue && analyticsReady) return <AnalyticsQuestion />;
     return null;
 }
 
 // The centred card; Escape, a click beside it or the no closes it
-function Card({ icon, title, text, children, wide = false }) {
+function Card({ icon, title, text, children, wide = false, onClose = closeOnboarding }) {
     const titleId = useId();
     const textId = useId();
     const cardRef = useRef(null);
     // on phones a sheet: pulled down, it closes like the no
-    const sheet = useSheet(closeOnboarding, cardRef);
+    const sheet = useSheet(onClose, cardRef);
     const { dismiss } = sheet;
 
     useEffect(() => {
@@ -125,6 +143,25 @@ function InstallQuestion() {
                 </button>
                 <button type="button" className={styles.no} onClick={closeOnboarding}>{t('onbInstallNo')}</button>
             </div>
+        </Card>
+    );
+}
+
+// Consent to Google Analytics for Firebase (Android app). Closing it without an answer asks again
+// on the next start; yes and no look the same, so neither is the easier one.
+function AnalyticsQuestion() {
+    const { t } = useTranslation();
+    const answer = (granted) => setAnalyticsConsent(granted);
+
+    return (
+        <Card icon="lightbulb" title={t('analyticsAskTitle')} text={t('analyticsAskText')} onClose={askAnalyticsLater}>
+            <div className={styles.answers}>
+                <button type="button" className={styles.no} onClick={() => answer(true)}>{t('analyticsAskYes')}</button>
+                <button type="button" className={styles.no} onClick={() => answer(false)}>{t('analyticsAskNo')}</button>
+            </div>
+            <p className={styles.fine}>
+                {t('analyticsAskLater')} <Link to="/datenschutz" onClick={askAnalyticsLater}>{t('analyticsAskPrivacy')}</Link>
+            </p>
         </Card>
     );
 }
