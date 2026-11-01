@@ -20,11 +20,12 @@
     text-align: left;
 }
 
+/* A large title: where am I, said first and biggest (tight leading and tracking, Inter's display
+   cut through its optical size) */
 .pageTitle {
-    font-size: 1.5rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    margin: 2.5rem 0 0.5rem;
+    font: var(--type-large);
+    letter-spacing: var(--track-large);
+    margin: 2.25rem 0 0.5rem;
 }
 
 /* Quiet sentence-case title at the top of a card */
@@ -32,7 +33,7 @@
     margin: 0 0 1rem;
     font-size: 0.875rem;
     font-weight: 600;
-    letter-spacing: 0;
+    letter-spacing: -0.004em;
     color: var(--text-h);
 }
 

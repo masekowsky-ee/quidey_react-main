@@ -223,6 +223,13 @@
     text-align: left;
 }
 
+/* on a phone the editor is a sheet from the bottom edge (index.css): it scrolls inside */
+@media (max-width: 720px) {
+    .sheet {
+        overflow-y: auto;
+    }
+}
+
 .sheetHead {
     display: flex;
     align-items: center;

@@ -5,6 +5,7 @@ import TaskContainer, { TaskListSkeleton } from './TaskContainer.jsx'
 import { showForms } from '../features/settings/settingsAction.js'
 import styles from './Home.module.css';
 import GroupForm from './GroupForm.jsx';
+import { FormSheet } from './QuickAdd.jsx';
 import WeekDaysContainer from './WeekDaysContainer.jsx';
 import GroupBtnContainer from './GroupBtnContainer.jsx';
 import WorkingContainer, { FocusSkeleton } from './WorkingContainer.jsx';
@@ -235,9 +236,9 @@ export default function Home(){
             <div data-part="home-week" data-label={t('calendar')}>
                 <WeekDaysContainer />
             </div>
-            {createGroup && <div className={styles.formsDiv}>
-                <GroupForm setCreateGroup={setCreateGroup}/>
-            </div>}
+            {createGroup && <FormSheet onClose={() => setCreateGroup(false)}>
+                {(sheet, close) => <GroupForm sheet={sheet} setCreateGroup={(value) => { if (!value) close(); }} />}
+            </FormSheet>}
             <div className={styles.columns} data-part="home-columns">
                 <div className={styles.mainCol} data-part="home-list" data-label={t('taskContainer')}>
                     <GroupBtnContainer setCreateGroup={setCreateGroup} />

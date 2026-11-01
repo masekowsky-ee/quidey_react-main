@@ -10,6 +10,8 @@ import GroupPicker from '../GroupPicker.jsx';
 import TaskEditor from './TaskEditor.jsx';
 import TaskMeta from '../task/TaskMeta.jsx';
 import Icon from './icons.jsx';
+import SheetGrabber from '../SheetGrabber.jsx';
+import { useSheet } from '../../features/layout/dragDismiss';
 import { taskColorAttr } from '../../features/tasks/taskColors';
 import { isEvent } from '../../features/tasks/kinds';
 
@@ -107,6 +109,9 @@ export default function DayPanel({
     const key = dateKey(date);
     const panelRef = useRef(null);
     const addRef = useRef(null);
+    // on phones a sheet: pulled down, it closes
+    const sheet = useSheet(onClose, panelRef);
+    const { dismiss } = sheet;
     const [draft, setDraft] = useState('');
     // optional time for the new task; empty: the whole day
     const [draftTime, setDraftTime] = useState('');
@@ -141,7 +146,7 @@ export default function DayPanel({
     useEffect(() => {
         const onKey = (e) => {
             if (pickerTask || e.defaultPrevented) return;
-            if (e.key === 'Escape') onClose();
+            if (e.key === 'Escape') dismiss();
             else if (!isTyping(e.target) && !e.altKey && !e.ctrlKey && !e.metaKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
                 e.preventDefault();
                 onShiftDay(e.key === 'ArrowLeft' ? -1 : 1);
@@ -149,7 +154,7 @@ export default function DayPanel({
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [pickerTask, onClose, onShiftDay]);
+    }, [pickerTask, dismiss, onShiftDay]);
 
     const add = async (e) => {
         e.preventDefault();
@@ -185,9 +190,10 @@ export default function DayPanel({
     const timeText = (value) => new Date(value).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
     return createPortal(
-        <div className={styles.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-            <div className={`${styles.panel} ${editingId !== null ? styles.panelWide : ''}`} role="dialog" aria-modal="true" aria-labelledby="dayPanelTitle" ref={panelRef} tabIndex={-1}>
-                <div className={styles.head}>
+        <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
+            <div className={`${styles.panel} ${editingId !== null ? styles.panelWide : ''}`} role="dialog" aria-modal="true" aria-labelledby="dayPanelTitle" {...sheet.panel} tabIndex={-1}>
+                <SheetGrabber />
+                <div className={styles.head} data-sheet-drag>
                     <button type="button" className={styles.navBtn} onClick={() => onShiftDay(-1)} aria-label={t('previousDay')} title={t('previousDay')}>
                         <Icon name="prev" />
                     </button>
@@ -201,7 +207,7 @@ export default function DayPanel({
                     <button type="button" className={styles.navBtn} onClick={() => onShiftDay(1)} aria-label={t('nextDay')} title={t('nextDay')}>
                         <Icon name="next" />
                     </button>
-                    <button type="button" className={styles.closeBtn} onClick={onClose} aria-label={t('close')} title={`${t('close')} (Esc)`}>
+                    <button type="button" className={styles.closeBtn} onClick={() => dismiss()} aria-label={t('close')} title={`${t('close')} (Esc)`}>
                         <Icon name="close" size={22} />
                     </button>
                 </div>

@@ -25,6 +25,7 @@ import { addSharedTask, selectSharedGroups, togetherErrorText } from '../feature
 import { shownSubGroup } from '../features/tasks/subGroups';
 
 import Icon from './icons';
+import SheetGrabber from './SheetGrabber.jsx';
 const EMPTY_EXTRAS = { reminders: [], reminder_email: false, location: '', link: '', details: '', repeat: null, repeat_left: null };
 
 // New task or event. A task needs only its name; optionally a day and time (no time: the whole
@@ -38,7 +39,8 @@ const EMPTY_EXTRAS = { reminders: [], reminder_email: false, location: '', link:
 // goes into that session (and, for testers, into its shown sub-group): then only the session's
 // fields, nothing personal (reminders, repeating, event types, sharing with friends).
 export default function TaskForm(props){
-    const {setCreateTask} = props;
+    // sheet: QuickAdd's FormSheet (slides in, swiped down on phones)
+    const {setCreateTask, sheet} = props;
 
     const dispatch = useDispatch();
 
@@ -178,11 +180,12 @@ export default function TaskForm(props){
     }
 
     return (
-        <div className={`${styles.div}`}>
+        <div className={`${styles.div}`} role="dialog" aria-modal="true" aria-labelledby="createTaskTitle" {...sheet?.panel}>
+            {sheet && <SheetGrabber />}
             <button className={styles.closeBtn} onClick={()=>{setCreateTask(false)}} aria-label={t('close')}>
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
             </button>
-            <h2>{t(event ? 'createEventH2' : 'createTaskH2')}</h2>
+            <h2 id="createTaskTitle" data-sheet-drag>{t(event ? 'createEventH2' : 'createTaskH2')}</h2>
             {session &&
                 <p className={styles.shareHint}>
                     {fill(t('createInSession'), { name: subGroupName ? `${session.name} · ${subGroupName}` : session.name })}

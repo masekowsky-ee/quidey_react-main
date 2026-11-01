@@ -7,6 +7,8 @@ import { addGroup, addGroupTasks, deleteGroupTasks } from '../features/tasks/tas
 import { setCustomError } from '../features/settings/settingsAction';
 
 import Icon from './icons';
+import SheetGrabber from './SheetGrabber.jsx';
+import { useSheet } from './../features/layout/dragDismiss';
 // Dialog to put a task into groups or take it out: every group is a toggle with a tick.
 // Closes with Escape, the close button, or a click next to it. A new group can be made
 // right here and the task goes straight into it.
@@ -19,18 +21,20 @@ export default function GroupPicker({ task, onClose }) {
     const [busyId, setBusyId] = useState(null);
     const [newName, setNewName] = useState('');
     const dialogRef = useRef(null);
+    const sheet = useSheet(onClose, dialogRef);
+    const { dismiss } = sheet;
 
     // Escape closes; focus starts inside the dialog and comes back to where it was
     useEffect(() => {
         const previous = document.activeElement;
         dialogRef.current?.querySelector('button, input')?.focus();
-        const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+        const onKey = (e) => { if (e.key === 'Escape') dismiss(); };
         window.addEventListener('keydown', onKey);
         return () => {
             window.removeEventListener('keydown', onKey);
             previous?.focus?.();
         };
-    }, [onClose]);
+    }, [dismiss]);
 
     const run = async (id, action) => {
         setBusyId(id);
@@ -63,14 +67,15 @@ export default function GroupPicker({ task, onClose }) {
     };
 
     return createPortal(
-        <div className={styles.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-            <div className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="groupPickerTitle" ref={dialogRef}>
-                <div className={styles.head}>
+        <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
+            <div className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="groupPickerTitle" {...sheet.panel}>
+                <SheetGrabber />
+                <div className={styles.head} data-sheet-drag>
                     <div className={styles.titles}>
                         <h2 id="groupPickerTitle" className={styles.title}>{t('assignGroup')}</h2>
                         <p className={styles.taskName}>{task.name}</p>
                     </div>
-                    <button className={styles.close} onClick={onClose} aria-label={t('close')} title={`${t('close')} (Esc)`}>
+                    <button className={styles.close} onClick={() => dismiss()} aria-label={t('close')} title={`${t('close')} (Esc)`}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px" fill="currentColor"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>
                     </button>
                 </div>
@@ -112,7 +117,7 @@ export default function GroupPicker({ task, onClose }) {
 
                 <div className={styles.foot}>
                     <span className={styles.hint}>{t('groupPickerHint')}</span>
-                    <button className={styles.done} onClick={onClose}>{t('sessionDone')}</button>
+                    <button className={styles.done} onClick={() => dismiss()}>{t('sessionDone')}</button>
                 </div>
             </div>
         </div>,

@@ -16,6 +16,8 @@ import { fill } from '../features/helperFunction';
 
 import Icon from './icons';
 import TourPreview from './tour/TourPreview';
+import SheetGrabber from './SheetGrabber.jsx';
+import { useSheet } from '../features/layout/dragDismiss';
 
 // The chapters of the tour, in the order a student meets them: plan, focus, see the week, grow,
 // do it with friends, look back, make it yours. Texts per step (tourTexts.js): tut_<id>_short,
@@ -116,9 +118,13 @@ export default function Tutorial() {
         if (restoreFocus) returnFocus.current?.focus?.();
     };
 
+    // slides in; on phones a sheet, pulled down it closes like "skip"
+    const sheet = useSheet(() => close(), dialogRef, open);
+    const { dismiss } = sheet;
+
     const finish = () => {
         celebrate();
-        close();
+        dismiss();
     };
 
     // out of the tour, to a page or into the new-task form; the tour is done then
@@ -143,7 +149,7 @@ export default function Tutorial() {
     useEffect(() => {
         if (!open) return;
         const onKey = (e) => {
-            if (e.key === 'Escape') close();
+            if (e.key === 'Escape') dismiss();
             else if (e.key === 'ArrowRight') move(1);
             else if (e.key === 'ArrowLeft') move(-1);
             else if (e.key === 'Home') go(0);
@@ -182,9 +188,8 @@ export default function Tutorial() {
     const goLabel = (to) => (to.label ? t(to.label) : fill(t('tutOpen'), { page: t(to.page) }));
 
     return (
-        <motion.div className={styles.backdrop} onClick={() => close()} {...MOTION.overlay[level]}>
-            <motion.div
-                ref={dialogRef}
+        <div className={styles.backdrop} {...sheet.backdrop} onClick={() => dismiss()}>
+            <div
                 className={styles.dialog}
                 role="dialog"
                 aria-modal="true"
@@ -192,11 +197,12 @@ export default function Tutorial() {
                 aria-describedby="tutorial-text"
                 onClick={(e) => e.stopPropagation()}
                 onKeyDown={trapFocus}
-                {...MOTION.tourCard[level]}
+                {...sheet.panel}
             >
-                <div className={styles.top}>
+                <SheetGrabber />
+                <div className={styles.top} data-sheet-drag>
                     <span className={styles.counter}>{current + 1} / {steps.length}</span>
-                    {!last && <button type="button" className={styles.skip} onClick={() => close()}>{t('tutSkip')}</button>}
+                    {!last && <button type="button" className={styles.skip} onClick={() => dismiss()}>{t('tutSkip')}</button>}
                 </div>
 
                 <div className={styles.progress} aria-hidden="true">
@@ -284,7 +290,7 @@ export default function Tutorial() {
                     </button>
                 </div>
                 <p className={styles.keys} aria-hidden="true">{t('tutKeys')}</p>
-            </motion.div>
-        </motion.div>
+            </div>
+        </div>
     );
 }

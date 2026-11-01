@@ -65,6 +65,26 @@ Build, signing and store steps: `README-android.md`, `STORE.md`. In short:
   (`src/features/settings/motion.js`, `MOTION` presets, confetti `burst`). Remotion
   (`@remotion/player`) renders the intro (`src/components/intro/`, only when the app is opened
   fresh on `/`: not on reload, back/forward or a deep link).
+- Interaction & material rules (Apple's fluid-interface guidelines, for the app's own look):
+  springs are `spring(response, dampingRatio)` from motion.js (damping 1 = no overshoot, the
+  default; bounce only on `extreme` or after a flick); CSS uses `--spring-curve` /
+  `--spring-bounce` (`linear()` samples of the same springs) via `--ease`, `--ease-slow`, and
+  `--press` for presses, which land on pointer-down. `minimal` = the reduced-motion rendition
+  (cross-fades only), and the system's reduce-motion always cross-fades dialogs. Every
+  dialog and form card uses `useSheet(onClose, ref?, open?)` (`features/layout/dragDismiss.js`:
+  `backdrop` / `panel` props, `<SheetGrabber />` first, `data-sheet-drag` on its head; form
+  cards via `FormSheet` in QuickAdd.jsx): it slides in (a short rise; on phones a bottom sheet
+  from the edge that can be pulled down: 1:1, rubber band, velocity projected, interruptible),
+  and `sheet.dismiss(then?)` (cross, Escape, Cancel, a click beside it, after saving) takes it
+  back the same way before closing. Behind it the page is dimmed and slightly blurred
+  (`--scrim-blur`, on the backdrop's `::before`; `data-scrim` / `data-scrim-layer` for
+  backdrops that aren't sheets). Other dialogs (popovers, command bar) materialise (scale +
+  blur). The drawer menu is pushed closed the same way
+  (`useDragDismiss`, axis x). Header and tab bar are translucent (`--material-bar`, blur on a
+  `::before`, only without `data-ui`), the header's hairline appears once content scrolls under
+  it; reduce transparency / more contrast make them solid. Type: Inter with its opsz axis,
+  `--type-*` / `--track-*` (tighter tracking as size grows). Haptics ride on `playSound` for the
+  big moments (`HAPTICS` in sound.js), theme changes cross-fade (View Transitions).
 - Sound: `src/features/settings/sound.js`, synthesised with the Web Audio API (no files), one
   voice (sine bell + octave + glassy tine, a short echo, A major pentatonic, motif E → A).
   `playSound(name)` (`SOUND_NAMES`: done, undo, focusStart, pause, focusEnd, challenge, streak,
@@ -415,7 +435,7 @@ says "installed" when running standalone, and hides the row everywhere else.
 Push notifications (Web Push, VAPID): Settings → App → "Benachrichtigungen" per device (on/off,
 then four kinds `plan` (tasks/events at each of their reminders), `digest`
 (morning overview 07:30–11:00 local), `messages`, `social` (friend requests, session/family
-invites, shared/assigned tasks, broadcasts), and "Test senden"). `src/features/pwa/push.js`
+invites, shared/assigned tasks, broadcasts; admins also new beta requests), and "Test senden"). `src/features/pwa/push.js`
 (external store, `usePushState`; `refreshPush` on every start via `usePushSync` in App re-PUTs the
 subscription, so a renewed address or another account is picked up and a revoked permission turns
 it off; `enablePush` asks for the permission first, from the click). After creating a task
@@ -554,7 +574,7 @@ the theme before React loads.
   `PUT|DELETE /api/push/subscription`, `POST /api/push/test`. `startPushSchedule` (every
   `REMINDER_CHECK_MS`) pushes due entries (SKIP LOCKED, once per time; events also when already
   ticked off) and the digest; routes call `pushLater`/`pushInvite` (messages, friend requests,
-  session/family invites, task shares, assignments, broadcasts). 404/410 from the push service
+  session/family invites, task shares, assignments, broadcasts; `pushBetaRequest`: a new beta request to every admin). 404/410 from the push service
   deletes the row; password change / logout-all delete all of the account's rows.
 - Mail via SMTP (Resend, `smtp.resend.com`): verification links, task reminders, contact form and
   feedback to `CONTACT_TO`. Without `SMTP_HOST` mails are only logged. All mails share one HTML

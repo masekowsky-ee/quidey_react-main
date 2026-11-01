@@ -11,7 +11,7 @@ export default function CustomError(){
     }
 
     return (
-        <div className={`${styles.div} ${customError.bool ? '' : styles.hidden}`}>
+        <div className={`${styles.div} ${customError.bool ? '' : styles.hidden}`} data-scrim>
             <div className={styles.innerDiv}>
                 <h2 className={styles.h2}>{customError.message}</h2>
                 <button className={styles.okBtn} onClick={errorOk}>OK</button>

@@ -19,6 +19,25 @@
     background-color: var(--surface-bar);
     border-top: 1px solid var(--border);
   }
+
+  /* the app's own look: a translucent material the page scrolls on under (on a ::before, like
+     the header), with the light catching its top edge instead of a drawn line */
+  :root:not([data-ui]) .bar {
+    background-color: transparent;
+    border-top-color: transparent;
+  }
+
+  :root:not([data-ui]) .bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--material-bar);
+    -webkit-backdrop-filter: var(--material-blur);
+    backdrop-filter: var(--material-blur);
+    box-shadow: inset 0 1px 0 var(--material-edge);
+  }
 }
 
 .tab {
@@ -44,8 +63,10 @@
   box-shadow: none;
 }
 
+/* the press lands at once; letting go springs it back */
 .tab:active .iconWrap {
-  transform: scale(0.92);
+  transform: scale(0.9);
+  transition-duration: var(--press);
 }
 
 .active {
@@ -61,7 +82,7 @@
   width: 3.5rem;
   height: 1.75rem;
   border-radius: var(--radius-pill);
-  transition: background-color var(--ease-out), transform var(--ease-out);
+  transition: background-color var(--ease-out), transform 0.45s var(--spring-bounce);
 }
 
 .active .iconWrap {
@@ -81,6 +102,8 @@
   font-size: 0.6875rem;
   font-weight: 500;
   line-height: 1;
+  /* small type gets a little air */
+  letter-spacing: 0.006em;
 }
 
 .active .label {

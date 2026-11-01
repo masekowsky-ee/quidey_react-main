@@ -19,6 +19,49 @@
     padding-right: env(safe-area-inset-right, 0px);
 }
 
+/* The app's own look: the bar is a translucent material the page scrolls under (on a ::before,
+   so the header never becomes the box its fixed children are placed in), and the hairline under
+   it only appears once content actually runs under the bar (a scroll edge, not a fixed line) */
+:root:not([data-ui]) .header{
+    background-color: transparent;
+    border-bottom-color: transparent;
+}
+
+:root:not([data-ui]) .header::before,
+:root:not([data-ui]) .header::after{
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+}
+
+:root:not([data-ui]) .header::before{
+    background-color: var(--material-bar);
+    -webkit-backdrop-filter: var(--material-blur);
+    backdrop-filter: var(--material-blur);
+}
+
+:root:not([data-ui]) .header::after{
+    top: auto;
+    height: 1px;
+    background-color: var(--material-edge);
+}
+
+@supports (animation-timeline: scroll()){
+    :root:not([data-ui]) .header::after{
+        animation: scrollEdge linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 2.5rem;
+    }
+}
+
+@keyframes scrollEdge{
+    from{
+        opacity: 0;
+    }
+}
+
 .btn{
     composes: iconBtn from './ui.module.css';
     flex-shrink: 0;
@@ -351,7 +394,9 @@
     border: 1px solid var(--control-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-float);
-    animation: chipIn 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+    /* it grows out of its button (top right), not out of its own middle */
+    transform-origin: top right;
+    animation: chipIn var(--ease);
     /* above everything else in the header (the daily line comes later in the page) */
     z-index: 20;
 }
@@ -587,6 +632,7 @@ a.quickRowBtn{
 
 .linePopover{
     position: absolute;
+    transform-origin: top right;
     top: calc(100% + 0.5rem);
     right: -3rem;
     z-index: 20;

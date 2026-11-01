@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from '../i18n/useTranslation';
 import { OPEN_SHORTCUTS_EVENT, SHORTCUTS, useKeyboardShortcuts } from '../features/shortcuts/shortcuts';
 import Icon from './icons';
+import SheetGrabber from './SheetGrabber.jsx';
+import { useSheet } from './../features/layout/dragDismiss';
 
 // The keyboard shortcuts (features/shortcuts/shortcuts.js) and their overview: "?" or the
 // command bar opens it, Escape, the cross or a click next to it closes it.
@@ -25,6 +27,8 @@ function Overview({ onClose }) {
     const { t } = useTranslation();
     const titleId = useId();
     const closeRef = useRef(null);
+    const sheet = useSheet(onClose);
+    const { dismiss } = sheet;
 
     useEffect(() => {
         const previous = document.activeElement;
@@ -32,21 +36,22 @@ function Overview({ onClose }) {
         const onKey = (e) => {
             if (e.key !== 'Escape') return;
             e.preventDefault();
-            onClose();
+            dismiss();
         };
         window.addEventListener('keydown', onKey);
         return () => {
             window.removeEventListener('keydown', onKey);
             previous?.focus?.();
         };
-    }, [onClose]);
+    }, [dismiss]);
 
     return createPortal(
-        <div className={styles.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-            <div className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby={titleId}>
-                <div className={styles.head}>
+        <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
+            <div className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby={titleId} {...sheet.panel}>
+                <SheetGrabber />
+                <div className={styles.head} data-sheet-drag>
                     <h2 id={titleId} className={styles.title}>{t('shortcutsTitle')}</h2>
-                    <button ref={closeRef} type="button" className={styles.close} onClick={onClose} aria-label={t('close')}>
+                    <button ref={closeRef} type="button" className={styles.close} onClick={() => dismiss()} aria-label={t('close')}>
                         <Icon name="close" size={18} />
                     </button>
                 </div>
