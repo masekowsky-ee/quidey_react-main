@@ -1,8 +1,11 @@
 // Registers the service worker that makes Quidey installable, lets it open offline and shows
 // push notifications (written by pwa.js at build time). In dev, Vite serves a worker with only
 // the notifications (pwa.js): a cached app would get in the way of hot reload.
+// Not in the Android app: its files are in the app itself, and a cache would only outlive updates.
+import { isNativeApp } from '../native/native';
+
 export function registerServiceWorker() {
-    if (!('serviceWorker' in navigator)) return;
+    if (!('serviceWorker' in navigator) || isNativeApp()) return;
     const register = () => navigator.serviceWorker.register('/sw.js').catch(() => {
         // no service worker (blocked, private mode): the site simply works as before
     });

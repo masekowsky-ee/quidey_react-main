@@ -52,6 +52,8 @@ import { useApplyUiVariant, useNavModel } from './features/tester/variants.js';
 import TesterOnly from './components/TesterOnly.jsx';
 import CommandPalette from './components/variants/CommandPalette.jsx';
 import ShortcutsDialog from './components/ShortcutsDialog.jsx';
+import LimitDialog from './components/pro/LimitDialog.jsx';
+import { restorePlayPurchases } from './features/pro/pro.js';
 
 const REQUEST_REFRESH_MS = 60 * 1000;
 
@@ -78,6 +80,7 @@ const PAGES = {
   Tester: () => import('./components/tester/Tester.jsx'),
   FocusRoom: () => import('./components/focus/FocusRoom.jsx'),
   Routines: () => import('./components/routines/Routines.jsx'),
+  ProPage: () => import('./components/pro/ProPage.jsx'),
 };
 const SignIn = lazy(PAGES.SignIn);
 const LegalPage = lazy(PAGES.LegalPage);
@@ -98,6 +101,7 @@ const FunPage = lazy(PAGES.FunPage);
 const Tester = lazy(PAGES.Tester);
 const FocusRoom = lazy(PAGES.FocusRoom);
 const Routines = lazy(PAGES.Routines);
+const ProPage = lazy(PAGES.ProPage);
 
 // the app's pages (not the sign-in or legal texts) in the background, when nothing else runs
 function preloadPages() {
@@ -170,6 +174,13 @@ function App(){
     return () => window.removeEventListener(PRO_REQUIRED_EVENT, check);
   }, [signedIn, dispatch]);
   useRealtime(REALTIME_REJECTED, checkAccess);
+  // a payment went through or a subscription ended (the server says so live)
+  useRealtime('pro:changed', checkAccess);
+  // Android app: purchases Google Play knows on this phone are handed to the server again (a new
+  // install, another phone, an answer that got lost), then access is looked at again
+  useEffect(() => {
+    if (signedIn) restorePlayPurchases().then((found) => { if (found) dispatch(fetchAccess()).catch(() => {}); });
+  }, [signedIn, token, dispatch]);
   useSafetyPoll(checkAccess, { everyMs: REQUEST_REFRESH_MS, enabled: signedIn });
 
   // The friend request and session invite badges: loaded on sign-in, then kept current by the
@@ -244,6 +255,8 @@ function App(){
       <>
         <Routes>
           <Route path="/beta" element={<BetaGate />} />
+          {/* Pro gets into the app during the beta too */}
+          <Route path="/pro" element={<Suspense fallback={pageLoading}><ProPage /></Suspense>} />
           <Route path="*" element={<Navigate to="/beta" replace />} />
         </Routes>
         <LegalFooter />
@@ -271,6 +284,8 @@ function App(){
         {/* Ctrl/⌘ K or "/": search tasks, jump, do; "?": the keyboard shortcuts */}
         <CommandPalette/>
         <ShortcutsDialog/>
+        {/* the free plan is full (after the beta): the way to Quidey Pro */}
+        <LimitDialog/>
         <main className={shell.main} data-part="main">
         {/* each page comes in as the motion setting says */}
         {/* ...the tabs of the Gemeinschaft page are one page: switching them doesn't */}
@@ -305,10 +320,14 @@ function App(){
           <Route path="/tester" element={<TesterOnly fallback={<Navigate to="/" replace />}><Tester/></TesterOnly>} />
           {/* hidden: only reachable through the daily line in the header */}
           <Route path="/fun" element={<FunPage/>} />
+          {/* Quidey Pro: supporting the development */}
+          <Route path="/pro" element={<ProPage/>} />
           <Route path="/beta" element={<Navigate to="/" replace />} />
           {/* where the landing page sends people to sign in or up */}
           <Route path="/signin" element={<Navigate to="/" replace />} />
           <Route path="/signup" element={<Navigate to="/" replace />} />
+          {/* back from Google's sign-in page (features/auth/google.js), already signed in */}
+          <Route path="/auth/google" element={<Navigate to="/" replace />} />
         </Routes>
         </Suspense>
         </motion.div>

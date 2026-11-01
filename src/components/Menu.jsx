@@ -174,6 +174,8 @@ export default function Menu(){
                         <MenuLink to="/admin" icon="admin" label={t('admin')} onClick={onClose}
                             count={adminPendingCount} countLabel={t('adminOpenRequests')} />
                     )}
+                    {/* Quidey Pro: supporting the development */}
+                    <MenuLink to="/pro" icon="heart" label={t('proNav')} onClick={onClose} />
                     <MenuLink to="/settings" icon="settings" label={t('settings')} onClick={onClose} />
                     <MenuLink to="/feedback" icon="feedback" label={t('feedback')} onClick={onClose} />
                     {/* who is signed in: profile, switch accounts, add one, sign out */}

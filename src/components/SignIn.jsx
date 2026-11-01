@@ -6,6 +6,7 @@ import { LegalFooter } from '../legal/LegalFooter.jsx';
 import { LANDING_URL } from '../features/site';
 import Logo from './Logo';
 import Profile from './Profile';
+import { GOOGLE_RETURN_PATH } from '../features/auth/google';
 
 // The address typed into the landing page's email line comes along as #email=… (a hash never
 // reaches a server). Read once, then taken out of the address bar.
@@ -33,7 +34,8 @@ export default function SignIn() {
                 <a href={LANDING_URL} className={styles.about}>{t('whatIsQuidey')}</a>
             </header>
             {/* a new key opens it fresh when the address switches between /signin and /signup */}
-            <Profile key={pathname} initialSignState={signUp || email ? 1 : 0} initialEmail={email} />
+            <Profile key={pathname} initialSignState={signUp || email ? 1 : 0} initialEmail={email}
+                googleReturn={pathname === GOOGLE_RETURN_PATH} />
             <LegalFooter />
         </div>
     );

@@ -11,9 +11,11 @@ import {Provider} from "react-redux";
 import store from "./features/store";
 import { registerServiceWorker } from './features/pwa/registerServiceWorker'
 import { listenForInstallPrompt } from './features/pwa/install'
+import { setupNativeApp } from './features/native/native'
 
 registerServiceWorker()
 listenForInstallPrompt()
+setupNativeApp(store)
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

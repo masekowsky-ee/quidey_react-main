@@ -15,6 +15,10 @@ const ACCESS_CODES = ['PRO_REQUIRED', 'TESTER_REQUIRED'];
 export const SIGNED_OUT_EVENT = 'quidey:signed-out';
 const SIGNED_OUT_CODES = ['TOKEN_REVOKED', 'TOKEN_INVALID'];
 
+// Fired when the free plan is full (403 LIMIT_REACHED, after the beta): detail { limit, max }.
+// App shows the friendly "this needs Quidey Pro" dialog (components/pro/LimitDialog.jsx).
+export const LIMIT_EVENT = 'quidey:limit-reached';
+
 export async function apiFetch(url, options = {}) {
     const token = localStorage.getItem("token");
 
@@ -33,10 +37,16 @@ export async function apiFetch(url, options = {}) {
         // status and the API's error code let the UI show a translated message
         error.status = response.status;
         error.code = errorData.code;
+        // which input the server refused (INVALID_INPUT)
+        error.field = errorData.field;
         // pro / tester was taken away while the app is open: App checks access again
         // (and shows the beta screen, or hides what only testers see)
         if (ACCESS_CODES.includes(errorData.code)) window.dispatchEvent(new Event(PRO_REQUIRED_EVENT));
         if (token && SIGNED_OUT_CODES.includes(errorData.code)) window.dispatchEvent(new Event(SIGNED_OUT_EVENT));
+        if (errorData.code === 'LIMIT_REACHED') {
+            error.limit = errorData.limit;
+            window.dispatchEvent(new CustomEvent(LIMIT_EVENT, { detail: { limit: errorData.limit, max: errorData.max } }));
+        }
         throw error;
     }
 

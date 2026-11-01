@@ -230,8 +230,12 @@ function UsersTab() {
                                                     disabled={busy}
                                                     onClick={() => change(user, { isPro: !user.isPro }, user.isPro ? 'adminToastProRevoked' : 'adminToastProGranted')}
                                                 >
-                                                    <span className={styles.toggleKnob} aria-hidden="true" /> Pro
+                                                    <span className={styles.toggleKnob} aria-hidden="true" /> {t('adminProGift')}
                                                 </button>
+                                                {/* a paid subscription (Stripe / Google Play), not switchable here */}
+                                                {user.proUntil && new Date(user.proUntil) > new Date() && (
+                                                    <span className={styles.meta}>{fill(t('adminProPaidUntil'), { date: formatDate(user.proUntil) })}</span>
+                                                )}
                                                 <button
                                                     role="switch"
                                                     aria-checked={user.isTester}
