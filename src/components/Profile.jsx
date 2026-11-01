@@ -10,7 +10,7 @@ import { listAccounts, switchAccount } from '../features/auth/accounts'
 import {useTranslation} from '../i18n/useTranslation'
 import PasswordInput from './PasswordInput.jsx';
 import { GoogleButton, GoogleSignupForm } from './auth/GoogleSignIn.jsx';
-import { googleSignInAvailable, readGoogleReturn, startGoogleSignIn } from '../features/auth/google';
+import { claimGoogleToken, googleSignInAvailable, readGoogleReturn, startGoogleSignIn } from '../features/auth/google';
 
 // Same rule as the server: 3-30 letters, digits, _ . or -
 const USERNAME_PATTERN = /^[A-Za-z0-9_.-]{3,30}$/;
@@ -161,7 +161,9 @@ export default function Profile({ initialSignState = 0, initialEmail = '', googl
     };
     useEffect(() => {
         if (googleResult?.error === 'failed') setCustomError({ bool: true, message: t('googleFailed') });
-        if (googleResult?.idToken) finishGoogle(googleResult.idToken).finally(() => setGoogleBusy(false));
+        // the token goes to the server once, however often this runs
+        const idToken = googleResult?.idToken && claimGoogleToken();
+        if (idToken) finishGoogle(idToken).finally(() => setGoogleBusy(false));
         // once, for the answer the page was opened with
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [googleResult]);

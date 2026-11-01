@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { StrictMode } from 'react'
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
@@ -71,6 +72,25 @@ describe('sign in with Google: the return from Google', () => {
         expect(window.location.hash).toBe('')
         expect(sessionStorage.getItem('googleState')).toBe(null)
         expect(readGoogleReturn()).toEqual({ idToken: 'tok123' })
+    })
+
+    it('hands the token to the server once, even when React runs the effect twice (development)', async () => {
+        vi.resetModules()
+        sessionStorage.setItem('googleState', 'abc')
+        window.history.replaceState(null, '', '/auth/google#state=abc&id_token=tok123')
+        const { apiFetch: fetchMock } = await import('../features/helperFunction')
+        fetchMock.mockResolvedValue({ signup: SIGNUP })
+        const { default: Profile } = await import('../components/Profile')
+        const { default: reducer } = await import('../features/rootReducer')
+        render(
+            <StrictMode>
+                <Provider store={configureStore({ reducer })}><MemoryRouter><Profile googleReturn /></MemoryRouter></Provider>
+            </StrictMode>
+        )
+        const googleCalls = () => fetchMock.mock.calls.filter(([path]) => path === '/api/auth/google')
+        await waitFor(() => expect(googleCalls()).toHaveLength(1))
+        await act(async () => {})
+        expect(googleCalls()).toHaveLength(1)
     })
 
     it('refuses an answer to a sign-in that wasn\'t started here', async () => {
