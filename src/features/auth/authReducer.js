@@ -16,10 +16,10 @@ const initialState = {
     // tourSeen: false only for a new account that hasn't closed the intro tour yet (it opens by itself then)
     // isPro: may use the app (the name is older than Quidey Pro). pro: Quidey Pro { active, gift,
     // until }; accessMode: 'beta' | 'open'; limits / usage: the free plan's (null without limits),
-    // see features/pro/pro.js. hasPassword: false for an account made with Google without one.
+    // see features/pro/pro.js; proSales: whether Pro is on sale (features/pro/flag.js). hasPassword: false for an account made with Google without one.
     access: {
         checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null, allDayReminderTime: '12:00', tourSeen: true, userId: null,
-        pro: { active: false, gift: false, until: null }, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false,
+        pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false,
     },
 };
 
@@ -56,6 +56,7 @@ const authReducer = (state = initialState, action) => {
                     allDayReminderTime: action.payload.allDayReminderTime ?? initialState.access.allDayReminderTime,
                     tourSeen: action.payload.tourSeen !== false,
                     pro: action.payload.pro ?? initialState.access.pro,
+                    proSales: Boolean(action.payload.proSales),
                     accessMode: action.payload.accessMode === 'open' ? 'open' : 'beta',
                     limits: action.payload.limits ?? null,
                     usage: action.payload.usage ?? null,

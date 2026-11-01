@@ -106,6 +106,8 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(request.url);
     if (url.origin !== self.location.origin) return;
     if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/socket.io/')) return;
+    // the Android app's APK: straight from the network, never stored
+    if (url.pathname.startsWith('/download/')) return;
 
     if (request.mode === 'navigate') {
         // every route of the SPA is the same index.html (stored under '/')

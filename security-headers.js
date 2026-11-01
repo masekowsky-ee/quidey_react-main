@@ -47,7 +47,9 @@ export function headersFile(apiUrl) {
     // for again, so an update of the installed app isn't held back by a cached copy.
     return block('/*', headers)
         + block('/assets/*', { 'Cache-Control': 'public, max-age=31536000, immutable' })
-        + block('/sw.js', { 'Cache-Control': 'no-cache' });
+        + block('/sw.js', { 'Cache-Control': 'no-cache' })
+        // the Android app (Settings → App): a new version keeps the name, so always asked for again
+        + block('/download/quidey.apk', { 'Cache-Control': 'no-cache', 'Content-Disposition': 'attachment; filename="Quidey.apk"' });
 }
 
 // Vite plugin: adds _headers to the build output

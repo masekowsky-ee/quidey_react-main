@@ -13,6 +13,9 @@ dist-ssr
 *.local
 coverage
 
+# the Android app's APK to download (the Android repo's npm run apk:web puts it here)
+public/download/
+
 # wrangler (local dev state and temporary bundles)
 .wrangler
 

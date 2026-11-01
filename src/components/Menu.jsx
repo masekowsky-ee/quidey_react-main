@@ -19,6 +19,7 @@ import { selectFamilies, selectFamilyInviteCount } from '../features/family/fami
 import { useMenuDocked, useNavModel } from '../features/tester/variants';
 import { selectIsTester } from '../features/auth/tester';
 import AccountSwitcher from './AccountSwitcher';
+import { useProOn } from '../features/pro/flag';
 import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, useMotionLevel } from '../features/settings/motion';
 import { useDragDismiss } from '../features/layout/dragDismiss';
@@ -99,6 +100,7 @@ export default function Menu(){
     const familyInviteCount = useSelector(selectFamilyInviteCount);
     const news = useSelector(state => state.news);
     const { t } = useTranslation();
+    const proOn = useProOn();
     const { pathname } = useLocation();
 
     const dispatch = useDispatch();
@@ -174,8 +176,8 @@ export default function Menu(){
                         <MenuLink to="/admin" icon="admin" label={t('admin')} onClick={onClose}
                             count={adminPendingCount} countLabel={t('adminOpenRequests')} />
                     )}
-                    {/* Quidey Pro: supporting the development */}
-                    <MenuLink to="/pro" icon="heart" label={t('proNav')} onClick={onClose} />
+                    {/* Quidey Pro: supporting the development (once it's switched on) */}
+                    {proOn && <MenuLink to="/pro" icon="heart" label={t('proNav')} onClick={onClose} />}
                     <MenuLink to="/settings" icon="settings" label={t('settings')} onClick={onClose} />
                     <MenuLink to="/feedback" icon="feedback" label={t('feedback')} onClick={onClose} />
                     {/* who is signed in: profile, switch accounts, add one, sign out */}

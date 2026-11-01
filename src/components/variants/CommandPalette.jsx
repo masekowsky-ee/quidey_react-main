@@ -15,6 +15,7 @@ import { OPEN_COMMANDS_EVENT } from '../../features/tester/commands';
 import { openShortcuts } from '../../features/shortcuts/shortcuts';
 import { placeList } from '../../features/search/places';
 import { useInstallState } from '../../features/pwa/install';
+import { apkOffer } from '../../features/native/androidApk';
 import TaskEditDialog from '../task/TaskEditDialog.jsx';
 
 // how many tasks a search shows at most
@@ -96,7 +97,7 @@ export default function CommandPalette() {
             go('/feedback', t('feedback'), 'feedback'),
             ...(isTester ? [go('/tester', t('testerNav'), 'flask')] : []),
             ...(isAdmin ? [go('/admin', t('admin'), 'admin')] : []),
-            ...placeList({ isAdmin, installable }).map(place => ({
+            ...placeList({ isAdmin, installable, apk: Boolean(apkOffer()) }).map(place => ({
                 id: `place:${place.to}:${place.label}`, group: 'places', deep: true, icon: place.icon,
                 label: t(place.label), meta: place.parent.map(key => t(key)).join(' · '),
                 run: () => navigate(place.to),

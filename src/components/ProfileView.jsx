@@ -2,6 +2,7 @@ import styles from './Profile.module.css';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
+import { useProOn } from '../features/pro/flag';
 import { formatDate, formatDuration } from '../features/helperFunction';
 import { updateProfile, changePassword, logoutEverywhere, resendVerificationMail, deleteAccount } from '../features/auth/authAction';
 import { fetchFriends } from '../features/friends/friendsAction';
@@ -32,6 +33,7 @@ export default function ProfileView({ onSignOut }) {
     // false: an account made with Google that has no password (set one, delete with the username)
     const hasPassword = useSelector(state => state.auth.access.hasPassword) !== false;
     const proActive = useSelector(state => Boolean(state.auth.access.pro?.active));
+    const proOn = useProOn();
 
     // the friends list is otherwise only loaded on the Social page
     useEffect(() => { dispatch(fetchFriends()).catch(() => {}); }, [dispatch]);
@@ -252,14 +254,14 @@ export default function ProfileView({ onSignOut }) {
                 </div>
             </section>
 
-            {/* Quidey Pro: supporting the development */}
-            <section className={styles.card} id="pro">
+            {/* Quidey Pro: supporting the development (once it's switched on) */}
+            {proOn && <section className={styles.card} id="pro">
                 <div className={styles.cardHead}>
                     <h2 className={styles.cardTitle}>Quidey Pro</h2>
                     <Link to="/pro" className={styles.quietBtn}>{t(proActive ? 'proProfileManage' : 'proProfileSupport')} →</Link>
                 </div>
                 <p className={styles.hint}>{t(proActive ? 'proProfileActive' : 'proProfileInactive')}</p>
-            </section>
+            </section>}
 
             <section className={styles.card} id="account">
                 <div className={styles.cardHead}>
