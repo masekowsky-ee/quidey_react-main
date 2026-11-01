@@ -10,6 +10,7 @@ public class MainActivity extends BridgeActivity {
         // the app's own plugins (before the bridge starts): sign in with Google, Quidey Pro via Google Play
         registerPlugin(GoogleSignInPlugin.class);
         registerPlugin(BillingPlugin.class);
+        registerPlugin(AnalyticsPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }

@@ -101,7 +101,8 @@ a phone (Start, Fokusraum, Kalender, Gemeinschaft, Statistiken, Quidey unterstü
 
 ## 3. Data safety
 
-Data is encrypted in transit: **yes**. Users can request deletion: **yes** (in the app and by mail).
+Data is encrypted in transit: **yes**. The app contains Firebase Analytics (with consent): in
+"Data safety" also answer **"Does your app use advertising ID?" → no**. Users can request deletion: **yes** (in the app and by mail).
 No data is shared with third parties for their own purposes (processors don't count as
 "sharing"; Stripe / Google Play payments are handled by them as the seller, Quidey receives no
 payment details).
@@ -118,11 +119,19 @@ payment details).
 | Other user-generated content (tasks, events, notes, routines) | yes | App functionality | required for the app to be useful |
 | Calendar events (the app's own entries, not the phone's calendar) | yes | App functionality | optional |
 | App activity: in-app actions (focus sessions, completed tasks, XP) | yes | App functionality (statistics, progress) | — |
-| Device or other IDs: push token (FCM) | yes | App functionality (notifications) | optional |
-| Location, contacts, health, financial info (card numbers), web history, audio | **no** | | |
+| Device or other IDs: push token (FCM); Firebase app instance id (analytics, with consent) | yes | App functionality (notifications); Analytics | optional |
+| App activity: app interactions (pages opened, kinds of actions) — Google Analytics for Firebase | yes | Analytics | optional (asked in the app, off until "yes") |
+| App info and performance: diagnostics (device model, Android / app version) — Firebase | yes | Analytics | optional (same consent) |
+| Approximate location (region derived from the IP by Google Analytics) | yes | Analytics | optional (same consent) |
+| Precise location, contacts, health, financial info (card numbers), web history, audio | **no** | | |
 
-Data is not used for advertising or analytics. Language and time zone of the device are sent so
-mails and reminders come at the right time (App functionality).
+Data is not used for advertising. Analytics (Google Analytics for Firebase, Google as processor)
+only after the person agrees in the app (question at the first start, Settings → App →
+"Nutzungsdaten"); the manifest keeps collection off until then, the advertising id and the
+Android id are never collected (`AD_ID` permission removed). Language and time zone of the device
+are sent so mails and reminders come at the right time (App functionality).
+**Firebase console:** Analytics → Data settings → Data retention **2 months** (the privacy policy
+says so), Google signals **off**, ads personalization **off**, no link to Google Ads.
 
 ## 4. Policy reminders
 

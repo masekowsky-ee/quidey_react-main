@@ -33,7 +33,7 @@ const run = (line, options = {}) => {
 };
 
 const firebase = existsSync(join(androidDir, 'app', 'google-services.json'));
-if (!firebase) console.warn('\n! android/app/google-services.json is missing: built without push notifications (see README-android.md).\n');
+if (!firebase) console.warn('\n! android/app/google-services.json is missing: built without push notifications and analytics (see README-android.md).\n');
 if (what === 'web' && !existsSync(join(androidDir, 'keystore.properties'))) {
     console.error("android/keystore.properties is missing: an unsigned APK can't be installed (see README-android.md).");
     process.exit(1);
@@ -42,7 +42,8 @@ if (what !== 'debug' && what !== 'sync' && !existsSync(join(androidDir, 'keystor
     console.warn('\n! android/keystore.properties is missing: the release build stays unsigned (see README-android.md).\n');
 }
 
-run('npx vite build --mode android', { env: { ...process.env, VITE_NATIVE_PUSH: firebase ? 'on' : 'off' } });
+// push and Google Analytics for Firebase both need the Firebase config
+run('npx vite build --mode android', { env: { ...process.env, VITE_NATIVE_PUSH: firebase ? 'on' : 'off', VITE_NATIVE_ANALYTICS: firebase ? 'on' : 'off' } });
 run('npx cap sync android');
 if (!TASKS[what]) process.exit(0);
 

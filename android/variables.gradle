@@ -17,4 +17,6 @@ ext {
     playBillingVersion = '8.3.0'
     androidxCredentialsVersion = '1.6.0'
     googleIdVersion = '1.2.1'
+    // BoM 34.12: firebase-messaging 25.0.1 (@capacitor/push-notifications) + firebase-analytics 23.2.0
+    firebaseAnalyticsVersion = '23.2.0'
 }
