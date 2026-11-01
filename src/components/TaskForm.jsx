@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { COMMUNITY_PATHS } from '../features/community/paths';
 import { Link, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -26,6 +26,7 @@ import { shownSubGroup } from '../features/tasks/subGroups';
 
 import Icon from './icons';
 import SheetGrabber from './SheetGrabber.jsx';
+import { useFocusOnArrival } from '../features/layout/dragDismiss';
 const EMPTY_EXTRAS = { reminders: [], reminder_email: false, location: '', link: '', details: '', repeat: null, repeat_left: null };
 
 // New task or event. A task needs only its name; optionally a day and time (no time: the whole
@@ -41,6 +42,8 @@ const EMPTY_EXTRAS = { reminders: [], reminder_email: false, location: '', link:
 export default function TaskForm(props){
     // sheet: QuickAdd's FormSheet (slides in, swiped down on phones)
     const {setCreateTask, sheet} = props;
+    const nameRef = useRef(null);
+    useFocusOnArrival(nameRef);
 
     const dispatch = useDispatch();
 
@@ -192,9 +195,9 @@ export default function TaskForm(props){
                 </p>}
             <form className={`${styles.form}`} onSubmit={handleSubmit} noValidate>
                 <KindSwitch value={kind} onChange={(next) => { setKind(next); followName(name, next); }} />
-                {/* the form opens to be typed into: the name has the focus */}
-                <input className={styles.input} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}
-                    autoFocus aria-describedby={quickParts.length > 0 ? 'quick-add-hint' : undefined}
+                {/* the form opens to be typed into: the name has the focus (on a touch screen once the sheet is up) */}
+                <input ref={nameRef} className={styles.input} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}
+                    aria-describedby={quickParts.length > 0 ? 'quick-add-hint' : undefined}
                     value={name} maxLength={200} onChange={(e) => { setName(e.target.value); followName(e.target.value, kind); }} />
                 {quickParts.length > 0 &&
                     <p id="quick-add-hint" className={styles.quickHint} aria-live="polite">

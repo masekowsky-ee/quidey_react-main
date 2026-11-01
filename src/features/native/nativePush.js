@@ -19,19 +19,24 @@ const CHANNELS = {
     social: { de: 'Freunde & Einladungen', en: 'Friends & invites', importance: 3 },
 };
 
-let plugin;
-const load = async () => (plugin ??= (await import('@capacitor/push-notifications')).PushNotifications);
+// the module, never the plugin itself out of a promise: a Capacitor plugin answers every
+// property, `then` too, so awaiting it calls PushNotifications.then() on Android, which fails and
+// leaves the await hanging (every push step did, the permission question never came)
+let pluginModule;
+const load = () => (pluginModule ??= import('@capacitor/push-notifications'));
 
 // 'granted' | 'denied' | 'default', like Notification.permission
 const permissionOf = (receive) => (receive === 'granted' ? 'granted' : receive === 'denied' ? 'denied' : 'default');
 
 export async function nativePermission() {
-    return permissionOf((await (await load()).checkPermissions()).receive);
+    const { PushNotifications } = await load();
+    return permissionOf((await PushNotifications.checkPermissions()).receive);
 }
 
 // Asks for it (Android 13+ shows the system's question; before, it is always granted)
 export async function requestNativePermission() {
-    return permissionOf((await (await load()).requestPermissions()).receive);
+    const { PushNotifications } = await load();
+    return permissionOf((await PushNotifications.requestPermissions()).receive);
 }
 
 let channelsMade = false;
@@ -52,7 +57,7 @@ async function makeChannels(push, language) {
 // Registers with FCM: the device's address for the server, { endpoint, toJSON() } like a
 // browser's push subscription
 export async function nativeSubscription(language) {
-    const push = await load();
+    const { PushNotifications: push } = await load();
     await makeChannels(push, language);
     const token = await new Promise((resolve, reject) => {
         const handles = [];
@@ -72,14 +77,15 @@ export async function nativeSubscription(language) {
 
 // Off on this device: Firebase forgets the token
 export async function unregisterNative() {
-    await (await load()).unregister().catch(() => {});
+    const { PushNotifications } = await load();
+    await PushNotifications.unregister().catch(() => {});
 }
 
 // A tapped notification opens the page it is about (data.url from the server). Returns a cleanup.
 export function onNativePushOpen(navigate) {
     if (!nativePushAvailable()) return () => {};
     let handle;
-    load().then((push) => {
+    load().then(({ PushNotifications: push }) => {
         handle = push.addListener('pushNotificationActionPerformed', ({ notification }) => {
             const url = notification?.data?.url;
             if (typeof url === 'string' && url.startsWith('/') && !url.startsWith('//')) navigate(url);

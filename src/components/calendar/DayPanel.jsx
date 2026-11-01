@@ -11,7 +11,7 @@ import TaskEditor from './TaskEditor.jsx';
 import TaskMeta from '../task/TaskMeta.jsx';
 import Icon from './icons.jsx';
 import SheetGrabber from '../SheetGrabber.jsx';
-import { useSheet } from '../../features/layout/dragDismiss';
+import { focusOnArrival, useSheet } from '../../features/layout/dragDismiss';
 import { taskColorAttr } from '../../features/tasks/taskColors';
 import { isEvent } from '../../features/tasks/kinds';
 
@@ -132,13 +132,15 @@ export default function DayPanel({
     const closePicker = useCallback(() => setPickerTask(null), []);
     const isToday = sameDay(date, today);
 
-    // focus starts in the panel (in the add field when adding was asked for) and goes back afterwards
+    // focus starts in the panel (in the add field when adding was asked for, on a touch screen once
+    // the sheet is up) and goes back afterwards
     useEffect(() => {
         const previous = document.activeElement;
         const finePointer = window.matchMedia?.('(pointer: fine)')?.matches;
-        if (initialTaskId === 'new' || (finePointer && !initialTaskId && tasks.length === 0)) addRef.current?.focus();
+        let stopFocus = () => {};
+        if (initialTaskId === 'new' || (finePointer && !initialTaskId && tasks.length === 0)) stopFocus = focusOnArrival(addRef.current);
         else if (!initialTaskId) panelRef.current?.focus();
-        return () => previous?.focus?.();
+        return () => { stopFocus(); previous?.focus?.(); };
         // only when the panel opens
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

@@ -43,7 +43,10 @@ Everything for the app is written here first; the Android repo takes it over wit
   cards via `FormSheet` in QuickAdd.jsx): it slides in (a short rise; on phones a bottom sheet
   from the edge that can be pulled down: 1:1, rubber band, velocity projected, interruptible),
   and `sheet.dismiss(then?)` (cross, Escape, Cancel, a click beside it, after saving) takes it
-  back the same way before closing. Behind it the page is dimmed and slightly blurred
+  back the same way before closing. A field a sheet opens to (new task, routine, the calendar's
+  add field) takes the focus through `useFocusOnArrival(ref)` / `focusOnArrival(el)`, never
+  `autoFocus`: at once with a mouse, on touch only after the slide-in (the on-screen keyboard
+  shrinks the window and the sheet would jump mid-way). Behind it the page is dimmed and slightly blurred
   (`--scrim-blur`, on the backdrop's `::before`; `data-scrim` / `data-scrim-layer` for
   backdrops that aren't sheets). Other dialogs (popovers, command bar) materialise (scale +
   blur). The drawer menu is pushed closed the same way

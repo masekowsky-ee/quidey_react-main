@@ -826,6 +826,9 @@ code {
 
   :root [data-sheet] {
     position: relative;
+    /* the full width includes its padding: some cards are content-box (the questions), and
+       their padding would push them past the right edge */
+    box-sizing: border-box;
     width: 100%;
     max-width: none;
     max-height: 92dvh;
