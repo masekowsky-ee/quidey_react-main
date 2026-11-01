@@ -9,6 +9,8 @@ import { showToast } from '../../features/toast/toast';
 import TaskEditor from '../calendar/TaskEditor.jsx';
 import GroupPicker from '../GroupPicker.jsx';
 import Icon from '../calendar/icons.jsx';
+import SheetGrabber from '../SheetGrabber.jsx';
+import { useSheet } from '../../features/layout/dragDismiss';
 
 // The calendar's task editor as a dialog (a sheet from the bottom on phones), for the task
 // list on Home: every option (time, reminder, repeat, colour, sharing, groups) in one place.
@@ -24,6 +26,9 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
     const panelRef = useRef(null);
     const [pickerTask, setPickerTask] = useState(null);
     const closePicker = useCallback(() => setPickerTask(null), []);
+    // on phones a sheet: pulled down, it closes like a click next to it (without saving)
+    const sheet = useSheet(onClose, panelRef);
+    const { dismiss } = sheet;
 
     const toast = (text, tone = 'success') => dispatch(showToast(text, tone));
     const reportError = () => toast(t('friendError_generic'), 'error');
@@ -38,11 +43,11 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
     useEffect(() => {
         const onKey = (e) => {
             if (pickerTask || e.defaultPrevented) return;
-            if (e.key === 'Escape') onClose();
+            if (e.key === 'Escape') dismiss();
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [pickerTask, onClose]);
+    }, [pickerTask, dismiss]);
 
     const run = async (action, doneText) => {
         try {
@@ -50,7 +55,7 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
             const result = await (typeof action === 'function' ? dispatch(action) : action);
             if (result === false) return false;
             if (doneText) toast(doneText, 'info');
-            onClose();
+            dismiss();
             return true;
         } catch {
             reportError();
@@ -59,13 +64,14 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
     };
 
     return createPortal(
-        <div className={styles.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-            <div className={`${styles.panel} ${styles.panelWide}`} role="dialog" aria-modal="true" aria-labelledby={titleId} ref={panelRef} tabIndex={-1}>
-                <div className={styles.head}>
+        <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
+            <div className={`${styles.panel} ${styles.panelWide}`} role="dialog" aria-modal="true" aria-labelledby={titleId} {...sheet.panel} tabIndex={-1}>
+                <SheetGrabber />
+                <div className={styles.head} data-sheet-drag>
                     <div className={styles.titles}>
                         <h2 id={titleId} className={styles.title}>{t(task.kind === 'event' ? 'editEvent' : 'editTask')}</h2>
                     </div>
-                    <button type="button" className={styles.closeBtn} onClick={onClose} aria-label={t('close')} title={`${t('close')} (Esc)`}>
+                    <button type="button" className={styles.closeBtn} onClick={() => dismiss()} aria-label={t('close')} title={`${t('close')} (Esc)`}>
                         <Icon name="close" size={22} />
                     </button>
                 </div>
@@ -75,7 +81,7 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
                         personal={false}
                         subGroups={handlers.subGroups}
                         onSave={(changes) => run(handlers.save(changes))}
-                        onCancel={onClose}
+                        onCancel={() => dismiss()}
                         onDelete={handlers.remove ? () => run(handlers.remove(), t('taskDeleted')) : undefined}
                     />
                     : shared
@@ -85,13 +91,13 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
                         allowEvents
                         subGroups={shared.subGroups}
                         onSave={(changes) => run(updateSharedTask(shared.sessionId, task.id, changes))}
-                        onCancel={onClose}
+                        onCancel={() => dismiss()}
                         onDelete={shared.canRemove ? () => run(removeSharedTask(shared.sessionId, task.id), t('taskDeleted')) : undefined}
                     />
                     : <TaskEditor
                         task={task}
                         onSave={(changes) => run(updateTaskProps(changes, task))}
-                        onCancel={onClose}
+                        onCancel={() => dismiss()}
                         onDelete={() => run(deleteTaskAsking(task), t('taskDeleted'))}
                         onLeave={() => run(leaveTask(task), t('taskLeft'))}
                         onPickGroups={setPickerTask}

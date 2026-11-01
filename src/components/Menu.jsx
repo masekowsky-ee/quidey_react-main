@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { COMMUNITY_PATHS, isCommunityPath } from '../features/community/paths';
 import { useOnlineFriends } from '../features/presence/presence';
@@ -21,6 +21,7 @@ import { selectIsTester } from '../features/auth/tester';
 import AccountSwitcher from './AccountSwitcher';
 import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, useMotionLevel } from '../features/settings/motion';
+import { useDragDismiss } from '../features/layout/dragDismiss';
 
 // One entry: icon, label and an optional count badge (or a dot: something changed there);
 // the current page is highlighted (`match`: also on other addresses that belong to it)
@@ -107,6 +108,11 @@ export default function Menu(){
         dispatch(setShowMenu(false));
     }
 
+    // the open drawer follows a finger pushing it back to the left (where it came from) and
+    // closes once it's pushed or flicked far enough
+    const drawerRef = useRef(null);
+    useDragDismiss(drawerRef, { onDismiss: onClose, enabled: isOpen, axis: 'x', direction: -1, media: null });
+
     // a new page (also by the browser's back button) closes the drawer
     useEffect(() => {
         dispatch(setShowMenu(false));
@@ -123,11 +129,11 @@ export default function Menu(){
     return (
         <>
             <AnimatePresence>
-                {isOpen && <motion.div className={`${styles.overlay} ${nav === 'top' ? styles.undocked : ''}`} onClick={onClose} {...overlayMotion} />}
+                {isOpen && <motion.div className={`${styles.overlay} ${nav === 'top' ? styles.undocked : ''}`} onClick={onClose} data-drawer-overlay {...overlayMotion} />}
             </AnimatePresence>
             {/* a closed drawer is off screen: out of the tab order and hidden from screen readers too */}
             <div className={[styles.menuDiv, isOpen && styles.open, nav === 'top' && styles.undocked, nav === 'rail' && styles.rail].filter(Boolean).join(' ')}
-                inert={!docked && !isOpen} data-part="menu">
+                inert={!docked && !isOpen} data-part="menu" ref={drawerRef}>
                 <div className={styles.menuHead}>
                     <Link to="/" className={styles.brand} onClick={onClose} aria-label={`Quidey, ${t('home')}`}>
                         <Logo className={styles.brandMark} />

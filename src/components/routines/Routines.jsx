@@ -9,6 +9,8 @@ import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
 import Icon from '../icons.jsx';
 import RoutineRunner from './RoutineRunner.jsx';
+import SheetGrabber from '../SheetGrabber.jsx';
+import { useSheet } from '../../features/layout/dragDismiss';
 import styles from './Routines.module.css';
 
 const EMPTY = { name: '', emoji: '✨', steps: [{ title: '', minutes: 5 }], days: [], atTime: null, remind: true };
@@ -21,6 +23,9 @@ function RoutineEditor({ initial, onClose }) {
     const dispatch = useDispatch();
     const [routine, setRoutine] = useState(() => ({ ...EMPTY, ...initial, steps: (initial?.steps ?? EMPTY.steps).map(step => ({ ...step })) }));
     const [saving, setSaving] = useState(false);
+    // slides in; on phones a sheet that is pulled down to cancel
+    const sheet = useSheet(onClose);
+    const { dismiss } = sheet;
     const set = (change) => setRoutine(prev => ({ ...prev, ...change }));
     const setStep = (i, change) => set({ steps: routine.steps.map((step, j) => j === i ? { ...step, ...change } : step) });
     const moveStep = (i, by) => {
@@ -39,7 +44,7 @@ function RoutineEditor({ initial, onClose }) {
         try {
             await dispatch(saveRoutine({ ...routine, name: routine.name.trim(), steps: routine.steps.filter(step => step.title.trim()).map(step => ({ title: step.title.trim(), minutes: Number(step.minutes) || 0 })) }));
             dispatch(showToast(t('routineSaved'), 'success'));
-            onClose();
+            dismiss();
         } catch (err) {
             dispatch(showToast(err.code === 'ROUTINE_LIMIT' ? t('routineLimit') : t('routineSaveFailed'), 'error'));
             setSaving(false);
@@ -47,11 +52,13 @@ function RoutineEditor({ initial, onClose }) {
     };
 
     return (
-        <div className={styles.overlay} role="dialog" aria-modal="true" aria-labelledby="routine-editor-title" onKeyDown={e => e.key === 'Escape' && onClose()}>
-            <form className={styles.sheet} onSubmit={submit}>
-                <div className={styles.sheetHead}>
+        <div className={styles.overlay} {...sheet.backdrop} onKeyDown={e => e.key === 'Escape' && dismiss()}
+            onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
+            <form className={styles.sheet} onSubmit={submit} role="dialog" aria-modal="true" aria-labelledby="routine-editor-title" {...sheet.panel}>
+                <SheetGrabber />
+                <div className={styles.sheetHead} data-sheet-drag>
                     <h2 id="routine-editor-title">{routine.id ? t('routineEdit') : t('routineNew')}</h2>
-                    <button type="button" className={styles.iconBtn} onClick={onClose} aria-label={t('close')}><Icon name="close" size={18} /></button>
+                    <button type="button" className={styles.iconBtn} onClick={() => dismiss()} aria-label={t('close')}><Icon name="close" size={18} /></button>
                 </div>
 
                 <div className={styles.nameRow}>
@@ -113,7 +120,7 @@ function RoutineEditor({ initial, onClose }) {
                 </fieldset>
 
                 <div className={styles.sheetActions}>
-                    <button type="button" className={styles.ghost} onClick={onClose}>{t('cancel')}</button>
+                    <button type="button" className={styles.ghost} onClick={() => dismiss()}>{t('cancel')}</button>
                     <button type="submit" className={styles.primary} disabled={!valid || saving}>{t('save')}</button>
                 </div>
             </form>

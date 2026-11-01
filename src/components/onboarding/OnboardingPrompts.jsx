@@ -9,6 +9,8 @@ import { COMMUNITY_PATHS, friendsPath } from '../../features/community/paths';
 import { showForms } from '../../features/settings/settingsAction';
 import { fill } from '../../features/helperFunction';
 import Icon from '../icons';
+import SheetGrabber from '../SheetGrabber.jsx';
+import { useSheet } from '../../features/layout/dragDismiss';
 
 // The questions of a new account's first days (features/onboarding/onboarding.js): what first,
 // after the tour; install Quidey?, after a few things done; do you like it?, after about ten.
@@ -30,6 +32,9 @@ function Card({ icon, title, text, children, wide = false }) {
     const titleId = useId();
     const textId = useId();
     const cardRef = useRef(null);
+    // on phones a sheet: pulled down, it closes like the no
+    const sheet = useSheet(closeOnboarding, cardRef);
+    const { dismiss } = sheet;
 
     useEffect(() => {
         const previous = document.activeElement;
@@ -38,21 +43,22 @@ function Card({ icon, title, text, children, wide = false }) {
             if (e.key !== 'Escape') return;
             e.preventDefault();
             e.stopPropagation();
-            closeOnboarding();
+            dismiss();
         };
         window.addEventListener('keydown', onKey, true);
         return () => {
             window.removeEventListener('keydown', onKey, true);
             previous?.focus?.();
         };
-    }, []);
+    }, [dismiss]);
 
     return createPortal(
-        <div className={styles.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) closeOnboarding(); }}>
-            <div ref={cardRef} className={`${styles.dialog} ${wide ? styles.wide : ''}`} role="dialog" aria-modal="true"
+        <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
+            <div {...sheet.panel} className={`${styles.dialog} ${wide ? styles.wide : ''}`} role="dialog" aria-modal="true"
                 aria-labelledby={titleId} aria-describedby={text ? textId : undefined}>
-                <span className={styles.badge} aria-hidden="true"><Icon name={icon} size={20} /></span>
-                <h2 id={titleId} className={styles.title}>{title}</h2>
+                <SheetGrabber />
+                <span className={styles.badge} aria-hidden="true" data-sheet-drag><Icon name={icon} size={20} /></span>
+                <h2 id={titleId} className={styles.title} data-sheet-drag>{title}</h2>
                 {text && <p id={textId} className={styles.text}>{text}</p>}
                 {children}
             </div>

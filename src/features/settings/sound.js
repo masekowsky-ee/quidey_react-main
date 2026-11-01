@@ -153,6 +153,26 @@ const SOUNDS = {
 
 export const SOUND_NAMES = Object.keys(SOUNDS);
 
+// A short buzz with the sounds that mark a real moment (done, a phase over, a win, an error),
+// on the same frame as the sound, so the hand feels what the eye sees and the ear hears. Only
+// where the browser can (Android; not iOS Safari), and only with them: nothing for the small
+// signals (a message, a start), which would teach people to ignore it.
+const HAPTICS = {
+    done: 12,
+    focusEnd: [40, 80, 40],
+    challenge: [14, 40, 14],
+    streak: [14, 40, 14],
+    milestone: [20, 50, 20, 50, 40],
+    levelUp: [20, 50, 20, 50, 40],
+    error: [30, 50, 30],
+};
+
+function buzz(name) {
+    const pattern = HAPTICS[name];
+    if (!pattern || typeof navigator === 'undefined' || !navigator.vibrate) return;
+    try { navigator.vibrate(pattern); } catch { /* not allowed (no tap on the page yet) */ }
+}
+
 const lastPlayed = {};
 
 // Plays one of SOUND_NAMES at the chosen level. Nothing while sounds are off, the page is in the
@@ -164,6 +184,7 @@ export function playSound(name) {
     const asked = Date.now();
     if (asked - (lastPlayed[name] ?? 0) < 120) return;
     lastPlayed[name] = asked;
+    buzz(name);
     if (!audio()) return;
     const run = () => {
         master.gain.value = VOLUME[level];

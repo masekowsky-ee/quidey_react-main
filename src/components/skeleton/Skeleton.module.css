@@ -33,9 +33,10 @@
     animation: sweep 1.6s ease-in-out infinite;
 }
 
+/* the shine runs left to right, the way the page is read */
 @keyframes sweep{
-    from{ background-position: 150vw 0; }
-    to{ background-position: -150vw 0; }
+    from{ background-position: -150vw 0; }
+    to{ background-position: 150vw 0; }
 }
 
 .fade{

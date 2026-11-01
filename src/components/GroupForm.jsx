@@ -5,9 +5,11 @@ import TaskColorPicker from './task/TaskColorPicker.jsx';
 import { addGroup } from '../features/tasks/taskAction';
 import {useTranslation} from '../i18n/useTranslation';
 import {setCustomError} from '../features/settings/settingsAction';
+import SheetGrabber from './SheetGrabber.jsx';
 
 export default function GroupForm(props){
-    const {setCreateGroup} = props;
+    // sheet: the FormSheet it sits in (slides in, swiped down on phones)
+    const {setCreateGroup, sheet} = props;
 
     const dispatch = useDispatch();
 
@@ -32,10 +34,12 @@ export default function GroupForm(props){
     }
 
     return (
-        <div className={`${styles.div}`}>
-            <button className={styles.closeBtn} onClick={()=>{setCreateGroup(false)}}>
+        <div className={`${styles.div}`} role="dialog" aria-modal="true" aria-labelledby="createGroupTitle" {...sheet?.panel}>
+            {sheet && <SheetGrabber />}
+            <button className={styles.closeBtn} onClick={()=>{setCreateGroup(false)}} aria-label={t('close')}>
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
-            </button>            <h2>{t('createGroupH2')}</h2>
+            </button>
+            <h2 id="createGroupTitle" data-sheet-drag>{t('createGroupH2')}</h2>
             <form className={`${styles.form}`} onSubmit={(e)=>{handleSubmit(e)}}>
                 <input type="text" className={styles.input} placeholder={t('groupName')} />
                 <input type="text" className={styles.input} placeholder={t('description')} />

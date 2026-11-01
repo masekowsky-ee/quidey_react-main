@@ -160,7 +160,7 @@ export default function CommandPalette() {
         <>
             <AnimatePresence>
                 {open && <>
-                    <motion.div className={styles.overlay} onClick={close} {...overlayMotion} />
+                    <motion.div className={styles.overlay} onClick={close} data-scrim-layer {...overlayMotion} />
                     <div className={styles.panel} role="dialog" aria-modal="true" aria-label={t('commandOpen')} data-part="commands">
                         <div className={styles.field}>
                             <Icon name="search" className={styles.fieldIcon} />

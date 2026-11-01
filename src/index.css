@@ -57,9 +57,41 @@
   --shadow-float: 0 16px 40px -16px rgba(0, 0, 0, 0.7);
   --shadow-modal: 0 24px 64px -24px rgba(0, 0, 0, 0.8);
   --overlay: rgba(6, 5, 4, 0.6);
-  /* a spring-like ease-out: quick start, long gentle settle */
-  --ease: 0.22s cubic-bezier(0.32, 0.72, 0, 1);
-  --ease-out: 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Springs (Apple's response + damping ratio, sampled into linear() by the same formula as
+     spring() in features/settings/motion.js). A critically damped spring has the same shape at
+     every response, only its length changes: --spring-curve for 0.3 s responds in 0.4 s. It
+     starts fast (half way in 80 ms), so a transition feels like a response, then settles.
+     --spring-bounce: damping 0.8, a hint of overshoot, only after a press or a flick. Browsers
+     without linear() get the old ease-out. */
+  --spring-curve: cubic-bezier(0.32, 0.72, 0, 1);
+  --spring-bounce: cubic-bezier(0.34, 1.3, 0.64, 1);
+  --ease: 0.4s var(--spring-curve);
+  --ease-out: 0.4s var(--spring-curve);
+  --ease-slow: 0.54s var(--spring-curve);
+  /* presses land at once, on the way down; the release springs back with --ease */
+  --press: 0.08s ease-out;
+
+  /* Materials: chrome that floats over the content is translucent, the content scrolls on under
+     it, blurred. Bigger surfaces are thicker. Solid again with "reduce transparency". */
+  --material-bar: color-mix(in srgb, var(--surface-bar) 72%, transparent);
+  --material-thick: color-mix(in srgb, var(--surface) 86%, transparent);
+  --material-blur: blur(20px) saturate(170%);
+  --material-edge: color-mix(in srgb, var(--text-h) 9%, transparent);
+
+  /* Type: size, leading and tracking as one set per step. Big type gets tighter (negative)
+     tracking and tighter leading, small type a little air; Inter's optical sizes do the rest
+     (main.jsx loads its opsz axis). */
+  --type-large: 700 2rem/1.12 var(--sans);       /* page titles */
+  --track-large: -0.024em;
+  --type-title: 650 1.375rem/1.2 var(--sans);
+  --track-title: -0.019em;
+  --type-headline: 600 1.0625rem/1.3 var(--sans);
+  --track-headline: -0.013em;
+  --type-footnote: 500 0.8125rem/1.35 var(--sans);
+  --track-footnote: -0.002em;
+  --type-caption: 500 0.75rem/1.3 var(--sans);
+  --track-caption: 0.004em;
 
   /* Buttons are flat: one fill, a quiet edge */
   --btn-border: var(--control-border);
@@ -87,13 +119,17 @@
   --sans: 'Inter Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 16px/1.5 var(--sans);
+  /* 100%: a larger text size set in the browser grows the whole app (everything is in rem) */
+  font: 100%/1.5 var(--sans);
   letter-spacing: -0.006em;
+  font-optical-sizing: auto;
   color-scheme: dark;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  /* the press state below is the feedback; no grey flash on tap, no 300 ms wait for a double tap */
+  -webkit-tap-highlight-color: transparent;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -370,23 +406,29 @@ h3 {
   text-wrap: balance;
 }
 
+/* tracking per size: the larger, the tighter (see --type-* above) */
 h1 {
   font-size: 1.5rem;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
+  line-height: 1.18;
+  letter-spacing: -0.021em;
   margin: 1.5rem 0;
 }
 
 h2 {
   font-size: 1.125rem;
-  line-height: 1.3;
-  letter-spacing: -0.012em;
+  line-height: 1.28;
+  letter-spacing: -0.015em;
   margin: 0 0 8px;
 }
 
 h3 {
   font-size: 1rem;
-  line-height: 1.4;
+  line-height: 1.38;
+  letter-spacing: -0.011em;
+}
+
+small {
+  letter-spacing: var(--track-caption);
 }
 
 /* figures that line up and don't jitter while they count */
@@ -428,8 +470,14 @@ code {
   justify-content: center;
   gap: 0.375rem;
   cursor: pointer;
+  touch-action: manipulation;
   transition: transform var(--ease-out), background-color var(--ease-out), border-color var(--ease-out),
     color var(--ease-out), box-shadow var(--ease-out);
+}
+
+/* links, labels and anything else tapped: no double-tap wait either */
+:where(a, label, summary, [role="button"], [role="tab"], input, select, textarea) {
+  touch-action: manipulation;
 }
 
 /* Hover effects only where there is a real hover (mouse, trackpad): on touch screens the
@@ -441,9 +489,11 @@ code {
   }
 }
 
-/* a press settles the button slightly into the page */
-:where(button:active) {
-  transform: scale(0.98);
+/* a press settles the button into the page the moment the finger lands (not on release);
+   letting go springs it back */
+:where(button:not(:disabled):active) {
+  transform: scale(0.97);
+  transition-duration: var(--press);
 }
 
 :where(button:disabled) {
@@ -469,8 +519,9 @@ code {
   }
 }
 
-:where(button:has(svg):active) {
-  transform: scale(0.94);
+:where(button:has(svg):not(:disabled):active) {
+  transform: scale(0.92);
+  transition-duration: var(--press);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -570,10 +621,22 @@ code {
   display: none;
 }
 
+/* Real springs where the browser has linear() (the curves: see --spring-curve above) */
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --spring-curve: linear(0, 0.049, 0.158, 0.285, 0.412, 0.526, 0.624, 0.706, 0.772, 0.825, 0.867, 0.899,
+      0.924, 0.943, 0.957, 0.968, 0.976, 0.983, 0.987, 0.991, 0.993, 0.995, 0.996, 0.997, 1);
+    --spring-bounce: linear(0, 0.047, 0.155, 0.291, 0.432, 0.562, 0.676, 0.771, 0.846, 0.903, 0.945, 0.974,
+      0.993, 1.005, 1.012, 1.015, 1.015, 1.014, 1.012, 1.01, 1.008, 1.006, 1.004, 1.003, 1);
+  }
+}
+
 /* ---------- Motion setting (Settings → Animations), <html data-motion> ----------
-   minimal: the calm defaults above plus a few quiet extras. normal: soft springs. extreme:
-   springs everywhere. normal and extreme use the separate scale / translate / rotate
-   properties, so they never fight a component's own transform (centering, slide-ins). */
+   minimal: the reduced-motion rendition, cross-fades and colour only. normal: critically damped
+   springs along short paths, no hover tricks (a hover only lights things up, like on iPad).
+   extreme: the playful one, springs that overshoot everywhere. normal and extreme use the
+   separate scale / translate / rotate properties, so they never fight a component's own
+   transform (centering, slide-ins, a sheet being dragged). */
 
 :root[data-motion="extreme"] {
   /* every transition built on the shared easing overshoots and springs back */
@@ -614,8 +677,9 @@ code {
 }
 
 /* dialogs bounce up out of the page */
-:root[data-motion="extreme"] [role="dialog"] {
-  animation: extremeDialogIn 0.65s var(--spring) both;
+:root[data-motion="extreme"] [role="dialog"],
+:root[data-motion="extreme"] [role="alertdialog"] {
+  animation: extremeDialogIn 0.65s var(--spring) backwards;
 }
 
 @keyframes extremeDialogIn {
@@ -630,73 +694,264 @@ code {
   }
 }
 
-/* normal: between the two, a softer spring that overshoots a little */
+/* normal: the press is the feedback (above, with every level); a release springs back with
+   the slightest give, because the finger just pushed it */
 :root[data-motion="normal"] {
-  --spring: cubic-bezier(0.34, 1.35, 0.64, 1);
-  --ease: 0.4s var(--spring);
-  --ease-out: 0.4s var(--spring);
   scroll-behavior: smooth;
 }
 
 :root[data-motion="normal"] :where(button, a) {
-  transition: transform var(--ease), scale var(--ease), translate var(--ease), rotate var(--ease),
-    background-color 0.22s ease, border-color 0.22s ease, color 0.22s ease, box-shadow 0.28s ease, opacity 0.22s ease;
-}
-
-@media (hover: hover) {
-  :root[data-motion="normal"] :where(button:not(:disabled)):hover {
-    scale: 1.03;
-    translate: 0 -1px;
-  }
-
-  :root[data-motion="normal"] :where(button:has(svg):not(:disabled)):hover {
-    scale: 1.1;
-    rotate: -4deg;
-    translate: none;
-  }
+  transition: transform 0.45s var(--spring-bounce), scale 0.45s var(--spring-bounce),
+    translate var(--ease), rotate var(--ease), background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.25s ease, opacity 0.2s ease;
 }
 
 :root[data-motion="normal"] :where(button:not(:disabled)):active {
-  scale: 0.93;
-  transition-duration: 0.08s;
+  transition-duration: var(--press);
 }
 
-:root[data-motion="normal"] [role="dialog"] {
-  animation: normalDialogIn 0.5s var(--spring) both;
+/* A dialog materialises where it opens: scale and blur together (a surface arriving, not a
+   flat fade), critically damped, no tilt. It leaves the same way it came. */
+:root[data-motion="normal"] :where([role="dialog"], [role="alertdialog"]) {
+  animation: materialize 0.42s var(--spring-curve) backwards;
 }
 
-@keyframes normalDialogIn {
+@keyframes materialize {
   from {
     opacity: 0;
-    scale: 0.82;
-    rotate: -1.5deg;
-    translate: 0 30px;
+    scale: 0.96;
+    filter: blur(8px);
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    filter: none;
+  }
+}
+
+/* minimal: a quiet cross-fade, nothing moves */
+:root[data-motion="minimal"] :where(button, a) {
+  transition: background-color var(--ease), border-color var(--ease), color var(--ease),
+    box-shadow var(--ease), opacity var(--ease);
+}
+
+:root[data-motion="minimal"] :where([role="dialog"], [role="alertdialog"]) {
+  animation: crossFade 0.2s ease-out backwards;
+}
+
+@keyframes crossFade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- Sheets: every dialog marked data-sheet slides in ----------
+   Phones: up from the bottom edge, one look for all of them (full width, round top corners, a
+   grabber, the home indicator's room), and pulled back down the same way (features/layout/
+   dragDismiss.js; the grabber and the dialog's head, data-sheet-drag, take the drag). Wider: it
+   rises a short way into its place. A close (button, Escape, a click beside it) takes it back
+   along the same path (useSheet's dismiss), critically damped; nothing overshoots unless a
+   flick put it there. Fill only backwards: once in place nothing keeps animating, so popovers
+   placed in window coordinates (position: fixed) stay where they are put. */
+:where([data-sheet-grabber]) {
+  display: none;
+}
+
+:root [data-sheet] {
+  animation: sheetRise 0.5s var(--spring-curve) backwards;
+}
+
+:root[data-motion="extreme"] [data-sheet] {
+  animation: sheetRise 0.6s var(--spring) backwards;
+}
+
+:root[data-motion="minimal"] [data-sheet] {
+  animation: crossFade 0.2s ease-out backwards;
+}
+
+@keyframes sheetRise {
+  from {
+    opacity: 0;
+    translate: 0 3rem;
   }
   40% {
     opacity: 1;
   }
 }
 
-/* minimal: a few quiet extras on top of the defaults */
-@media (hover: hover) {
-  :root[data-motion="minimal"] :where(button:not(:disabled, :has(svg))):hover {
-    translate: 0 -1px;
+/* The page behind a dialog: dimmed and slightly out of focus, so the dialog is the one sharp
+   thing. Dim and blur sit on a ::before that fades by itself: a blur under a fading parent
+   would only appear once the fade ends, and a filter on the backdrop itself would make it the
+   box that the dialog's fixed popovers are placed in. Pulled away, it lightens with the sheet.
+   data-scrim: the same for a backdrop that isn't a sheet (the error box). */
+:root {
+  --scrim-blur: 6px;
+}
+
+:root [data-sheet-backdrop],
+:root [data-scrim] {
+  background: none;
+  animation: none;
+}
+
+:root [data-sheet-backdrop]::before,
+:root [data-scrim]::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--overlay);
+  -webkit-backdrop-filter: blur(var(--scrim-blur));
+  backdrop-filter: blur(var(--scrim-blur));
+  opacity: calc(1 - var(--drag-progress, 0));
+  animation: crossFade 0.3s ease-out backwards;
+}
+
+/* the drawer's and the command bar's overlays are only the scrim: the blur on themselves */
+:root [data-drawer-overlay],
+:root [data-scrim-layer] {
+  -webkit-backdrop-filter: blur(calc(var(--scrim-blur) * (1 - var(--drag-progress, 0))));
+  backdrop-filter: blur(calc(var(--scrim-blur) * (1 - var(--drag-progress, 0))));
+}
+
+@media (max-width: 720px) {
+  :root [data-sheet-backdrop] {
+    /* flex and grid backdrops alike: the panel at the bottom, full width */
+    align-items: flex-end;
+    place-items: end stretch;
+    padding: 0;
+    overscroll-behavior: contain;
+  }
+
+  :root [data-sheet] {
+    position: relative;
+    width: 100%;
+    max-width: none;
+    max-height: 92dvh;
+    margin: 0;
+    padding-top: 1.5rem;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    border-bottom: none;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    overscroll-behavior: contain;
+    animation: sheetUp 0.5s var(--spring-curve) backwards;
+  }
+
+  :root[data-motion="minimal"] [data-sheet] {
+    animation: crossFade 0.2s ease-out backwards;
+  }
+
+  :root[data-motion="extreme"] [data-sheet] {
+    animation: sheetUp 0.6s var(--spring) backwards;
+  }
+
+  /* while a finger holds it, it follows the finger and nothing else */
+  :root [data-sheet][data-dragging] {
+    user-select: none;
+  }
+
+  /* a strip round the pill in the middle, not the whole width: close buttons in a corner of the
+     sheet stay tappable */
+  [data-sheet-grabber] {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 6rem;
+    translate: -50% 0;
+    z-index: 1;
+    height: 1.125rem;
+    touch-action: none;
+    cursor: grab;
+  }
+
+  [data-sheet-grabber]::before {
+    content: '';
+    position: absolute;
+    top: 0.45rem;
+    left: 50%;
+    width: 2.25rem;
+    height: 0.3125rem;
+    translate: -50% 0;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--text-muted) 55%, transparent);
+  }
+
+  /* the head of a sheet moves it too (its buttons still tap: a drag needs 10 px first) */
+  [data-sheet-drag] {
+    touch-action: none;
   }
 }
 
-:root[data-motion="minimal"] :where(button, a) {
-  transition: transform var(--ease), translate var(--ease), background-color var(--ease), border-color var(--ease),
-    color var(--ease), box-shadow var(--ease), opacity var(--ease);
-}
-
-:root[data-motion="minimal"] [role="dialog"] {
-  animation: minimalDialogIn 0.35s cubic-bezier(0.32, 0.72, 0, 1) both;
-}
-
-@keyframes minimalDialogIn {
+@keyframes sheetUp {
   from {
-    opacity: 0;
-    scale: 0.95;
-    translate: 0 12px;
+    translate: 0 100%;
+  }
+}
+
+/* the drawer's overlay lightens as the drawer is pushed away (relative colour: the overlay's own
+   alpha; a sheet's scrim fades instead, above) */
+@supports (color: rgb(from red r g b / alpha)) {
+  :root [data-drawer-overlay] {
+    background-color: rgb(from var(--overlay) r g b / calc(alpha * (1 - var(--drag-progress, 0))));
+  }
+}
+
+/* ---------- Materials: what floats over the content (header, tab bar) ----------
+   The bar is translucent and the page scrolls on under it, blurred. The material sits on a
+   ::before (each bar's stylesheet), so the bar itself never becomes the box its fixed children
+   are placed in. Only the app's own look; testers' variants paint their own bars. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --material-bar: var(--surface-bar);
+    --material-thick: var(--surface);
+  }
+}
+
+/* Reduce transparency: frosted becomes solid */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --material-bar: var(--surface-bar);
+    --material-thick: var(--surface);
+    --material-blur: none;
+    --scrim-blur: 0px;
+  }
+}
+
+/* Increase contrast: solid surfaces with a defined edge, and edges that are really there */
+@media (prefers-contrast: more) {
+  :root {
+    --material-bar: var(--surface-bar);
+    --material-thick: var(--surface);
+    --material-blur: none;
+    --material-edge: var(--border-strong);
+    --scrim-blur: 0px;
+  }
+
+  /* on body, so the theme's own values on :root stay what boot.css copies */
+  body {
+    --border: var(--border-strong);
+    --control-border: var(--border-strong);
+  }
+}
+
+/* ---------- Theme change: light ↔ dark eases over instead of flashing (theme.js) ---------- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.35s;
+  animation-timing-function: ease-in-out;
+}
+
+/* Reduce motion from the system always wins over the moving parts above, whatever the setting:
+   sheets and dialogs cross-fade in, nothing slides or scales */
+@media (prefers-reduced-motion: reduce) {
+  :root :where([role="dialog"], [role="alertdialog"]),
+  :root [data-sheet] {
+    animation: crossFade 0.2s ease-out backwards !important;
+  }
+
+  :root {
+    scroll-behavior: auto !important;
   }
 }

@@ -31,95 +31,111 @@ export function useApplyMotion() {
     }, [level]);
 }
 
-const EASE = [0.32, 0.72, 0, 1];
-const BOUNCY = { type: 'spring', stiffness: 380, damping: 18, mass: 0.9 };
-const SOFT_SPRING = { type: 'spring', stiffness: 220, damping: 22 };
+// Springs the way Apple describes them: a response (seconds to get to the target, not a fixed
+// duration) and a damping ratio (1 = settles without overshoot, lower = bouncier), turned into
+// Motion's mass/stiffness/damping. Everything starts from where it is on screen and keeps its
+// speed when it's redirected, so it can always be interrupted.
+export function spring(response = 0.35, dampingRatio = 1) {
+    const omega = (2 * Math.PI) / response;
+    return { type: 'spring', mass: 1, stiffness: omega * omega, damping: 2 * dampingRatio * omega };
+}
 
-const LIVELY_SPRING = { type: 'spring', stiffness: 340, damping: 22 };
+// critically damped: the default for anything that just appears or moves
+const SETTLE = spring(0.35, 1);
+const SETTLE_SLOW = spring(0.45, 1);
+// a little overshoot: only on "extreme", where the app is meant to be playful
+const BOUNCE = spring(0.4, 0.7);
+const BIG_BOUNCE = spring(0.5, 0.55);
+const FADE = { duration: 0.2, ease: 'easeOut' };
 
-// The motion props per level for each animated part of the app
+// The motion props per level for each animated part of the app. "minimal" is the reduced-motion
+// rendition (the default when the system asks for less motion): cross-fades only, nothing slides
+// or scales. "normal" moves along short paths with critically damped springs: in and out the same
+// way, never a bounce that no gesture caused. "extreme" is the playful one.
 export const MOTION = {
-    // whole page on navigation: minimal rises a little, normal springs up, extreme out of a blur.
+    // whole page on navigation: minimal fades, normal rises a few pixels, extreme out of a blur.
     // The filter is removed at the end, a transform or filter left on the wrapper would trap the
     // pages' fixed parts
     page: {
         minimal: {
-            initial: { opacity: 0, y: 12 },
-            animate: { opacity: 1, y: 0 },
-            transition: { duration: 0.35, ease: EASE },
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            transition: FADE,
         },
         normal: {
-            initial: { opacity: 0, y: 28, scale: 0.97 },
-            animate: { opacity: 1, y: 0, scale: 1 },
-            transition: { type: 'spring', stiffness: 260, damping: 24, opacity: { duration: 0.3 } },
+            initial: { opacity: 0, y: 10 },
+            animate: { opacity: 1, y: 0 },
+            transition: { ...SETTLE, opacity: { duration: 0.22, ease: 'easeOut' } },
         },
         extreme: {
             initial: { opacity: 0, y: 48, scale: 0.94, filter: 'blur(10px)' },
             animate: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', transitionEnd: { filter: 'none' } },
-            transition: { ...SOFT_SPRING, opacity: { duration: 0.3 }, filter: { duration: 0.45 } },
+            transition: { ...BOUNCE, opacity: { duration: 0.3 }, filter: { duration: 0.45 } },
         },
     },
     // task rows: in, out, and sliding to a new place
     row: {
         minimal: {
             layout: 'position',
-            initial: { opacity: 0, y: 10, scale: 0.98 },
-            animate: { opacity: 1, y: 0, scale: 1 },
-            exit: { opacity: 0, x: 24, transition: { duration: 0.2 } },
-            transition: { type: 'spring', stiffness: 320, damping: 28 },
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            exit: { opacity: 0, transition: { duration: 0.15 } },
+            transition: { ...SETTLE, opacity: FADE },
         },
         normal: {
-            layout: true,
-            initial: { opacity: 0, x: -36, scale: 0.93, rotate: -1 },
-            animate: { opacity: 1, x: 0, scale: 1, rotate: 0 },
-            exit: { opacity: 0, x: 90, scale: 0.86, rotate: 3, transition: { duration: 0.28, ease: 'backIn' } },
-            whileHover: { x: 3, transition: LIVELY_SPRING },
-            transition: LIVELY_SPRING,
+            layout: 'position',
+            initial: { opacity: 0, y: 8 },
+            animate: { opacity: 1, y: 0 },
+            // a finished row leaves the way the tick points: to the side, fading
+            exit: { opacity: 0, x: 32, transition: { ...SETTLE, opacity: { duration: 0.18 } } },
+            transition: SETTLE,
         },
         extreme: {
             layout: true,
             initial: { opacity: 0, x: -80, scale: 0.85, rotate: -3 },
             animate: { opacity: 1, x: 0, scale: 1, rotate: 0 },
             exit: { opacity: 0, x: 160, scale: 0.7, rotate: 8, transition: { duration: 0.35, ease: 'backIn' } },
-            whileHover: { x: 6, transition: BOUNCY },
-            transition: BOUNCY,
+            whileHover: { x: 6, transition: BOUNCE },
+            transition: BOUNCE,
         },
     },
+    // toasts rise from the bottom edge and go back down it (a swipe sends them its own way)
     toast: {
         minimal: {
             layout: true,
-            initial: { opacity: 0, y: 24, scale: 0.92 },
-            animate: { opacity: 1, y: 0, scale: 1 },
-            exit: { opacity: 0, scale: 0.95, transition: { duration: 0.18 } },
-            transition: { type: 'spring', stiffness: 420, damping: 26 },
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            exit: { opacity: 0, transition: { duration: 0.15 } },
+            transition: { ...SETTLE, opacity: FADE },
         },
         normal: {
             layout: true,
-            initial: { opacity: 0, y: 50, scale: 0.7, rotate: -4 },
-            animate: { opacity: 1, y: 0, scale: 1, rotate: 0 },
-            exit: { opacity: 0, y: 14, scale: 0.75, rotate: 3, transition: { duration: 0.22 } },
-            transition: { type: 'spring', stiffness: 460, damping: 20 },
+            initial: { opacity: 0, y: 32, scale: 0.96 },
+            animate: { opacity: 1, y: 0, scale: 1 },
+            exit: { opacity: 0, y: 24, scale: 0.96, transition: { ...SETTLE, opacity: { duration: 0.18 } } },
+            transition: SETTLE,
         },
         extreme: {
             layout: true,
             initial: { opacity: 0, y: 80, scale: 0.4, rotate: -10 },
             animate: { opacity: 1, y: 0, scale: 1, rotate: 0 },
             exit: { opacity: 0, y: 30, scale: 0.5, rotate: 6, transition: { duration: 0.25 } },
-            transition: { type: 'spring', stiffness: 500, damping: 14 },
+            transition: BIG_BOUNCE,
         },
     },
+    // the dimming behind a drawer: it only dims, a blur behind a moving panel costs every frame
     overlay: {
         minimal: {
             initial: { opacity: 0 },
             animate: { opacity: 1 },
             exit: { opacity: 0 },
-            transition: { duration: 0.25 },
+            transition: FADE,
         },
         normal: {
-            initial: { opacity: 0, backdropFilter: 'blur(0px)' },
-            animate: { opacity: 1, backdropFilter: 'blur(3px)' },
-            exit: { opacity: 0, backdropFilter: 'blur(0px)' },
-            transition: { duration: 0.32 },
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            exit: { opacity: 0 },
+            transition: { duration: 0.3, ease: [0.32, 0.72, 0, 1] },
         },
         extreme: {
             initial: { opacity: 0, backdropFilter: 'blur(0px)' },
@@ -128,58 +144,41 @@ export const MOTION = {
             transition: { duration: 0.4 },
         },
     },
-    // the tutorial card when it opens
-    tourCard: {
-        minimal: {
-            initial: { opacity: 0, y: 12, scale: 0.98 },
-            animate: { opacity: 1, y: 0, scale: 1 },
-            transition: { duration: 0.3, ease: EASE },
-        },
-        normal: {
-            initial: { opacity: 0, y: 40, scale: 0.92 },
-            animate: { opacity: 1, y: 0, scale: 1 },
-            transition: { type: 'spring', stiffness: 300, damping: 22 },
-        },
-        extreme: {
-            initial: { opacity: 0, y: 90, scale: 0.75, rotate: -4 },
-            animate: { opacity: 1, y: 0, scale: 1, rotate: 0 },
-            transition: { type: 'spring', stiffness: 260, damping: 15 },
-        },
-    },
-    // one step of the tutorial coming in; dir is 1 (next) or -1 (back)
+    // one step of the tutorial coming in; dir is 1 (next) or -1 (back), so back comes from where
+    // next went
     tourStep: {
-        minimal: (dir) => ({
-            initial: { opacity: 0, x: 16 * dir },
-            animate: { opacity: 1, x: 0 },
-            transition: { duration: 0.25, ease: EASE },
+        minimal: () => ({
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            transition: FADE,
         }),
         normal: (dir) => ({
-            initial: { opacity: 0, x: 48 * dir, scale: 0.97 },
-            animate: { opacity: 1, x: 0, scale: 1 },
-            transition: { ...LIVELY_SPRING, opacity: { duration: 0.2 } },
+            initial: { opacity: 0, x: 24 * dir },
+            animate: { opacity: 1, x: 0 },
+            transition: { ...SETTLE, opacity: { duration: 0.2 } },
         }),
         extreme: (dir) => ({
             initial: { opacity: 0, x: 110 * dir, rotate: 6 * dir, scale: 0.9, filter: 'blur(6px)' },
             animate: { opacity: 1, x: 0, rotate: 0, scale: 1, filter: 'blur(0px)', transitionEnd: { filter: 'none' } },
-            transition: { ...BOUNCY, opacity: { duration: 0.2 }, filter: { duration: 0.3 } },
+            transition: { ...BOUNCE, opacity: { duration: 0.2 }, filter: { duration: 0.3 } },
         }),
     },
     // a game on the fun page when it starts
     game: {
         minimal: {
-            initial: { opacity: 0, y: 16, scale: 0.97 },
-            animate: { opacity: 1, y: 0, scale: 1 },
-            transition: { type: 'spring', stiffness: 260, damping: 24 },
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            transition: FADE,
         },
         normal: {
-            initial: { opacity: 0, y: 36, scale: 0.9, rotateX: -22 },
-            animate: { opacity: 1, y: 0, scale: 1, rotateX: 0 },
-            transition: { type: 'spring', stiffness: 230, damping: 19 },
+            initial: { opacity: 0, y: 16, scale: 0.97 },
+            animate: { opacity: 1, y: 0, scale: 1 },
+            transition: SETTLE_SLOW,
         },
         extreme: {
             initial: { opacity: 0, y: 60, scale: 0.8, rotateX: -50 },
             animate: { opacity: 1, y: 0, scale: 1, rotateX: 0 },
-            transition: { type: 'spring', stiffness: 200, damping: 15 },
+            transition: BIG_BOUNCE,
         },
     },
 };

@@ -45,12 +45,20 @@ export function useApplyTheme() {
         try { localStorage.setItem(STORAGE_KEY, theme); } catch { /* not saved, still applied */ }
 
         const media = window.matchMedia?.(LIGHT_QUERY);
-        const apply = () => {
-            const resolved = resolveTheme(theme, media?.matches ?? false);
+        const set = (resolved) => {
             document.documentElement.dataset.theme = resolved;
             // the colour palette (the ground): <html data-palette>, colours in index.css
             document.documentElement.dataset.palette = palette;
             applyBarColor(resolved);
+        };
+        const apply = () => {
+            const resolved = resolveTheme(theme, media?.matches ?? false);
+            const before = document.documentElement.dataset.theme;
+            // light <-> dark eases over (a cross-fade, index.css) instead of a flash of brightness;
+            // the first paint and a change of palette alone just switch
+            if (before && before !== resolved && document.startViewTransition && !document.hidden) {
+                document.startViewTransition(() => set(resolved));
+            } else set(resolved);
         };
         apply();
 

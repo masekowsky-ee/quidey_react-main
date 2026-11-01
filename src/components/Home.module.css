@@ -126,15 +126,3 @@ a.overdue:focus-visible {
   }
 }
 
-/* the new task / new group forms, over the page */
-.formsDiv {
-  composes: overlay from './ui.module.css';
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 2rem;
-  padding-top: var(--header-h);
-  z-index: var(--z-modal);
-}

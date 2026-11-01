@@ -100,6 +100,36 @@
   border-color: var(--text-muted);
 }
 
+/* Ticked: the circle fills and the tick draws itself from left to right, on the same moment as
+   the sound (causality: the finger did that). A row that shows up already ticked plays it
+   once as well; it is short and quiet enough for that. */
+:root:not([data-motion="minimal"]) .checkDone {
+  animation: checkSettle 0.45s var(--spring-bounce);
+}
+
+:root:not([data-motion="minimal"]) .checkDone .checkIcon {
+  animation: checkDraw 0.32s var(--spring-curve) 0.04s both;
+}
+
+@keyframes checkSettle {
+  from {
+    scale: 0.82;
+  }
+}
+
+@keyframes checkDraw {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkDone,
+  .checkDone .checkIcon {
+    animation: none !important;
+  }
+}
+
 /* ---------- name and details ---------- */
 
 .body {
