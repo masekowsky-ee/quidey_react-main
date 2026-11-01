@@ -51,4 +51,7 @@ export async function setupNativeApp(store) {
     // back from the background: the focus clock, the lists and the socket catch up as on a
     // browser tab that gets the focus again
     App.addListener('resume', () => window.dispatchEvent(new Event('focus')));
+    // Google Analytics for Firebase: whether it's there, and the remembered answer handed over
+    const { setupAnalytics } = await import('./analytics');
+    setupAnalytics();
 }

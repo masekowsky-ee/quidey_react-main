@@ -74,6 +74,19 @@
     composes: btnNo from '../ui.module.css';
 }
 
+/* the small print under the answers (the analytics question: where to change it, the policy) */
+.fine{
+    margin: 0.7rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+}
+
+.fine a{
+    color: inherit;
+    text-decoration: underline;
+}
+
 /* what first: one row per way, like the tour's first steps */
 
 .choices{

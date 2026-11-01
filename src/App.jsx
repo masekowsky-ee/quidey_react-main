@@ -55,6 +55,7 @@ import ShortcutsDialog from './components/ShortcutsDialog.jsx';
 import LimitDialog from './components/pro/LimitDialog.jsx';
 import { restorePlayPurchases } from './features/pro/pro.js';
 import { useProOn } from './features/pro/flag.js';
+import { trackScreen } from './features/native/analytics.js';
 
 const REQUEST_REFRESH_MS = 60 * 1000;
 
@@ -242,6 +243,8 @@ function App(){
   useEffect(() => { if (allowed) return preloadPages(); }, [allowed]);
 
   const location = useLocation();
+  // the Android app's analytics count the pages by name, with consent only (native/analytics.js)
+  useEffect(() => { if (allowed) trackScreen(location.pathname); }, [allowed, location.pathname]);
   // while a page's code is on its way (only the first time, and briefly): that page's shape
   const pageLoading = <RouteSkeleton pathname={location.pathname} fade />;
 

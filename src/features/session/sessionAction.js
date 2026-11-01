@@ -3,6 +3,7 @@ import { apiFetch } from '../helperFunction';
 import { isSharedTaskId, sharedTaskIdOf, selectSharedSoloTasks } from '../together/togetherAction';
 import { storeTimerMode, storePomodoro } from '../settings/preferences';
 import { playSound } from '../settings/sound';
+import { trackEvent } from '../native/analytics';
 import { phaseMs } from './sessionReducer';
 
 export const setTimer = (time, active) => {
@@ -147,6 +148,8 @@ export const startFocus = () => (dispatch, getState) => {
     if (timerMode !== 'stopwatch' && timer.time < 1000) return;
     dispatch(setTimer(timer.time, true));
     playSound('focusStart');
+    // the Android app's analytics, with consent only (features/native/analytics.js)
+    trackEvent('focus_start', { mode: timerMode });
     const task = selectFocusTask(getState());
     if (task && (timerMode !== 'pomodoro' || pomodoro.phase === 'focus')) dispatch(addWorkedTask(task));
     scheduleAlarm(getState());
@@ -200,6 +203,7 @@ export const skipPhase = () => (dispatch, getState) => {
 export const countdownEnded = () => (dispatch, getState) => {
     const { timerMode, pomodoro } = getState().session;
     playSound('focusEnd');
+    trackEvent('focus_end', { mode: timerMode, phase: timerMode === 'pomodoro' ? pomodoro.phase : 'timer' });
     if (timerMode !== 'pomodoro') {
         dispatch(saveIfWorked());
         return 'timer';

@@ -10,6 +10,7 @@ import { useSyncExternalStore } from 'react';
 import { apiFetch } from '../helperFunction';
 import { installState } from '../pwa/install';
 import { pushAsking } from '../pwa/push';
+import { trackEvent } from '../native/analytics';
 
 // the install question comes from this action on (while the browser can install Quidey)
 export const INSTALL_AFTER = 3;
@@ -65,8 +66,15 @@ export function askNextSteps() {
     if (load()) set({ asking: 'next' });
 }
 
+// the actions as the Android app's analytics name them (with consent only, native/analytics.js)
+const EVENTS = {
+    task: 'task_created', done: 'task_done', group: 'group_created', friendRequest: 'friend_request_sent',
+    friend: 'friend_added', session: 'shared_session_created', family: 'family_created',
+};
+
 // Something was done (kind: 'task', 'done', 'group', 'friendRequest', 'friend', 'session', 'family')
 export function noteAction(kind) {
+    if (EVENTS[kind]) trackEvent(EVENTS[kind]);
     const record = load();
     if (!record) return;
     record.actions += 1;

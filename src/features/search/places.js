@@ -17,6 +17,7 @@ const SETTINGS = [
     ['notifications', 'allDayReminderTime', 'app'],
     ['install', 'installApp', 'app'],
     ['android', 'androidApp', 'app'],
+    ['analytics', 'analyticsSetting', 'app'],
 ];
 
 // the area each settings section sits in (Settings opens it for /settings#<section>); the tour
@@ -30,8 +31,8 @@ const ADMIN_TABS = { requests: 'adminRequests', users: 'adminUsers', broadcast: 
 // section's #id), `label` a text key, `parent` the text keys of where it sits (shown beside it
 // and searched too, so "Anfragen" in the inbox and among friends can be told apart).
 // The admin's tabs only for admins, "Als App" only where this browser can install, the Android
-// app only where it can be downloaded.
-export function placeList({ isAdmin = false, installable = false, apk = false } = {}) {
+// app only where it can be downloaded, the analytics setting only in the app with Firebase.
+export function placeList({ isAdmin = false, installable = false, apk = false, analytics = false } = {}) {
     const place = (to, label, parent, icon) => ({ to, label, parent, icon });
     return [
         place(COMMUNITY_PATHS.feed, 'communityTab_feed', ['community'], 'together'),
@@ -44,7 +45,7 @@ export function placeList({ isAdmin = false, installable = false, apk = false } 
         ...['messages', 'requests', 'notices', 'reminders'].map(tab => place(`/inbox?tab=${tab}`, `inboxTab_${tab}`, ['inbox'], 'inbox')),
         ...(isAdmin ? Object.entries(ADMIN_TABS).map(([tab, label]) => place(`/admin?tab=${tab}`, label, ['admin'], 'admin')) : []),
         ...['look', 'plan', 'app'].map(area => place(`/settings#${area}`, `settingsArea_${area}`, ['settings'], 'settings')),
-        ...SETTINGS.filter(([section]) => (section !== 'install' || installable) && (section !== 'android' || apk))
+        ...SETTINGS.filter(([section]) => (section !== 'install' || installable) && (section !== 'android' || apk) && (section !== 'analytics' || analytics))
             .map(([section, label, area]) => place(`/settings#${section}`, label, ['settings', `settingsArea_${area}`], 'settings')),
         place('/profile#account', 'account', ['profile'], 'profile'),
         place('/profile#password', 'changePassword', ['profile'], 'profile'),

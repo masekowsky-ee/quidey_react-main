@@ -16,6 +16,7 @@ import { openShortcuts } from '../../features/shortcuts/shortcuts';
 import { placeList } from '../../features/search/places';
 import { useInstallState } from '../../features/pwa/install';
 import { apkOffer } from '../../features/native/androidApk';
+import { useAnalytics } from '../../features/native/analytics';
 import TaskEditDialog from '../task/TaskEditDialog.jsx';
 
 // how many tasks a search shows at most
@@ -44,6 +45,7 @@ export default function CommandPalette() {
     const isAdmin = useSelector(state => state.auth.access.isAdmin);
     const tasks = useSelector(state => state.task.tasks);
     const installable = useInstallState() !== 'unavailable';
+    const analyticsAvailable = useAnalytics().available === true;
     const overlayMotion = MOTION.overlay[useMotionLevel()];
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
@@ -97,7 +99,7 @@ export default function CommandPalette() {
             go('/feedback', t('feedback'), 'feedback'),
             ...(isTester ? [go('/tester', t('testerNav'), 'flask')] : []),
             ...(isAdmin ? [go('/admin', t('admin'), 'admin')] : []),
-            ...placeList({ isAdmin, installable, apk: Boolean(apkOffer()) }).map(place => ({
+            ...placeList({ isAdmin, installable, apk: Boolean(apkOffer()), analytics: analyticsAvailable }).map(place => ({
                 id: `place:${place.to}:${place.label}`, group: 'places', deep: true, icon: place.icon,
                 label: t(place.label), meta: place.parent.map(key => t(key)).join(' · '),
                 run: () => navigate(place.to),
@@ -118,7 +120,7 @@ export default function CommandPalette() {
         ];
     // the theme is read when the bar opens
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [t, navigate, dispatch, isAdmin, isTester, installable, variant, open]);
+    }, [t, navigate, dispatch, isAdmin, isTester, installable, analyticsAvailable, variant, open]);
 
     const shown = useMemo(() => {
         const words = normalize(query.trim()).split(/\s+/).filter(Boolean);

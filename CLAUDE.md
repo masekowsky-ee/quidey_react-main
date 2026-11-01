@@ -475,7 +475,7 @@ Client-side storage: only `localStorage` (no cookies), plus the service worker's
 for the app's own files: `token` (JWT), `accounts` (several accounts on one device:
 `[{ username, displayName, token }]`, max 5, `src/features/auth/accounts.js`; switching reloads
 the app as the other one, signing out takes over the next remembered account), `language`, `accent`,
-`theme`, `palette`, `motion`, `sound`, `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
+`theme`, `palette`, `motion`, `sound`, `analytics` (Android app: the answer to the usage data question), `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
 `teamSessionId`, `streakNudge` (day of the last streak reminder), `uiVariant` and `uiColors`
 (testers' interface variant and the colours picked per variant), `push`, `pushEndpoint`,
 `pushAsked` (push notifications on this device), `onboarding:<username>` (a new account's action
@@ -546,9 +546,20 @@ the theme before React loads.
   service worker, install row "installed", push via FCM (`push.js` "app" branches), Pro via Play.
   Backend `utils/fcm.js` (FCM HTTP v1, `FIREBASE_SERVICE_ACCOUNT_FILE`); `push_subscriptions` rows
   with `fcm:` endpoints have no keys (migration 034). Besides Google Play, the APK can be downloaded
-  in Settings → App on Android phones (see PWA above). The privacy policy (§ 3) names Google
-  Analytics for Firebase in the Android app, only with consent; the app has no Analytics SDK yet
-  (only `firebase-messaging`): adding one needs an opt-in question before anything is collected.
+  in Settings → App on Android phones (see PWA above).
+- **Google Analytics for Firebase** (Android app only, only with consent; privacy § 3):
+  `features/native/analytics.js` + the app's plugin `QuideyAnalytics` (`AnalyticsPlugin.java`,
+  `firebase-analytics` 23.2.0). The manifest keeps collection off by default (no advertising id,
+  no Android id, no ad signals, no automatic screens, `AD_ID` permission removed). Asked once per
+  device (`OnboardingPrompts` → `AnalyticsQuestion`, both answers styled the same, closing = ask
+  again next start, never while another question / the tour is open), changed in Settings → App →
+  "Nutzungsdaten"; localStorage `analytics` = 'granted' | 'denied'. `setupAnalytics()` (from
+  `setupNativeApp`) hands the answer to Android on every start; no = collection off +
+  `resetAnalyticsData`. Counted: pages as names without ids (`screenName`, App), the onboarding
+  actions as events (`noteAction` → `task_created`, `task_done`, …) and `focus_start` /
+  `focus_end`. Never content, names or the account (no user id). Built only with the Firebase
+  config (`VITE_NATIVE_ANALYTICS=on`, Android build script). Adding an event: plain names and
+  params only, and list it in privacy § 3.
 
 ## API access
 

@@ -202,19 +202,32 @@ function Privacy() {
                 der App anders ist, steht jeweils dabei.
             </p>
             <p>
-                <strong>Google Analytics für Firebase (nur Android-App):</strong> Die Android-App gehört zu einem
-                Firebase-Projekt von <V>{PROCESSORS.google}</V>, in dem Google Analytics für Firebase eingerichtet ist.
-                Damit möchte ich verstehen, wie die App genutzt wird (z. B. welche Bereiche geöffnet werden, wie lange,
-                auf welchen Geräten und Android-Versionen, und ob sie abstürzt), um sie zu verbessern. Erfasst werden
-                dabei eine zufällige Kennung der App-Installation, Gerätetyp, Android-Version, Sprache, ungefährer Ort
-                (aus der IP-Adresse, die Google nicht speichert), Zeitpunkt und Art der Nutzung; nicht erfasst werden
-                deine Inhalte (Aufgaben, Notizen, Nachrichten), dein Name, deine E-Mail-Adresse und deine Werbe-ID.
-                Die Daten werden nicht für Werbung genutzt und nicht mit deinem Quidey-Konto verknüpft. Das geschieht
-                nur mit deiner Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG), die du jederzeit mit
-                Wirkung für die Zukunft widerrufen kannst; ohne Einwilligung wird nichts erfasst. Google verarbeitet die
-                Daten als Auftragsverarbeiter, auch in den USA (Google LLC ist unter dem EU-US Data Privacy Framework
-                zertifiziert, Art. 45 DSGVO, ergänzend Standardvertragsklauseln), und löscht sie nach 2 Monaten.
-                Im Browser wird Google Analytics nicht verwendet.
+                <strong>Google Analytics für Firebase (nur Android-App):</strong> Die Android-App kann über Google
+                Analytics für Firebase von <V>{PROCESSORS.google}</V> mitzählen, wie sie genutzt wird, damit ich sehe,
+                was gut funktioniert und was ich verbessern sollte. Das geschieht nur, wenn du zustimmst: Die App fragt
+                dich einmal danach (beide Antworten gleich einfach), und unter „Einstellungen“ → „App“ →
+                „Nutzungsdaten“ kannst du deine Entscheidung jederzeit ändern. Bis zu deiner Zustimmung ist die
+                Erfassung ausgeschaltet und es wird nichts übertragen.
+            </p>
+            <p>
+                Mit deiner Zustimmung erfasst werden: eine zufällige Kennung der App-Installation, Gerätemodell,
+                Android-Version, App-Version, Sprache, ungefähre Region (von Google aus der IP-Adresse abgeleitet, die
+                Google dafür nicht speichert), wann und wie lange die App genutzt wird, welche Bereiche der App du
+                öffnest (als Name des Bereichs, ohne Benutzernamen oder Nummern) und welche Aktionen du ausführst, nur
+                als Art der Aktion (Aufgabe angelegt oder erledigt, Gruppe angelegt, Freundschaftsanfrage gesendet,
+                Freund hinzugefügt, gemeinsame Sitzung oder Family angelegt, Fokus gestartet oder beendet mit der Art
+                des Timers). Nicht erfasst werden deine Inhalte (Aufgaben, Notizen, Nachrichten), dein Name, deine
+                E-Mail-Adresse, dein Quidey-Konto, die Werbe-ID und die Android-ID; die Daten werden nicht mit deinem
+                Konto verknüpft und nicht für Werbung genutzt (Werbe-Signale sind ausgeschaltet). Die Kennung und die
+                noch nicht übertragenen Ereignisse liegen im Speicher der App.
+            </p>
+            <p>
+                Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, für das Speichern und Auslesen auf
+                deinem Gerät § 25 Abs. 1 TDDDG). Du kannst sie jederzeit mit Wirkung für die Zukunft widerrufen; dabei
+                löscht die App auch die auf dem Gerät gesammelten Daten und verwirft die Kennung. Google verarbeitet
+                die Daten als Auftragsverarbeiter, auch in den USA (Google LLC ist unter dem EU-US Data Privacy
+                Framework zertifiziert, Art. 45 DSGVO, ergänzend Standardvertragsklauseln), und löscht sie nach
+                2 Monaten. Im Browser wird Google Analytics nicht verwendet.
             </p>
             <p>
                 Die Programmierschnittstelle (API) und die Datenbank laufen auf einem Server bei <V>{PROCESSORS.backendHost}</V>.
@@ -541,7 +554,8 @@ function Privacy() {
                     machst eine Aufgabe daraus);</li>
                 <li>welche Erinnerungen schon angezeigt wurden, an welchem Tag dich Quidey zuletzt an deine Serie erinnert hat und welche gemeinsame Sitzung gerade gestoppt wird;</li>
                 <li>ob auf diesem Gerät Benachrichtigungen an sind, die Adresse dafür beim Push-Dienst (siehe Abschnitt 6) und ob Quidey dich danach schon gefragt hat;</li>
-                <li>Schwierigkeit und Bestwerte der Spiele.</li>
+                <li>Schwierigkeit und Bestwerte der Spiele;</li>
+                <li>in der Android-App deine Antwort auf die Frage nach den Nutzungsdaten (Abschnitt 3).</li>
             </ul>
             <p>
                 Während einer Anmeldung mit Google merkt sich dein Browser bis zur Rückkehr von Google einen Zufallswert
