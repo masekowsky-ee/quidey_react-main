@@ -1,0 +1,402 @@
+/* /pro, "Quidey unterstützen": a warm, roomy page. The accent colours the heart and the saving
+   (data, not navigation); the one filled button is the call to support. */
+.page {
+    composes: pageColumn from '../ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-bottom: 3rem;
+}
+
+/* wider than the usual column, for the two plans side by side (main.page: beats the composed
+   column's width, whatever order the stylesheets load in) */
+main.page {
+    width: min(860px, calc(100% - 2 * var(--page-gutter, 1rem)));
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ---------- hero: why Pro exists ---------- */
+.hero {
+    position: relative;
+    text-align: center;
+    padding: clamp(2rem, 6vw, 3.5rem) clamp(1.25rem, 5vw, 3rem);
+    border-radius: var(--radius-xl);
+    background:
+        radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 70%),
+        var(--surface);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.heartWrap {
+    display: inline-grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    margin-bottom: 1rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--primary) 16%, var(--surface));
+    animation: beat 2.4s var(--ease-out, ease-out) infinite;
+}
+
+.heart {
+    width: 2.3rem;
+    height: 2.3rem;
+    color: var(--primary);
+    fill: color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+@keyframes beat {
+    0%, 70%, 100% { transform: scale(1); }
+    78% { transform: scale(1.08); }
+    86% { transform: scale(0.98); }
+}
+
+:root[data-motion="minimal"] .heartWrap {
+    animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .heartWrap { animation: none; }
+}
+
+.title {
+    margin: 0 0 0.75rem;
+    font-size: clamp(2rem, 5vw, 2.9rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--text-h);
+}
+
+.lead {
+    max-width: 38rem;
+    margin: 0 auto 0.9rem;
+    font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+    line-height: 1.55;
+    color: var(--text);
+}
+
+.kind {
+    max-width: 34rem;
+    margin: 0 auto;
+    color: var(--text-muted);
+    line-height: 1.55;
+}
+
+.noticeOk,
+.noticeErr {
+    margin: 0;
+    padding: 0.85rem 1.1rem;
+    border-radius: var(--radius);
+    background: var(--surface-inset);
+    color: var(--text-h);
+    font-weight: 550;
+}
+
+.noticeErr {
+    color: var(--danger);
+}
+
+/* ---------- the two plans ---------- */
+.plans {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.planGrid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 620px) {
+    .planGrid { grid-template-columns: 1fr; }
+}
+
+.plan {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 1.6rem 1.4rem 1.4rem;
+    text-align: left;
+    font: inherit;
+    color: var(--text);
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease);
+}
+
+.plan:hover {
+    border-color: var(--border-strong);
+}
+
+.plan[data-selected="true"] {
+    border-color: var(--text-h);
+    box-shadow: var(--shadow);
+}
+
+.planYearly {
+    background:
+        linear-gradient(160deg, color-mix(in srgb, var(--primary) 12%, transparent), transparent 60%),
+        var(--surface);
+}
+
+/* "Spare 30 %": big, warm, impossible to miss */
+.saveBadge {
+    position: absolute;
+    top: -0.85rem;
+    right: 1rem;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 750;
+    letter-spacing: 0.01em;
+    color: var(--primary-fg, #fff);
+    background: var(--primary);
+    border-radius: var(--radius-pill);
+    box-shadow: 0 6px 18px -8px var(--primary);
+}
+
+.planName {
+    font-size: 0.95rem;
+    font-weight: 650;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.price {
+    font-size: clamp(2.1rem, 5vw, 2.6rem);
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    color: var(--text-h);
+    line-height: 1.1;
+}
+
+.price small {
+    margin-left: 0.25rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.perMonth {
+    color: var(--text-muted);
+}
+
+.saveLine {
+    margin-top: 0.35rem;
+    font-weight: 650;
+    color: var(--primary-text, var(--primary));
+}
+
+.terms {
+    margin: 0;
+    padding: 1rem 1.25rem 1rem 2.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+    background: var(--surface-inset);
+    border-radius: var(--radius);
+}
+
+.cta {
+    composes: btnYes from '../ui.module.css';
+    height: 3.4rem;
+    font-size: 1.08rem;
+}
+
+.ctaIcon {
+    width: 1.3rem;
+    height: 1.3rem;
+}
+
+.small {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.linkBtn {
+    align-self: center;
+    padding: 0.4rem 0.6rem;
+    font: inherit;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* ---------- thank you (Pro is on) ---------- */
+.thanks {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    border-radius: var(--radius-xl);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.thanksHeart {
+    width: 2.6rem;
+    height: 2.6rem;
+    color: var(--primary);
+    fill: color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
+.thanksTitle {
+    margin: 0;
+    font-size: 1.7rem;
+    color: var(--text-h);
+}
+
+.thanksText {
+    margin: 0;
+    max-width: 32rem;
+    color: var(--text);
+    line-height: 1.55;
+}
+
+.facts {
+    display: flex;
+    gap: 2rem;
+    margin: 0.5rem 0;
+}
+
+.facts dt {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.facts dd {
+    margin: 0.15rem 0 0;
+    font-weight: 650;
+    color: var(--text-h);
+}
+
+.secondary {
+    composes: btnNo from '../ui.module.css';
+    width: auto;
+    padding: 0 1.5rem;
+    color: var(--text-h);
+}
+
+/* ---------- what Pro gives, free vs Pro, questions ---------- */
+.h2 {
+    margin: 0 0 1rem;
+    font-size: 1.35rem;
+    color: var(--text-h);
+}
+
+.givesList {
+    list-style: none;
+    margin: 0 0 0.75rem;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.75rem;
+}
+
+.givesList li {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    line-height: 1.45;
+}
+
+.giveIcon {
+    flex: none;
+    width: 1.35rem;
+    height: 1.35rem;
+    color: var(--primary);
+}
+
+.gives .small,
+.compare .small {
+    text-align: left;
+    margin-bottom: 0.75rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.table thead th {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.table tbody th {
+    font-weight: 550;
+    color: var(--text-h);
+}
+
+.proCell {
+    font-weight: 650;
+    color: var(--text-h);
+}
+
+.faqItem {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.faqItem summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.faqItem p {
+    margin: 0.6rem 0 0;
+    color: var(--text);
+    line-height: 1.55;
+}
+
+.cancelRow {
+    margin: 0;
+    text-align: center;
+}
+
+.cancelLink {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+}

@@ -161,3 +161,29 @@
     composes: btnPrimary from '../components/ui.module.css';
     align-self: flex-start;
 }
+
+/* the cancel form's choice of cancellation (radio buttons) */
+fieldset.field {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+fieldset.field legend {
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.choice {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    padding: 0.4rem 0;
+    line-height: 1.45;
+    cursor: pointer;
+}
+
+.choice input {
+    margin-top: 0.2rem;
+}

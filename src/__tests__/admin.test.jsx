@@ -113,10 +113,10 @@ describe('admin panel', () => {
         const store = await renderAdmin()
         expect(screen.getByText('I want to plan my study group')).toBeInTheDocument()
         expect(screen.getByText('@newbie · n@x.de')).toBeInTheDocument()
-        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Freischalten' })) })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Freischalten (Tester)' })) })
         expect(calls.some(c => c.url === '/api/admin/requests/7/approve' && c.method === 'POST')).toBe(true)
         expect(screen.getByText('Keine offenen Anfragen.')).toBeInTheDocument()
-        expect(store.getState().toast.map(toast => toast.text)).toContain('New Bie ist freigeschaltet')
+        expect(store.getState().toast.map(toast => toast.text)).toContain('New Bie ist freigeschaltet (Tester)')
         expect(store.getState().auth.access.adminPendingCount).toBe(0)
     })
 
@@ -157,7 +157,7 @@ describe('admin panel', () => {
     it('shows numbers and the log of admin actions', async () => {
         await renderAdmin('/admin?tab=overview')
         expect(screen.getByText('Mit Zugang').previousSibling).toHaveTextContent('2')
-        expect(screen.getByText('testUser1 hat testUser2 Pro gegeben')).toBeInTheDocument()
+        expect(screen.getByText('testUser1 hat testUser2 Pro geschenkt')).toBeInTheDocument()
     })
 })
 

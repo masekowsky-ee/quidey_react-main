@@ -1,21 +1,24 @@
 import styles from './Profile.module.css';
 import { useDispatch, useSelector } from "react-redux";
-import { loginSuccess, logout, register } from "../features/auth/authAction";
+import { loginSuccess, logout, register, signInWithGoogle } from "../features/auth/authAction";
 import { setCustomError as showError } from "../features/settings/settingsAction";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CustomError from './CustomError.jsx'
 import ProfileView from './ProfileView.jsx'
 import ResendVerification from './ResendVerification.jsx'
 import { listAccounts, switchAccount } from '../features/auth/accounts'
 import {useTranslation} from '../i18n/useTranslation'
 import PasswordInput from './PasswordInput.jsx';
+import { GoogleButton, GoogleSignupForm } from './auth/GoogleSignIn.jsx';
+import { googleSignInAvailable, readGoogleReturn, startGoogleSignIn } from '../features/auth/google';
 
 // Same rule as the server: 3-30 letters, digits, _ . or -
 const USERNAME_PATTERN = /^[A-Za-z0-9_.-]{3,30}$/;
 
 // initialSignState / initialEmail: the sign-in screen opens it on "sign up" (/signup) with the
-// address typed into the landing page's email line
-export default function Profile({ initialSignState = 0, initialEmail = '' } = {}){
+// address typed into the landing page's email line. googleReturn: opened on /auth/google, where
+// Google's sign-in page sends the browser back (features/auth/google.js)
+export default function Profile({ initialSignState = 0, initialEmail = '', googleReturn = false } = {}){
     const { t } = useTranslation();
 
     const token = useSelector((state) => state.auth.token);
@@ -134,6 +137,35 @@ export default function Profile({ initialSignState = 0, initialEmail = '' } = {}
         }
     }
 
+    // ---------- Sign in with Google ----------
+    // a Google account without a Quidey account yet: { token, email, name, username } (then the
+    // card asks for the rest instead of showing the tabs)
+    const [googleSignup, setGoogleSignup] = useState(null);
+    // back from Google's page (web): its answer from the address
+    const [googleResult] = useState(() => (googleReturn ? readGoogleReturn() : null));
+    const [googleBusy, setGoogleBusy] = useState(() => Boolean(googleResult?.idToken));
+    const googleError = (err) => {
+        const key = `authError_${err?.code}`;
+        setCustomError({ bool: true, message: t(key) !== key ? t(key) : t('googleFailed') });
+    };
+    const finishGoogle = (idToken) => dispatch(signInWithGoogle(idToken))
+        .then((signup) => { if (signup) setGoogleSignup(signup); })
+        .catch(googleError);
+    const handleGoogle = () => {
+        setVerifyNotice(null);
+        setGoogleBusy(true);
+        startGoogleSignIn()
+            .then((idToken) => (idToken ? finishGoogle(idToken) : null))
+            .catch(googleError)
+            .finally(() => setGoogleBusy(false));
+    };
+    useEffect(() => {
+        if (googleResult?.error === 'failed') setCustomError({ bool: true, message: t('googleFailed') });
+        if (googleResult?.idToken) finishGoogle(googleResult.idToken).finally(() => setGoogleBusy(false));
+        // once, for the answer the page was opened with
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [googleResult]);
+
     // 0 = sign in, 1 = sign up
     const [signState, setSignState] = useState(initialSignState);
     // accounts still signed in on this device (while adding another one): one tap goes back
@@ -150,6 +182,10 @@ export default function Profile({ initialSignState = 0, initialEmail = '' } = {}
                 <ProfileView onSignOut={handleSignOut} />
                 :
                 <section className={`${styles.card} ${styles.authCard}`}>
+                    {googleSignup ? (
+                        <GoogleSignupForm signup={googleSignup} onCancel={() => setGoogleSignup(null)}
+                            onError={(message) => setCustomError({ bool: true, message })} />
+                    ) : <>
                     <div className={styles.tabs} role="tablist">
                         {signArr.map((key, i) => (
                             <button
@@ -264,6 +300,8 @@ export default function Profile({ initialSignState = 0, initialEmail = '' } = {}
                             </button>
                         </form>
                     }
+                    {googleSignInAvailable() && <GoogleButton onClick={handleGoogle} busy={googleBusy} />}
+                    </>}
                 </section>
             }
         </div>

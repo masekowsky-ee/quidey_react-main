@@ -13,6 +13,7 @@ import SessionList from './stats/SessionList.jsx';
 import TimeChart from './stats/TimeChart.jsx';
 import Icon from './calendar/icons.jsx';
 import { Bone, Skeleton } from './skeleton/Skeleton.jsx';
+import { usePlan } from '../features/pro/pro';
 
 const TABS = ['overview', 'sessions', 'done'];
 
@@ -170,7 +171,10 @@ export default function Stats() {
     const locale = language === 'de' ? 'de-DE' : 'en-GB';
     const [params, setParams] = useSearchParams();
     const tab = TABS.includes(params.get('tab')) ? params.get('tab') : 'overview';
-    const { range, offset } = readPeriodParams(params);
+    // the free plan (after the beta) sees this week; longer periods come with Quidey Pro
+    const { limited } = usePlan();
+    const asked = readPeriodParams(params);
+    const { range, offset } = limited ? { range: 'week', offset: 0 } : asked;
     const sessionCount = useSelector(state => state.session.workedSessionData.length);
 
     const [stats, setStats] = useState({ query: null, data: null, error: false });
@@ -227,13 +231,14 @@ export default function Stats() {
                         {RANGES.map(name => (
                             <button key={name} type="button" role="radio" aria-checked={range === name}
                                 className={range === name ? styles.rangeActive : undefined}
+                                disabled={limited && name !== 'week'} title={limited && name !== 'week' ? t('statsProOnly') : undefined}
                                 onClick={() => update({ range: name, offset: 0 })}>
                                 {t(`range_${name}`)}
                             </button>
                         ))}
                     </div>
                     <div className={styles.stepper}>
-                        <button type="button" className={styles.stepBtn} disabled={range === 'all'}
+                        <button type="button" className={styles.stepBtn} disabled={range === 'all' || limited}
                             onClick={() => update({ offset: offset - 1 })} aria-label={t('periodPrevious')} title={t('periodPrevious')}>
                             <Icon name="prev" size={20} />
                         </button>
@@ -247,6 +252,12 @@ export default function Stats() {
                         </button>
                     </div>
                 </div>}
+
+            {limited && tab !== 'done' && (
+                <p className={styles.periodName}>
+                    <span>{t('statsFreeHint')} <Link to="/pro">{t('statsFreeHintLink')}</Link></span>
+                </p>
+            )}
 
             {tab === 'overview' &&
                 <>

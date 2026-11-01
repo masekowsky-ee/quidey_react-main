@@ -1,6 +1,8 @@
 import styles from './BetaGate.module.css';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import Icon from './icons';
 import { useTranslation } from '../i18n/useTranslation';
 import { formatDate } from '../features/helperFunction';
 import { fetchAccess, logout, requestBetaAccess } from '../features/auth/authAction';
@@ -95,6 +97,15 @@ export default function BetaGate() {
                         {betaRequest.reason && <blockquote className={styles.reason}>{betaRequest.reason}</blockquote>}
                     </div>
                 )}
+
+                {/* Pro gets in right away, and supports the development */}
+                <Link to="/pro" className={styles.proCard}>
+                    <Icon name="heart" className={styles.proHeart} />
+                    <span>
+                        <strong>{t('betaProTitle')}</strong>
+                        <span>{t('betaProText')}</span>
+                    </span>
+                </Link>
 
                 <div className={styles.actions}>
                     {betaRequest?.status !== 'declined' && (

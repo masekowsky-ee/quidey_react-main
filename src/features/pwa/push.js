@@ -9,10 +9,16 @@
 // Every start of the app checks it again (refreshPush): the permission can be taken back in the
 // browser, the push service can renew the address, another account can be signed in.
 // 'pushAsked': the question after creating a task came once on this device.
+//
+// In the Android app the same flow runs on Firebase Cloud Messaging (native/nativePush.js): the
+// device's address is 'fcm:<token>', the permission is Android's (the branches say "app").
 import { useEffect, useSyncExternalStore } from 'react';
 import { apiFetch, apiUrl } from '../helperFunction';
 import { installState } from './install';
 import { isNativeApp } from '../native/native';
+import {
+    nativePermission, nativePushAvailable, nativeSubscription, onNativePushOpen, requestNativePermission, unregisterNative,
+} from '../native/nativePush';
 
 const WANTED_KEY = 'push';
 const ENDPOINT_KEY = 'pushEndpoint';
@@ -66,9 +72,10 @@ export const pushCovers = (kind) => pushWanted() && state.status === 'on' && sta
 export const pushRemindsByDefault = () => pushWanted() && ['on', 'unknown'].includes(state.status) && state.kinds?.plan !== false;
 
 // 'supported', 'install' (Safari on iPhone / iPad outside the home screen) or 'unsupported'.
-// The Android app has no service worker, so no Web Push (that would need Firebase Cloud Messaging).
+// The Android app: through Firebase, when it was built with its config (nativePush.js).
 export function pushSupport() {
-    if (typeof window === 'undefined' || typeof navigator === 'undefined' || isNativeApp()) return 'unsupported';
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') return 'unsupported';
+    if (isNativeApp()) return nativePushAvailable() ? 'supported' : 'unsupported';
     if ('serviceWorker' in navigator && 'PushManager' in window && typeof Notification !== 'undefined') return 'supported';
     return installState() === 'ios' ? 'install' : 'unsupported';
 }
@@ -86,11 +93,16 @@ const sameKey = (subscription, bytes) => {
     return view.length === bytes.length && view.every((byte, i) => byte === bytes[i]);
 };
 
-let publicKey;
+// What the server sends with: its Web Push key, or for the app 'fcm' when it sends through
+// Firebase; null when it sends nothing to this kind of device
+let serverInfo;
 async function serverKey() {
-    if (publicKey === undefined) publicKey = (await apiFetch('/api/push/key')).publicKey ?? null;
-    return publicKey;
+    if (serverInfo === undefined) serverInfo = await apiFetch('/api/push/key');
+    if (isNativeApp()) return serverInfo.fcm ? 'fcm' : null;
+    return serverInfo.publicKey ?? null;
 }
+
+const appLanguage = () => (document.documentElement.lang === 'en' ? 'en' : 'de');
 
 // The service worker that shows the notifications (registerServiceWorker.js registers it at
 // startup; here it's waited for, at most READY_TIMEOUT_MS)
@@ -103,6 +115,11 @@ async function worker() {
 }
 
 async function currentSubscription() {
+    // app: the address this device handed over last
+    if (isNativeApp()) {
+        const endpoint = read(ENDPOINT_KEY);
+        return endpoint ? { endpoint, toJSON: () => ({ endpoint }), unsubscribe: unregisterNative } : null;
+    }
     const registration = await navigator.serviceWorker.getRegistration();
     return (await registration?.pushManager.getSubscription()) ?? null;
 }
@@ -119,6 +136,7 @@ async function save(subscription, kinds) {
 }
 
 async function subscribe(key) {
+    if (isNativeApp()) return nativeSubscription(appLanguage());
     const registration = await worker();
     const bytes = keyBytes(key);
     let subscription = await registration.pushManager.getSubscription();
@@ -188,6 +206,7 @@ async function checkPush() {
     const facts = { checkedAt: new Date().toLocaleTimeString(), support, app: runsAsApp(), stored: read(WANTED_KEY) };
     const decide = (result, changes) => set({ ...changes, diagnosis: { ...facts, result } });
     if (support !== 'supported') return decide(support, { status: support, kinds: null });
+    if (isNativeApp()) return checkNativePush(facts, decide);
     // 'on' | 'off' (chosen here, or signed out) | null (nothing stored, e.g. storage was cleared)
     const wanted = facts.stored;
     let subscription = null;
@@ -231,6 +250,33 @@ async function checkPush() {
     }
 }
 
+// The same for the Android app: on only when chosen here and Android allows it; the token is
+// handed over again on every start (Firebase renews it now and then)
+async function checkNativePush(facts, decide) {
+    const wanted = facts.stored;
+    try {
+        const permission = await inTime(nativePermission(), 'checkPermissions');
+        facts.permission = permission;
+        facts.serverKey = await serverKey().then((key) => (key ? 'fcm' : 'none'), () => 'not reachable');
+        if (facts.serverKey === 'none') return decide('unavailable: the server sends nothing to the app', { status: 'unavailable', kinds: null });
+        if (wanted !== 'on' || permission !== 'granted') {
+            if (read(ENDPOINT_KEY)) {
+                await removeFromServer(read(ENDPOINT_KEY));
+                await unregisterNative();
+            }
+            if (wanted === 'on') write(WANTED_KEY, 'off');
+            const why = wanted !== 'on' ? 'off: not turned on here' : 'off: not allowed by Android';
+            return decide(why, { status: permission === 'denied' ? 'denied' : 'off', kinds: null });
+        }
+        const subscription = await nativeSubscription(appLanguage());
+        facts.subscription = 'fcm';
+        const kinds = await save(subscription);
+        decide('on', { status: 'on', kinds, error: null });
+    } catch (err) {
+        decide(`error: ${err?.name || 'Error'}: ${err?.message || err}`.slice(0, 200), { status: wanted === 'on' ? 'on' : 'off' });
+    }
+}
+
 // Turns them on for this device. Call it right from a click: browsers only ask for the
 // permission then (Safari in particular), so that comes first, before waiting for anything.
 export async function enablePush() {
@@ -238,7 +284,8 @@ export async function enablePush() {
     set({ busy: true, error: null, detail: null });
     let permission;
     try {
-        permission = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+        permission = isNativeApp() ? await requestNativePermission()
+            : Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
     } catch (err) {
         set({ ...failure('permission', err), busy: false });
         return false;
@@ -283,7 +330,8 @@ export function disablePush() {
             await removeFromServer(subscription?.endpoint ?? read(ENDPOINT_KEY));
             await subscription?.unsubscribe().catch(() => {});
         } finally {
-            set({ status: Notification.permission === 'denied' ? 'denied' : 'off', kinds: null, busy: false });
+            const blocked = typeof Notification !== 'undefined' && Notification.permission === 'denied';
+            set({ status: blocked ? 'denied' : 'off', kinds: null, busy: false });
         }
     });
 }
@@ -341,7 +389,7 @@ export function forgetPushOnSignOut(token, keep = false) {
 // are off and the browser hasn't blocked them
 export function offerPushAfterTask() {
     if (state.status !== 'off' || read(ASKED_KEY)) return;
-    if (typeof Notification === 'undefined' || Notification.permission === 'denied') return;
+    if (!isNativeApp() && (typeof Notification === 'undefined' || Notification.permission === 'denied')) return;
     write(ASKED_KEY, '1');
     set({ asking: true });
 }
@@ -370,8 +418,11 @@ export function usePushSync(enabled, account, navigate) {
         if (enabled) refreshPush();
     }, [enabled, account]);
 
+    // app: a tapped notification
+    useEffect(() => onNativePushOpen(navigate), [navigate]);
+
     useEffect(() => {
-        if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+        if (typeof navigator === 'undefined' || !('serviceWorker' in navigator) || isNativeApp()) return;
         const onMessage = (event) => {
             const url = event.data?.type === 'quidey:open' ? event.data.url : null;
             // only addresses inside the app
@@ -385,7 +436,7 @@ export function usePushSync(enabled, account, navigate) {
 
 // Only for tests: back to the start
 export function resetPushState() {
-    publicKey = undefined;
+    serverInfo = undefined;
     queue = Promise.resolve();
     state = { status: 'unknown', kinds: null, busy: false, error: null, detail: null, asking: false, diagnosis: null };
 }

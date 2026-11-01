@@ -29,6 +29,9 @@ export default function ProfileView({ onSignOut }) {
     const user = useSelector(state => state.auth.user);
     const sessions = useSelector(state => state.session.workedSessionData);
     const friendCount = useSelector(state => state.friends.friends.length);
+    // false: an account made with Google that has no password (set one, delete with the username)
+    const hasPassword = useSelector(state => state.auth.access.hasPassword) !== false;
+    const proActive = useSelector(state => Boolean(state.auth.access.pro?.active));
 
     // the friends list is otherwise only loaded on the Social page
     useEffect(() => { dispatch(fetchFriends()).catch(() => {}); }, [dispatch]);
@@ -142,7 +145,7 @@ export default function ProfileView({ onSignOut }) {
         }
         setChanging(true);
         try {
-            await dispatch(changePassword(passwords.current, passwords.next));
+            await dispatch(changePassword(hasPassword ? passwords.current : '', passwords.next));
             setPasswords(emptyPasswords);
             setPasswordMessage({ ok: true, text: t('passwordChanged') });
         } catch (err) {
@@ -166,7 +169,8 @@ export default function ProfileView({ onSignOut }) {
         }
     };
 
-    // ---------- delete account: opened on purpose, confirmed with the password ----------
+    // ---------- delete account: opened on purpose, confirmed with the password (an account made
+    // with Google and without a password: with its username) ----------
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deletePassword, setDeletePassword] = useState('');
     const [deleting, setDeleting] = useState(false);
@@ -183,7 +187,7 @@ export default function ProfileView({ onSignOut }) {
         setDeleting(true);
         try {
             // signs out on success; this view is gone then
-            await dispatch(deleteAccount(deletePassword));
+            await dispatch(deleteAccount(hasPassword ? { password: deletePassword } : { confirmUsername: deletePassword }));
         } catch (err) {
             setDeleteMessage({ ok: false, text: errorText(t, err) });
             setDeletePassword('');
@@ -248,6 +252,15 @@ export default function ProfileView({ onSignOut }) {
                 </div>
             </section>
 
+            {/* Quidey Pro: supporting the development */}
+            <section className={styles.card} id="pro">
+                <div className={styles.cardHead}>
+                    <h2 className={styles.cardTitle}>Quidey Pro</h2>
+                    <Link to="/pro" className={styles.quietBtn}>{t(proActive ? 'proProfileManage' : 'proProfileSupport')} →</Link>
+                </div>
+                <p className={styles.hint}>{t(proActive ? 'proProfileActive' : 'proProfileInactive')}</p>
+            </section>
+
             <section className={styles.card} id="account">
                 <div className={styles.cardHead}>
                     <h2 className={styles.cardTitle}>{t('account')}</h2>
@@ -303,14 +316,18 @@ export default function ProfileView({ onSignOut }) {
             </section>
 
             <section className={styles.card} id="password">
-                <h2 className={styles.cardTitle}>{t('changePassword')}</h2>
+                <h2 className={styles.cardTitle}>{t(hasPassword ? 'changePassword' : 'setPassword')}</h2>
+                {/* made with Google: no password yet, one can be set (then it signs in both ways) */}
+                {!hasPassword && <p className={styles.hint}>{t('setPasswordHint')}</p>}
                 <form className={styles.form} onSubmit={submitPassword}>
                     {/* hidden username helps password managers update the right entry */}
                     <input type="text" name="username" value={user?.username ?? ''} autoComplete="username" readOnly hidden />
-                    <div className={styles.field}>
-                        <label htmlFor="currentPassword">{t('currentPassword')}</label>
-                        <PasswordInput id="currentPassword" value={passwords.current} onChange={setPassword('current')} autoComplete="current-password" />
-                    </div>
+                    {hasPassword && (
+                        <div className={styles.field}>
+                            <label htmlFor="currentPassword">{t('currentPassword')}</label>
+                            <PasswordInput id="currentPassword" value={passwords.current} onChange={setPassword('current')} autoComplete="current-password" />
+                        </div>
+                    )}
                     <div className={styles.fieldRow}>
                         <div className={styles.field}>
                             <label htmlFor="newPassword">{t('newPassword')}</label>
@@ -325,8 +342,8 @@ export default function ProfileView({ onSignOut }) {
                     {message(passwordMessage)}
                     <div className={styles.formActions}>
                         <button type="submit" className={styles.saveBtn}
-                            disabled={changing || !passwords.current || !passwords.next || !passwords.confirm}>
-                            {t('changePassword')}
+                            disabled={changing || (hasPassword && !passwords.current) || !passwords.next || !passwords.confirm}>
+                            {t(hasPassword ? 'changePassword' : 'setPassword')}
                         </button>
                     </div>
                 </form>
@@ -350,13 +367,20 @@ export default function ProfileView({ onSignOut }) {
             <section className={`${styles.card} ${styles.dangerCard}`} id="delete-account">
                 <h2 className={styles.cardTitle}>{t('deleteAccount')}</h2>
                 <p className={styles.hint}>{t('deleteAccountHint')}</p>
+                {proActive && <p className={styles.hint}>{t('deleteAccountPro')}</p>}
                 {deleteOpen ? (
                     <form className={styles.form} onSubmit={submitDelete}>
                         <input type="text" name="username" value={user?.username ?? ''} autoComplete="username" readOnly hidden />
                         <div className={styles.field}>
-                            <label htmlFor="deletePassword">{t('deleteAccountPassword')}</label>
-                            <PasswordInput id="deletePassword" value={deletePassword} autoComplete="current-password" autoFocus
-                                onChange={(e) => { setDeletePassword(e.target.value); setDeleteMessage(null); }} />
+                            {hasPassword ? <>
+                                <label htmlFor="deletePassword">{t('deleteAccountPassword')}</label>
+                                <PasswordInput id="deletePassword" value={deletePassword} autoComplete="current-password" autoFocus
+                                    onChange={(e) => { setDeletePassword(e.target.value); setDeleteMessage(null); }} />
+                            </> : <>
+                                <label htmlFor="deletePassword">{t('deleteAccountUsername')} <strong>{user?.username}</strong></label>
+                                <input id="deletePassword" value={deletePassword} autoComplete="off" autoFocus
+                                    onChange={(e) => { setDeletePassword(e.target.value); setDeleteMessage(null); }} />
+                            </>}
                         </div>
                         {message(deleteMessage)}
                         <div className={styles.formActions}>

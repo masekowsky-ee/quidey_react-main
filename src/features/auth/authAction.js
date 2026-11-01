@@ -5,6 +5,18 @@ import { forgetPushOnSignOut, refreshPush } from '../pwa/push';
 import { resetFocus } from '../session/sessionAction';
 import { clearFocusRun } from '../session/focusRun';
 
+// Signed in (password, Google): { token, username } from the server
+const finishSignIn = (data) => {
+    return async (dispatch) => {
+        localStorage.setItem("token", data.token);
+        // stays on this device next to the accounts signed in before (to switch between them)
+        rememberAccount({ username: data.username, token: data.token, displayName: data.display_name });
+        dispatch({ type: LOGIN_SUCCESS, payload: { token: data.token, username: data.username } });
+        // right after signing in: who may use the app goes in, everybody else to the beta screen
+        await dispatch(fetchAccess()).catch(() => {});
+    };
+};
+
 // Signs in with the username or the email address (the server tells them apart by the "@")
 export const loginSuccess = (username, password) => {
     return async (dispatch) => {
@@ -12,18 +24,36 @@ export const loginSuccess = (username, password) => {
             method: "POST",
             body: JSON.stringify({ username, password }),
         });
+        // the server sends the real username, also after signing in with the email address
+        await dispatch(finishSignIn({ ...data, username: data.username ?? username }));
+    };
+};
 
-        localStorage.setItem("token", data.token);
-        // stays on this device next to the accounts signed in before (to switch between them)
-        rememberAccount({ username: data.username ?? username, token: data.token, displayName: data.display_name });
+// Signs in with Google's ID token (features/auth/google.js gets it). Resolves null when signed
+// in, or { token, email, name, username } when this Google account has no Quidey account yet
+// (then registerWithGoogle with that token finishes it).
+// Rejects with the API error (error.code: GOOGLE_INVALID, GOOGLE_OTHER_ACCOUNT, GOOGLE_DISABLED).
+export const signInWithGoogle = (idToken) => {
+    return async (dispatch) => {
+        const data = await apiFetch('/api/auth/google', { method: 'POST', body: JSON.stringify({ idToken }) });
+        if (data.signup) return data.signup;
+        await dispatch(finishSignIn(data));
+        return null;
+    };
+};
 
-        dispatch({
-            type: LOGIN_SUCCESS,
-            // the server sends the real username, also after signing in with the email address
-            payload: { token: data.token, username: data.username ?? username },
+// A new account with Google: what every account needs (the address is Google's, no password).
+// Rejects with the API error (error.code: INVALID_USERNAME, USERNAME_TAKEN, TOO_YOUNG, GOOGLE_SIGNUP_EXPIRED, …).
+export const registerWithGoogle = ({ signupToken, username, displayName, birthDate }) => {
+    return async (dispatch, getState) => {
+        const data = await apiFetch('/api/auth/google/register', {
+            method: 'POST',
+            body: JSON.stringify({
+                signupToken, username, display_name: displayName, birth_date: birthDate,
+                language: getState().settings?.language, accept_terms: true, accept_privacy: true, confirm_age: true,
+            }),
         });
-        // right after login/registration: pro users go to the app, everybody else to the beta screen
-        await dispatch(fetchAccess()).catch(() => {});
+        await dispatch(finishSignIn(data));
     };
 };
 
@@ -171,6 +201,7 @@ export function requestVerificationMail(email) {
 
 // Rejects with the API error (error.code: WRONG_PASSWORD, WEAK_PASSWORD).
 // All other logins of the account end; this device gets a new token and stays signed in.
+// An account made with Google sets its first password without a current one (currentPassword '').
 export const changePassword = (currentPassword, newPassword) => {
     return async (dispatch, getState) => {
         const data = await apiFetch('/api/users/password', {
@@ -182,6 +213,8 @@ export const changePassword = (currentPassword, newPassword) => {
             rememberAccount({ username: getState().auth.user?.username, token: data.token });
             dispatch({ type: LOGIN_SUCCESS, payload: { token: data.token, username: getState().auth.user?.username } });
         }
+        // from now on it has one (an account made with Google sets its first here)
+        dispatch({ type: SET_ACCESS, payload: { ...getState().auth.access, hasPassword: true } });
         // the server forgot the devices of the other logins, this one signs up again
         refreshPush();
     };
@@ -195,13 +228,15 @@ export const logoutEverywhere = () => {
     };
 }
 
-// Deletes the account for good (needs the password again), then signs out here.
-// Rejects with the API error (error.code: WRONG_PASSWORD, LAST_ADMIN, RATE_LIMITED).
-export const deleteAccount = (password) => {
+// Deletes the account for good, then signs out here. Confirmed with the password, or (an account
+// made with Google, without one) with the username: { password } | { confirmUsername }.
+// A running Pro subscription ends with it (the server cancels it).
+// Rejects with the API error (error.code: WRONG_PASSWORD, WRONG_USERNAME, LAST_ADMIN, RATE_LIMITED).
+export const deleteAccount = (confirmation) => {
     return async (dispatch) => {
         await apiFetch('/api/users', {
             method: 'DELETE',
-            body: JSON.stringify({ password }),
+            body: JSON.stringify(confirmation),
         });
         dispatch(logout());
     };

@@ -25,10 +25,14 @@ export const PROCESSORS = {
     backendHost: 'STRATO AG, Otto-Ostrowski-Straße 7, 10249 Berlin',
     // the mail service sending the confirmation links (SMTP_HOST in the backend's .env: smtp.resend.com)
     mailProvider: 'Resend, Inc., 2261 Market Street #5039, San Francisco, CA 94114, USA',
+    // Quidey Pro on the web (backend utils/billing.js)
+    payments: 'Stripe Payments Europe, Limited, 1 Grand Canal Street Lower, Grand Canal Dock, Dublin, D02 H210, Irland',
+    // sign in with Google, the Android app's pushes (Firebase Cloud Messaging), Google Play
+    google: 'Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland',
 };
 
 // Date of the current version of the legal texts
-export const LEGAL_VERSION_DATE = '28.10.2026 (Fokusraum mit Notizbuch, Routinen, Fokus-Timer im Hintergrund, Profilbilder im Test, Untergruppen für alle, Sprache des Geräts)';
+export const LEGAL_VERSION_DATE = '01.11.2026 (Quidey Pro, Anmeldung mit Google, Android-App mit Benachrichtigungen, Kündigungsbutton)';
 
 export const COPYRIGHT_YEAR = 2026;
 

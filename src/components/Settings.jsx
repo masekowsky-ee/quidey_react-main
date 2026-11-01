@@ -109,7 +109,8 @@ function PushSettings() {
 
     return (
         <>
-            <SettingRow title={t('pushDevice')} hint={t(isNativeApp() && push.status === 'unsupported' ? 'pushUnsupportedApp' : PUSH_HINTS[push.status])}>
+            <SettingRow title={t('pushDevice')} hint={t(isNativeApp() && push.status === 'unsupported' ? 'pushUnsupportedApp'
+                : isNativeApp() && push.status === 'denied' ? 'pushDeniedApp' : PUSH_HINTS[push.status])}>
                 {(on || push.status === 'off') && (
                     <Choice label={t('pushDevice')} value={on} disabled={push.busy} options={ON_OFF}
                         onChange={(next) => {

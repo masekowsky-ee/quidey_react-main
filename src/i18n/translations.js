@@ -4,6 +4,7 @@ import moreTexts from './moreTexts';
 import testerTexts from './testerTexts';
 import tourTexts from './tourTexts';
 import focusTexts from './focusTexts';
+import proTexts from './proTexts';
 
 const translations = {
     de: {
@@ -461,11 +462,11 @@ const translations = {
         adminAllRequests: 'Alle',
         adminNoOpenRequests: 'Keine offenen Anfragen.',
         adminNoRequests: 'Noch keine Anfragen.',
-        adminApprove: 'Freischalten',
+        adminApprove: 'Freischalten (Tester)',
         adminReset: 'Zurücksetzen',
         adminResetHint: 'Anfrage löschen, damit die Person erneut anfragen kann',
         adminAsked: 'Angefragt',
-        adminHasPro: 'hat Pro',
+        adminHasPro: 'hat Pro (Geschenk)',
         adminSearch: 'Name, Benutzername oder E-Mail',
         adminNoUsers: 'Keine Benutzer gefunden.',
         adminJoined: 'Dabei seit',
@@ -485,20 +486,20 @@ const translations = {
         adminStatSessions: 'Laufende Sitzungen',
         adminLog: 'Letzte Änderungen',
         adminNoActions: 'Noch keine Änderungen.',
-        adminAction_grant_pro: '{admin} hat {target} Pro gegeben',
-        adminAction_revoke_pro: '{admin} hat {target} Pro entzogen',
+        adminAction_grant_pro: '{admin} hat {target} Pro geschenkt',
+        adminAction_revoke_pro: '{admin} hat {target} das geschenkte Pro entzogen',
         adminAction_grant_admin: '{admin} hat {target} zum Admin gemacht',
         adminAction_revoke_admin: '{admin} hat {target} die Admin-Rechte entzogen',
         adminAction_grant_tester: '{admin} hat {target} zum Tester gemacht',
         adminAction_revoke_tester: '{admin} hat {target} als Tester entfernt',
-        adminAction_approve_request: '{admin} hat {target} freigeschaltet',
+        adminAction_approve_request: '{admin} hat {target} als Tester freigeschaltet',
         adminAction_decline_request: '{admin} hat die Anfrage von {target} abgelehnt',
         adminAction_reset_request: '{admin} hat die Anfrage von {target} zurückgesetzt',
-        adminToastApproved: '{name} ist freigeschaltet',
+        adminToastApproved: '{name} ist freigeschaltet (Tester)',
         adminToastDeclined: 'Anfrage von {name} abgelehnt',
         adminToastReset: '{name} kann erneut anfragen',
-        adminToastProGranted: '{name} hat jetzt Pro',
-        adminToastProRevoked: '{name} hat kein Pro mehr',
+        adminToastProGranted: '{name} hat jetzt Pro geschenkt bekommen',
+        adminToastProRevoked: '{name} hat kein geschenktes Pro mehr',
         adminToastAdminGranted: '{name} ist jetzt Admin',
         adminToastAdminRevoked: '{name} ist kein Admin mehr',
         adminToastTesterGranted: '{name} ist jetzt Tester',
@@ -1076,7 +1077,6 @@ const translations = {
         pushOff: 'Aus',
         pushChecking: 'Wird geprüft …',
         pushUnsupported: 'Dieser Browser kann keine Benachrichtigungen empfangen.',
-        pushUnsupportedApp: 'Die Android-App kann noch keine Benachrichtigungen empfangen. Erinnerungen kommen, solange Quidey offen ist; für Benachrichtigungen bei geschlossener App nutze Quidey im Browser.',
         pushInstallFirst: 'Auf iPhone und iPad kommen Benachrichtigungen nur in der App: erst in Safari über „Teilen“ → „Zum Home-Bildschirm“ hinzufügen, dann dort einschalten.',
         pushDenied: 'Im Browser blockiert. Erlaube Benachrichtigungen für Quidey in den Website-Einstellungen (Symbol neben der Adresse) oder in den Systemeinstellungen, dann komm hierher zurück.',
         pushUnavailable: 'Der Server verschickt gerade keine Benachrichtigungen.',
@@ -1603,11 +1603,11 @@ const translations = {
         adminAllRequests: 'All',
         adminNoOpenRequests: 'No open requests.',
         adminNoRequests: 'No requests yet.',
-        adminApprove: 'Approve',
+        adminApprove: 'Approve (tester)',
         adminReset: 'Reset',
         adminResetHint: 'Delete the request so they can ask again',
         adminAsked: 'Asked',
-        adminHasPro: 'has pro',
+        adminHasPro: 'has Pro (gift)',
         adminSearch: 'Name, username or email',
         adminNoUsers: 'No users found.',
         adminJoined: 'Joined',
@@ -1627,20 +1627,20 @@ const translations = {
         adminStatSessions: 'Running sessions',
         adminLog: 'Recent changes',
         adminNoActions: 'No changes yet.',
-        adminAction_grant_pro: '{admin} gave {target} pro',
-        adminAction_revoke_pro: '{admin} took pro away from {target}',
+        adminAction_grant_pro: '{admin} gave {target} Pro as a gift',
+        adminAction_revoke_pro: '{admin} took the gifted Pro away from {target}',
         adminAction_grant_admin: '{admin} made {target} admin',
         adminAction_revoke_admin: '{admin} removed admin rights from {target}',
         adminAction_grant_tester: '{admin} made {target} a tester',
         adminAction_revoke_tester: '{admin} removed {target} as a tester',
-        adminAction_approve_request: '{admin} approved {target}',
+        adminAction_approve_request: '{admin} approved {target} as a tester',
         adminAction_decline_request: "{admin} declined {target}'s request",
         adminAction_reset_request: "{admin} reset {target}'s request",
-        adminToastApproved: '{name} is approved',
+        adminToastApproved: '{name} is approved (tester)',
         adminToastDeclined: "Declined {name}'s request",
         adminToastReset: '{name} can ask again',
-        adminToastProGranted: '{name} has pro now',
-        adminToastProRevoked: '{name} no longer has pro',
+        adminToastProGranted: '{name} has Pro as a gift now',
+        adminToastProRevoked: '{name} no longer has the gifted Pro',
         adminToastAdminGranted: '{name} is admin now',
         adminToastAdminRevoked: '{name} is no longer admin',
         adminToastTesterGranted: '{name} is a tester now',
@@ -2218,7 +2218,6 @@ const translations = {
         pushOff: 'Off',
         pushChecking: 'Checking …',
         pushUnsupported: 'This browser can’t receive notifications.',
-        pushUnsupportedApp: 'The Android app can’t receive notifications yet. Reminders appear while Quidey is open; for notifications while it is closed, use Quidey in the browser.',
         pushInstallFirst: 'On iPhone and iPad, notifications only come to the app: in Safari, tap “Share” → “Add to Home Screen” first, then turn them on there.',
         pushDenied: 'Blocked in the browser. Allow notifications for Quidey in the site settings (icon next to the address) or in your system settings, then come back here.',
         pushUnavailable: 'The server isn’t sending notifications right now.',
@@ -2294,6 +2293,6 @@ const translations = {
 
 // Gemeinschaft (feed, challenges, levels), the tour, the command bar and shortcuts and others
 // live in their own files
-for (const language of ['de', 'en']) Object.assign(translations[language], communityTexts[language], moreTexts[language], testerTexts[language], tourTexts[language], flowTexts[language], focusTexts[language]);
+for (const language of ['de', 'en']) Object.assign(translations[language], communityTexts[language], moreTexts[language], testerTexts[language], tourTexts[language], flowTexts[language], focusTexts[language], proTexts[language]);
 
 export default translations;
