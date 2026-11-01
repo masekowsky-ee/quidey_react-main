@@ -1,68 +1,67 @@
 # Quidey for Android (Capacitor)
 
 This repo is a clone of `quidey_react-main` (the web app) plus a Capacitor shell that packs the
-same React app into an Android APK. The web app keeps living in `../quidey_react-main`; this repo
-follows it through the git remote `web`.
+same React app into an Android app. **All app code is written in the web repo first** and comes
+here with `git pull web <branch>`; this repo only adds what is truly Android: `android/`,
+`capacitor.config.json`, `.env.android`, the build scripts, signing and the store listing
+(`STORE.md`, `store/`).
 
-## Build the APK
+## Build
 
 Needs Node 22+, the Android SDK (Android Studio) and a JDK 21+ (the script finds Android Studio's
 own `jbr` when `JAVA_HOME` is older).
 
 ```sh
 npm ci
-npm run apk           # vite build --mode android → cap sync android → gradlew assembleDebug
+npm run apk           # debug APK  → android/app/build/outputs/apk/debug/app-debug.apk
+npm run bundle        # release AAB for Google Play → android/app/build/outputs/bundle/release/app-release.aab
+npm run apk:release   # signed release APK (to install directly)
+npm run build:android # only web build + cap sync (then build in Android Studio: npm run android:open)
 ```
 
-The APK lands in `android/app/build/outputs/apk/debug/app-debug.apk`. Install it with
-`adb install -r <apk>` or copy it to the phone (allow "install unknown apps").
+Every command runs `vite build --mode android` (API `https://api.quidey.com` from `.env.android`)
+and `cap sync android` first.
 
-Other commands:
+- **Push notifications** are built in only when `android/app/google-services.json` (Firebase) is
+  there (`VITE_NATIVE_PUSH=on`); without it the app says notifications aren't available.
+- **Sign in with Google** needs `VITE_GOOGLE_CLIENT_ID` in `.env.android` (the web client id).
+- **Signing**: `android/keystore.properties` (git-ignored) points to the upload key in
+  `C:\Users\eesge\Quidey\quidey-android-keys\` (keystore, password, fingerprints). Back that
+  folder up somewhere safe; every update must be signed with the same upload key (with Play App
+  Signing, Google can reset a lost upload key).
+- Before a release raise `versionCode` / `versionName` in `android/app/build.gradle`.
 
-- `npm run build:android`: only the web build + copy into `android/` (then build in Android Studio)
-- `npm run android:open`: opens `android/` in Android Studio
-- `npm run apk:release`: release APK, signed when `android/keystore.properties` exists:
-
-  ```properties
-  storeFile=quidey-release.jks
-  storePassword=…
-  keyAlias=quidey
-  keyPassword=…
-  ```
-
-  (paths relative to `android/`; make a key once with
-  `keytool -genkey -v -keystore android/quidey-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias quidey`,
-  keep it safe: every update must be signed with the same key). Both files are git-ignored.
-
-Before each release raise `versionCode` / `versionName` in `android/app/build.gradle`.
+Install a build: `adb install -r <apk>` or copy the APK to the phone.
 
 ## Taking over changes of the web app
 
 ```sh
-git pull web master      # or the web repo's branch you want, e.g. refactor
+git pull web refactor           # or whichever branch of quidey_react-main
 npm install
 npm run apk
 ```
 
-The Android-only changes are small and harmless in a browser, so merges rarely conflict:
+`src/` here is always the web repo's; conflicts can only come up in `package.json`,
+`package-lock.json` (run `npm install`) and `CLAUDE.md`.
 
-| File | What |
+## What is Android-only
+
+| Where | What |
 |---|---|
-| `capacitor.config.json`, `android/`, `scripts/apk.mjs`, `.env.android` | the Android shell |
-| `src/features/native/native.js` | back button, system bar colours, resume |
-| `src/main.jsx` | calls `setupNativeApp(store)` |
-| `src/features/pwa/registerServiceWorker.js`, `install.js`, `push.js` | no service worker / install row / Web Push in the app |
-| `src/components/Settings.jsx`, `src/i18n/translations.js` | `pushUnsupportedApp` hint |
+| `capacitor.config.json` | app id `com.quidey.app`, served as `https://app.quidey.com` (CORS and password autofill like the web), SystemBars insets |
+| `android/app/src/main/java/com/quidey/app/` | `MainActivity` registers `GoogleSignInPlugin` ("QuideyGoogle": Credential Manager account picker → ID token with the server's nonce) and `BillingPlugin` ("QuideyBilling": Google Play Billing 8, product `quidey_pro`, base plans `monthly`/`yearly`) |
+| `android/app/src/main/AndroidManifest.xml` | no backups (the WebView storage holds the sign-in token), `POST_NOTIFICATIONS`, FCM defaults (icon `ic_stat_quidey`, colour, channel) |
+| `android/app/src/main/res/` | launcher icon (vector + monochrome), splash, notification icon |
+| `scripts/apk.mjs`, `scripts/store-graphic.mjs` | builds; the Play feature graphic |
+| `STORE.md`, `store/` | everything for the Play Console: services setup, listing texts, data safety, content rating |
 
-## How it works
+The JavaScript side of those plugins and the Android branches (`features/native/`,
+`features/pro/pro.js`, `features/auth/google.js`, `features/pwa/push.js`) live in the web repo
+and do nothing in a browser.
 
-- The app is served from the APK at **https://app.quidey.com** (`server.hostname`): the origin the
-  API's CORS already allows, and Android's autofill offers the passwords saved for the site.
-  Nothing on the server had to change.
-- The API is `https://api.quidey.com` (`.env.android`).
-- Android back: closes an open dialog / drawer / form (as Escape), else goes back a page, on the
-  first page the app goes to the background.
-- No cloud backup of the app's data (`allowBackup="false"`, `data_extraction_rules.xml`): the
-  WebView's storage holds the sign-in token.
-- Not in the app yet: push notifications (Web Push needs a service worker; native push would need
-  Firebase Cloud Messaging + a backend change). Reminders still appear while the app is open.
+## Services to set up (once)
+
+See `STORE.md` § 0: Firebase (`google-services.json` + server key), Google Cloud OAuth clients
+(web + Android with the SHA-1s in `quidey-android-keys/fingerprints.txt` and Play's app signing
+key), the Play subscription `quidey_pro`, the Play service account and real-time notifications,
+Stripe. Server settings in the backend's `.env.example`; database migrations 034 and 035.

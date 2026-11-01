@@ -26,6 +26,19 @@
 
         </activity>
 
+        <!-- pushes from Firebase Cloud Messaging: the logo as the small icon, the accent colour,
+             and the channel of tasks & events for messages without one (the app creates the
+             channels, features/native/nativePush.js) -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_quidey" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/quidey_accent" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="plan" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -40,4 +53,6 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Android 13+: asked only when notifications are turned on in the settings -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>

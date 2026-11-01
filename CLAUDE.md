@@ -24,24 +24,33 @@ scripts, signing, store listing).
 
 A clone of the web app (git remote `web` = `../quidey_react-main`; take its changes over with
 `git pull web <branch>`) plus a Capacitor shell; everything below about the web app holds here
-too. Build and release steps: `README-android.md`. In short:
+too. **App code (`src/`) is never changed here first**: write it in the web repo, then pull.
+Build, signing and store steps: `README-android.md`, `STORE.md`. In short:
 
-- `npm run apk` = `vite build --mode android` (`.env.android`: `VITE_API_URL=https://api.quidey.com`)
-  → `cap sync android` → `scripts/apk.mjs` (Gradle `assembleDebug` with a JDK 21+, else
-  Android Studio's `jbr`). `npm run apk:release` signs with `android/keystore.properties` (git-ignored).
+- `npm run apk | apk:release | bundle | build:android` → `scripts/apk.mjs`: `vite build --mode
+  android` (`.env.android`: API URL, `VITE_GOOGLE_CLIENT_ID`; `VITE_NATIVE_PUSH=on` only when
+  `android/app/google-services.json` exists) → `cap sync android` → Gradle (JDK 21+, else
+  Android Studio's `jbr`). Release builds are signed with `android/keystore.properties`
+  (git-ignored) → the upload key in `C:\Users\eesge\Quidey\quidey-android-keys\` (with
+  `fingerprints.txt`: SHA-1/256 of the upload and debug keys for the Google OAuth Android client).
 - `capacitor.config.json`: app id `com.quidey.app`, `server.hostname: app.quidey.com` (the WebView's
   origin is the web app's, so the API's CORS and the password autofill work unchanged),
   SystemBars `insetsHandling: css` (the existing `env(safe-area-inset-*)` CSS applies).
-- Native-only code stays in `src/features/native/native.js` (`isNativeApp()`, `setupNativeApp(store)`
-  in main.jsx: Android back = Escape on an open dialog/drawer/form, else history back, else
-  minimise; system bar icons follow `<html data-theme>`; `resume` → a window `focus` event). The
-  shared files only get guards: no service worker, `installState()` = installed, `pushSupport()` =
-  unsupported (Settings shows `pushUnsupportedApp`). Keep further changes like that, so merges
-  from `web` stay small and the web build here still behaves as the web app.
+- Native plugins of the app (`android/app/src/main/java/com/quidey/app/`, registered in
+  `MainActivity`): `GoogleSignInPlugin` ("QuideyGoogle", Credential Manager +
+  `GetSignInWithGoogleOption` with the server's nonce) and `BillingPlugin` ("QuideyBilling", Play
+  Billing 8: `getPlans`, `purchase` with obfuscatedAccountId, `restore`, `manage`). Their JS side
+  and every other native branch live in the web repo (`features/native/`, `features/pro/pro.js`,
+  `features/auth/google.js`, `features/pwa/push.js`); push via `@capacitor/push-notifications`.
 - `android/`: launcher icon + splash are the logo as vector drawables (`drawable/ic_launcher_foreground.xml`,
-  `_monochrome`, `splash.xml`), legacy PNGs from `public/icons/icon-512.png`; `allowBackup="false"` +
-  `xml/data_extraction_rules.xml` (the WebView storage holds the token).
-- Not yet: native push (would need FCM + backend), Android App Links for app.quidey.com.
+  `_monochrome`, `splash.xml`), legacy PNGs from `public/icons/icon-512.png`, notification icon
+  `ic_stat_quidey`; manifest: `allowBackup="false"` + `xml/data_extraction_rules.xml` (the WebView
+  storage holds the token), `POST_NOTIFICATIONS`, FCM default icon/colour/channel.
+- `STORE.md`: Play Console texts (de/en), data safety, content rating, reviewer access, the
+  services to set up (Firebase, OAuth clients, subscription `quidey_pro` with base plans
+  `monthly`/`yearly`, Play service account + RTDN, Stripe); `store/` the icon and the feature
+  graphic (`node scripts/store-graphic.mjs`).
+- Not yet: Android App Links for app.quidey.com.
 
 ## Frontend stack
 

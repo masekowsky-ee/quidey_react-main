@@ -11,10 +11,11 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:android": "vite build --mode android && cap sync android",
-    "apk": "npm run build:android && node scripts/apk.mjs",
-    "apk:release": "npm run build:android && node scripts/apk.mjs release",
-    "android:open": "cap open android"
+    "build:android": "node scripts/apk.mjs sync",
+    "apk": "node scripts/apk.mjs",
+    "apk:release": "node scripts/apk.mjs release",
+    "android:open": "cap open android",
+    "bundle": "node scripts/apk.mjs bundle"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.0",
