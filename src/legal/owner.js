@@ -27,12 +27,14 @@ export const PROCESSORS = {
     mailProvider: 'Resend, Inc., 2261 Market Street #5039, San Francisco, CA 94114, USA',
     // Quidey Pro on the web (backend utils/billing.js)
     payments: 'Stripe Payments Europe, Limited, 1 Grand Canal Street Lower, Grand Canal Dock, Dublin, D02 H210, Irland',
-    // sign in with Google, the Android app's pushes (Firebase Cloud Messaging), Google Play
+    // sign in with Google, the Android app's pushes (Firebase Cloud Messaging) and Google Analytics
+    // for Firebase (privacy § 3), Google Play
     google: 'Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland',
 };
 
 // Date of the current version of the legal texts
-export const LEGAL_VERSION_DATE = '01.11.2026 (Quidey Pro, Anmeldung mit Google, Android-App mit Benachrichtigungen, Kündigungsbutton)';
+// Switching Quidey Pro on (features/pro/flag.js) adds its parts to the texts: give that day's date then
+export const LEGAL_VERSION_DATE = '01.11.2026 (Anmeldung mit Google, Android-App mit Benachrichtigungen, Google Analytics für Firebase in der Android-App)';
 
 export const COPYRIGHT_YEAR = 2026;
 

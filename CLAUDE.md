@@ -397,7 +397,13 @@ cache). No `skipWaiting` — an update must not reload a running timer. Register
 production build (`src/features/pwa/registerServiceWorker.js`); `_headers` sends `/sw.js` with
 `no-cache`. Settings → "Als App": `src/features/pwa/install.js` catches `beforeinstallprompt` at
 startup and offers it as a button (Chrome/Edge/Android), explains the share menu on iOS Safari,
-says "installed" when running standalone, and hides the row everywhere else.
+says "installed" when running standalone, and hides the row everywhere else. On Android phones in
+the browser the section "Android-App" above it offers the APK (`features/native/androidApk.js`,
+`/download/quidey.apk`, version + size): the Android repo's `npm run apk:web` builds the signed
+release APK and writes it with `quidey-android.json` into `public/download/` (git-ignored, so it
+goes out with the next deploy but never into git); `vite.config.js` hands the details over as
+`VITE_ANDROID_APK` (web build only), no APK → no row. The service worker leaves `/download/`
+alone; `_headers` sends it `no-cache` + as attachment. Cloudflare's limit is 25 MiB per file.
 
 Push notifications (Web Push, VAPID): Settings → App → "Benachrichtigungen" per device (on/off,
 then four kinds `plan` (tasks/events at each of their reminders), `digest`
@@ -456,6 +462,18 @@ the theme before React loads.
   (= beta access back then) into a tester. `/api/me`: `isPro` still means "may use the app" (old
   app versions read it), plus `pro { active, gift, until }`, `accessMode`, `limits`/`usage`
   (null without limits), `hasPassword`, `googleLinked` (→ `state.auth.access`).
+- **Quidey Pro is switched off** (built and tested, not shown; planned for after the beta). Two
+  switches, turned on together by hand: `VITE_PRO=on` at build time (`features/pro/flag.js`:
+  `proBuilt()` for the legal texts, `useProOn()` = built and `/api/me` `proSales`) and
+  `PRO_BILLING=on` on the server (`utils/access.js`: else the selling routes `GET /api/billing`,
+  `/checkout`, `/portal`, `/play` answer 404 `BILLING_OFF`, and the free plan has no limits even
+  with `ACCESS_MODE=open`; webhooks and `/api/billing/cancel` stay on). Off: no `/pro` (redirects
+  to `/`), no menu entry, no profile / beta screen card, no `LimitDialog`, no Play restore, no
+  `/kuendigen` and no cancel link, terms without § 8–9 and privacy without § 7 (the later sections
+  move up: `privacyNo` / `termsNo` in LegalPage.jsx). Gifted Pro (`is_pro`) still lets people in.
+  The landing page shows the free plan and the planned prices as "Geplant für nach der Beta",
+  without a way to buy. Turning on: both switches, a new `LEGAL_VERSION_DATE`, the cancel link on
+  the landing page (`copy.js` `legal()`), and tell users about the new terms.
 - **Quidey Pro** (supporting the development: 2,99 €/month, 25 €/year = "Spare 30 %", 10,88 €;
   Kleinunternehmer § 19 UStG, no VAT): `/pro` (`components/pro/ProPage.jsx`, reachable from the
   beta page too, menu "Quidey unterstützen" with the `heart` icon, profile card `#pro`). Texts in
@@ -494,7 +512,10 @@ the theme before React loads.
   `android/app/google-services.json` exists). Shared files only branch on `isNativeApp()`: no
   service worker, install row "installed", push via FCM (`push.js` "app" branches), Pro via Play.
   Backend `utils/fcm.js` (FCM HTTP v1, `FIREBASE_SERVICE_ACCOUNT_FILE`); `push_subscriptions` rows
-  with `fcm:` endpoints have no keys (migration 034).
+  with `fcm:` endpoints have no keys (migration 034). Besides Google Play, the APK can be downloaded
+  in Settings → App on Android phones (see PWA above). The privacy policy (§ 3) names Google
+  Analytics for Firebase in the Android app, only with consent; the app has no Analytics SDK yet
+  (only `firebase-messaging`): adding one needs an opt-in question before anything is collected.
 
 ## API access
 
@@ -578,7 +599,8 @@ custom domain `app.quidey.com`. The app stays out of search results: `index.html
 `public/robots.txt` allows crawling on purpose (a blocked crawler never sees the noindex). Search
 engines get the landing page, which owns `robots.txt` + `sitemap.xml` on quidey.com. The landing page (`quidey_landing`) is its own worker `quidey-landing` on `quidey.com`; it
 forwards the old app URLs that used to live there. There is no deploy script in package.json; deploy is
-`npm run build` then wrangler (`npx wrangler deploy`).
+`npm run build` then wrangler (`npx wrangler deploy`). For the Android download, run `npm run apk:web`
+in `quidey_android` before the build (only when the app changed: the file stays in `public/download/`).
 - The production API address comes from `.env.production.local` (`VITE_API_URL=https://…`,
   git-ignored, ends up public in the bundle — never a secret).
 - `security-headers.js` is a Vite plugin that writes `dist/_headers` at build time: strict CSP

@@ -54,6 +54,7 @@ import CommandPalette from './components/variants/CommandPalette.jsx';
 import ShortcutsDialog from './components/ShortcutsDialog.jsx';
 import LimitDialog from './components/pro/LimitDialog.jsx';
 import { restorePlayPurchases } from './features/pro/pro.js';
+import { useProOn } from './features/pro/flag.js';
 
 const REQUEST_REFRESH_MS = 60 * 1000;
 
@@ -145,6 +146,8 @@ function App(){
   // closed beta: only pro users get into the app, the others see the beta screen
   const access = useSelector((state) => state.auth.access);
   const allowed = signedIn && access.checked && access.isPro;
+  // Quidey Pro is switched off until both switches are on (features/pro/flag.js)
+  const proOn = useProOn();
 
   useEffect(() => {
     if (allowed) {
@@ -179,8 +182,8 @@ function App(){
   // Android app: purchases Google Play knows on this phone are handed to the server again (a new
   // install, another phone, an answer that got lost), then access is looked at again
   useEffect(() => {
-    if (signedIn) restorePlayPurchases().then((found) => { if (found) dispatch(fetchAccess()).catch(() => {}); });
-  }, [signedIn, token, dispatch]);
+    if (signedIn && proOn) restorePlayPurchases().then((found) => { if (found) dispatch(fetchAccess()).catch(() => {}); });
+  }, [signedIn, proOn, token, dispatch]);
   useSafetyPoll(checkAccess, { everyMs: REQUEST_REFRESH_MS, enabled: signedIn });
 
   // The friend request and session invite badges: loaded on sign-in, then kept current by the
@@ -256,7 +259,7 @@ function App(){
         <Routes>
           <Route path="/beta" element={<BetaGate />} />
           {/* Pro gets into the app during the beta too */}
-          <Route path="/pro" element={<Suspense fallback={pageLoading}><ProPage /></Suspense>} />
+          {proOn && <Route path="/pro" element={<Suspense fallback={pageLoading}><ProPage /></Suspense>} />}
           <Route path="*" element={<Navigate to="/beta" replace />} />
         </Routes>
         <LegalFooter />
@@ -285,7 +288,7 @@ function App(){
         <CommandPalette/>
         <ShortcutsDialog/>
         {/* the free plan is full (after the beta): the way to Quidey Pro */}
-        <LimitDialog/>
+        {proOn && <LimitDialog/>}
         <main className={shell.main} data-part="main">
         {/* each page comes in as the motion setting says */}
         {/* ...the tabs of the Gemeinschaft page are one page: switching them doesn't */}
@@ -321,7 +324,7 @@ function App(){
           {/* hidden: only reachable through the daily line in the header */}
           <Route path="/fun" element={<FunPage/>} />
           {/* Quidey Pro: supporting the development */}
-          <Route path="/pro" element={<ProPage/>} />
+          <Route path="/pro" element={proOn ? <ProPage/> : <Navigate to="/" replace />} />
           <Route path="/beta" element={<Navigate to="/" replace />} />
           {/* where the landing page sends people to sign in or up */}
           <Route path="/signin" element={<Navigate to="/" replace />} />

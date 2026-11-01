@@ -6,6 +6,7 @@ import Icon from './icons';
 import { useTranslation } from '../i18n/useTranslation';
 import { formatDate } from '../features/helperFunction';
 import { fetchAccess, logout, requestBetaAccess } from '../features/auth/authAction';
+import { useProOn } from '../features/pro/flag';
 
 export const REASON_MIN = 10;
 export const REASON_MAX = 1000;
@@ -14,6 +15,7 @@ export const REASON_MAX = 1000;
 // They can ask for access once, with a reason; afterwards the screen shows how it stands.
 export default function BetaGate() {
     const { t } = useTranslation();
+    const proOn = useProOn();
     const dispatch = useDispatch();
     const username = useSelector(state => state.auth.user?.username);
     const betaRequest = useSelector(state => state.auth.access.betaRequest);
@@ -98,14 +100,14 @@ export default function BetaGate() {
                     </div>
                 )}
 
-                {/* Pro gets in right away, and supports the development */}
-                <Link to="/pro" className={styles.proCard}>
+                {/* Pro gets in right away, and supports the development (once it's switched on) */}
+                {proOn && <Link to="/pro" className={styles.proCard}>
                     <Icon name="heart" className={styles.proHeart} />
                     <span>
                         <strong>{t('betaProTitle')}</strong>
                         <span>{t('betaProText')}</span>
                     </span>
-                </Link>
+                </Link>}
 
                 <div className={styles.actions}>
                     {betaRequest?.status !== 'declined' && (

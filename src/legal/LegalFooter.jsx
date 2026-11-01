@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import styles from './Legal.module.css';
 import { OWNER, COPYRIGHT_YEAR, isPlaceholder } from './owner';
 import { CANCEL_PATH } from './paths';
+import { proBuilt } from '../features/pro/flag';
 
 // The footer with the legal links, on every screen. Its own file, so the app can show it
 // without loading the legal texts themselves (LegalPage loads when one of them is opened).
@@ -15,8 +16,8 @@ export function LegalFooter() {
                 <Link to="/datenschutz">Datenschutz</Link>
                 <Link to="/nutzungsbedingungen">Nutzungsbedingungen</Link>
                 <Link to="/kontakt">Kontakt</Link>
-                {/* § 312k BGB: on every page, clearly readable */}
-                <Link to={CANCEL_PATH}>Verträge hier kündigen</Link>
+                {/* § 312k BGB: on every page, clearly readable (once Quidey Pro is sold) */}
+                {proBuilt() && <Link to={CANCEL_PATH}>Verträge hier kündigen</Link>}
             </nav>
         </footer>
     );

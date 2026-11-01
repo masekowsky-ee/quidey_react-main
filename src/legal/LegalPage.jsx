@@ -5,6 +5,7 @@ import { useTranslation } from '../i18n/useTranslation';
 import ContactForm from './ContactForm';
 import CancelForm from './CancelForm';
 import { LegalFooter } from './LegalFooter';
+import { proBuilt } from '../features/pro/flag';
 
 // The legal pages. German law, so the texts are German; English readers get a short note.
 // Reachable signed in and signed out (App.jsx renders them before any sign-in check);
@@ -14,8 +15,16 @@ const LEGAL_PAGES = {
     '/datenschutz': { title: 'Datenschutzerklärung', Body: Privacy },
     '/nutzungsbedingungen': { title: 'Nutzungsbedingungen', Body: Terms },
     '/kontakt': { title: 'Kontakt', Body: Contact },
-    '/kuendigen': { title: 'Verträge hier kündigen', Body: Cancel },
+    // only while Quidey Pro is built in (features/pro/flag.js)
+    ...(proBuilt() ? { '/kuendigen': { title: 'Verträge hier kündigen', Body: Cancel } } : {}),
 };
+
+// Section numbers: the parts on Quidey Pro (privacy § 7, terms § 8–9) are only there while it is
+// built in; the sections after them move up when they aren't. n(number as with Pro).
+const PRIVACY_PRO = 7;
+const TERMS_PRO = 8;
+const privacyNo = (no) => (proBuilt() || no < PRIVACY_PRO ? no : no - 1);
+const termsNo = (no) => (proBuilt() || no < TERMS_PRO ? no : no - 2);
 
 // A value from owner.js; unfilled placeholders stand out so they can't slip through
 function V({ children }) {
@@ -152,11 +161,12 @@ function Privacy() {
             <h2>2. Das Wichtigste in Kürze</h2>
             <ul>
                 <li>Quidey verarbeitet nur die Daten, die für die App nötig sind.</li>
-                <li>Es gibt keine Werbung, kein Tracking, keine Analyse-Tools und keine Cookies.</li>
+                <li>Es gibt keine Werbung und keine Cookies. Im Browser gibt es kein Tracking und keine Analyse-Tools;
+                    in der Android-App nutze ich Google Analytics für Firebase, aber nur, wenn du einwilligst (Abschnitt 3).</li>
                 <li>Schriften und alle Dateien der App werden von Quidey selbst ausgeliefert, nicht von Dritten.</li>
                 <li>Du kannst dein Konto jederzeit im Profil selbst löschen. Dabei werden deine Daten gelöscht.</li>
-                <li>Bezahlst du für Quidey Pro, läuft das über Stripe bzw. Google Play; deine Karten- oder Kontodaten
-                    sehe ich nicht (Abschnitt 7).</li>
+                {proBuilt() && <li>Bezahlst du für Quidey Pro, läuft das über Stripe bzw. Google Play; deine Karten- oder Kontodaten
+                    sehe ich nicht (Abschnitt 7).</li>}
                 <li>Mit Google anmelden ist freiwillig; ein Konto mit E-Mail-Adresse und Passwort geht genauso.</li>
             </ul>
 
@@ -185,10 +195,26 @@ function Privacy() {
             </p>
             <p>
                 <strong>Android-App:</strong> Die Android-App „Quidey“ enthält die Dateien der App selbst und spricht
-                nur mit der API (unten); Cloudflare ist dabei nicht beteiligt. Du bekommst sie über Google Play; was
-                Google beim Herunterladen und Aktualisieren verarbeitet, regelt Google in eigener Verantwortung
-                (Datenschutzerklärung von Google). In der App gelten dieselben Abschnitte wie im Browser; was nur in
+                nur mit der API (unten); Cloudflare ist dabei nicht beteiligt. Du bekommst sie über Google Play oder als
+                Datei (APK) direkt von app.quidey.com („Einstellungen“ → „App“); was Google beim Herunterladen und
+                Aktualisieren über Google Play verarbeitet, regelt Google in eigener Verantwortung (Datenschutzerklärung
+                von Google), das Herunterladen der Datei läuft wie jeder Aufruf der Website über Cloudflare (oben). In der App gelten dieselben Abschnitte wie im Browser; was nur in
                 der App anders ist, steht jeweils dabei.
+            </p>
+            <p>
+                <strong>Google Analytics für Firebase (nur Android-App):</strong> Die Android-App gehört zu einem
+                Firebase-Projekt von <V>{PROCESSORS.google}</V>, in dem Google Analytics für Firebase eingerichtet ist.
+                Damit möchte ich verstehen, wie die App genutzt wird (z. B. welche Bereiche geöffnet werden, wie lange,
+                auf welchen Geräten und Android-Versionen, und ob sie abstürzt), um sie zu verbessern. Erfasst werden
+                dabei eine zufällige Kennung der App-Installation, Gerätetyp, Android-Version, Sprache, ungefährer Ort
+                (aus der IP-Adresse, die Google nicht speichert), Zeitpunkt und Art der Nutzung; nicht erfasst werden
+                deine Inhalte (Aufgaben, Notizen, Nachrichten), dein Name, deine E-Mail-Adresse und deine Werbe-ID.
+                Die Daten werden nicht für Werbung genutzt und nicht mit deinem Quidey-Konto verknüpft. Das geschieht
+                nur mit deiner Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG), die du jederzeit mit
+                Wirkung für die Zukunft widerrufen kannst; ohne Einwilligung wird nichts erfasst. Google verarbeitet die
+                Daten als Auftragsverarbeiter, auch in den USA (Google LLC ist unter dem EU-US Data Privacy Framework
+                zertifiziert, Art. 45 DSGVO, ergänzend Standardvertragsklauseln), und löscht sie nach 2 Monaten.
+                Im Browser wird Google Analytics nicht verwendet.
             </p>
             <p>
                 Die Programmierschnittstelle (API) und die Datenbank laufen auf einem Server bei <V>{PROCESSORS.backendHost}</V>.
@@ -431,6 +457,7 @@ function Privacy() {
                 Framework, ergänzend Standardvertragsklauseln). Alles Weitere gilt wie oben.
             </p>
 
+            {proBuilt() && <>
             <h2>7. Quidey Pro (Bezahlung)</h2>
             <p>
                 Quidey ist kostenlos nutzbar. Wer die Entwicklung unterstützen möchte, kann Quidey Pro abonnieren
@@ -466,8 +493,9 @@ function Privacy() {
                 (bis zu 10 Jahre, § 147 AO, § 257 HGB); die Abo-Einträge verlieren beim Löschen deines Kontos den Bezug zu
                 ihm, bleiben aber dafür erhalten. Ein laufendes Abo wird beim Löschen des Kontos sofort beendet.
             </p>
+            </>}
 
-            <h2>8. Kontaktformular, Feedback und E-Mail</h2>
+            <h2>{privacyNo(8)}. Kontaktformular, Feedback und E-Mail</h2>
             <p>
                 Schreibst du mir über das Kontaktformular oder per E-Mail, verarbeite ich deinen Namen, deine
                 E-Mail-Adresse und deine Nachricht, um sie zu beantworten. Sendest du in der App Feedback, gehen
@@ -492,7 +520,7 @@ function Privacy() {
                 App anhand der Rückmeldungen ihrer Tester).
             </p>
 
-            <h2>9. Speicherung auf deinem Gerät</h2>
+            <h2>{privacyNo(9)}. Speicherung auf deinem Gerät</h2>
             <p>
                 Quidey setzt keine Cookies. Im lokalen Speicher deines Browsers (localStorage) liegen nur:
             </p>
@@ -538,7 +566,7 @@ function Privacy() {
                 dient es allein der Sicherheit des Dienstes (§ 25 Abs. 2 Nr. 2 TDDDG, Art. 6 Abs. 1 lit. f DSGVO).
             </p>
 
-            <h2>10. Speicherdauer</h2>
+            <h2>{privacyNo(10)}. Speicherdauer</h2>
             <p>
                 Deine Konto- und Inhaltsdaten speichere ich, solange dein Konto besteht. Löschst du dein Konto, werden
                 Konto, Aufgaben, Events, Event-Typen, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen,
@@ -548,24 +576,25 @@ function Privacy() {
                 und von dir angelegte Einträge in Family-Kalendern verlieren den Bezug zu deinem Konto. Hast du eine
                 Family gegründet, übernimmt das am längsten beigetretene Mitglied sie; ist niemand sonst darin, wird
                 sie mit Kalender und Chat gelöscht.
-                Wie lange Feedback und Kontaktanfragen aufbewahrt werden, steht in Abschnitt 8, wie lange
-                Zahlungsbelege, in Abschnitt 7.
+                Wie lange Feedback und Kontaktanfragen aufbewahrt werden, steht in Abschnitt {privacyNo(8)}
+                {proBuilt() && ', wie lange Zahlungsbelege, in Abschnitt 7'}.
                 In Datensicherungen können Daten bis zu deren turnusmäßiger Überschreibung (höchstens 30 Tage)
                 erhalten bleiben. Gesetzliche Aufbewahrungspflichten bleiben unberührt.
             </p>
 
-            <h2>11. Empfänger</h2>
+            <h2>{privacyNo(11)}. Empfänger</h2>
             <p>
                 Daten erhalten nur die oben genannten Auftragsverarbeiter (Hosting, E-Mail-Versand, in der Android-App
                 Firebase Cloud Messaging) sowie – soweit du es veranlasst – deine Freunde (auch als Empfänger deiner
                 Nachrichten), Mitglieder gemeinsamer Sitzungen und Families, wenn du Benachrichtigungen eingeschaltet
                 hast der Push-Dienst deines Browsers (nur verschlüsselt, siehe Abschnitt 6), wenn du dich mit Google
-                anmeldest Google (Abschnitt 4) und wenn du Quidey Pro bezahlst Stripe bzw. Google (Abschnitt 7). Ich verkaufe keine Daten und gebe
+                anmeldest Google (Abschnitt 4), wenn du in der Android-App in die Analyse einwilligst Google
+                (Abschnitt 3){proBuilt() ? ' und wenn du Quidey Pro bezahlst Stripe bzw. Google (Abschnitt 7)' : ''}. Ich verkaufe keine Daten und gebe
                 sie nicht für Werbung weiter. Eine automatisierte Entscheidungsfindung oder Profilbildung
                 (Art. 22 DSGVO) findet nicht statt.
             </p>
 
-            <h2>12. Deine Rechte</h2>
+            <h2>{privacyNo(12)}. Deine Rechte</h2>
             <p>Du hast das Recht auf</p>
             <ul>
                 <li>Auskunft über deine gespeicherten Daten (Art. 15 DSGVO),</li>
@@ -580,13 +609,13 @@ function Privacy() {
                 Datenschutz-Aufsichtsbehörde beschweren (Art. 77 DSGVO), etwa bei der Behörde deines Wohnorts.
             </p>
 
-            <h2>13. Sicherheit</h2>
+            <h2>{privacyNo(13)}. Sicherheit</h2>
             <p>
                 Die Verbindung ist per TLS verschlüsselt. Passwörter werden nur gehasht gespeichert, Anmeldungen lassen
                 sich im Profil auf allen Geräten beenden, und der Zugang zu Datenbank und Server ist beschränkt.
             </p>
 
-            <h2>14. Änderungen</h2>
+            <h2>{privacyNo(14)}. Änderungen</h2>
             <p>
                 Ändern sich die App oder die Rechtslage, passe ich diese Erklärung an. Es gilt die hier
                 veröffentlichte Fassung.
@@ -603,12 +632,12 @@ function Terms() {
             <h2>1. Geltungsbereich</h2>
             <p>
                 Diese Bedingungen gelten für die Nutzung der App „Quidey“ (Website, Android-App und zugehöriger Dienst),
-                betrieben von <V>{OWNER.name}</V> („Betreiber“), und für das Abo Quidey Pro (Abschnitt 8). Mit der
+                betrieben von <V>{OWNER.name}</V> („Betreiber“){proBuilt() && ', und für das Abo Quidey Pro (Abschnitt 8)'}. Mit der
                 Registrierung akzeptierst du sie.
             </p>
 
             <h2>2. Leistung und Beta</h2>
-            <p>
+            {proBuilt() ? <p>
                 Quidey ist eine kostenlos nutzbare App zur Planung von Aufgaben und Arbeitssitzungen und befindet sich in
                 einer geschlossenen Beta: Zugang haben Testerinnen und Tester (auf Antrag freigeschaltet) und wer Quidey Pro
                 hat. Nach der Beta steht Quidey allen offen; der kostenlose Plan hat dann Grenzen (derzeit 10 offene
@@ -616,7 +645,13 @@ function Terms() {
                 laufenden Woche), Quidey Pro nicht. Ein Anspruch auf Zugang zur Beta, auf bestimmte Funktionen oder auf
                 ständige Verfügbarkeit besteht nicht; für Quidey Pro gilt Abschnitt 8. Funktionen können geändert, eingeschränkt oder eingestellt werden. Wird der Dienst
                 eingestellt, kündige ich das nach Möglichkeit vorher an.
-            </p>
+            </p> : <p>
+                Quidey ist eine kostenlose App zur Planung von Aufgaben und Arbeitssitzungen und befindet sich in einer
+                geschlossenen Beta: Zugang haben Testerinnen und Tester (auf Antrag freigeschaltet). Ein Anspruch auf
+                Zugang, auf bestimmte Funktionen oder auf ständige Verfügbarkeit besteht nicht. Funktionen können
+                geändert, eingeschränkt oder eingestellt werden. Wird der Dienst eingestellt, kündige ich das nach
+                Möglichkeit vorher an.
+            </p>}
 
             <h2>3. Konto</h2>
             <p>
@@ -662,15 +697,21 @@ function Terms() {
             </p>
 
             <h2>7. Haftung</h2>
-            <p>
+            {proBuilt() ? <p>
                 Der Betreiber haftet unbeschränkt bei Vorsatz und grober Fahrlässigkeit, bei Verletzung von Leben,
                 Körper oder Gesundheit sowie nach dem Produkthaftungsgesetz. Bei der kostenlosen Nutzung ist die Haftung
                 im Übrigen ausgeschlossen, soweit gesetzlich zulässig; §§ 521, 599 BGB gelten entsprechend. Bei Quidey
                 Pro haftet der Betreiber für leichte Fahrlässigkeit nur bei Verletzung wesentlicher Vertragspflichten
                 und begrenzt auf den vorhersehbaren, vertragstypischen Schaden. Sichere wichtige Daten (z. B. Termine)
                 bitte zusätzlich an anderer Stelle.
-            </p>
+            </p> : <p>
+                Quidey wird unentgeltlich bereitgestellt. Der Betreiber haftet unbeschränkt bei Vorsatz und grober
+                Fahrlässigkeit, bei Verletzung von Leben, Körper oder Gesundheit sowie nach dem Produkthaftungsgesetz.
+                Im Übrigen ist die Haftung ausgeschlossen, soweit gesetzlich zulässig; §§ 521, 599 BGB gelten
+                entsprechend. Sichere wichtige Daten (z. B. Termine) bitte zusätzlich an anderer Stelle.
+            </p>}
 
+            {proBuilt() && <>
             <h2 id="pro">8. Quidey Pro</h2>
             <p>
                 <strong>Wozu:</strong> Quidey Pro ist ein freiwilliges Abo, mit dem du die Entwicklung von Quidey
@@ -745,8 +786,9 @@ function Terms() {
                 – Datum<br />
                 (*) Unzutreffendes streichen.
             </p>
+            </>}
 
-            <h2>10. Änderungen dieser Bedingungen</h2>
+            <h2>{termsNo(10)}. Änderungen dieser Bedingungen</h2>
             <p>
                 Der Betreiber kann diese Bedingungen mit Wirkung für die Zukunft ändern, etwa wegen neuer Funktionen oder
                 geänderter Rechtslage. Über wesentliche Änderungen wirst du vorher informiert; widersprichst du nicht
@@ -754,7 +796,7 @@ function Terms() {
                 Mitteilung hingewiesen. Bei Widerspruch kannst du dein Konto löschen.
             </p>
 
-            <h2>11. Schlussbestimmungen</h2>
+            <h2>{termsNo(11)}. Schlussbestimmungen</h2>
             <p>
                 Es gilt deutsches Recht; zwingende Verbraucherschutzvorschriften deines Wohnsitzstaates bleiben unberührt.
                 Ist eine Bestimmung unwirksam, bleiben die übrigen wirksam.

@@ -18,6 +18,7 @@ import { useLocation } from 'react-router-dom';
 import { useHashTarget } from '../features/layout/hashTarget';
 import { SECTION_AREAS } from '../features/search/places';
 import { isNativeApp } from '../features/native/native';
+import { APK_URL, apkOffer, formatSize } from '../features/native/androidApk';
 
 const LANGUAGES = [
     { code: 'de', label: 'german' },
@@ -218,6 +219,8 @@ export default function Settings(){
     const defaultSessionMinutes = useSelector((state) => state.settings.defaultSessionMinutes);
     const showSharedTasks = useSelector((state) => state.settings.showSharedTasks);
     const installState = useInstallState();
+    // Android in the browser: the app as a file (features/native/androidApk.js)
+    const apk = apkOffer();
     const dispatch = useDispatch();
     const { hash, key } = useLocation();
     const [chosenArea, setArea] = useState(() => areaFromHash(hash));
@@ -370,13 +373,22 @@ export default function Settings(){
                             </button>
                         </SettingRow>
                     </SettingSection>
+                    {/* Android phones: the real app to download (with notifications through Android) */}
+                    {apk &&
+                        <SettingSection id="android" title={t('androidApp')} description={t('androidAppHint')}>
+                            <SettingRow title={t('androidAppRow')}
+                                hint={fill(t('androidAppVersion'), { version: apk.version, size: formatSize(apk.size, language) })}>
+                                <a href={APK_URL} download="Quidey.apk" className={styles.installButton}>{t('androidAppDownload')}</a>
+                            </SettingRow>
+                        </SettingSection>}
                     {/* only where this browser can install it */}
                     {installState !== 'unavailable' &&
                         <SettingSection id="install" title={t('installApp')} description={t('settingsAppHint')}>
                             <SettingRow title={t('installApp')}
                                 hint={t({ installed: 'installAppDone', ios: 'installAppIos', prompt: 'installAppHint' }[installState])}>
                                 {installState === 'prompt' && (
-                                    <button type="button" className={styles.installButton} onClick={promptInstall}>{t('installAppButton')}</button>
+                                    // the APK is the screen's one primary where there is one
+                                    <button type="button" className={apk ? styles.tourButton : styles.installButton} onClick={promptInstall}>{t('installAppButton')}</button>
                                 )}
                             </SettingRow>
                         </SettingSection>}
