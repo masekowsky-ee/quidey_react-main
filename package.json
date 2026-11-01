@@ -14,6 +14,7 @@
     "build:android": "node scripts/apk.mjs sync",
     "apk": "node scripts/apk.mjs",
     "apk:release": "node scripts/apk.mjs release",
+    "apk:web": "node scripts/apk.mjs web",
     "android:open": "cap open android",
     "bundle": "node scripts/apk.mjs bundle"
   },

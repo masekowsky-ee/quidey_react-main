@@ -16,6 +16,7 @@ npm ci
 npm run apk           # debug APK  → android/app/build/outputs/apk/debug/app-debug.apk
 npm run bundle        # release AAB for Google Play → android/app/build/outputs/bundle/release/app-release.aab
 npm run apk:release   # signed release APK (to install directly)
+npm run apk:web       # signed release APK into ../quidey_react-main/public/download/ (the download in Settings → App)
 npm run build:android # only web build + cap sync (then build in Android Studio: npm run android:open)
 ```
 
@@ -32,6 +33,17 @@ and `cap sync android` first.
 - Before a release raise `versionCode` / `versionName` in `android/app/build.gradle`.
 
 Install a build: `adb install -r <apk>` or copy the APK to the phone.
+
+## Download from the web app
+
+Until the app is in Google Play (and besides it), Android phones can download it in the web app:
+Settings → App → "Android-App". `npm run apk:web` builds the signed release APK and copies it with
+its details (`quidey-android.json`: version, size, SHA-256) into the web repo's `public/download/`
+(git-ignored there; `WEB_REPO=…` for another path). It goes online with the next web deploy
+(`npm run build`, `npx wrangler deploy` in `quidey_react-main`). Raise `versionCode` / `versionName`
+in `android/app/build.gradle` for every new APK, or Android won't install it over the old one.
+Note: Google Play re-signs with its own app signing key, so an APK from the website and the Play
+Store version can't update each other; switching means uninstalling once.
 
 ## Taking over changes of the web app
 
