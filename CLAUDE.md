@@ -5,13 +5,17 @@ with live. German-first (de default, en available), currently a **closed beta** 
 with `is_pro` or `is_tester` (admins always) get into the app. The app runs on **app.quidey.com**;
 the public landing page on **quidey.com** is a separate static site (repo `quidey_landing`).
 
-Three repositories, side by side on this machine:
+Four repositories, side by side on this machine in `C:\Users\eesge\Quidey\`:
 
 | Repo | Path | GitHub |
 |---|---|---|
-| Frontend (this one) | `C:\Users\eesge\quidey_react-main` | masekowsky-ee/quidey_react-main |
-| Backend | `C:\Users\eesge\quidey_react-backend` | masekowsky-ee/quidey_react-backend |
-| Landing page (Astro, static) | `C:\Users\eesge\quidey_landing` | not on GitHub yet |
+| Frontend (this one) | `C:\Users\eesge\Quidey\quidey_react-main` | masekowsky-ee/quidey_react-main |
+| Android app (Capacitor; a clone of this repo + `android/`) | `C:\Users\eesge\Quidey\quidey_android` | not on GitHub yet |
+| Backend | `C:\Users\eesge\Quidey\quidey_react-backend` | masekowsky-ee/quidey_react-backend |
+| Landing page (Astro, static) | `C:\Users\eesge\Quidey\quidey_landing` | not on GitHub yet |
+
+Everything for the app is written here first; the Android repo takes it over with
+`git pull web <branch>` and only adds what is truly Android (see "Android app" below).
 
 `README.md` is still the untouched Vite template; this file is the real description.
 
@@ -418,6 +422,59 @@ the app as the other one, signing out takes over the next remembered account), `
 `pushAsked` (push notifications on this device), `onboarding:<username>` (a new account's action
 count, whether install / rating were asked). `public/theme-init.js` applies
 the theme before React loads.
+
+## Quidey Pro, access, sign in with Google, Android app
+
+- **Access** (backend `utils/access.js`): `ACCESS_MODE=beta` (default): testers (beta access given
+  by an admin: approving a request / `npm run pro -- grant` sets `is_tester`), Pro and admins get
+  in; taking tester away takes the access away. `ACCESS_MODE=open` (after the beta): everybody,
+  with the free plan's limits unless Pro / tester / admin (`utils/limits.js`: 10 open tasks,
+  5 events ahead, 3 groups, 1 shared session, 3 friends incl. own open requests, statistics of the
+  last 7 days; new ones get 403 `LIMIT_REACHED { limit, max }`, what exists stays). Pro =
+  `users.is_pro` (a gift: admin "Pro (Geschenk)", CLI `gift|ungift`) or a running subscription
+  (`users.pro_until`). Pro never sees test features. Migration 035 turned every old `is_pro`
+  (= beta access back then) into a tester. `/api/me`: `isPro` still means "may use the app" (old
+  app versions read it), plus `pro { active, gift, until }`, `accessMode`, `limits`/`usage`
+  (null without limits), `hasPassword`, `googleLinked` (→ `state.auth.access`).
+- **Quidey Pro** (supporting the development: 2,99 €/month, 25 €/year = "Spare 30 %", 10,88 €;
+  Kleinunternehmer § 19 UStG, no VAT): `/pro` (`components/pro/ProPage.jsx`, reachable from the
+  beta page too, menu "Quidey unterstützen" with the `heart` icon, profile card `#pro`). Texts in
+  `i18n/proTexts.js` (kind: why it exists first, the free Quidey stays welcome). Web: Stripe
+  (`POST /api/billing/checkout` → Checkout, `/api/billing/portal`, webhook
+  `/api/billing/stripe-webhook` with the raw body); Android app: Google Play Billing through the
+  app's plugin `QuideyBilling` (`features/pro/pro.js`: `playPlans`, `buyInPlay`,
+  `restorePlayPurchases` on every start, `managePlaySubscription`), the server checks tokens
+  (`POST /api/billing/play`, Play Developer API) and gets real-time notifications
+  (`/api/billing/play-notifications?token=`). In the app never a word of Stripe or web prices
+  (Play policy). `GET /api/billing` → status + `playAccountId` (HMAC of the user id, handed to Play
+  as obfuscatedAccountId). Backend `utils/billing.js`, table `subscriptions`, `refreshProUntil`;
+  deleting an account cancels its subscriptions. `pro:changed` (socket) → App re-reads access.
+  Free plan full → `apiFetch` fires `LIMIT_EVENT` → `components/pro/LimitDialog.jsx`; Stats shows
+  only this week then (`usePlan().limited`).
+- **Cancel button** (§ 312k BGB): `/kuendigen` (`CANCEL_PATH`, a public legal page,
+  `legal/CancelForm.jsx`, "Jetzt kündigen" → `POST /api/billing/cancel`, no sign-in; Stripe
+  subscriptions of the matching account end at period end, a confirmation mail with the time goes
+  out at once, a copy to `CONTACT_TO`); linked in `LegalFooter` on every screen, on the landing page
+  and on `/pro`. Terms § 8 Quidey Pro, § 9 Widerrufsbelehrung (`#pro`, `#widerruf`); privacy § 7.
+- **Sign in with Google** (`features/auth/google.js`, `components/auth/GoogleSignIn.jsx`): the
+  server hands out a single-use nonce (`GET /api/auth/google/nonce`), the token must carry it.
+  Web: redirect to Google (`response_type=id_token`, `state` in sessionStorage) and back to
+  `/auth/google` (SignIn → Profile `googleReturn`), no Google script, CSP unchanged. App: native
+  account picker (plugin `QuideyGoogle`, Credential Manager). `POST /api/auth/google` signs in
+  (found by `users.google_sub`, else by email: linked; an unconfirmed account found by email loses
+  its password and logins) or answers `{ signup }` → `GoogleSignupForm` (display name, username,
+  birth date, consents) → `POST /api/auth/google/register` (no password: `has_password=false`;
+  setting the first password needs no current one, deleting confirms with the username).
+  `VITE_GOOGLE_CLIENT_ID` (frontend) = `GOOGLE_CLIENT_IDS` (backend), the "Web application" client.
+- **Android app** (Capacitor 8, repo `quidey_android`): the same build in a WebView served as
+  `https://app.quidey.com` (server.hostname: CORS and autofill as on the web). Native-only code:
+  `features/native/native.js` (`isNativeApp()`, back button, system bars, resume) and
+  `features/native/nativePush.js` (FCM: the token goes to the server as endpoint `fcm:<token>`,
+  one notification channel per kind, built only with `VITE_NATIVE_PUSH=on`, i.e. when
+  `android/app/google-services.json` exists). Shared files only branch on `isNativeApp()`: no
+  service worker, install row "installed", push via FCM (`push.js` "app" branches), Pro via Play.
+  Backend `utils/fcm.js` (FCM HTTP v1, `FIREBASE_SERVICE_ACCOUNT_FILE`); `push_subscriptions` rows
+  with `fcm:` endpoints have no keys (migration 034).
 
 ## API access
 

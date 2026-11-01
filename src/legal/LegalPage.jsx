@@ -3,6 +3,7 @@ import styles from './Legal.module.css';
 import { OWNER, PROCESSORS, LEGAL_VERSION_DATE, isPlaceholder } from './owner';
 import { useTranslation } from '../i18n/useTranslation';
 import ContactForm from './ContactForm';
+import CancelForm from './CancelForm';
 import { LegalFooter } from './LegalFooter';
 
 // The legal pages. German law, so the texts are German; English readers get a short note.
@@ -13,6 +14,7 @@ const LEGAL_PAGES = {
     '/datenschutz': { title: 'Datenschutzerklärung', Body: Privacy },
     '/nutzungsbedingungen': { title: 'Nutzungsbedingungen', Body: Terms },
     '/kontakt': { title: 'Kontakt', Body: Contact },
+    '/kuendigen': { title: 'Verträge hier kündigen', Body: Cancel },
 };
 
 // A value from owner.js; unfilled placeholders stand out so they can't slip through
@@ -54,6 +56,20 @@ function Contact() {
                 innerhalb von 1–2 Werktagen. Du erreichst mich auch per E-Mail an <V>{OWNER.email}</V>.
             </p>
             <ContactForm />
+        </>
+    );
+}
+
+// § 312k BGB: Quidey Pro can be cancelled here, without signing in
+function Cancel() {
+    return (
+        <>
+            <p>
+                Hier kündigst du dein Abo von Quidey Pro, das du über die Website abgeschlossen hast – ohne
+                Anmeldung. Du bekommst sofort eine Bestätigung per E-Mail mit Datum und Uhrzeit des Eingangs.
+                Angemeldet geht es auch über „Abo verwalten“ auf der Seite <Link to="/pro">Quidey unterstützen</Link>.
+            </p>
+            <CancelForm />
         </>
     );
 }
@@ -139,6 +155,9 @@ function Privacy() {
                 <li>Es gibt keine Werbung, kein Tracking, keine Analyse-Tools und keine Cookies.</li>
                 <li>Schriften und alle Dateien der App werden von Quidey selbst ausgeliefert, nicht von Dritten.</li>
                 <li>Du kannst dein Konto jederzeit im Profil selbst löschen. Dabei werden deine Daten gelöscht.</li>
+                <li>Bezahlst du für Quidey Pro, läuft das über Stripe bzw. Google Play; deine Karten- oder Kontodaten
+                    sehe ich nicht (Abschnitt 7).</li>
+                <li>Mit Google anmelden ist freiwillig; ein Konto mit E-Mail-Adresse und Passwort geht genauso.</li>
             </ul>
 
             <h2>3. Aufruf der Website (Hosting)</h2>
@@ -163,6 +182,13 @@ function Privacy() {
                 auf der Startseite deine E-Mail-Adresse ein, reicht dein Browser sie nur an das Registrierungsformular
                 der App weiter (im Teil der Adresse nach „#“, der nicht an einen Server übertragen wird); gespeichert
                 wird sie erst, wenn du dich registrierst.
+            </p>
+            <p>
+                <strong>Android-App:</strong> Die Android-App „Quidey“ enthält die Dateien der App selbst und spricht
+                nur mit der API (unten); Cloudflare ist dabei nicht beteiligt. Du bekommst sie über Google Play; was
+                Google beim Herunterladen und Aktualisieren verarbeitet, regelt Google in eigener Verantwortung
+                (Datenschutzerklärung von Google). In der App gelten dieselben Abschnitte wie im Browser; was nur in
+                der App anders ist, steht jeweils dabei.
             </p>
             <p>
                 Die Programmierschnittstelle (API) und die Datenbank laufen auf einem Server bei <V>{PROCESSORS.backendHost}</V>.
@@ -208,6 +234,20 @@ function Privacy() {
                 deine E-Mail-Adresse und der Inhalt der Mail verarbeitet. Resend kann Daten in den USA verarbeiten;
                 Grundlage dafür sind die EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) im
                 Auftragsverarbeitungsvertrag mit Resend.
+            </p>
+            <p>
+                <strong>Anmelden mit Google:</strong> Statt mit Passwort kannst du dich mit deinem Google-Konto anmelden
+                oder registrieren. Im Browser führt dich Quidey dazu auf die Anmeldeseite von Google und zurück; in der
+                Android-App wählst du das Konto in der Kontoauswahl deines Handys. Quidey lädt dafür keine Skripte von
+                Google. Google (<V>{PROCESSORS.google}</V>) teilt Quidey dabei nur mit: eine eindeutige Kennung deines
+                Google-Kontos, deine E-Mail-Adresse, ob Google sie bestätigt hat, und deinen Namen. Gespeichert werden
+                die Kennung (damit Google dich beim nächsten Mal wiedererkennt) und, bei einem neuen Konto, die
+                E-Mail-Adresse als bestätigte Adresse deines Kontos; der Name wird dir nur als Anzeigename
+                vorgeschlagen. Benutzername, Geburtsdatum und deine Zustimmungen fragt Quidey wie bei jeder Registrierung
+                selbst ab. Gibt es schon ein Konto mit dieser E-Mail-Adresse, wird Google damit verbunden. Google erfährt,
+                dass du dich bei Quidey anmeldest; das regelt Google in eigener Verantwortung. Google kann Daten auch in
+                den USA verarbeiten (Google LLC ist unter dem EU-US Data Privacy Framework zertifiziert, Art. 45 DSGVO).
+                Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO; die Anmeldung mit Google ist freiwillig.
             </p>
             <p>
                 <strong>Beta-Zugang:</strong> Während der geschlossenen Beta kannst du Zugang beantragen. Dabei speichere
@@ -380,8 +420,54 @@ function Privacy() {
                 DSGVO; das Speichern auf deinem Gerät ist für diese von dir ausdrücklich gewünschte Funktion unbedingt
                 erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG).
             </p>
+            <p>
+                <strong>Benachrichtigungen in der Android-App:</strong> In der App laufen Benachrichtigungen über Firebase
+                Cloud Messaging von <V>{PROCESSORS.google}</V> („FCM“). Schaltest du sie ein (und erlaubst sie Android),
+                vergibt FCM deinem Gerät eine Kennung (Token), die Quidey wie oben die Adresse eines Browsers speichert;
+                Quidey legt außerdem je Art einen Benachrichtigungskanal an, den du in den Android-Einstellungen einzeln
+                stummschalten kannst. Anders als im Browser ist der Inhalt dabei nicht Ende-zu-Ende verschlüsselt: Er wird
+                verschlüsselt (TLS) an Google übertragen und von Google an dein Gerät zugestellt; Google verarbeitet dabei
+                Token, Titel und Text der Benachrichtigung als Auftragsverarbeiter, auch in den USA (EU-US Data Privacy
+                Framework, ergänzend Standardvertragsklauseln). Alles Weitere gilt wie oben.
+            </p>
 
-            <h2>7. Kontaktformular, Feedback und E-Mail</h2>
+            <h2>7. Quidey Pro (Bezahlung)</h2>
+            <p>
+                Quidey ist kostenlos nutzbar. Wer die Entwicklung unterstützen möchte, kann Quidey Pro abonnieren
+                (Nutzungsbedingungen, Abschnitt 8). Dafür speichere ich zu deinem Konto: Plan (monatlich oder jährlich),
+                Zahlungsweg, Status, bis wann bezahlt ist, ob das Abo zum Ende gekündigt ist, wann es angelegt und
+                geändert wurde, und die Kennungen beim Zahlungsdienst (Kunden- und Abo-Nummer bei Stripe bzw. das
+                Kauf-Token von Google Play). Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, für die Aufbewahrung
+                Art. 6 Abs. 1 lit. c DSGVO.
+            </p>
+            <p>
+                <strong>Im Browser</strong> bezahlst du auf der Bezahlseite von <V>{PROCESSORS.payments}</V> („Stripe“).
+                Stripe erhält dazu deine E-Mail-Adresse und eine Kundennummer zu deinem Konto und verarbeitet deine
+                Zahlungsdaten (z. B. Karte, Name, Land) selbst; ich sehe sie nicht. Für die Zahlungsabwicklung und die
+                Betrugsvorbeugung ist Stripe eigener Verantwortlicher; Stripe kann Daten auch in den USA verarbeiten
+                (EU-US Data Privacy Framework, ergänzend Standardvertragsklauseln). Abo ändern, Rechnungen ansehen und
+                kündigen kannst du im Kundenbereich von Stripe („Abo verwalten“).
+            </p>
+            <p>
+                <strong>In der Android-App</strong> bezahlst du über Google Play; Verkäufer gegenüber dir ist dabei Google,
+                das deine Zahlungsdaten in eigener Verantwortung verarbeitet. Quidey erhält von Google nur das Kauf-Token
+                und prüft damit bei Google, welcher Plan bis wann bezahlt ist; Google meldet Änderungen (Verlängerung,
+                Kündigung) von selbst an den Server. Damit ein Kauf nur deinem Konto zugeordnet werden kann, gibt die App
+                Google dazu einen Prüfwert mit, der aus deiner Kontonummer berechnet ist und keine weiteren Angaben enthält.
+            </p>
+            <p>
+                <strong>Kündigungsbutton:</strong> Über „Verträge hier kündigen“ kannst du ohne Anmeldung kündigen. Dabei
+                verarbeite ich Namen, E-Mail-Adresse, optional Benutzername, Art der Kündigung, gegebenenfalls den Grund
+                und den Zeitpunkt des Eingangs, schicke dir sofort eine Bestätigung (über Resend, Abschnitt 4) und mir eine
+                Kopie zur Bearbeitung. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b und c DSGVO (§ 312k BGB).
+            </p>
+            <p>
+                Rechnungs- und Buchungsbelege bewahre ich so lange auf, wie es das Steuer- und Handelsrecht verlangt
+                (bis zu 10 Jahre, § 147 AO, § 257 HGB); die Abo-Einträge verlieren beim Löschen deines Kontos den Bezug zu
+                ihm, bleiben aber dafür erhalten. Ein laufendes Abo wird beim Löschen des Kontos sofort beendet.
+            </p>
+
+            <h2>8. Kontaktformular, Feedback und E-Mail</h2>
             <p>
                 Schreibst du mir über das Kontaktformular oder per E-Mail, verarbeite ich deinen Namen, deine
                 E-Mail-Adresse und deine Nachricht, um sie zu beantworten. Sendest du in der App Feedback, gehen
@@ -406,7 +492,7 @@ function Privacy() {
                 App anhand der Rückmeldungen ihrer Tester).
             </p>
 
-            <h2>8. Speicherung auf deinem Gerät</h2>
+            <h2>9. Speicherung auf deinem Gerät</h2>
             <p>
                 Quidey setzt keine Cookies. Im lokalen Speicher deines Browsers (localStorage) liegen nur:
             </p>
@@ -430,6 +516,13 @@ function Privacy() {
                 <li>Schwierigkeit und Bestwerte der Spiele.</li>
             </ul>
             <p>
+                Während einer Anmeldung mit Google merkt sich dein Browser bis zur Rückkehr von Google einen Zufallswert
+                (sessionStorage), damit nur eine von dir begonnene Anmeldung angenommen wird; er wird danach gelöscht.
+                In der Android-App liegt dasselbe im Speicher der App; es wird nicht in Datensicherungen deines Handys
+                übernommen. Die App braucht keinen Service Worker und keinen Cache-Speicher (unten): Ihre Dateien sind
+                in der App selbst enthalten.
+            </p>
+            <p>
                 Damit Quidey sich als App installieren lässt, schnell startet und auch ohne Verbindung öffnet, legt ein
                 Service Worker die Programmdateien der App (Seite, Skripte, Stylesheets, Schrift, Icons) im Cache-Speicher
                 deines Browsers ab. Darin liegen keine personenbezogenen Daten: Deine Aufgaben, Nachrichten und
@@ -445,7 +538,7 @@ function Privacy() {
                 dient es allein der Sicherheit des Dienstes (§ 25 Abs. 2 Nr. 2 TDDDG, Art. 6 Abs. 1 lit. f DSGVO).
             </p>
 
-            <h2>9. Speicherdauer</h2>
+            <h2>10. Speicherdauer</h2>
             <p>
                 Deine Konto- und Inhaltsdaten speichere ich, solange dein Konto besteht. Löschst du dein Konto, werden
                 Konto, Aufgaben, Events, Event-Typen, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen,
@@ -455,22 +548,24 @@ function Privacy() {
                 und von dir angelegte Einträge in Family-Kalendern verlieren den Bezug zu deinem Konto. Hast du eine
                 Family gegründet, übernimmt das am längsten beigetretene Mitglied sie; ist niemand sonst darin, wird
                 sie mit Kalender und Chat gelöscht.
-                Wie lange Feedback und Kontaktanfragen aufbewahrt werden, steht in Abschnitt 7.
+                Wie lange Feedback und Kontaktanfragen aufbewahrt werden, steht in Abschnitt 8, wie lange
+                Zahlungsbelege, in Abschnitt 7.
                 In Datensicherungen können Daten bis zu deren turnusmäßiger Überschreibung (höchstens 30 Tage)
                 erhalten bleiben. Gesetzliche Aufbewahrungspflichten bleiben unberührt.
             </p>
 
-            <h2>10. Empfänger</h2>
+            <h2>11. Empfänger</h2>
             <p>
-                Daten erhalten nur die oben genannten Auftragsverarbeiter (Hosting, E-Mail-Versand) sowie – soweit du
-                es veranlasst – deine Freunde (auch als Empfänger deiner Nachrichten), Mitglieder gemeinsamer
-                Sitzungen und Families und, wenn du Benachrichtigungen eingeschaltet hast, der Push-Dienst deines
-                Browsers (nur verschlüsselt, siehe Abschnitt 6). Ich verkaufe keine Daten und gebe
+                Daten erhalten nur die oben genannten Auftragsverarbeiter (Hosting, E-Mail-Versand, in der Android-App
+                Firebase Cloud Messaging) sowie – soweit du es veranlasst – deine Freunde (auch als Empfänger deiner
+                Nachrichten), Mitglieder gemeinsamer Sitzungen und Families, wenn du Benachrichtigungen eingeschaltet
+                hast der Push-Dienst deines Browsers (nur verschlüsselt, siehe Abschnitt 6), wenn du dich mit Google
+                anmeldest Google (Abschnitt 4) und wenn du Quidey Pro bezahlst Stripe bzw. Google (Abschnitt 7). Ich verkaufe keine Daten und gebe
                 sie nicht für Werbung weiter. Eine automatisierte Entscheidungsfindung oder Profilbildung
                 (Art. 22 DSGVO) findet nicht statt.
             </p>
 
-            <h2>11. Deine Rechte</h2>
+            <h2>12. Deine Rechte</h2>
             <p>Du hast das Recht auf</p>
             <ul>
                 <li>Auskunft über deine gespeicherten Daten (Art. 15 DSGVO),</li>
@@ -485,13 +580,13 @@ function Privacy() {
                 Datenschutz-Aufsichtsbehörde beschweren (Art. 77 DSGVO), etwa bei der Behörde deines Wohnorts.
             </p>
 
-            <h2>12. Sicherheit</h2>
+            <h2>13. Sicherheit</h2>
             <p>
                 Die Verbindung ist per TLS verschlüsselt. Passwörter werden nur gehasht gespeichert, Anmeldungen lassen
                 sich im Profil auf allen Geräten beenden, und der Zugang zu Datenbank und Server ist beschränkt.
             </p>
 
-            <h2>13. Änderungen</h2>
+            <h2>14. Änderungen</h2>
             <p>
                 Ändern sich die App oder die Rechtslage, passe ich diese Erklärung an. Es gilt die hier
                 veröffentlichte Fassung.
@@ -507,15 +602,19 @@ function Terms() {
 
             <h2>1. Geltungsbereich</h2>
             <p>
-                Diese Bedingungen gelten für die Nutzung der App „Quidey“ (Website und zugehöriger Dienst), betrieben
-                von <V>{OWNER.name}</V> („Betreiber“). Mit der Registrierung akzeptierst du sie.
+                Diese Bedingungen gelten für die Nutzung der App „Quidey“ (Website, Android-App und zugehöriger Dienst),
+                betrieben von <V>{OWNER.name}</V> („Betreiber“), und für das Abo Quidey Pro (Abschnitt 8). Mit der
+                Registrierung akzeptierst du sie.
             </p>
 
             <h2>2. Leistung und Beta</h2>
             <p>
-                Quidey ist eine kostenlose App zur Planung von Aufgaben und Arbeitssitzungen und befindet sich in einer
-                geschlossenen Beta. Ein Anspruch auf Zugang, auf bestimmte Funktionen oder auf ständige Verfügbarkeit
-                besteht nicht. Funktionen können geändert, eingeschränkt oder eingestellt werden. Wird der Dienst
+                Quidey ist eine kostenlos nutzbare App zur Planung von Aufgaben und Arbeitssitzungen und befindet sich in
+                einer geschlossenen Beta: Zugang haben Testerinnen und Tester (auf Antrag freigeschaltet) und wer Quidey Pro
+                hat. Nach der Beta steht Quidey allen offen; der kostenlose Plan hat dann Grenzen (derzeit 10 offene
+                Aufgaben, 5 anstehende Termine, 3 Gruppen, 1 gemeinsame Sitzung gleichzeitig, 3 Freunde, Statistiken der
+                laufenden Woche), Quidey Pro nicht. Ein Anspruch auf Zugang zur Beta, auf bestimmte Funktionen oder auf
+                ständige Verfügbarkeit besteht nicht; für Quidey Pro gilt Abschnitt 8. Funktionen können geändert, eingeschränkt oder eingestellt werden. Wird der Dienst
                 eingestellt, kündige ich das nach Möglichkeit vorher an.
             </p>
 
@@ -564,13 +663,90 @@ function Terms() {
 
             <h2>7. Haftung</h2>
             <p>
-                Quidey wird unentgeltlich bereitgestellt. Der Betreiber haftet unbeschränkt bei Vorsatz und grober
-                Fahrlässigkeit, bei Verletzung von Leben, Körper oder Gesundheit sowie nach dem Produkthaftungsgesetz.
-                Im Übrigen ist die Haftung ausgeschlossen, soweit gesetzlich zulässig; §§ 521, 599 BGB gelten
-                entsprechend. Sichere wichtige Daten (z. B. Termine) bitte zusätzlich an anderer Stelle.
+                Der Betreiber haftet unbeschränkt bei Vorsatz und grober Fahrlässigkeit, bei Verletzung von Leben,
+                Körper oder Gesundheit sowie nach dem Produkthaftungsgesetz. Bei der kostenlosen Nutzung ist die Haftung
+                im Übrigen ausgeschlossen, soweit gesetzlich zulässig; §§ 521, 599 BGB gelten entsprechend. Bei Quidey
+                Pro haftet der Betreiber für leichte Fahrlässigkeit nur bei Verletzung wesentlicher Vertragspflichten
+                und begrenzt auf den vorhersehbaren, vertragstypischen Schaden. Sichere wichtige Daten (z. B. Termine)
+                bitte zusätzlich an anderer Stelle.
             </p>
 
-            <h2>8. Änderungen dieser Bedingungen</h2>
+            <h2 id="pro">8. Quidey Pro</h2>
+            <p>
+                <strong>Wozu:</strong> Quidey Pro ist ein freiwilliges Abo, mit dem du die Entwicklung von Quidey
+                unterstützt. Es hebt die Grenzen des kostenlosen Plans auf (Abschnitt 2) und gibt während der Beta Zugang
+                zur App. Funktionen im Test bleiben Testerinnen und Testern vorbehalten. Ein Anspruch auf bestimmte
+                künftige Funktionen besteht nicht.
+            </p>
+            <p>
+                <strong>Preise:</strong> 2,99 € im Monat oder 25,00 € im Jahr. Das sind Endpreise; gemäß § 19 UStG wird
+                keine Umsatzsteuer berechnet. Im Voraus fällig für den jeweiligen Zeitraum.
+            </p>
+            <p>
+                <strong>Vertragsschluss:</strong> Im Browser wählst du einen Plan und gelangst zur Bezahlseite von Stripe;
+                mit dem Klick auf den Bestellknopf dort gibst du ein verbindliches Angebot ab, das mit der Bestätigung der
+                Zahlung angenommen ist. In der Android-App kaufst du über Google Play; dafür gelten zusätzlich die
+                Bedingungen von Google Play, Verkäufer und Ansprechpartner für Zahlung, Erstattung und Kündigung ist dort
+                Google.
+            </p>
+            <p>
+                <strong>Laufzeit und Kündigung:</strong> Das Abo läuft einen Monat bzw. ein Jahr und verlängert sich
+                automatisch um denselben Zeitraum, wenn du nicht kündigst. Du kannst jederzeit zum Ende des laufenden
+                Zeitraums kündigen: angemeldet über „Abo verwalten“ auf der Seite „Quidey unterstützen“, ohne Anmeldung
+                über <Link to="/kuendigen">„Verträge hier kündigen“</Link> unten auf jeder Seite, oder in Textform an
+                {' '}<V>{OWNER.email}</V>. Abos aus Google Play kündigst du im Play Store. Das Recht zur außerordentlichen
+                Kündigung aus wichtigem Grund bleibt unberührt. Löschst du dein Konto, endet das Abo sofort; bereits
+                bezahlte Zeiträume werden dann nicht anteilig erstattet, außer im Fall eines Widerrufs (unten).
+            </p>
+            <p>
+                <strong>Preisänderungen</strong> gelten für ein laufendes Abo nur, wenn du ihnen zustimmst; ich informiere
+                dich mindestens vier Wochen vorher. Stimmst du nicht zu, endet das Abo zum Ende des bezahlten Zeitraums.
+            </p>
+            <p>
+                <strong>Zahlung:</strong> Schlägt eine Zahlung fehl, versucht der Zahlungsdienst sie einige Tage lang
+                erneut; gelingt sie nicht, endet Pro mit dem bezahlten Zeitraum. Deine Inhalte bleiben erhalten.
+            </p>
+
+            <h2 id="widerruf">9. Widerrufsbelehrung</h2>
+            <p><strong>Widerrufsrecht</strong></p>
+            <p>
+                Du hast das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen. Die
+                Widerrufsfrist beträgt vierzehn Tage ab dem Tag des Vertragsabschlusses. Um dein Widerrufsrecht
+                auszuüben, musst du mir (<V>{OWNER.name}</V>, <V>{OWNER.street}</V>, <V>{OWNER.city}</V>, E-Mail:
+                {' '}<V>{OWNER.email}</V>) mittels einer eindeutigen Erklärung (z. B. eine E-Mail) über deinen
+                Entschluss, diesen Vertrag zu widerrufen, informieren. Du kannst dafür das unten stehende
+                Muster-Widerrufsformular verwenden, das jedoch nicht vorgeschrieben ist. Zur Wahrung der Widerrufsfrist
+                reicht es aus, dass du die Mitteilung über die Ausübung des Widerrufsrechts vor Ablauf der Widerrufsfrist
+                absendest.
+            </p>
+            <p><strong>Folgen des Widerrufs</strong></p>
+            <p>
+                Wenn du diesen Vertrag widerrufst, zahle ich dir alle Zahlungen, die ich von dir erhalten habe,
+                unverzüglich und spätestens binnen vierzehn Tagen ab dem Tag zurück, an dem die Mitteilung über deinen
+                Widerruf bei mir eingegangen ist – vollständig, auch wenn du Pro in dieser Zeit schon genutzt hast. Für
+                diese Rückzahlung verwende ich dasselbe Zahlungsmittel, das du bei der ursprünglichen Transaktion
+                eingesetzt hast, es sei denn, mit dir wurde ausdrücklich etwas anderes vereinbart; in keinem Fall werden
+                dir wegen dieser Rückzahlung Entgelte berechnet.
+            </p>
+            <p>
+                Für Käufe über Google Play gelten für Widerruf und Erstattung die Regeln von Google Play, da Google dort
+                der Verkäufer ist.
+            </p>
+            <p><strong>Muster-Widerrufsformular</strong></p>
+            <p>
+                (Wenn du den Vertrag widerrufen willst, fülle bitte dieses Formular aus und sende es zurück.)<br />
+                – An <V>{OWNER.name}</V>, <V>{OWNER.street}</V>, <V>{OWNER.city}</V>, E-Mail: <V>{OWNER.email}</V>:<br />
+                – Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag über die Erbringung der
+                folgenden Dienstleistung: Quidey Pro (monatlich / jährlich)<br />
+                – Bestellt am (*)<br />
+                – Name des/der Verbraucher(s)<br />
+                – Anschrift des/der Verbraucher(s)<br />
+                – Unterschrift des/der Verbraucher(s) (nur bei Mitteilung auf Papier)<br />
+                – Datum<br />
+                (*) Unzutreffendes streichen.
+            </p>
+
+            <h2>10. Änderungen dieser Bedingungen</h2>
             <p>
                 Der Betreiber kann diese Bedingungen mit Wirkung für die Zukunft ändern, etwa wegen neuer Funktionen oder
                 geänderter Rechtslage. Über wesentliche Änderungen wirst du vorher informiert; widersprichst du nicht
@@ -578,7 +754,7 @@ function Terms() {
                 Mitteilung hingewiesen. Bei Widerspruch kannst du dein Konto löschen.
             </p>
 
-            <h2>9. Schlussbestimmungen</h2>
+            <h2>11. Schlussbestimmungen</h2>
             <p>
                 Es gilt deutsches Recht; zwingende Verbraucherschutzvorschriften deines Wohnsitzstaates bleiben unberührt.
                 Ist eine Bestimmung unwirksam, bleiben die übrigen wirksam.

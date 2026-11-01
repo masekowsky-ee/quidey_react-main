@@ -176,3 +176,40 @@
         align-self: stretch;
     }
 }
+
+/* "Or support Quidey with Pro": gets in right away */
+.proCard {
+    display: flex;
+    gap: 0.85rem;
+    align-items: flex-start;
+    margin-top: 1.25rem;
+    padding: 1rem 1.1rem;
+    text-decoration: none;
+    color: var(--text);
+    background: linear-gradient(150deg, color-mix(in srgb, var(--primary) 14%, transparent), transparent 70%), var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition: border-color var(--ease);
+}
+
+.proCard:hover {
+    border-color: var(--border-strong);
+}
+
+.proCard > span {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    line-height: 1.45;
+}
+
+.proCard strong {
+    color: var(--text-h);
+}
+
+.proHeart {
+    flex: none;
+    width: 1.6rem;
+    height: 1.6rem;
+    color: var(--primary);
+}
