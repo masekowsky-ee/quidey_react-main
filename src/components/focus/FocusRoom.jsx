@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { useIsTester } from '../../features/auth/tester';
 import { selectFocusTask, setFocusTask, selectTaskTime } from '../../features/session/sessionAction';
 import { selectSharedSoloTasks } from '../../features/together/togetherAction';
 import { updateTaskProps } from '../../features/tasks/taskAction';
@@ -109,6 +110,7 @@ export default function FocusRoom() {
     const task = useSelector(selectFocusTask);
     const [notesVersion, setNotesVersion] = useState(0);
     const { full, toggle, supported } = useFullscreen();
+    const isTester = useIsTester();
 
     return (
         <div className={styles.page} data-part="focus-room">
@@ -140,7 +142,11 @@ export default function FocusRoom() {
                     </div>
                 </div>
                 <aside className={styles.notesCol} aria-labelledby="notebook-title">
-                    <h2 id="notebook-title" className={styles.cardLabel}><Icon name="note" size={16} /> {t('notebook')}</h2>
+                    <h2 id="notebook-title" className={styles.cardLabel}>
+                        <Icon name="note" size={16} /> {t('notebook')}
+                        {/* testers: every note, with folders, tags, archive and trash */}
+                        {isTester && <Link to="/notes" className={styles.allNotes}>{t('notesOpenAll')} <Icon name="arrowRight" size={14} /></Link>}
+                    </h2>
                     <Notebook key={notesVersion} focusTask={task} />
                 </aside>
             </div>

@@ -295,6 +295,8 @@ describe('the command bar', () => {
 })
 
 describe('the departure board', () => {
+    // a tester's board names a task's collection: they load once (none here)
+    beforeEach(() => apiFetch.mockResolvedValue([]))
     const at = (h, m) => `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`
     const todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
 

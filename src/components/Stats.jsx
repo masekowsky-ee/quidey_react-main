@@ -129,7 +129,11 @@ function Overview({ period, stats, error, t, locale }) {
         ms: type.ms,
         note: fill(t(type.count === 1 ? 'eventCountOne' : 'eventCount'), { n: type.count }),
     }));
-    const groupRows = stats.groups.map(group => ({ key: group.name, label: group.name, color: groupColorAttr(group), ms: group.ms }));
+    // testers get focus per collection in place of per group (the server sends it only to them)
+    const byCollection = Array.isArray(stats.collections);
+    const groupRows = byCollection
+        ? stats.collections.map(c => ({ key: c.id, label: c.emoji ? `${c.emoji} ${c.name}` : c.name, color: groupColorAttr(c), ms: c.ms }))
+        : stats.groups.map(group => ({ key: group.name, label: group.name, color: groupColorAttr(group), ms: group.ms }));
 
     return (
         <>
@@ -154,8 +158,8 @@ function Overview({ period, stats, error, t, locale }) {
                     <Link to="/settings#event-types" className={styles.cardLink}>{t('eventTypesManage')}</Link>
                 </section>
                 <section className={styles.card} aria-labelledby="stats-groups">
-                    <h2 id="stats-groups" className={styles.cardTitle}>{t('statsByGroup')}</h2>
-                    <Bars rows={groupRows} empty={t('statsNoGroups')} />
+                    <h2 id="stats-groups" className={styles.cardTitle}>{t(byCollection ? 'statsByCollection' : 'statsByGroup')}</h2>
+                    <Bars rows={groupRows} empty={t(byCollection ? 'statsNoCollections' : 'statsNoGroups')} />
                 </section>
             </div>
         </>

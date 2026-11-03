@@ -15,6 +15,8 @@ import { endOf, endDayOffset, fromEnd } from '../../features/tasks/eventTimes';
 import { EventTypePicker, KindSwitch } from '../task/KindFields.jsx';
 import { matchEventType } from '../../features/tasks/kinds';
 import { createdText } from '../../features/tasks/created';
+import { selectIsTester } from '../../features/auth/tester';
+import CollectionPicker from '../collections/CollectionPicker.jsx';
 import Icon from './icons.jsx';
 
 // What is set under "More options", for the line next to the (closed) toggle:
@@ -48,6 +50,7 @@ function optionsSummary(t, extras, hasDate, hasTime, task) {
 // hand, also "none"; a task whose name fits a type offers to become such an event.
 // subGroups: [{ id, name }] of a session or family (experimental, testers): a field to move the
 // entry between them (group_id). Under the fields a quiet line says when and by whom it was made.
+// Testers: an own task or event can be put into collections (with notes and other tasks).
 export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, onPickGroups, personal = true, allowEvents = false, subGroups }) {
     const { t, language } = useTranslation();
     const id = useId();
@@ -105,6 +108,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
     const focusedSeconds = useSelector(state => selectFocusByTask(state)[task.id] ?? 0);
+    const showCollections = useSelector(selectIsTester) && personal && Number.isInteger(task.id);
 
     useEffect(() => { nameRef.current?.focus(); }, []);
 
@@ -242,6 +246,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
                 <textarea rows={2} value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)} />
             </label>
             <TaskColorPicker value={color} onChange={setColor} />
+            {showCollections && <CollectionPicker item={{ kind: 'task', id: task.id }} name={name.trim() || task.name} />}
             {subGroups && !personal &&
                 <label className={styles.field}>
                     <span>{t('subGroup')}</span>

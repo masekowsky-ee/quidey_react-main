@@ -18,6 +18,7 @@ import {
 import { useTaskDrag } from '../features/calendar/useTaskDrag';
 import { matchEventType } from '../features/tasks/kinds';
 import { defaultReminders, selectAllDayTime } from '../features/tasks/reminders';
+import { addToShownCollection, useTaskGroups } from '../features/collections/collections';
 import MonthView from './calendar/MonthView.jsx';
 import WeekView from './calendar/WeekView.jsx';
 import AgendaView from './calendar/AgendaView.jsx';
@@ -41,7 +42,8 @@ export default function Calendar() {
     const dispatch = useDispatch();
 
     const ownTasks = useSelector(state => state.task.tasks);
-    const allGroups = useSelector(state => state.task.groups);
+    // my groups, or for testers my collections in their place
+    const taskGroups = useTaskGroups();
     const ownSessions = useSelector(state => state.session.workedSessionData);
     const sharedHistory = useSelector(state => state.together.history);
     const sharedSessions = useSelector(state => state.together.sessions);
@@ -69,7 +71,9 @@ export default function Calendar() {
     const [openTaskId, setOpenTaskId] = useState(() => (openDay && Number(params.get('task'))) || null);
 
     // filters
-    const groups = isShared ? [] : allGroups.filter(group => group.name !== 'all');
+    const groups = isShared ? [] : taskGroups.groups;
+    const { groupsOf } = taskGroups;
+    const inGroup = useMemo(() => (task, id) => groupsOf(task).some(group => group.id === id), [groupsOf]);
     const [groupFilter, setGroupFilter] = useState('all');
     const groupId = groups.some(group => group.id === groupFilter) ? groupFilter : 'all';
     const [showDone, setShowDone] = useState(true);
@@ -93,7 +97,7 @@ export default function Calendar() {
     }, [filtersOpen]);
     const clearFilters = () => { setGroupFilter('all'); setShowDone(true); setQuery(''); };
 
-    const shown = useMemo(() => filterTasks(tasks, { groupId, showDone, query }), [tasks, groupId, showDone, query]);
+    const shown = useMemo(() => filterTasks(tasks, { groupId, showDone, query, inGroup }), [tasks, groupId, showDone, query, inGroup]);
     const tasksByDay = useMemo(() => groupByDay(shown), [shown]);
     // the month and week grids also show the coming repeats of repeating tasks (a year ahead of
     // the shown day), as previews; the agenda and the day panel list only real tasks
@@ -105,10 +109,10 @@ export default function Calendar() {
     // coming repeats on that day (each can be deleted on its own there)
     const openDayKey = openDay ? dateKey(openDay) : null;
     const panelTasksByDay = useMemo(() => {
-        const inGroup = filterTasks(tasks, { groupId });
+        const ofGroup = filterTasks(tasks, { groupId, inGroup });
         const until = openDayKey ? fromKey(openDayKey) : null;
-        return groupByDay(isShared || !until ? inGroup : [...inGroup, ...projectRepeats(inGroup, until)]);
-    }, [tasks, groupId, isShared, openDayKey]);
+        return groupByDay(isShared || !until ? ofGroup : [...ofGroup, ...projectRepeats(ofGroup, until)]);
+    }, [tasks, groupId, isShared, openDayKey, inGroup]);
     const focusByDay = useMemo(() => toFocusByDay(sessions), [sessions]);
     const overdueCount = shown.filter(task => isOverdue(task, today)).length;
 
@@ -193,9 +197,13 @@ export default function Calendar() {
         try {
             if (isShared) await shared.add({ name, due: key, ...(time ? { due_time: time } : {}), ...(sharedEvents && kind === 'event' ? { kind } : {}) });
             // a new event of mine takes the type its name points to (a keyword of the type)
-            else await dispatch(addTask(name, key, '', kind === 'event' ? null : NEW_TASK_PRIO, newTaskGroup?.id ?? null, undefined,
-                // with notifications on, it reminds at its start (or at my all-day time on the day)
-                { ...(time ? { due_time: time } : {}), reminders: defaultReminders(), ...(kind === 'event' ? { kind, event_type_id: matchEventType(name, eventTypes)?.type.id ?? null } : {}) }));
+            else {
+                // a collection takes it once it is made (a group of mine: addTask itself)
+                const task = await dispatch(addTask(name, key, '', kind === 'event' ? null : NEW_TASK_PRIO, newTaskGroup?.collection ? null : newTaskGroup?.id ?? null, undefined,
+                    // with notifications on, it reminds at its start (or at my all-day time on the day)
+                    { ...(time ? { due_time: time } : {}), reminders: defaultReminders(), ...(kind === 'event' ? { kind, event_type_id: matchEventType(name, eventTypes)?.type.id ?? null } : {}) }));
+                await dispatch(addToShownCollection(newTaskGroup, task));
+            }
             return true;
         } catch (err) {
             reportError(err);
@@ -258,10 +266,7 @@ export default function Calendar() {
     const exportIcs = () => {
         const withDay = shown.filter(task => task.due);
         if (withDay.length === 0) { toast(t('nothingToExport'), 'info'); return; }
-        const groupName = (task) => (task.group_ids ?? [])
-            .map(id => groups.find(group => group.id === id)?.name)
-            .filter(Boolean)
-            .join(', ');
+        const groupName = (task) => groupsOf(task).map(group => group.name).join(', ');
         downloadFile(isShared ? `quidey-${source.kind}-${source.id}.ics` : 'quidey-tasks.ics', toIcs(withDay, { groupName, allDayTime }), 'text/calendar');
     };
 
@@ -366,11 +371,11 @@ export default function Calendar() {
                                 <div className={styles.filterMenu} id="calendarFilters" role="group" aria-label={t('calendarFilters')}>
                                     {groups.length > 0 &&
                                         <label className={styles.filterField}>
-                                            <span>{t('filterGroup')}</span>
+                                            <span>{t(taskGroups.collections ? 'collectionFilter' : 'filterGroup')}</span>
                                             <select className={styles.groupSelect} value={String(groupId)}
                                                 onChange={(e) => setGroupFilter(e.target.value === 'all' ? 'all' : groups.find(group => String(group.id) === e.target.value)?.id ?? 'all')}>
-                                                <option value="all">{t('allGroups')}</option>
-                                                {groups.map(group => <option key={group.id} value={String(group.id)}>{group.name}</option>)}
+                                                <option value="all">{t(taskGroups.collections ? 'collectionAllFilter' : 'allGroups')}</option>
+                                                {groups.map(group => <option key={group.id} value={String(group.id)}>{group.emoji ? `${group.emoji} ${group.name}` : group.name}</option>)}
                                             </select>
                                         </label>}
                                     <button type="button" className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}

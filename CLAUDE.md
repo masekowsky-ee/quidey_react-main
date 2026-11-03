@@ -213,10 +213,35 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
 - `/focus` — **Fokusraum** (`components/focus/`): big ring timer (`FocusTimer`, mode switch, Pomodoro lengths),
   session goal, task in focus (pick / done), recap after a Pomodoro (into the notebook), thought parking lot
   (→ task via `parseQuickEntry`), focus sounds (`features/focus/noise.js`, Web Audio brown/pink/rain), study
-  methods, full screen; the **notebook** beside it (`Notebook.jsx`, `features/focus/notebook.js`, API
+  methods, full screen (testers: the timer folds into a sticky bar on start, `MiniTimer` in `FocusTimer.jsx`,
+  "Groß zeigen" opens it, big again once nothing runs); the **notebook** beside it (`Notebook.jsx`, `features/focus/notebook.js`, API
   `/api/notebook`; the server reads its bigger bodies only after sign-in, checks pictures by their
   magic bytes and keeps all pictures of an account under 25 MB, `NOTEBOOK_STORAGE_FULL`): notes with `- [ ]` checklists, `# ` headings, link and picture attachments (pictures shrunk
-  in the browser, at most 4 per note), "plan as task" for the cursor's line, autosave.
+  in the browser, at most 4 per note), "plan as task" for the cursor's line, autosave. The editor is
+  `components/notes/NoteEditor.jsx` (shared with `/notes`; `full` = testers' extras).
+- `/notes` — **Notizen**, testers only (`components/notes/NotesPage.jsx`, `features/notes/notes.js`): the
+  notebook's notes in views (all, pinned, folders, tags, archive, trash; `?view=folder:<id>|tag:<word>|…`,
+  `?note=<id>`), search (words, `#tag`), sort + list/tiles (localStorage `notesSort`, `notesLayout`),
+  templates (`NOTE_TEMPLATES`, texts `noteTpl_*`), folders (`/api/tester/note-folders`), tags, colour,
+  archive, trash (30 days, `GET /api/notebook?trash=1`, `DELETE /api/tester/notebook/trash`), duplicate,
+  Markdown export, rich text (`noteLines(body, rich)`: `## `, lists that go on with Enter, `1. `, `> `,
+  `---`, `**bold**`, `` `code` ``). The server takes folderId/tags/color/archived/trashed only from testers
+  (`TESTER_REQUIRED`); `GET /api/notebook` leaves the trash out for everybody. Migration 036.
+- `/collections`, `/collections/:id` — **Sammlungen**, testers only (`components/collections/`, slice
+  `collections` in `features/collections/collections.js`, API `/api/tester/collections`): tasks, events and
+  notes together (`collection_items`, gone with their task/note). Put in from the collection (search or
+  make new) or from the other side: `CollectionPicker` in `TaskEditor` (own tasks/events) and the notes'
+  editor ("Neue Sammlung damit" names it after the thing). Texts of notes + collections in `i18n/notesTexts.js`.
+  **For testers collections replace groups** (`useTaskGroups()`, `asGroup` in collections.js: a collection goes
+  around as `{ id: 'collection-<id>', collection: true, collectionId, … }`): Home's chips ("+" makes one,
+  `GroupForm`), the list of the shown one (its colour, its page, delete, take a task out), a task's labels,
+  the new-task form and the calendar's quick add put new ones into the shown one (`addToShownCollection`), the
+  calendar's filter (`filterTasks(…, { inGroup })`) and .ics, the departure board, and "Fokus nach Sammlung" on
+  /stats (`GET /api/stats` → `collections`, testers only, focus booked on their tasks). The group picker is
+  hidden for them (the editor has `CollectionPicker`). Their first `GET /api/tester/collections` takes their
+  groups over once (`users.groups_imported_at`; same name, colour, description, tasks; not a group whose name a
+  collection has already); the groups themselves stay for when the test ends. Profile "top groups" still
+  come from groups. Session / family sub-groups are separate and unchanged.
 - `/routines`, `/routines/:id/run` — **Routinen** (`components/routines/`, slice `routines` in
   `features/routines/routines.js`, API `/api/routines`): steps with minutes, weekdays + time (push at the time,
   and an in-app toast via `useRoutineReminders`), templates (texts `routineTpl_*`), guided run by the wall clock
@@ -446,7 +471,7 @@ for the app's own files: `token` (JWT), `accounts` (several accounts on one devi
 `[{ username, displayName, token }]`, max 5, `src/features/auth/accounts.js`; switching reloads
 the app as the other one, signing out takes over the next remembered account), `language`, `accent`,
 `theme`, `palette`, `motion`, `sound`, `analytics` (Android app: the answer to the usage data question), `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
-`teamSessionId`, `streakNudge` (day of the last streak reminder), `uiVariant` and `uiColors`
+`teamSessionId`, `notesSort` / `notesLayout` (testers' notes area), `streakNudge` (day of the last streak reminder), `uiVariant` and `uiColors`
 (testers' interface variant and the colours picked per variant), `push`, `pushEndpoint`,
 `pushAsked` (push notifications on this device), `onboarding:<username>` (a new account's action
 count, whether install / rating were asked). `public/theme-init.js` applies
@@ -545,7 +570,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment, 028: push_subscriptions, tasks.push_sent_for, users.push_digest_on, 029: tasks.reminders (replaces reminder_minutes), 030: sub-groups — shared_session_groups, family_groups, shared_session_tasks.group_id, family_tasks.group_id, 031: users.tour_seen_at, users.allday_reminder_time). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment, 028: push_subscriptions, tasks.push_sent_for, users.push_digest_on, 029: tasks.reminders (replaces reminder_minutes), 030: sub-groups — shared_session_groups, family_groups, shared_session_tasks.group_id, family_tasks.group_id, 031: users.tour_seen_at, users.allday_reminder_time, …, 036: note_folders, notebook_notes.folder_id / tags / color / archived / trashed_at, collections, collection_items, users.groups_imported_at). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.

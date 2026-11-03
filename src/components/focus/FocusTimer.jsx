@@ -1,13 +1,71 @@
+import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectTimerProgress, selectTimerInProgress, setTimerMode, setSessionParams, startFocus, pauseFocus, stopFocus, skipPhase, setPomodoro, PHASE_LABEL } from '../../features/session/sessionAction';
 import { formatClock, fill } from '../../features/helperFunction';
 import { POMODORO_CHOICES, SESSION_LENGTHS } from '../../features/settings/preferences';
 import { useTranslation } from '../../i18n/useTranslation';
+import { useIsTester } from '../../features/auth/tester';
 import Icon from '../icons.jsx';
 import styles from './FocusRoom.module.css';
 
 const MODES = [['pomodoro', 'timerModePomodoro'], ['timer', 'timerModeTimer'], ['stopwatch', 'timerModeStopwatch']];
 const RING = 2 * Math.PI * 54;
+
+// Testers (in test): once the timer starts, the big card folds into a slim bar that stays at the
+// top while scrolling (time, a thin progress line, the controls), so the room below gets the
+// space. "Groß zeigen" opens it again; once nothing runs any more it is big again by itself.
+function useMinimized(enabled) {
+    const active = useSelector(state => state.session.timer.active);
+    const inProgress = useSelector(selectTimerInProgress);
+    const [minimized, setMinimized] = useState(false);
+    // folds on every start (also after a pause), unfolds once the run is over
+    const [seen, setSeen] = useState({ active, inProgress });
+    if (seen.active !== active || seen.inProgress !== inProgress) {
+        setSeen({ active, inProgress });
+        if (active && !seen.active) setMinimized(true);
+        if (!active && !inProgress) setMinimized(false);
+    }
+    return [enabled && minimized, setMinimized];
+}
+
+function MiniTimer({ onExpand }) {
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const { timer, timerMode, pomodoro } = useSelector(state => state.session);
+    const percent = useSelector(selectTimerProgress);
+    const isPomodoro = timerMode === 'pomodoro';
+    const stopwatch = timerMode === 'stopwatch';
+    const onBreak = isPomodoro && pomodoro.phase !== 'focus';
+    const label = isPomodoro ? t(PHASE_LABEL[pomodoro.phase]) : timer.active ? t('focusRunning') : t('focusPaused');
+    return (
+        <section className={styles.miniTimer} data-break={onBreak || undefined} data-part="timer" aria-label={t('focusTimerTitle')}>
+            <div className={styles.miniInfo}>
+                <span className={styles.miniTime} role="timer" aria-live="off">{formatClock(timer.time)}</span>
+                <span className={styles.phase}>{label}</span>
+            </div>
+            <div className={styles.miniControls}>
+                {timer.active
+                    ? <button type="button" className={styles.miniCtrl} onClick={() => dispatch(pauseFocus())} aria-label="pause timer" title={t('focusPause')}>
+                        <Icon name="pause" size={18} strokeWidth={2.2} />
+                    </button>
+                    : <button type="button" className={styles.miniCtrl} onClick={() => dispatch(startFocus())} aria-label="start timer" title={t('focusResume')}>
+                        <Icon name="play" size={18} strokeWidth={2} />
+                    </button>}
+                <button type="button" className={styles.miniCtrl} onClick={() => dispatch(stopFocus())} aria-label="stop timer" title={t('focusStop')}>
+                    <Icon name="stop" size={18} strokeWidth={2} />
+                </button>
+                {isPomodoro &&
+                    <button type="button" className={styles.miniCtrl} onClick={() => dispatch(skipPhase())} aria-label={t('pomodoroSkip')} title={t('pomodoroSkip')}>
+                        <Icon name="skip" size={18} strokeWidth={2} />
+                    </button>}
+                <button type="button" className={styles.miniExpand} onClick={onExpand} aria-expanded="false">
+                    <Icon name="expand" size={16} /> {t('focusTimerExpand')}
+                </button>
+            </div>
+            {!stopwatch && <span className={styles.miniProgress} style={{ '--progress': `${percent}%` }} aria-hidden="true" />}
+        </section>
+    );
+}
 
 // The Fokusraum's big timer: a ring that fills as the time goes, the time in the middle, the
 // controls under it. Same timer as everywhere (useFocusClock counts it, by the wall clock).
@@ -17,12 +75,16 @@ export default function FocusTimer() {
     const { timer, timerMode, pomodoro, sessionParams } = useSelector(state => state.session);
     const percent = useSelector(selectTimerProgress);
     const inProgress = useSelector(selectTimerInProgress);
+    const isTester = useIsTester();
+    const [minimized, setMinimized] = useMinimized(isTester);
     const isPomodoro = timerMode === 'pomodoro';
     const stopwatch = timerMode === 'stopwatch';
     const onBreak = isPomodoro && pomodoro.phase !== 'focus';
     const inCycle = pomodoro.round % pomodoro.config.every;
 
     const setLength = (key, minutes) => dispatch(setPomodoro({ config: { [key]: minutes } }));
+
+    if (minimized) return <MiniTimer onExpand={() => setMinimized(false)} />;
 
     return (
         <section className={styles.timerCard} data-break={onBreak || undefined} aria-label={t('focusTimerTitle')}>
@@ -96,6 +158,10 @@ export default function FocusTimer() {
                         </select>
                     </label>
                 </div>)}
+            {isTester && inProgress &&
+                <button type="button" className={styles.minimizeBtn} onClick={() => setMinimized(true)} aria-expanded="true">
+                    {t('focusTimerMinimize')}
+                </button>}
             <p className={styles.timerHint}>{t('focusPhoneOffHint')}</p>
         </section>
     );

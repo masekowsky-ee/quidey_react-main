@@ -156,6 +156,9 @@ export default function Menu(){
                         {/* the place to work and study (Pomodoro, notes), and guided routines */}
                         <MenuLink to="/focus" icon="focus" label={t('focusRoom')} onClick={onClose} />
                         <MenuLink to="/routines" icon="routine" label={t('routines')} onClick={onClose} />
+                        {/* testers: the notes area and collections (tasks, events and notes together) */}
+                        {isTester && <MenuLink to="/notes" icon="note" label={t('notesTitle')} onClick={onClose} />}
+                        {isTester && <MenuLink to="/collections" icon="collection" label={t('collections')} onClick={onClose} />}
                         {/* friends, shared sessions, families and the feed: one place for other people */}
                         <MenuLink to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} onClick={onClose}
                             count={inviteCount + incomingCount + familyInviteCount} countLabel={t('communityCount')}

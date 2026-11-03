@@ -551,3 +551,109 @@
         min-width: 8.5rem;
     }
 }
+
+/* ---------- testers: the timer folded into a bar while it runs ---------- */
+.minimizeBtn {
+    composes: ghostBtn from '../ui.module.css';
+    height: 2rem;
+    padding: 0 0.85rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.miniTimer {
+    composes: panel from '../ui.module.css';
+    position: sticky;
+    top: calc(var(--header-h) + 0.5rem);
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 0.6rem 0.75rem 0.7rem 1.1rem;
+    overflow: hidden;
+    animation: miniIn var(--ease) both;
+}
+
+@keyframes miniIn {
+    from { opacity: 0; transform: translateY(-0.4rem) scale(0.98); }
+}
+
+:root[data-motion="minimal"] .miniTimer {
+    animation-name: miniFade;
+}
+
+@keyframes miniFade {
+    from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .miniTimer { animation-name: miniFade; }
+}
+
+.miniInfo {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    min-width: 0;
+}
+
+.miniTime {
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-h);
+    line-height: 1;
+}
+
+.miniTimer[data-break] .phase {
+    color: var(--primary-fg);
+}
+
+.miniControls {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.miniCtrl {
+    composes: iconBtnRound from '../ui.module.css';
+    width: 2.4rem;
+    height: 2.4rem;
+}
+
+.miniExpand {
+    composes: ghostBtn from '../ui.module.css';
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 2.4rem;
+    padding: 0 0.8rem;
+    font-size: 0.8rem;
+}
+
+.miniProgress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(to right, var(--primary) var(--progress, 0%), transparent var(--progress, 0%));
+}
+
+.allNotes {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: auto;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.allNotes:hover {
+    color: var(--text-h);
+}

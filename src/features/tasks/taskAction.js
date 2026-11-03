@@ -243,8 +243,9 @@ export const deleteGroup = (groupId) => {
 
 export const editDisplaygroup = (group, groupToDisplayId) => {
     return async (dispatch) => {
-        // a shared session's group: its tasks come from the session (TaskContainer reads them live)
-        if (group.shared && groupToDisplayId !== group.id) {
+        // a shared session's group: its tasks come from the session; a collection (testers, in
+        // place of groups): from my tasks (TaskContainer reads both live)
+        if ((group.shared || group.collection) && groupToDisplayId !== group.id) {
             dispatch({ type: EDIT_DISPLAYGROUP, payload: { group, tasks: [] } });
             return;
         }

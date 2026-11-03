@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import styles from './DepartureBoard.module.css';
 import { useTranslation } from '../../i18n/useTranslation';
 import { dueText, fill, isOverdue, parseDate, sameDay } from '../../features/helperFunction';
 import { dateKey, minutesOfDay, timeText } from '../../features/calendar/calendar';
 import { isEvent } from '../../features/tasks/kinds';
 import { taskColorAttr } from '../../features/tasks/taskColors';
+import { useTaskGroups } from '../../features/collections/collections';
 
 const SHOWN = 8;
 const NOW_WINDOW_MIN = 5;
@@ -31,7 +31,8 @@ function noteOf(task, nowMin, activeId, t) {
 // what is happening now or about to.
 export default function DepartureBoard({ tasks, activeTask }) {
     const { t } = useTranslation();
-    const groups = useSelector(state => state.task.groups);
+    // a group of mine, or for testers a collection
+    const { groupsOf } = useTaskGroups();
     // the board counts on by the minute
     const [now, setNow] = useState(() => new Date());
     useEffect(() => {
@@ -49,7 +50,7 @@ export default function DepartureBoard({ tasks, activeTask }) {
     const order = (task) => isOverdue(task, now) ? -1 : minutesOfDay(task.due_time) ?? 2000;
     const rows = [...today].sort((a, b) => order(a) - order(b));
     const groupOf = (task) => task.shared?.sessionName
-        ?? (task.group_ids ?? []).map(id => groups.find(group => group.id === id)).find(group => group && group.name !== 'all')?.name
+        ?? groupsOf(task)[0]?.name
         ?? '';
 
     return (

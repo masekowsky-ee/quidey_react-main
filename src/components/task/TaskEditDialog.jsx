@@ -11,6 +11,7 @@ import GroupPicker from '../GroupPicker.jsx';
 import Icon from '../calendar/icons.jsx';
 import SheetGrabber from '../SheetGrabber.jsx';
 import { useSheet } from '../../features/layout/dragDismiss';
+import { useIsTester } from '../../features/auth/tester';
 
 // The calendar's task editor as a dialog (a sheet from the bottom on phones), for the task
 // list on Home: every option (time, reminder, repeat, colour, sharing, groups) in one place.
@@ -25,6 +26,8 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
     const titleId = useId();
     const panelRef = useRef(null);
     const [pickerTask, setPickerTask] = useState(null);
+    // testers sort tasks into collections (in the editor) instead of groups
+    const groupsOn = !useIsTester();
     const closePicker = useCallback(() => setPickerTask(null), []);
     // on phones a sheet: pulled down, it closes like a click next to it (without saving)
     const sheet = useSheet(onClose, panelRef);
@@ -100,7 +103,7 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
                         onCancel={() => dismiss()}
                         onDelete={() => run(deleteTaskAsking(task), t('taskDeleted'))}
                         onLeave={() => run(leaveTask(task), t('taskLeft'))}
-                        onPickGroups={setPickerTask}
+                        onPickGroups={groupsOn ? setPickerTask : undefined}
                     />}
             </div>
             {pickerTask && <GroupPicker task={pickerTask} onClose={closePicker} />}

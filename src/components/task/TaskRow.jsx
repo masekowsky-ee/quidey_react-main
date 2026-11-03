@@ -70,7 +70,7 @@ function Prio({ prio }) {
 const TaskRow = forwardRef(function TaskRow({
     task, hidden, motionProps,
     onToggleDone, onRename, onChangeDue, onEdit, onDelete, deleteLabel,
-    onFocus, onDragStart, onRemoveFromGroup, onOpenGroup,
+    onFocus, onDragStart, onRemoveFromGroup, removeLabel, onOpenGroup,
 }, ref) {
     const { t, language } = useTranslation();
     const myUsername = useSelector(state => state.auth.user?.username);
@@ -152,7 +152,7 @@ const TaskRow = forwardRef(function TaskRow({
                             </button>}
                         {onRemoveFromGroup &&
                             <button type="button" className={styles.action} onClick={onRemoveFromGroup}
-                                title={t('removeFromGroup')} aria-label={`${t('removeFromGroup')}: ${task.name}`}>
+                                title={removeLabel ?? t('removeFromGroup')} aria-label={`${removeLabel ?? t('removeFromGroup')}: ${task.name}`}>
                                 <Icon name="close" className={styles.actionIcon} />
                             </button>}
                         {/* a repeating task asks what goes instead (DeleteScopeDialog) */}

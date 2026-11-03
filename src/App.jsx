@@ -82,6 +82,8 @@ const PAGES = {
   Tester: () => import('./components/tester/Tester.jsx'),
   FocusRoom: () => import('./components/focus/FocusRoom.jsx'),
   Routines: () => import('./components/routines/Routines.jsx'),
+  NotesPage: () => import('./components/notes/NotesPage.jsx'),
+  Collections: () => import('./components/collections/Collections.jsx'),
   ProPage: () => import('./components/pro/ProPage.jsx'),
 };
 const SignIn = lazy(PAGES.SignIn);
@@ -103,6 +105,8 @@ const FunPage = lazy(PAGES.FunPage);
 const Tester = lazy(PAGES.Tester);
 const FocusRoom = lazy(PAGES.FocusRoom);
 const Routines = lazy(PAGES.Routines);
+const NotesPage = lazy(PAGES.NotesPage);
+const Collections = lazy(PAGES.Collections);
 const ProPage = lazy(PAGES.ProPage);
 
 // the app's pages (not the sign-in or legal texts) in the background, when nothing else runs
@@ -304,6 +308,10 @@ function App(){
           <Route path="/focus" element={<FocusRoom/>} />
           <Route path="/routines" element={<Routines/>} />
           <Route path="/routines/:id/run" element={<Routines/>} />
+          {/* testers: the notes area, and collections of tasks, events and notes */}
+          <Route path="/notes" element={<TesterOnly fallback={<Navigate to="/focus" replace />}><NotesPage/></TesterOnly>} />
+          <Route path="/collections" element={<TesterOnly fallback={<Navigate to="/" replace />}><Collections/></TesterOnly>} />
+          <Route path="/collections/:id" element={<TesterOnly fallback={<Navigate to="/" replace />}><Collections/></TesterOnly>} />
           <Route path="/stats" element={<Stats />} />
           {/* the old address of the statistics (bookmarks, ?tab=done links) */}
           <Route path="/history" element={<Navigate to={{ pathname: '/stats', search: location.search }} replace />} />

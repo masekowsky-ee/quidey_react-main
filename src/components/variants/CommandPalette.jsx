@@ -97,7 +97,7 @@ export default function CommandPalette() {
             go('/profile', t('profile'), 'profile'),
             go('/settings', t('settings'), 'settings'),
             go('/feedback', t('feedback'), 'feedback'),
-            ...(isTester ? [go('/tester', t('testerNav'), 'flask')] : []),
+            ...(isTester ? [go('/notes', t('notesTitle'), 'note'), go('/collections', t('collections'), 'collection'), go('/tester', t('testerNav'), 'flask')] : []),
             ...(isAdmin ? [go('/admin', t('admin'), 'admin')] : []),
             ...placeList({ isAdmin, installable, apk: Boolean(apkOffer()), analytics: analyticsAvailable }).map(place => ({
                 id: `place:${place.to}:${place.label}`, group: 'places', deep: true, icon: place.icon,

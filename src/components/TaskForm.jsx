@@ -23,6 +23,7 @@ import { dateKey, minutesOfDay, timeText } from '../features/calendar/calendar';
 import { defaultReminders } from '../features/tasks/reminders';
 import { addSharedTask, selectSharedGroups, togetherErrorText } from '../features/together/togetherAction';
 import { shownSubGroup } from '../features/tasks/subGroups';
+import { addToShownCollection } from '../features/collections/collections';
 
 import Icon from './icons';
 import SheetGrabber from './SheetGrabber.jsx';
@@ -39,6 +40,7 @@ const EMPTY_EXTRAS = { reminders: [], reminder_email: false, location: '', link:
 // While a shared session's group is shown on Home (and the form is opened there), the new task
 // goes into that session (and, for testers, into its shown sub-group): then only the session's
 // fields, nothing personal (reminders, repeating, event types, sharing with friends).
+// A shown collection (testers, in place of a group) takes the new task or event, as a group does.
 export default function TaskForm(props){
     // sheet: QuickAdd's FormSheet (slides in, swiped down on phones)
     const {setCreateTask, sheet} = props;
@@ -57,6 +59,7 @@ export default function TaskForm(props){
         : undefined;
     const subGroupId = session ? shownSubGroup(session.subGroups, groupToDisplay.group.subGroupId ?? null) : null;
     const subGroupName = session?.subGroups.find(group => group.id === subGroupId)?.name;
+    const collection = groupToDisplay.group?.collection ? groupToDisplay.group : null;
 
     const [kind, setKind] = useState('task');
     const event = kind === 'event';
@@ -171,6 +174,9 @@ export default function TaskForm(props){
                 repeat: due ? extras.repeat : null,
                 repeat_left: due && extras.repeat ? extras.repeat_left : null,
             }));
+            // made already: not getting into the collection is only told, the form still closes
+            await dispatch(addToShownCollection(collection, task))
+                .catch(() => dispatch(showToast(t('collectionError'), 'error')));
             if (shareWith.length > 0) {
                 await dispatch(shareTask(task.id, shareWith));
                 dispatch(showToast(t('shareInviteSent'), 'success'));
@@ -193,6 +199,8 @@ export default function TaskForm(props){
                 <p className={styles.shareHint}>
                     {fill(t('createInSession'), { name: subGroupName ? `${session.name} · ${subGroupName}` : session.name })}
                 </p>}
+            {collection &&
+                <p className={styles.shareHint}>{fill(t('createInCollection'), { name: collection.name })}</p>}
             <form className={`${styles.form}`} onSubmit={handleSubmit} noValidate>
                 <KindSwitch value={kind} onChange={(next) => { setKind(next); followName(name, next); }} />
                 {/* the form opens to be typed into: the name has the focus (on a touch screen once the sheet is up) */}

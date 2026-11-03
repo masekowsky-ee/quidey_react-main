@@ -14,6 +14,7 @@ import SheetGrabber from '../SheetGrabber.jsx';
 import { focusOnArrival, useSheet } from '../../features/layout/dragDismiss';
 import { taskColorAttr } from '../../features/tasks/taskColors';
 import { isEvent } from '../../features/tasks/kinds';
+import { useIsTester } from '../../features/auth/tester';
 
 const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
 const PRIO_TEXT = { high: 'prioHigh', medium: 'prioMedium', low: 'prioLow' };
@@ -128,6 +129,8 @@ export default function DayPanel({
         setEditing({ day: key, id: initialTaskId === 'new' ? null : initialTaskId });
     }
     const [pickerTask, setPickerTask] = useState(null);
+    // testers sort tasks into collections (in the editor) instead of groups
+    const groupsOn = !useIsTester();
     // stable, so the picker doesn't move the focus again each time the tasks change
     const closePicker = useCallback(() => setPickerTask(null), []);
     const isToday = sameDay(date, today);
@@ -252,7 +255,7 @@ export default function DayPanel({
                                 onSave={(changes) => save(task, changes)}
                                 onDelete={remove}
                                 onLeave={leave}
-                                onPickGroups={setPickerTask}
+                                onPickGroups={groupsOn ? setPickerTask : undefined}
                                 onOpenGroup={onOpenGroup}
                             />
                         ))}

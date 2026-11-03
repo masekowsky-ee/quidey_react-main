@@ -315,6 +315,10 @@ function Privacy() {
                 zuletzt geändert wurden, und ihre Anhänge: Links (Adresse und Titel) und Bilder, die du einfügst oder
                 auswählst. Bilder werden vorher auf deinem Gerät verkleinert und dann als Teil der Notiz auf dem Server
                 gespeichert; achte darauf, keine Bilder mit Daten anderer Personen hochzuladen, die das nicht möchten.
+                Wenn du sie ordnest, kommen dazu: in welchem deiner Ordner (Name und Symbol) eine Notiz liegt, ihre
+                Schlagwörter und Farbe, ob sie archiviert ist und seit wann sie im Papierkorb liegt; Notizen im
+                Papierkorb werden nach 30 Tagen endgültig gelöscht. In Sammlungen speichert Quidey Name, Symbol, Farbe
+                und Beschreibung einer Sammlung und welche deiner Aufgaben, Events und Notizen seit wann darin sind.
                 Von deinen Routinen speichert Quidey Name, Symbol, die Schritte (Text und Minuten), an welchen
                 Wochentagen und zu welcher Uhrzeit du sie eingeplant hast, ob du erinnert werden möchtest und an welchem
                 Tag zuletzt erinnert wurde, sowie jeden Durchgang (Beginn, Ende, wie viele Schritte geschafft wurden und
@@ -584,7 +588,7 @@ function Privacy() {
             <p>
                 Deine Konto- und Inhaltsdaten speichere ich, solange dein Konto besteht. Löschst du dein Konto, werden
                 Konto, Aufgaben, Events, Event-Typen, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen,
-                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen, deine Bewertungen als Tester, die für Benachrichtigungen angemeldeten Geräte, deine Notizen (mit ihren Bildern), dein Profilbild, Routinen und ihre Durchgänge, der Wecker deines Fokus-Timers und alle
+                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen, deine Bewertungen als Tester, die für Benachrichtigungen angemeldeten Geräte, deine Notizen (mit ihren Bildern), Ordner und Sammlungen, dein Profilbild, Routinen und ihre Durchgänge, der Wecker deines Fokus-Timers und alle
                 Nachrichten, die du geschrieben oder bekommen hast, sofort gelöscht – auch beim Gegenüber, auch deine
                 Nachrichten in Family-Chats. Einträge in Protokollen (Verlauf gemeinsamer Sitzungen, Admin-Protokoll)
                 und von dir angelegte Einträge in Family-Kalendern verlieren den Bezug zu deinem Konto. Hast du eine

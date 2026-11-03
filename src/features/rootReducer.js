@@ -13,6 +13,7 @@ import feedReducer from "./feed/feed";
 import progressReducer from "./progress/progress";
 import presenceReducer from "./presence/presence";
 import routinesReducer from "./routines/routines";
+import collectionsReducer from "./collections/collections";
 
 const rootReducer = combineReducers({
     task: taskReducer,
@@ -29,6 +30,7 @@ const rootReducer = combineReducers({
     progress: progressReducer,
     presence: presenceReducer,
     routines: routinesReducer,
+    collections: collectionsReducer,
 });
 
 export default rootReducer;

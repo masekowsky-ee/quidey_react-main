@@ -50,6 +50,19 @@
   color: var(--text-muted);
 }
 
+/* testers: the shown collection's own page */
+.openCollection {
+  composes: iconBtn from './ui.module.css';
+  width: 2rem;
+  height: 2rem;
+  color: var(--text-muted);
+}
+
+.openCollection svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
 .chevron,
 .chevronClosed {
   width: 1.25rem;

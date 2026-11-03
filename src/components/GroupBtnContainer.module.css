@@ -93,3 +93,9 @@
   width: 1rem;
   height: 1rem;
 }
+
+/* a collection's emoji (testers: collections in place of groups) stands where a group's dot does */
+.emoji {
+  font-size: 0.9375rem;
+  line-height: 1;
+}

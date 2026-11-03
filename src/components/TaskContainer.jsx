@@ -24,6 +24,7 @@ import { setShowSharedTasks } from '../features/settings/settingsAction'
 import { isEvent } from '../features/tasks/kinds'
 import { dateKey, minutesOfDay } from '../features/calendar/calendar'
 import TodayEvents from './task/TodayEvents.jsx'
+import { selectCollections, taskIdsIn, updateCollection, deleteCollection, removeFromCollection } from '../features/collections/collections'
 
 // seconds between two rows when the list cascades in
 const CASCADE_STEP = { minimal: 0.025, normal: 0.035, extreme: 0.045 };
@@ -103,8 +104,11 @@ export default function TaskContainer(props){
     const sharedInAll = showSharedTasks ? sharedTasks : [];
     const hiddenSharedCount = showingAll && !showSharedTasks ? sharedTasks.filter(task => !task.done).length : 0;
     const toggleSharedTasks = () => dispatch(setShowSharedTasks(!showSharedTasks));
-    // the shown group as stored (one of my own, not "all" or a session's), or undefined
-    const shownGroupRow = showingAll || shownGroup?.shared ? undefined : groups.find(g => g.id === shownGroup.id);
+    // the shown group as stored (one of my own, not "all", a session's or a collection), or undefined
+    const shownGroupRow = showingAll || shownGroup?.shared || shownGroup?.collection ? undefined : groups.find(g => g.id === shownGroup.id);
+    // testers: a collection in place of a group, its tasks (events among them) found in mine
+    const collections = useSelector(selectCollections);
+    const shownCollection = shownGroup?.collection ? collections.find(c => c.id === shownGroup.collectionId) : undefined;
     // a session's group: one of its sub-groups can be picked too (kept on the shown group, so
     // the new-task form puts new tasks there too; picking the session's chip again starts at all)
     const shownShared = shownGroup?.shared ? sharedGroups.find(group => group.sessionId === shownGroup.sessionId) : undefined;
@@ -115,8 +119,10 @@ export default function TaskContainer(props){
         dispatch(showToast(togetherErrorText(t, err), 'error'));
         return null;
     });
+    const collectionTaskIds = shownCollection ? taskIdsIn(shownCollection) : null;
     const groupTasks = shownGroup?.shared
         ? inSubGroup(shownShared?.tasks ?? [], subGroup)
+        : shownGroup?.collection ? tasks.filter(task => collectionTaskIds?.has(task.id))
         : showingAll ? [...groupToDisplay.tasks, ...sharedInAll] : groupToDisplay.tasks;
     // tasks put back from the work area go to the end, in the order they were put back
     const releasedRank = (task) => releasedIds.indexOf(task.id);
@@ -175,10 +181,11 @@ export default function TaskContainer(props){
 
     const [editGroupDescription, setEditGroupDescription] = useState(false);
     const setGroupDescriptionHandler = (description) => {
-        dispatch(editGroup(groupToDisplay.group.id, {description: description}, groupToDisplay.group));
+        if (shownCollection) dispatch(updateCollection(shownCollection.id, { description })).catch(reportError);
+        else dispatch(editGroup(groupToDisplay.group.id, {description: description}, groupToDisplay.group));
         setEditGroupDescription(false);
     }
-    const groupDescription = shownGroupRow?.description;
+    const groupDescription = shownGroupRow?.description ?? shownCollection?.description;
 
     const inOwnGroup = Boolean(groupToDisplay.group.name) && !showingAll && !shownGroup?.shared;
 
@@ -213,7 +220,10 @@ export default function TaskContainer(props){
             deleteLabel: t(leaving ? 'leaveTask' : 'deleteTask'),
             onFocus: onActivate ? () => onActivate(task) : undefined,
             onDragStart: (e) => handlePointerDown(e, task),
-            onRemoveFromGroup: inOwnGroup ? () => dispatch(deleteGroupTasks(task.id, groupToDisplay.group.id)) : undefined,
+            onRemoveFromGroup: shownCollection
+                ? () => dispatch(removeFromCollection(shownCollection.id, { kind: 'task', id: task.id })).catch(reportError)
+                : inOwnGroup ? () => dispatch(deleteGroupTasks(task.id, groupToDisplay.group.id)) : undefined,
+            removeLabel: shownCollection ? t('collectionRemoveTask') : undefined,
         };
     };
 
@@ -226,7 +236,9 @@ export default function TaskContainer(props){
                     <Icon name="chevronDown" className={collapsed ? styles.chevronClosed : styles.chevron} />
                 </button>
                 <h2 id="tasks-title" className={styles.sectionTitle}>
-                    {shownGroup?.name && !showingAll ? shownGroup.name : t('taskContainer')}
+                    {shownCollection
+                        ? `${shownCollection.emoji ? `${shownCollection.emoji} ` : ''}${shownCollection.name}`
+                        : shownGroup?.name && !showingAll ? shownGroup.name : t('taskContainer')}
                 </h2>
                 {/* "All" has its count in the page's title row */}
                 {!showingAll && <span className={styles.openCount}>{fill(t('openTasksCount'), { count: openTasks.length })}</span>}
@@ -238,6 +250,17 @@ export default function TaskContainer(props){
                 {shownGroupRow &&
                     <ConfirmDeleteButton label={`${t('deleteGroup')}: ${shownGroupRow.name}`} title={t('deleteGroup')}
                         onConfirm={() => dispatch(deleteGroup(shownGroupRow.id)).catch(reportError)} />}
+                {/* a collection: the same, and its own page (with its events and notes) */}
+                {shownCollection && <>
+                    <TaskColorButton task={shownCollection} label={t('collectionColor')}
+                        onChange={(color) => dispatch(updateCollection(shownCollection.id, { color })).catch(reportError)} />
+                    <Link to={`/collections/${shownCollection.id}`} className={styles.openCollection}
+                        title={t('collectionOpenPage')} aria-label={`${t('collectionOpenPage')}: ${shownCollection.name}`}>
+                        <Icon name="collection" />
+                    </Link>
+                    <ConfirmDeleteButton label={`${t('collectionDelete')}: ${shownCollection.name}`} title={t('collectionDeleteHint')}
+                        onConfirm={() => dispatch(deleteCollection(shownCollection.id)).catch(reportError)} />
+                </>}
                 <div className={styles.headActions}>
                     {showingAll && sharedTasks.length > 0 &&
                         <button className={`${styles.sharedToggle} ${showSharedTasks ? '' : styles.sharedToggleOff}`}

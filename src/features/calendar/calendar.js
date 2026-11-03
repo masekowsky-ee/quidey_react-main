@@ -163,12 +163,14 @@ export function groupByDay(tasks) {
     return days;
 }
 
-// Filters from the calendar toolbar: group id (or 'all'), whether done tasks show, search text
-export function filterTasks(tasks, { groupId = 'all', showDone = true, query = '' } = {}) {
+// Filters from the calendar toolbar: group id (or 'all'), whether done tasks show, search text.
+// inGroup(task, groupId): whether a task is in that group (testers: their collections)
+const inOwnGroup = (task, groupId) => (task.group_ids ?? []).includes(groupId);
+export function filterTasks(tasks, { groupId = 'all', showDone = true, query = '', inGroup = inOwnGroup } = {}) {
     const needle = query.trim().toLowerCase();
     return tasks.filter(task =>
         (showDone || !task.done)
-        && (groupId === 'all' || (task.group_ids ?? []).includes(groupId))
+        && (groupId === 'all' || inGroup(task, groupId))
         && (!needle || [task.name, task.description, task.location, task.details]
             .some(text => String(text ?? '').toLowerCase().includes(needle))));
 }
