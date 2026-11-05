@@ -50,7 +50,11 @@ Migration `quidey_react-backend/migrations/041_study_goals.sql` (existing style:
   kind text ('exam'|'assignment'|'presentation'|'other'), name text (1–200), due date NOT NULL,
   due_time time (optional), plan_mode text ('slots'|'days') DEFAULT 'slots',
   status text ('active'|'done'|'archived') DEFAULT 'active',
-  behind_notified_minutes integer DEFAULT 0, behind_notified_on date, created_at`.
+  behind_notified_minutes integer DEFAULT 0, behind_notified_on date,
+  freed_minutes integer NOT NULL DEFAULT 0, created_at`.
+  `freed_minutes`: minutes of sessions dropped because a part got ahead (marked done, or its focus time
+  reached the estimate). It feeds the "*x h frei geworden*" card so the card survives a reload, and is
+  reset to 0 when a plan is applied.
 - **`goal_parts`**: `id serial PK, goal_id → goals ON DELETE CASCADE, name text (1–200),
   position integer, estimate_minutes integer (15–1200), estimate_source text
   ('history'|'pages'|'ai'|'default'|'manual'), role text ('part'|'review') DEFAULT 'part',
@@ -216,7 +220,10 @@ The UI shows the source under each estimate: *"aus deinem Verlauf"*, *"aus 40 Se
   `claude-haiku-5-5`), key `ANTHROPIC_API_KEY`, using structured JSON output.
 - **Sent:** part names, subject name, kind, days until the date. **Never sent:** the user's name,
   email, ids, notes or any other data.
-- **Limits:** 20 AI estimate requests per user per day via `utils/limits.js`; at most 40 parts per request.
+- **Limits:** 20 AI estimate requests per user per day, counted with the server's existing rate limiter
+  (`express-rate-limit`, keyed by user id, 24 h window). The count lives in memory and resets when the
+  server restarts; that is accepted. (`utils/limits.js` holds the free plan's limits, not daily counters.)
+  Over the cap, estimates are answered without AI. At most 40 parts per request.
 - **Timeout 8 s.** Any error or timeout → fall back to steps 1/2/4 and show
   *"KI-Schätzung gerade nicht verfügbar"*. Creating a goal never fails because of the AI.
 - Without `ANTHROPIC_API_KEY` the button and the setting are hidden (`GET /api/study/status` reports
@@ -229,7 +236,7 @@ The UI shows the source under each estimate: *"aus deinem Verlauf"*, *"aus 40 Se
   the data they need."* The "Brand Commitments" and "Positioning" lines are adjusted to match.
 - `src/legal/owner.js`: Anthropic added to the processors.
 - Datenschutzerklärung (`src/legal/`, de/en): a section on AI estimates (provider Anthropic, purpose,
-  exactly which data, legal basis consent, transfer outside the EU and its safeguards), and the push
+  exactly which data, legal basis consent, transfer to Anthropic in the USA and its safeguards), and the push
   kind `study`.
 - `quidey_landing/src/copy.js` and any other "no third parties" wording on the landing page: adjusted.
 - `CLAUDE.md` of the web and backend repos: the new module and env variables.
@@ -341,6 +348,28 @@ Frontend (Vitest + Testing Library, `src/__tests__/`):
 - Migration `041` + `schema.sql`.
 - Android: `git pull web`, no native changes; push kind `study` works through the existing FCM setup.
 - Backend `.env.example`: `ANTHROPIC_API_KEY`, `STUDY_AI_MODEL`.
+
+### Legal review gate
+
+The AI part sends data to Anthropic in the USA. The privacy wording (Datenschutzerklärung,
+`owner.js`, landing page copy) is written by the implementation, then **reviewed by the owner before
+it is committed**. Nothing about AI estimates ships without that review.
+
+## Edge cases the tests must pin
+
+The spec's sections imply these; each has a test in the task that owns the code.
+
+1. **Exam due tomorrow, or in the past by the time the preview is applied:** a goal with no planning
+   days gets zero sessions and a shortfall equal to its remaining minutes. Never a session on or after
+   the due date.
+2. **Several windows on one weekday, gaps that fit exactly:** a session fits fully inside one window,
+   with the 10-minute buffer on both sides of every event; a gap of exactly the session length fits.
+3. **A session ticked off on the phone while the preview is open on the laptop:** applying answers
+   `409` with a fresh preview and changes nothing.
+4. **Dragging a planned session in the calendar to another day:** it is pinned and survives the next
+   re-plan untouched.
+5. **The AI returns nonsense or an index out of range:** invalid entries fall back per part (pages,
+   history, default); the answer always has one estimate per part.
 
 ## Out of scope (later sub-projects or v2)
 

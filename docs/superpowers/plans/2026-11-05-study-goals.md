@@ -24,7 +24,7 @@ The same rule holds in BE and LP.
 - Defaults/limits: `study_session_minutes` 45 (15–180), `study_daily_max_minutes` 180 (15–720), estimates clamped 15–1200, leftover chunk < 15 min merged, event buffer 10 min, defaults exam 120 / assignment 180 / presentation 90 / other 120, review = 15 % of the other estimates clamped 60–240, history/pages need ≥ 3 finished parts.
 - Missed: `slots` 60 min after the planned end; `days` once the day is over. Behind threshold = `sessionMinutes`.
 - Push kind `study`: TTL 3 h, at most once per user per day, only 08:00–19:00 in `users.timezone`.
-- AI: model from `STUDY_AI_MODEL` (default `claude-haiku-5-5`), key `ANTHROPIC_API_KEY`, timeout 8 s, ≤ 40 parts per request, **20 requests per user per day**. Deviation from spec §4: the daily cap uses `express-rate-limit` keyed by user id (24 h window, in memory), not `utils/limits.js` (that file holds the free plan's limits, not daily counters). Sent: part names, subject name, kind, days until due — nothing else.
+- AI: model from `STUDY_AI_MODEL` (default `claude-haiku-5-5`), key `ANTHROPIC_API_KEY`, timeout 8 s, ≤ 40 parts per request, **20 requests per user per day** via `express-rate-limit` keyed by user id (24 h window, in memory, resets on restart — spec §4). Sent: part names, subject name, kind, days until due — nothing else.
 - Weekdays 1–7, 1 = Monday. Dates `YYYY-MM-DD`, times `HH:MM`, all in the user's timezone.
 - All UI texts de + en in a new `src/i18n/studyTexts.js`, merged in `translations.js:2343` like `notesTexts`. Terms: Fach/Fächer, Ziel, Klausur/Abgabe/Referat/Sonstiges, Thema/Themen, Schritt/Schritte, Lernsitzung, Wiederholung, Lernzeiten. Sheets use `useSheet`; no accent on buttons/nav; everything usable at motion "minimal".
 - BE single test: `node --test --test-concurrency=1 --test-name-pattern="<name>" scripts/test/<file>.test.mjs`; full: `npm test`. FE: `npx vitest run <file>`; full: `npm test` + `npm run lint`.
@@ -357,7 +357,7 @@ Algorithm (spec §2 steps 4–7), to be implemented in this order:
 
 - [ ] **Step 1: Write the failing test** in `FE/src/__tests__/legal.test.jsx` (or the existing legal test file): the privacy page (de and en) mentions "Anthropic" and the push kind for studying.
 - [ ] **Step 2: Run** → FAIL.
-- [ ] **Step 3: Edit the texts** listed above. Ask the user to check the legal wording before committing (they own the legal texts).
+- [ ] **Step 3: Edit the texts** listed above. **Stop and ask the user to review the legal wording before committing** (spec §4 "Legal review gate"); commit only after their OK.
 - [ ] **Step 4: Run FE `npm test`, LP `npm run build`** → PASS / builds.
 - [ ] **Step 5: Commit (FE)** `docs(legal): AI estimates and study notifications; product principle on external services`; **commit (LP)** `copy: privacy wording with optional external services`.
 
@@ -366,5 +366,4 @@ Algorithm (spec §2 steps 4–7), to be implemented in this order:
 ## Self-review notes
 
 - Spec §1 → Task 1 (+ deletes in Task 7); §2 → Tasks 2–4; §3 → Tasks 5, 8, 9, 10, 13, 14; §4 → Tasks 6, 9, 13, 15; §5 → Tasks 11–14; §6 → Tasks 7–9; §7 → Tasks 7–9, 13; §8 → each task's tests; §9 → Tasks 1, 6, 10, 12, 15.
-- Deviation recorded in Global Constraints: AI daily cap via `express-rate-limit`, not `utils/limits.js`.
-- Addition beyond spec §1: `goals.freed_minutes`, needed so the "x h frei geworden" card survives a reload.
+- The spec now records the rate limiter (§4), `goals.freed_minutes` (§1), the legal review gate (§4) and the five edge cases ("Edge cases the tests must pin" = Review Focus).
