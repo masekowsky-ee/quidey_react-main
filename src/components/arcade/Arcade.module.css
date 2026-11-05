@@ -1,0 +1,509 @@
+/* The arcade (ArcadePage.jsx, Reflex.jsx, Pattern.jsx): a calm frame around loud little games.
+   Inside the app it sits under the header like every page; as the beta screen's waiting room
+   (data-waiting) it stands alone. The games' lights use the accent and the task colours: that
+   is the data here. */
+
+.page {
+    composes: page from '../ui.module.css';
+    width: min(1080px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    margin: 0 auto;
+    padding-bottom: 4rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    text-align: left;
+}
+
+.page[data-waiting] {
+    padding-top: 2.5rem;
+    min-height: 100vh;
+}
+
+.hero {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 1.75rem;
+}
+
+.kicker {
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.title {
+    margin: 0;
+    font: var(--type-large);
+    letter-spacing: var(--track-large);
+    color: var(--text-h);
+}
+
+.intro {
+    margin: 0;
+    max-width: 40rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+}
+
+.waitingLinks {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    margin-top: 0.4rem;
+}
+
+.ghostLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    color: var(--text-h);
+}
+
+.muted {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ---------- how it counts ---------- */
+
+.modeBar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+}
+
+.segmented {
+    composes: segmented from '../ui.module.css';
+}
+
+.segmented > button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.segmented > button[aria-checked="true"],
+.segmented > button[aria-checked="true"]:hover {
+    background: var(--surface-strong);
+    color: var(--text-h);
+}
+
+.modeHint {
+    flex: 1 1 18rem;
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* ---------- the games ---------- */
+
+.picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: 0.6rem;
+}
+
+.pick {
+    composes: panel from '../ui.module.css';
+    min-width: 0;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+    padding: 0.8rem 0.85rem;
+    text-align: left;
+    background: var(--surface);
+    box-shadow: none;
+}
+
+.pick[aria-selected="true"],
+.pick[aria-selected="true"]:hover {
+    border-color: var(--text-h);
+    background: var(--surface-hover);
+}
+
+.pickGlyph {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.pickTitle {
+    font-weight: 650;
+    color: var(--text-h);
+}
+
+.pickDesc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.pickBest {
+    margin-top: auto;
+    padding-top: 0.3rem;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+@media (min-width: 900px) {
+    .layout {
+        grid-template-columns: minmax(0, 1fr) 20rem;
+    }
+}
+
+.stage {
+    composes: panel from '../ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.1rem;
+}
+
+.stageHead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+}
+
+.myBests {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0;
+}
+
+.myBests dt,
+.gameStats dt {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.myBests dd,
+.gameStats dd {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-h);
+}
+
+.segmentedSmall {
+    composes: segmented from '../ui.module.css';
+}
+
+.segmentedSmall > button {
+    padding: 0.2rem 0.7rem;
+    font-size: 0.8rem;
+}
+
+.segmentedSmall > button[aria-pressed="true"],
+.segmentedSmall > button[aria-pressed="true"]:hover {
+    background: var(--surface-strong);
+    color: var(--text-h);
+}
+
+.news {
+    min-height: 1.2em;
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.game {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.gameStats {
+    display: flex;
+    gap: 1.5rem;
+    margin: 0;
+}
+
+/* the start / again card over a field */
+.overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1rem;
+    text-align: center;
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    backdrop-filter: blur(3px);
+    border-radius: inherit;
+}
+
+.overlayScore {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-h);
+}
+
+.overlayText {
+    margin: 0;
+    max-width: 22rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.startBtn {
+    composes: btnPrimary from '../ui.module.css';
+    height: 2.5rem;
+}
+
+/* ---------- reflex ---------- */
+
+.reflexField {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+    width: min(26rem, 100%);
+    aspect-ratio: 1;
+    margin: 0 auto;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    background: var(--surface-inset);
+    border-radius: var(--radius-lg);
+    touch-action: manipulation;
+    user-select: none;
+}
+
+.reflexTile {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+    transition: background-color 90ms linear, transform 90ms linear;
+}
+
+.reflexTile:disabled {
+    opacity: 1;
+    cursor: default;
+}
+
+.reflexTile[data-lit] {
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+.reflexTile[data-flash="hit"],
+.reflexTile[data-flash="fast"] {
+    animation: hitFlash 260ms ease-out;
+}
+
+.reflexTile[data-flash="fast"] {
+    --flash: var(--text-h);
+}
+
+.reflexTile[data-flash="miss"] {
+    animation: missFlash 260ms ease-out;
+}
+
+@keyframes hitFlash {
+    from { transform: scale(0.9); background: var(--flash, color-mix(in srgb, var(--primary) 60%, var(--surface))); }
+    to { transform: scale(1); }
+}
+
+@keyframes missFlash {
+    from { background: color-mix(in srgb, var(--danger) 35%, var(--surface)); }
+}
+
+/* ---------- pattern ---------- */
+
+.patternField {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    width: min(22rem, 100%);
+    aspect-ratio: 1;
+    margin: 0 auto;
+    padding: 0.75rem;
+    box-sizing: border-box;
+    background: var(--surface-inset);
+    border-radius: 50%;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+.pad {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    background: color-mix(in srgb, var(--task-color) 30%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--task-color) 45%, var(--border));
+    box-shadow: none;
+    transition: background-color 120ms linear, filter 120ms linear;
+}
+
+.pad:nth-child(1) { border-radius: 100% 0.5rem 0.5rem 0.5rem; }
+.pad:nth-child(2) { border-radius: 0.5rem 100% 0.5rem 0.5rem; }
+.pad:nth-child(3) { border-radius: 0.5rem 0.5rem 0.5rem 100%; }
+.pad:nth-child(4) { border-radius: 0.5rem 0.5rem 100% 0.5rem; }
+
+.pad:disabled {
+    opacity: 1;
+    cursor: default;
+}
+
+.pad[data-lit] {
+    background: var(--task-color);
+    filter: brightness(1.15);
+    box-shadow: 0 0 1.5rem color-mix(in srgb, var(--task-color) 55%, transparent);
+}
+
+.pad[data-wrong] {
+    outline: 3px solid var(--danger);
+    outline-offset: 2px;
+}
+
+/* ---------- the leaderboard ---------- */
+
+.board {
+    composes: panel from '../ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.1rem;
+}
+
+.boardTitle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 650;
+    color: var(--text-h);
+}
+
+.boardFor {
+    margin: 0 0 0.25rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.boardRows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.boardRow {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: var(--radius-sm);
+}
+
+.boardRow[data-me] {
+    background: var(--surface-inset);
+}
+
+.boardRow[data-gap] {
+    margin-top: 0.4rem;
+    border-top: 1px dashed var(--border);
+    border-radius: 0;
+}
+
+.rank {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.boardRow[data-rank] .rank {
+    color: var(--primary);
+}
+
+.who {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.whoName {
+    font-weight: 600;
+    color: var(--text-h);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.whoUser {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.points {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-h);
+}
+
+.leaveBtn {
+    composes: ghostBtn from '../ui.module.css';
+    align-self: flex-start;
+    height: 2rem;
+    padding: 0 0.6rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reflexTile[data-flash] {
+        animation: none;
+    }
+}

@@ -344,3 +344,58 @@
 .deleteBtn:hover {
     color: var(--danger);
 }
+
+/* ---------- Floating round buttons (Home's timer bottom left, the add button bottom right) ----------
+   One shape for both, above the tab bar and an iPhone's home indicator; each sets its corner and
+   colours. They float over the page, so they are the one thing with a shadow. */
+.fab {
+  position: fixed;
+  bottom: calc(1rem + var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px));
+  z-index: var(--z-header);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 3.5rem;
+  height: 3.5rem;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  box-shadow: var(--shadow-float);
+  transition: transform var(--ease), background-color var(--ease), color var(--ease);
+  animation: fabIn 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fab:hover {
+  box-shadow: var(--shadow-float);
+}
+
+.fab:active {
+  transform: scale(0.94);
+  transition-duration: var(--press);
+}
+
+@keyframes fabIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fab {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .fab {
+    bottom: calc(0.75rem + var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px));
+  }
+}

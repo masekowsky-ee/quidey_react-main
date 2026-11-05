@@ -21,7 +21,7 @@ const flowTexts = {
         shortcut_help: 'Diese Übersicht',
         shortcut_goHome: 'Zu Start',
         shortcut_goCalendar: 'Zum Kalender',
-        shortcut_goCommunity: 'Zur Gemeinschaft',
+        shortcut_goCommunity: 'Zu Sozial',
         shortcut_goInbox: 'Zum Postfach',
         shortcut_goStats: 'Zu den Statistiken',
 
@@ -57,7 +57,7 @@ const flowTexts = {
         shortcut_help: 'This overview',
         shortcut_goHome: 'Go to Home',
         shortcut_goCalendar: 'Go to the calendar',
-        shortcut_goCommunity: 'Go to Community',
+        shortcut_goCommunity: 'Go to Social',
         shortcut_goInbox: 'Go to the inbox',
         shortcut_goStats: 'Go to statistics',
 

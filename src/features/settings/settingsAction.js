@@ -28,7 +28,8 @@ export const setLanguage = (language) => {
     };
 };
 
-// The new-task form, open from anywhere (header, Home): true / false; without it it toggles
+// The new-task form, open from anywhere (header, Home): true / false / 'reminder' (opened on the
+// testers' reminder form); without it it toggles
 export const showForms = (open) => ({
     type: SET_SHOW_FORMS,
     payload: open,

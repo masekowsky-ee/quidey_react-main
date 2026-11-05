@@ -23,7 +23,7 @@ function makeStore({ isTester = false, isAdmin = false } = {}) {
 const wrap = (ui, store) => render(<Provider store={store}><MemoryRouter>{ui}</MemoryRouter></Provider>)
 const ANN = { id: 5, username: 'ann', displayName: 'Ann Lee' }
 
-describe('profile pictures (in test)', () => {
+describe('profile pictures', () => {
     beforeEach(() => {
         apiFetch.mockReset()
         forgetAvatar(5)
@@ -33,9 +33,9 @@ describe('profile pictures (in test)', () => {
     })
     afterEach(() => vi.useRealTimers())
 
-    it('a tester sees the picture instead of the initials, loaded with its version', async () => {
+    it('the picture shows instead of the initials, loaded with its version (for everybody)', async () => {
         apiFetch.mockResolvedValue({ 5: '2026-10-28T10:00:00Z' })
-        const { container } = wrap(<ProfileAvatar user={ANN} />, makeStore({ isTester: true }))
+        const { container } = wrap(<ProfileAvatar user={ANN} />, makeStore())
         expect(container.textContent).toBe('AL')
         await act(async () => { await new Promise(r => setTimeout(r, 60)) })
 
@@ -45,17 +45,16 @@ describe('profile pictures (in test)', () => {
         expect(container.textContent).toBe('')
     })
 
-    it('everybody else keeps the initials and asks for nothing', async () => {
-        const { container } = wrap(<ProfileAvatar user={ANN} />, makeStore())
+    it('nobody is asked for without an id', async () => {
+        const { container } = wrap(<ProfileAvatar user={{ username: 'x', displayName: 'Xa Yo' }} />, makeStore())
         await act(async () => { await new Promise(r => setTimeout(r, 60)) })
         expect(apiFetch).not.toHaveBeenCalled()
-        expect(container.querySelector('img')).toBeNull()
-        expect(container.textContent).toBe('AL')
+        expect(container.textContent).toBe('XY')
     })
 
     it('somebody without a picture stays as they were', async () => {
         apiFetch.mockResolvedValue({})
-        const { container } = wrap(<ProfileAvatar user={ANN} />, makeStore({ isTester: true }))
+        const { container } = wrap(<ProfileAvatar user={ANN} />, makeStore())
         await act(async () => { await new Promise(r => setTimeout(r, 60)) })
         expect(globalThis.fetch).not.toHaveBeenCalled()
         expect(container.textContent).toBe('AL')
@@ -71,10 +70,10 @@ describe('admin: what is in test right now', () => {
 
         const live = screen.getByRole('region', { name: 'Gerade im Test' })
         const lists = within(live).getAllByRole('list')
-        expect(within(lists[0]).getByText('Profilbilder')).toBeInTheDocument()
-        expect(within(lists[0]).getByText(/4,5 · 2 Bewertungen/)).toBeInTheDocument()
         expect(within(lists[0]).getByText('Oberflächen-Varianten')).toBeInTheDocument()
+        expect(within(lists[0]).queryByText('Profilbilder')).toBeNull()
         expect(within(lists[1]).getByText('Untergruppen')).toBeInTheDocument()
-        expect(within(lists[1]).queryByText('Profilbilder')).toBeNull()
+        expect(within(lists[1]).getByText('Profilbilder')).toBeInTheDocument()
+        expect(within(lists[1]).getByText(/4,5 · 2 Bewertungen/)).toBeInTheDocument()
     })
 })

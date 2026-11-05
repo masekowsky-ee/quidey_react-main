@@ -80,6 +80,8 @@ describe('email verification', () => {
         expect(store.getState().auth.token).toBeNull()
         expect(screen.getByText(/Bitte bestätige deine E-Mail-Adresse/)).toBeInTheDocument()
         expect(screen.getByText(/ann@example\.com/)).toBeInTheDocument()
+        // the spam folder, written out beside a small "i"
+        expect(screen.getByText('Wenn du die E-Mail nicht siehst, schau doch mal in deinen Spam-Ordner.')).toBeInTheDocument()
     })
 
     it('sign-in refused for an unconfirmed address offers a new link by email', async () => {
@@ -97,6 +99,7 @@ describe('email verification', () => {
         expect(apiFetch).toHaveBeenLastCalledWith('/api/resend-verification', expect.objectContaining({ method: 'POST' }))
         expect(JSON.parse(apiFetch.mock.calls.at(-1)[1].body)).toEqual({ email: 'ann@example.com' })
         expect(screen.getByText(/ein neuer Link unterwegs/)).toBeInTheDocument()
+        expect(screen.getAllByText(/Spam-Ordner/).length).toBeGreaterThan(0)
     })
 
     it('signing in with the unconfirmed address fills it into the new-link form', async () => {

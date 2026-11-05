@@ -14,6 +14,7 @@ import progressReducer from "./progress/progress";
 import presenceReducer from "./presence/presence";
 import routinesReducer from "./routines/routines";
 import collectionsReducer from "./collections/collections";
+import remindersReducer from "./reminders/reminders";
 
 const rootReducer = combineReducers({
     task: taskReducer,
@@ -31,6 +32,7 @@ const rootReducer = combineReducers({
     presence: presenceReducer,
     routines: routinesReducer,
     collections: collectionsReducer,
+    reminders: remindersReducer,
 });
 
 export default rootReducer;

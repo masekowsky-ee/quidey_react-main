@@ -21,7 +21,7 @@ const PRIO_TEXT = { high: 'prioHigh', medium: 'prioMedium', low: 'prioLow' };
 
 const isTyping = (el) => el?.closest?.('input, textarea, select, [contenteditable="true"]');
 
-function TaskRow({ task, today, personal, allowEvents, editing, onEdit, onCloseEdit, onToggleDone, onSave, onDelete, onLeave, onPickGroups, onOpenGroup }) {
+function TaskRow({ task, today, personal, allowEvents, remindsAll, editing, onEdit, onCloseEdit, onToggleDone, onSave, onDelete, onLeave, onPickGroups, onOpenGroup }) {
     const { t } = useTranslation();
     const event = isEvent(task);
     const level = event ? null : prioLevel(task.prio);
@@ -59,7 +59,7 @@ function TaskRow({ task, today, personal, allowEvents, editing, onEdit, onCloseE
             </div>
             {editing && (personal
                 ? <TaskEditor task={task} onSave={onSave} onCancel={onCloseEdit} onDelete={onDelete} onLeave={onLeave} onPickGroups={onPickGroups} />
-                : <TaskEditor task={task} personal={false} allowEvents={allowEvents} onSave={onSave} onCancel={onCloseEdit} onDelete={task.canRemove ? onDelete : undefined} />)}
+                : <TaskEditor task={task} personal={false} allowEvents={allowEvents} remindsAll={remindsAll} onSave={onSave} onCancel={onCloseEdit} onDelete={task.canRemove ? onDelete : undefined} />)}
         </li>
     );
 }
@@ -103,7 +103,7 @@ function PreviewRow({ task, onOpenSeries, onDelete }) {
 // personal: false in a shared calendar (session or family): no groups, reminders or sharing,
 // each task says who added it, and only who added it (or the owner) can delete it (canRemove).
 export default function DayPanel({
-    date, today, tasks, focus, sharedEntries, initialTaskId, newTaskGroup, locale, longDate, personal = true, allowEvents = false,
+    date, today, tasks, focus, sharedEntries, initialTaskId, newTaskGroup, locale, longDate, personal = true, allowEvents = false, remindsAll = false,
     onClose, onShiftDay, onAddTask, onToggleDone, onSaveTask, onDeleteTask, onLeaveTask, onOpenGroup, onOpenSeries,
 }) {
     const { t } = useTranslation();
@@ -248,6 +248,7 @@ export default function DayPanel({
                                 today={today}
                                 personal={personal}
                                 allowEvents={allowEvents}
+                                remindsAll={remindsAll}
                                 editing={editingId === task.id}
                                 onEdit={() => setEditing({ day: key, id: task.id })}
                                 onCloseEdit={() => setEditing({ day: key, id: null })}

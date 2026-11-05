@@ -8,13 +8,14 @@ import { EVENT_TYPE_SUGGESTIONS, eventTypeErrorText } from '../../features/tasks
 import { showToast } from '../../features/toast/toast';
 
 // Task or event, as two buttons side by side (a radio group). value: 'task' | 'event'.
-export function KindSwitch({ value, onChange }) {
+// kinds: the choices (testers also get 'reminder': a reminder without a task, QuickAdd swaps the form)
+export function KindSwitch({ value, onChange, kinds = ['task', 'event'] }) {
     const { t } = useTranslation();
     const name = useId();
     return (
-        <fieldset className={styles.kind}>
+        <fieldset className={kinds.length > 2 ? styles.kindThree : styles.kind}>
             <legend className={styles.srOnly}>{t('kindLegend')}</legend>
-            {['task', 'event'].map(kind => (
+            {kinds.map(kind => (
                 <label key={kind} className={value === kind ? styles.kindOn : styles.kindOption}>
                     <input type="radio" name={name} value={kind} checked={value === kind} onChange={() => onChange(kind)} />
                     <span className={styles.kindName}>{t(`kind_${kind}`)}</span>

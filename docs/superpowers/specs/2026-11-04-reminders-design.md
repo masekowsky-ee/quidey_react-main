@@ -30,13 +30,13 @@ Migration `039_reminders.sql`:
 
 Routes (behind `requirePro` + `requireTester`):
 
-- `GET /api/tester/reminders` → open ones + the ones done in the last 7 days, each with `next`
-  (the next time it rings, worked out in `users.timezone`; null when done).
+- `GET /api/tester/reminders` → open ones + the ones done in the last 7 days (done ones older than
+  30 days are deleted). The next time is worked out on the device (`nextOccurrence`).
 - `POST /api/tester/reminders { text, at } | { text, days, atTime }`
 - `PATCH /api/tester/reminders/:id` (same fields), `DELETE …/:id`
 - `POST …/:id/done { occurrence? }` (once: `done_at = now()`; weekly: only clears a snooze),
   `POST …/:id/snooze { minutes 1–120 }` (`snoozed_until = now() + minutes`).
-- `PUT /api/push/subscription` takes `alarms` (boolean) like the four kinds.
+- `PUT /api/tester/reminders/device { endpoint, alarms }` sets `alarms` on that device's row.
 - Every change: socket `reminders:changed` to `user:<id>`.
 
 Schedule (in `utils/focus.js`, every few seconds with alarms and routines): `PICK_REMINDERS`
@@ -71,19 +71,19 @@ with `next`, the schedule picks once and skips `alarms` devices.
 
 - `features/native/alarms.js` (written here, shared): `syncAlarms(reminders)` hands the coming
   occurrences to the plugin (each `{ id, text, at }` for the next 14 days), `cancelAlarms()` on
-  sign-out / account switch, `alarmStatus()` / `openAlarmSettings(which)`, and reads back the
-  taps done while the app was closed (`pendingActions()` → done / snooze sent to the server).
+  sign-out / account switch, `alarmStatus()` / `openAlarmSettings(which)`, and sends the taps
+  done on the alarm (`pendingActions()` → done / snooze to the server → `clearActions(keys)`).
   Built only for the app (`isNativeApp()`); with `alarms` allowed it sets `alarms: true` on this
   device's push subscription.
 - Plugin `QuideyAlarms` (`AlarmsPlugin.java`): `schedule({ alarms })` replaces all (stored in
   SharedPreferences, so `BootReceiver` can set them again), `cancelAll()`, `status()` → `{ exact,
-  fullScreen, notifications }`, `openSettings({ which })`, `takeActions()`.
+  fullScreen, notifications }`, `openSettings({ which })`, `pendingActions()`, `clearActions({ keys })`.
 - `AlarmReceiver`: notification on channel `alarm` (high importance, alarm sound category) with
   `setFullScreenIntent(AlarmActivity)` + actions "Erledigt" / "10 min später" (`ActionReceiver`).
-- `AlarmActivity`: native, `showWhenLocked` + `turnScreenOn`, big time + text, two buttons; rings
-  (`RingtoneManager` alarm sound, `AudioAttributes.USAGE_ALARM`) and vibrates in a loop; stops
-  after 5 min (the notification stays). A choice is stored for `takeActions()`; snooze sets a
-  local alarm in 10 min.
+- `AlarmActivity`: native, `showWhenLocked` + `turnScreenOn`, big time + text, two buttons. The
+  ringing is the notification's (`FLAG_INSISTENT`, alarm sound with `USAGE_ALARM`, vibration);
+  after 5 min it is re-posted silent (channel `alarm_quiet`). A choice is stored for
+  `pendingActions()`; snooze sets a local alarm in 10 min.
 - `BootReceiver`: `BOOT_COMPLETED` → set the stored alarms again.
 - Manifest: `SCHEDULE_EXACT_ALARM`, `USE_FULL_SCREEN_INTENT`, `RECEIVE_BOOT_COMPLETED`, `VIBRATE`,
   `WAKE_LOCK`; activity + receivers.

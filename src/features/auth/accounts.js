@@ -3,6 +3,7 @@
 // use (the rest of the app only knows that one). Nothing leaves the device.
 // Switching loads the app again, so no list, socket or timer of the other account stays behind.
 import { clearFocusRun } from '../session/focusRun';
+import { cancelAlarms } from '../native/alarms';
 
 const KEY = 'accounts';
 export const MAX_ACCOUNTS = 5;
@@ -60,6 +61,8 @@ export const otherAccounts = (username) => listAccounts().filter(account => !sam
 function reloadAs(token) {
     // a focus session running here belongs to the account that started it
     clearFocusRun({ freeze: true });
+    // and so do the reminders' alarms (Android app): the other account sets its own on its start
+    cancelAlarms();
     try {
         if (token) localStorage.setItem('token', token);
         else localStorage.removeItem('token');

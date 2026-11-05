@@ -75,17 +75,20 @@ export const storeTimerMode = (mode) => store('timerMode', mode);
 
 // Pomodoro lengths in minutes and after how many focus rounds the long break comes
 export const POMODORO_DEFAULTS = { focus: 25, short: 5, long: 15, every: 4 };
-export const POMODORO_CHOICES = {
-    focus: [15, 20, 25, 30, 45, 50, 60, 90],
-    short: [3, 5, 10],
-    long: [10, 15, 20, 30],
-    every: [2, 3, 4, 5, 6],
+// any whole number within these (minutes; `every`: focus rounds)
+export const POMODORO_LIMITS = {
+    focus: [1, 240],
+    short: [1, 60],
+    long: [1, 120],
+    every: [1, 12],
 };
+export const validPomodoroValue = (key, value) =>
+    Number.isInteger(value) && value >= POMODORO_LIMITS[key][0] && value <= POMODORO_LIMITS[key][1];
 export function readStoredPomodoro() {
     try {
         const stored = JSON.parse(localStorage.getItem('pomodoro') ?? 'null') ?? {};
         return Object.fromEntries(Object.entries(POMODORO_DEFAULTS).map(([key, fallback]) =>
-            [key, POMODORO_CHOICES[key].includes(stored[key]) ? stored[key] : fallback]));
+            [key, validPomodoroValue(key, stored[key]) ? stored[key] : fallback]));
     } catch {
         return { ...POMODORO_DEFAULTS };
     }

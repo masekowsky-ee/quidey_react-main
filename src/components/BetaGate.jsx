@@ -7,12 +7,15 @@ import { useTranslation } from '../i18n/useTranslation';
 import { formatDate } from '../features/helperFunction';
 import { fetchAccess, logout, requestBetaAccess } from '../features/auth/authAction';
 import { useProOn } from '../features/pro/flag';
+import { LANDING_URL } from '../features/site';
 
 export const REASON_MIN = 10;
 export const REASON_MAX = 1000;
 
 // Closed beta: everybody without pro lands here after logging in or registering.
 // They can ask for access once, with a reason; afterwards the screen shows how it stands.
+// Three ways on: the form, back to the landing page, or the waiting room (/arcade: games and a
+// leaderboard, which checks the access now and then and lets them in by itself).
 export default function BetaGate() {
     const { t } = useTranslation();
     const proOn = useProOn();
@@ -100,6 +103,15 @@ export default function BetaGate() {
                     </div>
                 )}
 
+                {/* the waiting room */}
+                <Link to="/arcade" className={styles.proCard}>
+                    <Icon name="gamepad" className={styles.proHeart} />
+                    <span>
+                        <strong>{t('betaArcadeTitle')}</strong>
+                        <span>{t('betaArcadeText')}</span>
+                    </span>
+                </Link>
+
                 {/* Pro gets in right away, and supports the development (once it's switched on) */}
                 {proOn && <Link to="/pro" className={styles.proCard}>
                     <Icon name="heart" className={styles.proHeart} />
@@ -113,6 +125,7 @@ export default function BetaGate() {
                     {betaRequest?.status !== 'declined' && (
                         <button className={styles.secondaryBtn} onClick={checkAgain} disabled={checking}>{t('betaCheckAgain')}</button>
                     )}
+                    <a href={LANDING_URL} className={styles.quietLink}>{t('betaToLanding')}</a>
                     <button className={styles.quietBtn} onClick={() => dispatch(logout())}>{t('logout')}</button>
                 </div>
             </section>

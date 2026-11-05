@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch, useStore } from 'react-redux';
-import { clockTick, countdownEnded, selectFocusTask } from './sessionAction';
+import { catchUpClock, countdownEnded } from './sessionAction';
 import { storeFocusRun } from './focusRun';
 import { showToast } from '../toast/toast';
 import { translate } from '../../i18n/useTranslation';
@@ -29,14 +29,7 @@ export function useFocusClock() {
         const tick = () => {
             if (owner && owner !== me) return;
             owner = me;
-            const state = store.getState();
-            const { timer, runningSince, timerMode } = state.session;
-            if (!timer.active || runningSince == null) return;
-            const passed = Math.floor((Date.now() - runningSince) / 1000);
-            if (passed < 1) return;
-            const seconds = timerMode === 'stopwatch' ? passed : Math.min(passed, Math.ceil(timer.time / 1000));
-            dispatch(clockTick(seconds, selectFocusTask(state)));
-            if (store.getState().session.timer.active) return;
+            if (!dispatch(catchUpClock())) return;
             // the countdown is over
             const ended = dispatch(countdownEnded());
             const after = store.getState();

@@ -123,7 +123,7 @@ describe('Quidey Family', () => {
     it('is a tab of the community page for testers only; its invites count on the menu entry', async () => {
         api({ ...COMMUNITY_API, 'GET /api/families': { families: [], invites: [{ id: 3, name: 'The Bergs', owner: BO, invitedBy: BO, memberCount: 2 }] } })
         await act(async () => { setup('/menu') })
-        expect(screen.getByRole('link', { name: /Community/ })).toHaveAttribute('href', '/community')
+        expect(screen.getByRole('link', { name: /Social/ })).toHaveAttribute('href', '/community')
         expect(screen.getByLabelText('1 invites and requests')).toBeInTheDocument()
         expect(screen.queryByRole('link', { name: /^Family/ })).not.toBeInTheDocument()
     })
@@ -131,7 +131,7 @@ describe('Quidey Family', () => {
     it('the tab shows the invites', async () => {
         api({ ...COMMUNITY_API, 'GET /api/families': { families: [], invites: [{ id: 3, name: 'The Bergs', owner: BO, invitedBy: BO, memberCount: 2 }] } })
         await act(async () => { setup('/community/family') })
-        const tabs = screen.getByRole('navigation', { name: 'Parts of the community' })
+        const tabs = screen.getByRole('navigation', { name: 'Parts of Social' })
         expect(within(tabs).getByRole('link', { name: /Family/ })).toHaveAttribute('href', '/community/family')
         expect(screen.getByText('The Bergs')).toBeInTheDocument()
     })
@@ -259,6 +259,45 @@ describe('Quidey Family', () => {
         await act(async () => { fireEvent.click(within(upcoming()).getByRole('button', { name: 'Mark as done: Bake a cake' })) })
         expect(JSON.parse(sent('PATCH', '/api/families/3/tasks/94')[0][1].body)).toEqual({ done: true })
         expect(within(upcoming()).queryByText('Bake a cake')).not.toBeInTheDocument()
+    })
+
+    it('an entry can be an event; events have no tick', async () => {
+        const party = { id: 95, name: 'Party', kind: 'event', due: apiDate(2026, 10, 23), due_time: '20:00', done: false, addedBy: BO }
+        api({
+            'GET /api/families/3': { ...FAMILY, tasks: [party, ...FAMILY.tasks] },
+            'POST /api/families/3/tasks': (options) => ({ ...FAMILY, tasks: [{ id: 96, ...JSON.parse(options.body), done: false, addedBy: ME }, party, ...FAMILY.tasks] }),
+        })
+        await act(async () => { setup('/family/3') })
+        const upcoming = () => screen.getByRole('heading', { name: 'Coming up' }).closest('section')
+        expect(within(upcoming()).getByText('Party')).toBeInTheDocument()
+        expect(within(upcoming()).queryByRole('button', { name: 'Mark as done: Party' })).not.toBeInTheDocument()
+        expect(within(upcoming()).getByRole('button', { name: 'Mark as done: Grandma visits' })).toBeInTheDocument()
+
+        fireEvent.click(within(upcoming()).getByRole('radio', { name: /Event/ }))
+        fireEvent.change(within(upcoming()).getByRole('textbox', { name: 'New entry' }), { target: { value: 'Concert' } })
+        fireEvent.change(within(upcoming()).getByLabelText('Due Date'), { target: { value: '2026-10-24' } })
+        fireEvent.change(within(upcoming()).getByLabelText('Time'), { target: { value: '19:00' } })
+        await act(async () => { fireEvent.click(within(upcoming()).getByRole('button', { name: 'Add' })) })
+        expect(JSON.parse(sent('POST', '/api/families/3/tasks')[0][1].body)).toEqual({ name: 'Concert', due: '2026-10-24', due_time: '19:00', kind: 'event' })
+        expect(within(upcoming()).queryByRole('button', { name: 'Mark as done: Concert' })).not.toBeInTheDocument()
+    })
+
+    it('the editor sets reminders for everybody', async () => {
+        api({
+            'GET /api/families/3': FAMILY,
+            'PATCH /api/families/3/tasks/90': (options) => ({
+                ...FAMILY, tasks: FAMILY.tasks.map(task => (task.id === 90 ? { ...task, ...JSON.parse(options.body) } : task)),
+            }),
+        })
+        await act(async () => { setup('/family/3') })
+        const upcoming = screen.getByRole('heading', { name: 'Coming up' }).closest('section')
+        fireEvent.click(within(upcoming).getByRole('button', { name: 'Edit: Grandma visits' }))
+        expect(within(screen.getByRole('dialog')).getByRole('radio', { name: /Event/ })).toBeInTheDocument()
+        fireEvent.click(screen.getByRole('button', { name: /More options/ }))
+        expect(screen.getByText('Reminds every member.')).toBeInTheDocument()
+        fireEvent.click(screen.getByRole('button', { name: 'At the start' }))
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save' })) })
+        expect(JSON.parse(sent('PATCH', '/api/families/3/tasks/90')[0][1].body)).toMatchObject({ reminders: [0], kind: 'task' })
     })
 
     it('the chat loads, sends, and gets new messages live', async () => {

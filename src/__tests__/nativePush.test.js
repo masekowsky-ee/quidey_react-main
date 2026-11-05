@@ -13,6 +13,7 @@ vi.mock('../features/native/nativePush', () => ({
     nativeSubscription: vi.fn(async () => ({ endpoint: 'fcm:token-123456789012345678', toJSON: () => ({ endpoint: 'fcm:token-123456789012345678' }) })),
     unregisterNative: vi.fn(async () => {}),
     onNativePushOpen: () => () => {},
+    onNativePushInApp: () => () => {},
 }))
 vi.mock('../features/helperFunction', async (importOriginal) => ({
     ...(await importOriginal()),

@@ -265,6 +265,7 @@ export default function Home(){
                     {uiVariant === 'lesesaal' && <Seats />}
                 </aside>
             </div>
+            {/* folded in the bottom left (the add button, from App, is in the bottom right) */}
             {!desktop && timerPanel}
         </div>
     );

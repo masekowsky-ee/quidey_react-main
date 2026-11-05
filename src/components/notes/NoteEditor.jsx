@@ -10,6 +10,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
 import TaskColorPicker from '../task/TaskColorPicker.jsx';
 import CollectionPicker from '../collections/CollectionPicker.jsx';
+import PinToBoards from '../board/PinToBoards.jsx';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
 import styles from '../focus/Notebook.module.css';
@@ -29,6 +30,7 @@ function LineText({ text, rich }) {
 
 // A note's text as it reads: checklist lines can be ticked right here, "# " lines are headings,
 // links can be opened. rich (the notes area): also "## ", bullets, numbered lines, quotes, dividers.
+// Without onToggle (somebody else's note on a board) the checklist is only read.
 export function NoteView({ body, onToggle, rich = false }) {
     const lines = noteLines(body, rich);
     return (
@@ -38,7 +40,7 @@ export function NoteView({ body, onToggle, rich = false }) {
                 switch (line.kind) {
                     case 'check': return (
                         <label key={line.index} className={styles.checkLine} data-done={line.done || undefined}>
-                            <input type="checkbox" checked={line.done} onChange={() => onToggle(line.index)} />
+                            <input type="checkbox" checked={line.done} disabled={!onToggle} onChange={() => onToggle?.(line.index)} />
                             <span>{text}</span>
                         </label>);
                     case 'heading': return <h4 key={line.index} className={styles.heading}>{text}</h4>;
@@ -320,8 +322,19 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
                         <button type="button" onClick={planLine} title={t('noteToolPlanHint')}><Icon name="calendar" size={16} /><span>{t('noteToolPlan')}</span></button>
                         <input ref={fileInput} type="file" accept="image/*" multiple hidden onChange={e => { addImages([...e.target.files]); e.target.value = ''; }} />
                     </div>
-                    <textarea ref={area} className={styles.area} value={draft.body} maxLength={20000} onPaste={onPaste} onKeyDown={onAreaKeyDown}
-                        placeholder={t(full ? 'notePlaceholderRich' : 'notePlaceholder')} aria-label={t('noteText')} onChange={e => edit({ body: e.target.value })} />
+                    {/* writing: how it reads stays in view, beside the text when there is room, else under it */}
+                    <div className={own.writeSplit}>
+                        <div className={own.writeSplitInner}>
+                            <textarea ref={area} className={styles.area} value={draft.body} maxLength={20000} onPaste={onPaste} onKeyDown={onAreaKeyDown}
+                                placeholder={t(full ? 'notePlaceholderRich' : 'notePlaceholder')} aria-label={t('noteText')} onChange={e => edit({ body: e.target.value })} />
+                            <section className={own.livePreview} aria-label={t('notePreviewLabel')}>
+                                <p className={own.livePreviewLabel} aria-hidden="true">{t('notePreviewLabel')}</p>
+                                {draft.body.trim()
+                                    ? <NoteView body={draft.body} rich={full} onToggle={(index) => edit({ body: toggleCheck(draft.body, index) }, true)} />
+                                    : <p className={styles.emptyText}>{t('notePreviewEmptyWrite')}</p>}
+                            </section>
+                        </div>
+                    </div>
                 </>
                 : <div className={styles.readArea} onDoubleClick={() => setWriting(true)}>
                     {draft.body.trim()
@@ -356,6 +369,8 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
                             <button type="button" className={styles.removeImage} aria-label={t('noteRemoveAttachment')} onClick={() => setAttachments(attachments.filter((_, j) => j !== i))}><Icon name="close" size={12} /></button>
                         </li>)}
                 </ul>}
+
+            <PinToBoards noteId={note.id} />
 
             {full &&
                 <>

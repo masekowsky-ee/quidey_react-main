@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchNotes, createNote, updateNote, removeNote, checklistCount } from '../../features/focus/notebook';
-import { fetchFolders, duplicateOf } from '../../features/notes/notes';
+import { fetchFolders, duplicateOf, firstLine } from '../../features/notes/notes';
 import { useIsTester } from '../../features/auth/tester';
 import { showToast } from '../../features/toast/toast';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import NoteEditor from '../notes/NoteEditor.jsx';
+import NotePreview from '../notes/NotePreview.jsx';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
 import styles from './Notebook.module.css';
@@ -104,16 +105,16 @@ export default function Notebook({ focusTask }) {
                     : <ul className={styles.rows}>
                         {shown.map(note => {
                             const checks = checklistCount(note.body);
-                            const firstLine = note.body.split('\n').map(line => line.replace(/^\s*(- \[( |x|X)\] |# )/, '').trim()).find(Boolean) ?? '';
+                            const line = firstLine(note.body);
                             return (
                                 <li key={note.id}>
                                     <button type="button" className={styles.row} onClick={() => setOpenId(note.id)}>
                                         <span className={styles.rowTitle}>
                                             {note.pinned && <Icon name="pin" size={13} />}
-                                            {note.title || firstLine || t('noteUntitled')}
+                                            {note.title || line || t('noteUntitled')}
                                         </span>
+                                        <NotePreview note={note} className={styles.rowPreview} />
                                         <span className={styles.rowMeta}>
-                                            {note.title && firstLine && <span className={styles.rowPreview}>{firstLine}</span>}
                                             {checks.total > 0 && <span>{fill(t('noteChecks'), checks)}</span>}
                                             {note.attachments.length > 0 && <span><Icon name={note.attachments.some(a => a.kind === 'image') ? 'image' : 'link'} size={12} /> {note.attachments.length}</span>}
                                             <span>{dateFmt.format(new Date(note.updatedAt))}</span>

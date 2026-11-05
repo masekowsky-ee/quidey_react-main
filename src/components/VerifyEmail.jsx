@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from '../i18n/useTranslation';
 import { verifyEmail, resendVerificationMail, setUser } from '../features/auth/authAction';
 import ResendVerification from './ResendVerification.jsx';
+import MailSpamHint from './auth/MailSpamHint.jsx';
 
 // A token can only be used once: StrictMode runs the effect twice, so both runs share one request
 const requests = new Map();
@@ -85,6 +86,7 @@ export default function VerifyEmail() {
                 {failed && !signedIn && <ResendVerification />}
 
                 {resend === 'sent' && <p className={styles.text} role="status">{t('verifyMailSent')}</p>}
+                {resend === 'sent' && <MailSpamHint />}
                 {resend === 'failed' && <p className={styles.error} role="alert">{t('verifyMailFailed')}</p>}
 
                 <div className={styles.actions}>

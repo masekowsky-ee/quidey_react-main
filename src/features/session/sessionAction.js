@@ -141,12 +141,30 @@ function cancelAlarm() {
     apiFetch('/api/focus/alarm', { method: 'DELETE' }).catch(() => {});
 }
 
+// Brings the running timer up to the wall clock: the whole seconds since `runningSince` are
+// booked (useFocusClock does this every quarter second; stop and pause first, so a late or
+// frozen clock loses nothing). Answers whether a countdown ran out by it.
+export const catchUpClock = () => (dispatch, getState) => {
+    const state = getState();
+    const { timer, runningSince, timerMode } = state.session;
+    if (!timer.active || runningSince == null) return false;
+    const passed = Math.floor((Date.now() - runningSince) / 1000);
+    if (passed < 1) return false;
+    const seconds = timerMode === 'stopwatch' ? passed : Math.min(passed, Math.ceil(timer.time / 1000));
+    dispatch(clockTick(seconds, selectFocusTask(state)));
+    return !getState().session.timer.active;
+};
+
 // ---------- the controls (timer panel, Fokusraum, shortcuts) ----------
 export const startFocus = () => (dispatch, getState) => {
-    const { timer, timerMode, pomodoro } = getState().session;
+    const { timer, timerMode, pomodoro, sessionParams } = getState().session;
     if (timer.active) return;
-    if (timerMode !== 'stopwatch' && timer.time < 1000) return;
-    dispatch(setTimer(timer.time, true));
+    // a countdown that is over (or was stopped) starts again with the last length
+    const from = timerMode !== 'stopwatch' && timer.time < 1000
+        ? (timerMode === 'pomodoro' ? phaseMs(pomodoro) : sessionParams.time)
+        : timer.time;
+    if (timerMode !== 'stopwatch' && from < 1000) return;
+    dispatch(setTimer(from, true));
     playSound('focusStart');
     // the Android app's analytics, with consent only (features/native/analytics.js)
     trackEvent('focus_start', { mode: timerMode });
@@ -156,8 +174,9 @@ export const startFocus = () => (dispatch, getState) => {
 };
 
 export const pauseFocus = () => (dispatch, getState) => {
+    if (!getState().session.timer.active) return;
+    dispatch(catchUpClock());
     const { timer } = getState().session;
-    if (!timer.active) return;
     playSound('pause');
     dispatch(setTimer(timer.time, false));
     cancelAlarm();
@@ -167,8 +186,10 @@ export const pauseFocus = () => (dispatch, getState) => {
 // over from the beginning
 export const stopFocus = () => (dispatch, getState) => {
     playSound('pause');
-    const { timerMode, timer } = getState().session;
-    const wasRunning = timer.active;
+    const wasRunning = getState().session.timer.active;
+    // the seconds since the last tick count too
+    dispatch(catchUpClock());
+    const { timerMode } = getState().session;
     if (timerMode === 'pomodoro') {
         dispatch(setTimer(0, false));
         dispatch({ type: SET_POMODORO, payload: { phase: 'focus', round: 0 } });

@@ -20,6 +20,8 @@ import TaskInvites from './task/TaskInvites.jsx';
 import { Bone, Skeleton, SkeletonRows } from './skeleton/Skeleton.jsx';
 
 import Icon from './icons';
+import { useIsTester } from '../features/auth/tester';
+import ReminderList from './reminders/ReminderList.jsx';
 const TABS = ['messages', 'requests', 'notices', 'reminders'];
 const SEEN_DELAY_MS = 1500;
 const REMINDER_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
@@ -322,10 +324,10 @@ function Notices() {
         return () => clearTimeout(seenTimer.current);
     }, [load]);
 
-    // a new notice from the team shows up on top right away
+    // a new notice shows up on top right away; one that grew ("Ann added 3 entries") moves up in its place
     useRealtime('notification:new', (notice) => {
         if (!notice?.id) return;
-        setNotices(prev => (!prev || prev.some(n => n.id === notice.id) ? prev : [notice, ...prev]));
+        setNotices(prev => (!prev ? prev : [notice, ...prev.filter(n => n.id !== notice.id)]));
         markSeenSoon();
     });
     useRealtime(REALTIME_RECONNECT, load);
@@ -368,6 +370,18 @@ function Notices() {
 // ---------- reminders (worked out from the tasks) ----------
 
 function Reminders() {
+    const isTester = useIsTester();
+    if (!isTester) return <TaskReminders />;
+    // testers: their own reminders on top, the tasks' below
+    return (
+        <>
+            <ReminderList />
+            <TaskReminders below />
+        </>
+    );
+}
+
+function TaskReminders({ below = false }) {
     const { t } = useTranslation();
     const tasks = useSelector(state => state.task.tasks);
     const allDayTime = useSelector(selectAllDayTime);
@@ -385,7 +399,9 @@ function Reminders() {
     const coming = withReminder.filter(({ at }) => at.getTime() > now && at.getTime() <= now + REMINDER_WINDOW_MS)
         .sort((a, b) => a.at - b.at);
 
-    if (due.length === 0 && coming.length === 0) return <p className={styles.empty}>{t('inboxNoReminders')}</p>;
+    if (due.length === 0 && coming.length === 0) {
+        return below ? null : <p className={styles.empty}>{t('inboxNoReminders')}</p>;
+    }
 
     const item = ({ task, minutes, at, start }) => {
         const key = dateKey(task.due);
@@ -408,6 +424,7 @@ function Reminders() {
 
     return (
         <>
+            {below && <h3 className={styles.subTitle}>{t('remindersFromTasks')}</h3>}
             {due.length > 0 && <section><h3 className={styles.subTitle}>{t('inboxRemindersDue')}</h3><ul className={styles.list}>{due.map(item)}</ul></section>}
             {coming.length > 0 && <section><h3 className={styles.subTitle}>{t('inboxRemindersComing')}</h3><ul className={styles.list}>{coming.map(item)}</ul></section>}
         </>

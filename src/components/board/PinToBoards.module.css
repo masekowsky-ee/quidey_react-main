@@ -1,0 +1,108 @@
+/* "An Board heften" in a note (PinToBoards.jsx): a quiet button that opens the boards I can
+   pin to, each a row that says whether the note is there. */
+
+.wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.toggle {
+    composes: ghostBtn from '../ui.module.css';
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 2.1rem;
+    padding: 0 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-h);
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-pill);
+}
+
+.toggle[aria-expanded="true"] svg:last-child {
+    transform: rotate(180deg);
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.7rem 0.75rem;
+    background: var(--surface-inset);
+    border-radius: var(--radius-sm);
+}
+
+.hint {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.board {
+    width: 100%;
+    height: auto;
+    display: grid;
+    grid-template-columns: 1.4rem minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.55rem;
+    font-size: 0.875rem;
+    text-align: left;
+    color: var(--text-h);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+}
+
+.board:hover:not(:disabled) {
+    background: var(--surface-hover);
+}
+
+.board[aria-pressed="true"] {
+    border-color: var(--control-border);
+    background: var(--surface);
+}
+
+.mark {
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
+}
+
+.name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.kind {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.state {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    min-width: 6.5rem;
+    justify-content: flex-end;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.board[aria-pressed="true"] .state {
+    color: var(--text-h);
+    font-weight: 600;
+}

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useIsTester } from '../../features/auth/tester';
+import { runsInBrowser } from '../../features/pwa/install';
 import { selectFocusTask, setFocusTask, selectTaskTime } from '../../features/session/sessionAction';
 import { selectSharedSoloTasks } from '../../features/together/togetherAction';
 import { updateTaskProps } from '../../features/tasks/taskAction';
@@ -89,7 +90,8 @@ function TodayLine() {
     );
 }
 
-// Full screen: nothing but the Fokusraum (Escape leaves it)
+// Full screen: nothing but the Fokusraum (Escape leaves it). Only in a browser tab: the Android
+// app and the installed web app have no browser bars to hide.
 function useFullscreen() {
     const [full, setFull] = useState(() => typeof document !== 'undefined' && Boolean(document.fullscreenElement));
     useEffect(() => {
@@ -97,7 +99,7 @@ function useFullscreen() {
         document.addEventListener('fullscreenchange', update);
         return () => document.removeEventListener('fullscreenchange', update);
     }, []);
-    const supported = typeof document !== 'undefined' && Boolean(document.documentElement.requestFullscreen);
+    const supported = runsInBrowser() && typeof document !== 'undefined' && Boolean(document.documentElement.requestFullscreen);
     const toggle = () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {});
     return { full, toggle, supported };
 }

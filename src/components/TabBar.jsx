@@ -9,41 +9,61 @@ import { selectIncomingCount } from '../features/friends/friendsAction';
 import { selectInviteCount } from '../features/together/togetherAction';
 import { selectTaskInviteCount } from '../features/tasks/taskAction';
 import { selectAdminPendingCount } from '../features/admin/adminAction';
-import { selectInboxCount } from '../features/inbox/inbox';
 import { selectFamilyInviteCount } from '../features/family/family';
 import { useOnlineFriends } from '../features/presence/presence';
 import { fill } from '../features/helperFunction';
+import { motion } from 'motion/react';
+import { spring, useMotionLevel } from '../features/settings/motion';
 
 function Count({ count, label }) {
     if (count <= 0) return null;
     return <span className={styles.count} aria-label={`${count} ${label}`}>{count > 9 ? '9+' : count}</span>;
 }
 
+// The mark of the current tab: a pill behind its icon that slides over from the last one
+// (one shared layoutId); on "minimal" it only fades in, on "extreme" it overshoots a little
+function Indicator() {
+    const level = useMotionLevel();
+    if (level === 'minimal') {
+        return <motion.span className={styles.indicator} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }} aria-hidden="true" />;
+    }
+    return <motion.span layoutId="tabbar-indicator" className={styles.indicator} aria-hidden="true"
+        transition={level === 'extreme' ? spring(0.4, 0.7) : spring(0.35, 1)} />;
+}
+
+function TabInner({ on, icon, label, count = 0, countLabel, news, newsLabel, online = 0, onlineLabel }) {
+    return <>
+        <span className={styles.iconWrap}>
+            {on && <Indicator />}
+            <Icon name={icon} className={styles.icon} strokeWidth={on ? 2.1 : 1.7} />
+            <Count count={count} label={countLabel} />
+            {count === 0 && news && <span className={styles.dot} role="img" aria-label={newsLabel} />}
+            {online > 0 && <span className={styles.online} role="img" aria-label={onlineLabel} />}
+        </span>
+        <span className={styles.label}>{label}</span>
+    </>;
+}
+
 // online: how many friends have the app open (a green dot at the icon's foot)
-function Tab({ to, end, match, icon, label, count = 0, countLabel, news, newsLabel, online = 0, onlineLabel }) {
+// While the menu ("More") is open, only "More" carries the mark.
+function Tab({ to, end, match, menuOpen, ...inner }) {
     const { pathname } = useLocation();
     const matched = match?.(pathname);
     return (
-        <NavLink to={to} end={end} className={({ isActive }) => `${styles.tab} ${isActive || matched ? styles.active : ''}`}
+        <NavLink to={to} end={end} className={({ isActive }) => `${styles.tab} ${(isActive || matched) && !menuOpen ? styles.active : ''}`}
             data-active={matched || undefined}>
-            <span className={styles.iconWrap}>
-                <Icon name={icon} className={styles.icon} />
-                <Count count={count} label={countLabel} />
-                {count === 0 && news && <span className={styles.dot} role="img" aria-label={newsLabel} />}
-                {online > 0 && <span className={styles.online} role="img" aria-label={onlineLabel} />}
-            </span>
-            <span className={styles.label}>{label}</span>
+            {({ isActive }) => <TabInner on={Boolean(isActive || matched) && !menuOpen} {...inner} />}
         </NavLink>
     );
 }
 
-// Phones: the main pages at the thumb, the rest of the menu behind "More" (with the count of
-// what is in there: beta requests)
+// Phones: the main pages at the thumb (Start, Kalender, Fokus, Sozial), the rest of the menu
+// behind "More" (with the count of what is in there: beta requests); the inbox sits in the header
 export default function TabBar() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const news = useSelector(state => state.news);
-    const inboxCount = useSelector(selectInboxCount);
     const inviteCount = useSelector(selectInviteCount);
     const taskInviteCount = useSelector(selectTaskInviteCount);
     const isAdmin = useSelector(state => state.auth.access.isAdmin);
@@ -56,24 +76,18 @@ export default function TabBar() {
 
     return (
         <nav className={styles.bar} aria-label={t('mainNav')} data-part="tabbar">
-            <Tab to="/" end icon="home" label={t('home')} />
-            <Tab to="/calendar" icon="calendar" label={t('calendar')}
+            <Tab menuOpen={menuOpen} to="/" end icon="home" label={t('home')} />
+            <Tab menuOpen={menuOpen} to="/calendar" icon="calendar" label={t('calendar')}
                 count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
-            <Tab to="/focus" icon="focus" label={t('focusTab')} />
-            <Tab to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')}
+            <Tab menuOpen={menuOpen} to="/focus" icon="focus" label={t('focusTab')} />
+            <Tab menuOpen={menuOpen} to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')}
                 count={inviteCount + friendRequests + familyInvites} countLabel={t('communityCount')}
                 news={news.together || news.social || news.feed} newsLabel={t('menuNews')}
                 online={onlineFriends}
                 onlineLabel={fill(t(onlineFriends === 1 ? 'onlineFriendsOne' : 'onlineFriendsCount'), { count: onlineFriends })} />
-            <Tab to="/inbox" icon="inbox" label={t('inbox')}
-                count={inboxCount} countLabel={t('inboxUnread')} />
             <button type="button" className={`${styles.tab} ${menuOpen ? styles.active : ''}`}
                 onClick={() => dispatch(setShowMenu(true))} aria-expanded={menuOpen} aria-haspopup="dialog">
-                <span className={styles.iconWrap}>
-                    <Icon name="more" className={styles.icon} />
-                    <Count count={moreCount} label={t('menuNews')} />
-                </span>
-                <span className={styles.label}>{t('more')}</span>
+                <TabInner on={menuOpen} icon="more" label={t('more')} count={moreCount} countLabel={t('menuNews')} />
             </button>
         </nav>
     );

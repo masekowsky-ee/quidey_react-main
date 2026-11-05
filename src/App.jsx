@@ -26,8 +26,12 @@ import { fetchSharedSessions, fetchMySharedTasks } from './features/together/tog
 import { useWorkReporter } from './features/together/work.js'
 import { useSoloSharedWork } from './features/together/useSoloSharedWork.js'
 import { useFocusClock } from './features/session/useFocusClock.js'
+import { useFocusNotification } from './features/session/focusNotification';
+import { useFocusTitle } from './features/session/focusTitle';
 import { selectFocusTask } from './features/session/sessionAction.js'
 import { useRoutineReminders } from './features/routines/routines.js'
+import { useReminders } from './features/reminders/reminders.js'
+import ReminderAlert from './components/reminders/ReminderAlert.jsx'
 import { useAvatarRealtime } from './features/profile/avatars.js'
 import Toaster from './components/Toaster.jsx';
 import Tutorial from './components/Tutorial.jsx';
@@ -35,6 +39,8 @@ import DeleteScopeDialog from './components/task/DeleteScopeDialog.jsx';
 import PushOffer from './components/PushOffer.jsx';
 import OnboardingPrompts from './components/onboarding/OnboardingPrompts.jsx';
 import QuickAdd from './components/QuickAdd.jsx';
+import AddFab from './components/home/AddFab.jsx';
+import { showsAddFab } from './features/layout/addFab.js';
 import { fetchInboxUnread } from './features/inbox/inbox.js';
 import { useInboxRealtime } from './features/inbox/useInboxRealtime.js';
 import { connectRealtime, disconnectRealtime, useRealtime, useSafetyPoll, REALTIME_REJECTED } from './features/realtime/socket.js';
@@ -78,7 +84,7 @@ const PAGES = {
   SharedSession: () => import('./components/SharedSession.jsx'),
   Admin: () => import('./components/Admin.jsx'),
   FamilyPage: () => import('./components/family/FamilyPage.jsx'),
-  FunPage: () => import('./components/fun/FunPage.jsx'),
+  ArcadePage: () => import('./components/arcade/ArcadePage.jsx'),
   Tester: () => import('./components/tester/Tester.jsx'),
   FocusRoom: () => import('./components/focus/FocusRoom.jsx'),
   Routines: () => import('./components/routines/Routines.jsx'),
@@ -101,7 +107,7 @@ const Community = lazy(PAGES.Community);
 const SharedSession = lazy(PAGES.SharedSession);
 const Admin = lazy(PAGES.Admin);
 const FamilyPage = lazy(PAGES.FamilyPage);
-const FunPage = lazy(PAGES.FunPage);
+const ArcadePage = lazy(PAGES.ArcadePage);
 const Tester = lazy(PAGES.Tester);
 const FocusRoom = lazy(PAGES.FocusRoom);
 const Routines = lazy(PAGES.Routines);
@@ -243,6 +249,11 @@ function App(){
   usePushSync(allowed, token, navigate);
   // routines planned for a time of day: a toast while the app is open
   useRoutineReminders(allowed);
+  // testers' reminders: loaded, live, handed to the Android app's alarm clock
+  useReminders(allowed);
+  // a lasting notification with the time while a focus session is on (features/session/focusNotification.js)
+  useFocusNotification(allowed);
+  useFocusTitle(allowed);
 
   useEffect(() => { if (allowed) return preloadPages(); }, [allowed]);
 
@@ -265,6 +276,8 @@ function App(){
       <>
         <Routes>
           <Route path="/beta" element={<BetaGate />} />
+          {/* the waiting room: the arcade, while access is still to come */}
+          <Route path="/arcade" element={<Suspense fallback={pageLoading}><ArcadePage waiting /></Suspense>} />
           {/* Pro gets into the app during the beta too */}
           {proOn && <Route path="/pro" element={<Suspense fallback={pageLoading}><ProPage /></Suspense>} />}
           <Route path="*" element={<Navigate to="/beta" replace />} />
@@ -291,12 +304,15 @@ function App(){
         <PushOffer/>
         <OnboardingPrompts/>
         <QuickAdd/>
+        <ReminderAlert/>
+        {/* the round add button, bottom right, on the planning pages */}
+        <AddFab/>
         {/* Ctrl/⌘ K or "/": search tasks, jump, do; "?": the keyboard shortcuts */}
         <CommandPalette/>
         <ShortcutsDialog/>
         {/* the free plan is full (after the beta): the way to Quidey Pro */}
         {proOn && <LimitDialog/>}
-        <main className={shell.main} data-part="main">
+        <main className={shell.main} data-part="main" data-fab={showsAddFab(location.pathname) || undefined}>
         {/* each page comes in as the motion setting says */}
         {/* ...the tabs of the Gemeinschaft page are one page: switching them doesn't */}
         <motion.div key={location.pathname.startsWith(COMMUNITY_PATHS.feed) ? COMMUNITY_PATHS.feed : location.pathname} {...MOTION.page[motionLevel]}>
@@ -333,7 +349,10 @@ function App(){
           {/* testers: interface variants and the features in test, with their ratings */}
           <Route path="/tester" element={<TesterOnly fallback={<Navigate to="/" replace />}><Tester/></TesterOnly>} />
           {/* hidden: only reachable through the daily line in the header */}
-          <Route path="/fun" element={<FunPage/>} />
+          {/* the old hidden playground: its games live in the Arcade now */}
+          <Route path="/fun" element={<Navigate to="/arcade" replace />} />
+          {/* small games and their leaderboard (the beta screen's waiting room, too) */}
+          <Route path="/arcade" element={<ArcadePage/>} />
           {/* Quidey Pro: supporting the development */}
           <Route path="/pro" element={proOn ? <ProPage/> : <Navigate to="/" replace />} />
           <Route path="/beta" element={<Navigate to="/" replace />} />

@@ -100,12 +100,16 @@ Order of checks on every render:
    and `/signup` redirect to `/`. `LANDING_URL` in `src/features/site.js`.
 4. Signed in, access not checked yet → `AppSkeleton` (the real `Header`/`Menu`/`TabBar`, inert,
    and the address's `RouteSkeleton`; after 5 s a bar "Verbindung…" + retry / sign out); not pro → `/beta` (`BetaGate`, user can
-   request beta access).
+   request beta access; three ways on: the form, "Zur Startseite" (`LANDING_URL`) and "Ab in den Warteraum" →
+   `/arcade` with `ArcadePage waiting`, the only other route there, which re-checks access every 60 s so the app
+   opens by itself once let in).
 5. Pro → full app in the frame `AppShell.module.css`: `Header`, `Menu`, `TabBar`, `Toaster`,
    `Tutorial`, animated page routes in `<main>`. Widths (`src/features/layout/breakpoints.js`,
    `useMediaQuery`): ≥1100px the `Menu` is a fixed sidebar and the header starts beside it;
    721–1099px the menu is a drawer behind the header's button; ≤720px a bottom `TabBar` (Start,
-   Kalender, Gemeinschaft, Postfach, Mehr → drawer) replaces the header's button. The shell sets
+   Kalender, Fokus, Sozial, Mehr → drawer; equal columns edge to edge, the current tab marked by a
+   neutral pill behind a bolder icon that slides between tabs, layoutId, only "Mehr" while the menu is
+   open) replaces the header's button. The shell sets
    `--sidebar-w`, `--tabbar-h` and `--page-gutter`; fixed parts (toasts, timer button) and every
    page container use them. The closed drawer is `inert`; `setShowMenu(true|false)` (no argument
    toggles). Menu (Hick's law: few choices at once): Start, Kalender, Gemeinschaft, Postfach,
@@ -131,7 +135,11 @@ Order of checks on every render:
    Yes/no questions use `btnYes` (lifted primary with an icon) / `btnNo` (grey) from
    `ui.module.css` (also `PushOffer`). The header has a streak pill (flame + days, filled once today counts). The active entry is
    brighter ink, no fill; count badges are neutral (the accent stays on data, never on nav,
-   tabs or buttons; one filled inverted primary per screen). The header's "Neu" opens the
+   tabs or buttons; one filled inverted primary per screen). The header ends with the inbox (unread
+   count as badge, every width). The round add button at the bottom right (`home/AddFab.jsx`,
+   rendered by App on Start, Kalender, Fokusraum, `/family/:id`, `/together/:id` and the Sozial tabs
+   Sitzungen / Family: `features/layout/addFab.js`, `main[data-fab]` keeps room under it; Home's folded
+   timer has the same shape bottom left, `.fab` in ui.module.css, only the colours differ) opens the
    new-task form over any page (`QuickAdd`, `settings.showForms` via `showForms(true|false)`).
    Its name field takes a day, time and priority written into it ("Essay morgen 14 Uhr !hoch",
    German and English, `features/tasks/quickParse.js`): a line under the name says what was
@@ -180,7 +188,7 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   line of details, day as "Heute/Morgen/weekday" (`dueText`), priority as "Hoch/Mittel", focus /
   edit / two-step delete (`ConfirmDeleteButton`)), and the "Fokus" column (`WorkingContainer` +
   `TimerContainer inline`) sticky beside the list from 1100px; narrower, the focus card comes
-  first and the timer is the corner button. Colour, groups, description and priority are set in
+  first and the timer is the corner button (bottom left; the add button bottom right). Colour, groups, description and priority are set in
   the editor (`TaskEditDialog`); a shown group's colour and deletion sit in the list's title row.
   Tasks of shared sessions can be taken out of "Alle" (`settings.showSharedTasks`, eye button in
   the list's title row and in Settings); a session's own group always shows them. While a
@@ -189,14 +197,16 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   Every task row has a tooltip "Erstellt am … um … von …" and the editor (`TaskEditor`) the same
   line under its fields (`features/tasks/created.js`: own tasks `created_at` + `owner`, session /
   family entries `createdAt` + `addedBy`; compared with my username).
-- **Profile pictures — testers only** (`features/profile/avatars.js`, `profile/AvatarUpload.jsx` in
-  "Profil gestalten"): a square picture made in the browser (WebP, ≤ 110 KB, metadata dropped),
-  `PUT /api/tester/avatar`, `DELETE /api/profile/avatar`, admins `DELETE /api/admin/users/:id/avatar`
-  (users list "Profilbild entfernen", `hasAvatar`). Only testers see pictures: `useAvatarUrl(userId)`
-  is null for everybody else and asks nothing. For testers it batches `GET /api/avatars?ids=` (→
-  { id: version }, only people who also see my online status), then loads `/api/avatars/:id?v=` with
-  the token into an object URL; `avatars:changed` (live, `useAvatarRealtime` in App) forgets one.
-  `ProfileAvatar` and `together/Avatar` show it instead of emoji / initials. `access.userId` = my id.
+- **Profile pictures — for everybody** (testers only until 2026-11-04; `features/profile/avatars.js`,
+  `profile/AvatarUpload.jsx` in "Profil gestalten"): the picked file opens `AvatarCropper.jsx` (a sheet: the picture
+  under a round window, drag / arrow keys to move, slider / wheel / pinch to zoom, `clampPlacement` keeps the circle
+  covered, `cropSquare`), `circlePicture` cuts that circle out in the browser (corners transparent, WebP else PNG,
+  ≤ 110 KB, metadata dropped), `PUT /api/profile/avatar` (`/api/tester/avatar` still answers testers),
+  `DELETE /api/profile/avatar`, admins `DELETE /api/admin/users/:id/avatar` (users list "Profilbild entfernen",
+  `hasAvatar`). `useAvatarUrl(userId)` batches `GET /api/avatars?ids=` (→ { id: version }, only people who also see
+  my online status), then loads `/api/avatars/:id?v=` with the token into an object URL; `avatars:changed` (live,
+  `useAvatarRealtime` in App) forgets one. `ProfileAvatar` and `together/Avatar` show it instead of emoji / initials.
+  `access.userId` = my id.
 - **Admin → Tester-Feedback → "Gerade im Test"**: what is live for testers, from `TEST_FEATURES`
   (`testerOnly`, `since`) and the interface variants, with the ratings so far.
 - **Focus timer** (one for the whole app): `state.session` holds `timerMode` (`timer | pomodoro | stopwatch`),
@@ -210,15 +220,34 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   cleared on sign-out / account switch) and taken up on the next start. Controls are thunks (`startFocus`,
   `pauseFocus`, `stopFocus`, `skipPhase`); start sets `PUT /api/focus/alarm` {endsAt, phase}, pause/stop
   `DELETE`: the server pushes the end (kind `plan`) even with the phone off. The header's chip links to /focus.
+  Stop and pause first book the seconds since the last tick (`catchUpClock`, also what useFocusClock runs). A
+  session is dated when its time starts (SET_TIMER with nothing booked sets `currentSessionData.date`): the empty
+  one made after the last save, kept overnight in focusRun, used to put the day's first session on the day
+  before. Start on a countdown that is over (or stopped) runs the last length again (`sessionParams.time`, a
+  Pomodoro phase's length): the button says "Nochmal". Lengths are typed freely: the countdown in h / min / s
+  (`focus/DurationInput.jsx`, 1 s – 23:59:59, quick lengths beside it; the corner timer's editor fields take
+  typing too), Pomodoro lengths as numbers within `POMODORO_LIMITS` (preferences.js). While a session is on
+  (started, or paused mid-way) a lasting notification shows it (`features/session/focusNotification.js`,
+  `useFocusNotification` in App, written anew only when what it shows changes): in the Android app the plugin
+  `QuideyFocusNotification` (`FocusNotificationPlugin.java` in quidey_android: ongoing, silent channel "focus",
+  Android's chronometer counting to the end / up from the start, gone by itself at the end); in the browser a
+  service-worker notification (tag `quidey-focus`, "Endet um …" / "Läuft seit …", a tap opens /focus), only where
+  notifications are already allowed. In the browser the running timer also stands in the tab's title ("▶ 24:13 ·
+  Essay", `features/session/focusTitle.js`, `useFocusTitle` in App; worked out from `runningSince`, the beat from the
+  worker `titleTick.worker.js`, since a background tab slows the page's own timers; not while the team stopwatch has it).
 - `/focus` — **Fokusraum** (`components/focus/`): big ring timer (`FocusTimer`, mode switch, Pomodoro lengths),
   session goal, task in focus (pick / done), recap after a Pomodoro (into the notebook), thought parking lot
   (→ task via `parseQuickEntry`), focus sounds (`features/focus/noise.js`, Web Audio brown/pink/rain), study
-  methods, full screen (testers: the timer folds into a sticky bar on start, `MiniTimer` in `FocusTimer.jsx`,
+  methods, full screen (only in a browser tab, `runsInBrowser()` in install.js: not in the Android app or the
+  installed web app; testers: the timer folds into a sticky bar on start, `MiniTimer` in `FocusTimer.jsx`,
   "Groß zeigen" opens it, big again once nothing runs); the **notebook** beside it (`Notebook.jsx`, `features/focus/notebook.js`, API
   `/api/notebook`; the server reads its bigger bodies only after sign-in, checks pictures by their
   magic bytes and keeps all pictures of an account under 25 MB, `NOTEBOOK_STORAGE_FULL`): notes with `- [ ]` checklists, `# ` headings, link and picture attachments (pictures shrunk
   in the browser, at most 4 per note), "plan as task" for the cursor's line, autosave. The editor is
-  `components/notes/NoteEditor.jsx` (shared with `/notes`; `full` = testers' extras).
+  `components/notes/NoteEditor.jsx` (shared with `/notes`; `full` = testers' extras). Writing keeps a live preview of
+  how it reads beside the text (under it when narrow, container query in Notes.module.css); every list row shows a
+  preview line (`notePreview`, `notes/NotePreview.jsx`: the text after the title line, else "only attachments (n)" /
+  "nothing written yet"). "An Board heften" (`board/PinToBoards.jsx`) pins it to a family's / open session's board.
 - `/notes` — **Notizen**, testers only (`components/notes/NotesPage.jsx`, `features/notes/notes.js`): the
   notebook's notes in views (all, pinned, folders, tags, archive, trash; `?view=folder:<id>|tag:<word>|…`,
   `?note=<id>`), search (words, `#tag`), sort + list/tiles (localStorage `notesSort`, `notesLayout`),
@@ -247,14 +276,30 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   and an in-app toast via `useRoutineReminders`), templates (texts `routineTpl_*`), guided run by the wall clock
   (localStorage `routineRun`), runs booked. Home's dashboard (`home/Today.jsx`, under the motivation strip):
   focus today vs. the daily goal (localStorage `focusGoal`), today's routines, up next, quick note (→ notebook).
-  Texts of all of this in `i18n/focusTexts.js`. Menu and tab bar (6 tabs) have Fokusraum; shortcuts G F / G R.
+  Texts of all of this in `i18n/focusTexts.js`. Menu and tab bar (5 tabs) have Fokusraum; shortcuts G F / G R.
+- **Erinnerungen** — testers only, no tab of their own (`features/reminders/reminders.js`, slice `reminders`,
+  `useReminders` in App; `components/reminders/`; texts `i18n/reminderTexts.js`; API `/api/tester/reminders`,
+  migration 039): a text and a time, no task. Once (`at`) or on weekdays (`days` 1 = Monday + `atTime`), "Erledigt"
+  ends a once one, "10 Min. später" snoozes (`snoozedUntil`). They live in Postfach → Erinnerungen (`ReminderList`
+  above the tasks' reminders), the new-task form's kind switch has a third choice "Erinnerung" (QuickAdd swaps in
+  `ReminderForm`, the typed text goes along; `showForms('reminder')` opens it so), the command bar "Neue Erinnerung".
+  Times are worked out on the device (`occurrences`, `nextOccurrence`, `dueOccurrence`). The server pushes them
+  (kind `plan`, `utils/focus.js` `pushReminders`) except to devices with `push_subscriptions.alarms`. While the web
+  app is open a due one covers the page (`ReminderAlert`). **Android app**: rung natively like an alarm clock
+  (`features/native/alarms.js` → plugin `QuideyAlarms` in quidey_android: `AlarmsPlugin`, `Alarms`
+  (`setAlarmClock`, next 14 days, ≤ 100), `AlarmReceiver` (channel `alarm`, insistent alarm sound, full-screen
+  intent, quiet after 5 min), `AlarmActivity` (native, over the lock screen), `BootReceiver`, `AlarmStore`); taps
+  there are kept on the device until sent (`pendingActions` / `clearActions`), sign-out / account switch
+  `cancelAlarms()`; `PUT /api/tester/reminders/device { endpoint, alarms }` tells the server this device rings
+  them. Settings → App "Erinnerungen als Wecker" (testers, app only) shows the three permissions (exact alarms,
+  full screen, notifications) with a way to Android's page.
 - `/calendar` — month / week / agenda views, drag tasks between days, keyboard grid,
   `TaskEditor` (times, reminders, repeat weekly/monthly/yearly, notes, groups/labels, sharing).
   Several calendars: `?cal=session-<id>` shows a shared session's tasks, `?cal=family-<id>` a
   family's calendar; picker in the toolbar. `src/features/calendar/sources.js`
   (`useSharedCalendar`) loads them and routes add/move/edit/delete to their API; DayPanel gets
   `personal={false}` (no groups/reminders/sharing, "von X", delete only with `canRemove`).
-- `/community` — **Gemeinschaft**: everything with other people on one page
+- `/community` — **Sozial** (DE; EN "Social", formerly "Gemeinschaft"): everything with other people on one page
   (`components/community/Community.jsx`, paths in `src/features/community/paths.js`). Tabs with their
   own address: Feed (`/community`), Fortschritt (`/community/progress`, `Progress.jsx`),
   Sitzungen (`/community/sessions`, the old `/together` list),
@@ -300,12 +345,31 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   streak; only who shows statistics). Slice `family` in
   `src/features/family/family.js` (list + invites, `useFamilyList` in App), pages in
   `src/components/family/`. API under `/api/families` (behind `requirePro`) (backend migration 022).
+  Entries can be **events** (`family_tasks.kind`, migration 040): they need a day, are done once over (family
+  owner's time zone, `syncFamilyEvents`), have no tick ("Demnächst" has the kind switch, editor and family calendar
+  `allowEvents`). Entries have **reminders** (`family_tasks.reminders`, only with a day; editor `remindsAll`, hint
+  "Erinnert alle Mitglieder"): pushed (kind `plan`) to every joined member at the owner's times (`pushFamilyEntries`,
+  `push_sent_for`). **"Aus meinen Aufgaben"** (`family/MoveMyTasks.jsx`, `movableTasks`, `moveToFamily`): one of my
+  own open tasks / coming events moves in after a question (`POST …/tasks { taskId }`: details + reminders copied,
+  my task deleted; repeating, shared or done ones refused: `TASK_REPEATS`, `TASK_SHARED`, `TASK_DONE`).
+  `done_by` / `completed_at` of family and session tasks are booked for the statistics.
+- **Boards: notes pinned in families and sessions** (`features/board/board.js`, `components/board/NoteBoard.jsx`; on
+  the family page under the board text, on a session page as its own card): a member pins one of their own notes
+  (`board_notes`, migration 037, max 30 per board); the others read it as it is now (edits show, the trash or deleting
+  takes it off, notes of people no longer in it are hidden) and can't change it; the note's owner and the family's /
+  session's owner take it off. Cards with a preview, the open note in a sheet (pictures loaded then), a picker of my
+  notes. An ended session's board is read only. API `GET|POST /api/families/:id/board`, `GET|DELETE …/board/:pinId`,
+  the same under `/api/shared-sessions/:id`, `GET /api/notebook/:id/boards`; live `board:changed { kind, id }`.
+  Texts `noteBoard*` in focusTexts.js (plain `board*` keys belong to the departure board).
 - `/stats` — **Statistiken** (formerly `/history`, which redirects): tabs Übersicht | Sitzungen |
   Erledigt (`?tab=`), period Woche/Monat/Jahr/Gesamt stepped back with arrows (`?range=&offset=`,
   `src/features/stats/period.js`). Overview from `GET /api/stats?from&to`: tiles, stacked columns
   focus + event time (`stats/TimeChart.jsx`, fixed validated pair blue/orange, table view), bars per
-  event type and per group, then the all-time `ProfileStats` ("Aktivität"). Sessions list in
-  `stats/SessionList.jsx`, completed tasks in `CompletedTasks.jsx` (events left out).
+  event type and per group, "In Sitzungen & Familien" (`stats/TogetherStats.jsx`: team stopwatch time, per place
+  done / events, from `together`), then the all-time `ProfileStats` ("Aktivität"). Sessions list in
+  `stats/SessionList.jsx`, completed tasks in `CompletedTasks.jsx` (events left out; a second part from
+  `together.done`). Session and family work counts in `tasksDone` and the events: tasks I ticked off
+  (`done_by`) or that were given to me, events I added or was given (a session copy of my own task isn't counted twice).
 - Repeats: `tasks.repeat_left` (how many more times, null = no end; "Endet: nie / nach N") and
   `tasks.repeat_skip` (coming days deleted on their own). Deleting a repeating task (or a coming
   repeat, which the calendar's day panel lists as a preview row) asks "only this / this and
@@ -342,7 +406,7 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   (`TaskEditor personal={false} allowEvents`). Session entries can be events
   (`shared_session_tasks.kind`): they need a day, are done once over (session owner's time zone,
   `syncSessionEvents`), have no tick, assignee or stopwatch and stay out of Home's list. Reminders, repeating, groups and sharing stay personal; adding
-  an own task copies its details, later edits don't sync back (only `done` does).
+  an own task (or coming own event, `ShareMyTasks`) copies its details, later edits don't sync back (only `done` does).
 - Sub-groups in sessions and families — **for everybody** (testers only until 2026-10-28): a session's or family's
   entries sorted into named groups (`shared_session_groups` / `family_groups`, entries'
   `group_id`, migration 030; max 20, name ≤ 40, unique per session/family; deleting one keeps its
@@ -397,8 +461,20 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   shell sets `--sidebar-w`, and for `top` a taller `--header-h`), `Menu.module.css` (`.undocked`
   drawer on wide screens, `.rail`), `Header` (`TopNav` row, command field). Surface brief:
   `.impeccable/surfaces/src-app-jsx.md`.
-- `/fun` — hidden mini-games (word guess, scramble, sequence, stats), reached only via the
-  daily line in the header.
+- `/arcade` — **Arcade**, for everybody signed in, also before beta access (the beta screen's waiting room; in the
+  app: menu after Statistiken, command bar). `components/arcade/` (`ArcadePage`, `Reflex`, `Pattern`,
+  Arcade.module.css), `features/arcade/arcade.js`, texts `i18n/arcadeTexts.js`. Games: `reflex` (a light on a 4 × 4
+  field, endless: 5 % quicker every 8 hits, a light gone out untouched or a dark tile ends it, quick hits double), `pattern` (four coloured pads with `playPad` tones from sound.js,
+  the pattern grows each round; score = rounds) and the three quiz games of `components/fun/` (score = streak, per difficulty; they
+  report it through `onScore`). Mode per run, remembered in localStorage `arcadeMode`: `ranked` (personal best +
+  leaderboard, display and user name public to everybody signed in) or `casual` (default: only my personal best).
+  Leaderboard per game and difficulty beside the game (top 25 + my place), "Mich aus allen Ranglisten nehmen". API
+  (behind authenticateToken, not requirePro): `GET /api/arcade/me`, `POST /api/arcade/scores { game, level, score,
+  ranked }` (rate limited, scores checked against each game's max; client scores, so for fun only),
+  `GET /api/arcade/leaderboard?game=&level=`, `DELETE /api/arcade/ranked`. Table `arcade_scores` (migration 038).
+- `/fun` — the old hidden playground, gone: redirects to `/arcade`. Its quiz games (`components/fun/`
+  WordGuess, Scramble, Sequence, Stats; `features/fun/`) live on in the Arcade; the daily line in the
+  header (`DailyTicker.jsx`, today's fact / quote / slogan behind a bulb) links to `/arcade`.
 - Task sharing: send a task to a friend (`task_shares`), accepted shares appear in their list.
 - Task colours: `tasks.color` (8 names, `src/features/tasks/taskColors.js`); rows and chips set
   `data-task-color`, the tones live in `index.css` as `--task-color` per theme. An event without
@@ -434,9 +510,12 @@ goes out with the next deploy but never into git); `vite.config.js` hands the de
 alone; `_headers` sends it `no-cache` + as attachment. Cloudflare's limit is 25 MiB per file.
 
 Push notifications (Web Push, VAPID): Settings → App → "Benachrichtigungen" per device (on/off,
-then four kinds `plan` (tasks/events at each of their reminders), `digest`
+then five kinds `plan` (tasks/events at each of their reminders, also my families' entries), `digest`
 (morning overview 07:30–11:00 local), `messages`, `social` (friend requests, session/family
-invites, shared/assigned tasks, broadcasts; admins also new beta requests), and "Test senden"). `src/features/pwa/push.js`
+invites, shared/assigned tasks incl. family entries given to me, broadcasts; admins also new beta requests), `groups`
+(somebody else added entries to my family / session: inbox notice `entries_added`, bundled per person and place for
+30 min while unread, backend `utils/groupNotices.js`; family / session chat messages), and "Test senden"). The whole
+list of when anybody is notified: **`docs/notifications.md`** (keep it up to date). `src/features/pwa/push.js`
 (external store, `usePushState`; `refreshPush` on every start via `usePushSync` in App re-PUTs the
 subscription, so a renewed address or another account is picked up and a revoked permission turns
 it off; `enablePush` asks for the permission first, from the click). After creating a task
@@ -471,7 +550,7 @@ for the app's own files: `token` (JWT), `accounts` (several accounts on one devi
 `[{ username, displayName, token }]`, max 5, `src/features/auth/accounts.js`; switching reloads
 the app as the other one, signing out takes over the next remembered account), `language`, `accent`,
 `theme`, `palette`, `motion`, `sound`, `analytics` (Android app: the answer to the usage data question), `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
-`teamSessionId`, `notesSort` / `notesLayout` (testers' notes area), `streakNudge` (day of the last streak reminder), `uiVariant` and `uiColors`
+`teamSessionId`, `arcadeMode` (ranked | casual), `reminderSeen` (testers' reminders already shown in the page), `notesSort` / `notesLayout` (testers' notes area), `streakNudge` (day of the last streak reminder), `uiVariant` and `uiColors`
 (testers' interface variant and the colours picked per variant), `push`, `pushEndpoint`,
 `pushAsked` (push notifications on this device), `onboarding:<username>` (a new account's action
 count, whether install / rating were asked). `public/theme-init.js` applies
@@ -537,7 +616,9 @@ the theme before React loads.
   `features/native/native.js` (`isNativeApp()`, back button, system bars, resume) and
   `features/native/nativePush.js` (FCM: the token goes to the server as endpoint `fcm:<token>`,
   one notification channel per kind, built only with `VITE_NATIVE_PUSH=on`, i.e. when
-  `android/app/google-services.json` exists). Shared files only branch on `isNativeApp()`: no
+  `android/app/google-services.json` exists; a push that comes while the app is open is not shown by
+  Android, like the web hides them in a focused tab, except the test: `onNativePushInApp` shows it
+  through the app's plugin `QuideyNotice`, `NoticePlugin.java` in quidey_android). Shared files only branch on `isNativeApp()`: no
   service worker, install row "installed", push via FCM (`push.js` "app" branches), Pro via Play.
   Backend `utils/fcm.js` (FCM HTTP v1, `FIREBASE_SERVICE_ACCOUNT_FILE`); `push_subscriptions` rows
   with `fcm:` endpoints have no keys (migration 034). Besides Google Play, the APK can be downloaded
@@ -570,7 +651,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment, 028: push_subscriptions, tasks.push_sent_for, users.push_digest_on, 029: tasks.reminders (replaces reminder_minutes), 030: sub-groups — shared_session_groups, family_groups, shared_session_tasks.group_id, family_tasks.group_id, 031: users.tour_seen_at, users.allday_reminder_time, …, 036: note_folders, notebook_notes.folder_id / tags / color / archived / trashed_at, collections, collection_items, users.groups_imported_at). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment, 028: push_subscriptions, tasks.push_sent_for, users.push_digest_on, 029: tasks.reminders (replaces reminder_minutes), 030: sub-groups — shared_session_groups, family_groups, shared_session_tasks.group_id, family_tasks.group_id, 031: users.tour_seen_at, users.allday_reminder_time, …, 036: note_folders, notebook_notes.folder_id / tags / color / archived / trashed_at, collections, collection_items, users.groups_imported_at, 037: board_notes, 038: arcade_scores, 039: reminders + push_subscriptions.alarms, 040: family_tasks.kind / reminders / push_sent_for / done_by / completed_at, shared_session_tasks.done_by / completed_at, push_subscriptions.groups, notification kind entries_added). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.
@@ -625,7 +706,7 @@ the theme before React loads.
   everybody; none that needs friends without any). Team stopwatch time is also booked per day in
   `shared_time_days`.
 - CLI: `npm run pro -- list|requests|grant|revoke|decline|admin|unadmin|tester|untester <username>`.
-- Tests: `npm test` (`test/api.test.mjs`, node:test, creates/drops its own DB). Extend for every new route.
+- Tests: `npm test` (`scripts/test/*.test.mjs`, node:test; api.test.mjs creates/drops its own DB). Extend for every new route.
 - Config via `.env` (see `.env.example`): `NODE_ENV`, `DB_*`, `JWT_SECRET` (≥32 chars), `PORT`,
   `CORS_ORIGINS`, `TRUST_PROXY`, `SMTP_*`, `MAIL_FROM`, `CONTACT_TO`, `FRONTEND_URL`, `VAPID_*`.
 

@@ -1,5 +1,6 @@
-/* Phones only: five equal tabs on the page ground, above the iPhone's home indicator.
-   The current page: the label and icon in full ink, the others muted (no coloured pill). */
+/* Phones only: equal tabs across the whole width, above the iPhone's home indicator.
+   The current page: a neutral pill behind its icon that slides from tab to tab, the icon drawn
+   bolder, icon and label in full ink; the others muted (the accent stays off the nav). */
 .bar {
   display: none;
 }
@@ -12,7 +13,10 @@
     bottom: 0;
     z-index: var(--z-header);
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    /* as many equal columns as there are tabs, filling the bar edge to edge */
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    justify-items: stretch;
     height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
     padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
     box-sizing: border-box;
@@ -41,6 +45,8 @@
 }
 
 .tab {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -69,24 +75,51 @@
   transition-duration: var(--press);
 }
 
+.tab {
+  transition: color var(--ease);
+}
+
 .active {
   color: var(--text-h);
 }
 
-/* the current page also gets a soft pill behind its icon */
 .iconWrap {
   position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3.5rem;
-  height: 1.75rem;
+  width: 4rem;
+  height: 2rem;
   border-radius: var(--radius-pill);
   transition: background-color var(--ease-out), transform 0.45s var(--spring-bounce);
 }
 
-.active .iconWrap {
+/* the mark of the current tab (TabBar.jsx Indicator): it moves between the tabs */
+.indicator {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in srgb, var(--text-h) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-h) 8%, transparent);
+}
+
+/* the interface variants have their own mark on the icon's box (see ui-variants/*.css) */
+:root[data-ui] .indicator {
+  display: none;
+}
+
+:root[data-ui] .active .iconWrap {
   background-color: var(--surface-strong);
+}
+
+/* more contrast: a solid step instead of the wash */
+@media (prefers-contrast: more) {
+  .indicator {
+    background-color: var(--surface-strong);
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+  }
 }
 
 .icon {
@@ -107,14 +140,14 @@
 }
 
 .active .label {
-  font-weight: 600;
+  font-weight: 650;
 }
 
 /* unread / open, on the icon's corner */
 .count {
   position: absolute;
-  top: -0.3rem;
-  right: 0.45rem;
+  top: -0.2rem;
+  right: 0.7rem;
   min-width: 1.05rem;
   padding: 0 0.25rem;
   box-sizing: border-box;
@@ -132,8 +165,8 @@
 /* friends online: a small green dot at the foot of the icon, apart from counts and news */
 .online {
   position: absolute;
-  bottom: 0.1rem;
-  right: 1rem;
+  bottom: 0.25rem;
+  right: 1.25rem;
   width: 0.45rem;
   height: 0.45rem;
   background-color: var(--online);
@@ -143,19 +176,11 @@
 
 .dot {
   position: absolute;
-  top: 0.05rem;
-  right: 0.9rem;
+  top: 0.15rem;
+  right: 1.15rem;
   width: 0.5rem;
   height: 0.5rem;
   background-color: var(--primary);
   border-radius: 999px;
   box-shadow: 0 0 0 2px var(--surface-bar);
-}
-
-/* six tabs on a narrow phone: the labels a little smaller, so "Gemeinschaft" still fits */
-@media (max-width: 420px) {
-  .label {
-    font-size: 0.625rem;
-    letter-spacing: -0.03em;
-  }
 }

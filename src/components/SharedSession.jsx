@@ -16,6 +16,7 @@ import TeamPresence from './together/TeamPresence';
 import ActivityFeed from './together/ActivityFeed';
 import WorkSummary from './together/WorkSummary';
 import { calendarLink } from '../features/calendar/sources';
+import NoteBoard from './board/NoteBoard.jsx';
 
 import Icon from './icons';
 // Title of a session; the owner can click it to rename the session
@@ -139,6 +140,9 @@ export default function SharedSession() {
                 <div className={styles.roomMain}>
                     <WorkPanel session={session} />
                     <SharedTaskList session={session} />
+                    <section className={styles.card} aria-label={t('noteBoardNotes')}>
+                        <NoteBoard kind="session" id={session.id} canPin={!session.endedAt} />
+                    </section>
                     <WorkSummary session={session} />
                 </div>
                 <div className={styles.roomSide}>

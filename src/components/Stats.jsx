@@ -11,6 +11,7 @@ import ProfileStats from './profile/ProfileStats.jsx';
 import CompletedTasks from './CompletedTasks.jsx';
 import SessionList from './stats/SessionList.jsx';
 import TimeChart from './stats/TimeChart.jsx';
+import TogetherStats from './stats/TogetherStats.jsx';
 import Icon from './calendar/icons.jsx';
 import { Bone, Skeleton } from './skeleton/Skeleton.jsx';
 import { usePlan } from '../features/pro/pro';
@@ -162,6 +163,7 @@ function Overview({ period, stats, error, t, locale }) {
                     <Bars rows={groupRows} empty={t(byCollection ? 'statsNoCollections' : 'statsNoGroups')} />
                 </section>
             </div>
+            <TogetherStats together={stats.together} />
         </>
     );
 }
@@ -270,7 +272,7 @@ export default function Stats() {
                         <ProfileStats stats={profile.stats} title={t('statsActivity')} colorAttr={profileColorAttr(profile)} />}
                 </>}
             {tab === 'sessions' && <SessionList period={period} />}
-            {tab === 'done' && <CompletedTasks />}
+            {tab === 'done' && <CompletedTasks together={shownStats.data?.together} />}
         </div>
     );
 }

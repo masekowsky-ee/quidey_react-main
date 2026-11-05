@@ -51,7 +51,8 @@ function optionsSummary(t, extras, hasDate, hasTime, task) {
 // subGroups: [{ id, name }] of a session or family (experimental, testers): a field to move the
 // entry between them (group_id). Under the fields a quiet line says when and by whom it was made.
 // Testers: an own task or event can be put into collections (with notes and other tasks).
-export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, onPickGroups, personal = true, allowEvents = false, subGroups }) {
+// remindsAll: a family's entry: not personal, but with reminders (they reach every member).
+export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, onPickGroups, personal = true, allowEvents = false, remindsAll = false, subGroups }) {
     const { t, language } = useTranslation();
     const id = useId();
     const nameRef = useRef(null);
@@ -140,6 +141,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             link: extras.link.trim(),
             details: extras.details.trim(),
             ...(subGroups ? { group_id: groupId } : {}),
+            ...(remindsAll ? { reminders: due ? extras.reminders : [] } : {}),
         } : {
             name: name.trim(),
             // the day is optional; a time of day, a reminder and repeating need one
@@ -265,7 +267,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             </button>
             {showMore &&
                 <div className={styles.more}>
-                    <TaskOptionsFields value={extras} hasTime={Boolean(time)} hasDate={Boolean(due)} canMail={isOwner} personal={personal} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
+                    <TaskOptionsFields value={extras} hasTime={Boolean(time)} hasDate={Boolean(due)} canMail={isOwner} personal={personal} remindsAll={remindsAll} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
                     {personal && <TaskSharing task={task} />}
                 </div>}
 

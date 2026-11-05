@@ -35,6 +35,8 @@ function mockApi(me) {
         if (url === '/api/sessions') return []
         if (url === '/api/friends/requests') return { incoming: [], outgoing: [] }
         if (url === '/api/shared-sessions') return { sessions: [], invites: [] }
+        if (url === '/api/arcade/me') return []
+        if (url.startsWith('/api/arcade/leaderboard')) return { top: [{ rank: 1, user: { id: 9, username: 'zoe', displayName: 'Zoe' }, score: 42, me: false }], me: null }
         throw new Error(`unexpected call ${options.method ?? 'GET'} ${url}`)
     })
     return state
@@ -88,6 +90,20 @@ describe('closed beta', () => {
         const called = apiFetch.mock.calls.map(([url]) => url)
         expect(called).not.toContain('/api/tasks')
         expect(called).not.toContain('/api/shared-sessions')
+    })
+
+    it('offers three ways on: the form, the landing page, and the waiting room with the arcade', async () => {
+        mockApi({ userId: 1, username: 'ann', isPro: false, betaRequest: null })
+        const store = await renderApp('/beta')
+        await signIn(store)
+        expect(screen.getByRole('textbox')).toBeInTheDocument()
+        expect(screen.getByRole('link', { name: 'Zur Startseite' })).toHaveAttribute('href', 'https://quidey.com')
+
+        await act(async () => { fireEvent.click(screen.getByRole('link', { name: /Ab in den Warteraum/ })) })
+        expect(await screen.findByRole('heading', { name: 'Arcade' })).toBeInTheDocument()
+        expect(screen.getByText('Warteraum')).toBeInTheDocument()
+        expect(await screen.findByText('Zoe')).toBeInTheDocument()
+        expect(apiFetch.mock.calls.map(([url]) => url)).not.toContain('/api/tasks')
     })
 
     it('asks for access once, with a reason of at least 10 characters', async () => {

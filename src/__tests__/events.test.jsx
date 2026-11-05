@@ -258,6 +258,42 @@ describe('statistics page', () => {
         expect(screen.getByRole('button', { name: 'Next period' })).toBeDisabled()
     })
 
+    const together = {
+        teamMs: 2 * 3600000,
+        places: [
+            { kind: 'family', id: 3, name: 'The Bergs', emoji: '🏡', color: null, done: 2, events: 1 },
+            { kind: 'session', id: 5, name: 'Study group', emoji: null, color: null, done: 1, events: 0 },
+        ],
+        done: [{ id: 40, name: 'Wash up', completedAt: new Date().toISOString(), where: { kind: 'family', id: 3, name: 'The Bergs' } }],
+    }
+
+    it('shows what I did in sessions and families, linked to them', async () => {
+        apiFetch.mockImplementation(async (url) => (url.startsWith('/api/stats') ? { ...stats, together } : url === '/api/profile' ? {} : []))
+        await act(async () => { wrap(makeStore(), <Stats />, '/stats') })
+        const card = screen.getByRole('region', { name: 'In sessions & families' })
+        expect(within(card).getByText('Team time')).toBeInTheDocument()
+        expect(within(card).getByText('2 h')).toBeInTheDocument()
+        const family = within(card).getByRole('link', { name: /The Bergs/ })
+        expect(family).toHaveAttribute('href', '/family/3')
+        expect(family).toHaveTextContent('2 done')
+        expect(family).toHaveTextContent('1 event')
+        expect(within(card).getByRole('link', { name: /Study group/ })).toHaveAttribute('href', '/together/5')
+    })
+
+    it('without anything together there is no such section', async () => {
+        apiFetch.mockImplementation(async (url) => (url.startsWith('/api/stats') ? { ...stats, together: { teamMs: 0, places: [], done: [] } } : url === '/api/profile' ? {} : []))
+        await act(async () => { wrap(makeStore(), <Stats />, '/stats') })
+        expect(screen.queryByRole('region', { name: 'In sessions & families' })).not.toBeInTheDocument()
+    })
+
+    it('the done tab lists what I did in families and sessions too', async () => {
+        apiFetch.mockImplementation(async (url) => (url.startsWith('/api/stats') ? { ...stats, together } : url === '/api/profile' ? {} : []))
+        await act(async () => { wrap(makeStore(), <Stats />, '/stats?tab=done') })
+        const section = screen.getByRole('region', { name: 'In sessions & families' })
+        const row = within(section).getByText('Wash up').closest('li')
+        expect(row).toHaveTextContent('The Bergs')
+    })
+
     it('the chart has a table with the same numbers', async () => {
         apiFetch.mockImplementation(async (url) => (url.startsWith('/api/stats') ? stats : {}))
         await act(async () => { wrap(makeStore(), <Stats />, '/stats?range=all') })

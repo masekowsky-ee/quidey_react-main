@@ -6,7 +6,7 @@
   composes: page from './ui.module.css';
   width: min(76rem, calc(100% - 2 * var(--page-gutter, 1rem)));
   margin: 0 auto;
-  padding-bottom: 4rem;
+  padding-bottom: 1rem; /* main adds the room for the round buttons (AppShell .main[data-fab]) */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -113,7 +113,7 @@ a.overdue:focus-visible {
 
 @media (max-width: 720px) {
   .page {
-    padding-bottom: 5rem; /* room so the timer button never covers the last task */
+    padding-bottom: 1rem;
     gap: 1rem;
   }
 

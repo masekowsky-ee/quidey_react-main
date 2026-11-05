@@ -24,6 +24,11 @@
   min-width: 0;
 }
 
+/* pages with the round add button (bottom right): room under the last row, so it covers nothing */
+.main[data-fab] {
+  padding-bottom: 4.5rem;
+}
+
 @media (min-width: 1100px) {
   .shell {
     --sidebar-w: 15rem;

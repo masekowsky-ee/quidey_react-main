@@ -4,6 +4,7 @@ import { forgetAccount, forgetToken, listAccounts, rememberAccount, switchAccoun
 import { forgetPushOnSignOut, refreshPush } from '../pwa/push';
 import { resetFocus } from '../session/sessionAction';
 import { clearFocusRun } from '../session/focusRun';
+import { cancelAlarms } from '../native/alarms';
 
 // Signed in (password, Google): { token, username } from the server
 const finishSignIn = (data) => {
@@ -98,6 +99,8 @@ export const logout = () => {
         // no more push notifications for this account here (with another one taking over,
         // they go over to that one on its start)
         forgetPushOnSignOut(token, Boolean(next));
+        // the reminders' alarm clock (Android app) rings for nobody now; the next account sets its own
+        cancelAlarms();
         if (next) {
             switchAccount(next.username);
             return;

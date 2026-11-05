@@ -168,6 +168,8 @@ export default function Menu(){
                         <MenuLink to="/inbox" icon="inbox" label={t('inbox')} onClick={onClose}
                             count={inboxCount} countLabel={t('inboxUnread')} />
                         <MenuLink to="/stats" icon="history" label={t('history')} onClick={onClose} />
+                        {/* small games, with a leaderboard (also the beta screen's waiting room) */}
+                        <MenuLink to="/arcade" icon="gamepad" label={t('arcade')} onClick={onClose} />
                     </div>
                 </nav>
 

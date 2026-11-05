@@ -94,6 +94,7 @@ export default function CommandPalette() {
             go(COMMUNITY_PATHS.family, t('communityTab_family'), 'family'),
             go('/inbox', t('inbox'), 'inbox'),
             go('/stats', t('history'), 'history'),
+            go('/arcade', t('arcade'), 'gamepad'),
             go('/profile', t('profile'), 'profile'),
             go('/settings', t('settings'), 'settings'),
             go('/feedback', t('feedback'), 'feedback'),
@@ -105,6 +106,7 @@ export default function CommandPalette() {
                 run: () => navigate(place.to),
             })),
             { id: 'do:new', group: 'do', label: t('commandNewEntry'), icon: 'plus', run: () => dispatch(showForms(true)) },
+            ...(isTester ? [{ id: 'do:reminder', group: 'do', label: t('reminderNew'), icon: 'alarm', run: () => dispatch(showForms('reminder')) }] : []),
             {
                 id: 'do:theme', group: 'do', label: t(dark ? 'commandThemeLight' : 'commandThemeDark'), icon: dark ? 'sun' : 'moon',
                 run: () => dispatch(setTheme(dark ? 'light' : 'dark')),

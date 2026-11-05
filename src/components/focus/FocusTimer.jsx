@@ -2,14 +2,38 @@ import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectTimerProgress, selectTimerInProgress, setTimerMode, setSessionParams, startFocus, pauseFocus, stopFocus, skipPhase, setPomodoro, PHASE_LABEL } from '../../features/session/sessionAction';
 import { formatClock, fill } from '../../features/helperFunction';
-import { POMODORO_CHOICES, SESSION_LENGTHS } from '../../features/settings/preferences';
+import { POMODORO_LIMITS, validPomodoroValue, SESSION_LENGTHS } from '../../features/settings/preferences';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useIsTester } from '../../features/auth/tester';
 import Icon from '../icons.jsx';
+import DurationInput from './DurationInput.jsx';
 import styles from './FocusRoom.module.css';
 
 const MODES = [['pomodoro', 'timerModePomodoro'], ['timer', 'timerModeTimer'], ['stopwatch', 'timerModeStopwatch']];
 const RING = 2 * Math.PI * 54;
+
+// A Pomodoro length (or the rounds before the long break) typed freely within its limits
+function PomodoroField({ name, label, value, onChange, unit }) {
+    const [draft, setDraft] = useState(null);
+    const [min, max] = POMODORO_LIMITS[name];
+    return (
+        <label className={styles.lengthField}>
+            <span>{label}</span>
+            <span className={styles.lengthInput}>
+                <input inputMode="numeric" pattern="[0-9]*" value={draft ?? String(value)}
+                    onFocus={e => e.target.select()} onBlur={() => setDraft(null)}
+                    onChange={e => {
+                        const raw = e.target.value.replace(/\D/g, '').slice(0, 3);
+                        setDraft(raw);
+                        const n = Number(raw);
+                        if (raw && validPomodoroValue(name, n)) onChange(n);
+                    }} />
+                <span aria-hidden="true">{unit}</span>
+            </span>
+            <span className={styles.lengthLimits}>{min}–{max}</span>
+        </label>
+    );
+}
 
 // Testers (in test): once the timer starts, the big card folds into a slim bar that stays at the
 // top while scrolling (time, a thin progress line, the controls), so the room below gets the
@@ -126,9 +150,9 @@ export default function FocusTimer() {
                     ? <button type="button" className={styles.ctrlMain} onClick={() => dispatch(pauseFocus())} aria-label="pause timer">
                         <Icon name="pause" size={26} strokeWidth={2.2} /><span>{t('focusPause')}</span>
                     </button>
-                    : <button type="button" className={styles.ctrlMain} onClick={() => dispatch(startFocus())} aria-label="start timer"
-                        disabled={!stopwatch && timer.time < 1000}>
-                        <Icon name="play" size={26} strokeWidth={2} /><span>{inProgress ? t('focusResume') : onBreak ? t('pomodoroStartBreak') : t('focusStart')}</span>
+                    : <button type="button" className={styles.ctrlMain} onClick={() => dispatch(startFocus())} aria-label="start timer">
+                        <Icon name="play" size={26} strokeWidth={2} />
+                        <span>{inProgress ? t('focusResume') : !stopwatch && timer.time < 1000 ? t('focusAgain') : onBreak ? t('pomodoroStartBreak') : t('focusStart')}</span>
                     </button>}
                 {isPomodoro &&
                     <button type="button" className={styles.ctrl} onClick={() => dispatch(skipPhase())} aria-label={t('pomodoroSkip')} title={t('pomodoroSkip')}>
@@ -140,23 +164,13 @@ export default function FocusTimer() {
             {!inProgress && (isPomodoro
                 ? <div className={styles.lengths}>
                     {[['focus', 'pomodoroFocus'], ['short', 'pomodoroShort'], ['long', 'pomodoroLong'], ['every', 'pomodoroEvery']].map(([key, label]) =>
-                        <label key={key} className={styles.lengthField}>
-                            <span>{t(label)}</span>
-                            <select value={pomodoro.config[key]} onChange={e => setLength(key, Number(e.target.value))}>
-                                {POMODORO_CHOICES[key].map(value =>
-                                    <option key={value} value={value}>{key === 'every' ? fill(t('pomodoroEveryN'), { n: value }) : fill(t('minutesShort'), { n: value })}</option>)}
-                            </select>
-                        </label>)}
+                        <PomodoroField key={key} name={key} label={t(label)} value={pomodoro.config[key]}
+                            unit={key === 'every' ? '×' : 'min'} onChange={value => setLength(key, value)} />)}
                 </div>
                 : timerMode === 'timer' &&
                 <div className={styles.lengths}>
-                    <label className={styles.lengthField}>
-                        <span>{t('focusLength')}</span>
-                        <select value={Math.round(sessionParams.time / 60000)} onChange={e => dispatch(setSessionParams({ ...sessionParams, time: Number(e.target.value) * 60000 }))}>
-                            {[...new Set([...SESSION_LENGTHS, 90, 120, Math.round(sessionParams.time / 60000)])].filter(Boolean).sort((a, b) => a - b).map(value =>
-                                <option key={value} value={value}>{fill(t('minutesShort'), { n: value })}</option>)}
-                        </select>
-                    </label>
+                    <DurationInput label={t('focusLength')} ms={sessionParams.time} presets={[...SESSION_LENGTHS, 90]}
+                        onChange={time => dispatch(setSessionParams({ ...sessionParams, time }))} />
                 </div>)}
             {isTester && inProgress &&
                 <button type="button" className={styles.minimizeBtn} onClick={() => setMinimized(true)} aria-expanded="true">

@@ -2,8 +2,8 @@
 // Merged into translations.js (same keys in both languages, checked by translate.test.js).
 const communityTexts = {
     de: {
-        community: 'Gemeinschaft',
-        communityTabs: 'Bereiche der Gemeinschaft',
+        community: 'Sozial',
+        communityTabs: 'Bereiche von Sozial',
         communityTab_feed: 'Feed',
         communityTab_progress: 'Fortschritt',
         communityTab_sessions: 'Sitzungen',
@@ -168,8 +168,8 @@ const communityTexts = {
         profileError_BADGE_NOT_EARNED: 'Dieses Abzeichen hast du noch nicht verdient.',
     },
     en: {
-        community: 'Community',
-        communityTabs: 'Parts of the community',
+        community: 'Social',
+        communityTabs: 'Parts of Social',
         communityTab_feed: 'Feed',
         communityTab_progress: 'Progress',
         communityTab_sessions: 'Sessions',

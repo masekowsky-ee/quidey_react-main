@@ -273,6 +273,28 @@
     min-width: 6rem;
 }
 
+.lengthInput {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25rem;
+}
+
+.lengthInput input {
+    width: 3.4rem;
+    height: 2.2rem;
+    padding: 0 0.3rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    color: var(--text-h);
+}
+
+.lengthLimits {
+    font-size: 0.68rem;
+    opacity: 0.8;
+}
+
 .timerHint {
     margin: 0;
     font-size: 0.75rem;

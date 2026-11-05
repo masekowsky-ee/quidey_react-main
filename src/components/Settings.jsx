@@ -20,6 +20,8 @@ import { SECTION_AREAS } from '../features/search/places';
 import { isNativeApp } from '../features/native/native';
 import { APK_URL, apkOffer, formatSize } from '../features/native/androidApk';
 import { setAnalyticsConsent, useAnalytics } from '../features/native/analytics';
+import { useIsTester } from '../features/auth/tester';
+import AlarmSettings from './reminders/AlarmSettings.jsx';
 
 const LANGUAGES = [
     { code: 'de', label: 'german' },
@@ -238,6 +240,7 @@ export default function Settings(){
     const apk = apkOffer();
     // the Android app with Firebase: may it count how it is used
     const analytics = useAnalytics();
+    const isTester = useIsTester();
     const dispatch = useDispatch();
     const { hash, key } = useLocation();
     const [chosenArea, setArea] = useState(() => areaFromHash(hash));
@@ -390,6 +393,11 @@ export default function Settings(){
                             </button>
                         </SettingRow>
                     </SettingSection>
+                    {/* testers' reminders ring like an alarm clock in the Android app: what that needs */}
+                    {isTester && isNativeApp() &&
+                        <SettingSection id="alarms" title={t('reminderAlarmSetting')} description={t('reminderAlarmHint')}>
+                            <AlarmSettings />
+                        </SettingSection>}
                     {analytics.available &&
                         <SettingSection id="analytics" title={t('analyticsSetting')} description={t('analyticsSettingHint')}>
                             <AnalyticsSetting />

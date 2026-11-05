@@ -54,8 +54,10 @@ export default function Calendar() {
     const source = parseCalendarSource(params.get('cal'));
     const shared = useSharedCalendar(source);
     const isShared = source.kind !== 'mine';
-    // a shared session's calendar holds events too (a family's only tasks)
-    const sharedEvents = source.kind === 'session';
+    // a shared session's and a family's calendar hold events too; a family's entries also
+    // have reminders, which reach every member
+    const sharedEvents = source.kind === 'session' || source.kind === 'family';
+    const remindsAll = source.kind === 'family';
     const eventTypes = useSelector(state => state.task.eventTypes);
     const allDayTime = useSelector(selectAllDayTime);
     const tasks = isShared ? shared.tasks : ownTasks;
@@ -413,6 +415,7 @@ export default function Calendar() {
                     sharedEntries={isShared ? [] : (sharedHistory ?? []).filter(entry => entry.lastWorkedAt && sameDay(new Date(entry.lastWorkedAt), openDay))}
                     personal={!isShared}
                     allowEvents={sharedEvents}
+                    remindsAll={remindsAll}
                     initialTaskId={openTaskId}
                     newTaskGroup={newTaskGroup}
                     locale={locale}

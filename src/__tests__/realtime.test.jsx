@@ -14,7 +14,8 @@ import Toaster from '../components/Toaster'
 import Header from '../components/Header'
 import { useLocation } from 'react-router-dom'
 import { fireEvent } from '@testing-library/react'
-import { setInboxUnread, selectMenuBadgeCount } from '../features/inbox/inbox'
+import { setInboxUnread, selectMenuBadgeCount, noticeView } from '../features/inbox/inbox'
+import translations from '../i18n/translations'
 import { io } from 'socket.io-client'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
@@ -173,6 +174,44 @@ describe('live chats and notices', () => {
         expect(screen.getByText('In der Session „Lerngruppe“')).toBeInTheDocument()
         fireEvent.click(screen.getByText('Ben hat dir „Folien“ zugewiesen'))
         expect(screen.getByTestId('where')).toHaveTextContent('/together/3')
+    })
+
+    it('tells me what somebody added to my family or session, and opens it', async () => {
+        function Where() { return <p data-testid="where">{useLocation().pathname}</p> }
+        await act(async () => { renderAt(makeStore(), '/', <><Where /><Toaster /></>) })
+        await serverSends('notification:new', {
+            id: 8, kind: 'entries_added', title: 'Wäsche', body: 'WG', createdAt: now(), readAt: null,
+            data: { place: 'family', placeId: 4, entryId: 9, count: 1, by: ben },
+        })
+        expect(screen.getByText('In „WG“')).toBeInTheDocument()
+        fireEvent.click(screen.getByText('Ben hat „Wäsche“ eingetragen'))
+        expect(screen.getByTestId('where')).toHaveTextContent('/family/4')
+    })
+
+    it('a notice that grows pops up once, not once per entry', async () => {
+        const store = makeStore()
+        await act(async () => { renderAt(store, '/', <Toaster />) })
+        const notice = (count, title) => ({ id: 9, kind: 'entries_added', title, body: 'WG', createdAt: now(), readAt: null, data: { place: 'family', placeId: 4, count, by: ben } })
+        await serverSends('notification:new', notice(1, 'Wäsche'))
+        await serverSends('notification:new', notice(2, 'Bad'))
+        await serverSends('notification:new', notice(3, 'Flur'))
+        expect(store.getState().toast).toHaveLength(1)
+    })
+
+    it('words several entries in one, and a family entry given to me leads to the family', () => {
+        const t = (key) => translations.de[key] ?? key
+        expect(noticeView(t, { kind: 'entries_added', title: 'Flur', body: 'Lerngruppe', data: { place: 'session', placeId: 3, count: 4, by: ben } }))
+            .toEqual({ title: 'Ben hat 4 Einträge eingetragen', body: 'In „Lerngruppe“', to: '/together/3' })
+        expect(noticeView(t, { kind: 'task_assigned', title: 'Einkaufen', body: 'WG', data: { familyId: 4, taskId: 9, by: ben } }).to).toBe('/family/4')
+    })
+
+    it('a notice that grew replaces itself in the list', async () => {
+        api({ 'GET /api/notifications': [{ id: 8, kind: 'entries_added', title: 'Wäsche', body: 'WG', createdAt: now(), readAt: null, data: { place: 'family', placeId: 4, count: 1, by: ben } }] })
+        await act(async () => { renderAt(makeStore(), '/inbox?tab=notices', <Inbox />) })
+        expect(screen.getByRole('link', { name: 'Ben hat „Wäsche“ eingetragen' })).toHaveAttribute('href', '/family/4')
+        await serverSends('notification:new', { id: 8, kind: 'entries_added', title: 'Bad', body: 'WG', createdAt: now(), readAt: null, data: { place: 'family', placeId: 4, count: 2, by: ben } })
+        expect(screen.getByRole('link', { name: 'Ben hat 2 Einträge eingetragen' })).toBeInTheDocument()
+        expect(screen.queryByRole('link', { name: 'Ben hat „Wäsche“ eingetragen' })).not.toBeInTheDocument()
     })
 
     it('lists a given task among the notices, linked to its session', async () => {

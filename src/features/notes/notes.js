@@ -90,9 +90,22 @@ export function cleanTag(value) {
 }
 
 // ---------- the text ----------
-export const firstLine = (body) => (body ?? '').split('\n')
-    .map(line => line.replace(/^\s*(- \[( |x|X)\] |#{1,2} |[-*] |\d{1,3}\. |> )/, '').replace(/^-{3,}$/, '').trim())
-    .find(Boolean) ?? '';
+// a line as it reads: list / heading / quote marks, dividers and **bold** / `code` marks dropped
+const plainLine = (line) => line.replace(/^\s*(- \[( |x|X)\] |#{1,2} |[-*] |\d{1,3}\. |> )/, '').replace(/^-{3,}$/, '')
+    .replace(/\*\*([^*\n]+)\*\*/g, '$1').replace(/`([^`\n]+)`/g, '$1').trim();
+
+export const firstLine = (body) => (body ?? '').split('\n').map(plainLine).find(Boolean) ?? '';
+
+// What a note's row shows under its title, always: the lines that read (after the one standing in
+// as the title when it has none), joined, at most max characters. Without any text: how much is
+// attached ({ attachments: n }), or { empty: true }.
+export function notePreview(note, max = 160) {
+    const lines = (note.body ?? '').split('\n').map(plainLine).filter(Boolean);
+    const text = (note.title ? lines : lines.slice(1)).join(' ').slice(0, max);
+    if (text) return { text };
+    const attachments = note.attachments?.length ?? 0;
+    return attachments ? { attachments } : { empty: true };
+}
 
 export function wordCount(body) {
     const words = (body ?? '').replace(/- \[( |x|X)\] /g, ' ').match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu);

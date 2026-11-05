@@ -21,6 +21,22 @@ describe('sessionReducer', () => {
         expect(state.timer).toEqual({ time: 5000, active: true })
     })
 
+    // the first session of a day used to land on the day before: its date was the moment the empty
+    // session was made (after the last save the evening before, kept overnight in focusRun)
+    it('a session is dated when its time starts, not when the empty session was made', () => {
+        vi.useFakeTimers()
+        vi.setSystemTime(new Date('2026-11-03T21:00:00Z'))
+        const saved = sessionReducer(initial, { type: SAVE_SESSION_DATA, payload: { id: 1 } })
+        vi.setSystemTime(new Date('2026-11-04T08:00:00Z'))
+        const started = sessionReducer(saved, setTimer(THIRTY_MIN, true))
+        expect(started.currentSessionData.date).toBe('2026-11-04T08:00:00.000Z')
+        // paused and started again: still the same session, dated when it began
+        vi.setSystemTime(new Date('2026-11-04T08:20:00Z'))
+        const paused = sessionReducer({ ...started, currentSessionData: { ...started.currentSessionData, totalTime: 600 } }, setTimer(1000, false))
+        const again = sessionReducer(paused, setTimer(1000, true))
+        expect(again.currentSessionData.date).toBe('2026-11-04T08:00:00.000Z')
+    })
+
     it('SET_SESSION_PARAMS sets the session length and resets the timer to it, stopped', () => {
         const running = sessionReducer(initial, setTimer(1000, true))
         const state = sessionReducer(running, setSessionParams({ time: 60000, group: 'work' }))

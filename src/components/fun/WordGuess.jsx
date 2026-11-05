@@ -18,7 +18,8 @@ const keepFocus = (e) => e.preventDefault();
 const newAnswer = (language, length) => pick((GUESS_WORDS[language] ?? GUESS_WORDS.en)[length]);
 
 // Guess the word; tiles show which letters are right. The difficulty sets length and tries.
-export default function WordGuess({ level = 'normal' }) {
+// onScore(streak): every right answer (the arcade sends it, see features/arcade/arcade.js)
+export default function WordGuess({ level = 'normal', onScore }) {
     const { t, language } = useTranslation();
     const { length, tries } = GUESS_LEVELS[level];
     const [answer, setAnswer] = useState(() => newAnswer(language, length));
@@ -50,6 +51,7 @@ export default function WordGuess({ level = 'normal' }) {
                 const nextStreak = streak + 1;
                 setStreak(nextStreak);
                 setBest(saveBest('guess', level, nextStreak));
+                onScore?.(nextStreak);
                 celebrate();
             } else if (next.length === tries) {
                 setStreak(0);

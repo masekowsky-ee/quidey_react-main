@@ -36,7 +36,8 @@ const settingsReducer = (state = intitialState, action) => {
         case SET_CUSTOM_ERROR:
             return { ...state, customError: action.payload };
         case SET_SHOW_FORMS:
-            return { ...state, showForms: typeof action.payload === 'boolean' ? action.payload : !state.showForms };
+            // 'reminder': opened on the testers' reminder form (command bar "Neue Erinnerung")
+            return { ...state, showForms: typeof action.payload === 'boolean' || action.payload === 'reminder' ? action.payload : !state.showForms };
         case SET_THEME:
             return THEMES.includes(action.payload) ? { ...state, theme: action.payload } : state;
         case SET_SHOW_SHARED_TASKS:

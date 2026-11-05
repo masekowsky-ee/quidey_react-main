@@ -13,6 +13,10 @@ const notify = () => listeners.forEach((listener) => listener());
 // the Android app (Capacitor) is installed by definition
 const runsAsApp = () => isNativeApp() || window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
+// A plain browser tab: not the Android app, not the installed web app (e.g. the Fokusraum's
+// full-screen button exists only here; an app window already has the whole screen)
+export const runsInBrowser = () => typeof window !== 'undefined' && !runsAsApp();
+
 export function listenForInstallPrompt() {
     window.addEventListener('beforeinstallprompt', (event) => {
         // no mini-infobar of the browser's own: the settings offer it instead

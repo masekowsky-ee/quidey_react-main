@@ -129,3 +129,50 @@ describe('saveSessionData', () => {
         expect(currentSessionData.workedTasks).toEqual([])
     })
 })
+
+describe('stopping and pausing the focus timer', () => {
+    it('books the seconds since the last tick before it stops (a late clock loses nothing)', async () => {
+        vi.useFakeTimers()
+        vi.setSystemTime(new Date('2026-11-04T08:00:00Z'))
+        const { setTimerMode, startFocus, stopFocus } = await import('../features/session/sessionAction')
+        const store = makeStore()
+        apiFetch.mockResolvedValue({ id: 1 })
+        store.dispatch(setTimerMode('stopwatch'))
+        store.dispatch(startFocus())
+        // no tick ran meanwhile (a throttled or frozen page)
+        vi.setSystemTime(new Date('2026-11-04T08:00:42Z'))
+        await store.dispatch(stopFocus())
+        const saved = apiFetch.mock.calls.find(([url, options]) => url === '/api/sessions' && options?.method === 'POST')
+        expect(bodyOf(saved).totalTime).toBe(42)
+        vi.useRealTimers()
+    })
+
+    it('pausing books them too', async () => {
+        vi.useFakeTimers()
+        vi.setSystemTime(new Date('2026-11-04T08:00:00Z'))
+        const { setTimerMode, startFocus, pauseFocus } = await import('../features/session/sessionAction')
+        const store = makeStore()
+        apiFetch.mockResolvedValue({})
+        store.dispatch(setTimerMode('stopwatch'))
+        store.dispatch(startFocus())
+        vi.setSystemTime(new Date('2026-11-04T08:00:10Z'))
+        store.dispatch(pauseFocus())
+        expect(store.getState().session.currentSessionData.totalTime).toBe(10)
+        expect(store.getState().session.timer).toEqual({ time: 10000, active: false })
+        vi.useRealTimers()
+    })
+})
+
+describe('starting again after a countdown is over', () => {
+    it('start on a finished countdown runs the last length again', async () => {
+        const { setTimerMode, startFocus, setTimer: set, setSessionParams: params } = await import('../features/session/sessionAction')
+        const store = makeStore()
+        apiFetch.mockResolvedValue({})
+        store.dispatch(setTimerMode('timer'))
+        store.dispatch(params({ time: 7 * 60 * 1000 + 30 * 1000 }))
+        // over: it stands at zero
+        store.dispatch(set(0, false))
+        store.dispatch(startFocus())
+        expect(store.getState().session.timer).toEqual({ time: 450000, active: true })
+    })
+})

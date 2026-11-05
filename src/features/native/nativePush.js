@@ -5,6 +5,7 @@
 //
 // Built only when the app has its Firebase config (android/app/google-services.json): the build
 // script sets VITE_NATIVE_PUSH=on then. Without it, registering would crash the app.
+import { registerPlugin } from '@capacitor/core';
 import { isNativeApp } from './native';
 
 export const nativePushAvailable = () => isNativeApp() && import.meta.env.VITE_NATIVE_PUSH === 'on';
@@ -12,11 +13,12 @@ export const nativePushAvailable = () => isNativeApp() && import.meta.env.VITE_N
 const REGISTER_TIMEOUT_MS = 10 * 1000;
 // one Android notification channel per kind (the server sends the kind as channel_id), so each
 // can be muted in Android's settings; the names in the app's language
-const CHANNELS = {
+export const NATIVE_CHANNELS = {
     plan: { de: 'Aufgaben & Termine', en: 'Tasks & events', importance: 4 },
     digest: { de: 'Tagesüberblick', en: 'Daily overview', importance: 3 },
     messages: { de: 'Nachrichten', en: 'Messages', importance: 4 },
     social: { de: 'Freunde & Einladungen', en: 'Friends & invites', importance: 3 },
+    groups: { de: 'Familien & Sitzungen', en: 'Families & sessions', importance: 3 },
 };
 
 // the module, never the plugin itself out of a promise: a Capacitor plugin answers every
@@ -43,7 +45,7 @@ let channelsMade = false;
 async function makeChannels(push, language) {
     if (channelsMade) return;
     channelsMade = true;
-    await Promise.all(Object.entries(CHANNELS).map(([id, channel]) => push.createChannel({
+    await Promise.all(Object.entries(NATIVE_CHANNELS).map(([id, channel]) => push.createChannel({
         id,
         name: channel[language === 'en' ? 'en' : 'de'],
         importance: channel.importance,
@@ -89,6 +91,29 @@ export function onNativePushOpen(navigate) {
         handle = push.addListener('pushNotificationActionPerformed', ({ notification }) => {
             const url = notification?.data?.url;
             if (typeof url === 'string' && url.startsWith('/') && !url.startsWith('//')) navigate(url);
+        });
+    }).catch(() => {});
+    return () => { handle?.then((h) => h.remove()).catch(() => {}); };
+}
+
+// A push that comes while the app is open goes to the app only: Android shows nothing (the push
+// plugin's presentationOptions would show every one, but the open app has its own toasts and
+// sounds for those, as the service worker leaves them out on the web). The test from Settings →
+// "Test senden" is always sent from the open app, so that one is shown here, by the app's plugin
+// "QuideyNotice" (android/…/NoticePlugin.java), on the channel of its kind. Returns a cleanup.
+const QuideyNotice = registerPlugin('QuideyNotice');
+export function onNativePushInApp() {
+    if (!nativePushAvailable()) return () => {};
+    let handle;
+    load().then(({ PushNotifications: push }) => {
+        handle = push.addListener('pushNotificationReceived', (notification) => {
+            if (notification?.data?.tag !== 'test') return;
+            const kind = notification.data.kind;
+            QuideyNotice.show({
+                title: notification.title || 'Quidey',
+                body: notification.body || '',
+                channel: kind in NATIVE_CHANNELS ? kind : 'plan',
+            }).catch(() => {});
         });
     }).catch(() => {});
     return () => { handle?.then((h) => h.remove()).catch(() => {}); };

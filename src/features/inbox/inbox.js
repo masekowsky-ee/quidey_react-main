@@ -56,14 +56,25 @@ export const sendMessage = (userId, body) =>
 export const fetchNotifications = () => apiFetch('/api/notifications');
 
 // How a notice reads and where it leads: { title, body, to? }. An admin's broadcast brings its
-// own words; for a task given to me in a session (kind task_assigned, title = task, body =
-// session) the words are made here, in my language, and it leads to the session.
+// own words; the others are worded here, in my language:
+//   task_assigned  a task given to me (title = task, body = session / family), data.sessionId or data.familyId
+//   entries_added  somebody else added entries to my family / session (title = the latest, body =
+//                  the place), data { place: 'family' | 'session', placeId, count, by }
 export function noticeView(t, notice) {
     if (notice.kind === 'task_assigned' && notice.data) {
+        const family = notice.data.familyId != null;
         return {
             title: fill(t('noticeTaskAssigned'), { name: displayName(notice.data.by), task: notice.title }),
-            body: fill(t('noticeTaskAssignedIn'), { session: notice.body }),
-            to: `/together/${notice.data.sessionId}`,
+            body: family ? fill(t('noticeIn'), { place: notice.body }) : fill(t('noticeTaskAssignedIn'), { session: notice.body }),
+            to: family ? `/family/${notice.data.familyId}` : `/together/${notice.data.sessionId}`,
+        };
+    }
+    if (notice.kind === 'entries_added' && notice.data) {
+        const { by, count = 1, place, placeId } = notice.data;
+        return {
+            title: fill(t(count > 1 ? 'noticeEntriesAdded' : 'noticeEntryAdded'), { name: displayName(by), task: notice.title, count }),
+            body: fill(t('noticeIn'), { place: notice.body }),
+            to: place === 'family' ? `/family/${placeId}` : `/together/${placeId}`,
         };
     }
     return { title: notice.title, body: notice.body };

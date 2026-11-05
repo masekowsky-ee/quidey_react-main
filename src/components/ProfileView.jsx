@@ -13,6 +13,7 @@ import ProfileCard from './profile/ProfileCard.jsx';
 import ProfileEditor from './profile/ProfileEditor.jsx';
 import PlantCard from './progress/PlantCard.jsx';
 import PasswordInput from './PasswordInput.jsx';
+import MailSpamHint from './auth/MailSpamHint.jsx';
 
 // Translated message for a profile API error, using the error code the backend sends
 function errorText(t, err) {
@@ -305,6 +306,7 @@ export default function ProfileView({ onSignOut }) {
                                             </button>
                                         </span>
                                     )}
+                                    {unverified && <MailSpamHint />}
                                 </dd>
                             </div>
                             <div className={styles.detailRow}>

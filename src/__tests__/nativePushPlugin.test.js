@@ -35,3 +35,12 @@ describe('the Android app\'s push plugin', () => {
         expect(plugin.unregister).toHaveBeenCalled()
     })
 })
+
+describe('Android notification channels', () => {
+    it('every kind of push has a channel of its own (the server sends the kind as channel_id)', async () => {
+        const { NATIVE_CHANNELS } = await import('../features/native/nativePush')
+        const { PUSH_KINDS } = await import('../features/pwa/push')
+        expect(Object.keys(NATIVE_CHANNELS).sort()).toEqual([...PUSH_KINDS].sort())
+        expect(NATIVE_CHANNELS.groups.de).toBe('Familien & Sitzungen')
+    })
+})

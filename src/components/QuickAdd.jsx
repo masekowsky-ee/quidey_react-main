@@ -1,21 +1,37 @@
 import styles from './QuickAdd.module.css';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { showForms } from '../features/settings/settingsAction';
 import { useSheet } from '../features/layout/dragDismiss';
+import { useIsTester } from '../features/auth/tester';
 import TaskForm from './TaskForm.jsx';
+import ReminderForm from './reminders/ReminderForm.jsx';
 
 // The new-task form over whatever page is open: the header's "New" and Home's "Create task"
-// both open it (settings.showForms).
+// both open it (settings.showForms). Testers can switch it to a reminder ("Erinnerung" in the
+// kind switch; showForms('reminder') opens it so, e.g. the command bar's "Neue Erinnerung").
 export default function QuickAdd() {
     const dispatch = useDispatch();
     const open = useSelector(state => state.settings.showForms);
     if (!open) return null;
     return (
         <FormSheet onClose={() => dispatch(showForms(false))}>
-            {(sheet, close) => <TaskForm sheet={sheet} setCreateTask={(value) => { if (!value) close(); }} />}
+            {(sheet, close) => <QuickAddForm sheet={sheet} close={close} reminder={open === 'reminder'} />}
         </FormSheet>
     );
+}
+
+function QuickAddForm({ sheet, close, reminder }) {
+    const isTester = useIsTester();
+    // what was typed goes along when switching between the two forms
+    const [form, setForm] = useState(() => ({ kind: reminder && isTester ? 'reminder' : 'task', text: '' }));
+    if (form.kind === 'reminder' && isTester) {
+        return <ReminderForm sheet={sheet} initialText={form.text} onDone={close}
+            onKind={(kind, text) => setForm({ kind, text })} />;
+    }
+    return <TaskForm key={form.kind} sheet={sheet} initialKind={form.kind} initialName={form.text}
+        onReminder={(text) => setForm({ kind: 'reminder', text })}
+        setCreateTask={(value) => { if (!value) close(); }} />;
 }
 
 // A form card that slides in over the page (a sheet on phones, swiped down to put it away);

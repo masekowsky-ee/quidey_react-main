@@ -271,11 +271,19 @@ describe('the command bar', () => {
         expect(screen.queryByRole('dialog')).toBeNull()
         await act(async () => { fireEvent.keyDown(window, { key: 'k', ctrlKey: true }) })
         const input = screen.getByRole('combobox')
+        // testers also get "Neue Erinnerung"
         fireEvent.change(input, { target: { value: 'neue' } })
+        expect(screen.getAllByRole('option').map(o => o.textContent)).toEqual(['Neue Aufgabe oder Termin', 'Neue Erinnerung'])
+        fireEvent.change(input, { target: { value: 'neue auf' } })
         expect(screen.getAllByRole('option')).toHaveLength(1)
         await act(async () => { fireEvent.keyDown(input, { key: 'Enter' }) })
         expect(store.getState().settings.showForms).toBe(true)
         expect(screen.queryByRole('dialog')).toBeNull()
+
+        await act(async () => { fireEvent.keyDown(window, { key: 'k', ctrlKey: true }) })
+        fireEvent.change(screen.getByRole('combobox'), { target: { value: 'erinnerung' } })
+        await act(async () => { fireEvent.click(screen.getByRole('option', { name: /Neue Erinnerung/ })) })
+        expect(store.getState().settings.showForms).toBe('reminder')
     })
 
     it('finds a place without umlauts and switches variants', async () => {

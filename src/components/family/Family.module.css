@@ -99,6 +99,52 @@
     background: transparent;
 }
 
+/* "Move “Essay”?" before one of my tasks goes into the family: a small centred card */
+.moveBackdrop{
+    composes: backdrop from '../task/DeleteScopeDialog.module.css';
+}
+
+.moveDialog{
+    composes: dialog from '../task/DeleteScopeDialog.module.css';
+}
+
+.moveTitle{
+    composes: title from '../task/DeleteScopeDialog.module.css';
+    overflow-wrap: anywhere;
+}
+
+.moveText{
+    margin: 0.25rem 0 1rem;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+}
+
+.moveActions{
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.moveYes{
+    composes: btnYes from '../ui.module.css';
+}
+
+.moveNo{
+    composes: btnNo from '../ui.module.css';
+}
+
+/* an event in its place: nothing to tick, it's done once it's over */
+.entryEvent{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    color: var(--text-muted);
+}
+
 .entryEdit{
     composes: iconBtnRound from '../ui.module.css';
     align-self: center;
@@ -286,6 +332,12 @@ button.emojiBadge:hover{
     width: 100%;
     box-sizing: border-box;
     resize: vertical;
+}
+
+.boardNotes{
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border);
 }
 
 .boardCount{

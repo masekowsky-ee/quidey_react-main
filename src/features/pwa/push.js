@@ -17,7 +17,7 @@ import { apiFetch, apiUrl } from '../helperFunction';
 import { installState } from './install';
 import { isNativeApp } from '../native/native';
 import {
-    nativePermission, nativePushAvailable, nativeSubscription, onNativePushOpen, requestNativePermission, unregisterNative,
+    nativePermission, nativePushAvailable, nativeSubscription, onNativePushInApp, onNativePushOpen, requestNativePermission, unregisterNative,
 } from '../native/nativePush';
 
 const WANTED_KEY = 'push';
@@ -34,7 +34,8 @@ const inTime = (promise, what) => Promise.race([
 ]);
 
 // The kinds each device can switch on or off (columns on the server)
-export const PUSH_KINDS = ['plan', 'digest', 'messages', 'social'];
+// (groups: new entries by others and chat messages in my families and sessions)
+export const PUSH_KINDS = ['plan', 'digest', 'messages', 'social', 'groups'];
 
 // status: 'unknown' (not checked yet) | 'unsupported' (this browser can't) | 'install' (iPhone /
 // iPad: only as an app on the home screen) | 'denied' (blocked in the browser's settings) |
@@ -418,8 +419,9 @@ export function usePushSync(enabled, account, navigate) {
         if (enabled) refreshPush();
     }, [enabled, account]);
 
-    // app: a tapped notification
+    // app: a tapped notification, and the test shown while the app is open
     useEffect(() => onNativePushOpen(navigate), [navigate]);
+    useEffect(() => onNativePushInApp(), []);
 
     useEffect(() => {
         if (typeof navigator === 'undefined' || !('serviceWorker' in navigator) || isNativeApp()) return;

@@ -34,7 +34,7 @@ export const PROCESSORS = {
 
 // Date of the current version of the legal texts
 // Switching Quidey Pro on (features/pro/flag.js) adds its parts to the texts: give that day's date then
-export const LEGAL_VERSION_DATE = '01.11.2026 (Anmeldung mit Google, Android-App mit Benachrichtigungen, Google Analytics für Firebase in der Android-App)';
+export const LEGAL_VERSION_DATE = '04.11.2026 (Profilbilder für alle, Notizen am Board von Families und Sitzungen, Arcade mit Rangliste)';
 
 export const COPYRIGHT_YEAR = 2026;
 

@@ -482,3 +482,63 @@
         justify-content: space-between;
     }
 }
+
+/* "In sessions & families": the team time, then one row per session / family */
+.togetherTime{
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin: 0.4rem 0 0.8rem;
+}
+
+.togetherTime dt{
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.togetherTime dd{
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--text-h);
+}
+
+.places{
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.place{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    color: inherit;
+    text-decoration: none;
+    border-top: 1px solid var(--border);
+}
+
+.place:hover .placeName{
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.placeName{
+    min-width: 0;
+    font-weight: 550;
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+}
+
+.placeCounts{
+    flex: none;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}

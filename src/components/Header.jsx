@@ -1,14 +1,14 @@
 import styles from './Header.module.css';
-import {Link} from 'react-router-dom'
+import {Link, useLocation} from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { setShowMenu, showForms } from '../features/settings/settingsAction'
+import { setShowMenu } from '../features/settings/settingsAction'
 import Icon from './icons'
 import { selectTimerProgress, selectTimerInProgress } from '../features/session/sessionAction'
 import TeamWorkPill from './together/TeamWorkPill'
 import TeamQuickPanel from './together/TeamQuickPanel'
 import DailyTicker from './DailyTicker'
 import Logo from './Logo'
-import { selectMenuBadgeCount } from '../features/inbox/inbox'
+import { selectMenuBadgeCount, selectInboxCount } from '../features/inbox/inbox'
 import { selectHasNews } from '../features/realtime/news'
 import { useTranslation } from '../i18n/useTranslation'
 import { fill } from '../features/helperFunction'
@@ -48,6 +48,8 @@ export default function Header(){
     }
     const token = useSelector((state) => state.auth.token);
     const badgeCount = useSelector(selectMenuBadgeCount);
+    const inboxCount = useSelector(selectInboxCount);
+    const { pathname } = useLocation();
     const hasNews = useSelector(selectHasNews);
     const { t } = useTranslation();
     const timer = useSelector((state) => state.session.timer);
@@ -100,12 +102,14 @@ export default function Header(){
                         <StreakPill />
                         <DailyTicker />
                         <TeamQuickPanel />
-                        {/* the most frequent job, from every page: a new task or event */}
-                        <button type="button" className={styles.newBtn} onClick={() => dispatch(showForms(true))}
-                            aria-label={t('newEntry')} title={t('newEntry')}>
-                            <Icon name="plus" size={18} strokeWidth={2} />
-                            <span className={styles.newLabel}>{t('newEntryShort')}</span>
-                        </button>
+                        {/* messages and notifications, from every page (new tasks: Home's add button,
+                            N, the command bar) */}
+                        <Link to="/inbox" className={`${styles.btn} ${styles.inboxBtn}`}
+                            aria-current={pathname.startsWith('/inbox') ? 'page' : undefined}
+                            aria-label={inboxCount > 0 ? `${t('inbox')}, ${inboxCount} ${t('inboxUnread')}` : t('inbox')} title={t('inbox')}>
+                            <Icon name="inbox" size={20} />
+                            {inboxCount > 0 && <span className={styles.menuBadge} aria-hidden="true">{inboxCount > 9 ? '9+' : inboxCount}</span>}
+                        </Link>
                     </div>
                 </div>
                 {nav === 'top' && <TopNav />}

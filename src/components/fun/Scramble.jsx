@@ -18,7 +18,8 @@ function newRound(language, level, previous) {
 
 // Letter salad: tap (or type) the mixed-up letters in the right order.
 // The difficulty sets the word length, whether the category is shown and free letters.
-export default function Scramble({ level = 'normal' }) {
+// onScore(streak): every right answer (the arcade sends it, see features/arcade/arcade.js)
+export default function Scramble({ level = 'normal', onScore }) {
     const { t, language } = useTranslation();
     const settings = SCRAMBLE_LEVELS[level];
     const [round, setRound] = useState(() => newRound(language, level));
@@ -44,6 +45,7 @@ export default function Scramble({ level = 'normal' }) {
             const nextStreak = streak + 1;
             setStreak(nextStreak);
             setBest(saveBest('scramble', level, nextStreak));
+            onScore?.(nextStreak);
             celebrate();
             setRound((r) => ({ ...r, picked: nextPicked, result: 'right' }));
         } else {

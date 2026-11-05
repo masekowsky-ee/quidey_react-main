@@ -12,6 +12,7 @@ import { showToast } from '../../features/toast/toast';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import NoteEditor from './NoteEditor.jsx';
+import NotePreview from './NotePreview.jsx';
 import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
@@ -344,7 +345,7 @@ export default function NotesPage() {
                                                         {note.pinned && <Icon name="pin" size={13} />}
                                                         {note.title || line || t('noteUntitled')}
                                                     </span>
-                                                    {note.title && line && <span className={styles.rowPreview}>{layout === 'grid' ? note.body.slice(0, 280) : line}</span>}
+                                                    <NotePreview note={note} className={styles.rowPreview} max={layout === 'grid' ? 320 : 160} />
                                                     <span className={styles.rowMeta}>
                                                         {inFolder && <span><Icon name="folder" size={12} /> {inFolder.name}</span>}
                                                         {(note.tags ?? []).slice(0, 3).map(tag => <span key={tag} className={styles.rowTag}>#{tag}</span>)}

@@ -293,6 +293,15 @@ function Privacy() {
                 ich deine Begründung und die Entscheidung. Administratoren sehen dafür Benutzername, Anzeigename und
                 E-Mail-Adresse; Entscheidungen werden protokolliert (Art. 6 Abs. 1 lit. b und f DSGVO).
             </p>
+            <p>
+                <strong>Arcade:</strong> In den kleinen Spielen (auch im Warteraum vor dem Beta-Zugang) speichert Quidey
+                zu deinem Konto je Spiel und Schwierigkeit deine beste Punktzahl, wie oft du Punkte geschickt hast und
+                wann zuletzt. Spielst du im Modus „Rangliste“, kommt deine beste Punktzahl in diesem Modus mit dem
+                Zeitpunkt dazu; dann sehen alle angemeldeten Nutzer in der Rangliste deinen Anzeigenamen, deinen
+                Benutzernamen und diese Punktzahl. Im Modus „Nur für mich“ sieht deine Punkte nur du. Mit „Mich aus
+                allen Ranglisten nehmen“ löschst du deine Ranglisten-Einträge jederzeit; alles wird mit deinem Konto
+                gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+            </p>
 
             <h2>5. Deine Inhalte</h2>
             <p>
@@ -322,10 +331,22 @@ function Privacy() {
                 Von deinen Routinen speichert Quidey Name, Symbol, die Schritte (Text und Minuten), an welchen
                 Wochentagen und zu welcher Uhrzeit du sie eingeplant hast, ob du erinnert werden möchtest und an welchem
                 Tag zuletzt erinnert wurde, sowie jeden Durchgang (Beginn, Ende, wie viele Schritte geschafft wurden und
-                wie lange es dauerte). Läuft der Fokus-Timer, speichert der Server, wann er endet und welche Phase
+                wie lange es dauerte). Als Tester kannst du Erinnerungen ohne Aufgabe anlegen: Von ihnen speichert
+                Quidey den Text, den Zeitpunkt oder die Wochentage mit Uhrzeit, ob und bis wann du eine verschoben hast,
+                wann du sie erledigt hast und für welchen Zeitpunkt sie zuletzt gemeldet wurde; erledigte werden nach
+                30 Tagen gelöscht. In der Android-App stellt Quidey die kommenden Zeiten deiner Erinnerungen (Text und
+                Uhrzeit, für die nächsten 14 Tage) als Wecker auf deinem Gerät; was du dort antippst („Erledigt“ oder
+                „Später“), bleibt auf dem Gerät, bis es an den Server geschickt ist, und beim Abmelden werden die Wecker
+                gelöscht. Für dieses Gerät merkt sich der Server, dass es die Erinnerungen selbst klingeln lässt, und
+                schickt ihm dazu keine Benachrichtigung. Läuft der Fokus-Timer, speichert der Server, wann er endet und welche Phase
                 (Timer, Fokus, kurze oder lange Pause) es ist, damit er dir dann eine Benachrichtigung schicken kann,
                 auch wenn dein Handy aus ist; der Eintrag wird beim Pausieren, Beenden oder nach der Benachrichtigung
-                gelöscht. Diese Inhalte sieht nur du. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+                gelöscht. Diese Inhalte siehst nur du, mit einer Ausnahme: Heftest du eine Notiz an das Board einer
+                Family oder einer gemeinsamen Sitzung, speichert Quidey, an welchem Board sie seit wann hängt, und die
+                Mitglieder dort sehen ihren Titel, Text, ihre Farbe und Anhänge (Links und Bilder), wann sie zuletzt
+                geändert wurde und dass sie von dir ist, und zwar immer so, wie sie gerade ist, bis du (oder die Person,
+                der die Family oder Sitzung gehört) sie wieder abnimmst, sie löschst oder in den Papierkorb legst oder
+                du nicht mehr dabei bist. Ändern können sie sie nicht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
             </p>
 
             <h2>6. Freunde und gemeinsame Funktionen</h2>
@@ -337,7 +358,10 @@ function Privacy() {
                 gearbeitet hat und den Verlauf der Sitzung. Untergruppen speichern ihren Namen,
                 wer sie angelegt hat und wann. Fügst du
                 eine eigene Aufgabe zu einer Sitzung hinzu, werden diese Angaben in die Sitzung übernommen; deine
-                Erinnerungen, Wiederholungen und Gruppen bleiben privat. Aufgaben, die du mit
+                Erinnerungen, Wiederholungen und Gruppen bleiben privat. Verschiebst du eine eigene Aufgabe oder einen
+                eigenen Termin in eine Family, wird daraus ein Eintrag der Family (mit seinen Angaben und Erinnerungen)
+                und deine Aufgabe gelöscht. Bei Aufgaben einer Sitzung wird gespeichert, wer sie wann abgehakt hat; was
+                du in Sitzungen und Families erledigst, zählt in deinen eigenen Statistiken mit. Aufgaben, die du mit
                 Freunden teilst, sehen diese Freunde. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
                 Verlässt du eine Sitzung oder löschst du dein Konto, bleibt im Verlauf der Sitzung nur ein Eintrag
                 ohne Bezug zu deinem Konto. Jede Sitzung hat einen gemeinsamen Kalender: Er zeigt die Aufgaben der
@@ -347,8 +371,9 @@ function Privacy() {
                 <strong>Quidey Family</strong>: Eine Family ist eine feste Gruppe, zu der du
                 Freunde einlädst. Gespeichert werden Name der Family, wer sie gegründet hat, wer eingeladen wurde
                 (von wem, wann) und wer beigetreten ist. Alle Mitglieder sehen die Namen der anderen Mitglieder, den
-                gemeinsamen Kalender mit allem, was ihr eintragt (z. B. Tag, Uhrzeit, Priorität, Dauer, Ort, Link,
-                Beschreibung, weitere Infos, Farbe, erledigt, wer den Eintrag wann angelegt hat, Untergruppe – diese
+                gemeinsamen Kalender mit allem, was ihr eintragt (z. B. Aufgabe oder Termin, Tag, Uhrzeit, Priorität,
+                Dauer, Ort, Link, Beschreibung, weitere Infos, Farbe, Erinnerungen – die bekommen alle Mitglieder –,
+                erledigt, wer den Eintrag wann angelegt und wer ihn wann abgehakt hat, Untergruppe – diese
                 speichern ihren Namen, wer sie angelegt hat und wann), und den Chat der Family
                 (Text, Absender, Zeitpunkt). Dazu kommen die Pinnwand der Family (ein kurzer Text, den alle Mitglieder
                 ändern können, mit wer ihn zuletzt geändert hat und wann), Emoji und Farbe der Family, die Liste
@@ -374,11 +399,11 @@ function Privacy() {
                 Art. 6 Abs. 1 lit. b DSGVO.
             </p>
             <p>
-                <strong>Profilbild</strong> (derzeit nur für Tester): Lädst du freiwillig ein Profilbild hoch, wird es
-                auf deinem Gerät quadratisch zugeschnitten und verkleinert (dabei fallen Angaben wie Aufnahmeort und
-                Kamera weg) und dann mit dem Zeitpunkt der letzten Änderung zu deinem Konto gespeichert. Es sehen nur
-                Personen, die auch deinen Online-Status sehen können: deine Freunde und die Mitglieder deiner laufenden
-                gemeinsamen Sitzungen und Families; solange die Funktion im Test ist, wird es nur Testern angezeigt.
+                <strong>Profilbild</strong>: Lädst du freiwillig ein Profilbild hoch, wählst du einen kreisrunden
+                Ausschnitt; nur dieser wird auf deinem Gerät ausgeschnitten und verkleinert (dabei fallen Angaben wie
+                Aufnahmeort und Kamera weg) und dann mit dem Zeitpunkt der letzten Änderung zu deinem Konto gespeichert.
+                Der Rest des Bildes verlässt dein Gerät nicht. Es sehen nur Personen, die auch deinen Online-Status sehen
+                können: deine Freunde und die Mitglieder deiner laufenden gemeinsamen Sitzungen und Families.
                 Du kannst es jederzeit unter „Profil gestalten“ entfernen; es wird auch gelöscht, wenn du dein Konto
                 löschst. Verstößt ein Bild gegen die Nutzungsbedingungen, kann der Betreiber es entfernen (das wird
                 im Admin-Protokoll vermerkt). Lade bitte nur Bilder hoch, an denen du die Rechte hast, und keine Bilder
@@ -407,7 +432,7 @@ function Privacy() {
                 Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
             </p>
             <p>
-                <strong>Feed:</strong> Im Feed unter „Gemeinschaft“ sehen deine Freunde – und nur sie – was du teilst:
+                <strong>Feed:</strong> Im Feed unter „Sozial“ sehen deine Freunde – und nur sie – was du teilst:
                 deine Fokuszeit und erledigten Aufgaben des Tages, geschaffte Challenges, neue Level und Lernserien,
                 sowie kurze Beiträge (bis zu 280 Zeichen), die du selbst schreibst. Die automatischen Einträge kannst
                 du im Profil unter „Profil gestalten“ mit „Meine Erfolge im Feed teilen“ abschalten; deine Beiträge
@@ -443,17 +468,22 @@ function Privacy() {
                 <strong>Benachrichtigungen auf deinem Gerät (Push):</strong> Nur wenn du sie einschaltest (in den
                 Einstellungen unter „App“ oder auf die Frage nach deiner ersten Aufgabe) und dein Browser es erlaubt,
                 meldet sich Quidey auch bei geschlossener App: zu den Erinnerungen deiner Aufgaben und Termine (neue
-                bekommen dann von selbst eine zum Beginn), wenn dein Fokus-Timer oder eine Pomodoro-Pause abgelaufen ist,
-                zur geplanten Uhrzeit deiner Routinen, morgens mit einem Überblick über deinen Tag, bei Nachrichten, Freundschaftsanfragen,
-                Einladungen, geteilten oder zugewiesenen Aufgaben und Meldungen des Quidey-Teams. Welche Arten du
+                bekommen dann von selbst eine zum Beginn) und zu den Erinnerungen an Einträge deiner Families (die
+                bekommen alle Mitglieder), wenn dein Fokus-Timer oder eine Pomodoro-Pause abgelaufen ist,
+                zur geplanten Uhrzeit deiner Routinen und Erinnerungen, morgens mit einem Überblick über deinen Tag, bei Nachrichten, Freundschaftsanfragen,
+                Einladungen, geteilten oder zugewiesenen Aufgaben, wenn jemand anderes in einer deiner Families oder
+                Sitzungen etwas einträgt oder in deren Chat schreibt, und bei Meldungen des Quidey-Teams. Welche Arten du
                 bekommst, stellst du je Gerät ein. Dafür erzeugt dein Browser bei seinem Push-Dienst eine Adresse; welcher
                 Dienst das ist, bestimmt der Hersteller deines Browsers bzw. Betriebssystems (z. B. Google bei Chrome und
                 Android, Apple bei Safari und auf iPhone/iPad, Mozilla bei Firefox), nicht Quidey. Gespeichert werden je
                 Gerät diese Adresse, zwei Schlüssel zum Verschlüsseln, die gewählten Arten und wann das Gerät angemeldet
-                bzw. zuletzt bestätigt wurde, zusammen mit deinem Konto; außerdem, für welchen Zeitpunkt eine Aufgabe schon
-                gemeldet wurde und an welchem Tag der Tagesüberblick kam, damit nichts doppelt kommt. Eine Benachrichtigung
-                enthält je nach Art den Namen und die Uhrzeit der Aufgabe (und den Ort), den Namen der Person, die dir
-                schreibt oder dich einlädt, den Anfang der Nachricht bzw. den Namen der Sitzung, Family oder Aufgabe. Sie
+                bzw. zuletzt bestätigt wurde, zusammen mit deinem Konto; außerdem, für welchen Zeitpunkt eine Aufgabe oder
+                ein Family-Eintrag schon gemeldet wurde und an welchem Tag der Tagesüberblick kam, damit nichts doppelt
+                kommt. Eine Benachrichtigung enthält je nach Art den Namen und die Uhrzeit der Aufgabe (und den Ort), den
+                Text einer Erinnerung, den Namen der Person, die dir schreibt, dich einlädt oder etwas einträgt, den
+                Anfang der Nachricht (auch aus dem Chat einer Family oder Sitzung, also von anderen Mitgliedern
+                geschrieben) bzw. den Namen der Sitzung, Family oder Aufgabe. Was jemand anderes in eine Family oder
+                Sitzung einträgt, kommt außerdem als Hinweis in dein Postfach (mehrere kurz nacheinander als einer). Sie
                 wird Ende-zu-Ende verschlüsselt (RFC 8291) übermittelt: Der Push-Dienst sieht nur verschlüsselte Daten
                 und technische Angaben wie Adresse, Zeitpunkt und Größe; er kann sie auch in den USA verarbeiten.
                 Benachrichtigungen erscheinen je nach Einstellung deines Geräts auch auf dem Sperrbildschirm. Ausschalten
@@ -588,7 +618,7 @@ function Privacy() {
             <p>
                 Deine Konto- und Inhaltsdaten speichere ich, solange dein Konto besteht. Löschst du dein Konto, werden
                 Konto, Aufgaben, Events, Event-Typen, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen,
-                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen, deine Bewertungen als Tester, die für Benachrichtigungen angemeldeten Geräte, deine Notizen (mit ihren Bildern), Ordner und Sammlungen, dein Profilbild, Routinen und ihre Durchgänge, der Wecker deines Fokus-Timers und alle
+                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen, deine Bewertungen als Tester, die für Benachrichtigungen angemeldeten Geräte, deine Notizen (mit ihren Bildern und wo sie angeheftet sind), Ordner und Sammlungen, dein Profilbild, deine Arcade-Punkte, Routinen und ihre Durchgänge, deine Erinnerungen, der Wecker deines Fokus-Timers und alle
                 Nachrichten, die du geschrieben oder bekommen hast, sofort gelöscht – auch beim Gegenüber, auch deine
                 Nachrichten in Family-Chats. Einträge in Protokollen (Verlauf gemeinsamer Sitzungen, Admin-Protokoll)
                 und von dir angelegte Einträge in Family-Kalendern verlieren den Bezug zu deinem Konto. Hast du eine

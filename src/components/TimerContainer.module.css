@@ -1,27 +1,16 @@
-/* Folded: a round button at the bottom right; with the time beside the icon while a session is on */
+/* Folded: a round button at the bottom left (the right corner is Home's add button); with the
+   time beside the icon while a session is on */
 .fab{
-    position: fixed;
-    right: calc(1rem + env(safe-area-inset-right, 0px));
-    bottom: calc(1rem + var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px)); /* above an iPhone's home indicator */
-    z-index: var(--z-header);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    min-width: 3.25rem;
-    height: 3.25rem;
-    padding: 0 0.9rem;
-    box-sizing: border-box;
+    /* the same shape as the add button (ui.module.css .fab), only the colours differ */
+    composes: fab from './ui.module.css';
+    left: calc(1rem + var(--sidebar-w, 0px) + env(safe-area-inset-left, 0px));
     color: var(--text-h);
     background-color: var(--surface-hover);
-    border: 1px solid var(--control-border);
-    border-radius: 999px;
-    /* it floats over the list, so it is the one thing on the screen with a shadow */
-    box-shadow: var(--shadow-float);
-    animation: timerIn 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    border-color: var(--control-border);
 }
 
 .fab:hover{
+    color: var(--text-h);
     background-color: color-mix(in srgb, var(--surface-hover) 85%, var(--text-h));
 }
 
@@ -56,7 +45,7 @@
 /* Open: a small panel in the same corner, mode switch on top */
 .panel{
     position: fixed;
-    right: calc(1rem + env(safe-area-inset-right, 0px));
+    left: calc(1rem + var(--sidebar-w, 0px) + env(safe-area-inset-left, 0px));
     bottom: calc(1rem + var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px));
     z-index: var(--z-header);
     display: flex;
@@ -71,7 +60,7 @@
     border-radius: 1.4rem;
     box-shadow: var(--shadow-float);
     animation: timerIn 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-    transform-origin: bottom right;
+    transform-origin: bottom left;
 }
 
 .panelHead{
@@ -160,7 +149,7 @@
 @media (max-width: 640px) {
     .fab,
     .panel{
-        right: 0.75rem;
+        left: calc(0.75rem + env(safe-area-inset-left, 0px));
         bottom: calc(0.75rem + var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px));
     }
 
@@ -279,6 +268,25 @@
     font-weight: 600;
     font-variant-numeric: tabular-nums;
     margin: 0;
+}
+
+/* the length typed straight into its parts (the arrows still step it) */
+.setTimerInput{
+    width: 2.6em;
+    height: auto;
+    padding: 0.1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    color: var(--text-h);
+    background: var(--surface-inset);
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-sm);
+}
+
+.inlinePanel .setTimerInput{
+    font-size: 1.6rem;
 }
 
 .foldIcon{

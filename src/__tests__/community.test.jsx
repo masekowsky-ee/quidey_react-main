@@ -154,9 +154,9 @@ describe('Gemeinschaft page', () => {
     it('leads with my level, then the tabs and the feed; level and challenges have their own tab', async () => {
         api(COMMUNITY)
         await renderCommunity()
-        expect(screen.getByRole('heading', { level: 1, name: 'Gemeinschaft' })).toBeInTheDocument()
+        expect(screen.getByRole('heading', { level: 1, name: 'Sozial' })).toBeInTheDocument()
         expect(screen.getByText('Level 3 · Keimling · noch 155 XP bis Level 4')).toBeInTheDocument()
-        const tabs = screen.getByRole('navigation', { name: 'Bereiche der Gemeinschaft' })
+        const tabs = screen.getByRole('navigation', { name: 'Bereiche von Sozial' })
         expect(within(tabs).getAllByRole('link').map(link => link.textContent)).toEqual(['Feed', 'Fortschritt', 'Sitzungen', 'Freunde', 'Family'])
         expect(within(tabs).getByRole('link', { name: 'Fortschritt' })).toHaveAttribute('href', '/community/progress')
         // the feed has no level card or challenges beside it any more

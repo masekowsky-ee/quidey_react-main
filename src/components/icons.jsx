@@ -42,6 +42,8 @@ const PATHS = {
     flame: <path d="M12 21c-3.7 0-6.2-2.5-6.2-5.8 0-3.4 2.7-5.2 3.7-8.7.4 1.9 1.4 3.1 2.5 3.7.3-2.7 1.4-5.2 3.5-6.8-.4 3.1 2.7 5.8 2.7 9.7 0 4.4-2.7 7.9-6.2 7.9z" />,
     star: <path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8L12 3.5z" />,
     // notifications on this device (settings, the question after the first task)
+    info: <><circle cx="12" cy="12" r="8.5" /><path d="M12 11v5.5M12 7.8v.2" /></>,
+    alarm: <><circle cx="12" cy="13" r="7.5" /><path d="M12 9.5V13l2.3 1.8M4 5.5L6.5 3M20 5.5L17.5 3M7 19.5L5.5 21M17 19.5l1.5 1.5" /></>,
     bell: <><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15L6 16.5z" /><path d="M10 20.5a2 2 0 0 0 4 0" /></>,
     route: <><circle cx="6" cy="18" r="2" /><circle cx="18" cy="6" r="2" /><path d="M8 18h7.5a3 3 0 0 0 0-6h-7a3 3 0 0 1 0-6H16" /></>,
     sun: <><circle cx="12" cy="12" r="3.8" /><path d="M12 2.8v2.2M12 19v2.2M2.8 12h2.2M19 12h2.2M5.5 5.5l1.6 1.6M16.9 16.9l1.6 1.6M5.5 18.5l1.6-1.6M16.9 7.1l1.6-1.6" /></>,
@@ -74,6 +76,8 @@ const PATHS = {
     list: <path d="M8.5 6.5h11M8.5 12h11M8.5 17.5h11M4.5 6.5h.5M4.5 12h.5M4.5 17.5h.5" />,
     // Quidey Pro: supporting the development
     heart: <path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z" />,
+    // the arcade: a game pad
+    gamepad: <><path d="M7.5 7.5h9a4.5 4.5 0 0 1 4.5 4.5v2.8a2.7 2.7 0 0 1-4.9 1.6L14.6 14H9.4l-1.5 2.4A2.7 2.7 0 0 1 3 14.8V12a4.5 4.5 0 0 1 4.5-4.5z" /><path d="M8 9.8v3.4M6.3 11.5h3.4M15.2 10.6h.01M17.2 12.4h.01" /></>,
 };
 
 // size: width and height in px; without it, CSS (className) decides

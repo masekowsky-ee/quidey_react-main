@@ -17,7 +17,7 @@ import { useIsTester } from '../../features/auth/tester';
 // list on Home: every option (time, reminder, repeat, colour, sharing, groups) in one place.
 // Escape, the close button or a click next to it closes without saving.
 // shared: { sessionId, canRemove, subGroups? } for a task in a shared session (its own fields, no groups).
-// handlers: { save(changes), remove?, subGroups? } (promises) for a task kept somewhere else, e.g. a
+// handlers: { save(changes), remove?, subGroups?, allowEvents?, remindsAll? } (promises) for a task kept somewhere else, e.g. a
 // family's calendar: the same fields as a shared session's task; without remove there is no delete
 // button. subGroups (testers): the session's / family's sub-groups to move it between.
 export default function TaskEditDialog({ task, onClose, shared, handlers }) {
@@ -82,6 +82,8 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
                     ? <TaskEditor
                         task={task}
                         personal={false}
+                        allowEvents={Boolean(handlers.allowEvents)}
+                        remindsAll={Boolean(handlers.remindsAll)}
                         subGroups={handlers.subGroups}
                         onSave={(changes) => run(handlers.save(changes))}
                         onCancel={() => dismiss()}

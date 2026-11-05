@@ -28,6 +28,7 @@ import { addToShownCollection } from '../features/collections/collections';
 import Icon from './icons';
 import SheetGrabber from './SheetGrabber.jsx';
 import { useFocusOnArrival } from '../features/layout/dragDismiss';
+import { useIsTester } from '../features/auth/tester';
 const EMPTY_EXTRAS = { reminders: [], reminder_email: false, location: '', link: '', details: '', repeat: null, repeat_left: null };
 
 // New task or event. A task needs only its name; optionally a day and time (no time: the whole
@@ -43,7 +44,10 @@ const EMPTY_EXTRAS = { reminders: [], reminder_email: false, location: '', link:
 // A shown collection (testers, in place of a group) takes the new task or event, as a group does.
 export default function TaskForm(props){
     // sheet: QuickAdd's FormSheet (slides in, swiped down on phones)
-    const {setCreateTask, sheet} = props;
+    // onReminder(name): testers' "Erinnerung" choice, QuickAdd swaps in the reminder form;
+    // initialKind / initialName: coming back from there
+    const {setCreateTask, sheet, onReminder, initialKind = 'task', initialName = ''} = props;
+    const isTester = useIsTester();
     const nameRef = useRef(null);
     useFocusOnArrival(nameRef);
 
@@ -61,12 +65,12 @@ export default function TaskForm(props){
     const subGroupName = session?.subGroups.find(group => group.id === subGroupId)?.name;
     const collection = groupToDisplay.group?.collection ? groupToDisplay.group : null;
 
-    const [kind, setKind] = useState('task');
+    const [kind, setKind] = useState(initialKind);
     const event = kind === 'event';
     const [eventTypeId, setEventTypeId] = useState(null);
     // a task's planned time, an event's length (minutes)
     const [duration, setDuration] = useState(null);
-    const [name, setName] = useState('');
+    const [name, setName] = useState(initialName);
     // the type follows the name's keywords until one is picked by hand (also "none")
     const types = useSelector(state => state.task.eventTypes);
     const [typeByHand, setTypeByHand] = useState(false);
@@ -202,7 +206,11 @@ export default function TaskForm(props){
             {collection &&
                 <p className={styles.shareHint}>{fill(t('createInCollection'), { name: collection.name })}</p>}
             <form className={`${styles.form}`} onSubmit={handleSubmit} noValidate>
-                <KindSwitch value={kind} onChange={(next) => { setKind(next); followName(name, next); }} />
+                <KindSwitch value={kind} kinds={onReminder && isTester && !session ? ['task', 'event', 'reminder'] : undefined}
+                    onChange={(next) => {
+                        if (next === 'reminder') { onReminder(name); return; }
+                        setKind(next); followName(name, next);
+                    }} />
                 {/* the form opens to be typed into: the name has the focus (on a touch screen once the sheet is up) */}
                 <input ref={nameRef} className={styles.input} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}
                     aria-describedby={quickParts.length > 0 ? 'quick-add-hint' : undefined}

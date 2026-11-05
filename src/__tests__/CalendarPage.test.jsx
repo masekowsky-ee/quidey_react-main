@@ -375,6 +375,15 @@ describe('shared calendars', () => {
         expect(within(cell('2026-10-19')).getByText('Dentist')).toBeInTheDocument()
     })
 
+    it("a family's entries can be events and remind every member", async () => {
+        answer({ 'GET /api/families/3': FAMILY })
+        await act(async () => { setup('/calendar?date=2026-10-19&day=2026-10-24&cal=family-3') })
+        fireEvent.click(screen.getByRole('button', { name: 'Edit: Grandma visits' }))
+        expect(screen.getAllByRole('radio', { name: /Event/ }).length).toBeGreaterThan(0)
+        fireEvent.click(screen.getByRole('button', { name: /More options/ }))
+        expect(screen.getByText('Reminds every member.')).toBeInTheDocument()
+    })
+
     it("a calendar I'm not in leads back to my own", async () => {
         apiFetch.mockImplementation(async (url) => {
             if (url === '/api/shared-sessions/8') throw Object.assign(new Error('Session not found'), { status: 404 })

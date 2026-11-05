@@ -62,7 +62,7 @@ const tourTexts = {
 
         tut_together_short: 'Gemeinsam',
         tut_together_title: 'Lernen mit Freunden',
-        tut_together_text: 'Unter Gemeinschaft findest du alles mit anderen: Feed, Freunde, geteilte Sitzungen und Families. Nachrichten landen im Postfach.',
+        tut_together_text: 'Unter Sozial findest du alles mit anderen: Feed, Freunde, geteilte Sitzungen und Families. Nachrichten landen im Postfach.',
         tut_together_tips: [
             'Sitzungen: eine gemeinsame Aufgabenliste, eine Stoppuhr für alle und ein Chat, alles live.',
             'Family: eine feste Gruppe mit gemeinsamem Kalender, Pinnwand und eigenem Chat.',
@@ -89,7 +89,7 @@ const tourTexts = {
 
         tut_ready_short: 'Los',
         tut_ready_title: 'Alles griffbereit',
-        tut_ready_text_phone: 'Unten erreichst du Start, Kalender, Gemeinschaft und Postfach. Alles Weitere steckt hinter „Mehr“.',
+        tut_ready_text_phone: 'Unten erreichst du Start, Kalender, Fokus und Sozial, das Postfach oben rechts. Alles Weitere steckt hinter „Mehr“.',
         tut_ready_text_drawer: 'Über den Menü-Knopf links im Header erreichst du alle Seiten, dein Konto und die Einstellungen.',
         tut_ready_text_sidebar: 'Links in der Seitenleiste findest du alle Seiten, unten Einstellungen, Feedback und dein Konto.',
         tut_ready_text_other: 'Alle Seiten erreichst du über die Navigation deiner Oberfläche, Einstellungen und Konto über das Menü.',
@@ -170,7 +170,7 @@ const tourTexts = {
 
         tut_together_short: 'Together',
         tut_together_title: 'Study with friends',
-        tut_together_text: 'Community holds everything with other people: the feed, friends, shared sessions and families. Messages land in your inbox.',
+        tut_together_text: 'Social holds everything with other people: the feed, friends, shared sessions and families. Messages land in your inbox.',
         tut_together_tips: [
             'Sessions: one shared task list, a stopwatch for everyone and a chat, all live.',
             'Family: a fixed group with a shared calendar, a board and its own chat.',
@@ -197,7 +197,7 @@ const tourTexts = {
 
         tut_ready_short: 'Go',
         tut_ready_title: 'Always at hand',
-        tut_ready_text_phone: 'Home, calendar, community and inbox are at the bottom. Everything else is behind "More".',
+        tut_ready_text_phone: 'Home, calendar, focus and social are at the bottom, the inbox at the top right. Everything else is behind "More".',
         tut_ready_text_drawer: 'The menu button on the left of the header leads to every page, your account and the settings.',
         tut_ready_text_sidebar: 'The sidebar on the left holds every page, with settings, feedback and your account at the bottom.',
         tut_ready_text_other: 'Every page is in the navigation of your interface, settings and account are in the menu.',

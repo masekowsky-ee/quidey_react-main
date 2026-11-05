@@ -22,7 +22,7 @@ const SETTINGS = [
 
 // the area each settings section sits in (Settings opens it for /settings#<section>); the tour
 // is found as "Einführung starten", which opens it right away
-export const SECTION_AREAS = { ...Object.fromEntries(SETTINGS.map(([section, , area]) => [section, area])), tour: 'app' };
+export const SECTION_AREAS = { ...Object.fromEntries(SETTINGS.map(([section, , area]) => [section, area])), tour: 'app', alarms: 'app' };
 
 const ADMIN_TABS = { requests: 'adminRequests', users: 'adminUsers', broadcast: 'adminBroadcast', testers: 'adminTesterFeedback', overview: 'adminOverview' };
 

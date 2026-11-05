@@ -119,10 +119,18 @@
 }
 
 .rowPreview {
-    max-width: 14rem;
+    max-width: 100%;
+    font-size: 0.8rem;
+    color: var(--text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* nothing written yet / only attachments: quieter than a note's own words */
+.rowPreview[data-empty] {
+    font-style: italic;
+    opacity: 0.75;
 }
 
 .empty {
