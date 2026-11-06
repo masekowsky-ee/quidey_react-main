@@ -4,6 +4,7 @@ import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
+import { setLanguage } from '../features/settings/settingsAction'
 import { apiFetch } from '../features/helperFunction'
 import LegalPage from '../legal/LegalPage'
 import { OWNER } from '../legal/owner'
@@ -38,16 +39,36 @@ describe('legal pages', () => {
 })
 
 describe('privacy page: study goals', () => {
-    it.each(['de', 'en'])('names Anthropic for the AI estimates and the study push kind (%s)', (lang) => {
-        localStorage.setItem('language', lang)
-        const { container } = renderAt('/datenschutz')
+    // The language is read from localStorage only when the settings reducer loads, so set it on the store.
+    const renderPrivacyIn = (lang) => {
+        const store = configureStore({ reducer: rootReducer })
+        store.dispatch(setLanguage(lang))
+        return render(
+            <Provider store={store}>
+                <MemoryRouter initialEntries={['/datenschutz']}><LegalPage /></MemoryRouter>
+            </Provider>
+        )
+    }
+
+    it.each([
+        ['de', false],
+        ['en', true],
+    ])('names Anthropic for the AI estimates and the study push kind (%s)', (lang, englishNote) => {
+        const { container } = renderPrivacyIn(lang)
         const text = container.textContent
         expect(text).toContain('KI-Schätzungen')
         expect(text).toContain('Anthropic')
         expect(text).toContain('Art. 6 Abs. 1 lit. a DSGVO')
-        expect(text).toMatch(/Benachrichtigungen[\s\S]*Lernen/)
-        expect(text).toContain('„Lernen“')
-        localStorage.removeItem('language')
+
+        const push = [...container.querySelectorAll('p')]
+            .find((p) => p.textContent.includes('Benachrichtigungen auf deinem Gerät (Push)'))
+        expect(push).toBeDefined()
+        expect(push.textContent).toContain('in der Art „Lernen“')
+        expect(push.textContent).toContain('hinter dem Plan')
+
+        const note = container.querySelector('p[lang="en"]')
+        if (englishNote) expect(note?.textContent).toBe('This legal information is provided in German, as required by German law.')
+        else expect(note).toBeNull()
     })
 })
 
