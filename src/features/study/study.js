@@ -59,6 +59,16 @@ export default function studyReducer(state = initialState, action) {
     }
 }
 
+// 90 -> '1,5', 180 -> '3' (one decimal, whole hours without; de comma, en dot)
+export const hoursNumber = (minutes, language = 'de') => {
+    const hours = Math.round((minutes / 60) * 10) / 10;
+    const text = Number.isInteger(hours) ? String(hours) : hours.toFixed(1);
+    return language === 'de' ? text.replace('.', ',') : text;
+};
+
+// '6,5 h' | '6.5 h'
+export const formatHours = (minutes, language = 'de') => `${hoursNumber(minutes, language)} h`;
+
 const BASE = '/api/tester/study';
 const send = (method, body) => ({ method, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
 const reloadTasks = (dispatch) => dispatch(refreshTasks()).catch(() => {});

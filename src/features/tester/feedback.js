@@ -13,6 +13,7 @@ import { UI_VARIANT_IDS } from './variants';
 // (texts: testerFeature_<id>, _<id>Hint in i18n/testerTexts.js), take it out once it's settled.
 // No change on the server needed.
 export const TEST_FEATURES = [
+    { id: 'study', to: '/study', testerOnly: true, since: '2026-11-05' },
     { id: 'reminders', to: '/inbox?tab=reminders', testerOnly: true, since: '2026-11-04' },
     { id: 'notes', to: '/notes', testerOnly: true, since: '2026-11-03' },
     { id: 'collections', to: '/collections', testerOnly: true, since: '2026-11-03' },

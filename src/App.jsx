@@ -90,6 +90,7 @@ const PAGES = {
   Routines: () => import('./components/routines/Routines.jsx'),
   NotesPage: () => import('./components/notes/NotesPage.jsx'),
   Collections: () => import('./components/collections/Collections.jsx'),
+  StudyPage: () => import('./components/study/StudyPage.jsx'),
   ProPage: () => import('./components/pro/ProPage.jsx'),
 };
 const SignIn = lazy(PAGES.SignIn);
@@ -113,6 +114,7 @@ const FocusRoom = lazy(PAGES.FocusRoom);
 const Routines = lazy(PAGES.Routines);
 const NotesPage = lazy(PAGES.NotesPage);
 const Collections = lazy(PAGES.Collections);
+const StudyPage = lazy(PAGES.StudyPage);
 const ProPage = lazy(PAGES.ProPage);
 
 // the app's pages (not the sign-in or legal texts) in the background, when nothing else runs
@@ -328,6 +330,9 @@ function App(){
           <Route path="/notes" element={<TesterOnly fallback={<Navigate to="/focus" replace />}><NotesPage/></TesterOnly>} />
           <Route path="/collections" element={<TesterOnly fallback={<Navigate to="/" replace />}><Collections/></TesterOnly>} />
           <Route path="/collections/:id" element={<TesterOnly fallback={<Navigate to="/" replace />}><Collections/></TesterOnly>} />
+          <Route path="/study" element={<TesterOnly fallback={<Navigate to="/" replace />}><StudyPage/></TesterOnly>} />
+          <Route path="/study/goals/:id" element={<TesterOnly fallback={<Navigate to="/" replace />}><StudyPage/></TesterOnly>} />
+          <Route path="/study/:subjectId" element={<TesterOnly fallback={<Navigate to="/" replace />}><StudyPage/></TesterOnly>} />
           <Route path="/stats" element={<Stats />} />
           {/* the old address of the statistics (bookmarks, ?tab=done links) */}
           <Route path="/history" element={<Navigate to={{ pathname: '/stats', search: location.search }} replace />} />

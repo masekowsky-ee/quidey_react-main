@@ -1,0 +1,118 @@
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { fetchSubjects, saveSubject, selectSubjects } from '../../features/study/study';
+import { showToast } from '../../features/toast/toast';
+import { groupColorAttr } from '../../features/tasks/taskColors';
+import { fill } from '../../features/helperFunction';
+import { useTranslation } from '../../i18n/useTranslation';
+import Icon from '../icons.jsx';
+import { Bone, Skeleton } from '../skeleton/Skeleton.jsx';
+import { ProgressBar } from './GoalProgress.jsx';
+import { countdownText, useStudyError } from './studyUi';
+import styles from './Study.module.css';
+
+const NAME_MAX = 60;
+
+function SubjectRow({ subject, onArchive }) {
+    const { t } = useTranslation();
+    const goal = subject.nextGoal;
+    return (
+        <li className={styles.item} data-task-color={groupColorAttr(subject)}>
+            <Link to={`/study/${subject.id}`} className={styles.itemLink}>
+                <span className={styles.itemName}>
+                    {subject.emoji && <span aria-hidden="true">{subject.emoji} </span>}
+                    <span>{subject.name}</span>
+                </span>
+                {goal ? (
+                    <span className={styles.meta}>
+                        <span>{goal.name}</span>
+                        <span>{countdownText(goal.due, t)}</span>
+                        {goal.behindMinutes > 0 && <span className={styles.badge}>{t('studyBehind')}</span>}
+                        <ProgressBar value={goal.progress} label={goal.name} />
+                    </span>
+                ) : (
+                    <span className={styles.meta}>{t('studyNoGoal')}</span>
+                )}
+            </Link>
+            <button type="button" className={styles.iconButton} onClick={() => onArchive(subject)}
+                aria-label={`${subject.archived ? t('studyUnarchive') : t('studyArchive')}: ${subject.name}`}
+                title={subject.archived ? t('studyUnarchive') : t('studyArchive')}>
+                <Icon name="archive" size={18} />
+            </button>
+        </li>
+    );
+}
+
+export default function SubjectList() {
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const errorText = useStudyError();
+    const subjects = useSelector(selectSubjects);
+    const [loaded, setLoaded] = useState(false);
+    const [name, setName] = useState('');
+    const [showArchived, setShowArchived] = useState(false);
+
+    useEffect(() => {
+        dispatch(fetchSubjects()).catch(() => dispatch(showToast(t('studyError_default'), 'error'))).finally(() => setLoaded(true));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dispatch]);
+
+    const add = async (e) => {
+        e.preventDefault();
+        const trimmed = name.trim();
+        if (!trimmed) return;
+        try {
+            await dispatch(saveSubject(null, { name: trimmed }));
+            setName('');
+        } catch (err) {
+            dispatch(showToast(err.code === 'subject_exists' ? t('studySubjectExists') : errorText(err), 'error'));
+        }
+    };
+
+    const archive = (subject) => dispatch(saveSubject(subject.id, { archived: !subject.archived }))
+        .catch((err) => dispatch(showToast(errorText(err), 'error')));
+
+    const active = subjects.filter(s => !s.archived);
+    const archived = subjects.filter(s => s.archived);
+
+    return (
+        <div className={styles.page} data-part="study">
+            <header className={styles.head}>
+                <div>
+                    <h1 className={styles.title}>{t('studyTitle')}</h1>
+                    <p className={styles.subtitle}>{t('studySubtitle')}</p>
+                </div>
+            </header>
+
+            <form className={styles.newRow} onSubmit={add}>
+                <input value={name} maxLength={NAME_MAX} onChange={e => setName(e.target.value)}
+                    placeholder={t('studyNewSubject')} aria-label={t('studySubjectName')} />
+                <button type="submit" className={styles.btnPrimary} disabled={!name.trim()}>
+                    <Icon name="plus" size={16} /> {t('studyAddSubject')}
+                </button>
+            </form>
+
+            {!loaded ? (
+                <Skeleton className={styles.list}>
+                    {[0, 1, 2].map(i => <Bone key={i} h="4.2rem" />)}
+                </Skeleton>
+            ) : (
+                <>
+                    {active.length === 0
+                        ? <p className={styles.empty}>{t('studySubjectsEmpty')}</p>
+                        : <ul className={styles.list}>{active.map(s => <SubjectRow key={s.id} subject={s} onArchive={archive} />)}</ul>}
+                    {archived.length > 0 && (
+                        <div className={styles.group}>
+                            <button type="button" className={styles.groupToggle} aria-expanded={showArchived}
+                                onClick={() => setShowArchived(v => !v)}>
+                                <Icon name="chevronDown" size={16} /> {fill(t('studyArchived'), { n: archived.length })}
+                            </button>
+                            {showArchived && <ul className={styles.list}>{archived.map(s => <SubjectRow key={s.id} subject={s} onArchive={archive} />)}</ul>}
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
+    );
+}

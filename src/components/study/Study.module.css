@@ -119,3 +119,308 @@
     color: var(--text);
     font-size: 0.9rem;
 }
+
+/* ---------- pages: Lernen, a subject, a goal ---------- */
+.page{
+    composes: page from '../ui.module.css';
+    width: min(52rem, calc(100% - 2 * var(--page-gutter, 1rem)));
+    margin: 0 auto;
+    padding-bottom: 5rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    text-align: left;
+}
+
+.page > :first-child{
+    margin-top: 1.75rem;
+}
+
+.head{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+}
+
+.title{
+    margin: 0;
+    font-size: 1.5rem;
+    line-height: 1.25;
+}
+
+.subtitle{
+    margin: 0.25rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+    max-width: 36rem;
+}
+
+.back{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    align-self: flex-start;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.back:hover{
+    color: var(--text-h);
+}
+
+.actions{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn{
+    composes: ghostBtn from '../ui.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    height: 2.25rem;
+    padding: 0 0.9rem;
+    font-size: 0.875rem;
+    color: var(--text);
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+}
+
+.btn:disabled{
+    opacity: 0.45;
+    cursor: default;
+}
+
+.btnPrimary{
+    composes: btnPrimary from '../ui.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-width: 0;
+    flex: none;
+}
+
+.btnPrimary:disabled{
+    opacity: 0.5;
+}
+
+.newRow{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.newRow input{
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.list{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.item{
+    composes: panel from '../ui.module.css';
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    overflow: hidden;
+}
+
+.item[data-task-color]::before{
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--task-color);
+}
+
+.itemLink{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.itemName{
+    font-weight: 500;
+    color: var(--text-h);
+}
+
+.meta{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.6rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.badge{
+    display: inline-flex;
+    align-items: center;
+    padding: 0.05rem 0.5rem;
+    font-size: 0.78rem;
+    color: var(--danger);
+    border: 1px solid currentColor;
+    border-radius: var(--radius-pill);
+}
+
+.bar{
+    height: 0.4rem;
+    min-width: 6rem;
+    background: var(--surface-strong);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.barFill{
+    height: 100%;
+    background: var(--primary);
+    border-radius: inherit;
+    transition: width var(--ease);
+}
+
+.progress{
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.progressText{
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.group{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.groupToggle{
+    composes: btn;
+    align-self: flex-start;
+}
+
+.sectionTitle{
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.empty{
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.part{
+    composes: panel from '../ui.module.css';
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.7rem 1rem;
+}
+
+.partMain{
+    flex: 1 1 14rem;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.partText{
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.partDone{
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.source{
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.stepper{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.stepValue{
+    min-width: 4.25rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-h);
+    font-variant-numeric: tabular-nums;
+}
+
+.iconButton{
+    composes: iconBtn from '../ui.module.css';
+    width: 2rem;
+    height: 2rem;
+}
+
+.iconButton:disabled{
+    opacity: 0.35;
+    cursor: default;
+}
+
+.sessions{
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.session{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.ask{
+    composes: panel from '../ui.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem;
+}
+
+.ask p{
+    margin: 0;
+    color: var(--text-h);
+}
+
+.danger{
+    color: var(--danger);
+}
