@@ -168,6 +168,8 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
             if (inline) {
                 try {
                     id = (await dispatch(saveSubject(null, { name: fields.newSubject.trim() }))).id;
+                    // the subject exists now: a retry after a failed createGoal must pick it, not create it again
+                    setFields(prev => ({ ...prev, subject: String(id), newSubject: '' }));
                 } catch (err) {
                     setStep(1);
                     setError(err.code === 'subject_exists' ? t('studySubjectExists') : errorText(err));

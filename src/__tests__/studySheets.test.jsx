@@ -227,6 +227,37 @@ describe('create sheet', () => {
         expect(calls(`${BASE}/goals`, 'POST')).toHaveLength(0)
     })
 
+    it('a retry after a failed create reuses the new subject instead of creating it again', async () => {
+        const base = apiFetch.getMockImplementation()
+        let failOnce = true
+        apiFetch.mockImplementation(async (url, options = {}) => {
+            if (url === `${BASE}/goals` && options.method === 'POST' && failOnce) {
+                failOnce = false
+                throw Object.assign(new Error('boom'), { status: 500, code: 'server_error' })
+            }
+            return base(url, options)
+        })
+        open('/study?new=goal')
+        const dialog = await screen.findByRole('dialog')
+        await waitFor(() => expect(within(dialog).getByLabelText('Fach')).toBeTruthy())
+        fireEvent.change(within(dialog).getByLabelText('Fach'), { target: { value: 'new' } })
+        fireEvent.change(within(dialog).getByLabelText('Name des neuen Fachs'), { target: { value: 'Chemie' } })
+        fireEvent.change(within(dialog).getByLabelText('Name des Ziels'), { target: { value: 'Test' } })
+        fireEvent.change(within(dialog).getByLabelText('Datum'), { target: { value: inDays(10) } })
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Weiter' }))
+        fireEvent.change(await screen.findByLabelText('Themen, eins pro Zeile'), { target: { value: 'Eins' } })
+        await defaults(dialog, 1)
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Plan ansehen' }))
+        await waitFor(() => expect(calls(`${BASE}/goals`, 'POST')).toHaveLength(1))
+        await waitFor(() => expect(within(dialog).getByRole('alert')).toBeTruthy())
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Plan ansehen' }))
+        await screen.findByRole('button', { name: 'Übernehmen' })
+        expect(calls(`${BASE}/subjects`, 'POST')).toHaveLength(1)
+        const goalCalls = calls(`${BASE}/goals`, 'POST')
+        expect(goalCalls).toHaveLength(2)
+        expect(bodyOf(goalCalls[1]).subjectId).toBe(9)
+    })
+
     it('slots mode without study times links to the settings instead of a preview', async () => {
         settings.windows = []
         open('/study/1?new=goal')
