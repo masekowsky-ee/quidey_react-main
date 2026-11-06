@@ -19,6 +19,7 @@ export const NATIVE_CHANNELS = {
     messages: { de: 'Nachrichten', en: 'Messages', importance: 4 },
     social: { de: 'Freunde & Einladungen', en: 'Friends & invites', importance: 3 },
     groups: { de: 'Familien & Sitzungen', en: 'Families & sessions', importance: 3 },
+    study: { de: 'Lernen', en: 'Studying', importance: 3 },
 };
 
 // the module, never the plugin itself out of a promise: a Capacitor plugin answers every

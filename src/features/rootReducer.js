@@ -14,6 +14,7 @@ import progressReducer from "./progress/progress";
 import presenceReducer from "./presence/presence";
 import routinesReducer from "./routines/routines";
 import collectionsReducer from "./collections/collections";
+import studyReducer from "./study/study";
 import remindersReducer from "./reminders/reminders";
 
 const rootReducer = combineReducers({
@@ -33,6 +34,7 @@ const rootReducer = combineReducers({
     routines: routinesReducer,
     collections: collectionsReducer,
     reminders: remindersReducer,
+    study: studyReducer,
 });
 
 export default rootReducer;

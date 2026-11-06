@@ -22,6 +22,7 @@ import { APK_URL, apkOffer, formatSize } from '../features/native/androidApk';
 import { setAnalyticsConsent, useAnalytics } from '../features/native/analytics';
 import { useIsTester } from '../features/auth/tester';
 import AlarmSettings from './reminders/AlarmSettings.jsx';
+import StudySettings from './study/StudySettings.jsx';
 
 const LANGUAGES = [
     { code: 'de', label: 'german' },
@@ -379,6 +380,11 @@ export default function Settings(){
                     <SettingSection id="event-types" title={t('eventTypes')} description={t('eventTypesHint')}>
                         <EventTypeSettings embedded />
                     </SettingSection>
+
+                    {isTester &&
+                        <SettingSection id="study" title={t('studySettingsTitle')} description={t('studySettingsHint')}>
+                            <StudySettings />
+                        </SettingSection>}
                 </>}
 
                 {area === 'app' && <>

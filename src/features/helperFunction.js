@@ -39,6 +39,8 @@ export async function apiFetch(url, options = {}) {
         error.code = errorData.code;
         // which input the server refused (INVALID_INPUT)
         error.field = errorData.field;
+        // the whole error body (a 409 plan_changed carries the fresh preview)
+        error.data = errorData;
         // pro / tester was taken away while the app is open: App checks access again
         // (and shows the beta screen, or hides what only testers see)
         if (ACCESS_CODES.includes(errorData.code)) window.dispatchEvent(new Event(PRO_REQUIRED_EVENT));

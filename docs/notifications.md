@@ -24,7 +24,7 @@ Stand: 2026-11-05. Bei jeder Änderung an Benachrichtigungen hier mitpflegen.
 | `messages` | Nachrichten | Nachrichten |
 | `social` | Anfragen und Einladungen | Freunde & Einladungen |
 | `groups` | Familien und Sitzungen | Familien & Sitzungen |
-| `study` | Lernziele | Lernziele |
+| `study` | Lernen | Lernen |
 
 ## Alle Anlässe
 

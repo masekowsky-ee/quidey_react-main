@@ -34,8 +34,9 @@ const inTime = (promise, what) => Promise.race([
 ]);
 
 // The kinds each device can switch on or off (columns on the server)
-// (groups: new entries by others and chat messages in my families and sessions)
-export const PUSH_KINDS = ['plan', 'digest', 'messages', 'social', 'groups'];
+// (groups: new entries by others and chat messages in my families and sessions;
+// study: a goal falls behind its plan, testers)
+export const PUSH_KINDS = ['plan', 'digest', 'messages', 'social', 'groups', 'study'];
 
 // status: 'unknown' (not checked yet) | 'unsupported' (this browser can't) | 'install' (iPhone /
 // iPad: only as an app on the home screen) | 'denied' (blocked in the browser's settings) |
