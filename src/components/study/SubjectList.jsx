@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { fetchSubjects, saveSubject, selectSubjects } from '../../features/study/study';
 import { showToast } from '../../features/toast/toast';
 import { groupColorAttr } from '../../features/tasks/taskColors';
@@ -45,6 +45,7 @@ function SubjectRow({ subject, onArchive }) {
 }
 
 export default function SubjectList() {
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const errorText = useStudyError();
@@ -82,6 +83,11 @@ export default function SubjectList() {
                 <div>
                     <h1 className={styles.title}>{t('studyTitle')}</h1>
                     <p className={styles.subtitle}>{t('studySubtitle')}</p>
+                </div>
+                <div className={styles.actions}>
+                    <button type="button" className={styles.btn} onClick={() => navigate({ search: '?new=goal' })}>
+                        <Icon name="plus" size={14} /> {t('studyAddGoal')}
+                    </button>
                 </div>
             </header>
 
