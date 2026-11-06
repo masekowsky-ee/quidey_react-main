@@ -164,6 +164,9 @@ function Privacy() {
                 <li>Es gibt keine Werbung und keine Cookies. Im Browser gibt es kein Tracking und keine Analyse-Tools;
                     in der Android-App nutze ich Google Analytics für Firebase, aber nur, wenn du einwilligst (Abschnitt 3).</li>
                 <li>Schriften und alle Dateien der App werden von Quidey selbst ausgeliefert, nicht von Dritten.</li>
+                <li>Externe Dienste kommen nur zum Einsatz, wenn du sie auslöst oder einschaltest: Die optionalen
+                    KI-Schätzungen im Bereich „Lernen“ gehen an Anthropic (Abschnitt 5), und nur mit den Angaben, die dafür
+                    nötig sind.</li>
                 <li>Du kannst dein Konto jederzeit im Profil selbst löschen. Dabei werden deine Daten gelöscht.</li>
                 {proBuilt() && <li>Bezahlst du für Quidey Pro, läuft das über Stripe bzw. Google Play; deine Karten- oder Kontodaten
                     sehe ich nicht (Abschnitt 7).</li>}
@@ -348,6 +351,39 @@ function Privacy() {
                 der die Family oder Sitzung gehört) sie wieder abnimmst, sie löschst oder in den Papierkorb legst oder
                 du nicht mehr dabei bist. Ändern können sie sie nicht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
             </p>
+            <p>
+                <strong>Lernen (Fächer und Lernziele):</strong> Als Tester kannst du im Bereich „Lernen“ Fächer und
+                Lernziele (Klausur, Abgabe, Referat, Sonstiges) anlegen. Quidey speichert zu deinem Konto: bei Fächern
+                Name, Symbol und Farbe; bei Zielen das Fach, die Art, den Namen, den Termin (Tag, optional Uhrzeit), den
+                Status und die Planungsart; bei den Themen und Schritten eines Ziels Name, Reihenfolge, geschätzte
+                Dauer samt Herkunft der Schätzung (aus deinem Verlauf, aus der Seitenzahl, KI-Schätzung, Standardwert
+                oder von dir eingegeben), wann du sie erledigt hast und wie lange du daran gearbeitet hast; deine
+                Lernzeiten (Wochentage und Uhrzeiten), Länge einer Lernsitzung, Höchstdauer pro Tag und ob KI-Schätzungen
+                automatisch erfolgen sollen. Daraus legt Quidey Lernsitzungen als Aufgaben in deinem Kalender an
+                (Abschnitt 5, Aufgaben). Diese Inhalte sieht nur du. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+                Mit deinem Konto werden sie gelöscht.
+            </p>
+            <p>
+                <strong>KI-Schätzungen (Anthropic):</strong> Quidey kann die Dauer der Themen und Schritte eines Ziels
+                mit Hilfe künstlicher Intelligenz schätzen. Das geschieht nur, wenn du auf „Schätzen lassen“ tippst
+                oder in den Einstellungen unter „Lernen“ automatische KI-Schätzungen einschaltest; ohne das wird
+                nichts an Anthropic übermittelt. Der Dienst wird von <V>{PROCESSORS.aiProvider}</V> („Anthropic“) erbracht,
+                die der Quidey-Server über eine Programmierschnittstelle aufruft (nicht dein Gerät). Übermittelt werden
+                ausschließlich: die Namen der Themen bzw. Schritte, der Name des Fachs, die Art des Ziels (z. B.
+                Klausur) und die Zahl der Tage bis zum Termin. Nicht übermittelt werden dein Name, Benutzername,
+                deine E-Mail-Adresse, Kontonummer, Notizen, Aufgaben oder andere Daten. Bitte schreib deshalb keine
+                Namen oder Angaben über Personen in Fach- und Themennamen, wenn du KI-Schätzungen nutzt. Anthropic
+                liefert eine Zahl in Minuten je Thema zurück; sie wird bei dem Thema gespeichert und als „KI-Schätzung“
+                gekennzeichnet. Dauert die Antwort länger als 8 Sekunden oder gibt es einen Fehler, schätzt Quidey
+                ohne KI weiter. Pro Konto sind höchstens 20 Anfragen am Tag möglich. Rechtsgrundlage ist deine
+                Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO, die du durch das Tippen auf „Schätzen lassen“ bzw. das
+                Einschalten des Schalters erteilst; du kannst sie jederzeit widerrufen, indem du den Schalter
+                ausschaltest und nicht mehr tippst (die Rechtmäßigkeit der bisherigen Verarbeitung bleibt davon
+                unberührt). Anthropic verarbeitet die Daten als Auftragsverarbeiter auf Grundlage eines
+                Auftragsverarbeitungsvertrags (Art. 28 DSGVO) und kann sie in den USA verarbeiten; Grundlage dafür sind
+                die EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) in diesem Vertrag. Ohne diese Einwilligung nutzt du „Lernen“ ohne
+                Einschränkung weiter, nur ohne KI-Schätzungen.
+            </p>
 
             <h2>6. Freunde und gemeinsame Funktionen</h2>
             <p>
@@ -472,7 +508,9 @@ function Privacy() {
                 bekommen alle Mitglieder), wenn dein Fokus-Timer oder eine Pomodoro-Pause abgelaufen ist,
                 zur geplanten Uhrzeit deiner Routinen und Erinnerungen, morgens mit einem Überblick über deinen Tag, bei Nachrichten, Freundschaftsanfragen,
                 Einladungen, geteilten oder zugewiesenen Aufgaben, wenn jemand anderes in einer deiner Families oder
-                Sitzungen etwas einträgt oder in deren Chat schreibt, und bei Meldungen des Quidey-Teams. Welche Arten du
+                Sitzungen etwas einträgt oder in deren Chat schreibt, bei Meldungen des Quidey-Teams und, als Tester, in der
+                Art „Lernen“, wenn eines deiner Lernziele hinter dem Plan liegt (höchstens einmal am Tag und nur zwischen
+                8 und 19 Uhr; die Benachrichtigung enthält den Namen des Ziels und die fehlende Zeit). Welche Arten du
                 bekommst, stellst du je Gerät ein. Dafür erzeugt dein Browser bei seinem Push-Dienst eine Adresse; welcher
                 Dienst das ist, bestimmt der Hersteller deines Browsers bzw. Betriebssystems (z. B. Google bei Chrome und
                 Android, Apple bei Safari und auf iPhone/iPad, Mozilla bei Firefox), nicht Quidey. Gespeichert werden je
@@ -587,6 +625,7 @@ function Privacy() {
                     Gedankenparkplatz (sie bleiben auf diesem Gerät und werden nicht an den Server geschickt, außer du
                     machst eine Aufgabe daraus);</li>
                 <li>welche Erinnerungen schon angezeigt wurden, an welchem Tag dich Quidey zuletzt an deine Serie erinnert hat und welche gemeinsame Sitzung gerade gestoppt wird;</li>
+                <li>als Tester, an welchem Tag du den Hinweis „Plan anpassen“ bei den Lernzielen auf „Später“ gestellt hast (nur das Datum);</li>
                 <li>ob auf diesem Gerät Benachrichtigungen an sind, die Adresse dafür beim Push-Dienst (siehe Abschnitt 6) und ob Quidey dich danach schon gefragt hat;</li>
                 <li>Schwierigkeit und Bestwerte der Spiele;</li>
                 <li>in der Android-App deine Antwort auf die Frage nach den Nutzungsdaten (Abschnitt 3).</li>
@@ -633,7 +672,7 @@ function Privacy() {
             <h2>{privacyNo(11)}. Empfänger</h2>
             <p>
                 Daten erhalten nur die oben genannten Auftragsverarbeiter (Hosting, E-Mail-Versand, in der Android-App
-                Firebase Cloud Messaging) sowie – soweit du es veranlasst – deine Freunde (auch als Empfänger deiner
+                Firebase Cloud Messaging, bei KI-Schätzungen Anthropic, Abschnitt 5) sowie – soweit du es veranlasst – deine Freunde (auch als Empfänger deiner
                 Nachrichten), Mitglieder gemeinsamer Sitzungen und Families, wenn du Benachrichtigungen eingeschaltet
                 hast der Push-Dienst deines Browsers (nur verschlüsselt, siehe Abschnitt 6), wenn du dich mit Google
                 anmeldest Google (Abschnitt 4), wenn du in der Android-App in die Analyse einwilligst Google

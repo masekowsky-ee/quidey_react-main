@@ -271,6 +271,16 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   groups over once (`users.groups_imported_at`; same name, colour, description, tasks; not a group whose name a
   collection has already); the groups themselves stay for when the test ends. Profile "top groups" still
   come from groups. Session / family sub-groups are separate and unchanged.
+- `/study`, `/study/:subjectId`, `/study/goals/:id` — **Lernen**, testers only (`TesterOnly`, `src/features/study/`, `components/study/`,
+  API `/api/tester/study`, backend migration 041, Settings section `/settings#study` "Lernen"): subjects (Fächer), goals (exam /
+  assignment / presentation / other with a due date) split into parts with estimated minutes, and a planner that puts
+  study sessions as ordinary tasks (`tasks.goal_part_id`, `plan_pinned`) into the free gaps of the calendar within the user's
+  study windows. A goal is "behind" when planned sessions were missed (home card with Ansehen / Später / So lassen,
+  `/study?replan=1`; "Später" stores today's date in localStorage `studyLater` and hides the card until the date changes).
+  Estimates: history, page ranges, optional AI ("Schätzen lassen" or the setting "automatisch"), defaults; the source shows under
+  each estimate. **AI estimates go to Anthropic** (only part names, subject name, kind, days until due; consent = the tap / the
+  switch; hidden without `ANTHROPIC_API_KEY`), so privacy § 5 names Anthropic (`PROCESSORS.aiProvider`). Push kind `study`
+  (label "Lernen"/"Studying", `docs/notifications.md`).
 - `/routines`, `/routines/:id/run` — **Routinen** (`components/routines/`, slice `routines` in
   `features/routines/routines.js`, API `/api/routines`): steps with minutes, weekdays + time (push at the time,
   and an in-app toast via `useRoutineReminders`), templates (texts `routineTpl_*`), guided run by the wall clock
@@ -510,11 +520,11 @@ goes out with the next deploy but never into git); `vite.config.js` hands the de
 alone; `_headers` sends it `no-cache` + as attachment. Cloudflare's limit is 25 MiB per file.
 
 Push notifications (Web Push, VAPID): Settings → App → "Benachrichtigungen" per device (on/off,
-then five kinds `plan` (tasks/events at each of their reminders, also my families' entries), `digest`
+then six kinds `plan` (tasks/events at each of their reminders, also my families' entries), `digest`
 (morning overview 07:30–11:00 local), `messages`, `social` (friend requests, session/family
 invites, shared/assigned tasks incl. family entries given to me, broadcasts; admins also new beta requests), `groups`
 (somebody else added entries to my family / session: inbox notice `entries_added`, bundled per person and place for
-30 min while unread, backend `utils/groupNotices.js`; family / session chat messages), and "Test senden"). The whole
+30 min while unread, backend `utils/groupNotices.js`; family / session chat messages), `study` (testers: a study goal is behind its plan, at most once a day, 08:00–19:00 local, kept 3 h; label "Lernen"), and "Test senden"). The whole
 list of when anybody is notified: **`docs/notifications.md`** (keep it up to date). `src/features/pwa/push.js`
 (external store, `usePushState`; `refreshPush` on every start via `usePushSync` in App re-PUTs the
 subscription, so a renewed address or another account is picked up and a revoked permission turns
@@ -550,7 +560,7 @@ for the app's own files: `token` (JWT), `accounts` (several accounts on one devi
 `[{ username, displayName, token }]`, max 5, `src/features/auth/accounts.js`; switching reloads
 the app as the other one, signing out takes over the next remembered account), `language`, `accent`,
 `theme`, `palette`, `motion`, `sound`, `analytics` (Android app: the answer to the usage data question), `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
-`teamSessionId`, `arcadeMode` (ranked | casual), `reminderSeen` (testers' reminders already shown in the page), `notesSort` / `notesLayout` (testers' notes area), `streakNudge` (day of the last streak reminder), `uiVariant` and `uiColors`
+`teamSessionId`, `arcadeMode` (ranked | casual), `reminderSeen` (testers' reminders already shown in the page), `notesSort` / `notesLayout` (testers' notes area), `streakNudge` (day of the last streak reminder), `studyLater` (testers: the day the "plan is behind" card on Home was put off), `uiVariant` and `uiColors`
 (testers' interface variant and the colours picked per variant), `push`, `pushEndpoint`,
 `pushAsked` (push notifications on this device), `onboarding:<username>` (a new account's action
 count, whether install / rating were asked). `public/theme-init.js` applies
@@ -651,7 +661,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment, 028: push_subscriptions, tasks.push_sent_for, users.push_digest_on, 029: tasks.reminders (replaces reminder_minutes), 030: sub-groups — shared_session_groups, family_groups, shared_session_tasks.group_id, family_tasks.group_id, 031: users.tour_seen_at, users.allday_reminder_time, …, 036: note_folders, notebook_notes.folder_id / tags / color / archived / trashed_at, collections, collection_items, users.groups_imported_at, 037: board_notes, 038: arcade_scores, 039: reminders + push_subscriptions.alarms, 040: family_tasks.kind / reminders / push_sent_for / done_by / completed_at, shared_session_tasks.done_by / completed_at, push_subscriptions.groups, notification kind entries_added). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment, 028: push_subscriptions, tasks.push_sent_for, users.push_digest_on, 029: tasks.reminders (replaces reminder_minutes), 030: sub-groups — shared_session_groups, family_groups, shared_session_tasks.group_id, family_tasks.group_id, 031: users.tour_seen_at, users.allday_reminder_time, …, 036: note_folders, notebook_notes.folder_id / tags / color / archived / trashed_at, collections, collection_items, users.groups_imported_at, 037: board_notes, 038: arcade_scores, 039: reminders + push_subscriptions.alarms, 040: family_tasks.kind / reminders / push_sent_for / done_by / completed_at, shared_session_tasks.done_by / completed_at, push_subscriptions.groups, notification kind entries_added, 041: study goals — subjects, goals, goal_parts, study_windows, tasks.goal_part_id / plan_pinned, users.study_*, push_subscriptions.study). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.
@@ -705,10 +715,11 @@ the theme before React loads.
   /api/feed/:id/cheer`. Challenges are dealt per day/week by a hash of the date (the same for
   everybody; none that needs friends without any). Team stopwatch time is also booked per day in
   `shared_time_days`.
+- Study goals (testers, `/api/tester/study`, router `study.js`, migration `041_study_goals.sql`): pure modules in `utils/` — `studyPlanner.js` (places sessions in free gaps), `studyStatus.js` (on track / behind), `studyEstimate.js` (history, pages, AI via the Claude API, defaults), `studyLoad.js`. Env: `ANTHROPIC_API_KEY` (without it no AI), `STUDY_AI_MODEL` (default `claude-haiku-5-5`). AI estimates: 20 requests per user per day (express-rate-limit, in memory), 8 s timeout, falls back to non-AI estimates; only part names, subject name, kind and days until due are sent.
 - CLI: `npm run pro -- list|requests|grant|revoke|decline|admin|unadmin|tester|untester <username>`.
 - Tests: `npm test` (`scripts/test/*.test.mjs`, node:test; api.test.mjs creates/drops its own DB). Extend for every new route.
 - Config via `.env` (see `.env.example`): `NODE_ENV`, `DB_*`, `JWT_SECRET` (≥32 chars), `PORT`,
-  `CORS_ORIGINS`, `TRUST_PROXY`, `SMTP_*`, `MAIL_FROM`, `CONTACT_TO`, `FRONTEND_URL`, `VAPID_*`.
+  `CORS_ORIGINS`, `TRUST_PROXY`, `SMTP_*`, `MAIL_FROM`, `CONTACT_TO`, `FRONTEND_URL`, `VAPID_*`, `ANTHROPIC_API_KEY`, `STUDY_AI_MODEL`.
 
 ## Deployment
 
@@ -740,7 +751,7 @@ limited role `quidey_app` (`scripts/db-app-role.sql`), migrations run as `postgr
 
 German law applies: Impressum (§ 5 DDG), Datenschutzerklärung (DSGVO), Nutzungsbedingungen,
 contact form — all in `src/legal/LegalPage.jsx`, owner details and processors (Cloudflare,
-STRATO, Resend) in `src/legal/owner.js`. Any feature touching personal data must update these
+STRATO, Resend, Anthropic for the optional AI estimates) in `src/legal/owner.js`. Any feature touching personal data must update these
 texts in the same change.
 
 ## Repo extras

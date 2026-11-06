@@ -37,6 +37,20 @@ describe('legal pages', () => {
     })
 })
 
+describe('privacy page: study goals', () => {
+    it.each(['de', 'en'])('names Anthropic for the AI estimates and the study push kind (%s)', (lang) => {
+        localStorage.setItem('language', lang)
+        const { container } = renderAt('/datenschutz')
+        const text = container.textContent
+        expect(text).toContain('KI-Schätzungen')
+        expect(text).toContain('Anthropic')
+        expect(text).toContain('Art. 6 Abs. 1 lit. a DSGVO')
+        expect(text).toMatch(/Benachrichtigungen[\s\S]*Lernen/)
+        expect(text).toContain('„Lernen“')
+        localStorage.removeItem('language')
+    })
+})
+
 describe('contact form', () => {
     beforeEach(() => apiFetch.mockReset())
 

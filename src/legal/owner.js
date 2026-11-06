@@ -30,11 +30,16 @@ export const PROCESSORS = {
     // sign in with Google, the Android app's pushes (Firebase Cloud Messaging) and Google Analytics
     // for Firebase (privacy § 3), Google Play
     google: 'Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland',
+    // optional AI estimates for study goals (backend utils/studyEstimate.js, Claude API).
+    // Entity + address: Anthropic's privacy policy § 9 (https://www.anthropic.com/legal/privacy, read 2026-11-06):
+    // Anthropic Ireland, Limited is the controller/contracting entity for the EEA. Confirm that it is the
+    // entity named in the API terms / DPA you accepted before going live.
+    aiProvider: 'Anthropic Ireland, Limited, 6th Floor, South Bank House, Barrow Street, Dublin 4, D04 TR29, Irland',
 };
 
 // Date of the current version of the legal texts
 // Switching Quidey Pro on (features/pro/flag.js) adds its parts to the texts: give that day's date then
-export const LEGAL_VERSION_DATE = '04.11.2026 (Profilbilder für alle, Notizen am Board von Families und Sitzungen, Arcade mit Rangliste)';
+export const LEGAL_VERSION_DATE = '06.11.2026 (Lernziele mit optionalen KI-Schätzungen über Anthropic, Benachrichtigungsart „Lernen“)';
 
 export const COPYRIGHT_YEAR = 2026;
 
