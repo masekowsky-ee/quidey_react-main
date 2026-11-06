@@ -279,8 +279,13 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   `/study?replan=1`; "Später" stores today's date in localStorage `studyLater` and hides the card until the date changes).
   Estimates: history, page ranges, optional AI ("Schätzen lassen" or the setting "automatisch"), defaults; the source shows under
   each estimate. **AI estimates go to Anthropic** (only part names, subject name, kind, days until due; consent = the tap / the
-  switch; hidden without `ANTHROPIC_API_KEY`), so privacy § 5 names Anthropic (`PROCESSORS.aiProvider`). Push kind `study`
-  (label "Lernen"/"Studying", `docs/notifications.md`).
+  switch; hidden without `ANTHROPIC_API_KEY`), so privacy § 5 names Anthropic (`PROCESSORS.aiProvider`); with "automatisch" the
+  AI is asked once per new topic name when the list is left (typing estimates send `ai: false`). Push kind `study`
+  (label "Lernen"/"Studying", `docs/notifications.md`). New goals plan in the study times by default when there are any.
+  Goal page: "Ziel bearbeiten" (`GoalSettingsSheet`: name, kind, date + time, mode, done / archive); a new date, time or
+  mode opens the preview, part edits only offer it ("Plan anpassen?"); saving Settings → Lernen opens it too while a goal
+  is planned. Subject page: "Fach bearbeiten" (`SubjectEditSheet`: name, emoji, colour; a new colour recolours its
+  sessions). A goal whose date is over has ended ("Vorbei"): not planned, not in status / push.
 - `/routines`, `/routines/:id/run` — **Routinen** (`components/routines/`, slice `routines` in
   `features/routines/routines.js`, API `/api/routines`): steps with minutes, weekdays + time (push at the time,
   and an in-app toast via `useRoutineReminders`), templates (texts `routineTpl_*`), guided run by the wall clock

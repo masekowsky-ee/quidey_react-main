@@ -65,6 +65,16 @@ beforeEach(() => {
         }
         const goalUrl = url.match(new RegExp(`^${BASE}/goals/(\\d+)$`))
         if (goalUrl && method === 'GET') return structuredClone(goals[goalUrl[1]])
+        if (goalUrl && method === 'PATCH') {
+            goals[goalUrl[1]] = { ...goals[goalUrl[1]], ...body }
+            return structuredClone(goals[goalUrl[1]])
+        }
+        if (url === `${BASE}/plan`) return { inputHash: 'a'.repeat(64), shortfall: { 10: 0 }, goals: [{ goalId: 10, name: 'Klausur Analysis', summary: { moved: 1, added: 0, dropped: 0, unchanged: 0 }, changes: [] }] }
+        const unpin = url.match(/\/sessions\/(\d+)\/unpin$/)
+        if (unpin) {
+            for (const goal of Object.values(goals)) goal.sessions = goal.sessions.map(x => (x.taskId === Number(unpin[1]) ? { ...x, pinned: false } : x))
+            return { ok: true }
+        }
         if (goalUrl && method === 'DELETE') return { ok: true, removedSessions: 0 }
         const partUrl = url.match(new RegExp(`^${BASE}/parts/(\\d+)$`))
         if (partUrl && method === 'PATCH') {
@@ -178,6 +188,29 @@ describe('subject list', () => {
 })
 
 describe('subject page', () => {
+    it('edits the subject: name, emoji and colour', async () => {
+        open('/study/1')
+        fireEvent.click(await screen.findByRole('button', { name: 'Fach bearbeiten' }))
+        const dialog = await screen.findByRole('dialog')
+        const name = within(dialog).getByLabelText('Name des Fachs')
+        expect(name).toHaveValue('Mathe')
+        fireEvent.change(name, { target: { value: 'Mathematik' } })
+        fireEvent.change(within(dialog).getByLabelText('Emoji (optional)'), { target: { value: '📐' } })
+        fireEvent.click(within(dialog).getByRole('radio', { name: 'Rot' }))
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Speichern' }))
+        await waitFor(() => expect(calls(`${BASE}/subjects/1`, 'PATCH')).toHaveLength(1))
+        expect(bodyOf(calls(`${BASE}/subjects/1`, 'PATCH')[0])).toEqual({ name: 'Mathematik', emoji: '📐', color: 'red' })
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+        expect(screen.getByRole('heading', { name: /Mathematik/ })).toBeInTheDocument()
+    })
+
+    it('a past goal is marked as such in the list', async () => {
+        goals[11].due = inDays(-1)
+        open('/study/1')
+        const row = (await screen.findByText('Abgabe Übung')).closest('li')
+        expect(within(row).getByText('Vorbei')).toBeInTheDocument()
+    })
+
     it('lists the goals by date and leads to + Ziel', async () => {
         open('/study/1')
         const links = await screen.findAllByRole('link', { name: /Abgabe Übung|Klausur Analysis/ })
@@ -262,6 +295,74 @@ describe('goal page', () => {
         fireEvent.click(screen.getAllByRole('button', { name: 'Jetzt lernen' })[0])
         await waitFor(() => expect(store.getState().toast.some(x => x.text === 'Der Termin dieses Ziels ist schon vorbei.')).toBe(true))
         expect(store.getState().session.timer.active).toBe(false)
+    })
+
+    it('unpinning a session clears its pin on the page', async () => {
+        goals[10].sessions[0].pinned = true
+        open('/study/goals/10')
+        expect(await screen.findByText('festgesetzt')).toBeInTheDocument()
+        fireEvent.click(screen.getByRole('button', { name: 'Lösen' }))
+        await waitFor(() => expect(screen.queryByText('festgesetzt')).toBeNull())
+    })
+
+    it('the goal settings save the edited fields and open the preview when the date changed', async () => {
+        open('/study/goals/10')
+        fireEvent.click(await screen.findByRole('button', { name: 'Ziel bearbeiten' }))
+        const dialog = await screen.findByRole('dialog')
+        fireEvent.change(within(dialog).getByLabelText('Name des Ziels'), { target: { value: 'Klausur Analysis 2' } })
+        fireEvent.change(within(dialog).getByLabelText('Datum'), { target: { value: inDays(14) } })
+        fireEvent.change(within(dialog).getByLabelText('Uhrzeit (optional)'), { target: { value: '09:30' } })
+        fireEvent.click(within(dialog).getByRole('radio', { name: 'Referat' }))
+        fireEvent.click(within(dialog).getByRole('radio', { name: 'In deinen Lernzeiten' }))
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Speichern' }))
+        await waitFor(() => expect(calls(`${BASE}/goals/10`, 'PATCH')).toHaveLength(1))
+        expect(bodyOf(calls(`${BASE}/goals/10`, 'PATCH')[0])).toEqual({
+            name: 'Klausur Analysis 2', kind: 'presentation', due: inDays(14), dueTime: '09:30', planMode: 'slots',
+        })
+        expect(await screen.findByRole('heading', { name: 'Neuer Plan' })).toBeInTheDocument()
+        expect(screen.getByRole('heading', { name: 'Klausur Analysis 2' })).toBeInTheDocument()
+    })
+
+    it('renaming in the goal settings opens no preview', async () => {
+        open('/study/goals/10')
+        fireEvent.click(await screen.findByRole('button', { name: 'Ziel bearbeiten' }))
+        const dialog = await screen.findByRole('dialog')
+        fireEvent.change(within(dialog).getByLabelText('Name des Ziels'), { target: { value: 'Analysis' } })
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Speichern' }))
+        await waitFor(() => expect(calls(`${BASE}/goals/10`, 'PATCH')).toHaveLength(1))
+        expect(bodyOf(calls(`${BASE}/goals/10`, 'PATCH')[0])).toEqual({ name: 'Analysis' })
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+        expect(calls(`${BASE}/plan`)).toHaveLength(0)
+    })
+
+    it('the goal settings mark the goal done', async () => {
+        open('/study/goals/10')
+        fireEvent.click(await screen.findByRole('button', { name: 'Ziel bearbeiten' }))
+        const dialog = await screen.findByRole('dialog')
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Als erledigt markieren' }))
+        await waitFor(() => expect(calls(`${BASE}/goals/10`, 'PATCH')).toHaveLength(1))
+        expect(bodyOf(calls(`${BASE}/goals/10`, 'PATCH')[0])).toEqual({ status: 'done' })
+        expect(await screen.findByText('Erledigt', { selector: 'span' })).toBeInTheDocument()
+    })
+
+    it('a goal whose date is over shows "Vorbei" with done and archive', async () => {
+        goals[10].due = inDays(-2)
+        open('/study/goals/10')
+        expect(await screen.findByText('Vorbei')).toBeInTheDocument()
+        fireEvent.click(screen.getByRole('button', { name: 'Ziel archivieren' }))
+        await waitFor(() => expect(calls(`${BASE}/goals/10`, 'PATCH')).toHaveLength(1))
+        expect(bodyOf(calls(`${BASE}/goals/10`, 'PATCH')[0])).toEqual({ status: 'archived' })
+    })
+
+    it('after a part edit a quiet line offers the preview, without opening it', async () => {
+        open('/study/goals/10')
+        await screen.findByText(/Thema 4 ·/)
+        expect(screen.queryByText('Plan anpassen?')).toBeNull()
+        fireEvent.click(screen.getByRole('button', { name: 'Mehr Zeit: Thema 4' }))
+        expect(await screen.findByText('Plan anpassen?')).toBeInTheDocument()
+        expect(screen.queryByRole('dialog')).toBeNull()
+        fireEvent.click(screen.getByRole('button', { name: 'Plan ansehen' }))
+        expect(await screen.findByRole('heading', { name: 'Neuer Plan' })).toBeInTheDocument()
     })
 
     it('deleting a goal asks what happens to the coming sessions', async () => {

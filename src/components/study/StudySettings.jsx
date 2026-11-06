@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
-import { fetchStudySettings, saveStudySettings } from '../../features/study/study';
+import { fetchStudySettings, saveStudySettings, fetchPlanPreview } from '../../features/study/study';
+import PlanPreview from './PlanPreview.jsx';
 import styles from './Study.module.css';
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
@@ -11,6 +12,8 @@ const DAILY_RANGE = [15, 720];
 let nextKey = 0;
 const withKeys = (windows) => windows.map(w => ({ ...w, key: ++nextKey }));
 const inRange = (text, [min, max]) => /^\d+$/.test(text) && Number(text) >= min && Number(text) <= max;
+// what the planner reads from the settings (the AI switch doesn't move the plan)
+const planningOf = ({ windows, sessionMinutes, dailyMaxMinutes }) => JSON.stringify({ windows, sessionMinutes, dailyMaxMinutes });
 
 function Form({ settings }) {
     const { t } = useTranslation();
@@ -22,6 +25,9 @@ function Form({ settings }) {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState(null);
     const [saved, setSaved] = useState(false);
+    const [preview, setPreview] = useState(false);
+    // the planning part of what the server has now, to see whether a save changed it
+    const [planning, setPlanning] = useState(() => planningOf(settings));
 
     const touch = (change) => { setSaved(false); setError(null); change(); };
     const add = (weekday) => touch(() => setWindows(list => [...list, { key: ++nextKey, weekday, start: '16:00', end: '18:00' }]));
@@ -36,7 +42,7 @@ function Form({ settings }) {
         setBusy(true);
         setError(null);
         try {
-            await dispatch(saveStudySettings({
+            const next = await dispatch(saveStudySettings({
                 windows: [...windows].sort((a, b) => a.weekday - b.weekday || a.start.localeCompare(b.start))
                     .map(({ weekday, start, end }) => ({ weekday, start, end })),
                 sessionMinutes: Number(sessionMinutes),
@@ -44,6 +50,13 @@ function Form({ settings }) {
                 aiAuto,
             }));
             setSaved(true);
+            // the setup changed (spec §3): with a goal being planned, the preview opens (ruling 30)
+            const now = planningOf(next);
+            if (now !== planning) {
+                setPlanning(now);
+                const plan = await dispatch(fetchPlanPreview()).catch(() => null);
+                if (plan?.goals?.length > 0) setPreview(true);
+            }
         } catch (err) {
             setError(['invalid_window', 'invalid_input'].includes(err.code) ? `studyError_${err.code}` : 'studyError_default');
         } finally {
@@ -102,6 +115,7 @@ function Form({ settings }) {
                 {saved && <span className={styles.saved} role="status">{t('studySaved')}</span>}
                 {error && <p className={styles.error} role="alert">{t(error)}</p>}
             </div>
+            {preview && <PlanPreview onDone={() => setPreview(false)} />}
         </>
     );
 }

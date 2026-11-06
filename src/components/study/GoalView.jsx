@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-    fetchGoal, fetchSubjects, deleteGoal, updatePart, addPart, deletePart, reorderParts, studyNow, unpinSession,
+    fetchGoal, fetchSubjects, deleteGoal, updateGoal, updatePart, addPart, deletePart, reorderParts, studyNow, unpinSession,
     selectGoal, selectSubjects, selectStudyStatus, formatHours, hoursNumber,
 } from '../../features/study/study';
 import { setFocusTask, startFocus } from '../../features/session/sessionAction';
@@ -13,7 +13,9 @@ import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
 import Icon from '../icons.jsx';
 import { Bone, Skeleton } from '../skeleton/Skeleton.jsx';
 import GoalProgress from './GoalProgress.jsx';
-import { countdownText, useStudyError } from './studyUi';
+import GoalSettingsSheet from './GoalSettingsSheet.jsx';
+import PlanPreview from './PlanPreview.jsx';
+import { changesPlan, countdownText, goalStateKey, isPastGoal, useStudyError } from './studyUi';
 import styles from './Study.module.css';
 
 const STEP = 15;
@@ -24,7 +26,9 @@ const NAME_MAX = 200;
 
 const sum = (parts, key) => parts.reduce((total, p) => total + (p[key] ?? 0), 0);
 
-function PartRow({ part, index, parts, goal, busy, run, onStudyNow }) {
+// run(action): a change; replan(action): a change of the plan's input (estimate, order, delete), which
+// offers the preview afterwards
+function PartRow({ part, index, parts, goal, busy, run, replan, onStudyNow }) {
     const { t, language } = useTranslation();
     const done = Boolean(part.doneAt);
     const review = part.role === 'review';
@@ -32,9 +36,9 @@ function PartRow({ part, index, parts, goal, busy, run, onStudyNow }) {
     const move = (by) => {
         const ids = parts.map(p => p.id);
         [ids[index], ids[index + by]] = [ids[index + by], ids[index]];
-        run(() => reorderParts(goal.id, ids));
+        replan(() => reorderParts(goal.id, ids));
     };
-    const step = (delta) => run(() => updatePart(part.id, { estimateMinutes: Math.min(MAX, Math.max(MIN, part.estimateMinutes + delta)) }));
+    const step = (delta) => replan(() => updatePart(part.id, { estimateMinutes: Math.min(MAX, Math.max(MIN, part.estimateMinutes + delta)) }));
     const name = { name: part.name };
 
     return (
@@ -75,16 +79,17 @@ function PartRow({ part, index, parts, goal, busy, run, onStudyNow }) {
                 </div>
             )}
 
-            <button type="button" className={styles.btn} disabled={busy || done || goal.status !== 'active'} onClick={() => onStudyNow(part)}>
+            <button type="button" className={styles.btn} disabled={busy || done || goal.status !== 'active' || isPastGoal(goal)} onClick={() => onStudyNow(part)}>
                 <Icon name="play" size={14} /> {t('studyStudyNow')}
             </button>
-            <ConfirmDeleteButton label={fill(t('studyDeletePart'), name)} onConfirm={() => run(() => deletePart(part.id))} />
+            <ConfirmDeleteButton label={fill(t('studyDeletePart'), name)} onConfirm={() => replan(() => deletePart(part.id))} />
         </li>
     );
 }
 
-// One goal: its parts (done, time, order, study now), the planned sessions, delete. "Neu planen"
-// sets ?replan=1, where the plan preview (Task 13) opens.
+// One goal: its parts (done, time, order, study now), the planned sessions, its settings, delete.
+// "Neu planen" sets ?replan=1, where the plan preview opens. A saved change of date, time or mode opens
+// the preview at once; a part edit only offers it in a quiet line (ruling 30: not on every stepper click).
 export default function GoalView({ goalId }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
@@ -97,6 +102,9 @@ export default function GoalView({ goalId }) {
     const [busy, setBusy] = useState(false);
     const [asking, setAsking] = useState(false);
     const [partName, setPartName] = useState('');
+    const [editing, setEditing] = useState(false);
+    const [preview, setPreview] = useState(false);
+    const [prompt, setPrompt] = useState(false);
 
     useEffect(() => {
         dispatch(fetchGoal(goalId)).catch((err) => {
@@ -109,15 +117,20 @@ export default function GoalView({ goalId }) {
 
     const subject = goal && subjects.find(s => s.id === goal.subjectId);
     const behind = (status?.goals ?? []).some(g => g.goalId === goalId && g.behindMinutes > 0);
+    const stateKey = goal ? goalStateKey(goal) : null;
     const parts = useMemo(() => goal?.parts ?? [], [goal]);
     const sessions = useMemo(() => [...(goal?.sessions ?? [])]
         .sort((a, b) => a.due.localeCompare(b.due) || (a.dueTime ?? '').localeCompare(b.dueTime ?? '')), [goal]);
 
-    // runs a change and shows what went wrong as a toast
-    const run = async (action) => {
+    // the planner plans this goal: active and its day not over
+    const planned = goal?.status === 'active' && !isPastGoal(goal);
+
+    // runs a change and shows what went wrong as a toast; { replan: true } offers the preview after it
+    const run = async (action, { replan = false } = {}) => {
         setBusy(true);
         try {
             await dispatch(action());
+            if (replan && planned) setPrompt(true);
         } catch (err) {
             dispatch(showToast(errorText(err), 'error'));
         } finally {
@@ -142,7 +155,7 @@ export default function GoalView({ goalId }) {
         e.preventDefault();
         const trimmed = partName.trim();
         if (!trimmed) return;
-        await run(() => addPart(goalId, { name: trimmed, estimateMinutes: NEW_PART_MINUTES, estimateSource: 'manual' }));
+        await run(() => addPart(goalId, { name: trimmed, estimateMinutes: NEW_PART_MINUTES, estimateSource: 'manual' }), { replan: true });
         setPartName('');
     };
 
@@ -154,6 +167,19 @@ export default function GoalView({ goalId }) {
         } catch (err) {
             setBusy(false);
             dispatch(showToast(errorText(err), 'error'));
+        }
+    };
+
+    const setStatus = (status) => run(() => updateGoal(goalId, { status }));
+
+    // the settings sheet put away: a new date, time or mode of a planned goal opens the preview
+    const settingsClosed = (change) => {
+        setEditing(false);
+        if (!changesPlan(change)) return;
+        const next = { ...goal, ...change };
+        if (next.status === 'active' && !isPastGoal(next)) {
+            setPrompt(false);
+            setPreview(true);
         }
     };
 
@@ -186,10 +212,14 @@ export default function GoalView({ goalId }) {
                     <p className={styles.subtitle}>
                         {[t(`studyKind_${goal.kind}`), `${formatDate(goal.due)}${goal.dueTime ? ` ${goal.dueTime}` : ''}`, countdownText(goal.due, t)].join(' · ')}
                         {behind && <> <span className={styles.badge}>{t('studyBehind')}</span></>}
+                        {stateKey && <> <span className={styles.badgeQuiet}>{t(stateKey)}</span></>}
                     </p>
                 </div>
                 <div className={styles.actions}>
                     <button type="button" className={styles.btn} onClick={() => navigate({ search: '?replan=1' })}>{t('studyReplan')}</button>
+                    <button type="button" className={styles.btn} onClick={() => setEditing(true)}>
+                        <Icon name="edit" size={14} /> {t('studyEditGoal')}
+                    </button>
                     <button type="button" className={`${styles.btn} ${styles.danger}`} onClick={() => setAsking(v => !v)} aria-expanded={asking}>
                         <Icon name="trash" size={14} /> {t('studyDeleteGoal')}
                     </button>
@@ -207,13 +237,31 @@ export default function GoalView({ goalId }) {
                 </div>
             )}
 
+            {goal.status === 'active' && isPastGoal(goal) && (
+                <div className={styles.ask} role="group" aria-label={t('studyGoalPast')}>
+                    <p>{t('studyGoalPastHint')}</p>
+                    <div className={styles.actions}>
+                        <button type="button" className={styles.btn} disabled={busy} onClick={() => setStatus('done')}>{t('studyMarkDone')}</button>
+                        <button type="button" className={styles.btn} disabled={busy} onClick={() => setStatus('archived')}>{t('studyArchiveGoal')}</button>
+                    </div>
+                </div>
+            )}
+
+            {prompt && planned && (
+                <div className={styles.replanCard} role="status">
+                    <p className={styles.replanText}>{t('studyAdjustPlan')}</p>
+                    <button type="button" className={styles.btn} onClick={() => setPreview(true)}>{t('studySeePlan')}</button>
+                </div>
+            )}
+
             <GoalProgress credit={sum(parts, 'credit')} estimate={sum(parts, 'estimateMinutes')} />
 
             <h2 className={styles.sectionTitle}>{t('studyParts')}</h2>
             {parts.length === 0 ? <p className={styles.empty}>{t('studyPartsEmpty')}</p> : (
                 <ul className={styles.list}>
                     {parts.map((part, index) => (
-                        <PartRow key={part.id} part={part} index={index} parts={parts} goal={goal} busy={busy} run={run} onStudyNow={studyNowOn} />
+                        <PartRow key={part.id} part={part} index={index} parts={parts} goal={goal} busy={busy} run={run}
+                            replan={(action) => run(action, { replan: true })} onStudyNow={studyNowOn} />
                     ))}
                 </ul>
             )}
@@ -242,6 +290,9 @@ export default function GoalView({ goalId }) {
                     ))}
                 </ul>
             )}
+
+            {editing && <GoalSettingsSheet goal={goal} onClose={settingsClosed} />}
+            {preview && <PlanPreview onDone={() => { setPreview(false); setPrompt(false); }} />}
         </div>
     );
 }

@@ -20,7 +20,7 @@ const inDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return
 const calls = (path, method = 'GET') => apiFetch.mock.calls.filter(([url, options]) => url === path && (options?.method ?? 'GET') === method)
 const bodyOf = (call) => JSON.parse(call[1].body)
 
-let settings, subjects, replanAnswers, previews
+let settings, subjects, replanAnswers, previews, goalSessions
 const part = (id, name, extra = {}) => ({ id, name, position: id, estimateMinutes: 120, estimateSource: 'default', role: 'part', doneAt: null, credit: 0, remaining: 120, ...extra })
 const newGoal = () => ({
     id: 20, subjectId: 1, kind: 'exam', name: 'Klausur Analysis', due: inDays(10), dueTime: null, planMode: 'days', status: 'active',
@@ -53,6 +53,7 @@ beforeEach(() => {
     ]
     previews = [previewOf()]
     replanAnswers = []
+    goalSessions = []
     apiFetch.mockImplementation(async (url, options = {}) => {
         const method = options.method ?? 'GET'
         const body = options.body ? JSON.parse(options.body) : undefined
@@ -71,7 +72,7 @@ beforeEach(() => {
         }
         if (url === `${BASE}/goals` && method === 'POST') return { ...newGoal(), planMode: body.planMode }
         if (url === `${BASE}/goals?subject=1`) return []
-        if (url === `${BASE}/goals/20` && method === 'GET') return newGoal()
+        if (url === `${BASE}/goals/20` && method === 'GET') return { ...newGoal(), sessions: goalSessions }
         if (url === `${BASE}/parts/202` && method === 'DELETE') return { ok: true, removedSessions: 0 }
         if (url === `${BASE}/plan`) return structuredClone(previews[0])
         if (url === `${BASE}/replan`) {
@@ -148,13 +149,13 @@ describe('create sheet', () => {
         await defaults(dialog, 2)
         const estimate = bodyOf(calls(`${BASE}/estimate`, 'POST')[0])
         expect(estimate).toMatchObject({ subjectId: 1, subjectName: 'Mathe', kind: 'exam', parts: ['Grenzwerte', 'Ableitungen'] })
-        expect(estimate.ai).toBeUndefined()
+        expect(estimate.ai).toBe(false)
         // a stepper change is manual
         fireEvent.click(within(dialog).getByRole('button', { name: 'Mehr Zeit: Grenzwerte' }))
         fireEvent.click(within(dialog).getByRole('button', { name: 'Plan ansehen' }))
         await screen.findByRole('button', { name: 'Übernehmen' })
         const body = bodyOf(calls(`${BASE}/goals`, 'POST')[0])
-        expect(body).toMatchObject({ subjectId: 1, kind: 'exam', name: 'Klausur Analysis', due: inDays(10), planMode: 'days' })
+        expect(body).toMatchObject({ subjectId: 1, kind: 'exam', name: 'Klausur Analysis', due: inDays(10), planMode: 'slots' })
         expect(body.parts).toEqual([
             { name: 'Grenzwerte', estimateMinutes: 135, estimateSource: 'manual' },
             { name: 'Ableitungen', estimateMinutes: 120, estimateSource: 'default' },
@@ -177,6 +178,51 @@ describe('create sheet', () => {
             { name: 'Grenzwerte', estimateMinutes: 90, estimateSource: 'ai' },
             { name: 'Ableitungen', estimateMinutes: 135, estimateSource: 'manual' },
         ])
+    })
+
+    it('plans in the study times by default when there is one, else on days', async () => {
+        open('/study/1?new=goal')
+        let dialog = await screen.findByRole('dialog')
+        await waitFor(() => expect(within(dialog).getByRole('radio', { name: 'In deinen Lernzeiten' })).toHaveAttribute('aria-checked', 'true'))
+        expect(within(dialog).getByRole('radio', { name: 'Nur an Tagen' })).toHaveAttribute('aria-checked', 'false')
+        cleanup()
+        settings.windows = []
+        open('/study/1?new=goal')
+        dialog = await screen.findByRole('dialog')
+        await waitFor(() => expect(calls(`${BASE}/settings`).length).toBeGreaterThan(1))
+        await waitFor(() => expect(within(dialog).getByRole('radio', { name: 'Nur an Tagen' })).toHaveAttribute('aria-checked', 'true'))
+        expect(within(dialog).getByRole('radio', { name: 'In deinen Lernzeiten' })).toHaveAttribute('aria-checked', 'false')
+    })
+
+    it('with AI automatic, typing estimates without AI; leaving the list asks the AI once per name', async () => {
+        settings.aiAuto = true
+        const dialog = await toStepTwo()
+        await defaults(dialog, 2)
+        const aiCalls = () => calls(`${BASE}/estimate`, 'POST').map(bodyOf).filter(b => b.ai === true)
+        expect(calls(`${BASE}/estimate`, 'POST').map(bodyOf).every(b => b.ai === false)).toBe(true)
+        const area = within(dialog).getByLabelText('Themen, eins pro Zeile')
+        fireEvent.blur(area)
+        await waitFor(() => expect(within(dialog).getAllByText('KI-Schätzung')).toHaveLength(2))
+        expect(aiCalls()).toHaveLength(1)
+        expect(aiCalls()[0].parts).toEqual(['Grenzwerte', 'Ableitungen'])
+        fireEvent.blur(area)
+        // a new line: estimated without AI, the AI answers of the others stay
+        fireEvent.change(area, { target: { value: 'Grenzwerte\nAbleitungen\nIntegrale' } })
+        await defaults(dialog, 1)
+        expect(within(dialog).getAllByText('KI-Schätzung')).toHaveLength(2)
+        expect(aiCalls()).toHaveLength(1)
+        fireEvent.blur(area)
+        await waitFor(() => expect(within(dialog).getAllByText('KI-Schätzung')).toHaveLength(3))
+        expect(aiCalls()).toHaveLength(2)
+        expect(aiCalls()[1].parts).toEqual(['Integrale'])
+    })
+
+    it('without AI automatic, leaving the list asks no AI', async () => {
+        const dialog = await toStepTwo()
+        await defaults(dialog, 2)
+        fireEvent.blur(within(dialog).getByLabelText('Themen, eins pro Zeile'))
+        await new Promise(r => setTimeout(r, 50))
+        expect(calls(`${BASE}/estimate`, 'POST').map(bodyOf).some(b => b.ai === true)).toBe(false)
     })
 
     it('has no AI button without aiAvailable', async () => {
@@ -326,6 +372,26 @@ describe('plan preview', () => {
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
         expect(calls(`${BASE}/replan`, 'POST')).toHaveLength(0)
         expect(screen.getByTestId('where').textContent).toBe('/study/goals/20')
+    })
+
+    it('after applying on a goal page its sessions list shows the new sessions', async () => {
+        open('/study/goals/20?replan=1')
+        expect(await screen.findByText('Noch keine Lernsitzungen geplant.')).toBeTruthy()
+        const dialog = await screen.findByRole('dialog')
+        goalSessions = [{ taskId: 950, partId: 200, due: inDays(2), dueTime: null, minutes: 45, done: false, focusMs: 0, pinned: false }]
+        fireEvent.click(await within(dialog).findByRole('button', { name: 'Übernehmen' }))
+        await waitFor(() => expect(screen.queryByText('Noch keine Lernsitzungen geplant.')).toBeNull())
+        expect(screen.getByText('45 Min.')).toBeTruthy()
+    })
+
+    it('a shortfall with nothing to change shows only the banner and close', async () => {
+        previews = [{ inputHash: 'c'.repeat(64), shortfall: { 20: 120 }, goals: [{ goalId: 20, name: 'Klausur Analysis', summary: { moved: 0, added: 0, dropped: 0, unchanged: 0 }, changes: [] }] }]
+        open('/study/goals/20?replan=1')
+        const dialog = await screen.findByRole('dialog')
+        expect(await within(dialog).findByText(/Es fehlen 2 h/)).toBeTruthy()
+        expect(within(dialog).queryByText('Alles passt – nichts zu ändern.')).toBeNull()
+        expect(within(dialog).queryByRole('button', { name: 'Übernehmen' })).toBeNull()
+        expect(within(dialog).getAllByRole('button', { name: 'Schließen' }).length).toBeGreaterThan(0)
     })
 
     it('an empty plan says everything fits and only offers to close', async () => {

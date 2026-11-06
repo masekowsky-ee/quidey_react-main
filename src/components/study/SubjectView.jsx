@@ -9,7 +9,8 @@ import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
 import Icon from '../icons.jsx';
 import { Bone, Skeleton } from '../skeleton/Skeleton.jsx';
 import GoalProgress from './GoalProgress.jsx';
-import { countdownText, useStudyError } from './studyUi';
+import SubjectEditSheet from './SubjectEditSheet.jsx';
+import { countdownText, goalStateKey, useStudyError } from './studyUi';
 import styles from './Study.module.css';
 
 const sum = (parts, key) => parts.reduce((total, p) => total + (p[key] ?? 0), 0);
@@ -23,6 +24,7 @@ export default function SubjectView({ subjectId }) {
     const subjects = useSelector(selectSubjects);
     const allGoals = useSelector(state => state.study.goals);
     const [loaded, setLoaded] = useState(false);
+    const [editing, setEditing] = useState(false);
     const subject = subjects.find(s => s.id === subjectId);
 
     useEffect(() => {
@@ -60,9 +62,15 @@ export default function SubjectView({ subjectId }) {
                     <button type="button" className={styles.btnPrimary} onClick={() => navigate({ search: '?new=goal' })}>
                         <Icon name="plus" size={16} /> {t('studyAddGoal')}
                     </button>
+                    {subject && (
+                        <button type="button" className={styles.btn} onClick={() => setEditing(true)}>
+                            <Icon name="edit" size={14} /> {t('studyEditSubject')}
+                        </button>
+                    )}
                     {subject && <ConfirmDeleteButton onConfirm={remove} label={fill(t('studyDeleteSubject'), { name: subject.name })} />}
                 </div>
             </header>
+            {editing && subject && <SubjectEditSheet subject={subject} onClose={() => setEditing(false)} />}
 
             <h2 className={styles.sectionTitle}>{t('studyGoals')}</h2>
             {!loaded && goals.length === 0 ? (
@@ -71,18 +79,22 @@ export default function SubjectView({ subjectId }) {
                 <p className={styles.empty}>{t('studyGoalsEmpty')}</p>
             ) : (
                 <ul className={styles.list}>
-                    {goals.map(goal => (
-                        <li key={goal.id} className={styles.item}>
-                            <Link to={`/study/goals/${goal.id}`} className={styles.itemLink}>
-                                <span className={styles.itemName}>{goal.name}</span>
-                                <span className={styles.meta}>
-                                    <span>{t(`studyKind_${goal.kind}`)}</span>
-                                    <span>{countdownText(goal.due, t)}</span>
-                                </span>
-                                <GoalProgress credit={sum(goal.parts, 'credit')} estimate={sum(goal.parts, 'estimateMinutes')} />
-                            </Link>
-                        </li>
-                    ))}
+                    {goals.map(goal => {
+                        const state = goalStateKey(goal);
+                        return (
+                            <li key={goal.id} className={styles.item}>
+                                <Link to={`/study/goals/${goal.id}`} className={styles.itemLink}>
+                                    <span className={styles.itemName}>{goal.name}</span>
+                                    <span className={styles.meta}>
+                                        <span>{t(`studyKind_${goal.kind}`)}</span>
+                                        <span>{countdownText(goal.due, t)}</span>
+                                        {state && <span className={styles.badgeQuiet}>{t(state)}</span>}
+                                    </span>
+                                    <GoalProgress credit={sum(goal.parts, 'credit')} estimate={sum(goal.parts, 'estimateMinutes')} />
+                                </Link>
+                            </li>
+                        );
+                    })}
                 </ul>
             )}
         </div>

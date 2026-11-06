@@ -64,7 +64,8 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
 
     const [step, setStep] = useState(1);
     const [fields, setFields] = useState(() => ({
-        kind: 'exam', name: '', subject: subjectId == null ? '' : String(subjectId), newSubject: '', due: '', dueTime: '', planMode: 'days',
+        // planMode null: not picked yet, see `planMode` below
+        kind: 'exam', name: '', subject: subjectId == null ? '' : String(subjectId), newSubject: '', due: '', dueTime: '', planMode: null,
     }));
     const set = (changes) => { setFields(prev => ({ ...prev, ...changes })); setError(null); };
     const [error, setError] = useState(null);
@@ -78,6 +79,9 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
     const [aiFailed, setAiFailed] = useState(false);
     const [reviewOn, setReviewOn] = useState(true);
     const requestId = useRef(0);
+    // AI answers per part name for the sheet's lifetime (null: asked, no AI answer): a name is sent to the AI once
+    const aiCache = useRef({});
+    const [aiRunning, setAiRunning] = useState(false);
 
     useEffect(() => {
         dispatch(fetchSubjects()).catch(() => {});
@@ -91,23 +95,35 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
     const inline = fields.subject === NEW_SUBJECT || (subjects.length === 0 && fields.subject === '');
     const subjectName = inline ? fields.newSubject.trim() : subject?.name ?? '';
     const aiAvailable = Boolean(settings?.aiAvailable);
+    const autoAi = aiAvailable && Boolean(settings?.aiAuto);
+    // in the study times when there are any, else on days (spec: slots by default), until one is picked
+    const planMode = fields.planMode ?? (settings?.windows?.length > 0 ? 'slots' : 'days');
     const today = toInputDate(new Date());
+    const subjectFields = () => ({
+        ...(subject && !inline ? { subjectId: subject.id } : {}),
+        subjectName: subjectName.slice(0, SUBJECT_MAX), kind: fields.kind, due: fields.due,
+    });
+    // an AI answer the sheet already has beats a plain default
+    const remember = (name, e) => (e.source === 'default' && aiCache.current[name]) || { minutes: e.minutes, source: e.source };
+    const keepAi = (names, estimates) => names.forEach((name, i) => {
+        const e = estimates?.[i];
+        aiCache.current[name] = e?.source === 'ai' ? { minutes: e.minutes, source: 'ai' } : aiCache.current[name] ?? null;
+    });
 
     const estimate = async (ai) => {
         if (names.length === 0 || !subjectName) return;
         const id = ++requestId.current;
         setEstimating(true);
         try {
-            const result = await dispatch(estimateParts({
-                ...(subject && !inline ? { subjectId: subject.id } : {}),
-                subjectName: subjectName.slice(0, SUBJECT_MAX), kind: fields.kind, due: fields.due, parts: names, ...(ai ? { ai: true } : {}),
-            }));
+            // ai: false says so even with "automatisch" on: the runs while typing never use the AI (ruling 32)
+            const result = await dispatch(estimateParts({ ...subjectFields(), parts: names, ai }));
+            if (ai) keepAi(names, result.estimates);
             if (id !== requestId.current) return;
             setKnown(prev => {
                 const next = { ...prev };
                 names.forEach((name, i) => {
                     const e = result.estimates?.[i];
-                    if (e && next[name]?.source !== 'manual') next[name] = { minutes: e.minutes, source: e.source };
+                    if (e && next[name]?.source !== 'manual') next[name] = remember(name, e);
                 });
                 return next;
             });
@@ -117,11 +133,38 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
             // an estimate that failed: the defaults, so the goal can still be made
             setKnown(prev => {
                 const next = { ...prev };
-                for (const name of names) if (!next[name]) next[name] = { minutes: DEFAULT_MINUTES[fields.kind], source: 'default' };
+                for (const name of names) if (!next[name]) next[name] = remember(name, { minutes: DEFAULT_MINUTES[fields.kind], source: 'default' });
                 return next;
             });
         } finally {
             if (id === requestId.current) setEstimating(false);
+        }
+    };
+
+    // "automatisch" on: leaving the list asks the AI once for the names nothing else could estimate
+    // (source 'default', or not estimated yet) and that weren't sent before
+    const estimateWithAi = async () => {
+        if (!autoAi || !subjectName) return;
+        const open = names.filter(name => !(name in aiCache.current) && (known[name] == null || known[name].source === 'default'));
+        if (open.length === 0) return;
+        for (const name of open) aiCache.current[name] = null;
+        setAiRunning(true);
+        try {
+            const result = await dispatch(estimateParts({ ...subjectFields(), parts: open, ai: true }));
+            keepAi(open, result.estimates);
+            setKnown(prev => {
+                const next = { ...prev };
+                open.forEach((name, i) => {
+                    const e = result.estimates?.[i];
+                    if (e && next[name]?.source !== 'manual') next[name] = remember(name, e);
+                });
+                return next;
+            });
+            setAiFailed(Boolean(result.aiFailed));
+        } catch {
+            // the plain estimates stay
+        } finally {
+            setAiRunning(false);
         }
     };
 
@@ -135,7 +178,7 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
     }, [step, namesKey]);
 
     const rows = names.map(name => ({ name, ...known[name] }));
-    const ready = names.length > 0 && !estimating && rows.every(r => r.minutes != null);
+    const ready = names.length > 0 && !estimating && !aiRunning && rows.every(r => r.minutes != null);
     const reviewMin = exam && reviewOn ? reviewMinutes(rows.map(r => r.minutes ?? DEFAULT_MINUTES.exam)) : 0;
 
     const change = (name, delta) => setKnown(prev => ({
@@ -159,7 +202,7 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
         setError(null);
         try {
             const latest = settings ?? await dispatch(fetchStudySettings());
-            if (fields.planMode === 'slots' && !(latest?.windows?.length > 0)) {
+            if (planMode === 'slots' && !(latest?.windows?.length > 0)) {
                 setNoWindows(true);
                 setStep(3);
                 return;
@@ -178,7 +221,7 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
             }
             const goal = await dispatch(createGoal({
                 subjectId: id, kind: fields.kind, name: fields.name.trim(), due: fields.due,
-                ...(fields.dueTime ? { dueTime: fields.dueTime } : {}), planMode: fields.planMode,
+                ...(fields.dueTime ? { dueTime: fields.dueTime } : {}), planMode,
                 parts: rows.map(r => ({ name: r.name, estimateMinutes: r.minutes, estimateSource: r.source })),
             }));
             setCreated(goal);
@@ -252,8 +295,8 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
                         <span className={own.label} id="goalModeLabel">{t('studyPlanMode')}</span>
                         <div className={ui.segmented} role="radiogroup" aria-labelledby="goalModeLabel">
                             {['days', 'slots'].map(mode => (
-                                <button key={mode} type="button" role="radio" aria-checked={fields.planMode === mode}
-                                    className={fields.planMode === mode ? ui.segmentActive : undefined} onClick={() => set({ planMode: mode })}>
+                                <button key={mode} type="button" role="radio" aria-checked={planMode === mode}
+                                    className={planMode === mode ? ui.segmentActive : undefined} onClick={() => set({ planMode: mode })}>
                                     {t(`studyPlanMode_${mode}`)}
                                 </button>
                             ))}
@@ -271,12 +314,12 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
                     <label className={own.field}>
                         <span className={own.label}>{t('studyPartsLabel')}</span>
                         <textarea className={own.parts} value={text} onChange={(e) => { setText(e.target.value); setError(null); }}
-                            placeholder={t('studyPartsPlaceholder')} />
+                            onBlur={estimateWithAi} placeholder={t('studyPartsPlaceholder')} />
                     </label>
                     <p className={own.hint}>{t('studyPartsHint')}</p>
                     {aiAvailable && (
                         <div>
-                            <button type="button" className={styles.btn} disabled={estimating || names.length === 0} onClick={() => estimate(true)}>
+                            <button type="button" className={styles.btn} disabled={estimating || aiRunning || names.length === 0} onClick={() => estimate(true)}>
                                 {t('studyAiEstimate')}
                             </button>
                         </div>
