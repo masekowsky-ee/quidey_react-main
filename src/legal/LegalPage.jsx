@@ -371,11 +371,11 @@ function Privacy() {
                 die der Quidey-Server über eine Programmierschnittstelle aufruft (nicht dein Gerät). Übermittelt werden
                 ausschließlich: die Namen der Themen bzw. Schritte, der Name des Fachs, die Art des Ziels (z. B.
                 Klausur) und die Zahl der Tage bis zum Termin. Nicht übermittelt werden dein Name, Benutzername,
-                deine E-Mail-Adresse, Kontonummer, Notizen, Aufgaben oder andere Daten. Bitte schreib deshalb keine
+                deine E-Mail-Adresse, Nutzer-ID, Notizen, Aufgaben oder andere Daten. Bitte schreib deshalb keine
                 Namen oder Angaben über Personen in Fach- und Themennamen, wenn du KI-Schätzungen nutzt. Anthropic
                 liefert eine Zahl in Minuten je Thema zurück; sie wird bei dem Thema gespeichert und als „KI-Schätzung“
                 gekennzeichnet. Dauert die Antwort länger als 8 Sekunden oder gibt es einen Fehler, schätzt Quidey
-                ohne KI weiter. Pro Konto sind höchstens 20 Anfragen am Tag möglich. Rechtsgrundlage ist deine
+                ohne KI weiter. Pro Konto sind höchstens 20 Anfragen innerhalb von 24 Stunden möglich. Rechtsgrundlage ist deine
                 Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO, die du durch das Tippen auf „Schätzen lassen“ bzw. das
                 Einschalten des Schalters erteilst; du kannst sie jederzeit widerrufen, indem du den Schalter
                 ausschaltest und nicht mehr tippst (die Rechtmäßigkeit der bisherigen Verarbeitung bleibt davon
