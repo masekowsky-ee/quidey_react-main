@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { render, cleanup, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
@@ -81,6 +81,16 @@ describe('study slice', () => {
         apiFetch.mockResolvedValueOnce({ ok: true, removedSessions: 0 })
         await store.dispatch(deleteSubject(2))
         expect(selectSubjects(store.getState())).toEqual([])
+    })
+
+    it('renaming a subject keeps its next goal', async () => {
+        const store = makeStore()
+        const nextGoal = { id: 5, name: 'Klausur', kind: 'exam', due: '2026-12-01', progress: 0.5, behindMinutes: 0 }
+        apiFetch.mockResolvedValueOnce([{ id: 2, name: 'Bio', archived: false, nextGoal }])
+        await store.dispatch(fetchSubjects())
+        apiFetch.mockResolvedValueOnce({ id: 2, name: 'Biologie', archived: false, nextGoal: null })
+        await store.dispatch(saveSubject(2, { name: 'Biologie' }))
+        expect(selectSubjects(store.getState())[0]).toMatchObject({ name: 'Biologie', nextGoal })
     })
 
     it('deleting a goal with its sessions reloads the tasks', async () => {
@@ -206,6 +216,21 @@ describe('Settings → Lernen', () => {
         apiFetch.mockImplementationOnce(async () => { throw Object.assign(new Error('Invalid study window'), { status: 400, code: 'invalid_window' }) })
         fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
         expect(await screen.findByRole('alert')).toHaveTextContent(/Lernzeit/)
+    })
+
+    it('the push list hides the study kind from non-testers', async () => {
+        renderSettings({ hash: '#app', tester: false })
+        expect(await screen.findByText('Aufgaben und Termine')).toBeInTheDocument()
+        expect(screen.queryByText('Wenn ein Ziel hinter seinem Plan liegt, höchstens einmal am Tag.')).not.toBeInTheDocument()
+    })
+
+    it('a second visit shows the fresh settings, not the cached ones', async () => {
+        const store = renderSettings()
+        await screen.findByRole('group', { name: 'Mo' })
+        settings = { ...settings, sessionMinutes: 90 }
+        cleanup()
+        render(<Provider store={store}><MemoryRouter initialEntries={['/settings#plan']}><Settings /></MemoryRouter></Provider>)
+        expect(await screen.findByDisplayValue('90')).toBeInTheDocument()
     })
 
     it('the push list in Settings has the study kind', async () => {

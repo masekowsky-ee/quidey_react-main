@@ -111,6 +111,9 @@ function PushSettings() {
     const [tested, setTested] = useState(false);
     useEffect(() => { refreshPush(); }, []);
     const on = push.status === 'on';
+    // the study kind belongs to the testers' feature
+    const isTester = useIsTester();
+    const kinds = PUSH_KINDS.filter(kind => kind !== 'study' || isTester);
 
     return (
         <>
@@ -125,7 +128,7 @@ function PushSettings() {
                         }} />
                 )}
             </SettingRow>
-            {on && push.kinds && PUSH_KINDS.map(kind => (
+            {on && push.kinds && kinds.map(kind => (
                 <SettingRow key={kind} title={t(`pushKind_${kind}`)} hint={t(`pushKindHint_${kind}`)}>
                     <Choice label={t(`pushKind_${kind}`)} value={push.kinds[kind] !== false} disabled={push.busy} options={ON_OFF}
                         onChange={(next) => { if (next !== (push.kinds[kind] !== false)) setPushKind(kind, next); }} />

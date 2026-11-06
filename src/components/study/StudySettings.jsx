@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
-import { fetchStudySettings, saveStudySettings, selectStudySettings } from '../../features/study/study';
+import { fetchStudySettings, saveStudySettings } from '../../features/study/study';
 import styles from './Study.module.css';
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
@@ -135,12 +135,13 @@ function NumberField({ label, value, range, onChange }) {
 export default function StudySettings() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const settings = useSelector(selectStudySettings);
+    // the form starts from what the server says now, never from an older visit's cache
+    const [fresh, setFresh] = useState(null);
     const [failed, setFailed] = useState(false);
     useEffect(() => {
-        dispatch(fetchStudySettings()).catch(() => setFailed(true));
+        dispatch(fetchStudySettings()).then(setFresh, () => setFailed(true));
     }, [dispatch]);
 
-    if (!settings) return failed ? <p className={styles.error} role="alert">{t('studyLoadFailed')}</p> : null;
-    return <Form settings={settings} />;
+    if (!fresh) return failed ? <p className={styles.error} role="alert">{t('studyLoadFailed')}</p> : null;
+    return <Form settings={fresh} />;
 }

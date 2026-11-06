@@ -26,7 +26,15 @@ export default function studyReducer(state = initialState, action) {
             const known = state.subjects.some(s => s.id === saved.id);
             return {
                 ...state,
-                subjects: known ? state.subjects.map(s => (s.id === saved.id ? { ...s, ...saved } : s)) : [...state.subjects, saved],
+                subjects: known
+                    ? state.subjects.map(s => {
+                        // the answer to a change has no next goal (null): keep the one the list has
+                        if (s.id !== saved.id) return s;
+                        const fields = { ...saved };
+                        delete fields.nextGoal;
+                        return { ...s, ...fields };
+                    })
+                    : [...state.subjects, saved],
             };
         }
         case SUBJECT_REMOVED: {
