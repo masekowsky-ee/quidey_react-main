@@ -239,6 +239,13 @@
     white-space: nowrap;
 }
 
+.chipStudy{
+    display: inline-flex;
+    vertical-align: -0.1em;
+    margin-right: 0.25rem;
+    color: var(--task-color, var(--text-muted));
+}
+
 .chipShared{
     display: inline-flex;
     vertical-align: -0.1em;

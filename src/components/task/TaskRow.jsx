@@ -1,7 +1,7 @@
 import { forwardRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from './TaskRow.module.css';
 import Icon from '../icons';
 import TaskMeta from './TaskMeta.jsx';
@@ -15,6 +15,8 @@ import { prioLevel } from '../../features/calendar/calendar';
 import { taskColorAttr } from '../../features/tasks/taskColors';
 import { createdText } from '../../features/tasks/created';
 import { Bone } from '../skeleton/Skeleton.jsx';
+import SessionMarker from '../study/SessionMarker.jsx';
+import { unpinSession } from '../../features/study/study';
 
 // While my tasks are on their way: a row's shape, its name and line of details grey
 const SKELETON_NAME_WIDTHS = ['62%', '46%', '71%', '38%', '55%'];
@@ -74,6 +76,7 @@ const TaskRow = forwardRef(function TaskRow({
 }, ref) {
     const { t, language } = useTranslation();
     const myUsername = useSelector(state => state.auth.user?.username);
+    const dispatch = useDispatch();
     const [editing, setEditing] = useState(null); // 'name' | 'due' | null
     const shared = Boolean(task.shared);
     const overdue = !task.done && isOverdue(task);
@@ -126,6 +129,7 @@ const TaskRow = forwardRef(function TaskRow({
                 label={`${t(task.done ? 'reopen' : 'markDone')}: ${task.name}`} />
             <div className={styles.body}>
                 {name}
+                {task.study && <SessionMarker study={task.study} pinned={task.plan_pinned} />}
                 <div className={styles.details}>
                     <TaskMeta task={task} showTime={false} />
                     {task.description && <span className={styles.description} title={task.description}>{task.description}</span>}
@@ -141,6 +145,11 @@ const TaskRow = forwardRef(function TaskRow({
                     <button type="button" className={styles.action} onClick={onFocus}
                         title={t('makeActive')} aria-label={`${t('makeActive')}: ${task.name}`}>
                         <Icon name="focus" className={styles.actionIcon} />
+                    </button>}
+                {task.plan_pinned && !task.done &&
+                    <button type="button" className={styles.action} onClick={() => dispatch(unpinSession(task.id)).catch(() => {})}
+                        title={t('studyUnpinSession')} aria-label={`${t('studyUnpinSession')}: ${task.name}`}>
+                        <Icon name="book" className={styles.actionIcon} />
                     </button>}
                 {shared
                     ? <Link to={`/together/${task.shared.sessionId}`} className={styles.sessionLink}>{t('openSession')}</Link>

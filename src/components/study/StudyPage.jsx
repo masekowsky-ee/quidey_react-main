@@ -1,3 +1,6 @@
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { fetchStudyStatus } from '../../features/study/study';
 import { matchPath, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import SubjectList from './SubjectList.jsx';
 import SubjectView from './SubjectView.jsx';
@@ -9,6 +12,9 @@ import PlanPreview from './PlanPreview.jsx';
 // TesterOnly by App. The sheets hang on query parameters: ?new=goal (create sheet, on the subject
 // list and a subject's page) and ?replan=1 (plan preview, on every study page). Closing removes them.
 export default function StudyPage() {
+    const dispatch = useDispatch();
+    // the status feeds the goal pages' behind badge (and frees what is ahead), once per visit
+    useEffect(() => { dispatch(fetchStudyStatus()).catch(() => {}); }, [dispatch]);
     const { pathname } = useLocation();
     const navigate = useNavigate();
     const [params] = useSearchParams();

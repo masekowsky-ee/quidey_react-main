@@ -43,6 +43,7 @@ export default function TaskChip({ task, today, onOpen, startDrag, dragging, sho
                 {time && <span className={styles.chipTime}>{time}</span>}
                 {/* before the name: a long name is cut off at the end */}
                 {task.repeat && <span className={styles.chipRepeat} role="img" aria-label={t(`repeat_${task.repeat}`)}>↻</span>}
+                {task.study && <span className={styles.chipStudy} data-study-mark role="img" aria-label={task.study.subjectName}><Icon name="book" size={12} /></span>}
                 {task.name}
                 {shared && <span className={styles.chipShared} title={t('sharedWithLabel')} role="img" aria-label={t('sharedWithLabel')}><Icon name="team" size={12} /></span>}
             </span>

@@ -424,3 +424,33 @@
 .danger{
     color: var(--danger);
 }
+
+/* the line under a planned session's name (task rows) */
+.marker{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 0;
+    font-size: 0.8125rem;
+    color: var(--task-color, var(--text-muted));
+}
+
+/* the Home card asking to adjust the plan */
+.replanCard{
+    composes: panel from '../ui.module.css';
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem 1rem;
+    padding: 0.75rem 1rem;
+    box-sizing: border-box;
+}
+
+.replanText{
+    margin: 0;
+    flex: 1 1 16rem;
+    min-width: 0;
+    font-size: 0.9rem;
+    color: var(--text-h);
+}

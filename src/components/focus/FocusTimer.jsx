@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectTimerProgress, selectTimerInProgress, setTimerMode, setSessionParams, startFocus, pauseFocus, stopFocus, skipPhase, setPomodoro, PHASE_LABEL } from '../../features/session/sessionAction';
+import { selectFocusTask, selectTimerProgress, selectTimerInProgress, setTimerMode, setSessionParams, startFocus, pauseFocus, stopFocus, skipPhase, setPomodoro, PHASE_LABEL } from '../../features/session/sessionAction';
 import { formatClock, fill } from '../../features/helperFunction';
 import { POMODORO_LIMITS, validPomodoroValue, SESSION_LENGTHS } from '../../features/settings/preferences';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -100,6 +100,7 @@ export default function FocusTimer() {
     const percent = useSelector(selectTimerProgress);
     const inProgress = useSelector(selectTimerInProgress);
     const isTester = useIsTester();
+    const study = useSelector(selectFocusTask)?.study;
     const [minimized, setMinimized] = useMinimized(isTester);
     const isPomodoro = timerMode === 'pomodoro';
     const stopwatch = timerMode === 'stopwatch';
@@ -120,6 +121,8 @@ export default function FocusTimer() {
                         {t(label)}
                     </button>)}
             </div>
+
+            {study && <p className={styles.studyLine} data-task-color={study.subjectColor || undefined}>{study.subjectName} · {study.partName}</p>}
 
             <div className={styles.ringWrap}>
                 <svg className={styles.ring} viewBox="0 0 120 120" aria-hidden="true">

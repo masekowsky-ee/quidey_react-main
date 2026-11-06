@@ -18,6 +18,7 @@ import { fetchMySharedTasks, selectSharedSoloTasks } from '../features/together/
 import { selectTasksLoaded } from '../features/tasks/taskAction.js'
 import { Bone } from './skeleton/Skeleton.jsx'
 import Today from './home/Today.jsx'
+import ReplanCard from './study/ReplanCard.jsx'
 import { DESKTOP_QUERY, useMediaQuery } from '../features/layout/breakpoints.js'
 import { fill, isOverdue, sameDay, parseDate } from '../features/helperFunction.js'
 import { isEvent } from '../features/tasks/kinds.js'
@@ -231,6 +232,7 @@ export default function Home(){
                 <Momentum />
             </div>
             {/* the day at a glance: focus goal, routines, what's next, a quick note */}
+            <ReplanCard />
             <Today tasks={listedTasks} />
             <TaskInvites />
             <div data-part="home-week" data-label={t('calendar')}>
