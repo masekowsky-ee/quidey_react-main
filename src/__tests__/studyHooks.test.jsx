@@ -75,6 +75,11 @@ describe('task rows of study sessions', () => {
         await waitFor(() => expect(calls(`${BASE}/sessions/900/unpin`, 'POST')).toHaveLength(1))
     })
 
+    it('a pinned task without a goal (kept after its goal went) offers no unpin', () => {
+        render(wrap(<ul><TaskRow task={sessionTask({ plan_pinned: true, goal_part_id: null, study: null })} onToggleDone={() => {}} /></ul>, makeStore()))
+        expect(screen.queryByRole('button', { name: /Wieder dem Plan überlassen/ })).toBeNull()
+    })
+
     it('an ordinary task has neither', () => {
         render(wrap(<ul><TaskRow task={plainTask} onToggleDone={() => {}} /></ul>, makeStore()))
         expect(screen.queryByText(/·/)).toBeNull()

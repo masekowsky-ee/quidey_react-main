@@ -81,9 +81,11 @@ export const fetchSubjects = () => async (dispatch) => {
 };
 
 // id null: a new subject. { name, emoji?, color?, archived? }. Rejects with code subject_exists.
+// A new colour recolours the subject's planned sessions on the server: the tasks are read again.
 export const saveSubject = (id, data) => async (dispatch) => {
     const subject = await apiFetch(id == null ? `${BASE}/subjects` : `${BASE}/subjects/${id}`, send(id == null ? 'POST' : 'PATCH', data));
     dispatch({ type: SUBJECT_SAVED, payload: subject });
+    if (id != null && data.color !== undefined) await reloadTasks(dispatch);
     return subject;
 };
 
@@ -193,7 +195,8 @@ export const fetchPlanPreview = () => async (dispatch) => {
 };
 
 // A 409 means the plan changed since the preview: the fresh one is stored, nothing was applied.
-export const applyPlan = (inputHash) => async (dispatch) => {
+// Applying rewrites the goals' sessions: the goals in the store are read again (an open goal page shows them).
+export const applyPlan = (inputHash) => async (dispatch, getState) => {
     try {
         await apiFetch(`${BASE}/replan`, send('POST', { inputHash }));
     } catch (err) {
@@ -201,7 +204,10 @@ export const applyPlan = (inputHash) => async (dispatch) => {
         throw err;
     }
     dispatch({ type: PREVIEW_SET, payload: null });
-    await reloadTasks(dispatch);
+    await Promise.all([
+        reloadTasks(dispatch),
+        ...Object.keys(getState().study.goals).map(id => reloadGoal(dispatch, Number(id))),
+    ]);
     return { ok: true };
 };
 
@@ -221,9 +227,13 @@ export const studyNow = (partId) => async (dispatch) => {
     return result;
 };
 
-export const unpinSession = (taskId) => async (dispatch) => {
+// The session's goal (from the store's goals, else the task row's study.goalId) is read again: its pin goes.
+export const unpinSession = (taskId) => async (dispatch, getState) => {
+    const state = getState();
+    const goalId = Object.values(state.study.goals).find(g => g.sessions?.some(s => s.taskId === taskId))?.id
+        ?? state.task?.tasks?.find(t => t.id === taskId)?.study?.goalId;
     const result = await apiFetch(`${BASE}/sessions/${taskId}/unpin`, send('POST'));
-    await reloadTasks(dispatch);
+    await Promise.all([reloadTasks(dispatch), reloadGoal(dispatch, goalId)]);
     return result;
 };
 

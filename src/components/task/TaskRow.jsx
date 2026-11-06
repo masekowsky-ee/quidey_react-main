@@ -146,7 +146,8 @@ const TaskRow = forwardRef(function TaskRow({
                         title={t('makeActive')} aria-label={`${t('makeActive')}: ${task.name}`}>
                         <Icon name="focus" className={styles.actionIcon} />
                     </button>}
-                {task.plan_pinned && !task.done &&
+                {/* only a session of a goal can go back to the plan (one kept after its goal went is a plain task) */}
+                {task.plan_pinned && task.study && !task.done &&
                     <button type="button" className={styles.action} onClick={() => dispatch(unpinSession(task.id)).catch(() => {})}
                         title={t('studyUnpinSession')} aria-label={`${t('studyUnpinSession')}: ${task.name}`}>
                         <Icon name="book" className={styles.actionIcon} />

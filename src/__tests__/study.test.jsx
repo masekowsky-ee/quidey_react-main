@@ -30,11 +30,13 @@ const SETTINGS = { windows: [], sessionMinutes: 45, dailyMaxMinutes: 180, aiAuto
 const calls = (path, method = 'GET') => apiFetch.mock.calls.filter(([url, options]) => url === path && (options?.method ?? 'GET') === method)
 const makeStore = () => configureStore({ reducer: rootReducer, middleware: (get) => get({ serializableCheck: false, immutableCheck: false }) })
 
-let settings
+let settings, plan
 beforeEach(() => {
     apiFetch.mockReset()
     settings = { ...SETTINGS }
+    plan = { inputHash: 'a'.repeat(64), shortfall: {}, goals: [] }
     apiFetch.mockImplementation(async (url, options = {}) => {
+        if (url === '/api/tester/study/plan') return structuredClone(plan)
         if (url === '/api/tester/study/settings' && options.method === 'PUT') {
             settings = { ...settings, ...JSON.parse(options.body) }
             return settings
@@ -125,6 +127,32 @@ describe('study slice', () => {
         expect(calls('/api/tasks')).toHaveLength(0)
     })
 
+    it('applyPlan reloads the goals in the store, unpinSession the goal of the session', async () => {
+        const store = makeStore()
+        const goal = (pinned) => ({ id: 5, subjectId: 1, parts: [], sessions: [{ taskId: 9, partId: 1, due: '2026-12-01', dueTime: null, minutes: 45, done: false, focusMs: 0, pinned }] })
+        let pinned = true
+        apiFetch.mockImplementation(async (url) => {
+            if (url === '/api/tester/study/goals/5') return goal(pinned)
+            if (url.endsWith('/unpin')) { pinned = false; return { ok: true } }
+            return url === '/api/tasks' || url === '/api/event-types' ? [] : { ok: true }
+        })
+        await store.dispatch(fetchGoal(5))
+        await store.dispatch(applyPlan('a'.repeat(64)))
+        expect(calls('/api/tester/study/goals/5')).toHaveLength(2)
+        await store.dispatch(unpinSession(9))
+        expect(calls('/api/tester/study/goals/5')).toHaveLength(3)
+        expect(selectGoal(5)(store.getState()).sessions[0].pinned).toBe(false)
+    })
+
+    it('a new colour of a subject reloads the tasks (its sessions take it)', async () => {
+        const store = makeStore()
+        apiFetch.mockImplementation(async (url) => (url === '/api/tasks' || url === '/api/event-types' ? [] : { id: 2, name: 'Bio', color: 'red' }))
+        await store.dispatch(saveSubject(2, { name: 'Biologie' }))
+        expect(calls('/api/tasks')).toHaveLength(0)
+        await store.dispatch(saveSubject(2, { color: 'red' }))
+        expect(calls('/api/tasks')).toHaveLength(1)
+    })
+
     it('applyPlan, studyNow and unpinSession reload the tasks', async () => {
         const store = makeStore()
         apiFetch.mockImplementation(async (url) => (url === '/api/tasks' || url === '/api/event-types' ? [] : { ok: true, task: { id: 9 } }))
@@ -185,6 +213,35 @@ describe('Settings → Lernen', () => {
         expect(JSON.parse(calls('/api/tester/study/settings', 'PUT')[0][1].body)).toEqual({
             windows: [{ weekday: 1, start: '15:00', end: '19:00' }], sessionMinutes: 45, dailyMaxMinutes: 180, aiAuto: false,
         })
+    })
+
+    it('a saved change of the study times opens the plan preview when a goal is planned', async () => {
+        plan.goals = [{ goalId: 7, name: 'Klausur', summary: { moved: 2, added: 0, dropped: 0, unchanged: 1 }, changes: [] }]
+        renderSettings()
+        const monday = await screen.findByRole('group', { name: 'Mo' })
+        fireEvent.click(within(monday).getByRole('button', { name: /Lernzeit hinzufügen/ }))
+        fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
+        const dialog = await screen.findByRole('dialog')
+        expect(within(dialog).getByRole('heading', { name: 'Neuer Plan' })).toBeInTheDocument()
+        expect(await within(dialog).findByText('2 Sitzungen verschoben')).toBeInTheDocument()
+    })
+
+    it('no preview after saving when no goal is planned, nor when only the AI switch changed', async () => {
+        renderSettings()
+        const monday = await screen.findByRole('group', { name: 'Mo' })
+        fireEvent.click(within(monday).getByRole('button', { name: /Lernzeit hinzufügen/ }))
+        fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
+        expect(await screen.findByText('Gespeichert')).toBeInTheDocument()
+        await waitFor(() => expect(calls('/api/tester/study/plan')).toHaveLength(1))
+        expect(screen.queryByRole('dialog')).toBeNull()
+
+        plan.goals = [{ goalId: 7, name: 'Klausur', summary: { moved: 2, added: 0, dropped: 0, unchanged: 1 }, changes: [] }]
+        fireEvent.click(screen.getByRole('switch', { name: 'KI-Schätzungen automatisch' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
+        await waitFor(() => expect(calls('/api/tester/study/settings', 'PUT')).toHaveLength(2))
+        expect(await screen.findByText('Gespeichert')).toBeInTheDocument()
+        expect(calls('/api/tester/study/plan')).toHaveLength(1)
+        expect(screen.queryByRole('dialog')).toBeNull()
     })
 
     it('removes a window', async () => {

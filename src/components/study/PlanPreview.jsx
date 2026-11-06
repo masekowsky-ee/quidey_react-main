@@ -105,6 +105,8 @@ export function PlanPreviewContent({ onCancel, onApplied }) {
     }
 
     const nothing = preview.goals.every(g => g.summary.moved + g.summary.added + g.summary.dropped === 0);
+    // a goal that doesn't fit is not "everything fits": then only its banner and Schließen
+    const short = preview.goals.some(g => shortfallOf(preview.shortfall, g.goalId) > 0);
     return (
         <>
             {changed && <p className={own.notice} role="status">{t('studyPlanChanged')}</p>}
@@ -126,7 +128,7 @@ export function PlanPreviewContent({ onCancel, onApplied }) {
                     </fieldset>
                 );
             })}
-            {nothing && <p className={own.hint}>{t('studyPlanNothing')}</p>}
+            {nothing && !short && <p className={own.hint}>{t('studyPlanNothing')}</p>}
             {error && <p className={own.error} role="alert">{error}</p>}
             <div className={own.footer}>
                 {nothing ? (
