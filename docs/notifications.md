@@ -24,6 +24,7 @@ Stand: 2026-11-05. Bei jeder Änderung an Benachrichtigungen hier mitpflegen.
 | `messages` | Nachrichten | Nachrichten |
 | `social` | Anfragen und Einladungen | Freunde & Einladungen |
 | `groups` | Familien und Sitzungen | Familien & Sitzungen |
+| `study` | Lernziele | Lernziele |
 
 ## Alle Anlässe
 
@@ -46,6 +47,7 @@ Stand: 2026-11-05. Bei jeder Änderung an Benachrichtigungen hier mitpflegen.
 | Neue Beta-Anfrage | Admins | Push | `social` |
 | Jemand anderes trägt in meiner Familie / Sitzung etwas ein (neu, verschoben oder kopiert) | die anderen beigetretenen Mitglieder | Postfach-Hinweis + Push; dieselbe Person am selben Ort innerhalb von 30 Minuten, solange ungelesen: ein Hinweis („Ann hat 4 Einträge eingetragen“), auf dem Gerät ersetzt der neue Push den alten | `groups` |
 | Nachricht im Chat meiner Familie / Sitzung | die anderen beigetretenen Mitglieder | Push (pro Chat ersetzt der neue den alten), kein Postfach-Hinweis | `groups` |
+| Ein Lernziel (Klausur, Abgabe, …) liegt hinter dem Plan: mindestens eine Lernsitzung versäumt, neu oder um eine ganze Sitzung gewachsen; höchstens einmal am Tag, nur 08:00–19:00 (Ortszeit) | ich (nur Tester) | Push „<Ziel> liegt 1,5 h zurück – Plan anpassen?“ (mehrere Ziele: „3 Ziele liegen zurück …“ mit Liste), hält 3 Std.; führt zu `/study?replan=1` | `study` |
 | Jemand feuert mich im Feed an | ich | Toast in der App | — |
 | Serie verlängert / Meilenstein, Level-Aufstieg, Challenge geschafft | ich | Toast in der App (+ Konfetti je nach Bewegungs-Stufe) | — |
 | Serie heute noch offen, ab 18:00 | ich | Toast in der App, einmal am Tag | — |
