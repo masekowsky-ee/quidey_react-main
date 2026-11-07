@@ -8,20 +8,15 @@ import { displayName, fill, formatDate, formatRelative, getInitials } from '../f
 import { showToast } from '../features/toast/toast';
 import {
     fetchAdminOverview, fetchBetaRequests, fetchAdminUsers,
-    decideBetaRequest, resetBetaRequest, updateAdminUser,
+    decideBetaRequest, resetBetaRequest, updateAdminUser, adminErrorText,
 } from '../features/admin/adminAction';
+import AdminUsage from './admin/AdminUsage';
 import AdminTesterFeedback from './tester/AdminTesterFeedback';
 import { removeAvatarOf } from '../features/profile/avatars';
 import { Bone, Skeleton, SkeletonRows } from './skeleton/Skeleton.jsx';
 
-const TABS = ['requests', 'users', 'broadcast', 'testers', 'overview'];
+const TABS = ['requests', 'users', 'broadcast', 'testers', 'overview', 'usage'];
 const SEARCH_DELAY_MS = 300;
-
-// Translated message for an admin API error
-function adminErrorText(t, err) {
-    const key = `adminError_${err?.code}`;
-    return t(key) === key ? t('friendError_generic') : t(key);
-}
 
 // run(action, successKey) dispatches, shows a toast either way, resolves to the result or null
 function useAdminRun() {
@@ -466,7 +461,7 @@ export default function Admin() {
             <div className={styles.tabs} role="tablist" aria-label={t('admin')} ref={tabList}>
                 {TABS.map(key => (
                     <button key={key} role="tab" aria-selected={tab === key} className={tab === key ? styles.tabActive : undefined} onClick={() => setTab(key)}>
-                        {t({ requests: 'adminRequests', users: 'adminUsers', broadcast: 'adminBroadcast', testers: 'adminTesterFeedback', overview: 'adminOverview' }[key])}
+                        {t({ requests: 'adminRequests', users: 'adminUsers', broadcast: 'adminBroadcast', testers: 'adminTesterFeedback', overview: 'adminOverview', usage: 'adminUsage' }[key])}
                         {key === 'requests' && pendingCount > 0 && <span className={styles.badge}>{pendingCount}</span>}
                     </button>
                 ))}
@@ -476,6 +471,7 @@ export default function Admin() {
             {tab === 'broadcast' && <BroadcastTab />}
             {tab === 'testers' && <AdminTesterFeedback />}
             {tab === 'overview' && <OverviewTab />}
+            {tab === 'usage' && <AdminUsage />}
         </div>
     );
 }
