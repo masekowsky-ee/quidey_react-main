@@ -42,8 +42,11 @@
     border-color: var(--border-strong);
 }
 
+/* "Neu": a quiet tonal button (the timer's start is the room's one filled button) */
 .smallPrimary {
-    composes: btnPrimary from '../ui.module.css';
+    color: var(--text-h);
+    background: color-mix(in oklab, var(--text-h) 8%, transparent);
+    border: none;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;

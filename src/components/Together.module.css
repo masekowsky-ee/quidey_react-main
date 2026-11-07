@@ -582,7 +582,7 @@ a.primaryBtn{
 /* Wider column for the session room (two columns on desktop) */
 .pageWide{
     composes: page from './ui.module.css';
-    width: min(1180px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
     margin: 0 auto;
     padding-bottom: 3rem;
     box-sizing: border-box;
@@ -1146,7 +1146,7 @@ a.primaryBtn{
 
 .teamPage{
     composes: page from './ui.module.css';
-    width: min(1440px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
     margin: 0 auto;
     padding-bottom: 3rem;
     box-sizing: border-box;

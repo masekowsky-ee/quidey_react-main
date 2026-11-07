@@ -11,8 +11,8 @@ const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styl
 const isShared = (task) => Boolean(task.owner) || (task.sharedWith ?? []).some(share => share.status === 'accepted');
 
 // One task inside a day of the month or week view: its start time (in the week view with the
-// end and the location), name and a mark when it's shared. Clicking opens it, dragging (mouse
-// or pen) moves it to another day. The day itself is the tab stop, so the chip is left out of
+// end and the location), name and a mark when it's shared. Clicking opens it, dragging moves it
+// to another day (mouse or pen at once, a finger after holding it a moment). The day itself is the tab stop, so the chip is left out of
 // the tab order unless asked for.
 export default function TaskChip({ task, today, onOpen, startDrag, dragging, showDescription = false, tabIndex = -1 }) {
     const { t } = useTranslation();

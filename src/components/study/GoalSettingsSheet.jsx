@@ -4,6 +4,9 @@ import { updateGoal } from '../../features/study/study';
 import { useFocusOnArrival } from '../../features/layout/dragDismiss';
 import { toInputDate } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
+import { useSelector } from 'react-redux';
+import { selectSubjects } from '../../features/study/study';
+import { ShapePicker } from './GoalShape.jsx';
 import { FormSheet } from '../QuickAdd.jsx';
 import SheetGrabber from '../SheetGrabber.jsx';
 import Icon from '../icons.jsx';
@@ -33,7 +36,9 @@ function GoalSettingsForm({ goal, sheet, close, onClose }) {
     useFocusOnArrival(nameRef);
     const [fields, setFields] = useState(() => ({
         name: goal.name, kind: goal.kind, due: goal.due, dueTime: goal.dueTime ?? '', planMode: goal.planMode,
+        shape: goal.shape ?? 'circle',
     }));
+    const subjectColor = useSelector(selectSubjects).find(s => s.id === goal.subjectId)?.color;
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState(null);
     const set = (changes) => { setFields(prev => ({ ...prev, ...changes })); setError(null); };
@@ -64,6 +69,7 @@ function GoalSettingsForm({ goal, sheet, close, onClose }) {
         if (fields.due !== goal.due) change.due = fields.due;
         if ((fields.dueTime || null) !== (goal.dueTime ?? null)) change.dueTime = fields.dueTime || null;
         if (fields.planMode !== goal.planMode) change.planMode = fields.planMode;
+        if (fields.shape !== (goal.shape ?? 'circle')) change.shape = fields.shape;
         save(change);
     };
 
@@ -112,6 +118,7 @@ function GoalSettingsForm({ goal, sheet, close, onClose }) {
                         ))}
                     </div>
                 </div>
+                <ShapePicker value={fields.shape} onChange={(shape) => set({ shape })} color={subjectColor} />
                 <div className={styles.actions}>
                     {goal.status === 'active' ? (
                         <>

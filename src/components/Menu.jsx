@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { COMMUNITY_PATHS, isCommunityPath } from '../features/community/paths';
 import { useOnlineFriends } from '../features/presence/presence';
@@ -9,7 +9,7 @@ import Icon from './icons';
 import Logo from './Logo';
 import {useSelector, useDispatch} from 'react-redux'
 import {useTranslation} from '../i18n/useTranslation'
-import {setShowMenu} from '../features/settings/settingsAction';
+import {setShowMenu, setMenuSide} from '../features/settings/settingsAction';
 import { selectIncomingCount } from '../features/friends/friendsAction';
 import { selectInviteCount } from '../features/together/togetherAction';
 import { selectTaskInviteCount } from '../features/tasks/taskAction';
@@ -88,8 +88,12 @@ function FamilyLinks({ onClick }) {
 export default function Menu(){
     const docked = useMenuDocked();
     const nav = useNavModel();
+    // a drawer on wide screens too, when the main places are tabs in the header ("bar", "top")
+    const undocked = nav === 'top' || nav === 'bar';
     const showMenu = useSelector((state) => state.settings.showMenu);
     const isOpen = showMenu && !docked;
+    // phones: swiped past the last tab, the drawer comes in from the right (features/layout/tabSwipe.js)
+    const fromRight = useSelector((state) => state.settings.menuSide) === 'right' && !docked;
     const isTester = useSelector(selectIsTester);
     const incomingCount = useSelector(selectIncomingCount);
     const inviteCount = useSelector(selectInviteCount);
@@ -110,10 +114,33 @@ export default function Menu(){
         dispatch(setShowMenu(false));
     }
 
-    // the open drawer follows a finger pushing it back to the left (where it came from) and
-    // closes once it's pushed or flicked far enough
+    // the open drawer follows a finger pushing it back to the side it came from and closes once
+    // it's pushed or flicked far enough
     const drawerRef = useRef(null);
-    useDragDismiss(drawerRef, { onDismiss: onClose, enabled: isOpen, axis: 'x', direction: -1, media: null });
+    useDragDismiss(drawerRef, { onDismiss: onClose, enabled: isOpen, axis: 'x', direction: fromRight ? 1 : -1, media: null });
+
+    // changing sides happens while it is closed and off screen: at once, so it never slides across
+    const sideChanged = useRef(false);
+    useLayoutEffect(() => {
+        const drawer = drawerRef.current;
+        if (!sideChanged.current) { sideChanged.current = true; return; }
+        if (!drawer) return;
+        drawer.style.transition = 'none';
+        void drawer.offsetWidth;
+        drawer.style.transition = '';
+    }, [fromRight]);
+
+    // closed from the right, it goes back to the usual side once it is out of sight, so "Mehr" and
+    // the header's button open it from the left again
+    // (only after it was open: taking the right side comes a frame before it opens, see openMenu)
+    const wasOpen = useRef(false);
+    useEffect(() => {
+        const closed = wasOpen.current && !isOpen;
+        wasOpen.current = isOpen;
+        if (!closed || !fromRight) return undefined;
+        const back = setTimeout(() => dispatch(setMenuSide('left')), 700);
+        return () => clearTimeout(back);
+    }, [isOpen, fromRight, dispatch]);
 
     // a new page (also by the browser's back button) closes the drawer
     useEffect(() => {
@@ -131,10 +158,10 @@ export default function Menu(){
     return (
         <>
             <AnimatePresence>
-                {isOpen && <motion.div className={`${styles.overlay} ${nav === 'top' ? styles.undocked : ''}`} onClick={onClose} data-drawer-overlay {...overlayMotion} />}
+                {isOpen && <motion.div className={`${styles.overlay} ${undocked ? styles.undocked : ''}`} onClick={onClose} data-drawer-overlay {...overlayMotion} />}
             </AnimatePresence>
             {/* a closed drawer is off screen: out of the tab order and hidden from screen readers too */}
-            <div className={[styles.menuDiv, isOpen && styles.open, nav === 'top' && styles.undocked, nav === 'rail' && styles.rail].filter(Boolean).join(' ')}
+            <div className={[styles.menuDiv, isOpen && styles.open, fromRight && styles.fromRight, undocked && styles.undocked, nav === 'rail' && styles.rail].filter(Boolean).join(' ')}
                 inert={!docked && !isOpen} data-part="menu" ref={drawerRef}>
                 <div className={styles.menuHead}>
                     <Link to="/" className={styles.brand} onClick={onClose} aria-label={`Quidey, ${t('home')}`}>

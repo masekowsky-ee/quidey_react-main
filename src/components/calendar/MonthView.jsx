@@ -4,12 +4,19 @@ import { fill, monthGrid, sameDay } from '../../features/helperFunction';
 import { dateKey, isoWeek, startOfMonth, formatFocus } from '../../features/calendar/calendar';
 import { useDayGridKeys } from '../../features/calendar/useDayGridKeys';
 import TaskChip from './TaskChip.jsx';
+import Icon from './icons.jsx';
 
 const MAX_VISIBLE_TASKS = 3;
 
+// On a touch screen the names in a day are small targets, so a tap on one opens the day's
+// timeline (where the entry is easy to hit) rather than its editor.
+const coarsePointer = () => Boolean(window.matchMedia?.('(pointer: coarse)')?.matches);
+
 // The month as 6 weeks (Monday first) with the ISO week number in front of each row.
-// A day shows its first tasks, how long I focused that day, and opens with a click or Enter.
-export default function MonthView({ focusedDate, today, tasksByDay, focusByDay, drag, startDrag, onFocusDate, onOpenDate, onOpenWeek, dayLabel }) {
+// A day shows its first tasks (on phones too, by name, in a column), how long I focused that day,
+// and opens with a click or Enter. Tasks are dragged onto another day (a finger: hold first).
+// With a mouse, a plus in the day's top right corner opens the new-task form on that day.
+export default function MonthView({ focusedDate, today, tasksByDay, focusByDay, drag, startDrag, onFocusDate, onOpenDate, onOpenWeek, onCreateOn, dayLabel, longDate }) {
     const { t } = useTranslation();
     const { gridRef, onKeyDown, focusedKey } = useDayGridKeys({ focusedDate, onFocusDate, onOpenDate });
 
@@ -62,6 +69,11 @@ export default function MonthView({ focusedDate, today, tasksByDay, focusByDay, 
                                         onClick={() => onOpenDate(date)}
                                     >
                                         <span className={styles.srOnly}>{dayLabel(date, dayTasks.length)}</span>
+                                        <button type="button" className={styles.cellAdd} tabIndex={-1}
+                                            onClick={(e) => { e.stopPropagation(); onCreateOn(date); }}
+                                            aria-label={fill(t('addEntryOnDay'), { date: longDate(date) })} title={fill(t('addEntryOnDay'), { date: longDate(date) })}>
+                                            <Icon name="add" size={16} />
+                                        </button>
                                         <div className={styles.cellHead} aria-hidden="true">
                                             <span className={styles.dayNum}>{date.getDate()}</span>
                                             {focusSeconds >= 60 &&
@@ -73,7 +85,7 @@ export default function MonthView({ focusedDate, today, tasksByDay, focusByDay, 
                                                     <li key={task.id}>
                                                         <TaskChip task={task} today={today} startDrag={task.projected ? undefined : startDrag}
                                                             dragging={drag?.task.id === task.id}
-                                                            onOpen={() => onOpenDate(date, task.projected ? null : task.id)} />
+                                                            onOpen={() => onOpenDate(date, task.projected || coarsePointer() ? null : task.id)} />
                                                     </li>
                                                 ))}
                                                 {dayTasks.length > MAX_VISIBLE_TASKS &&

@@ -7,8 +7,9 @@ import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import {
     fromKey, addDays, addMonths, startOfWeek, weekDates, monthDates, isoWeek, prioLevel,
     compareTasks, groupByDay, filterTasks, focusByDay, formatFocus, toIcs,
-    readStoredCalendarView, storeCalendarView,
+    readStoredCalendarView, storeCalendarView, layoutDay,
 } from '../features/calendar/calendar'
+import { snapMinutes } from '../features/calendar/useTimelineDrag'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
     ...(await importOriginal()),
@@ -228,5 +229,28 @@ describe('saving a task keeps its day', () => {
         expect(store.getState().task.tasks[0].description).toBeNull()
         // the groups (not sent back by PUT) stay
         expect(store.getState().task.tasks[0].group_ids).toEqual([2])
+    })
+})
+
+describe('the day timeline', () => {
+    it('puts overlapping entries side by side and the rest full width', () => {
+        const placed = layoutDay([
+            { task: 'a', start: 540, end: 600 },
+            { task: 'b', start: 570, end: 630 },
+            { task: 'c', start: 600, end: 660 },
+            { task: 'd', start: 720, end: 750 },
+        ])
+        const of = (name) => placed.find(item => item.task === name)
+        // a and b overlap; c starts when a ends, so it takes a's lane
+        expect([of('a').col, of('b').col, of('c').col]).toEqual([0, 1, 0])
+        expect([of('a').cols, of('b').cols, of('c').cols]).toEqual([2, 2, 2])
+        expect(of('d')).toMatchObject({ col: 0, cols: 1 })
+    })
+
+    it('moves in quarter hours and stays inside the day', () => {
+        expect(snapMinutes(847)).toBe(840)
+        expect(snapMinutes(853)).toBe(855)
+        expect(snapMinutes(-30)).toBe(0)
+        expect(snapMinutes(1500)).toBe(1425)
     })
 })

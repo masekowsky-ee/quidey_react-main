@@ -2,7 +2,7 @@ import styles from './TaskOptions.module.css';
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from '../../i18n/useTranslation';
-import { TASK_COLORS } from '../../features/tasks/taskColors';
+import { isOwnColor, isTaskColor } from '../../features/tasks/taskColors';
 import TaskColorPicker from './TaskColorPicker.jsx';
 
 // distance kept to the window's edges
@@ -19,7 +19,7 @@ export default function TaskColorButton({ task, onChange, label }) {
     const ref = useRef(null);
     const popRef = useRef(null);
     const popId = useId();
-    const color = TASK_COLORS.includes(task.color) ? task.color : null;
+    const color = isTaskColor(task.color) ? task.color : null;
 
     useEffect(() => {
         if (!open) return;
@@ -57,15 +57,16 @@ export default function TaskColorButton({ task, onChange, label }) {
         popEl.style.visibility = 'visible';
     }, [open]);
 
+    // a named colour closes the swatches; an own colour keeps them open while it is being found
     const pick = (next) => {
-        setOpen(false);
+        if (!isOwnColor(next)) setOpen(false);
         if (next !== color) onChange(next);
     };
 
     return (
         <span className={styles.colorButtonWrap} ref={ref}>
             <button type="button" className={styles.colorButton} aria-expanded={open} aria-controls={open ? popId : undefined}
-                title={label ?? t('taskColor')} aria-label={`${label ?? t('taskColor')}: ${t(color ? `taskColor_${color}` : 'taskColorNone')}`}
+                title={label ?? t('taskColor')} aria-label={`${label ?? t('taskColor')}: ${isOwnColor(color) ? `${t('taskColorOwn')} ${color}` : t(color ? `taskColor_${color}` : 'taskColorNone')}`}
                 onClick={() => setOpen(!open)}>
                 <span className={color ? styles.swatchDot : `${styles.swatchDot} ${styles.swatchNone}`} data-task-color={color ?? undefined} aria-hidden="true" />
             </button>

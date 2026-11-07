@@ -41,6 +41,8 @@ import OnboardingPrompts from './components/onboarding/OnboardingPrompts.jsx';
 import QuickAdd from './components/QuickAdd.jsx';
 import AddFab from './components/home/AddFab.jsx';
 import { showsAddFab } from './features/layout/addFab.js';
+import { useTabSwipe } from './features/layout/tabSwipe.js';
+import { useKeyboardInset } from './features/layout/keyboardInset.js';
 import { fetchInboxUnread } from './features/inbox/inbox.js';
 import { useInboxRealtime } from './features/inbox/useInboxRealtime.js';
 import { connectRealtime, disconnectRealtime, useRealtime, useSafetyPoll, REALTIME_REJECTED } from './features/realtime/socket.js';
@@ -53,7 +55,7 @@ import { COMMUNITY_PATHS } from './features/community/paths.js';
 import { LegalFooter } from './legal/LegalFooter.jsx';
 import { LEGAL_PATHS } from './legal/paths.js';
 import { useApplyTheme } from './features/settings/theme.js';
-import { MOTION, useApplyMotion, useMotionLevel } from './features/settings/motion.js';
+import { MOTION, pageSwipeMotion, useApplyMotion, useMotionLevel } from './features/settings/motion.js';
 import { useApplyUiVariant, useNavModel } from './features/tester/variants.js';
 import TesterOnly from './components/TesterOnly.jsx';
 import CommandPalette from './components/variants/CommandPalette.jsx';
@@ -256,6 +258,10 @@ function App(){
   // a lasting notification with the time while a focus session is on (features/session/focusNotification.js)
   useFocusNotification(allowed);
   useFocusTitle(allowed);
+  // phones: a sideways swipe goes to the tab beside it (and past the ends, the menu)
+  useTabSwipe({ enabled: allowed });
+  // phones: the on-screen keyboard's height, so sheets (the add form) stand above it
+  useKeyboardInset();
 
   useEffect(() => { if (allowed) return preloadPages(); }, [allowed]);
 
@@ -317,7 +323,9 @@ function App(){
         <main className={shell.main} data-part="main" data-fab={showsAddFab(location.pathname) || undefined}>
         {/* each page comes in as the motion setting says */}
         {/* ...the tabs of the Gemeinschaft page are one page: switching them doesn't */}
-        <motion.div key={location.pathname.startsWith(COMMUNITY_PATHS.feed) ? COMMUNITY_PATHS.feed : location.pathname} {...MOTION.page[motionLevel]}>
+        {/* ...a tab reached by a sideways swipe (phones) slides in from that side */}
+        <motion.div key={location.pathname.startsWith(COMMUNITY_PATHS.feed) ? COMMUNITY_PATHS.feed : location.pathname}
+            {...(location.state?.tabSwipe ? pageSwipeMotion(location.state.tabSwipe, motionLevel) : MOTION.page[motionLevel])}>
         <Suspense fallback={pageLoading}>
         <Routes location={location}>
           <Route path="/" element={homeLayout === 'team' ? <TeamHome/> : <Home/>} />

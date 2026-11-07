@@ -4,14 +4,16 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
 import { displayName, fill, isOverdue, mondayIndex, sameDay } from '../../features/helperFunction';
-import { dateKey, formatFocus, prioLevel } from '../../features/calendar/calendar';
+import { addDays, dateKey, formatFocus, minutesOfDay, prioLevel, timeText } from '../../features/calendar/calendar';
+import { snapMinutes, useTimelineDrag } from '../../features/calendar/useTimelineDrag';
 import TaskLabels from '../TaskLabels.jsx';
 import GroupPicker from '../GroupPicker.jsx';
 import TaskEditor from './TaskEditor.jsx';
+import DayTimeline from './DayTimeline.jsx';
 import TaskMeta from '../task/TaskMeta.jsx';
 import Icon from './icons.jsx';
 import SheetGrabber from '../SheetGrabber.jsx';
-import { focusOnArrival, useSheet } from '../../features/layout/dragDismiss';
+import { useSheet } from '../../features/layout/dragDismiss';
 import { taskColorAttr } from '../../features/tasks/taskColors';
 import { isEvent } from '../../features/tasks/kinds';
 import { useIsTester } from '../../features/auth/tester';
@@ -97,36 +99,33 @@ function PreviewRow({ task, onOpenSeries, onDelete }) {
     );
 }
 
-// Everything about one day: its tasks (done, edit, delete, groups), a field to add one,
-// and the focus sessions of that day. Arrows (outside a field) or the buttons go to the
-// day before/after; Escape or a click next to it closes.
+// Everything about one day: its tasks and events on a timeline (see DayTimeline: dragged to
+// another time, into the all-day row or onto the arrows for the day before/after) and the focus
+// sessions of that day. The plus in the head, or a tap on a free spot of the hours, opens the
+// new-task form on this day (onCreate(time | null)). An entry opens in its editor in place of the
+// timeline (done, edit, delete, groups). Arrows (outside a field) or the buttons go to the day
+// before/after; Escape or a click next to it closes. paused: the new-task form lies over it, so
+// its keys are the form's.
 // personal: false in a shared calendar (session or family): no groups, reminders or sharing,
 // each task says who added it, and only who added it (or the owner) can delete it (canRemove).
 export default function DayPanel({
-    date, today, tasks, focus, sharedEntries, initialTaskId, newTaskGroup, locale, longDate, personal = true, allowEvents = false, remindsAll = false,
-    onClose, onShiftDay, onAddTask, onToggleDone, onSaveTask, onDeleteTask, onLeaveTask, onOpenGroup, onOpenSeries,
+    date, today, tasks, focus, sharedEntries, initialTaskId, locale, longDate, personal = true, allowEvents = false, remindsAll = false, paused = false,
+    onClose, onShiftDay, onCreate, onToggleDone, onSaveTask, onDeleteTask, onLeaveTask, onOpenGroup, onOpenSeries,
 }) {
     const { t } = useTranslation();
     const key = dateKey(date);
     const panelRef = useRef(null);
-    const addRef = useRef(null);
     // on phones a sheet: pulled down, it closes
     const sheet = useSheet(onClose, panelRef);
     const { dismiss } = sheet;
-    const [draft, setDraft] = useState('');
-    // optional time for the new task; empty: the whole day
-    const [draftTime, setDraftTime] = useState('');
-    // what the field adds: a task or an event (only in my own calendar)
-    const [draftKind, setDraftKind] = useState('task');
-    const [busy, setBusy] = useState(false);
     // the task being edited, remembered with its day so changing the day closes the editor
-    const [editing, setEditing] = useState({ day: key, id: initialTaskId === 'new' ? null : initialTaskId });
+    const [editing, setEditing] = useState({ day: key, id: initialTaskId });
     const editingId = editing.day === key ? editing.id : null;
     // "edit series" from a coming repeat names another task (and day) while the panel stays open
     const [lastInitialId, setLastInitialId] = useState(initialTaskId);
     if (initialTaskId !== lastInitialId) {
         setLastInitialId(initialTaskId);
-        setEditing({ day: key, id: initialTaskId === 'new' ? null : initialTaskId });
+        setEditing({ day: key, id: initialTaskId });
     }
     const [pickerTask, setPickerTask] = useState(null);
     // testers sort tasks into collections (in the editor) instead of groups
@@ -135,22 +134,39 @@ export default function DayPanel({
     const closePicker = useCallback(() => setPickerTask(null), []);
     const isToday = sameDay(date, today);
 
-    // focus starts in the panel (in the add field when adding was asked for, on a touch screen once
-    // the sheet is up) and goes back afterwards
+    // ---------- the timeline ----------
+    const gridRef = useRef(null);
+    const scrollerRef = useRef(null);
+    // a move being saved: shown at its new place until the list has it (or it failed)
+    const [pending, setPending] = useState(null);
+    const moveTo = useCallback(async (task, changes) => {
+        setPending({ id: task.id, changes });
+        await onSaveTask(task, changes);
+        setPending(null);
+    }, [onSaveTask]);
+    const { drag, startDrag } = useTimelineDrag({ gridRef, scrollerRef, onMove: moveTo });
+    const shiftTime = (task, delta) => {
+        const start = minutesOfDay(task.due_time);
+        if (start === null) return;
+        const next = snapMinutes(start + delta);
+        if (next !== start) moveTo(task, { due_time: timeText(next) });
+    };
+    const prevKey = dateKey(addDays(date, -1));
+    const nextKey = dateKey(addDays(date, 1));
+    const dropDay = drag?.target === 'day' ? drag.day : null;
+
+    // focus starts in the panel and goes back afterwards
     useEffect(() => {
         const previous = document.activeElement;
-        const finePointer = window.matchMedia?.('(pointer: fine)')?.matches;
-        let stopFocus = () => {};
-        if (initialTaskId === 'new' || (finePointer && !initialTaskId && tasks.length === 0)) stopFocus = focusOnArrival(addRef.current);
-        else if (!initialTaskId) panelRef.current?.focus();
-        return () => { stopFocus(); previous?.focus?.(); };
+        if (!initialTaskId) panelRef.current?.focus();
+        return () => { previous?.focus?.(); };
         // only when the panel opens
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         const onKey = (e) => {
-            if (pickerTask || e.defaultPrevented) return;
+            if (pickerTask || paused || e.defaultPrevented) return;
             if (e.key === 'Escape') dismiss();
             else if (!isTyping(e.target) && !e.altKey && !e.ctrlKey && !e.metaKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
                 e.preventDefault();
@@ -159,21 +175,7 @@ export default function DayPanel({
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [pickerTask, dismiss, onShiftDay]);
-
-    const add = async (e) => {
-        e.preventDefault();
-        const name = draft.trim();
-        if (!name || busy) return;
-        setBusy(true);
-        const ok = await onAddTask(name, key, draftTime || null, personal || allowEvents ? draftKind : 'task');
-        setBusy(false);
-        if (ok) {
-            setDraft('');
-            setDraftTime('');
-        }
-        addRef.current?.focus();
-    };
+    }, [pickerTask, paused, dismiss, onShiftDay]);
 
     const leave = async (task) => {
         const ok = await onLeaveTask(task);
@@ -191,15 +193,18 @@ export default function DayPanel({
         if (ok) setEditing({ day: key, id: null });
     };
 
+    // the entry open in its editor (in place of the timeline); gone from the day (moved, deleted): none
+    const editingTask = editingId === null ? null : tasks.find(task => task.id === editingId) ?? null;
     const sessions = focus?.sessions ?? [];
-    const timeText = (value) => new Date(value).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+    const clockText = (value) => new Date(value).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
     return createPortal(
         <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
-            <div className={`${styles.panel} ${editingId !== null ? styles.panelWide : ''}`} role="dialog" aria-modal="true" aria-labelledby="dayPanelTitle" {...sheet.panel} tabIndex={-1}>
+            <div className={`${styles.panel} ${editingTask ? styles.panelWide : styles.panelTimeline}`} role="dialog" aria-modal="true" aria-labelledby="dayPanelTitle" {...sheet.panel} tabIndex={-1}>
                 <SheetGrabber />
                 <div className={styles.head} data-sheet-drag>
-                    <button type="button" className={styles.navBtn} onClick={() => onShiftDay(-1)} aria-label={t('previousDay')} title={t('previousDay')}>
+                    <button type="button" className={`${styles.navBtn} ${dropDay === prevKey ? styles.dropOn : ''}`} data-drop-day={prevKey}
+                        onClick={() => onShiftDay(-1)} aria-label={t('previousDay')} title={t('previousDay')}>
                         <Icon name="prev" />
                     </button>
                     <div className={styles.titles}>
@@ -209,92 +214,91 @@ export default function DayPanel({
                         </span>
                         <h2 id="dayPanelTitle" className={styles.title}>{longDate(date)}</h2>
                     </div>
-                    <button type="button" className={styles.navBtn} onClick={() => onShiftDay(1)} aria-label={t('nextDay')} title={t('nextDay')}>
+                    <button type="button" className={`${styles.navBtn} ${dropDay === nextKey ? styles.dropOn : ''}`} data-drop-day={nextKey}
+                        onClick={() => onShiftDay(1)} aria-label={t('nextDay')} title={t('nextDay')}>
                         <Icon name="next" />
+                    </button>
+                    <button type="button" className={styles.addDayBtn} onClick={() => onCreate(null)}
+                        aria-label={fill(t('addEntryOnDay'), { date: longDate(date) })} title={fill(t('addEntryOnDay'), { date: longDate(date) })}>
+                        <Icon name="add" size={22} />
                     </button>
                     <button type="button" className={styles.closeBtn} onClick={() => dismiss()} aria-label={t('close')} title={`${t('close')} (Esc)`}>
                         <Icon name="close" size={22} />
                     </button>
                 </div>
 
-                {(personal || allowEvents) &&
-                    <div className={styles.quickKind} role="radiogroup" aria-label={t('kindLegend')}>
-                        {['task', 'event'].map(kind => (
-                            <button key={kind} type="button" role="radio" aria-checked={draftKind === kind}
-                                className={draftKind === kind ? styles.quickKindOn : undefined}
-                                onClick={() => { setDraftKind(kind); addRef.current?.focus(); }}>
-                                {t(`kind_${kind}`)}
-                            </button>
-                        ))}
-                    </div>}
-                <form className={styles.quickAdd} onSubmit={add}>
-                    <input ref={addRef} value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={200}
-                        placeholder={t(draftKind === 'event' && (personal || allowEvents) ? 'addEventForDay' : 'addTaskForDay')}
-                        aria-label={t(draftKind === 'event' && (personal || allowEvents) ? 'addEventForDay' : 'addTaskForDay')} />
-                    <input type="time" className={styles.quickTime} value={draftTime} onChange={(e) => setDraftTime(e.target.value)}
-                        aria-label={`${t('taskTime')} (${t('allDay')}: –)`} title={t('taskTime')} />
-                    <button type="submit" className={styles.addBtn} disabled={!draft.trim() || busy}>{t('add')}</button>
-                </form>
-                {newTaskGroup && <p className={styles.addHint}>→ {newTaskGroup.name}</p>}
-
-                {tasks.length > 0
+                {editingTask
                     ? <ul className={styles.list}>
-                        {tasks.map(task => task.projected
-                            ? <PreviewRow key={task.id} task={task} onOpenSeries={onOpenSeries} onDelete={remove} />
+                        {editingTask.projected
+                            ? <PreviewRow task={editingTask} onOpenSeries={onOpenSeries} onDelete={remove} />
                             : (
                             <TaskRow
-                                key={task.id}
-                                task={task}
+                                task={editingTask}
                                 today={today}
                                 personal={personal}
                                 allowEvents={allowEvents}
                                 remindsAll={remindsAll}
-                                editing={editingId === task.id}
-                                onEdit={() => setEditing({ day: key, id: task.id })}
+                                editing
+                                onEdit={() => setEditing({ day: key, id: editingTask.id })}
                                 onCloseEdit={() => setEditing({ day: key, id: null })}
                                 onToggleDone={onToggleDone}
-                                onSave={(changes) => save(task, changes)}
+                                onSave={(changes) => save(editingTask, changes)}
                                 onDelete={remove}
                                 onLeave={leave}
                                 onPickGroups={groupsOn ? setPickerTask : undefined}
                                 onOpenGroup={onOpenGroup}
                             />
-                        ))}
+                        )}
                     </ul>
-                    : <p className={styles.empty}>{t('noTasks')}</p>
-                }
-
-                {(sessions.length > 0 || sharedEntries.length > 0) &&
-                    <section className={styles.focus}>
-                        <h3 className={styles.sectionTitle}>
-                            {t('focusOnDay')}
-                            {focus?.seconds >= 60 && <span className={styles.focusTotal}>{formatFocus(focus.seconds)}</span>}
-                        </h3>
-                        <ul className={styles.focusList}>
-                            {sessions.map(session => (
-                                <li key={`solo-${session.id}`}>
-                                    <span className={styles.focusTime}>{timeText(session.date)}</span>
-                                    <span className={styles.focusWhat}>
-                                        {(session.workedTasks ?? []).map(task => task.name).join(', ') || t('sessions')}
-                                        {session.group && session.group !== 'all' && <span className={styles.focusGroup}> · {session.group}</span>}
-                                    </span>
-                                    <span className={styles.focusDuration}>{formatFocus(session.totalTime ?? 0)}</span>
-                                </li>
-                            ))}
-                            {sharedEntries.map(entry => (
-                                <li key={`shared-${entry.id}`} className={styles.focusShared}>
-                                    <span className={styles.focusTime}>{timeText(entry.lastWorkedAt)}</span>
-                                    <span className={styles.focusWhat}>
-                                        <Link to={`/together/${entry.id}`}>{entry.name}</Link>
-                                        <span className={styles.focusGroup}> · {t('sharedSessionLabel')}</span>
-                                    </span>
-                                    <span className={styles.focusDuration}>{formatFocus(Math.round((entry.myMs ?? 0) / 1000))}</span>
-                                </li>
-                            ))}
-                        </ul>
-                        <Link to="/stats?tab=sessions" className={styles.historyLink}>{t('openHistory')} →</Link>
-                    </section>
-                }
+                    : <DayTimeline
+                        date={date}
+                        dayKey={key}
+                        today={today}
+                        tasks={tasks}
+                        personal={personal}
+                        drag={drag}
+                        startDrag={startDrag}
+                        gridRef={gridRef}
+                        scrollerRef={scrollerRef}
+                        pending={pending}
+                        onOpen={(task) => setEditing({ day: key, id: task.id })}
+                        onToggleDone={onToggleDone}
+                        onShiftTime={shiftTime}
+                        onOpenGroup={onOpenGroup}
+                        onCreateAt={(minutes) => onCreate(timeText(minutes))}
+                    >
+                    {(sessions.length > 0 || sharedEntries.length > 0) &&
+                        <section className={styles.focus}>
+                            <h3 className={styles.sectionTitle}>
+                                {t('focusOnDay')}
+                                {focus?.seconds >= 60 && <span className={styles.focusTotal}>{formatFocus(focus.seconds)}</span>}
+                            </h3>
+                            <ul className={styles.focusList}>
+                                {sessions.map(session => (
+                                    <li key={`solo-${session.id}`}>
+                                        <span className={styles.focusTime}>{clockText(session.date)}</span>
+                                        <span className={styles.focusWhat}>
+                                            {(session.workedTasks ?? []).map(task => task.name).join(', ') || t('sessions')}
+                                            {session.group && session.group !== 'all' && <span className={styles.focusGroup}> · {session.group}</span>}
+                                        </span>
+                                        <span className={styles.focusDuration}>{formatFocus(session.totalTime ?? 0)}</span>
+                                    </li>
+                                ))}
+                                {sharedEntries.map(entry => (
+                                    <li key={`shared-${entry.id}`} className={styles.focusShared}>
+                                        <span className={styles.focusTime}>{clockText(entry.lastWorkedAt)}</span>
+                                        <span className={styles.focusWhat}>
+                                            <Link to={`/together/${entry.id}`}>{entry.name}</Link>
+                                            <span className={styles.focusGroup}> · {t('sharedSessionLabel')}</span>
+                                        </span>
+                                        <span className={styles.focusDuration}>{formatFocus(Math.round((entry.myMs ?? 0) / 1000))}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                            <Link to="/stats?tab=sessions" className={styles.historyLink}>{t('openHistory')} →</Link>
+                        </section>
+                    }
+                    </DayTimeline>}
             </div>
             {pickerTask && <GroupPicker task={pickerTask} onClose={closePicker} />}
         </div>,

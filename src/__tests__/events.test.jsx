@@ -216,15 +216,16 @@ describe('events on Home and in the calendar', () => {
         if (now.getHours() < 23) expect(within(strip).getByText('now')).toBeInTheDocument()
     })
 
-    it('an event has no tick in the day panel; the quick add makes events too', async () => {
+    it('an event has no tick in the day panel; its plus makes events too', async () => {
         const store = makeStore([event], [WORK])
         wrap(store, <Calendar />, `/calendar?date=${todayKey()}&day=${todayKey()}`)
         const dialog = screen.getByRole('dialog')
         expect(within(dialog).queryByRole('button', { name: /Mark as done: Lecture/ })).not.toBeInTheDocument()
-        fireEvent.click(within(dialog).getByRole('radio', { name: 'Event' }))
-        fireEvent.change(within(dialog).getByRole('textbox', { name: 'New event on this day…' }), { target: { value: 'Gym' } })
+        fireEvent.click(within(dialog).getByRole('button', { name: /^New entry on/ }))
+        fireEvent.click(screen.getByRole('radio', { name: /^Event/ }))
+        fireEvent.change(screen.getByRole('textbox', { name: 'Event name' }), { target: { value: 'Gym' } })
         apiFetch.mockResolvedValueOnce({ id: 9, name: 'Gym', kind: 'event', due: todayKey() })
-        await act(async () => { fireEvent.click(within(dialog).getByRole('button', { name: 'Add' })) })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Create' })) })
         expect(bodyOf('/api/tasks', 'POST')).toMatchObject({ name: 'Gym', kind: 'event', prio: null })
     })
 })

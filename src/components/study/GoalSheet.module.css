@@ -1,6 +1,6 @@
 /* The create-goal sheet and the plan preview (sheets over the study pages) */
 .panel{
-    composes: panel from '../ui.module.css';
+    composes: lifted from '../ui.module.css'; /* floats over the page: the white sheet */
     position: relative;
     box-sizing: border-box;
     width: min(36rem, 100%);

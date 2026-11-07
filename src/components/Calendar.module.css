@@ -1,6 +1,6 @@
 .page{
     composes: page from './ui.module.css';
-    width: min(1180px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
     margin: 0 auto;
     padding-bottom: 3rem;
     box-sizing: border-box;
@@ -260,10 +260,18 @@
     color: var(--text-muted);
 }
 
-/* no dragging or keyboard on phones and tablets */
+/* phones and tablets: hold and drag instead of the mouse and keyboard hints */
+.hintTouch{
+    display: none;
+}
+
 @media (hover: none), (pointer: coarse) {
-    .hint{
+    .hintPointer{
         display: none;
+    }
+
+    .hintTouch{
+        display: inline;
     }
 }
 
@@ -473,6 +481,9 @@
     box-shadow: none;
     cursor: grab;
     user-select: none;
+    -webkit-user-select: none;
+    /* a long press lifts the task to drag it, it doesn't open the browser's menu */
+    -webkit-touch-callout: none;
     transition: background-color var(--ease-out), opacity var(--ease-out);
 }
 
@@ -585,6 +596,13 @@
     transform: translate(12px, 8px) rotate(-2deg);
 }
 
+/* a finger covers what it holds: the chip rides above it */
+@media (pointer: coarse) {
+    .dragGhost{
+        transform: translate(-50%, calc(-100% - 1.75rem)) rotate(-2deg);
+    }
+}
+
 /* ---------- Week ---------- */
 
 .week{
@@ -682,32 +700,77 @@
 }
 
 /* Shows on hover; always on touch screens */
+/* ---------- Adding on a day: a plus in its top right corner ----------
+   With a mouse it shows while the pointer is on the day; on touch screens the week keeps it in
+   view (the month's days are too narrow: a tap opens the day, which has its own plus). */
+
+.cellAdd,
 .weekAdd{
-    align-self: stretch;
-    height: 1.9rem;
-    margin-top: auto;
+    position: absolute;
+    z-index: 1;
+    top: 0.3rem;
+    right: 0.3rem;
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    padding: 0;
     color: var(--text-muted);
-    border: 1px dashed var(--btn-border-hover);
-    border-radius: var(--radius-sm);
+    background: var(--surface);
+    border: 1px solid var(--btn-border);
+    border-radius: 50%;
+    box-shadow: none;
     opacity: 0;
-    transition: opacity var(--ease-out), color var(--ease-out), border-color var(--ease-out);
+    transition: opacity 0.12s ease-out, color 0.12s ease-out, border-color 0.12s ease-out;
 }
 
-.weekDay:hover .weekAdd,
-.weekDay:focus-within .weekAdd{
-    opacity: 1;
+.weekAdd{
+    width: 1.9rem;
+    height: 1.9rem;
 }
 
+.cellAdd:hover,
 .weekAdd:hover{
     color: var(--text-h);
-    border-color: var(--primary);
+    border-color: var(--border-strong);
+    box-shadow: none;
     filter: none;
     transform: none;
 }
 
+.cellAdd:active,
+.weekAdd:active{
+    transform: scale(0.96);
+}
+
+@media (hover: hover) {
+    .cell:hover .cellAdd,
+    .cell:focus-within .cellAdd,
+    .weekDay:hover .weekAdd,
+    .weekDay:focus-within .weekAdd{
+        opacity: 1;
+    }
+
+    /* the plus takes the corner the focus time sits in */
+    .cell:hover .focusBadge,
+    .weekDay:hover .focusBadge{
+        visibility: hidden;
+    }
+}
+
 @media (hover: none) {
+    .cellAdd{
+        display: none;
+    }
+
     .weekAdd{
         opacity: 1;
+        width: 2.75rem;
+        height: 2.75rem;
+        top: 0;
+        right: 0;
+        background: transparent;
+        border-color: transparent;
     }
 }
 
@@ -1044,14 +1107,6 @@ button.agendaName:hover{
         max-width: none;
     }
 
-    .exportBtn span{
-        display: none;
-    }
-
-    .exportBtn{
-        padding: 0 0.6rem;
-    }
-
     .monthCard{
         padding: 0.4rem;
     }
@@ -1081,10 +1136,12 @@ button.agendaName:hover{
         font-size: 0.58rem;
     }
 
+    /* a day is a little taller: its tasks and events by name, one under the other */
     .cell{
-        align-items: center;
-        min-height: 3.9rem;
-        padding: 0.3rem 0.15rem;
+        align-items: stretch;
+        gap: 0.2rem;
+        min-height: 5.75rem;
+        padding: 0.3rem 0.125rem 0.375rem;
     }
 
     .cellHead{
@@ -1097,36 +1154,43 @@ button.agendaName:hover{
         font-size: 0.8rem;
     }
 
-    .cell .focusBadge,
-    .chips .chipMore{
+    .cell .focusBadge{
         display: none;
     }
 
-    /* On phones only a dot per task fits */
     .chips{
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 3px;
+        gap: 2px;
     }
 
+    /* the name gets the whole width (up to two lines, words broken where they must); time and
+       marks wait in the day's timeline */
     .chips .chip{
-        width: 6px;
-        height: 6px;
-        padding: 0;
-        background: var(--task-color, var(--chip-color));
-        border: none;
-        border-radius: 50%;
-        corner-shape: round;
-        pointer-events: none;
-    }
-
-    .chips .chipOverdue{
-        background: var(--danger);
+        padding: 0.0625rem 0.125rem;
+        font-size: 0.6875rem;
+        line-height: 1.25;
+        border-radius: 3px;
     }
 
     .chips .chipName{
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        hyphens: auto;
+    }
+
+    .chips .chipTime,
+    .chips .chipRepeat,
+    .chips .chipStudy,
+    .chips .chipShared{
         display: none;
+    }
+
+    .chips .chipMore{
+        padding-left: 0.1875rem;
+        font-size: 0.625rem;
+        line-height: 1.3;
     }
 
     /* the week as a list of days */
@@ -1171,50 +1235,122 @@ button.agendaName:hover{
     background: transparent;
 }
 
-/* ---------- Which calendar: mine, a shared session's or a family's ---------- */
+/* ---------- Which calendar: mine, a shared session's or a family's ----------
+   A pill like "Filters" beside it: an icon for whose it is, the name, a chevron. The select itself
+   spans the pill (the phone's own picker opens), the icons lie over it. */
 
-.sourceRow{
+.source{
     display: flex;
-    flex-direction: row;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem 1rem;
-    margin-bottom: -0.25rem;
-    font-size: 0.85rem;
+    gap: 0.25rem;
+    min-width: 0;
 }
 
-.sourceLabel{
-    display: flex;
+.sourcePick{
+    position: relative;
+    display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    min-width: 0;
+    max-width: 15rem;
     color: var(--text-muted);
+}
+
+.sourcePick > svg,
+.sourceChevron{
+    position: absolute;
+    pointer-events: none;
+}
+
+.sourcePick > svg{
+    left: 0.7rem;
+}
+
+.sourceChevron{
+    right: 0.5rem;
+    display: inline-flex;
 }
 
 .sourceSelect{
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    min-width: 0;
     height: 2.15rem;
-    max-width: 16rem;
-    font-weight: 600;
+    padding: 0 2rem 0 2.1rem;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-h);
+    text-overflow: ellipsis;
+    background: transparent;
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-pill);
+    box-shadow: none;
+    cursor: pointer;
+    transition: background-color 0.14s ease-out, border-color 0.14s ease-out;
 }
 
-.sourceLink{
-    font-weight: 600;
+.sourceSelect:hover{
+    background: var(--hover-wash);
+    border-color: var(--border-strong);
+}
+
+.sourceSelect:focus-visible{
+    outline: 2px solid var(--border-strong);
+    outline-offset: 2px;
+}
+
+/* a shared calendar is showing: the pill says so in full ink, like an active filter */
+.sourcePickShared{
     color: var(--text-h);
-    text-decoration: none;
-    text-underline-offset: 3px;
+}
+
+.sourcePickShared .sourceSelect{
+    background: var(--surface-strong);
+    border-color: transparent;
+}
+
+/* to the session's / family's own page */
+.sourceLink{
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 2.15rem;
+    height: 2.15rem;
+    color: var(--text-muted);
+    border-radius: 50%;
+    transition: background-color 0.14s ease-out, color 0.14s ease-out;
 }
 
 .sourceLink:hover{
-    text-decoration: underline;
+    color: var(--text-h);
+    background: var(--hover-wash);
 }
 
 .sourceNote{
+    margin: 0;
+    font-size: 0.85rem;
     color: var(--text-muted);
 }
 
-@media (max-width: 600px){
-    .sourceLabel,
+@media (pointer: coarse) {
     .sourceSelect{
-        flex: 1;
+        height: 2.75rem;
+    }
+
+    .sourceLink{
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+}
+
+@media (max-width: 640px){
+    .source{
+        flex: 1 1 auto;
+    }
+
+    .sourcePick{
+        flex: 1 1 auto;
         max-width: none;
     }
 }
@@ -1307,4 +1443,385 @@ button.agendaName:hover{
         right: auto;
         left: 0;
     }
+}
+
+/* ---------- the app's own look (direction B): a month like a printed planner ----------
+   One tonal panel, the days split by hairlines instead of tiles in a box; today's number in the
+   accent; entries as plain lines with a small dot in their colour, events a soft block of time;
+   the focus time per day as a quiet figure; overdue said in red text, not a red pill. */
+:global(:root:not([data-ui])) .monthCard{
+    padding: 0.5rem 1rem 1rem;
+}
+
+:global(:root:not([data-ui])) .month{
+    gap: 0;
+}
+
+:global(:root:not([data-ui])) .cell{
+    min-height: 7rem;
+    padding: 0.5rem 0.5rem 0.625rem;
+    background: transparent;
+    border: none;
+    border-top: 1px solid color-mix(in oklab, var(--text-h) 10%, transparent);
+    border-radius: 0;
+}
+
+:global(:root:not([data-ui])) .cell:hover{
+    background: var(--hover-wash);
+    border-color: color-mix(in oklab, var(--text-h) 10%, transparent);
+}
+
+:global(:root:not([data-ui])) .todayCell{
+    border-top: 2px solid var(--primary);
+}
+
+:global(:root:not([data-ui])) .dropTarget,
+:global(:root:not([data-ui])) .dropTarget:hover{
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    border: none;
+    border-top: 2px dashed var(--primary);
+}
+
+:global(:root:not([data-ui])) .weekdayHead{
+    padding-left: 0.5rem;
+    font-weight: 500;
+}
+
+:global(:root:not([data-ui])) .weekNumCell{
+    border-top: 1px solid color-mix(in oklab, var(--text-h) 10%, transparent);
+}
+
+:global(:root:not([data-ui])) .focusBadge{
+    padding: 0;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.7rem;
+    color: var(--text-muted);
+    background: none;
+}
+
+:global(:root:not([data-ui])) .chip{
+    position: relative;
+    padding: 0.0625rem 0.25rem 0.0625rem 0.875rem;
+    font-size: 0.8125rem;
+    color: var(--text);
+    background: transparent;
+    border-left: none;
+    border-radius: 4px;
+}
+
+/* the entry's colour (its own, else its priority) as a dot before the name */
+:global(:root:not([data-ui])) .chip::before{
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: calc(0.0625rem + 0.7em - 0.1875rem);
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 50%;
+    background: var(--task-color, var(--chip-color));
+}
+
+:global(:root:not([data-ui])) .chip:where([data-task-color]){
+    background: transparent;
+}
+
+:global(:root:not([data-ui])) .chip:hover{
+    background: var(--hover-wash);
+}
+
+:global(:root:not([data-ui])) .chipEvent{
+    background: color-mix(in srgb, var(--task-color, var(--primary)) 14%, transparent);
+}
+
+:global(:root:not([data-ui])) .chipEvent:hover{
+    background: color-mix(in srgb, var(--task-color, var(--primary)) 22%, transparent);
+}
+
+:global(:root:not([data-ui])) .chipOverdue{
+    color: var(--danger);
+    background: transparent;
+}
+
+:global(:root:not([data-ui])) .chipDone{
+    color: var(--text-muted);
+    background: transparent;
+}
+
+:global(:root:not([data-ui])) .chipDone::before{
+    background: var(--text-muted);
+    opacity: 0.6;
+}
+
+:global(:root:not([data-ui])) .overdueBtn,
+:global(:root:not([data-ui])) .overdueBtn:hover{
+    padding-inline: 0.5rem;
+    color: var(--danger);
+    background: none;
+    border-color: transparent;
+}
+
+:global(:root:not([data-ui])) .overdueBtn:hover{
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+:global(:root:not([data-ui])) .nav > .navBtn{
+    background-color: transparent;
+    border-color: transparent;
+}
+
+:global(:root:not([data-ui])) .nav > .navBtn:hover{
+    background-color: var(--hover-wash);
+}
+
+/* the printed-planner month on phones: no room for the dot before a name, so the entry's colour
+   tints it instead; the day keeps a narrow inset so names get the width */
+@media (max-width: 640px) {
+    :global(:root:not([data-ui])) .cell{
+        min-height: 5.75rem;
+        padding: 0.375rem 0.125rem;
+    }
+
+    :global(:root:not([data-ui])) .chips .chip{
+        padding: 0.0625rem 0.125rem;
+        background: color-mix(in srgb, var(--task-color, var(--chip-color)) 14%, transparent);
+    }
+
+    :global(:root:not([data-ui])) .chips .chip::before{
+        display: none;
+    }
+
+    :global(:root:not([data-ui])) .chips .chipEvent{
+        background: color-mix(in srgb, var(--task-color, var(--primary)) 26%, transparent);
+    }
+
+    :global(:root:not([data-ui])) .chips .chipOverdue{
+        color: var(--danger);
+        background: color-mix(in srgb, var(--danger) 12%, transparent);
+    }
+
+    :global(:root:not([data-ui])) .chips .chipDone{
+        color: var(--text-muted);
+        background: transparent;
+    }
+}
+
+/* ---------- Phones: the toolbar as one row of icons ----------
+   Views behind the menu button, then month and year, then search, filters, back and forth. The
+   buttons are 44px targets with no gaps between them, so the title keeps as much width as it can. */
+
+.toolbarCompact{
+    gap: 0.5rem;
+    /* the icons' own padding lines them up with the grid's edges */
+    margin: 0.5rem 0 0.75rem;
+}
+
+.compactBar{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+}
+
+.menuWrap{
+    position: relative;
+    flex: none;
+}
+
+.barBtn{
+    position: relative;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    box-shadow: none;
+    transition: background-color 0.12s ease-out, color 0.12s ease-out;
+}
+
+.barBtn:hover{
+    color: var(--text-h);
+    background: var(--hover-wash);
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.barBtn:active{
+    transform: scale(0.96);
+}
+
+.barBtn:focus-visible{
+    outline: 2px solid var(--border-strong);
+    outline-offset: -2px;
+}
+
+/* search open, a filter set, a shared calendar shown: the button holds a soft fill */
+.barBtnOn,
+.barBtnOn:hover{
+    color: var(--text-h);
+    background: var(--surface-strong);
+}
+
+/* overdue tasks wait behind the menu: a small dot says so */
+.barDot{
+    position: absolute;
+    top: 0.625rem;
+    right: 0.625rem;
+    width: 0.4375rem;
+    height: 0.4375rem;
+    background: var(--danger);
+    border: 2px solid var(--bg);
+    border-radius: 50%;
+}
+
+/* how many filters are set */
+.barCount{
+    position: absolute;
+    top: 0.25rem;
+    right: 0.1875rem;
+    min-width: 1rem;
+    height: 1rem;
+    padding: 0 0.25rem;
+    box-sizing: border-box;
+    font-size: 0.625rem;
+    font-weight: 600;
+    line-height: 1rem;
+    text-align: center;
+    color: var(--bg);
+    background: var(--text-h);
+    border-radius: 999px;
+}
+
+.compactTitle{
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* the page titles' serif, at a size that leaves the icons their room (two classes beat the
+   app's one size for every h1, the way Home's greeting does it) */
+:global(:root:not([data-ui])) .compactTitle,
+.compactTitle{
+    font-size: 1.1875rem;
+    line-height: 1.2;
+}
+
+/* the views: a short menu under its button */
+.toolbarCompact .filterMenu{
+    right: 0;
+    left: auto;
+}
+
+.toolbarCompact .viewMenu{
+    left: 0;
+    right: auto;
+    width: 12rem;
+    gap: 0.125rem;
+    padding: 0.375rem;
+}
+
+.toolbarCompact .viewMenu .filterDivider{
+    margin: 0.25rem -0.375rem;
+}
+
+.viewItem{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0 0.75rem;
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--text-h);
+    text-align: left;
+    background: transparent;
+    border: none;
+    border-radius: calc(var(--radius) - 0.375rem);
+    box-shadow: none;
+}
+
+.viewItem:hover,
+.viewItem:focus-visible{
+    background: var(--hover-wash);
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.viewItem[aria-checked="true"]{
+    font-weight: 600;
+}
+
+.viewItemDanger{
+    color: var(--danger);
+}
+
+/* the phone's filters: the calendar picker spans the menu */
+.toolbarCompact .filterMenu .source{
+    flex: none;
+}
+
+.toolbarCompact .filterMenu .sourcePick{
+    flex: 1 1 auto;
+    max-width: none;
+}
+
+/* search, opened from the magnifier */
+.compactSearch{
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+}
+
+.compactSearch > svg{
+    position: absolute;
+    left: 0.75rem;
+    pointer-events: none;
+}
+
+.compactSearch input{
+    width: 100%;
+    height: 2.75rem;
+    padding: 0 2.75rem 0 2.25rem;
+    box-sizing: border-box;
+}
+
+/* the browser's own clear cross would sit beside ours */
+.compactSearch input::-webkit-search-cancel-button{
+    -webkit-appearance: none;
+}
+
+.searchClose{
+    position: absolute;
+    right: 0;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.searchClose:hover{
+    color: var(--text-h);
+    background: transparent;
+    box-shadow: none;
+    filter: none;
+    transform: none;
 }

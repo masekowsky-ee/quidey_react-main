@@ -9,6 +9,7 @@ import { setFocusTask, startFocus } from '../../features/session/sessionAction';
 import { showToast } from '../../features/toast/toast';
 import { fill, formatDate } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
+import GoalShape from './GoalShape.jsx';
 import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
 import Icon from '../icons.jsx';
 import { Bone, Skeleton } from '../skeleton/Skeleton.jsx';
@@ -208,7 +209,9 @@ export default function GoalView({ goalId }) {
             <Link to={`/study/${goal.subjectId}`} className={styles.back}>{subject ? subject.name : t('studyBackSubject')}</Link>
             <header className={styles.head}>
                 <div>
-                    <h1 className={styles.title}>{goal.name}</h1>
+                    <h1 className={styles.title}>
+                        <GoalShape shape={goal.shape} size={22} color={subject?.color} className={styles.titleShape} /> {goal.name}
+                    </h1>
                     <p className={styles.subtitle}>
                         {[t(`studyKind_${goal.kind}`), `${formatDate(goal.due)}${goal.dueTime ? ` ${goal.dueTime}` : ''}`, countdownText(goal.due, t)].join(' · ')}
                         {behind && <> <span className={styles.badge}>{t('studyBehind')}</span></>}

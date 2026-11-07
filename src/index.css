@@ -12,6 +12,13 @@
   --border-strong: #5a5550;   /* controls, hover outlines */
   --control-border: #34312e;  /* resting field and button edges */
 
+  /* page panels: in the dark they rise like any surface; in the light (below) they are one tonal
+     step darker than the paper, so the white sheet (--surface) stands out as the one lifted thing */
+  --panel: var(--surface);
+  --panel-edge: transparent;
+  /* the one lifted sheet on a page (Home's task in focus): a clear step above the panels */
+  --sheet: color-mix(in oklab, var(--surface), var(--text-h) 6%);
+
   --text: #d9d4cf;
   --text-h: #f4f3f1;
   --text-muted: #9b958f;      /* 4.5:1 on every surface up to --surface-strong */
@@ -79,13 +86,15 @@
   --material-blur: blur(20px) saturate(170%);
   --material-edge: color-mix(in srgb, var(--text-h) 9%, transparent);
 
-  /* Type: size, leading and tracking as one set per step. Big type gets tighter (negative)
-     tracking and tighter leading, small type a little air; Inter's optical sizes do the rest
-     (main.jsx loads its opsz axis). */
-  --type-large: 700 2rem/1.12 var(--sans);       /* page titles */
-  --track-large: -0.024em;
-  --type-title: 650 1.375rem/1.2 var(--sans);
-  --track-title: -0.019em;
+  /* Type: size, leading and tracking as one set per step. Page titles are set in Newsreader,
+     the serif (its optical sizes do the rest, main.jsx loads the opsz axis); everything you work
+     with is Instrument Sans. Big type gets tighter tracking and leading, small type a little air. */
+  --type-display: 400 3.375rem/1.05 var(--serif);  /* Home's greeting */
+  --track-display: -0.022em;
+  --type-large: 400 2.25rem/1.08 var(--serif);    /* page titles */
+  --track-large: -0.018em;
+  --type-title: 600 1.375rem/1.2 var(--sans);
+  --track-title: -0.016em;
   --type-headline: 600 1.0625rem/1.3 var(--sans);
   --track-headline: -0.013em;
   --type-footnote: 500 0.8125rem/1.35 var(--sans);
@@ -116,12 +125,17 @@
   --z-menu-overlay: 400;
   --z-menu: 410;
 
-  --sans: 'Inter Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: 'Instrument Sans Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --serif: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
   --mono: ui-monospace, Consolas, monospace;
+  /* the width the pages and the header's row line up on (centred, with --page-gutter beside it) */
+  --content-w: 70rem;
+  /* where a narrower page starts: on the header's left edge, the line every page title stands on */
+  --page-start: max(var(--page-gutter, 1rem), calc((100% - var(--content-w)) / 2));
 
   /* 100%: a larger text size set in the browser grows the whole app (everything is in rem) */
   font: 100%/1.5 var(--sans);
-  letter-spacing: -0.006em;
+  letter-spacing: 0;
   font-optical-sizing: auto;
   color-scheme: dark;
   color: var(--text);
@@ -137,21 +151,26 @@
 /* Light theme: same tokens, light values. Set on <html> by the theme setting
    (and before the first paint by the script in index.html). */
 :root[data-theme="light"] {
-  /* warm paper white; white cards on it, a whisper of an edge */
-  --bg: #f5f5f3;
-  --surface-inset: #eeedeb;
-  --surface-bar: #f5f5f3;
+  /* warm paper; page panels one tonal step darker than it (every light palette derives them the
+     same way), the white sheet for what is lifted (the task in focus, dialogs, menus) and white
+     fields, so they read on the panels */
+  --bg: #f4f3ef;
+  --surface-inset: #fbfaf8;
+  --surface-bar: #f4f3ef;
   --surface: #ffffff;
-  --surface-hover: #f1f0ee;
-  --surface-strong: #e6e5e2;
+  --surface-hover: #efede8;
+  --surface-strong: #e3e0d9;
+  --panel: color-mix(in oklab, var(--bg), var(--text-h) 4.5%);
+  --panel-edge: transparent;
+  --sheet: #ffffff;
 
-  --border: #e9e8e5;
+  --border: #e2dfd8;
   --border-strong: #57524d;
-  --control-border: #d5d3cf;
+  --control-border: #d3cfc7;
 
   --text: #2e2b28;
   --text-h: #151413;
-  --text-muted: #6b6560;
+  --text-muted: #67615b;
 
   --primary: #f97316;
   --primary-text: #1c0a00;
@@ -203,6 +222,9 @@
 :root[data-theme="light"][data-accent="sunset"] { --primary: #f97316; --primary-text: #1c0a00; --primary-fg: #c2410c; }
 :root[data-theme="light"][data-accent="rose"]   { --primary: #f43f5e; --primary-text: #ffffff; --primary-fg: #be123c; }
 :root[data-theme="light"][data-accent="gold"]   { --primary: #eab308; --primary-text: #1f1700; --primary-fg: #a16207; }
+/* "Tanne": the deep green of the Papier scheme, as ink on paper; a lighter green on the dark ground */
+:root[data-accent="pine"]   { --primary: #5cc49f; --primary-text: #062018; --primary-fg: #6fd0ab; }
+:root[data-theme="light"][data-accent="pine"]   { --primary: #1e6b55; --primary-text: #ffffff; --primary-fg: #1e6b55; }
 
 /* Colour palettes, chosen in the settings (<html data-palette>): the ground the app stands on,
    for dark and light. "warm" (the warm near-black and paper white above) is the default; the
@@ -335,6 +357,36 @@
   --text-h: #ffffff;
   --text-muted: #9a9a9a;
 }
+/* "Papier": cool paper with ink, like a printed timetable; the dark rendition is the same paper
+   at night, a green-grey slate */
+:root[data-palette="papier"] {
+  --bg: #111311;
+  --surface-bar: #111311;
+  --surface-inset: #0b0c0b;
+  --surface: #1a1c1a;
+  --surface-hover: #222522;
+  --surface-strong: #2d302d;
+  --border: #252825;
+  --border-strong: #5a605a;
+  --control-border: #333733;
+  --text: #d8dbd5;
+  --text-h: #f1f3ef;
+  --text-muted: #969c94;
+}
+:root[data-theme="light"][data-palette="papier"] {
+  --bg: #f3f3f0;
+  --surface-bar: #f3f3f0;
+  --surface-inset: #fbfbf9;
+  --surface: #ffffff;
+  --surface-hover: #ecece7;
+  --surface-strong: #dedfd8;
+  --border: #e0e0d9;
+  --border-strong: #4f4f49;
+  --control-border: #d0d0c8;
+  --text: #2b2b27;
+  --text-h: #1b1b19;
+  --text-muted: #63635c;
+}
 :root[data-theme="light"][data-palette="mono"] {
   --bg: #ffffff;
   --surface-bar: #ffffff;
@@ -412,6 +464,22 @@ h1 {
   line-height: 1.18;
   letter-spacing: -0.021em;
   margin: 1.5rem 0;
+}
+
+/* The app's own look: every page title is the serif at one size, whatever a page's module says
+   (one rule instead of a size per page, so the titles match from page to page). Testers'
+   interface variants ([data-ui]) keep their own. A title that needs to be bigger (Home's greeting)
+   sets it with two classes. */
+:root:not([data-ui]) h1 {
+  font: var(--type-large);
+  letter-spacing: var(--track-large);
+  color: var(--text-h);
+}
+
+@media (max-width: 720px) {
+  :root:not([data-ui]) h1 {
+    font-size: 1.875rem;
+  }
 }
 
 h2 {
@@ -492,7 +560,7 @@ code {
 /* a press settles the button into the page the moment the finger lands (not on release);
    letting go springs it back */
 :where(button:not(:disabled):active) {
-  transform: scale(0.97);
+  transform: scale(0.96);
   transition-duration: var(--press);
 }
 
@@ -520,7 +588,7 @@ code {
 }
 
 :where(button:has(svg):not(:disabled):active) {
-  transform: scale(0.92);
+  transform: scale(0.96);
   transition-duration: var(--press);
 }
 
@@ -821,6 +889,9 @@ code {
     align-items: flex-end;
     place-items: end stretch;
     padding: 0;
+    /* on top of the on-screen keyboard while it is up (features/layout/keyboardInset.js), not
+       behind it */
+    padding-bottom: var(--keyboard-inset, 0px);
     overscroll-behavior: contain;
   }
 
@@ -831,7 +902,7 @@ code {
     box-sizing: border-box;
     width: 100%;
     max-width: none;
-    max-height: 92dvh;
+    max-height: calc(92dvh - var(--keyboard-inset, 0px));
     margin: 0;
     padding-top: 1.5rem;
     padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
@@ -957,4 +1028,9 @@ code {
   :root {
     scroll-behavior: auto !important;
   }
+}
+
+/* the streak in the accent, in the app's own look (interface variants set their own ink) */
+:root:not([data-ui]) {
+  --streak-ink: var(--primary);
 }

@@ -119,6 +119,29 @@
     composes: iconBtn from './ui.module.css';
 }
 
+/* a new entry on this day: the new-task form opens on it */
+.addDayBtn{
+    composes: iconBtnRound from './ui.module.css';
+}
+
+.head > .addDayBtn{
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    margin-left: 0.25rem;
+    color: var(--text-h);
+    background-color: var(--surface);
+    border: 1px solid var(--btn-border);
+    corner-shape: round;
+}
+
+@media (pointer: coarse) {
+    .head > .addDayBtn{
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+}
+
 .head > .closeBtn{
     width: 2rem;
     height: 2rem;
@@ -795,3 +818,543 @@
 /* the chevron points right while closed, down while open */
 .moreChevron{ display: inline-flex; transition: transform var(--ease); }
 .moreChevronOpen{ transform: rotate(90deg); }
+
+/* ---------- The day as a timeline ----------
+   An all-day row on top, then 24 hours in one column that scrolls on its own; the head, the add
+   field and the all-day row stay put. Blocks sit at their time and length, overlapping ones side
+   by side. --hour is one hour's height (taller on touch screens, so a short block can be hit). */
+
+.panelTimeline{
+    height: min(86vh, 780px);
+    height: min(86dvh, 780px);
+    overflow: hidden;
+}
+
+.timelineWrap{
+    --gutter: 3.25rem;
+    --hour: 3rem;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (pointer: coarse) {
+    .timelineWrap{
+        --hour: 3.75rem;
+    }
+}
+
+.srOnly{
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* --- entries without a time --- */
+
+.allDay{
+    /* the hours below give way, not this row */
+    flex: none;
+    display: grid;
+    grid-template-columns: var(--gutter) minmax(0, 1fr);
+    align-items: start;
+    max-height: 8.5rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.25rem 0 0.5rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--text-h) 12%, transparent);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    transition: background-color 0.14s ease-out;
+}
+
+.allDayLabel{
+    padding: 0.45rem 0.5rem 0 0;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: right;
+    color: var(--text-muted);
+}
+
+.allDayList{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.allDayEmpty{
+    padding: 0.35rem 0.5rem;
+    min-height: 1.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+/* --- the hours --- */
+
+.timeline{
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    outline: none;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--text-h) 22%, transparent) transparent;
+}
+
+.hours{
+    position: relative;
+    height: calc(24 * var(--hour));
+    margin: 0.5rem 0 0.75rem;
+}
+
+.hourRow{
+    position: relative;
+    height: var(--hour);
+}
+
+/* the hour's line starts after the labels */
+.hourRow::after{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: var(--gutter);
+    right: 0;
+    border-top: 1px solid color-mix(in oklab, var(--text-h) 9%, transparent);
+}
+
+.hourRow:first-child::after{
+    border-top-color: transparent;
+}
+
+.hourLabel{
+    position: absolute;
+    top: -0.6em;
+    left: 0;
+    width: calc(var(--gutter) - 0.5rem);
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    text-align: right;
+    color: var(--text-muted);
+}
+
+.blocks{
+    position: absolute;
+    inset: 0 0 0 var(--gutter);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- an entry: a block on the hours, a row in the all-day list --- */
+
+.block,
+.allDayItem{
+    --chip-color: var(--primary);
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    min-width: 0;
+    box-sizing: border-box;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: var(--text-h);
+    background: color-mix(in srgb, var(--task-color, var(--chip-color)) 13%, var(--surface));
+    border-radius: 6px;
+    transition: background-color 0.14s ease-out, opacity 0.14s ease-out;
+}
+
+.block{
+    position: absolute;
+    top: calc(var(--start) * var(--hour) / 60);
+    left: calc(var(--col) * 100% / var(--cols));
+    width: calc(100% / var(--cols) - 3px);
+    height: calc(var(--length) * var(--hour) / 60 - 2px);
+    overflow: hidden;
+}
+
+.allDayItem{
+    min-height: 2rem;
+}
+
+@media (pointer: coarse) {
+    .allDayItem{
+        min-height: 2.75rem;
+    }
+}
+
+.block:hover,
+.allDayItem:hover{
+    background: color-mix(in srgb, var(--task-color, var(--chip-color)) 20%, var(--surface));
+}
+
+/* an event is a block of time: a fuller tint of its colour */
+.entryEvent{
+    background: color-mix(in srgb, var(--task-color, var(--primary)) 26%, var(--surface));
+}
+
+.entryEvent:hover{
+    background: color-mix(in srgb, var(--task-color, var(--primary)) 33%, var(--surface));
+}
+
+.entryDone,
+.entryDone:hover{
+    color: var(--text-muted);
+    background: color-mix(in oklab, var(--text-h) 5%, var(--surface));
+}
+
+.entryDone .entryName{
+    text-decoration: line-through;
+}
+
+.entryOverdue .entryName{
+    color: var(--danger);
+}
+
+/* a coming repeat: only an outline until it's real */
+.entryPreview,
+.entryPreview:hover{
+    background: transparent;
+    outline: 1px dashed color-mix(in srgb, var(--task-color, var(--chip-color)) 60%, transparent);
+    outline-offset: -1px;
+}
+
+/* the entry being dragged stays as a trace where it was */
+.entryDragging{
+    opacity: 0.35;
+}
+
+/* the entry's text: time, name, details, labels. Secondary text in it is mixed from the ink and
+   the entry's own colour, never a plain grey on the tint */
+.entryText{
+    --text-muted: color-mix(in oklab, var(--text-h) 70%, var(--task-color, var(--chip-color)));
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.0625rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+.blockCheck + .entryText{
+    padding-left: 0;
+}
+
+.allDayItem .entryText{
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 0.5rem;
+}
+
+/* the name opens the entry; its hit area covers the whole entry */
+.entryOpen{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    background: none;
+    border: none;
+    box-shadow: none;
+    cursor: inherit;
+}
+
+.entryOpen::after{
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+}
+
+.entryOpen:hover,
+.entryOpen:active{
+    background: none;
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.entryOpen:focus-visible{
+    outline: none;
+}
+
+.entryOpen:focus-visible::after{
+    outline: 2px solid var(--border-strong);
+    outline-offset: -2px;
+}
+
+/* the entry's own controls stay clickable above that */
+.blockCheck,
+.entryText :is(a, button:not([data-entry-open])){
+    position: relative;
+    z-index: 1;
+}
+
+.block,
+.allDayItem{
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    /* a long press lifts the entry to drag it, it doesn't open the browser's menu */
+    -webkit-touch-callout: none;
+}
+
+.allDayItem{
+    position: relative;
+}
+
+.block:active,
+.allDayItem:active{
+    cursor: grabbing;
+}
+
+.entryName{
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.blockTime{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.6875rem;
+    color: color-mix(in oklab, var(--text-h) 72%, var(--task-color, var(--chip-color)));
+}
+
+.entryDone .blockTime{
+    color: inherit;
+}
+
+.entryMeta{
+    max-width: 100%;
+    font-size: 0.6875rem;
+    color: color-mix(in oklab, var(--text-h) 72%, var(--task-color, var(--chip-color)));
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* a short block: time and name on one line */
+.block[data-short] .entryText{
+    flex-direction: row;
+    align-items: center;
+    gap: 0.375rem;
+    padding-block: 0;
+}
+
+.block[data-short] .entryName{
+    -webkit-line-clamp: 1;
+}
+
+
+/* ticking off: the whole height of the entry is the target, the circle shows the state */
+.blockCheck{
+    flex: none;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 1.875rem;
+    margin: 0;
+    padding: 0.3rem 0 0;
+    background: none;
+    border: none;
+    border-radius: inherit;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+.allDayItem .blockCheck,
+.block[data-short] .blockCheck{
+    align-items: center;
+    padding-top: 0;
+}
+
+@media (pointer: coarse) {
+    .blockCheck{
+        width: 2.75rem;
+    }
+}
+
+.blockCheck:hover{
+    background: none;
+    box-shadow: none;
+    filter: none;
+    transform: none;
+}
+
+.checkCircle{
+    display: grid;
+    place-items: center;
+    width: 1rem;
+    height: 1rem;
+    box-sizing: border-box;
+    color: transparent;
+    border: 1.5px solid var(--task-color, var(--chip-color));
+    border-radius: 50%;
+    transition: background-color 0.14s ease-out, color 0.14s ease-out;
+}
+
+.blockCheck:hover .checkCircle{
+    color: var(--text-muted);
+}
+
+.blockCheck[aria-pressed="true"] .checkCircle{
+    color: var(--primary-text);
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.blockCheck:focus-visible{
+    outline: 2px solid var(--border-strong);
+    outline-offset: -2px;
+}
+
+/* --- while dragging --- */
+
+/* where the entry lands: lifted above the others, its new time on it */
+.dropPreview{
+    --chip-color: var(--primary);
+    position: absolute;
+    z-index: 2;
+    top: calc(var(--start) * var(--hour) / 60);
+    left: var(--gutter);
+    right: 0;
+    height: calc(var(--length) * var(--hour) / 60 - 2px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.0625rem;
+    box-sizing: border-box;
+    padding: 0.25rem 0.5rem;
+    overflow: hidden;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: var(--text-h);
+    background: color-mix(in srgb, var(--task-color, var(--chip-color)) 30%, var(--surface));
+    outline: 1px solid var(--task-color, var(--chip-color));
+    outline-offset: -1px;
+    border-radius: 6px;
+    box-shadow: var(--shadow-float);
+    pointer-events: none;
+}
+
+.dropPreview .blockTime{
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+/* a place that takes the dragged entry: the all-day row, the arrows for another day */
+.dropOn,
+.head > .dropOn{
+    background-color: color-mix(in srgb, var(--primary) 14%, var(--surface));
+    outline: 1.5px solid var(--primary);
+    outline-offset: -1.5px;
+}
+
+/* following the pointer off the hours; above a finger, since it would cover it */
+.dragChip{
+    position: fixed;
+    z-index: calc(var(--z-modal) + 10);
+    max-width: 14rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    color: var(--text-h);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background-color: var(--surface);
+    border: 1px solid var(--btn-border-hover);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-float);
+    pointer-events: none;
+    transform: translate(12px, 8px);
+}
+
+@media (pointer: coarse) {
+    .dragChip{
+        transform: translate(-50%, calc(-100% - 1.75rem));
+    }
+}
+
+/* --- now --- */
+
+.nowLine{
+    position: absolute;
+    z-index: 3;
+    top: calc(var(--start) * var(--hour) / 60);
+    left: calc(var(--gutter) - 0.25rem);
+    right: 0;
+    border-top: 1.5px solid var(--primary);
+    pointer-events: none;
+}
+
+.nowDot{
+    position: absolute;
+    top: calc(-0.25rem - 0.75px);
+    left: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--primary);
+}
+
+/* the focus sessions follow the hours */
+.timeline > .focus{
+    margin: 0 0 0.5rem;
+}
+
+@media (max-width: 640px) {
+    .panelTimeline{
+        height: 90vh;
+        height: 90dvh;
+    }
+
+    .timelineWrap{
+        --gutter: 2.75rem;
+    }
+}
+
+/* a free spot under the mouse: where a click adds an entry */
+.hours{
+    cursor: copy;
+}
+
+.slotHover{
+    position: absolute;
+    z-index: 0;
+    top: calc(var(--start) * var(--hour) / 60);
+    left: var(--gutter);
+    right: 0;
+    height: calc(30 * var(--hour) / 60 - 2px);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    box-sizing: border-box;
+    padding: 0 0.5rem;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    background: var(--hover-wash);
+    border-radius: 6px;
+    pointer-events: none;
+}

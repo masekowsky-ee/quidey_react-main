@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { fetchSubjects, saveSubject, selectSubjects } from '../../features/study/study';
 import { showToast } from '../../features/toast/toast';
 import { groupColorAttr } from '../../features/tasks/taskColors';
+import TaskColorButton from '../task/TaskColorButton.jsx';
+import GoalShape from './GoalShape.jsx';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import Icon from '../icons.jsx';
@@ -14,7 +16,7 @@ import styles from './Study.module.css';
 
 const NAME_MAX = 60;
 
-function SubjectRow({ subject, onArchive }) {
+function SubjectRow({ subject, onArchive, onColor }) {
     const { t } = useTranslation();
     const goal = subject.nextGoal;
     return (
@@ -26,7 +28,7 @@ function SubjectRow({ subject, onArchive }) {
                 </span>
                 {goal ? (
                     <span className={styles.meta}>
-                        <span>{goal.name}</span>
+                        <span><GoalShape shape={goal.shape} /> {goal.name}</span>
                         <span>{countdownText(goal.due, t)}</span>
                         {goal.behindMinutes > 0 && <span className={styles.badge}>{t('studyBehind')}</span>}
                         <ProgressBar value={goal.progress} label={goal.name} />
@@ -35,6 +37,7 @@ function SubjectRow({ subject, onArchive }) {
                     <span className={styles.meta}>{t('studyNoGoal')}</span>
                 )}
             </Link>
+            <TaskColorButton task={subject} label={t('studySubjectColor')} onChange={(color) => onColor(subject, color)} />
             <button type="button" className={styles.iconButton} onClick={() => onArchive(subject)}
                 aria-label={`${subject.archived ? t('studyUnarchive') : t('studyArchive')}: ${subject.name}`}
                 title={subject.archived ? t('studyUnarchive') : t('studyArchive')}>
@@ -73,6 +76,8 @@ export default function SubjectList() {
 
     const archive = (subject) => dispatch(saveSubject(subject.id, { archived: !subject.archived }))
         .catch((err) => dispatch(showToast(errorText(err), 'error')));
+    const recolor = (subject, color) => dispatch(saveSubject(subject.id, { color }))
+        .catch((err) => dispatch(showToast(errorText(err), 'error')));
 
     const active = subjects.filter(s => !s.archived);
     const archived = subjects.filter(s => s.archived);
@@ -107,14 +112,14 @@ export default function SubjectList() {
                 <>
                     {active.length === 0
                         ? <p className={styles.empty}>{t('studySubjectsEmpty')}</p>
-                        : <ul className={styles.list}>{active.map(s => <SubjectRow key={s.id} subject={s} onArchive={archive} />)}</ul>}
+                        : <ul className={styles.list}>{active.map(s => <SubjectRow key={s.id} subject={s} onArchive={archive} onColor={recolor} />)}</ul>}
                     {archived.length > 0 && (
                         <div className={styles.group}>
                             <button type="button" className={styles.groupToggle} aria-expanded={showArchived}
                                 onClick={() => setShowArchived(v => !v)}>
                                 <Icon name="chevronDown" size={16} /> {fill(t('studyArchived'), { n: archived.length })}
                             </button>
-                            {showArchived && <ul className={styles.list}>{archived.map(s => <SubjectRow key={s.id} subject={s} onArchive={archive} />)}</ul>}
+                            {showArchived && <ul className={styles.list}>{archived.map(s => <SubjectRow key={s.id} subject={s} onArchive={archive} onColor={recolor} />)}</ul>}
                         </div>
                     )}
                 </>

@@ -3,7 +3,7 @@
 
 .page {
     composes: page from '../ui.module.css';
-    width: min(84rem, calc(100% - 2 * var(--page-gutter, 1rem)));
+    width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
     margin: 0 auto;
     padding-bottom: 5rem;
     box-sizing: border-box;

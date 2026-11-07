@@ -134,7 +134,7 @@ export default function FocusTimer() {
                 </svg>
                 <div className={styles.ringCenter}>
                     {isPomodoro && <span className={styles.phase}>{t(PHASE_LABEL[pomodoro.phase])}</span>}
-                    <span className={styles.bigTime} role="timer" aria-live="off">{formatClock(timer.time)}</span>
+                    <span className={styles.bigTime} role="timer" aria-live="off">{formatClock(timer.time).replace(/^00:/, '')}</span>
                     {isPomodoro &&
                         <span className={styles.roundDots} aria-label={fill(t('pomodoroRoundOf'), { round: inCycle + (pomodoro.phase === 'focus' ? 1 : 0), every: pomodoro.config.every })}>
                             {Array.from({ length: pomodoro.config.every }, (_, i) =>

@@ -94,14 +94,14 @@
     padding: 0;
     border: none;
     min-width: 0;
+    text-align: left;
 }
 
 .colorsLegend{
     padding: 0;
-    margin-bottom: 0.35rem;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
+    margin-bottom: 0.4rem;
+    font-size: 0.875rem;
+    font-weight: 500;
     color: var(--text-muted);
 }
 
@@ -167,6 +167,29 @@
 .swatch input:focus-visible + .swatchDot{
     outline: 2px solid var(--border-strong);
     outline-offset: 4px;
+}
+
+/* the last swatch: the colour wheel (a ring of every hue), or the own colour once there is one */
+.ownSwatch{
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.ownDot{
+    background:
+        radial-gradient(closest-side, var(--surface) 38%, transparent 40%),
+        conic-gradient(#f87171, #facc15, #4ade80, #2dd4bf, #60a5fa, #a78bfa, #f472b6, #f87171);
+}
+
+.ownSwatch:hover .swatchDot{
+    transform: scale(1.12);
+}
+
+.ownSwatch[aria-pressed="true"] .swatchDot{
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--task-color, var(--text-muted));
 }
 
 /* the dot in the task list that opens the swatches */
@@ -416,8 +439,8 @@
     flex-direction: row;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 0.15rem 0.7rem;
-    font-size: 0.8rem;
+    gap: 0.125rem 0.75rem;
+    font-size: inherit;
     color: var(--text-muted);
 }
 
@@ -425,10 +448,6 @@
     font-weight: 600;
     color: var(--text);
     font-variant-numeric: tabular-nums;
-}
-
-.metaLocation::before{
-    content: '⌖ ';
 }
 
 /* an event's type: a dot in its colour and the name */
@@ -448,7 +467,7 @@
     background-color: var(--task-color, var(--text-muted));
 }
 
-/* a task's planned time; once there is focus time, how much of it with a small bar */
+/* a task's planned time; once there is focus time, how much of it ("1 h / 2 h") */
 .metaPlanned{
     display: inline-flex;
     align-items: center;
@@ -456,28 +475,6 @@
     font-variant-numeric: tabular-nums;
 }
 
-.metaPlannedBar{
-    position: relative;
-    width: 2.5rem;
-    height: 4px;
-    border-radius: 999px;
-    background-color: var(--surface-strong);
-    overflow: hidden;
-}
-
-.metaPlannedBar::after{
-    content: '';
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: calc(var(--share, 0) * 100%);
-    border-radius: inherit;
-    background-color: var(--primary);
-}
-
-/* more focus than planned: the bar is full and turns warm */
-.metaPlannedBar[data-over]::after{
-    background-color: var(--warning, #d97706);
-}
 
 .metaLink{
     color: var(--primary-fg);

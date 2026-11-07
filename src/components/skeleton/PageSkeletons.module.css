@@ -8,7 +8,7 @@
 /* Calendar, Gemeinschaft */
 .wide{
     composes: page from '../ui.module.css';
-    width: min(1180px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
     margin: 0 auto;
     padding-bottom: 4rem;
     box-sizing: border-box;
@@ -18,7 +18,7 @@
 /* Settings, the inbox's split view (not composed from pageColumn: its width would win) */
 .medium{
     composes: page from '../ui.module.css';
-    width: min(1100px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
     margin: 0 auto;
     padding-bottom: 4rem;
     box-sizing: border-box;
@@ -36,7 +36,7 @@
 /* Statistics */
 .stats{
     composes: pageColumn from '../ui.module.css';
-    width: min(760px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
 }
 
 .title{
@@ -528,7 +528,7 @@ div.communityTabs > button{
 
 .brand{
     width: min(680px, calc(100% - 2 * var(--page-gutter, 1rem)));
-    margin: 0 auto;
+    margin: 0 auto 0 var(--page-start);
     padding: calc(1.5rem + env(safe-area-inset-top, 0px)) 0 0;
     display: flex;
     align-items: center;

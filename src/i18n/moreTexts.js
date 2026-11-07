@@ -29,6 +29,13 @@ const moreTexts = {
         palette_forest: 'Wald',
         palette_plum: 'Pflaume',
         palette_mono: 'Mono',
+        palette_papier: 'Papier',
+        // a palette with its accent in one go
+        schemeSetting: 'Farbschema',
+        schemeSettingHint: 'Grundton und Akzent zusammen. Darunter kannst du beides einzeln ändern.',
+        schemeAbendrot: 'Glut mit Abendrot',
+        schemePapier: 'Papier mit Tanne',
+        accentPine: 'Tanne',
 
         // ---------- the tour in the settings ----------
         settingsTourHint: 'Die kurze Tour durch Quidey: was wo ist und wie es zusammenspielt.',
@@ -62,7 +69,7 @@ const moreTexts = {
 
         // ---------- Home: the motivation strip ----------
         momentumTitle: 'Dein Schwung',
-        momentumToday: 'Heute',
+        momentumToday: 'Herausforderungen',
         momentumChallengesDone: '{done} von {all}',
         momentumFriends: 'Freunde',
         momentumNoFriends: 'Zusammen hält man länger durch: Lerne mit Freunden, feuert euch an und vergleicht eure Serien.',
@@ -145,6 +152,13 @@ const moreTexts = {
         palette_forest: 'Forest',
         palette_plum: 'Plum',
         palette_mono: 'Mono',
+        palette_papier: 'Paper',
+        // a palette with its accent in one go
+        schemeSetting: 'Colour scheme',
+        schemeSettingHint: 'Ground tone and accent together. You can change each of them below.',
+        schemeAbendrot: 'Ember with Sunset',
+        schemePapier: 'Paper with Pine',
+        accentPine: 'Pine',
 
         // ---------- the tour in the settings ----------
         settingsTourHint: 'The short tour of Quidey: what is where and how it fits together.',
@@ -178,7 +192,7 @@ const moreTexts = {
 
         // ---------- Home: the motivation strip ----------
         momentumTitle: 'Your momentum',
-        momentumToday: 'Today',
+        momentumToday: 'Challenges',
         momentumChallengesDone: '{done} of {all}',
         momentumFriends: 'Friends',
         momentumNoFriends: 'It is easier to keep going together: study with friends, cheer each other on and compare your streaks.',

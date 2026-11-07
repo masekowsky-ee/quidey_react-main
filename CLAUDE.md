@@ -22,7 +22,8 @@ Everything for the app is written here first; the Android repo takes it over wit
 ## Frontend stack
 
 - React 19 + Vite 8, plain JavaScript (no TypeScript), CSS Modules (most modules
-  `composes:` shared classes from `src/components/ui.module.css`), Inter via `@fontsource-variable`.
+  `composes:` shared classes from `src/components/ui.module.css`), Instrument Sans (UI) and Newsreader
+  (serif, opsz axis: page titles, Home's greeting, big figures) via `@fontsource-variable`.
 - State: Redux (`configureStore` + classic reducers/action types + thunks), slices in
   `src/features/rootReducer.js`: `task`, `session`, `auth`, `settings`, `friends`, `together`,
   `toast`, `inbox`, `news`, `family`, `feed`, `progress`, `presence` (who is online: user id →
@@ -50,10 +51,12 @@ Everything for the app is written here first; the Android repo takes it over wit
   (`--scrim-blur`, on the backdrop's `::before`; `data-scrim` / `data-scrim-layer` for
   backdrops that aren't sheets). Other dialogs (popovers, command bar) materialise (scale +
   blur). The drawer menu is pushed closed the same way
-  (`useDragDismiss`, axis x). Header and tab bar are translucent (`--material-bar`, blur on a
-  `::before`, only without `data-ui`), the header's hairline appears once content scrolls under
-  it; reduce transparency / more contrast make them solid. Type: Inter with its opsz axis,
-  `--type-*` / `--track-*` (tighter tracking as size grows). Haptics ride on `playSound` for the
+  (`useDragDismiss`, axis x). The header is translucent (`--material-bar`, blur on a
+  `::before`, only without `data-ui`), the tab bar a floating liquid-glass capsule (blur on the
+  capsule itself), the header's hairline appears once content scrolls under
+  it; reduce transparency / more contrast make them solid. Type: `--sans` Instrument Sans,
+  `--serif` Newsreader; `--type-*` / `--track-*` (`--type-display` Home's greeting, `--type-large` every
+  page title: `:root:not([data-ui]) h1` sets it in index.css). Haptics ride on `playSound` for the
   big moments (`HAPTICS` in sound.js), theme changes cross-fade (View Transitions).
 - Sound: `src/features/settings/sound.js`, synthesised with the Web Audio API (no files), one
   voice (sine bell + octave + glassy tine, a short echo, A major pentatonic, motif E → A).
@@ -105,11 +108,25 @@ Order of checks on every render:
    opens by itself once let in).
 5. Pro → full app in the frame `AppShell.module.css`: `Header`, `Menu`, `TabBar`, `Toaster`,
    `Tutorial`, animated page routes in `<main>`. Widths (`src/features/layout/breakpoints.js`,
-   `useMediaQuery`): ≥1100px the `Menu` is a fixed sidebar and the header starts beside it;
+   `useMediaQuery`): ≥1100px the app's own look (`current`, nav model `bar`) has no sidebar: the header
+   carries the main places as words (`TopNav inline`: Start, Kalender, Fokusraum, Lernen for testers,
+   Sozial, Postfach, Statistiken, then "Mehr" opening the drawer), and header and pages line up on
+   `--content-w` (70rem; narrower pages start at `--page-start`, the same left edge);
    721–1099px the menu is a drawer behind the header's button; ≤720px a bottom `TabBar` (Start,
-   Kalender, Fokus, Sozial, Mehr → drawer; equal columns edge to edge, the current tab marked by a
-   neutral pill behind a bolder icon that slides between tabs, layoutId, only "Mehr" while the menu is
-   open) replaces the header's button. The shell sets
+   Kalender, Fokus, Sozial, Mehr → drawer; icons only, the words for screen readers; a capsule
+   floating 0.75rem above the bottom edge, the current tab marked by a neutral pill behind a bolder
+   icon that slides between tabs (one CSS track in the capsule, `--tab` index, not a layoutId:
+   a shared layout animation flew in from the old scroll position), only "Mehr" while the menu is open; swiped down it sinks
+   away and leaves a handle at the bottom edge, a tap or a swipe up brings it back, `data-collapsed`,
+   the shell's `--tabbar-h` follows via `:has`) replaces the header's button. A sideways swipe on the page
+   (`features/layout/tabSwipe.js`, phones) goes to the tab beside it: the page follows the finger,
+   slides out, the next slides in (`pageSwipeMotion`, via `location.state.tabSwipe`); past Start the
+   drawer comes from the left, past Sozial from the right (`openMenu(side)`, `settings.menuSide`,
+   `.fromRight`; it goes back to the left once closed). Swipes are left alone on inputs, sideways
+   scrollers, anything with its own `touch-action`, and `[data-no-tab-swipe]`. Sheets stand on the
+   on-screen keyboard: `features/layout/keyboardInset.js` keeps `--keyboard-inset` on `<html>`
+   (visualViewport). Home's task list: in "All" the study plan's later sessions (`task.study`,
+   due after today) fold into one row; a long list scrolls inside (`.list[data-scrolls]`). The shell sets
    `--sidebar-w`, `--tabbar-h` and `--page-gutter`; fixed parts (toasts, timer button) and every
    page container use them. The closed drawer is `inert`; `setShowMenu(true|false)` (no argument
    toggles). Menu (Hick's law: few choices at once): Start, Kalender, Gemeinschaft, Postfach,
@@ -179,7 +196,15 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
 
 ## Pages / features
 
-- `/` Home — layout `solo` or `team` (`TeamHome`), switchable in settings. Solo (`Home.jsx`):
+- `/` Home — layout `solo` or `team` (`TeamHome`), switchable in settings. **The app's own look (direction
+  B, `uiVariant` `current`)**: the greeting (serif, first name) with the task in focus as a grey second line, the
+  day said in sentences (`DaySentence`: date, due today, next event, overdue as a link); then a 2 + 1 grid
+  (`.board`): `home/FocusSheet.jsx` (the one white sheet, `--sheet`: task name in the serif, worked vs planned,
+  the time large, the timer's controls, notes folded) beside `home/DayPlan.jsx` ("Dein Tag": today's events,
+  timed tasks and routines by the clock with a "Jetzt" line, focus today vs the goal); the list
+  (`TaskContainer plain`: today's events left to Dein Tag, the first 6 open tasks then "N weitere zeigen", quiet
+  text buttons) beside `Momentum stacked` (Serie, Herausforderungen, Freunde); "Demnächst" at the end. Narrower:
+  one column in that order, the timer stays in the sheet. Testers' variants keep the layout below. Solo (`Home.jsx`):
   title row (today's date as h1, open / due today / overdue, Solo|Team switch), the motivation
   strip (`home/Momentum.jsx`: streak with the last 7 days, today's state and next milestone; today's
   daily challenges + level plant; friends online and friends' streaks; a swipe row on phones), next 8 days
@@ -243,7 +268,7 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   "Groß zeigen" opens it, big again once nothing runs); the **notebook** beside it (`Notebook.jsx`, `features/focus/notebook.js`, API
   `/api/notebook`; the server reads its bigger bodies only after sign-in, checks pictures by their
   magic bytes and keeps all pictures of an account under 25 MB, `NOTEBOOK_STORAGE_FULL`): notes with `- [ ]` checklists, `# ` headings, link and picture attachments (pictures shrunk
-  in the browser, at most 4 per note), "plan as task" for the cursor's line, autosave. The editor is
+  in the browser, at most 4 per note), "plan as task" for the cursor's line, autosave. A task's notes (Home's focus sheet, the focus column) are these notes about the task (`TaskNoteRow`: one-line ones edited in place, fuller ones open the notebook; `refreshTaskNotes` on mount). The editor is
   `components/notes/NoteEditor.jsx` (shared with `/notes`; `full` = testers' extras). Writing keeps a live preview of
   how it reads beside the text (under it when narrow, container query in Notes.module.css); every list row shows a
   preview line (`notePreview`, `notes/NotePreview.jsx`: the text after the title line, else "only attachments (n)" /
@@ -285,7 +310,12 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   Goal page: "Ziel bearbeiten" (`GoalSettingsSheet`: name, kind, date + time, mode, done / archive); a new date, time or
   mode opens the preview, part edits only offer it ("Plan anpassen?"); saving Settings → Lernen opens it too while a goal
   is planned. Subject page: "Fach bearbeiten" (`SubjectEditSheet`: name, emoji, colour; a new colour recolours its
-  sessions). A goal whose date is over has ended ("Vorbei"): not planned, not in status / push.
+  sessions). Every subject has a colour (a new one without takes the first of the eight not in use; the list has a
+  colour dot per row) and every goal a **shape** (`goals.shape`, migration 042: circle, square, triangle, diamond,
+  star, hexagon, heart; `components/study/GoalShape.jsx` + `ShapePicker`, list in `features/study/shapes.js`; a new
+  goal without one gets the first its subject has no active goal in). The shape is drawn in the subject's colour on
+  the goal page, the subject's goal list, the subjects list and every planned session (`SessionMarker`,
+  `task.study.goalShape`). A goal whose date is over has ended ("Vorbei"): not planned, not in status / push.
 - `/routines`, `/routines/:id/run` — **Routinen** (`components/routines/`, slice `routines` in
   `features/routines/routines.js`, API `/api/routines`): steps with minutes, weekdays + time (push at the time,
   and an in-app toast via `useRoutineReminders`), templates (texts `routineTpl_*`), guided run by the wall clock
@@ -310,6 +340,20 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   full screen, notifications) with a way to Android's page.
 - `/calendar` — month / week / agenda views, drag tasks between days, keyboard grid,
   `TaskEditor` (times, reminders, repeat weekly/monthly/yearly, notes, groups/labels, sharing).
+  Dragging (`features/calendar/pressDrag.js`): mouse/pen after a few px, touch after a ~280 ms hold
+  (a swipe before that scrolls), scrolls along at the edges, Escape cancels. On phones a month day
+  lists its entries by name (up to 3 + "+N"); a tap on one opens the day. A day's plus (top right on
+  hover; always on touch in the week) and the day panel's plus open the new-task form on that day:
+  the calendar renders `FormSheet` + `TaskForm` itself (`initialDue` / `initialTime`, `group` = the
+  calendar's filter, `target` for a shared calendar so the entry goes there). The day panel is a
+  timeline (`calendar/DayTimeline.jsx`, `useTimelineDrag`): all-day row on top, 24 h with overlap
+  lanes (`layoutDay`) and a now line; a block drags to another quarter hour, onto the all-day row
+  (no time) or onto the head's arrows (day before/after); Alt + ↑/↓ moves it 15 min; a click on a
+  free spot opens the form at that quarter hour; an entry opens its editor in place of the timeline.
+  The calendar picker is a pill beside search / Filters (no label; "Kalender" is its aria-label).
+  Up to 640px the toolbar is one row (`compact`, `useMediaQuery`): a menu button (views, Heute, the
+  overdue count; a red dot while any are overdue), month + year (week view: "KW 45 · Nov. 2026"), a
+  magnifier that opens a search row, the filter icon (its menu also holds the calendar picker) and ‹ ›.
   Several calendars: `?cal=session-<id>` shows a shared session's tasks, `?cal=family-<id>` a
   family's calendar; picker in the toolbar. `src/features/calendar/sources.js`
   (`useSharedCalendar`) loads them and routes add/move/edit/delete to their API; DayPanel gets
@@ -397,10 +441,11 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   areas (Darstellung | Planen | App, the area in the URL hash, `#event-types` opens Planen),
   each section a label column beside a panel; language,
   theme (dark/light/system; system when nothing is saved, also in `theme-init.js`; the app saves the
-  choice on every start, so devices that had used it keep `dark`), colour palette (the ground: warm (default), graphite, nord, forest,
-  plum, mono — `<html data-palette>`, values in `index.css`, swatches in `preferences.js`
-  `PALETTES`), accent colour (green, ocean, violet, sunset (default), rose, gold — also recolours
-  the favicon), motion level, home layout. "App": the tour and (where possible) installing.
+  choice on every start, so devices that had used it keep `dark`), colour scheme ("Farbschema", `COLOR_SCHEMES`:
+  Glut mit Abendrot = warm + sunset, the default; Papier mit Tanne = papier + pine; sets both below), colour palette
+  (the ground: warm (default), papier, graphite, nord, forest, plum, mono — `<html data-palette>`, values in
+  `index.css` and `public/boot.css`, swatches in `preferences.js` `PALETTES`), accent colour (green, ocean, violet,
+  sunset (default), rose, gold, pine — also recolours the favicon), motion level, home layout. "App": the tour and (where possible) installing.
   Password fields use `PasswordInput` (eye button to show/hide).
 - Friends tab (`Social.jsx`) — friends and friend requests; names link to `/u/:username`, the Add
   tab can open a profile before sending a request.
@@ -491,9 +536,13 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   WordGuess, Scramble, Sequence, Stats; `features/fun/`) live on in the Arcade; the daily line in the
   header (`DailyTicker.jsx`, today's fact / quote / slogan behind a bulb) links to `/arcade`.
 - Task sharing: send a task to a friend (`task_shares`), accepted shares appear in their list.
-- Task colours: `tasks.color` (8 names, `src/features/tasks/taskColors.js`); rows and chips set
-  `data-task-color`, the tones live in `index.css` as `--task-color` per theme. An event without
-  its own colour takes its type's.
+- Task colours: `tasks.color` (8 names, `src/features/tasks/taskColors.js`, or an own colour "#rrggbb" from the
+  colour wheel: `task/ColorWheel.jsx`, the last swatch of `TaskColorPicker`; `isTaskColor`, `hexToHsl` /
+  `hslToHex`); rows and chips set `data-task-color`, the tones of the names live in `index.css` as `--task-color`
+  per theme, an own colour gets its rule from `features/tasks/ownColors.js` (a constructed stylesheet + a
+  MutationObserver, started in main.jsx; CSP unchanged). Own colours are allowed on tasks, groups, event types,
+  session / family entries, subjects, collections and notes (api `cleanColor`, migration 042 widens the CHECKs;
+  families and profiles keep the eight). An event without its own colour takes its type's.
 - Tasks vs. events (`tasks.kind`, `src/features/tasks/kinds.js`): a task is ticked off by hand, an
   event needs a day and is done once it's over — the server ticks it off (every minute, on
   `GET /api/tasks`, on save; repeating ones get their next one), `useEventEnds` reloads the list
@@ -666,7 +715,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment, 028: push_subscriptions, tasks.push_sent_for, users.push_digest_on, 029: tasks.reminders (replaces reminder_minutes), 030: sub-groups — shared_session_groups, family_groups, shared_session_tasks.group_id, family_tasks.group_id, 031: users.tour_seen_at, users.allday_reminder_time, …, 036: note_folders, notebook_notes.folder_id / tags / color / archived / trashed_at, collections, collection_items, users.groups_imported_at, 037: board_notes, 038: arcade_scores, 039: reminders + push_subscriptions.alarms, 040: family_tasks.kind / reminders / push_sent_for / done_by / completed_at, shared_session_tasks.done_by / completed_at, push_subscriptions.groups, notification kind entries_added, 041: study goals — subjects, goals, goal_parts, study_windows, tasks.goal_part_id / plan_pinned, users.study_*, push_subscriptions.study). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment, 028: push_subscriptions, tasks.push_sent_for, users.push_digest_on, 029: tasks.reminders (replaces reminder_minutes), 030: sub-groups — shared_session_groups, family_groups, shared_session_tasks.group_id, family_tasks.group_id, 031: users.tour_seen_at, users.allday_reminder_time, …, 036: note_folders, notebook_notes.folder_id / tags / color / archived / trashed_at, collections, collection_items, users.groups_imported_at, 037: board_notes, 038: arcade_scores, 039: reminders + push_subscriptions.alarms, 040: family_tasks.kind / reminders / push_sent_for / done_by / completed_at, shared_session_tasks.done_by / completed_at, push_subscriptions.groups, notification kind entries_added, 041: study goals — subjects, goals, goal_parts, study_windows, tasks.goal_part_id / plan_pinned, users.study_*, push_subscriptions.study, 042: own colours "#rrggbb" in the color CHECKs of tasks, groups, event_types, shared_session_tasks, family_tasks, subjects + goals.shape, 043: task notes moved into notebook_notes (task_id); `notes` stays empty, `/api/notes` and `/api/tasks/:id/notes` read / write my notebook notes about tasks in the old shape { id, task_id, content }). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.

@@ -57,8 +57,19 @@ export function TaskListSkeleton() {
     );
 }
 
+// open tasks shown at first on Home (own look)
+const PLAIN_ROWS = 6;
+
 export default function TaskContainer(props){
     const { handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask, releasedIds = [], onActivate } = props;
+    // plain: the app's own Home (today's events are in "Dein Tag" beside it, the list doesn't fold,
+    // "5 erledigt" and "Neue Aufgabe" are quiet text buttons; the add button in the corner is the loud one)
+    const plain = Boolean(props.plain);
+    // Home's own look shows the first few open tasks, the rest one tap away, so the list stays
+    // about as long as the column beside it
+    const [expanded, setExpanded] = useState(false);
+    // "All": the study plan's later sessions shown too (see plannedStudy)
+    const [showPlanned, setShowPlanned] = useState(false);
 
     // whether the Done list is shown; only this component uses it
     const [showDone, setShowDone] = useState(false);
@@ -135,6 +146,11 @@ export default function TaskContainer(props){
     const openTasks = todoTasks.filter(task => !task.done && task.id !== activeTask?.id);
     const doneTasks = todoTasks.filter(task => task.done && task.id !== activeTask?.id);
     const todayKey = dateKey(new Date());
+    // The study plan (Lernen) puts many sessions into the list, days ahead. In "All" only today's
+    // and overdue ones are rows; the later ones wait behind one row that shows them. A subject's
+    // own group (or any other one picked) shows everything.
+    const plannedStudy = showingAll ? openTasks.filter(task => task.study && task.due && dateKey(task.due) > todayKey) : [];
+    const listedOpen = showPlanned || plannedStudy.length === 0 ? openTasks : openTasks.filter(task => !plannedStudy.includes(task));
     const todayEvents = listTasks
         .filter(task => isEvent(task) && dateKey(task.due) === todayKey)
         .sort((a, b) => (minutesOfDay(a.due_time) ?? -1) - (minutesOfDay(b.due_time) ?? -1));
@@ -228,13 +244,13 @@ export default function TaskContainer(props){
     };
 
     return (
-        <section className={styles.section} aria-labelledby="tasks-title" data-part="task-list">
+        <section className={styles.section} aria-labelledby="tasks-title" data-part="task-list" data-plain={plain || undefined}>
             {taskInEditor && <TaskEditDialog task={taskInEditor} onClose={closeEditor} />}
             <div className={styles.sectionHead}>
-                <button className={styles.collapseBtn} onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed}
+                {!plain && <button className={styles.collapseBtn} onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed}
                     title={t(collapsed ? 'expandTasks' : 'collapseTasks')} aria-label={t(collapsed ? 'expandTasks' : 'collapseTasks')}>
                     <Icon name="chevronDown" className={collapsed ? styles.chevronClosed : styles.chevron} />
-                </button>
+                </button>}
                 <h2 id="tasks-title" className={styles.sectionTitle}>
                     {shownCollection
                         ? `${shownCollection.emoji ? `${shownCollection.emoji} ` : ''}${shownCollection.name}`
@@ -270,16 +286,25 @@ export default function TaskContainer(props){
                             <Icon name={showSharedTasks ? 'eye' : 'eyeOff'} className={styles.sharedToggleIcon} />
                             <span className={styles.sharedToggleLabel}>{t('sessionTasks')}</span>
                         </button>}
-                    {doneTasks.length > 0 && !collapsed &&
-                        <button className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}
+                    {doneTasks.length > 0 && !collapsed && (plain
+                        ? <button className={`${styles.textBtn} ${showDone ? styles.textBtnOn : ''}`}
+                            onClick={() => setShowDone(!showDone)} aria-pressed={showDone}>
+                            {fill(t('homeListDone'), { count: doneTasks.length })}
+                        </button>
+                        : <button className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}
                             onClick={() => setShowDone(!showDone)} aria-pressed={showDone}>
                             {t('done')}
                             <span className={styles.doneCount}>{doneTasks.length}</span>
+                        </button>)}
+                    {plain
+                        ? <button className={styles.textBtn} onClick={() => setCreateTask(true)}>
+                            <Icon name="plus" className={styles.addIcon} strokeWidth={2} />
+                            {t('homeListAdd')}
+                        </button>
+                        : <button className={styles.addBtn} onClick={() => setCreateTask(true)}>
+                            <Icon name="plus" className={styles.addIcon} strokeWidth={2} />
+                            {t('createTaskH2')}
                         </button>}
-                    <button className={styles.addBtn} onClick={() => setCreateTask(true)}>
-                        <Icon name="plus" className={styles.addIcon} strokeWidth={2} />
-                        {t('createTaskH2')}
-                    </button>
                 </div>
             </div>
             {hiddenSharedCount > 0 &&
@@ -305,18 +330,28 @@ export default function TaskContainer(props){
                 </p>)}
 
             {!collapsed && <>
-                {todayEvents.length > 0 && <TodayEvents events={todayEvents} onOpen={(task) => setEditTaskId(task.id)} />}
-                {!loaded ? <SkeletonPanel /> : <div className={styles.panel}>
-                    {openTasks.length === 0
+                {todayEvents.length > 0 && !plain && <TodayEvents events={todayEvents} onOpen={(task) => setEditTaskId(task.id)} />}
+                {!loaded ? <SkeletonPanel /> : <div className={plain ? styles.plainList : styles.panel}>
+                    {listedOpen.length === 0 && plannedStudy.length === 0
                         ? <div className={styles.empty}>
                             <p className={styles.emptyTitle}>{t('noOpenTasks')}</p>
                             <p className={styles.emptyText}>{t('noOpenTasksHint')}</p>
                         </div>
-                        : <ul className={styles.list} aria-label={t('toDo')}>
+                        : <ul className={styles.list} aria-label={t('toDo')} data-scrolls={!plain || expanded || undefined}>
                             <AnimatePresence>
-                                {openTasks.map((task, index) => <TaskRow key={task.id} {...rowProps(task, index)} />)}
+                                {(plain && !expanded ? listedOpen.slice(0, PLAIN_ROWS) : listedOpen)
+                                    .map((task, index) => <TaskRow key={task.id} {...rowProps(task, index)} />)}
                             </AnimatePresence>
                         </ul>}
+                    {plain && listedOpen.length > PLAIN_ROWS &&
+                        <button type="button" className={styles.moreRows} onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>
+                            {expanded ? t('homeListLess') : fill(t('homeListMore'), { count: listedOpen.length - PLAIN_ROWS })}
+                        </button>}
+                    {plannedStudy.length > 0 &&
+                        <button type="button" className={styles.plannedRow} onClick={() => setShowPlanned(!showPlanned)} aria-expanded={showPlanned}>
+                            <Icon name="book" size={16} />
+                            <span>{showPlanned ? t('studyPlannedHide') : fill(t(plannedStudy.length === 1 ? 'studyPlannedOne' : 'studyPlannedShow'), { count: plannedStudy.length })}</span>
+                        </button>}
                 </div>}
 
                 {showDone && doneTasks.length > 0 &&

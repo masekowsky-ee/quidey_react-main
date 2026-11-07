@@ -228,3 +228,10 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* Home's side column on wide screens: the cards one under the other */
+@media (min-width: 1100px) {
+    .grid.stacked {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

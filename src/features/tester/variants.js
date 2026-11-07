@@ -16,7 +16,7 @@ import { DESKTOP_QUERY, useMediaQuery } from '../layout/breakpoints';
 //   top      tabs in a second row of the header, the rest of the menu as a drawer
 //   command  a compact sidebar plus a command bar (Ctrl/⌘ K) for jumping and doing
 export const UI_VARIANTS = {
-    current: { nav: 'sidebar', swatches: ['#0e0d0c', '#181716', '#f4f3f1', '#fb923c'] },
+    current: { nav: 'bar', swatches: ['#0e0d0c', '#181716', '#f4f3f1', '#fb923c'] },
     schulheft: { nav: 'top', swatches: ['#fbfcfe', '#dbe5f5', '#2340b8', '#e2574c'] },
     lesesaal: { nav: 'rail', swatches: ['#0b1310', '#13201a', '#efe7d4', '#e3b35a'] },
     uebersicht: { nav: 'command', swatches: ['#f4f5f7', '#ffffff', '#1d1f23', '#d7000f'] },

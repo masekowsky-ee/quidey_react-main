@@ -6,7 +6,7 @@ import { useTranslation } from '../i18n/useTranslation';
 import { apiFetch, fill, mondayIndex } from '../features/helperFunction';
 import { fetchOwnProfile, profileColorAttr } from '../features/profile/profileOptions';
 import { RANGES, hoursText, periodOf, periodQuery, sumByBucket } from '../features/stats/period';
-import { TASK_COLORS, groupColorAttr } from '../features/tasks/taskColors';
+import { isTaskColor, groupColorAttr } from '../features/tasks/taskColors';
 import ProfileStats from './profile/ProfileStats.jsx';
 import CompletedTasks from './CompletedTasks.jsx';
 import SessionList from './stats/SessionList.jsx';
@@ -126,7 +126,7 @@ function Overview({ period, stats, error, t, locale }) {
     const typeRows = stats.events.types.map(type => ({
         key: type.id ?? 'none',
         label: type.name ?? t('eventTypeNone'),
-        color: TASK_COLORS.includes(type.color) ? type.color : undefined,
+        color: isTaskColor(type.color) ? type.color : undefined,
         ms: type.ms,
         note: fill(t(type.count === 1 ? 'eventCountOne' : 'eventCount'), { n: type.count }),
     }));

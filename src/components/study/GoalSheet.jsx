@@ -10,6 +10,7 @@ import { useFocusOnArrival } from '../../features/layout/dragDismiss';
 import { fill, toInputDate } from '../../features/helperFunction';
 import { showToast } from '../../features/toast/toast';
 import { useTranslation } from '../../i18n/useTranslation';
+import { ShapePicker } from './GoalShape.jsx';
 import { FormSheet } from '../QuickAdd.jsx';
 import SheetGrabber from '../SheetGrabber.jsx';
 import Icon from '../icons.jsx';
@@ -65,7 +66,7 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
     const [step, setStep] = useState(1);
     const [fields, setFields] = useState(() => ({
         // planMode null: not picked yet, see `planMode` below
-        kind: 'exam', name: '', subject: subjectId == null ? '' : String(subjectId), newSubject: '', due: '', dueTime: '', planMode: null,
+        kind: 'exam', name: '', subject: subjectId == null ? '' : String(subjectId), newSubject: '', due: '', dueTime: '', planMode: null, shape: null,
     }));
     const set = (changes) => { setFields(prev => ({ ...prev, ...changes })); setError(null); };
     const [error, setError] = useState(null);
@@ -222,6 +223,7 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
             const goal = await dispatch(createGoal({
                 subjectId: id, kind: fields.kind, name: fields.name.trim(), due: fields.due,
                 ...(fields.dueTime ? { dueTime: fields.dueTime } : {}), planMode,
+                ...(fields.shape ? { shape: fields.shape } : {}),
                 parts: rows.map(r => ({ name: r.name, estimateMinutes: r.minutes, estimateSource: r.source })),
             }));
             setCreated(goal);
@@ -301,6 +303,10 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
                                 </button>
                             ))}
                         </div>
+                    </div>
+                    <div className={own.field}>
+                        <ShapePicker value={fields.shape} onChange={(shape) => set({ shape })} color={subject?.color} />
+                        {!fields.shape && <p className={own.hint}>{t('goalShapeAuto')}</p>}
                     </div>
                     {error && <p className={own.error} role="alert">{error}</p>}
                     <div className={own.footer}>

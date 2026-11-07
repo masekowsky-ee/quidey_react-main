@@ -6,7 +6,7 @@ import {setLanguage, setTheme, setAccent, setPalette, setDefaultSessionMinutes, 
 import {MOTION_LEVELS} from '../features/settings/motion';
 import {SOUND_LEVELS, SOUND_NAMES, playSound} from '../features/settings/sound';
 import {setSessionParams} from '../features/session/sessionAction';
-import {SESSION_LENGTHS, PALETTES, ACCENT_SWATCHES as ACCENT_OPTIONS} from '../features/settings/preferences';
+import {SESSION_LENGTHS, PALETTES, COLOR_SCHEMES, ACCENT_SWATCHES as ACCENT_OPTIONS} from '../features/settings/preferences';
 import { DEFAULT_UI_VARIANT, OWN_COLORS, VARIANT_COLORS, setUiColors, useColorChoice } from '../features/tester/variants';
 import HomeLayoutSwitch from './together/HomeLayoutSwitch';
 import {useInstallState, promptInstall} from '../features/pwa/install';
@@ -302,6 +302,32 @@ export default function Settings(){
                         <SettingRow title={t('settingsThemeRow')}>
                             <Choice label={t('appearance')} value={theme} onChange={(value) => dispatch(setTheme(value))} options={THEME_OPTIONS} />
                         </SettingRow>
+                        {!inVariant && <div className={styles.rowStack}>
+                            <span className={styles.rowText}>
+                                <span className={styles.rowLabel}>{t('schemeSetting')}</span>
+                                <span className={styles.rowHint}>{t('schemeSettingHint')}</span>
+                            </span>
+                            {/* a palette and its accent in one go; each tile shows both halves with the accent on them */}
+                            <div className={styles.swatches} role="group" aria-label={t('schemeSetting')}>
+                                {COLOR_SCHEMES.map((scheme) => {
+                                    const chosen = palette === scheme.palette && accent === scheme.accent;
+                                    const { dark, light } = PALETTES[scheme.palette];
+                                    const color = ACCENT_OPTIONS.find(option => option.value === scheme.accent)?.color;
+                                    return (
+                                        <button key={scheme.id} type="button"
+                                            className={`${styles.swatch} ${styles.schemeSwatch} ${chosen ? styles.swatchActive : ''}`}
+                                            aria-pressed={chosen}
+                                            onClick={() => { dispatch(setPalette(scheme.palette)); dispatch(setAccent(scheme.accent)); }}>
+                                            <span className={styles.palettePreview} aria-hidden="true">
+                                                <span style={{ '--ground': dark[0], '--card': dark[1], '--ink': dark[2], '--dot': color }} />
+                                                <span style={{ '--ground': light[0], '--card': light[1], '--ink': light[2], '--dot': scheme.accent === 'pine' ? '#1e6b55' : '#f97316' }} />
+                                            </span>
+                                            <span className={styles.swatchLabel}>{t(scheme.label)}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>}
                         <div className={styles.rowStack}>
                             <span className={styles.rowText}>
                                 <span className={styles.rowLabel}>{t('paletteSetting')}</span>

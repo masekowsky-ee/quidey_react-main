@@ -7,7 +7,8 @@ import TaskChip from './TaskChip.jsx';
 import Icon from './icons.jsx';
 
 // Monday to Sunday side by side (stacked on phones), every task of a day with its description.
-export default function WeekView({ focusedDate, today, tasksByDay, focusByDay, drag, startDrag, onFocusDate, onOpenDate, dayLabel, longDate }) {
+// A plus in a day's top right corner (on hover; always on touch screens) opens the new-task form.
+export default function WeekView({ focusedDate, today, tasksByDay, focusByDay, drag, startDrag, onFocusDate, onOpenDate, onCreateOn, dayLabel, longDate }) {
     const { t } = useTranslation();
     const { gridRef, onKeyDown, focusedKey } = useDayGridKeys({ focusedDate, onFocusDate, onOpenDate });
 
@@ -60,9 +61,9 @@ export default function WeekView({ focusedDate, today, tasksByDay, focusByDay, d
                                 type="button"
                                 className={styles.weekAdd}
                                 tabIndex={-1}
-                                onClick={(e) => { e.stopPropagation(); onOpenDate(date, 'new'); }}
-                                aria-label={fill(t('addTaskOnDay'), { date: longDate(date) })}
-                                title={fill(t('addTaskOnDay'), { date: longDate(date) })}
+                                onClick={(e) => { e.stopPropagation(); onCreateOn(date); }}
+                                aria-label={fill(t('addEntryOnDay'), { date: longDate(date) })}
+                                title={fill(t('addEntryOnDay'), { date: longDate(date) })}
                             >
                                 <Icon name="add" size={18} />
                             </button>

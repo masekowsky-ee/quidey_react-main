@@ -37,17 +37,34 @@
 }
 
 @media (max-width: 720px) {
+  /* the floating tab bar: its capsule (3.25rem) and the gap under it (0.75rem) */
   .shell {
-    --tabbar-h: 3.75rem;
+    --tabbar-h: 4rem;
     --page-gutter: 1rem;
     padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
   }
+
+  /* a page sliding in or out sideways (features/layout/tabSwipe.js) never makes the window
+     scroll sideways */
+  .main {
+    overflow-x: clip;
+  }
+
+  /* swiped away (TabBar.jsx): only its handle at the bottom edge is left */
+  .shell:has([data-part="tabbar"][data-collapsed]) {
+    --tabbar-h: 2.75rem;
+  }
 }
 
-/* Testers' interface variants (features/tester/variants.js) bring their own navigation on wide
-   screens: <div data-nav>. "top" puts the main places as tabs in a second header row (the menu
+/* The navigation on wide screens: <div data-nav> (features/tester/variants.js). The app's own
+   look is "bar"; testers' interface variants bring their own. "top" puts the main places as tabs in a second header row (the menu
    is a drawer then), "rail" is a narrow column of icons, "command" a compact sidebar. */
 @media (min-width: 1100px) {
+  /* the app's own look: no sidebar, the main places sit in the header's one row */
+  .shell[data-nav="bar"] {
+    --sidebar-w: 0px;
+  }
+
   .shell[data-nav="top"] {
     --sidebar-w: 0px;
     --ticker-h: 2.75rem;

@@ -343,14 +343,12 @@ export const editNote = (taskId, noteId, noteContent) => {
     };
 };
 
-export const getNotes = (taskId) => {
+// A task's notes are notebook notes about it (the server's /api/notes reads them from there), so
+// one written or changed in the Fokusraum or on /notes shows here once this has run again
+export const refreshTaskNotes = () => {
     return async (dispatch) => {
-        const notes = await apiFetch(`/api/notes?taskId=${taskId}`, {method: "GET"});
-
-        dispatch({
-            type: GET_NOTES,
-            payload: { taskId, notes },
-        });
+        const notes = await apiFetch("/api/notes");
+        dispatch({ type: GET_NOTES, payload: notes });
     };
 };
 

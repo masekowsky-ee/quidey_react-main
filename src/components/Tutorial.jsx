@@ -54,7 +54,7 @@ function useNavPlace() {
     const phone = useMediaQuery(PHONE_QUERY);
     const model = useNavModel();
     if (phone) return 'phone';
-    return model === 'drawer' || model === 'sidebar' ? model : 'other';
+    return model === 'drawer' || model === 'sidebar' || model === 'bar' ? model : 'other';
 }
 
 // The intro tour: one card per chapter, each with a small scene of the page it is about, a few

@@ -165,10 +165,11 @@ function QuickNote() {
 
 // Home's dashboard: the day at a glance, between the motivation strip and the week. Four quiet
 // cards side by side on wide screens, two by two on tablets, a swipe row on phones.
-export default function Today({ tasks }) {
+// stacked: one card under the other (Home's side column on wide screens)
+export default function Today({ tasks, stacked = false }) {
     const { t } = useTranslation();
     return (
-        <div className={styles.grid} data-part="home-today" aria-label={t('dashTitle')}>
+        <div className={`${styles.grid} ${stacked ? styles.stacked : ''}`} data-part="home-today" aria-label={t('dashTitle')}>
             <FocusGoal />
             <RoutinesToday />
             <UpNext tasks={tasks} />

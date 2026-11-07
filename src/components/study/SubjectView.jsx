@@ -5,6 +5,7 @@ import { fetchSubjects, fetchGoals, deleteSubject, selectSubjects } from '../../
 import { showToast } from '../../features/toast/toast';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
+import GoalShape from './GoalShape.jsx';
 import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
 import Icon from '../icons.jsx';
 import { Bone, Skeleton } from '../skeleton/Skeleton.jsx';
@@ -84,7 +85,9 @@ export default function SubjectView({ subjectId }) {
                         return (
                             <li key={goal.id} className={styles.item}>
                                 <Link to={`/study/goals/${goal.id}`} className={styles.itemLink}>
-                                    <span className={styles.itemName}>{goal.name}</span>
+                                    <span className={styles.itemName}>
+                                        <GoalShape shape={goal.shape} color={subject?.color} /> {goal.name}
+                                    </span>
                                     <span className={styles.meta}>
                                         <span>{t(`studyKind_${goal.kind}`)}</span>
                                         <span>{countdownText(goal.due, t)}</span>

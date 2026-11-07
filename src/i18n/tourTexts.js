@@ -91,6 +91,7 @@ const tourTexts = {
         tut_ready_title: 'Alles griffbereit',
         tut_ready_text_phone: 'Unten erreichst du Start, Kalender, Fokus und Sozial, das Postfach oben rechts. Alles Weitere steckt hinter „Mehr“.',
         tut_ready_text_drawer: 'Über den Menü-Knopf links im Header erreichst du alle Seiten, dein Konto und die Einstellungen.',
+        tut_ready_text_bar: 'Oben in der Leiste erreichst du Start, Kalender, Fokusraum, Sozial, Postfach und Statistiken. Unter „Mehr“ findest du den Rest, dein Konto und die Einstellungen.',
         tut_ready_text_sidebar: 'Links in der Seitenleiste findest du alle Seiten, unten Einstellungen, Feedback und dein Konto.',
         tut_ready_text_other: 'Alle Seiten erreichst du über die Navigation deiner Oberfläche, Einstellungen und Konto über das Menü.',
         tut_ready_tips: [
@@ -199,6 +200,7 @@ const tourTexts = {
         tut_ready_title: 'Always at hand',
         tut_ready_text_phone: 'Home, calendar, focus and social are at the bottom, the inbox at the top right. Everything else is behind "More".',
         tut_ready_text_drawer: 'The menu button on the left of the header leads to every page, your account and the settings.',
+        tut_ready_text_bar: 'The bar at the top takes you to Home, Calendar, Focus room, Social, Inbox and Statistics. "More" holds the rest, your account and the settings.',
         tut_ready_text_sidebar: 'The sidebar on the left holds every page, with settings, feedback and your account at the bottom.',
         tut_ready_text_other: 'Every page is in the navigation of your interface, settings and account are in the menu.',
         tut_ready_tips: [

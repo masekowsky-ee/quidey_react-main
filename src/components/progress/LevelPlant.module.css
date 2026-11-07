@@ -37,8 +37,8 @@
 }
 
 @keyframes growIn{
-    from{ transform: scale(0); }
-    to{ transform: scale(1); }
+    from{ transform: scale(0.5); opacity: 0; }
+    to{ transform: scale(1); opacity: 1; }
 }
 
 :global(:root[data-motion="minimal"]) .part{

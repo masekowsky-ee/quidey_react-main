@@ -415,3 +415,11 @@
 .panel .phaseLine{
     flex-basis: 100%;
 }
+
+/* On Home's white sheet ([data-flat]): the sheet is the card, the timer sits on it without a box */
+:global([data-flat]) .inlinePanel{
+    padding: 1.25rem 0 0;
+    background-color: transparent;
+    border-color: transparent;
+    border-radius: 0;
+}

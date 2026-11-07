@@ -1,9 +1,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
-// the app's one typeface, bundled so the Content-Security-Policy (font-src 'self') allows it;
-// with its optical-size axis, so titles get Inter's display cut and small text its open text cut
-import '@fontsource-variable/inter/opsz.css'
+// the app's two typefaces, bundled so the Content-Security-Policy (font-src 'self') allows them:
+// Instrument Sans for everything you work with, Newsreader (with its optical-size axis) for the
+// page titles and the task in focus
+import '@fontsource-variable/instrument-sans/wght.css'
+import '@fontsource-variable/newsreader/opsz.css'
 import './index.css'
 import App from './App.jsx'
 import AppIntro from './components/intro/AppIntro.jsx'
@@ -12,10 +14,12 @@ import store from "./features/store";
 import { registerServiceWorker } from './features/pwa/registerServiceWorker'
 import { listenForInstallPrompt } from './features/pwa/install'
 import { setupNativeApp } from './features/native/native'
+import { startOwnColors } from './features/tasks/ownColors'
 
 registerServiceWorker()
 listenForInstallPrompt()
 setupNativeApp(store)
+startOwnColors()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

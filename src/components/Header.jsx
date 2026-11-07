@@ -54,11 +54,12 @@ export default function Header(){
     const { t } = useTranslation();
     const timer = useSelector((state) => state.session.timer);
     const timerMode = useSelector((state) => state.session.timerMode);
-    // testers' interface variants: tabs on top (with the menu as a drawer), or a command bar
+    // wide screens: the main places in the bar ("bar", the app's own look), or for testers'
+    // interface variants tabs on top (with the menu as a drawer), a rail or a command bar
     const nav = useNavModel();
     const commandBar = UI_VARIANTS[useUiVariant()].nav === 'command';
     return (
-        <div className={`${styles.header} ${nav === 'top' ? styles.undocked : ''}`} data-part="header">
+        <div className={`${styles.header} ${nav === 'top' ? styles.undocked : ''} ${nav === 'bar' ? styles.bar : ''}`} data-part="header">
             {token && <>
                 <div className={styles.div} data-part="header-row">
                     {/* tablets only: desktop has the sidebar, phones the tab bar's "More" */}
@@ -72,6 +73,8 @@ export default function Header(){
                         <Logo className={styles.brandMark} />
                         <span className={styles.brandText}>Quidey</span>
                     </Link>
+                    {/* the app's own look on wide screens: the main places as words beside the logo */}
+                    {nav === 'bar' && <TopNav inline />}
                     <div className={styles.center}>
                         {activeTimer &&
                             <Link to="/focus" className={styles.timerChip} title={timer.active ? 'running' : 'paused'}>

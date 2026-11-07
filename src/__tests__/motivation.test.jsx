@@ -141,7 +141,7 @@ describe('streak', () => {
         expect(within(streak).getByText('Rekord: 9')).toBeInTheDocument()
         expect(within(streak).getAllByRole('listitem')).toHaveLength(7)
 
-        const today = screen.getByRole('heading', { name: 'Heute' }).closest('section')
+        const today = screen.getByRole('heading', { name: 'Herausforderungen' }).closest('section')
         expect(within(today).getByText('1 von 3')).toBeInTheDocument()
 
         const friends = screen.getByRole('heading', { name: 'Freunde' }).closest('section')

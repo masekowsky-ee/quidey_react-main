@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { editDisplaygroup, selectTasksLoaded } from '../features/tasks/taskAction';
 import { selectSharedGroups } from '../features/together/togetherAction';
@@ -10,12 +10,39 @@ import { Bone } from './skeleton/Skeleton.jsx';
 import { useTaskGroups, selectCollectionsLoaded } from '../features/collections/collections';
 
 // Which tasks the list shows: all of them, one of my groups, or a shared session's tasks.
-// A row of chips that scrolls sideways when there are many; "+" makes a new group.
+// A row of chips that scrolls sideways when there are many; "+" makes a new group. Where more
+// chips are hidden, that edge fades out (data-more-before / -after) instead of cutting a name.
+// (a callback ref: the bar comes after the loading shapes, not with the first render)
+function useEdgeFades() {
+    const cleanup = useRef(null);
+    return useCallback((bar) => {
+        cleanup.current?.();
+        cleanup.current = null;
+        if (!bar) return;
+        const update = () => {
+            bar.toggleAttribute('data-more-before', bar.scrollLeft > 1);
+            bar.toggleAttribute('data-more-after', bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 1);
+        };
+        update();
+        bar.addEventListener('scroll', update, { passive: true });
+        const resize = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(update);
+        resize?.observe(bar);
+        // chips come and go (a new group, a session ended)
+        const mutations = typeof MutationObserver === 'undefined' ? null : new MutationObserver(update);
+        mutations?.observe(bar, { childList: true, subtree: true, characterData: true });
+        cleanup.current = () => {
+            bar.removeEventListener('scroll', update);
+            resize?.disconnect();
+            mutations?.disconnect();
+        };
+    }, []);
+}
 // (A group's colour and its deletion sit in the list's title row while it is shown.)
 // For testers my collections take the place of my groups (useTaskGroups): "+" makes a collection.
 export default function GroupBtnContainer({ setCreateGroup }){
     const {t} = useTranslation();
     const dispatch = useDispatch();
+    const barRef = useEdgeFades();
 
     // my groups (or collections), without a group named "all" from older accounts: that is the "All" chip itself
     const { groups, collections: asCollections } = useTaskGroups();
@@ -43,7 +70,7 @@ export default function GroupBtnContainer({ setCreateGroup }){
     const showAll = () => { if (!showingAll) dispatch(editDisplaygroup(shown, shown.id)); };
 
     return (
-        <div className={styles.bar} role="group" aria-label={t('groups')}>
+        <div className={styles.bar} role="group" aria-label={t('groups')} ref={barRef}>
             <button type="button" className={`${styles.chip} ${showingAll ? styles.active : ''}`}
                 aria-pressed={showingAll} onClick={showAll}>
                 {t('all')}

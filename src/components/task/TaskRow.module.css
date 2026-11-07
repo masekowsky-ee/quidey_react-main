@@ -1,29 +1,29 @@
 /* One task: drag | check | name over its details | day + priority | actions.
-   Rows are split by one quiet rule; a task's own colour is a 3px edge on the left. */
+   Rows are split by one hairline; a task's own colour is the edge of its check box. */
 .row {
   display: grid;
   grid-template-columns: 1.25rem 2rem minmax(0, 1fr) auto auto;
   grid-template-areas: "drag check body when actions";
   align-items: center;
   column-gap: 0.625rem;
-  min-height: 3.5rem;
-  padding: 0.5rem 0.5rem 0.5rem 0.25rem;
+  min-height: 3.75rem;
+  padding: 0.625rem 0.25rem 0.625rem 0;
   box-sizing: border-box;
   text-align: left;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid color-mix(in oklab, var(--text-h) 10%, transparent);
 }
 
 .row:last-child {
   border-bottom: none;
 }
 
-.row[data-task-color] {
-  box-shadow: inset 3px 0 0 var(--task-color);
+/* the task's colour on its check box; a shared session's tasks take the accent */
+.row[data-task-color] .check:not(.checkDone) {
+  border-color: var(--task-color);
 }
 
-/* from a shared session: the team's edge */
-.sharedRow {
-  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--primary) 60%, transparent);
+.sharedRow .check:not(.checkDone) {
+  border-color: color-mix(in srgb, var(--primary) 70%, transparent);
 }
 
 .drag {
@@ -59,14 +59,14 @@
 
 .check {
   grid-area: check;
-  width: 1.375rem;
-  height: 1.375rem;
+  width: 1.125rem;
+  height: 1.125rem;
   margin: 0 auto;
   padding: 0;
   color: transparent;
   background: none;
-  border: 1.5px solid var(--border-strong);
-  border-radius: 50%;
+  border: 1.5px solid color-mix(in oklab, var(--text-muted) 75%, transparent);
+  border-radius: 5px;
   corner-shape: round;
 }
 
@@ -89,8 +89,8 @@
 }
 
 .checkIcon {
-  width: 0.85rem;
-  height: 0.85rem;
+  width: 0.8rem;
+  height: 0.8rem;
 }
 
 .checkDone,
@@ -141,7 +141,7 @@
 }
 
 .name {
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 1.35;
   color: var(--text-h);
@@ -167,9 +167,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.25rem 0.75rem;
+  gap: 0.125rem 0.75rem;
   min-width: 0;
-  font-size: 0.8125rem;
+  font-size: 0.84375rem;
   color: var(--text-muted);
 }
 
@@ -205,8 +205,8 @@
   height: 2rem;
   padding: 0 0.6rem;
   gap: 0.35rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
+  font-size: 0.875rem;
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   color: var(--text);
@@ -246,21 +246,18 @@
   padding-block: 0;
 }
 
+/* priority as a word beside the day; "Hoch" in the warning colour */
 .prio {
   flex: none;
-  padding: 0.1rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.8125rem;
+  font-weight: 500;
   line-height: 1.4;
   color: var(--text-muted);
   white-space: nowrap;
-  background-color: var(--surface-hover);
-  border-radius: var(--radius-pill);
 }
 
 .prioHigh {
   color: var(--danger);
-  background-color: color-mix(in srgb, var(--danger) 14%, transparent);
 }
 
 .myTime {
