@@ -268,11 +268,13 @@ function App(){
   useEffect(() => { if (allowed) return preloadPages(); }, [allowed]);
 
   const location = useLocation();
+  // Quidey's own anonymous statistics: counting follows my answer (access.usageConsent). Declared before
+  // the page view below: effects run in order, so the first view finds counting already on. Nothing is
+  // decided before the server answered (a reload keeps its queue); sign-out and account switches switch it off themselves.
+  const usageOn = allowed && access.usageConsent.choice === 'granted';
+  useEffect(() => { if (access.checked) setUsageEnabled(usageOn); }, [access.checked, usageOn]);
   // the pages by name: Android's Firebase analytics and Quidey's statistics, each with its own consent (usage/track.js)
   useEffect(() => { if (allowed) trackView(location.pathname); }, [allowed, location.pathname]);
-  // Quidey's own anonymous statistics: counting follows my answer (access.usageConsent, also reset on sign-out)
-  const usageOn = allowed && access.usageConsent.choice === 'granted';
-  useEffect(() => { setUsageEnabled(usageOn); }, [usageOn]);
   useAppOpen(usageOn);
   useActiveMinutes(usageOn);
   // while a page's code is on its way (only the first time, and briefly): that page's shape

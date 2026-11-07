@@ -93,6 +93,8 @@ export const requestBetaAccess = (reason) => {
 // (the app loads again as that one); otherwise it's the sign-in.
 export const logout = () => {
     return (dispatch, getState) => {
+        // this account's queued usage events are gone with it
+        setUsageEnabled(false);
         const token = localStorage.getItem('token');
         forgetToken(token);
         forgetAccount(getState().auth.user?.username);

@@ -63,7 +63,7 @@ function listen(on) {
 
 export function setUsageEnabled(value) {
     const next = Boolean(value);
-    if (next === enabled && next === Boolean(timer)) return;
+    if (next && enabled && timer) return;
     enabled = next;
     if (next) {
         queue = [...readStored(), ...queue].slice(-QUEUE_MAX);
