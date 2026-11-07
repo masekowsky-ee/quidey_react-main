@@ -61,11 +61,25 @@ describe('downloadXlsx', () => {
     expect(data[0][0]).toMatchObject({ value: 'S', fontWeight: 'bold' });
     expect(data[1][1]).toMatchObject({ value: 2, type: Number });
     expect(data[1][2].type).toBe(Date);
-    expect(data[1][2].value).toEqual(new Date(2026, 10, 7));
+    expect(data[1][2].value.toISOString()).toBe('2026-11-07T00:00:00.000Z');
     expect(data[1][2].format).toBe('dd.mm.yyyy');
     expect(data[1][3]).toMatchObject({ value: true, type: Boolean });
     expect(data[2]).toEqual([null, null, null, null]);
     expect(columns[0].width).toBe(20);
+  });
+});
+
+describe('fix round 1', () => {
+  it('xlsx datetime keeps local wall time as UTC components', async () => {
+    writeExcelFile.mockClear();
+    const s = sheet([{ key: 't', label: 'T', type: 'datetime' }], [{ t: new Date(2026, 10, 7, 9, 5).toISOString() }]);
+    await downloadXlsx([s], 'f.xlsx');
+    expect(writeExcelFile.mock.calls[0][0][0].data[1][0].value.toISOString()).toBe('2026-11-07T09:05:00.000Z');
+  });
+  it('csv neutralises formulas in string cells but not numbers', () => {
+    const s = sheet([{ key: 'a', label: 'A', type: 'string' }, { key: 'n', label: 'N', type: 'number' }], [{ a: '=HYPERLINK("x")', n: -3 }]);
+    const csv = toCsv(s, 'de');
+    expect(csv).toContain("\"'=HYPERLINK(\"\"x\"\")\";-3");
   });
 });
 

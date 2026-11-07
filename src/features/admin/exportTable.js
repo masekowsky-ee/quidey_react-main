@@ -26,7 +26,9 @@ function csvCell(value, type, language) {
     const day = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
     return type === 'date' ? day : `${day} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
-  return String(value);
+  const text = String(value);
+  // Neutralise spreadsheet formulas in text cells (CSV injection).
+  return /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
 }
 
 function quote(field) {
@@ -48,7 +50,9 @@ function xlsxCell(value, type) {
   if (type === 'date' || type === 'datetime') {
     const d = toDate(value);
     if (!d) return null;
-    return { value: d, type: Date, format: type === 'date' ? 'dd.mm.yyyy' : 'dd.mm.yyyy hh:mm' };
+    // The library serialises dates as UTC, so hand it the local wall time as UTC.
+    const wall = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes()));
+    return { value: wall, type: Date, format: type === 'date' ? 'dd.mm.yyyy' : 'dd.mm.yyyy hh:mm' };
   }
   return { value: String(value), type: String };
 }
