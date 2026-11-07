@@ -17,6 +17,7 @@ const SETTINGS = [
     ['notifications', 'allDayReminderTime', 'app'],
     ['install', 'installApp', 'app'],
     ['android', 'androidApp', 'app'],
+    ['privacy', 'privacySetting', 'app'],
     ['analytics', 'analyticsSetting', 'app'],
 ];
 

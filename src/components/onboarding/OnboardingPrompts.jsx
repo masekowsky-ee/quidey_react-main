@@ -13,6 +13,9 @@ import SheetGrabber from '../SheetGrabber.jsx';
 import { useSheet } from '../../features/layout/dragDismiss';
 import { analyticsQuestionDue, askAnalyticsLater, setAnalyticsConsent, useAnalytics } from '../../features/native/analytics';
 import { usePushState } from '../../features/pwa/push';
+import { selectUsageConsent, setUsageConsent } from '../../features/auth/authAction';
+import { showToast } from '../../features/toast/toast';
+import { askUsageLater, usageAskedLater } from '../../features/usage/askLater';
 
 // the analytics question waits a moment after the app is there (and after any other question)
 export const ANALYTICS_DELAY_MS = 1500;
@@ -28,10 +31,22 @@ export default function OnboardingPrompts() {
     const { asking } = useOnboarding();
     const pushAsking = usePushState().asking;
     useAnalytics();
-    const analyticsDue = analyticsQuestionDue() && !asking && !pushAsking && !tourOpen;
+    const [, bump] = useState(0);
+    const usageChoice = useSelector((state) => selectUsageConsent(state).choice);
+    const accessChecked = useSelector((state) => state.auth.access.checked);
+    const free = !asking && !pushAsking && !tourOpen;
+    const usageDue = usageChoice === null && accessChecked && !usageAskedLater() && free;
+    const [usageReady, setUsageReady] = useState(false);
+    // the usage card goes first; the analytics card follows once it is answered or put aside
+    const analyticsDue = analyticsQuestionDue() && free && !usageDue;
     const [analyticsReady, setAnalyticsReady] = useState(false);
 
     useEffect(() => { setOnboardingAccount(username); }, [username]);
+    useEffect(() => {
+        if (!usageDue) return;
+        const timer = setTimeout(() => setUsageReady(true), ANALYTICS_DELAY_MS);
+        return () => { clearTimeout(timer); setUsageReady(false); };
+    }, [usageDue]);
     useEffect(() => {
         if (!analyticsDue) return;
         const timer = setTimeout(() => setAnalyticsReady(true), ANALYTICS_DELAY_MS);
@@ -41,6 +56,7 @@ export default function OnboardingPrompts() {
     if (asking === 'next') return <NextSteps />;
     if (asking === 'install') return <InstallQuestion />;
     if (asking === 'rating') return <RatingQuestion />;
+    if (usageDue && usageReady) return <UsageQuestion onLater={() => { askUsageLater(); bump((n) => n + 1); }} />;
     if (analyticsDue && analyticsReady) return <AnalyticsQuestion />;
     return null;
 }
@@ -161,6 +177,33 @@ function AnalyticsQuestion() {
             </div>
             <p className={styles.fine}>
                 {t('analyticsAskLater')} <Link to="/datenschutz" onClick={askAnalyticsLater}>{t('analyticsAskPrivacy')}</Link>
+            </p>
+        </Card>
+    );
+}
+
+// Consent to Quidey's own anonymous usage statistics (every platform). Closing it without an
+// answer asks again on the next start; yes and no look the same.
+function UsageQuestion({ onLater }) {
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const answer = async (granted) => {
+        try {
+            await dispatch(setUsageConsent(granted));
+        } catch {
+            dispatch(showToast(t('pushErrorSave'), 'error'));
+            onLater();
+        }
+    };
+
+    return (
+        <Card icon="lightbulb" title={t('usageAskTitle')} text={t('usageAskText')} onClose={onLater}>
+            <div className={styles.answers}>
+                <button type="button" className={styles.no} onClick={() => answer(true)}>{t('usageAskYes')}</button>
+                <button type="button" className={styles.no} onClick={() => answer(false)}>{t('usageAskNo')}</button>
+            </div>
+            <p className={styles.fine}>
+                {t('usageAskLater')} <Link to="/datenschutz#nutzungsstatistik" onClick={onLater}>{t('usageAskPrivacy')}</Link>
             </p>
         </Card>
     );

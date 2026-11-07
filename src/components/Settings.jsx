@@ -11,10 +11,12 @@ import { DEFAULT_UI_VARIANT, OWN_COLORS, VARIANT_COLORS, setUiColors, useColorCh
 import HomeLayoutSwitch from './together/HomeLayoutSwitch';
 import {useInstallState, promptInstall} from '../features/pwa/install';
 import { PUSH_KINDS, disablePush, enablePush, refreshPush, sendTestPush, setPushKind, usePushState } from '../features/pwa/push';
-import { fill } from '../features/helperFunction';
+import { fill, formatDate } from '../features/helperFunction';
+import { selectUsageConsent, setUsageConsent } from '../features/auth/authAction';
+import { showToast } from '../features/toast/toast';
 import { saveAllDayTime, selectAllDayTime } from '../features/tasks/reminders';
 import EventTypeSettings from './EventTypeSettings.jsx';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useHashTarget } from '../features/layout/hashTarget';
 import { SECTION_AREAS } from '../features/search/places';
 import { isNativeApp } from '../features/native/native';
@@ -176,6 +178,35 @@ function AnalyticsSetting() {
             <Choice label={t('analyticsRow')} value={on} options={ON_OFF}
                 onChange={(next) => { if (next !== on) setAnalyticsConsent(next); }} />
         </SettingRow>
+    );
+}
+
+// Quidey's own anonymous usage statistics (every platform): my answer and when I gave it.
+// A failed save leaves the choice as it was.
+function UsageSetting() {
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const { choice, at } = useSelector(selectUsageConsent);
+    const on = choice === 'granted';
+    const hint = choice === null ? t('usageRowNotAsked')
+        : fill(t(on ? 'usageRowGranted' : 'usageRowDenied'), { date: formatDate(at) });
+    const change = async (next) => {
+        if (next === on) return;
+        try {
+            await dispatch(setUsageConsent(next));
+        } catch {
+            dispatch(showToast(t('pushErrorSave'), 'error'));
+        }
+    };
+    return (
+        <>
+            <SettingRow title={t('usageRow')} hint={hint}>
+                <Choice label={t('usageRow')} value={on} options={ON_OFF} onChange={change} />
+            </SettingRow>
+            <SettingRow title={t('usageRowPolicy')}>
+                <Link to="/datenschutz#nutzungsstatistik" className={styles.tourButton}>{t('usageRowPolicy')}</Link>
+            </SettingRow>
+        </>
     );
 }
 
@@ -433,6 +464,9 @@ export default function Settings(){
                         <SettingSection id="alarms" title={t('reminderAlarmSetting')} description={t('reminderAlarmHint')}>
                             <AlarmSettings />
                         </SettingSection>}
+                    <SettingSection id="privacy" title={t('privacySetting')} description={t('privacySettingHint')}>
+                        <UsageSetting />
+                    </SettingSection>
                     {analytics.available &&
                         <SettingSection id="analytics" title={t('analyticsSetting')} description={t('analyticsSettingHint')}>
                             <AnalyticsSetting />
