@@ -5,6 +5,7 @@ import { forgetPushOnSignOut, refreshPush } from '../pwa/push';
 import { resetFocus } from '../session/sessionAction';
 import { clearFocusRun } from '../session/focusRun';
 import { cancelAlarms } from '../native/alarms';
+import { setUsageEnabled } from '../usage/usage';
 
 // Signed in (password, Google): { token, username } from the server
 const finishSignIn = (data) => {
@@ -259,3 +260,17 @@ export const register = (username, display_name, email, birth_date, password) =>
         });
     };
 }
+export const selectUsageConsent = (state) => state.auth.access.usageConsent;
+
+// Answer the question about the anonymous usage statistics (works before beta access too)
+export const setUsageConsent = (granted) => {
+    return async (dispatch, getState) => {
+        const usageConsent = await apiFetch('/api/profile/usage-consent', {
+            method: 'PUT',
+            body: JSON.stringify({ granted: Boolean(granted) }),
+        });
+        dispatch({ type: SET_ACCESS, payload: { ...getState().auth.access, usageConsent } });
+        setUsageEnabled(usageConsent.choice === 'granted');
+        return usageConsent;
+    };
+};

@@ -66,7 +66,7 @@ export async function setAnalyticsConsent(granted) {
 const counting = () => state.available === true && state.choice === 'granted';
 
 // A page as a name: the place, never an id or a user name ('/u/anna' → 'user_profile')
-const PAGES = ['calendar', 'focus', 'stats', 'profile', 'settings', 'inbox', 'feedback', 'admin', 'tester', 'fun', 'pro', 'beta'];
+const PAGES = ['calendar', 'focus', 'stats', 'profile', 'settings', 'inbox', 'feedback', 'admin', 'tester', 'fun', 'pro', 'beta', 'notes', 'study'];
 const COMMUNITY_TABS = ['progress', 'sessions', 'friends', 'family'];
 export function screenName(pathname) {
     const [first, second, third] = pathname.split('/').filter(Boolean);

@@ -7,6 +7,7 @@
 // counted by the wall clock, like the focus timer, so a phone that goes off loses nothing.
 
 import { useEffect } from 'react';
+import { trackAction } from '../usage/track';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { apiFetch, fill } from '../helperFunction';
 import { showToast } from '../toast/toast';
@@ -83,6 +84,7 @@ export const deleteRoutine = (id) => async (dispatch) => {
 export const logRoutineRun = (id, run) => async (dispatch) => {
     const saved = await apiFetch(`/api/routines/${id}/runs`, { method: 'POST', body: JSON.stringify(run) });
     dispatch({ type: ROUTINE_SAVED, payload: saved });
+    trackAction('routine_run');
     return saved;
 };
 

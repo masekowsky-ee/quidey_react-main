@@ -63,7 +63,9 @@ import ShortcutsDialog from './components/ShortcutsDialog.jsx';
 import LimitDialog from './components/pro/LimitDialog.jsx';
 import { restorePlayPurchases } from './features/pro/pro.js';
 import { useProOn } from './features/pro/flag.js';
-import { trackScreen } from './features/native/analytics.js';
+import { trackView } from './features/usage/track.js';
+import { setUsageEnabled } from './features/usage/usage.js';
+import { useActiveMinutes, useAppOpen } from './features/usage/useActiveMinutes.js';
 
 const REQUEST_REFRESH_MS = 60 * 1000;
 
@@ -266,8 +268,13 @@ function App(){
   useEffect(() => { if (allowed) return preloadPages(); }, [allowed]);
 
   const location = useLocation();
-  // the Android app's analytics count the pages by name, with consent only (native/analytics.js)
-  useEffect(() => { if (allowed) trackScreen(location.pathname); }, [allowed, location.pathname]);
+  // the pages by name: Android's Firebase analytics and Quidey's statistics, each with its own consent (usage/track.js)
+  useEffect(() => { if (allowed) trackView(location.pathname); }, [allowed, location.pathname]);
+  // Quidey's own anonymous statistics: counting follows my answer (access.usageConsent, also reset on sign-out)
+  const usageOn = allowed && access.usageConsent.choice === 'granted';
+  useEffect(() => { setUsageEnabled(usageOn); }, [usageOn]);
+  useAppOpen(usageOn);
+  useActiveMinutes(usageOn);
   // while a page's code is on its way (only the first time, and briefly): that page's shape
   const pageLoading = <RouteSkeleton pathname={location.pathname} fade />;
 

@@ -11,6 +11,7 @@
 // the app keeps equal to the device's (useAccountLocale).
 
 import { useEffect, useMemo } from 'react';
+import { trackAction } from '../usage/track';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiFetch } from '../helperFunction';
 import { useRealtime, useSafetyPoll } from '../realtime/socket';
@@ -65,6 +66,7 @@ export const saveReminder = (reminder) => async (dispatch) => {
     const saved = reminder.id
         ? await apiFetch(`/api/tester/reminders/${reminder.id}`, { method: 'PATCH', body })
         : await apiFetch('/api/tester/reminders', { method: 'POST', body });
+    if (!reminder.id) trackAction('reminder_created');
     dispatch({ type: REMINDER_SAVED, payload: saved });
     return saved;
 };

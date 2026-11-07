@@ -3,6 +3,7 @@ import { apiFetch } from '../helperFunction';
 import { isSharedTaskId, sharedTaskIdOf, selectSharedSoloTasks } from '../together/togetherAction';
 import { storeTimerMode, storePomodoro } from '../settings/preferences';
 import { playSound } from '../settings/sound';
+import { trackAction } from '../usage/track';
 import { trackEvent } from '../native/analytics';
 import { phaseMs } from './sessionReducer';
 
@@ -167,7 +168,7 @@ export const startFocus = () => (dispatch, getState) => {
     dispatch(setTimer(from, true));
     playSound('focusStart');
     // the Android app's analytics, with consent only (features/native/analytics.js)
-    trackEvent('focus_start', { mode: timerMode });
+    trackAction('focus_start', { mode: timerMode });
     const task = selectFocusTask(getState());
     if (task && (timerMode !== 'pomodoro' || pomodoro.phase === 'focus')) dispatch(addWorkedTask(task));
     scheduleAlarm(getState());

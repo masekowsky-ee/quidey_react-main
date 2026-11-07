@@ -4,6 +4,7 @@
 // changes them reloads the task list.
 
 import { apiFetch } from '../helperFunction';
+import { trackAction } from '../usage/track';
 import { refreshTasks } from '../tasks/taskAction';
 
 const SET_SUBJECTS = 'STUDY_SET_SUBJECTS';
@@ -204,6 +205,7 @@ export const applyPlan = (inputHash) => async (dispatch, getState) => {
         throw err;
     }
     dispatch({ type: PREVIEW_SET, payload: null });
+    trackAction('study_plan_applied');
     await Promise.all([
         reloadTasks(dispatch),
         ...Object.keys(getState().study.goals).map(id => reloadGoal(dispatch, Number(id))),
