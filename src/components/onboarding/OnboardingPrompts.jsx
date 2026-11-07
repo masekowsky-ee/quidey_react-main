@@ -62,7 +62,7 @@ export default function OnboardingPrompts() {
 }
 
 // The centred card; Escape, a click beside it or the no closes it
-function Card({ icon, title, text, children, wide = false, onClose = closeOnboarding }) {
+function Card({ icon, title, text, children, wide = false, focusTitle = false, onClose = closeOnboarding }) {
     const titleId = useId();
     const textId = useId();
     const cardRef = useRef(null);
@@ -72,7 +72,8 @@ function Card({ icon, title, text, children, wide = false, onClose = closeOnboar
 
     useEffect(() => {
         const previous = document.activeElement;
-        cardRef.current?.querySelector('button, textarea')?.focus();
+        const first = focusTitle ? cardRef.current?.querySelector('h2') : cardRef.current?.querySelector('button, textarea');
+        first?.focus();
         const onKey = (e) => {
             if (e.key !== 'Escape') return;
             e.preventDefault();
@@ -84,7 +85,7 @@ function Card({ icon, title, text, children, wide = false, onClose = closeOnboar
             window.removeEventListener('keydown', onKey, true);
             previous?.focus?.();
         };
-    }, [dismiss]);
+    }, [dismiss, focusTitle]);
 
     return createPortal(
         <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
@@ -92,7 +93,7 @@ function Card({ icon, title, text, children, wide = false, onClose = closeOnboar
                 aria-labelledby={titleId} aria-describedby={text ? textId : undefined}>
                 <SheetGrabber />
                 <span className={styles.badge} aria-hidden="true" data-sheet-drag><Icon name={icon} size={20} /></span>
-                <h2 id={titleId} className={styles.title} data-sheet-drag>{title}</h2>
+                <h2 id={titleId} className={styles.title} data-sheet-drag tabIndex={focusTitle ? -1 : undefined}>{title}</h2>
                 {text && <p id={textId} className={styles.text}>{text}</p>}
                 {children}
             </div>
@@ -170,7 +171,7 @@ function AnalyticsQuestion() {
     const answer = (granted) => setAnalyticsConsent(granted);
 
     return (
-        <Card icon="lightbulb" title={t('analyticsAskTitle')} text={t('analyticsAskText')} onClose={askAnalyticsLater}>
+        <Card focusTitle icon="lightbulb" title={t('analyticsAskTitle')} text={t('analyticsAskText')} onClose={askAnalyticsLater}>
             <div className={styles.answers}>
                 <button type="button" className={styles.no} onClick={() => answer(true)}>{t('analyticsAskYes')}</button>
                 <button type="button" className={styles.no} onClick={() => answer(false)}>{t('analyticsAskNo')}</button>
@@ -197,7 +198,7 @@ function UsageQuestion({ onLater }) {
     };
 
     return (
-        <Card icon="lightbulb" title={t('usageAskTitle')} text={t('usageAskText')} onClose={onLater}>
+        <Card focusTitle icon="lightbulb" title={t('usageAskTitle')} text={t('usageAskText')} onClose={onLater}>
             <div className={styles.answers}>
                 <button type="button" className={styles.no} onClick={() => answer(true)}>{t('usageAskYes')}</button>
                 <button type="button" className={styles.no} onClick={() => answer(false)}>{t('usageAskNo')}</button>
