@@ -121,7 +121,7 @@ function rawSheet(raw, t) {
     return {
         name: t('adminUsageSheet_raw'),
         columns: [
-            col('hour', t('adminUsageHourStart'), 'datetime', 18), col('localHour', t('adminUsageLocalHour'), 'number', 10),
+            col('date', t('adminUsageDay'), 'date', 12), col('localHour', t('adminUsageLocalHour'), 'number', 10),
             col('weekday', t('adminUsageWeekdayNo'), 'number', 18), col('metric', t('adminUsageMetric'), 'string', 22),
             col('platform', t('adminUsagePlatform'), 'string', 10), col('language', t('adminUsageLanguage'), 'string', 10),
             col('plan', t('adminUsagePlan'), 'string', 10), col('events', t('adminUsageEvents'), 'number', 12),

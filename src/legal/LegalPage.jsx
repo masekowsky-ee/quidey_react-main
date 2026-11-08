@@ -167,8 +167,9 @@ function Privacy() {
             <h2>2. Das Wichtigste in Kürze</h2>
             <ul>
                 <li>Quidey verarbeitet nur die Daten, die für die App nötig sind.</li>
-                <li>Es gibt keine Werbung und keine Cookies. Mit deiner Einwilligung zählt Quidey anonym mit, wann und
-                    welche Bereiche genutzt werden: nur Summen, ohne Bezug zu dir, auf dem eigenen Server (Abschnitt {USAGE_NO}).
+                <li>Es gibt keine Werbung und keine Cookies. Mit deiner Einwilligung zählt Quidey mit, wann und welche
+                    Bereiche genutzt werden: nur als Summen ohne Konto, Benutzernummer oder Inhalte, auf dem eigenen Server
+                    (Abschnitt {USAGE_NO}).
                     In der Android-App nutze ich zusätzlich Google Analytics für Firebase, nur wenn du einwilligst (Abschnitt 3).</li>
                 <li>Schriften und alle Dateien der App werden von Quidey selbst ausgeliefert, nicht von Dritten.</li>
                 <li>Externe Dienste kommen nur zum Einsatz, wenn du sie auslöst oder einschaltest: Die optionalen
@@ -258,7 +259,7 @@ function Privacy() {
 
             <h2 id="nutzungsstatistik">{USAGE_NO}. Anonyme Nutzungsstatistik (nur mit Einwilligung)</h2>
             <p>
-                Damit ich sehe, was in Quidey genutzt wird und was ich verbessern sollte, kann Quidey anonym mitzählen,
+                Damit ich sehe, was in Quidey genutzt wird und was ich verbessern sollte, kann Quidey mitzählen,
                 wann und welche Bereiche genutzt werden. Das geschieht nur, wenn du einwilligst; ohne dein Ja wird
                 nichts gezählt.
             </p>
@@ -282,8 +283,10 @@ function Privacy() {
                 einmal gezählt werden, merkt er sich pro Stunde, Tag und Woche mit deiner Benutzernummer, dass du
                 schon gezählt wurdest („schon gezählt“-Marken). Diese Marken werden spätestens nach 8 Tagen gelöscht.
                 Die Summen enthalten kein Konto, keine Benutzernummer und keine Inhalte; sie werden ohne zeitliche
-                Begrenzung aufbewahrt. Noch nicht gesendete Ereignisse wartet die App kurz auf deinem Gerät ab
-                (Abschnitt {privacyNo(9)}).
+                Begrenzung aufbewahrt. Nutzen nur sehr wenige Menschen Quidey, kann eine Summe (etwa für eine Sprache,
+                einen Plan, eine Plattform oder eine Stunde) auch nur eine einzelne Person betreffen. Quidey nutzt sie
+                nur als Summen und versucht nie herauszufinden, wer dahintersteht. Noch nicht gesendete Ereignisse
+                wartet die App kurz auf deinem Gerät ab (Abschnitt {privacyNo(9)}).
             </p>
             <p>
                 Es gibt dabei keine Dritten und keine Cookies; alles läuft auf dem Quidey-Server (Abschnitt 3).
@@ -294,7 +297,7 @@ function Privacy() {
                 Quidey fragt dich einmal danach; „Ja“ und „Nein“ sind gleich einfach, und die Antwort ist kein
                 Nachteil. Du kannst sie jederzeit unter Einstellungen → Datenschutz („Anonyme Nutzungsstatistik“)
                 ändern. Widerrufst du, wird sofort nicht mehr gezählt und deine „schon gezählt“-Marken werden gelöscht.
-                Die bereits eingerechneten Summen bleiben, weil sie keinen Bezug zu dir haben. Quidey funktioniert ohne
+                Die bereits eingerechneten Summen bleiben, weil sie kein Konto und keine Benutzernummer enthalten. Quidey funktioniert ohne
                 deine Einwilligung genauso.
             </p>
 
@@ -683,8 +686,9 @@ function Privacy() {
                 Während einer Anmeldung mit Google merkt sich dein Browser bis zur Rückkehr von Google einen Zufallswert
                 (sessionStorage), damit nur eine von dir begonnene Anmeldung angenommen wird; er wird danach gelöscht.
                 Hast du der anonymen Nutzungsstatistik zugestimmt (Abschnitt {USAGE_NO}), liegen die noch nicht gesendeten
-                Ereignisse (nur Art der Handlung und Zeitpunkt, keine Inhalte) dort, höchstens bis sie gesendet sind;
-                sagst du Nein oder meldest dich ab, wird die Warteschlange ohne Senden geleert.
+                Ereignisse (nur Art der Handlung und Zeitpunkt, keine Inhalte) dort, zusammen mit deiner Benutzernummer,
+                damit sie nur für dein Konto gesendet werden, und höchstens bis sie gesendet sind; sagst du Nein, meldest
+                dich ab oder ist inzwischen ein anderes Konto angemeldet, wird die Warteschlange ohne Senden geleert.
                 In der Android-App liegt dasselbe im Speicher der App; es wird nicht in Datensicherungen deines Handys
                 übernommen. Die App braucht keinen Service Worker und keinen Cache-Speicher (unten): Ihre Dateien sind
                 in der App selbst enthalten.
@@ -723,8 +727,8 @@ function Privacy() {
 
             <p>
                 Die „schon gezählt“-Marken zur anonymen Nutzungsstatistik (Abschnitt {USAGE_NO}) werden nach höchstens 8 Tagen
-                gelöscht, die anonymen Summen ohne zeitliche Begrenzung aufbewahrt, da sie keinen Bezug zu einer Person
-                haben. Deine Antwort auf die Frage nach der Statistik (Ja oder Nein, Zeitpunkt und Version der Frage)
+                gelöscht, die Summen ohne zeitliche Begrenzung aufbewahrt, da sie kein Konto und keine Benutzernummer
+                enthalten. Deine Antwort auf die Frage nach der Statistik (Ja oder Nein, Zeitpunkt und Version der Frage)
                 bleibt so lange gespeichert, wie dein Konto besteht.
             </p>
 

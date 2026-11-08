@@ -52,7 +52,7 @@ const report = {
 }
 
 const raw = {
-    rows: [{ hour: '2026-11-04T12:00:00.000Z', localHour: 13, weekday: 2, metric: 'task_done', platform: 'web', language: 'de', plan: 'pro', events: 1, people: 1, valueSum: 0 }],
+    rows: [{ date: '2026-11-04', localHour: 13, weekday: 2, metric: 'task_done', platform: 'web', language: 'de', plan: 'pro', events: 1, people: 1, valueSum: 0 }],
 }
 
 const SHEETS_DE = ['Übersicht', 'Tageszeiten', 'Täglich', 'Bereiche', 'Aufteilung', 'Rohdaten']
@@ -112,7 +112,7 @@ describe('admin usage tab', () => {
         await act(async () => { fireEvent.click(tab) })
         expect(tab).toHaveAttribute('aria-selected', 'true')
         expect(usageCalls()).toEqual(['/api/admin/usage?from=2026-10-09&to=2026-11-07'])
-        expect(screen.getByText('Nur Summen von Leuten, die zugestimmt haben. Keine Personen, keine Inhalte.')).toBeInTheDocument()
+        expect(screen.getByText('Nur Summen von Leuten, die zugestimmt haben, ohne Konten und Inhalte. Kleine Zahlen können eine einzelne Person sein.')).toBeInTheDocument()
     })
 
     it('shows the summary numbers', async () => {
@@ -271,6 +271,13 @@ describe('usageSheets', () => {
         for (const sheet of sheets) {
             for (const col of sheet.columns) expect(['string', 'number', 'date', 'datetime', 'boolean']).toContain(col.type)
         }
+    })
+
+    it('the raw sheet has the day, never the exact hour', () => {
+        const sheet = usageSheets(report, raw, (key, i) => translate('de', key, i))[5]
+        expect(sheet.columns.map(c => c.key)).toEqual(['date', 'localHour', 'weekday', 'metric', 'platform', 'language', 'plan', 'events', 'people', 'valueSum'])
+        expect(sheet.columns[0]).toMatchObject({ label: 'Tag', type: 'date' })
+        expect(sheet.rows[0]).not.toHaveProperty('hour')
     })
 
     it('labels sums of daily people as person-days', () => {

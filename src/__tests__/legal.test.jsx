@@ -123,7 +123,16 @@ describe('anonymous usage statistics in the legal texts', () => {
 
     it('the privacy page explains the opt-in statistics', () => {
         const text = norm(textOf('/datenschutz'))
-        expect(text).toContain('Mit deiner Einwilligung zählt Quidey anonym mit, wann und welche Bereiche genutzt werden: nur Summen, ohne Bezug zu dir, auf dem eigenen Server (Abschnitt 4).')
+        expect(text).toContain('Mit deiner Einwilligung zählt Quidey mit, wann und welche Bereiche genutzt werden: nur als Summen ohne Konto, Benutzernummer oder Inhalte, auf dem eigenen Server (Abschnitt 4).')
+        // with few people a total can concern one person: said plainly, no promise of "no reference"
+        expect(text).toContain('Nutzen nur sehr wenige Menschen Quidey, kann eine Summe (etwa für eine Sprache, einen Plan, eine Plattform oder eine Stunde) auch nur eine einzelne Person betreffen. Quidey nutzt sie nur als Summen und versucht nie herauszufinden, wer dahintersteht.')
+        expect(text).toContain('Die bereits eingerechneten Summen bleiben, weil sie kein Konto und keine Benutzernummer enthalten.')
+        expect(text).toContain('die Summen ohne zeitliche Begrenzung aufbewahrt, da sie kein Konto und keine Benutzernummer enthalten.')
+        // the queue on the device carries the account it belongs to
+        expect(text).toContain('zusammen mit deiner Benutzernummer, damit sie nur für dein Konto gesendet werden')
+        for (const promise of ['ohne Bezug zu dir', 'keinen Bezug zu dir', 'keinen Bezug zu einer Person', 'zählt Quidey anonym', 'anonym mitzählen']) {
+            expect(text).not.toContain(promise)
+        }
         expect(text).not.toContain('Im Browser gibt es kein Tracking')
         expect(screen.getByRole('heading', { name: '4. Anonyme Nutzungsstatistik (nur mit Einwilligung)' })).toBeInTheDocument()
         for (const part of [
