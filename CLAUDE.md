@@ -700,6 +700,19 @@ the theme before React loads.
   `focus_end`. Never content, names or the account (no user id). Built only with the Firebase
   config (`VITE_NATIVE_ANALYTICS=on`, Android build script). Adding an event: plain names and
   params only, and list it in privacy § 3.
+- **Anonyme Nutzungsstatistik** (every platform, only with consent; privacy § 4 `#nutzungsstatistik`, spec
+  `docs/superpowers/specs/2026-11-07-usage-analytics-design.md`): asked once per account (`UsageQuestion`, both
+  answers equal, closing = ask again next start, kept only in memory: `askLater.js`), changed in Settings → Datenschutz; stored as
+  `users.usage_consent` / `_at` / `_version` (`PUT /api/profile/usage-consent`, open without beta access; `/api/me`
+  → `usageConsent`). Client `features/usage/` (`track(metric)`, queue in sessionStorage `usageQueue`, sent to
+  `POST /api/usage` with `X-Quidey-Platform` web|pwa|android; no = queue emptied, nothing sent); the server counts
+  `task_created`, `task_done`, `focus_done` itself. Backend `utils/usage.js` (migration 044): `usage_hourly` totals
+  without a user id (kept without limit), `usage_people` day/week people, `usage_seen` "already counted" marks with the
+  user id (deleted 26 h / 2 days / 8 days after the hour / day / week starts; withdrawal deletes them at once).
+  Admin → Nutzung (`admin/AdminUsage.jsx`, `GET /api/admin/usage`, `/raw` for the export) and Admin → Nutzer (every
+  account field, paging, detail sheet, `GET /api/admin/users/export`, logged as `export_users`, migration 045); both
+  export .xlsx / CSV (`features/admin/exportTable.js`, write-excel-file). Adding a metric: both whitelists (client
+  usage.js, backend usage.js) and the privacy text's list.
 
 ## API access
 

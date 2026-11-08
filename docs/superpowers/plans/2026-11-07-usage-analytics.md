@@ -17,7 +17,7 @@
 - Platforms exactly `web | pwa | android`; languages `de | en`; plans `free | tester | pro`; timezone fallback `Europe/Berlin`.
 - Metric whitelist (spec § 2) lives only in backend `utils/usage.js` (`METRICS`, `CLIENT_METRICS`, `SERVER_METRICS`); `view:<area>` areas = the names `screenName()` returns plus `notes`, `study`.
 - Never store or export content, names in analytics, ids in metric names, `password_hash`, `token_version`, `google_sub`.
-- `usage_seen` deleted: hour marks 2 h after the hour, day marks 2 days after, week marks 8 days after. Totals kept without limit.
+- `usage_seen` deleted: hour marks 26 h after the hour starts, day marks 2 days after, week marks 8 days after. Totals kept without limit.
 - Real numbers everywhere; no small-number suppression.
 - German-first copy; every new translation key exists in `de` and `en`.
 - Landing short notes: exactly "Kostenlos in der Beta. Ohne Werbung." / "Free during the beta. No ads."
@@ -278,4 +278,4 @@
 ## Finish
 
 - [ ] Run the full suites once more: backend `npm test`, web `npm test` + `npm run lint` + `npm run build`, landing `npm run build`.
-- [ ] Use superpowers:finishing-a-development-branch per repo. Deploy order (spec § 9): migration 044 → backend → web (with the new privacy policy) → landing.
+- [ ] Use superpowers:finishing-a-development-branch per repo. Deploy order (spec § 9): migrations 044 + 045 → backend → web (with the new privacy policy) → landing.

@@ -677,9 +677,7 @@ function Privacy() {
                 <li>als Tester, an welchem Tag du den Hinweis „Plan anpassen“ bei den Lernzielen auf „Später“ gestellt hast (nur das Datum);</li>
                 <li>ob auf diesem Gerät Benachrichtigungen an sind, die Adresse dafür beim Push-Dienst (siehe Abschnitt {privacyNo(6)}) und ob Quidey dich danach schon gefragt hat;</li>
                 <li>Schwierigkeit und Bestwerte der Spiele;</li>
-                <li>in der Android-App deine Antwort auf die Frage nach den Nutzungsdaten (Abschnitt 3);</li>
-                <li>deine Antwort auf die Frage nach der anonymen Nutzungsstatistik (Abschnitt {USAGE_NO}) und ob du später
-                    nachgefragt werden willst.</li>
+                <li>in der Android-App deine Antwort auf die Frage nach den Nutzungsdaten (Abschnitt 3).</li>
             </ul>
             <p>
                 Während einer Anmeldung mit Google merkt sich dein Browser bis zur Rückkehr von Google einen Zufallswert

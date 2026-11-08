@@ -122,7 +122,7 @@ memory). Rate limit: the global `/api` limiter plus 30 calls / 10 min per user. 
 without consent, so the client needn't know). Server-side metrics sent by the client are ignored.
 
 **Cleanup**: an interval job (hourly, like the other jobs in index.js) deletes `usage_seen` rows whose
-period ended (hour marks after 2 h, day marks after 2 days, week marks after 8 days).
+period ended, counted from the period start (hour marks after 26 h — the beacon takes events up to 24 h late —, day marks after 2 days, week marks after 8 days).
 
 **Consent**:
 - `PUT /api/profile/usage-consent` `{ granted: boolean }` → sets `usage_consent`, `_at = now()`,
@@ -271,5 +271,5 @@ The repos are on feature branches today (backend `google-signin-fcm`, web `refac
 `pro-and-android`). Work goes on a new branch per repo, `usage-statistics`, from the current branch.
 Order: backend (migration, counting, endpoints, tests) → web (client tracking, consent, Settings, admin
 tabs, legal, tests) → landing copy → Android `git pull web usage-statistics` and a build check.
-Deploy order: migration first, then backend, then web, then landing; the privacy policy goes live with
+Deploy order: migrations 044 and 045 (`045_admin_export_action.sql` lets the admin log record account exports) first, then backend, then web, then landing; the privacy policy goes live with
 the web app, before any counting can start (counting needs a consent given in that web app).
