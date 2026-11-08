@@ -191,9 +191,29 @@
     min-width: 0;
 }
 
-/* an older answer stays while the new range loads */
+/* an older answer stays while the new range loads, after it failed, or under an invalid range */
 .results[data-stale]{
     opacity: 0.55;
+}
+
+/* why the numbers below aren't current (invalid range, failed load), with a way to ask again */
+.notice{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: var(--text-h);
+    background-color: var(--surface-inset);
+    border-radius: var(--radius);
+}
+
+.notice > p{
+    flex: 1 1 14rem;
+    margin: 0;
+    text-wrap: pretty;
 }
 
 /* ---------- heatmap ---------- */
@@ -204,6 +224,18 @@
     overscroll-behavior-x: contain;
     margin-top: 0.75rem;
     padding-bottom: 0.25rem;
+    border-radius: var(--radius-sm);
+}
+
+.heatScroll:focus-visible{
+    outline: 2px solid var(--text-h);
+    outline-offset: 2px;
+}
+
+/* 24 hour columns: tight cells, the box scrolls on phones */
+.heatTable th,
+.heatTable td{
+    padding-inline: 0.3rem;
 }
 
 .heat{

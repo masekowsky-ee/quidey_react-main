@@ -20,6 +20,17 @@ export function heatGrid(cells = []) {
 export const sortedFeatures = (features = []) =>
     [...features].sort((a, b) => b.personDays - a.personDays || b.events - a.events || a.metric.localeCompare(b.metric));
 
+// A metric as people read it: "view:home" → "Ansicht: Startseite", "task_done" → "Aufgabe erledigt";
+// one without a text keeps its raw name
+export function metricLabel(metric, t) {
+    const known = (key) => { const text = t(key); return text === key ? null : text; };
+    if (metric.startsWith('view:')) {
+        const area = known(`adminUsageArea_${metric.slice(5)}`);
+        return area ? t('adminUsageView').replace('{area}', area) : metric;
+    }
+    return known(`adminUsageAction_${metric}`) ?? metric;
+}
+
 const col = (key, label, type, width) => ({ key, label, type, ...(width && { width }) });
 
 function summarySheet(report, t) {
@@ -85,10 +96,12 @@ function featuresSheet(report, t) {
     return {
         name: t('adminUsageSheet_features'),
         columns: [
-            col('metric', t('adminUsageFeature'), 'string', 24), col('personDays', t('adminUsagePersonDays'), 'number', 14),
-            col('events', t('adminUsageEvents'), 'number', 12), col('perPersonDay', t('adminUsagePerPersonDay'), 'number', 16),
+            col('label', t('adminUsageFeature'), 'string', 28), col('metric', t('adminUsageMetric'), 'string', 24),
+            col('personDays', t('adminUsagePersonDays'), 'number', 14), col('events', t('adminUsageEvents'), 'number', 12),
+            col('perPersonDay', t('adminUsagePerPersonDay'), 'number', 16),
         ],
-        rows: sortedFeatures(report.features).map(({ metric, personDays, events, perPersonDay }) => ({ metric, personDays, events, perPersonDay })),
+        rows: sortedFeatures(report.features).map(({ metric, personDays, events, perPersonDay }) =>
+            ({ label: metricLabel(metric, t), metric, personDays, events, perPersonDay })),
     };
 }
 

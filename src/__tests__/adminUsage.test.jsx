@@ -59,6 +59,7 @@ const SHEETS_DE = ['Übersicht', 'Tageszeiten', 'Täglich', 'Bereiche', 'Aufteil
 const SHEETS_EN = ['Summary', 'Times of day', 'Daily', 'Features', 'Splits', 'Raw']
 
 let rawAnswer
+let usageAnswer
 const usageCalls = () => apiFetch.mock.calls.map(([url]) => url).filter(url => url.startsWith('/api/admin/usage?'))
 const rawCalls = () => apiFetch.mock.calls.map(([url]) => url).filter(url => url.startsWith('/api/admin/usage/raw'))
 
@@ -91,10 +92,11 @@ beforeEach(() => {
     downloadXlsx.mockClear()
     downloadCsv.mockClear()
     rawAnswer = async () => raw
+    usageAnswer = async () => structuredClone(report)
     apiFetch.mockImplementation(async (url) => {
         if (url === '/api/admin/requests') return []
         if (url.startsWith('/api/admin/usage/raw')) return rawAnswer()
-        if (url.startsWith('/api/admin/usage?')) return structuredClone(report)
+        if (url.startsWith('/api/admin/usage?')) return usageAnswer(url)
         throw new Error(`unexpected call ${url}`)
     })
 })
@@ -140,6 +142,41 @@ describe('admin usage tab', () => {
         expect(usageCalls().at(-1)).toBe('/api/admin/usage?from=2026-11-02&to=2026-11-07')
     })
 
+    it('dims the old numbers and offers to try again when a new range fails', async () => {
+        const { container } = await renderAdmin()
+        let fail = true
+        usageAnswer = async (url) => {
+            if (fail && url.includes('from=2026-11-01')) throw Object.assign(new Error('down'), { status: 500 })
+            return structuredClone(report)
+        }
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: '7 Tage' })) })
+        expect(container.querySelector('[data-stale]')).not.toBeNull()
+        expect(screen.getByText(/Die Zahlen konnten nicht geladen werden/)).toBeInTheDocument()
+        expect(screen.getByText(/noch vom vorigen Zeitraum/)).toBeInTheDocument()
+        fail = false
+        const before = usageCalls().length
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Nochmal versuchen' })) })
+        expect(usageCalls()).toHaveLength(before + 1)
+        expect(usageCalls().at(-1)).toBe('/api/admin/usage?from=2026-11-01&to=2026-11-07')
+        expect(container.querySelector('[data-stale]')).toBeNull()
+        expect(screen.queryByText(/konnten nicht geladen/)).not.toBeInTheDocument()
+    })
+
+    it('says when a custom range does not work and dims the old numbers', async () => {
+        const { container } = await renderAdmin()
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Eigener Zeitraum' })) })
+        const before = usageCalls().length
+        await act(async () => { fireEvent.change(screen.getByLabelText('Von'), { target: { value: '2026-11-08' } }) })
+        expect(usageCalls()).toHaveLength(before)
+        expect(screen.getByText(/Dieser Zeitraum geht nicht/)).toBeInTheDocument()
+        expect(container.querySelector('[data-stale]')).not.toBeNull()
+        await act(async () => { fireEvent.change(screen.getByLabelText('Von'), { target: { value: '' } }) })
+        expect(screen.getByText(/Dieser Zeitraum geht nicht/)).toBeInTheDocument()
+        await act(async () => { fireEvent.change(screen.getByLabelText('Von'), { target: { value: '2026-11-03' } }) })
+        expect(screen.queryByText(/Dieser Zeitraum geht nicht/)).not.toBeInTheDocument()
+        expect(container.querySelector('[data-stale]')).toBeNull()
+    })
+
     it('filters by platform', async () => {
         await renderAdmin()
         await act(async () => { fireEvent.change(screen.getByLabelText('Plattform'), { target: { value: 'android' } }) })
@@ -149,7 +186,13 @@ describe('admin usage tab', () => {
     it('draws a 7 × 24 heatmap with the numbers in a table', async () => {
         const { container } = await renderAdmin()
         expect(container.querySelectorAll('[data-heat-cell]')).toHaveLength(168)
-        const table = screen.getByRole('table', { name: /Tageszeiten/ })
+        const section = screen.getByRole('heading', { name: 'Tageszeiten' }).closest('section')
+        const grid = within(section).getByRole('region', { name: /Raster/ })
+        expect(grid).toHaveAttribute('tabindex', '0')
+        const table = within(section).getByRole('table', { name: /Tageszeiten/ })
+        expect(table).not.toBeVisible()
+        await act(async () => { fireEvent.click(within(section).getByText('Als Tabelle zeigen')) })
+        expect(table).toBeVisible()
         const tuesday = within(table).getByRole('rowheader', { name: 'Di' }).closest('tr')
         const cells = within(tuesday).getAllByRole('cell')
         expect(cells).toHaveLength(24)
@@ -164,13 +207,13 @@ describe('admin usage tab', () => {
         const table = screen.getByRole('table', { name: 'Bereiche' })
         expect(within(table).getByRole('columnheader', { name: 'Personentage' })).toBeInTheDocument()
         const names = within(table).getAllByRole('rowheader').map(cell => cell.textContent)
-        expect(names).toEqual(['task_done', 'view:home', 'view:calendar'])
+        expect(names).toEqual(['Aufgabe erledigt', 'Ansicht: Startseite', 'Ansicht: Kalender'])
     })
 
     it('shows the splits as person-days', async () => {
         await renderAdmin()
         const platform = screen.getByRole('table', { name: 'Plattform' })
-        expect(within(within(platform).getByRole('rowheader', { name: 'android' }).closest('tr')).getAllByRole('cell').map(c => c.textContent)).toEqual(['2', '5'])
+        expect(within(within(platform).getByRole('rowheader', { name: 'Android' }).closest('tr')).getAllByRole('cell').map(c => c.textContent)).toEqual(['2', '5'])
     })
 
     it('exports all six sheets to Excel, with the raw rows fetched only then', async () => {
@@ -235,5 +278,16 @@ describe('usageSheets', () => {
         expect(sheets[3].columns.map(c => c.label)).toContain('Personentage')
         expect(sheets[4].columns.map(c => c.label)).toContain('Personentage')
         expect(sheets[4].rows).toContainEqual(expect.objectContaining({ dimension: 'Plattform', key: 'android', personDays: 2, events: 5 }))
+    })
+
+    it('names the features for people and keeps the raw metric beside them', () => {
+        const withUnknown = { ...report, features: [...report.features, { metric: 'something_new', personDays: 0, events: 1, perPersonDay: 0, spark: [] }] }
+        const features = usageSheets(withUnknown, null, (key, i) => translate('de', key, i))[3]
+        expect(features.columns.map(c => [c.key, c.label])).toEqual(expect.arrayContaining([['label', 'Bereich'], ['metric', 'Metrik']]))
+        expect(features.rows[0]).toMatchObject({ label: 'Aufgabe erledigt', metric: 'task_done' })
+        expect(features.rows).toContainEqual(expect.objectContaining({ label: 'Ansicht: Startseite', metric: 'view:home' }))
+        expect(features.rows).toContainEqual(expect.objectContaining({ label: 'something_new', metric: 'something_new' }))
+        const en = usageSheets(report, null, (key, i) => translate('en', key, i))[3]
+        expect(en.rows).toContainEqual(expect.objectContaining({ label: 'View: Calendar', metric: 'view:calendar' }))
     })
 })

@@ -6,7 +6,7 @@ import { fill } from '../../features/helperFunction';
 import { showToast } from '../../features/toast/toast';
 import { adminErrorText, fetchAdminUsage, fetchAdminUsageRaw, usageQuery } from '../../features/admin/adminAction';
 import { downloadCsv, downloadXlsx } from '../../features/admin/exportTable';
-import { HEAT_METRICS, SHEET_IDS, SPLIT_KEYS, fileSlug, heatGrid, sortedFeatures, usageSheets } from '../../features/admin/usageSheets';
+import { HEAT_METRICS, SHEET_IDS, SPLIT_KEYS, fileSlug, heatGrid, metricLabel, sortedFeatures, usageSheets } from '../../features/admin/usageSheets';
 import { Bone, Skeleton, SkeletonRows } from '../skeleton/Skeleton.jsx';
 import Icon from '../icons.jsx';
 
@@ -41,18 +41,23 @@ function scaleFor(max) {
     return { top: count * step, ticks: Array.from({ length: count + 1 }, (_, i) => i * step) };
 }
 
-const optionLabel = (t, key, value) =>
-    key === 'platform' ? { web: 'Web', pwa: 'PWA', android: 'Android' }[value]
-        : t(key === 'language' ? `adminUsageLang_${value}` : `adminUsagePlan_${value}`);
+// a filter value as people read it ("android" → "Android", "de" → "Deutsch"); an unknown one stays raw
+function optionLabel(t, key, value) {
+    if (key === 'platform') return { web: 'Web', pwa: 'PWA', android: 'Android' }[value] ?? value;
+    const textKey = key === 'language' ? `adminUsageLang_${value}` : `adminUsagePlan_${value}`;
+    return t(textKey) === textKey ? value : t(textKey);
+}
 
 function Heatmap({ cells, metric, t }) {
     const grid = heatGrid(cells);
     const max = Math.max(0, ...grid.flat().map(c => c.people));
     const share = (people) => (people > 0 && max > 0 ? `${Math.max(8, Math.round((people / max) * 100))}%` : '0%');
     const day = (d) => t('weekDays', d);
+    const metricName = t(`adminUsageMetric_${metric}`);
     return (
         <>
-            <div className={styles.heatScroll}>
+            {/* focusable so a keyboard can scroll it sideways on a phone; the numbers are in the table below */}
+            <div className={styles.heatScroll} tabIndex={0} role="region" aria-label={fill(t('adminUsageHeatGrid'), { metric: metricName })}>
                 <div className={styles.heat} aria-hidden="true">
                     <span />
                     {Array.from({ length: 24 }, (_, h) => <span key={h} className={styles.heatHour}>{h % 3 === 0 ? h : ''}</span>)}
@@ -69,17 +74,22 @@ function Heatmap({ cells, metric, t }) {
                 <span className={styles.scaleBar} aria-hidden="true" />
                 {fill(t('adminUsageScaleMax'), { max })}
             </p>
-            <table className={styles.srOnly}>
-                <caption>{fill(t('adminUsageHeatCaption'), { metric: t(`adminUsageMetric_${metric}`) })}</caption>
-                <thead>
-                    <tr><th scope="col">{t('adminUsageWeekday')}</th>{Array.from({ length: 24 }, (_, h) => <th key={h} scope="col">{h}</th>)}</tr>
-                </thead>
-                <tbody>
-                    {grid.map((hours, d) => (
-                        <tr key={d}><th scope="row">{day(d)}</th>{hours.map((cell, h) => <td key={h}>{cell.people}</td>)}</tr>
-                    ))}
-                </tbody>
-            </table>
+            <details className={styles.tableToggle}>
+                <summary>{t('statsAsTable')}</summary>
+                <div className={styles.tableScroll}>
+                    <table className={`${styles.table} ${styles.heatTable}`}>
+                        <caption className={styles.srOnly}>{fill(t('adminUsageHeatCaption'), { metric: metricName })}</caption>
+                        <thead>
+                            <tr><th scope="col">{t('adminUsageWeekday')}</th>{Array.from({ length: 24 }, (_, h) => <th key={h} scope="col">{h}</th>)}</tr>
+                        </thead>
+                        <tbody>
+                            {grid.map((hours, d) => (
+                                <tr key={d}><th scope="row">{day(d)}</th>{hours.map((cell, h) => <td key={h}>{cell.people}</td>)}</tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
         </>
     );
 }
@@ -200,6 +210,11 @@ export default function AdminUsage() {
     const params = { from: range.from, to: range.to, ...filters };
     const query = usageQuery(params);
     const loading = valid && loaded.query !== query;
+    // the answer for this very query failed: the numbers shown (if any) are older, a retry asks again
+    const failed = valid && loaded.query === query && Boolean(loaded.error);
+    // what is shown isn't for the current controls: loading, failed, or the range is invalid
+    const stale = Boolean(loaded.data) && !(valid && loaded.query === query && !loaded.error);
+    const tryAgain = () => { setLoaded(prev => ({ ...prev, query: null, error: null })); setRetry(n => n + 1); };
 
     useEffect(() => {
         if (!valid) return undefined;
@@ -311,15 +326,22 @@ export default function AdminUsage() {
                 <p className={styles.note}>{t('adminUsageNote')}</p>
             </section>
 
+            {(!valid || failed) && (
+                <div className={styles.notice} role="status">
+                    <p>
+                        {t(valid ? 'adminUsageLoadFailed' : 'adminUsageRangeInvalid')}
+                        {data && ` ${t('adminUsageStaleNote')}`}
+                    </p>
+                    {failed && <button type="button" className={styles.exportBtn} onClick={tryAgain}>{t('adminUsageRetry')}</button>}
+                </div>
+            )}
+
             {!data ? (
-                loaded.error && !loading ? (
-                    <section className={styles.card}>
-                        <p className={styles.empty}>{t('adminUsageLoadFailed')}</p>
-                        <button type="button" className={styles.exportBtn} onClick={() => { setLoaded(prev => ({ ...prev, query: null, error: null })); setRetry(n => n + 1); }}>{t('adminUsageRetry')}</button>
-                    </section>
-                ) : <UsageSkeleton />
+                valid && !failed && <UsageSkeleton />
             ) : (
-                <div className={styles.results} aria-busy={loading || undefined} data-stale={loading || undefined}>
+                // data-stale dims numbers that aren't for the current controls (see the notice above, or
+                // still loading); aria-busy only while a request is out
+                <div className={styles.results} aria-busy={loading || undefined} data-stale={stale || undefined}>
                     <div className={styles.stats}>
                         <div className={styles.stat}>
                             <span className={styles.statValue}>{num(summary.activeToday)}</span>
@@ -397,7 +419,7 @@ export default function AdminUsage() {
                                     <tbody>
                                         {features.map(f => (
                                             <tr key={f.metric}>
-                                                <th scope="row">{f.metric}</th><td>{num(f.personDays)}</td><td>{num(f.events)}</td>
+                                                <th scope="row" title={f.metric}>{metricLabel(f.metric, t)}</th><td>{num(f.personDays)}</td><td>{num(f.events)}</td>
                                                 <td>{num(f.perPersonDay)}</td><td><Spark values={f.spark ?? []} /></td>
                                             </tr>
                                         ))}
@@ -420,7 +442,7 @@ export default function AdminUsage() {
                                         </thead>
                                         <tbody>
                                             {(data.splits?.[key] ?? []).map(row => (
-                                                <tr key={row.key}><th scope="row">{row.key}</th><td>{num(row.personDays)}</td><td>{num(row.events)}</td></tr>
+                                                <tr key={row.key}><th scope="row">{optionLabel(t, key, row.key)}</th><td>{num(row.personDays)}</td><td>{num(row.events)}</td></tr>
                                             ))}
                                         </tbody>
                                     </table>
