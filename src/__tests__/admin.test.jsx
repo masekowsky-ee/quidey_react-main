@@ -250,6 +250,29 @@ describe('admin users: all fields', () => {
         expect(screen.getByText('test_name')).toBeInTheDocument()
     })
 
+    it('ignores a "Mehr laden" answer that lands after the search changed', async () => {
+        await renderAdmin('/admin?tab=users')
+        const more = await screen.findByText('Mehr laden')
+        const base = apiFetch.getMockImplementation()
+        let resolveOld
+        apiFetch.mockImplementation((url, options) => {
+            const params = new URL(url, 'http://x').searchParams
+            if (url.startsWith('/api/admin/users?') && params.get('page') === '2' && !params.get('q')) {
+                return new Promise(resolve => { resolveOld = () => resolve({ users: [extraUser], total: 5 }) })
+            }
+            if (url.startsWith('/api/admin/users?') && params.get('q') === 'zed') return Promise.resolve({ users: [proUser], total: 1 })
+            return base(url, options)
+        })
+        await act(async () => { fireEvent.click(more) })
+        await act(async () => { fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'zed' } }) })
+        await act(async () => { await new Promise(r => setTimeout(r, 450)) })
+        expect(screen.getByText('1 Konten')).toBeInTheDocument()
+        await act(async () => { resolveOld() })
+        expect(screen.queryByText('Second Page')).not.toBeInTheDocument()
+        expect(screen.getByText('1 Konten')).toBeInTheDocument()
+        expect(screen.queryByText('Mehr laden')).not.toBeInTheDocument()
+    })
+
     it('exports every account with all columns and no secrets', async () => {
         await renderAdmin('/admin?tab=users')
         await screen.findByText('5 Konten')

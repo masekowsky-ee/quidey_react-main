@@ -153,16 +153,17 @@ function RequestsTab() {
 // ---------- users ----------
 
 function UsersTab() {
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
     const dispatch = useDispatch();
     const run = useAdminRun();
     const myName = useSelector(state => state.auth.user?.username);
-    const { language } = useTranslation();
     const [query, setQuery] = useState('');
     const [sort, setSort] = useState('newest');
     const [users, setUsers] = useState(null);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
+    const [loaded, setLoaded] = useState({ query: '', sort: 'newest' }); // what the list on screen was asked with
+    const generation = useRef(0); // bumped by every new search / sort: older answers are dropped
     const [loadingMore, setLoadingMore] = useState(false);
     const [exporting, setExporting] = useState(false);
     const [detail, setDetail] = useState(null);
@@ -172,27 +173,33 @@ function UsersTab() {
     // searches as you type, a moment after the last key; a new search or sort starts at page 1
     useEffect(() => {
         let cancelled = false;
+        generation.current += 1;
         const timeout = setTimeout(() => {
             dispatch(fetchAdminUsers({ q: query, sort, page: 1, pageSize: PAGE_SIZE }))
-                .then(result => { if (!cancelled) { setUsers(result.users); setTotal(result.total); setPage(1); } })
-                .catch(err => { if (!cancelled) { setUsers([]); setTotal(0); dispatch(showToast(adminErrorText(t, err), 'error')); } });
+                .then(result => { if (!cancelled) { setUsers(result.users); setTotal(result.total); setPage(1); setLoaded({ query, sort }); setLoadingMore(false); } })
+                .catch(err => { if (!cancelled) { setUsers([]); setTotal(0); setLoaded({ query, sort }); setLoadingMore(false); dispatch(showToast(adminErrorText(t, err), 'error')); } });
         }, query ? SEARCH_DELAY_MS : 0);
         return () => { cancelled = true; clearTimeout(timeout); };
     // t only changes with the language
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch, query, sort]);
 
+    // a new search or sort while this is on its way makes the answer stale: it is ignored
+    const searching = loaded.query !== query || loaded.sort !== sort;
     const loadMore = async () => {
+        if (searching) return;
+        const mine = generation.current;
         setLoadingMore(true);
         try {
             const result = await dispatch(fetchAdminUsers({ q: query, sort, page: page + 1, pageSize: PAGE_SIZE }));
+            if (mine !== generation.current) return;
             setUsers(list => [...list, ...result.users.filter(u => !list.some(x => x.id === u.id))]);
             setTotal(result.total);
             setPage(page + 1);
         } catch (err) {
-            dispatch(showToast(adminErrorText(t, err), 'error'));
+            if (mine === generation.current) dispatch(showToast(adminErrorText(t, err), 'error'));
         } finally {
-            setLoadingMore(false);
+            if (mine === generation.current) setLoadingMore(false);
         }
     };
 
@@ -329,7 +336,7 @@ function UsersTab() {
                         </ul>
                     )}
             {users !== null && users.length < total && (
-                <button type="button" className={styles.loadMore} disabled={loadingMore} onClick={loadMore}>{t('adminLoadMore')}</button>
+                <button type="button" className={styles.loadMore} disabled={loadingMore || searching} onClick={loadMore}>{t('adminLoadMore')}</button>
             )}
             <p className={styles.footnote}>{t('adminSelfNote')}</p>
             {detail && <AdminUserDetail user={detail} onClose={() => setDetail(null)} />}
