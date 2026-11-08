@@ -149,6 +149,8 @@ export async function flushUsage({ keepalive = false } = {}) {
         if (status >= 200 && status < 300) continue;
         // the account is no longer valid: nothing of it is kept
         if (status === 401 || status === 403) { clear(); return; }
+        // a chunk the server will never take (malformed, too big): dropped, so it can't block newer events
+        if (status === 400 || status === 413) return;
         // not taken (offline, 429, 5xx …): back in front, and no more tries until the next beat
         if (enabled) { queue = [...events, ...queue].slice(-QUEUE_MAX); store(); }
         return;

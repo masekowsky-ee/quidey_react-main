@@ -161,6 +161,20 @@ describe('track', () => {
         expect(queued()).toEqual([])
     })
 
+    it('drops a chunk the server will never take (400, 413) and goes on with the rest later', async () => {
+        for (const status of [400, 413]) {
+            setUsageEnabled(true, ME)
+            for (let i = 0; i < 300; i++) track('app_open')
+            fetchMock.mockResolvedValueOnce({ ok: false, status, json: async () => ({}) })
+            const before = usageCalls().length
+            await flushUsage()
+            expect(usageCalls().length - before).toBe(1)
+            expect(queued()).toHaveLength(100)
+            await flushUsage()
+            expect(queued()).toEqual([])
+        }
+    })
+
     it('drops the events when the account is no longer valid (401, 403)', async () => {
         for (const status of [401, 403]) {
             setUsageEnabled(true, ME)
