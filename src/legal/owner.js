@@ -39,7 +39,7 @@ export const PROCESSORS = {
 
 // Date of the current version of the legal texts
 // Switching Quidey Pro on (features/pro/flag.js) adds its parts to the texts: give that day's date then
-export const LEGAL_VERSION_DATE = '06.11.2026 (Lernziele mit optionalen KI-Schätzungen über Anthropic, Benachrichtigungsart „Lernen“)';
+export const LEGAL_VERSION_DATE = '07.11.2026 (anonyme Nutzungsstatistik mit Einwilligung)';
 
 export const COPYRIGHT_YEAR = 2026;
 

@@ -7,7 +7,7 @@ import rootReducer from '../features/rootReducer'
 import { setLanguage } from '../features/settings/settingsAction'
 import { apiFetch } from '../features/helperFunction'
 import LegalPage from '../legal/LegalPage'
-import { OWNER } from '../legal/owner'
+import { OWNER, LEGAL_VERSION_DATE } from '../legal/owner'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
     ...(await importOriginal()),
@@ -110,5 +110,39 @@ describe('contact form', () => {
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Nachricht senden' })) })
         expect(screen.getByRole('alert')).toHaveTextContent('Zu viele Nachrichten')
         expect(screen.getByLabelText('Nachricht')).toHaveValue('Hallo, ich habe eine Frage zu Quidey.')
+    })
+})
+
+describe('anonymous usage statistics in the legal texts', () => {
+    const textOf = (path) => renderAt(path).container.textContent
+    const norm = (t) => t.replace(/\s+/g, ' ')
+
+    it('has the current version date', () => {
+        expect(LEGAL_VERSION_DATE).toBe('07.11.2026 (anonyme Nutzungsstatistik mit Einwilligung)')
+    })
+
+    it('the privacy page explains the opt-in statistics', () => {
+        const text = norm(textOf('/datenschutz'))
+        expect(text).toContain('Mit deiner Einwilligung zählt Quidey anonym mit, wann und welche Bereiche genutzt werden: nur Summen, ohne Bezug zu dir, auf dem eigenen Server (Abschnitt 4).')
+        expect(text).not.toContain('Im Browser gibt es kein Tracking')
+        expect(screen.getByRole('heading', { name: '4. Anonyme Nutzungsstatistik (nur mit Einwilligung)' })).toBeInTheDocument()
+        for (const part of [
+            'höchstens 8 Tage', 'ohne zeitliche Begrenzung', 'Art. 6 Abs. 1 lit. a DSGVO', '§ 25 Abs. 1 TDDDG',
+            'Einstellungen → Datenschutz', 'Anonyme Nutzungsstatistik', 'Aufgabe angelegt', 'Fokuszeit',
+            'keine Cookies', 'Plan (kostenlos, Tester oder Pro)',
+        ]) expect(text).toContain(part)
+        expect(text).not.toContain('2 Stunden')
+        expect(text).not.toContain('<3')
+    })
+
+    it('numbers the privacy sections one after the other', () => {
+        renderAt('/datenschutz')
+        const numbers = screen.getAllByRole('heading', { level: 2 }).map((h) => parseInt(h.textContent, 10))
+        expect(numbers).toEqual(numbers.map((_, i) => i + 1))
+    })
+
+    it('the terms say the statistics are optional', () => {
+        const text = norm(textOf('/nutzungsbedingungen'))
+        expect(text).toContain('Die anonyme Nutzungsstatistik ist freiwillig; alle Funktionen von Quidey funktionieren genauso, wenn du sie nicht einschaltest.')
     })
 })

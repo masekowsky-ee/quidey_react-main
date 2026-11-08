@@ -23,7 +23,13 @@ const LEGAL_PAGES = {
 // built in; the sections after them move up when they aren't. n(number as with Pro).
 const PRIVACY_PRO = 7;
 const TERMS_PRO = 8;
-const privacyNo = (no) => (proBuilt() || no < PRIVACY_PRO ? no : no - 1);
+// The section on the anonymous usage statistics is privacy § 4 (USAGE_NO); the numbers below it
+// are given here as before it existed and move up by one.
+const USAGE_NO = 4;
+const privacyNo = (no) => {
+    const n = proBuilt() || no < PRIVACY_PRO ? no : no - 1;
+    return n >= USAGE_NO ? n + 1 : n;
+};
 const termsNo = (no) => (proBuilt() || no < TERMS_PRO ? no : no - 2);
 
 // A value from owner.js; unfilled placeholders stand out so they can't slip through
@@ -161,15 +167,16 @@ function Privacy() {
             <h2>2. Das Wichtigste in Kürze</h2>
             <ul>
                 <li>Quidey verarbeitet nur die Daten, die für die App nötig sind.</li>
-                <li>Es gibt keine Werbung und keine Cookies. Im Browser gibt es kein Tracking und keine Analyse-Tools;
-                    in der Android-App nutze ich Google Analytics für Firebase, aber nur, wenn du einwilligst (Abschnitt 3).</li>
+                <li>Es gibt keine Werbung und keine Cookies. Mit deiner Einwilligung zählt Quidey anonym mit, wann und
+                    welche Bereiche genutzt werden: nur Summen, ohne Bezug zu dir, auf dem eigenen Server (Abschnitt {USAGE_NO}).
+                    In der Android-App nutze ich zusätzlich Google Analytics für Firebase, nur wenn du einwilligst (Abschnitt 3).</li>
                 <li>Schriften und alle Dateien der App werden von Quidey selbst ausgeliefert, nicht von Dritten.</li>
                 <li>Externe Dienste kommen nur zum Einsatz, wenn du sie auslöst oder einschaltest: Die optionalen
-                    KI-Schätzungen im Bereich „Lernen“ gehen an Anthropic (Abschnitt 5), und nur mit den Angaben, die dafür
+                    KI-Schätzungen im Bereich „Lernen“ gehen an Anthropic (Abschnitt {privacyNo(5)}), und nur mit den Angaben, die dafür
                     nötig sind.</li>
                 <li>Du kannst dein Konto jederzeit im Profil selbst löschen. Dabei werden deine Daten gelöscht.</li>
                 {proBuilt() && <li>Bezahlst du für Quidey Pro, läuft das über Stripe bzw. Google Play; deine Karten- oder Kontodaten
-                    sehe ich nicht (Abschnitt 7).</li>}
+                    sehe ich nicht (Abschnitt {privacyNo(7)}).</li>}
                 <li>Mit Google anmelden ist freiwillig; ein Konto mit E-Mail-Adresse und Passwort geht genauso.</li>
             </ul>
 
@@ -249,7 +256,49 @@ function Privacy() {
                 oder der Abmeldung endet sie. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
             </p>
 
-            <h2>4. Dein Konto</h2>
+            <h2 id="nutzungsstatistik">{USAGE_NO}. Anonyme Nutzungsstatistik (nur mit Einwilligung)</h2>
+            <p>
+                Damit ich sehe, was in Quidey genutzt wird und was ich verbessern sollte, kann Quidey anonym mitzählen,
+                wann und welche Bereiche genutzt werden. Das geschieht nur, wenn du einwilligst; ohne dein Ja wird
+                nichts gezählt.
+            </p>
+            <p>
+                <strong>Was gezählt wird:</strong> dass die App geöffnet wurde; die Minuten, in denen du sie aktiv
+                benutzt hast; welche Bereiche du öffnest (nur als Name des Bereichs, etwa Start, Kalender, Fokusraum,
+                Statistiken, Notizen, Lernen, Routinen, Gemeinschaft, Sitzungen, Family, Postfach, Profil oder
+                Einstellungen, ohne Benutzernamen oder Nummern); dass eine Aufgabe angelegt oder erledigt wurde; dass
+                ein Fokus gestartet wurde und wie viel Fokuszeit eine gespeicherte Sitzung hatte; dass eine Gruppe,
+                eine gemeinsame Sitzung oder eine Family angelegt, eine Freundschaftsanfrage gesendet oder ein Freund
+                hinzugefügt wurde; dass eine Routine durchgeführt, eine Notiz geschrieben, ein Lernplan übernommen oder
+                eine Erinnerung angelegt wurde. Jeweils nur die Art der Handlung, nie ihr Inhalt.
+            </p>
+            <p>
+                <strong>Dazu gehört:</strong> die Plattform (Web, installierte Web-App oder Android-App), die Sprache,
+                dein Plan (kostenlos, Tester oder Pro) sowie Stunde und Wochentag in deiner Zeitzone.
+            </p>
+            <p>
+                <strong>Wie das geht:</strong> Die App schickt diese Ereignisse mit deinem Konto an den Quidey-Server.
+                Der Server rechnet sie in Summen ein und speichert die einzelnen Ereignisse nicht. Damit Personen nur
+                einmal gezählt werden, merkt er sich pro Stunde, Tag und Woche mit deiner Benutzernummer, dass du
+                schon gezählt wurdest („schon gezählt“-Marken). Diese Marken werden spätestens nach 8 Tagen gelöscht.
+                Die Summen enthalten kein Konto, keine Benutzernummer und keine Inhalte; sie werden ohne zeitliche
+                Begrenzung aufbewahrt. Noch nicht gesendete Ereignisse wartet die App kurz auf deinem Gerät ab
+                (Abschnitt {privacyNo(9)}).
+            </p>
+            <p>
+                Es gibt dabei keine Dritten und keine Cookies; alles läuft auf dem Quidey-Server (Abschnitt 3).
+                Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, für das Speichern und Auslesen auf
+                deinem Gerät § 25 Abs. 1 TDDDG).
+            </p>
+            <p>
+                Quidey fragt dich einmal danach; „Ja“ und „Nein“ sind gleich einfach, und die Antwort ist kein
+                Nachteil. Du kannst sie jederzeit unter Einstellungen → Datenschutz („Anonyme Nutzungsstatistik“)
+                ändern. Widerrufst du, wird sofort nicht mehr gezählt und deine „schon gezählt“-Marken werden gelöscht.
+                Die bereits eingerechneten Summen bleiben, weil sie keinen Bezug zu dir haben. Quidey funktioniert ohne
+                deine Einwilligung genauso.
+            </p>
+
+            <h2>{privacyNo(4)}. Dein Konto</h2>
             <p>Für die Registrierung verarbeite ich:</p>
             <ul>
                 <li><strong>Benutzername und Anzeigename</strong> – zur Anmeldung und damit Freunde dich finden und erkennen können;</li>
@@ -306,7 +355,7 @@ function Privacy() {
                 gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
             </p>
 
-            <h2>5. Deine Inhalte</h2>
+            <h2>{privacyNo(5)}. Deine Inhalte</h2>
             <p>
                 Gespeichert wird, was du in Quidey anlegst: Aufgaben und Events (mit Tag, Uhrzeit, geplanter Zeit bzw.
                 Dauer, Erinnerung, Wiederholung, Farbe, Ort, Link, Beschreibung und Notizen sowie dem Zeitpunkt, zu dem
@@ -317,7 +366,7 @@ function Privacy() {
                 diesen Daten berechnet Quidey deine Statistiken für Woche, Monat, Jahr oder insgesamt (Fokuszeit,
                 Event-Zeit pro Typ, Fokuszeit pro Gruppe, erledigte Aufgaben); sie werden bei jedem Aufruf berechnet
                 und nicht zusätzlich gespeichert. Die Event-Zeit pro Typ siehst nur du, auch deine Freunde nicht.
-                Diese Inhalte sieht nur du – außer du teilst sie bewusst (Abschnitt 6). Rechtsgrundlage ist Art. 6
+                Diese Inhalte sieht nur du – außer du teilst sie bewusst (Abschnitt {privacyNo(6)}). Rechtsgrundlage ist Art. 6
                 Abs. 1 lit. b DSGVO. Bitte gib in Aufgaben, Events, Event-Typen, Notizen und Bildern keine besonders
                 sensiblen Daten ein (z. B. Gesundheitsdaten), die die App nicht braucht.
             </p>
@@ -360,7 +409,7 @@ function Privacy() {
                 oder von dir eingegeben), wann du sie erledigt hast und wie lange du daran gearbeitet hast; deine
                 Lernzeiten (Wochentage und Uhrzeiten), Länge einer Lernsitzung, Höchstdauer pro Tag und ob KI-Schätzungen
                 automatisch erfolgen sollen. Daraus legt Quidey Lernsitzungen als Aufgaben in deinem Kalender an
-                (Abschnitt 5, Aufgaben). Diese Inhalte sieht nur du. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+                (Abschnitt {privacyNo(5)}, Aufgaben). Diese Inhalte sieht nur du. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
                 Mit deinem Konto werden sie gelöscht.
             </p>
             <p>
@@ -385,7 +434,7 @@ function Privacy() {
                 Einschränkung weiter, nur ohne KI-Schätzungen.
             </p>
 
-            <h2>6. Freunde und gemeinsame Funktionen</h2>
+            <h2>{privacyNo(6)}. Freunde und gemeinsame Funktionen</h2>
             <p>
                 Wenn du Freundschaftsanfragen sendest oder annimmst, sehen deine Freunde deinen Benutzernamen und
                 Anzeigenamen. In gemeinsamen Sitzungen sehen alle Mitglieder deinen Namen, die Aufgaben der Sitzung
@@ -495,7 +544,7 @@ function Privacy() {
                 <strong>Erinnerungen per E-Mail:</strong> Schaltest du bei einer Aufgabe „Auch per E-Mail erinnern“ ein,
                 schickt dir Quidey zur eingestellten Zeit eine Mail an deine E-Mail-Adresse. Sie enthält den Namen der
                 Aufgabe, Tag und Uhrzeit sowie – falls angegeben – Ort, Link und Beschreibung. Der Versand erfolgt über
-                {' '}<V>{PROCESSORS.mailProvider}</V> als Auftragsverarbeiter (siehe Abschnitt 4). Gespeichert wird nur,
+                {' '}<V>{PROCESSORS.mailProvider}</V> als Auftragsverarbeiter (siehe Abschnitt {privacyNo(4)}). Gespeichert wird nur,
                 für welchen Zeitpunkt die Erinnerung schon verschickt wurde, damit sie nicht doppelt kommt. Bei geteilten
                 Aufgaben bekommt nur die Person die Mail, der die Aufgabe gehört. Du kannst die Mail-Erinnerung jederzeit
                 in der Aufgabe wieder ausschalten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
@@ -543,7 +592,7 @@ function Privacy() {
             </p>
 
             {proBuilt() && <>
-            <h2>7. Quidey Pro (Bezahlung)</h2>
+            <h2>{privacyNo(7)}. Quidey Pro (Bezahlung)</h2>
             <p>
                 Quidey ist kostenlos nutzbar. Wer die Entwicklung unterstützen möchte, kann Quidey Pro abonnieren
                 (Nutzungsbedingungen, Abschnitt 8). Dafür speichere ich zu deinem Konto: Plan (monatlich oder jährlich),
@@ -570,7 +619,7 @@ function Privacy() {
             <p>
                 <strong>Kündigungsbutton:</strong> Über „Verträge hier kündigen“ kannst du ohne Anmeldung kündigen. Dabei
                 verarbeite ich Namen, E-Mail-Adresse, optional Benutzername, Art der Kündigung, gegebenenfalls den Grund
-                und den Zeitpunkt des Eingangs, schicke dir sofort eine Bestätigung (über Resend, Abschnitt 4) und mir eine
+                und den Zeitpunkt des Eingangs, schicke dir sofort eine Bestätigung (über Resend, Abschnitt {privacyNo(4)}) und mir eine
                 Kopie zur Bearbeitung. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b und c DSGVO (§ 312k BGB).
             </p>
             <p>
@@ -626,13 +675,18 @@ function Privacy() {
                     machst eine Aufgabe daraus);</li>
                 <li>welche Erinnerungen schon angezeigt wurden, an welchem Tag dich Quidey zuletzt an deine Serie erinnert hat und welche gemeinsame Sitzung gerade gestoppt wird;</li>
                 <li>als Tester, an welchem Tag du den Hinweis „Plan anpassen“ bei den Lernzielen auf „Später“ gestellt hast (nur das Datum);</li>
-                <li>ob auf diesem Gerät Benachrichtigungen an sind, die Adresse dafür beim Push-Dienst (siehe Abschnitt 6) und ob Quidey dich danach schon gefragt hat;</li>
+                <li>ob auf diesem Gerät Benachrichtigungen an sind, die Adresse dafür beim Push-Dienst (siehe Abschnitt {privacyNo(6)}) und ob Quidey dich danach schon gefragt hat;</li>
                 <li>Schwierigkeit und Bestwerte der Spiele;</li>
-                <li>in der Android-App deine Antwort auf die Frage nach den Nutzungsdaten (Abschnitt 3).</li>
+                <li>in der Android-App deine Antwort auf die Frage nach den Nutzungsdaten (Abschnitt 3);</li>
+                <li>deine Antwort auf die Frage nach der anonymen Nutzungsstatistik (Abschnitt {USAGE_NO}) und ob du später
+                    nachgefragt werden willst.</li>
             </ul>
             <p>
                 Während einer Anmeldung mit Google merkt sich dein Browser bis zur Rückkehr von Google einen Zufallswert
                 (sessionStorage), damit nur eine von dir begonnene Anmeldung angenommen wird; er wird danach gelöscht.
+                Hast du der anonymen Nutzungsstatistik zugestimmt (Abschnitt {USAGE_NO}), liegen die noch nicht gesendeten
+                Ereignisse (nur Art der Handlung und Zeitpunkt, keine Inhalte) dort, höchstens bis sie gesendet sind;
+                sagst du Nein oder meldest dich ab, wird die Warteschlange ohne Senden geleert.
                 In der Android-App liegt dasselbe im Speicher der App; es wird nicht in Datensicherungen deines Handys
                 übernommen. Die App braucht keinen Service Worker und keinen Cache-Speicher (unten): Ihre Dateien sind
                 in der App selbst enthalten.
@@ -648,7 +702,7 @@ function Privacy() {
             <p>
                 Das ist für die von dir gewünschten Funktionen unbedingt erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG);
                 eine Einwilligung und ein Cookie-Banner sind dafür nicht nötig. Diese Daten verlassen dein Gerät nicht
-                (außer dem Token bei Anfragen an Quidey und der Sprache, siehe Abschnitt 4). Du kannst sie jederzeit in deinem Browser löschen.
+                (außer dem Token bei Anfragen an Quidey und der Sprache, siehe Abschnitt {privacyNo(4)}). Du kannst sie jederzeit in deinem Browser löschen.
                 Setzt Cloudflare zur Abwehr von Bots im Einzelfall ein technisch notwendiges Sicherheits-Cookie,
                 dient es allein der Sicherheit des Dienstes (§ 25 Abs. 2 Nr. 2 TDDDG, Art. 6 Abs. 1 lit. f DSGVO).
             </p>
@@ -664,19 +718,26 @@ function Privacy() {
                 Family gegründet, übernimmt das am längsten beigetretene Mitglied sie; ist niemand sonst darin, wird
                 sie mit Kalender und Chat gelöscht.
                 Wie lange Feedback und Kontaktanfragen aufbewahrt werden, steht in Abschnitt {privacyNo(8)}
-                {proBuilt() && ', wie lange Zahlungsbelege, in Abschnitt 7'}.
+                {proBuilt() && ', wie lange Zahlungsbelege, in Abschnitt ' + privacyNo(7)}.
                 In Datensicherungen können Daten bis zu deren turnusmäßiger Überschreibung (höchstens 30 Tage)
                 erhalten bleiben. Gesetzliche Aufbewahrungspflichten bleiben unberührt.
+            </p>
+
+            <p>
+                Die „schon gezählt“-Marken zur anonymen Nutzungsstatistik (Abschnitt {USAGE_NO}) werden nach höchstens 8 Tagen
+                gelöscht, die anonymen Summen ohne zeitliche Begrenzung aufbewahrt, da sie keinen Bezug zu einer Person
+                haben. Deine Antwort auf die Frage nach der Statistik (Ja oder Nein, Zeitpunkt und Version der Frage)
+                bleibt so lange gespeichert, wie dein Konto besteht.
             </p>
 
             <h2>{privacyNo(11)}. Empfänger</h2>
             <p>
                 Daten erhalten nur die oben genannten Auftragsverarbeiter (Hosting, E-Mail-Versand, in der Android-App
-                Firebase Cloud Messaging, bei KI-Schätzungen Anthropic, Abschnitt 5) sowie – soweit du es veranlasst – deine Freunde (auch als Empfänger deiner
+                Firebase Cloud Messaging, bei KI-Schätzungen Anthropic, Abschnitt {privacyNo(5)}) sowie – soweit du es veranlasst – deine Freunde (auch als Empfänger deiner
                 Nachrichten), Mitglieder gemeinsamer Sitzungen und Families, wenn du Benachrichtigungen eingeschaltet
-                hast der Push-Dienst deines Browsers (nur verschlüsselt, siehe Abschnitt 6), wenn du dich mit Google
-                anmeldest Google (Abschnitt 4), wenn du in der Android-App in die Analyse einwilligst Google
-                (Abschnitt 3){proBuilt() ? ' und wenn du Quidey Pro bezahlst Stripe bzw. Google (Abschnitt 7)' : ''}. Ich verkaufe keine Daten und gebe
+                hast der Push-Dienst deines Browsers (nur verschlüsselt, siehe Abschnitt {privacyNo(6)}), wenn du dich mit Google
+                anmeldest Google (Abschnitt {privacyNo(4)}), wenn du in der Android-App in die Analyse einwilligst Google
+                (Abschnitt 3){proBuilt() ? ' und wenn du Quidey Pro bezahlst Stripe bzw. Google (Abschnitt ' + privacyNo(7) + ')' : ''}. Ich verkaufe keine Daten und gebe
                 sie nicht für Werbung weiter. Eine automatisierte Entscheidungsfindung oder Profilbildung
                 (Art. 22 DSGVO) findet nicht statt.
             </p>
@@ -739,6 +800,10 @@ function Terms() {
                 geändert, eingeschränkt oder eingestellt werden. Wird der Dienst eingestellt, kündige ich das nach
                 Möglichkeit vorher an.
             </p>}
+            <p>
+                Die anonyme Nutzungsstatistik ist freiwillig; alle Funktionen von Quidey funktionieren genauso, wenn du
+                sie nicht einschaltest.
+            </p>
 
             <h2>3. Konto</h2>
             <p>
