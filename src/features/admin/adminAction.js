@@ -11,8 +11,18 @@ export const fetchAdminOverview = () => () => apiFetch('/api/admin/overview');
 export const fetchBetaRequests = (status = 'pending') => () =>
     apiFetch(`/api/admin/requests${status === 'all' ? '?status=all' : ''}`);
 
-export const fetchAdminUsers = (query = '') => () =>
-    apiFetch(`/api/admin/users${query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ''}`);
+// One page of accounts: { users, total }. sort: 'newest' | 'oldest' | 'name'
+export const fetchAdminUsers = ({ q = '', sort = 'newest', page = 1, pageSize = 50 } = {}) => () => {
+    const params = new URLSearchParams();
+    if (q.trim()) params.set('q', q.trim());
+    params.set('sort', sort);
+    params.set('page', String(page));
+    params.set('pageSize', String(pageSize));
+    return apiFetch(`/api/admin/users?${params}`);
+};
+
+// Every account for the export: { users } (the server logs it in the admin log)
+export const fetchAdminUsersExport = () => () => apiFetch('/api/admin/users/export');
 
 // A change that answers with the updated user; afterwards my access (and the badge) is refreshed
 const adminChange = (url, options) => async (dispatch) => {

@@ -7,16 +7,22 @@ import { useTranslation } from '../i18n/useTranslation';
 import { displayName, fill, formatDate, formatRelative, getInitials } from '../features/helperFunction';
 import { showToast } from '../features/toast/toast';
 import {
-    fetchAdminOverview, fetchBetaRequests, fetchAdminUsers,
+    fetchAdminOverview, fetchBetaRequests, fetchAdminUsers, fetchAdminUsersExport,
     decideBetaRequest, resetBetaRequest, updateAdminUser, adminErrorText,
 } from '../features/admin/adminAction';
 import AdminUsage from './admin/AdminUsage';
+import AdminUserDetail from './admin/AdminUserDetail';
+import { downloadCsv, downloadXlsx } from '../features/admin/exportTable';
+import { userSheet, usersFileBase } from '../features/admin/userSheet';
+import Icon from './icons.jsx';
 import AdminTesterFeedback from './tester/AdminTesterFeedback';
 import { removeAvatarOf } from '../features/profile/avatars';
 import { Bone, Skeleton, SkeletonRows } from './skeleton/Skeleton.jsx';
 
 const TABS = ['requests', 'users', 'broadcast', 'testers', 'overview', 'usage'];
 const SEARCH_DELAY_MS = 300;
+const PAGE_SIZE = 50;
+const SORTS = ['newest', 'oldest', 'name'];
 
 // run(action, successKey) dispatches, shows a toast either way, resolves to the result or null
 function useAdminRun() {
@@ -34,16 +40,20 @@ function useAdminRun() {
     }, [dispatch, t]);
 }
 
-function Person({ user }) {
-    return (
-        <div className={styles.person}>
+// onOpen: the person area becomes a button (the users list opens the detail sheet with it)
+function Person({ user, onOpen }) {
+    const inner = (
+        <>
             <span className={styles.avatar} aria-hidden="true">{getInitials(displayName(user))}</span>
-            <div className={styles.who}>
+            <span className={styles.who}>
                 <span className={styles.name}>{displayName(user)}</span>
                 <span className={styles.meta}>@{user.username}{user.email && ` · ${user.email}`}</span>
-            </div>
-        </div>
+            </span>
+        </>
     );
+    return onOpen
+        ? <button type="button" className={styles.personBtn} onClick={onOpen}>{inner}</button>
+        : <div className={styles.person}>{inner}</div>;
 }
 
 function StatusChip({ status, t }) {
@@ -147,23 +157,60 @@ function UsersTab() {
     const dispatch = useDispatch();
     const run = useAdminRun();
     const myName = useSelector(state => state.auth.user?.username);
+    const { language } = useTranslation();
     const [query, setQuery] = useState('');
+    const [sort, setSort] = useState('newest');
     const [users, setUsers] = useState(null);
+    const [total, setTotal] = useState(0);
+    const [page, setPage] = useState(1);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [exporting, setExporting] = useState(false);
+    const [detail, setDetail] = useState(null);
     const [busyId, setBusyId] = useState(null);
     const [confirm, setConfirm] = useState(null); // { id, isAdmin } waiting for "really?"
 
-    // searches as you type, a moment after the last key
+    // searches as you type, a moment after the last key; a new search or sort starts at page 1
     useEffect(() => {
         let cancelled = false;
         const timeout = setTimeout(() => {
-            dispatch(fetchAdminUsers(query))
-                .then(list => { if (!cancelled) setUsers(list); })
-                .catch(err => { if (!cancelled) { setUsers([]); dispatch(showToast(adminErrorText(t, err), 'error')); } });
+            dispatch(fetchAdminUsers({ q: query, sort, page: 1, pageSize: PAGE_SIZE }))
+                .then(result => { if (!cancelled) { setUsers(result.users); setTotal(result.total); setPage(1); } })
+                .catch(err => { if (!cancelled) { setUsers([]); setTotal(0); dispatch(showToast(adminErrorText(t, err), 'error')); } });
         }, query ? SEARCH_DELAY_MS : 0);
         return () => { cancelled = true; clearTimeout(timeout); };
     // t only changes with the language
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dispatch, query]);
+    }, [dispatch, query, sort]);
+
+    const loadMore = async () => {
+        setLoadingMore(true);
+        try {
+            const result = await dispatch(fetchAdminUsers({ q: query, sort, page: page + 1, pageSize: PAGE_SIZE }));
+            setUsers(list => [...list, ...result.users.filter(u => !list.some(x => x.id === u.id))]);
+            setTotal(result.total);
+            setPage(page + 1);
+        } catch (err) {
+            dispatch(showToast(adminErrorText(t, err), 'error'));
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
+    // every account, not only the pages loaded; the sheet has no secrets (userSheet.js)
+    const exportUsers = async (kind) => {
+        setExporting(true);
+        try {
+            const { users: all } = await dispatch(fetchAdminUsersExport());
+            const sheet = userSheet(all, t);
+            const base = usersFileBase();
+            if (kind === 'xlsx') await downloadXlsx([sheet], `${base}.xlsx`);
+            else downloadCsv(sheet, language, `${base}.csv`);
+        } catch (err) {
+            dispatch(showToast(adminErrorText(t, err), 'error'));
+        } finally {
+            setExporting(false);
+        }
+    };
 
     const change = async (user, changes, successKey) => {
         setConfirm(null);
@@ -186,6 +233,20 @@ function UsersTab() {
                     aria-label={t('adminSearch')}
                 />
             </div>
+            <div className={styles.userTools}>
+                <select className={styles.sortSelect} value={sort} onChange={(e) => setSort(e.target.value)} aria-label={t('adminSort')}>
+                    {SORTS.map(key => <option key={key} value={key}>{t(`adminSort${key[0].toUpperCase()}${key.slice(1)}`)}</option>)}
+                </select>
+                {users !== null && <span className={styles.meta}>{fill(t('adminCount'), { n: total })}</span>}
+                <div className={styles.exports} role="group" aria-label={t('adminUsageExport')}>
+                    <button type="button" className={styles.exportBtn} disabled={exporting} onClick={() => exportUsers('xlsx')}>
+                        <Icon name="download" size={16} />{t('adminUsageExcel')}
+                    </button>
+                    <button type="button" className={styles.exportBtn} disabled={exporting} onClick={() => exportUsers('csv')}>
+                        {t('adminUsageCsv')}
+                    </button>
+                </div>
+            </div>
             {users === null ? <SkeletonRows count={5} />
                 : users.length === 0 ? <p className={styles.empty}>{t('adminNoUsers')}</p>
                     : (
@@ -195,7 +256,7 @@ function UsersTab() {
                                 const busy = busyId === user.id;
                                 return (
                                     <li key={user.id} className={styles.userRow}>
-                                        <Person user={user} />
+                                        <Person user={user} onOpen={() => setDetail(user)} />
                                         <div className={styles.userInfo}>
                                             {user.isAdmin && <span className={styles.chip_admin}>{t('adminRoleAdmin')}</span>}
                                             {user.isTester && <span className={styles.chip_tester}>{t('adminRoleTester')}</span>}
@@ -267,7 +328,11 @@ function UsersTab() {
                             })}
                         </ul>
                     )}
+            {users !== null && users.length < total && (
+                <button type="button" className={styles.loadMore} disabled={loadingMore} onClick={loadMore}>{t('adminLoadMore')}</button>
+            )}
             <p className={styles.footnote}>{t('adminSelfNote')}</p>
+            {detail && <AdminUserDetail user={detail} onClose={() => setDetail(null)} />}
         </section>
     );
 }
