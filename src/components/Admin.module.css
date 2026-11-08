@@ -141,18 +141,19 @@
 .name{
     color: var(--text-h);
     font-weight: 600;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word; /* not anywhere: that lets the row squeeze them to one letter per line */
 }
 
 .meta{
     font-size: 0.8rem;
     color: var(--text-muted);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
 /* the person area of a users row: a button that opens the detail sheet */
 .personBtn{
     composes: person;
+    justify-content: flex-start; /* buttons centre their content by default */
     text-align: left;
     font: inherit;
     color: inherit;
@@ -344,6 +345,12 @@
     align-items: center;
     gap: 0.5rem 1rem;
     padding: 0.8rem 0;
+}
+
+/* the person keeps a readable width; chips and switches wrap below it when the row is narrow */
+.userRow > .personBtn,
+.userRow > .person{
+    flex: 1 1 16rem;
 }
 
 .userInfo{

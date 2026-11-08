@@ -150,6 +150,11 @@
     flex-wrap: wrap;
 }
 
+/* never narrower than their words: on a phone the six ranges wrap instead of running into each other */
+.range.range > button{ /* doubled: outranks .segmented > button, which loads later */
+    flex: 1 0 auto;
+}
+
 .fields{
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
@@ -421,7 +426,8 @@
     padding-left: 0;
     text-align: left;
     font-weight: 500;
-    overflow-wrap: anywhere;
+    /* break-word, not anywhere: words stay whole when the table sizes its columns */
+    overflow-wrap: break-word;
     white-space: normal;
 }
 
@@ -444,8 +450,9 @@
 
 .splits{
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
     gap: 1rem 1.5rem;
+    align-items: start;
     margin-top: 0.75rem;
 }
 
