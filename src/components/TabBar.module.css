@@ -41,7 +41,9 @@
   pointer-events: auto;
   touch-action: none;
   color: var(--text-muted);
-  background-color: var(--surface-bar);
+  /* the capsule's fill; the badges' rings (below) take it too */
+  --bar-fill: var(--surface-bar);
+  background-color: var(--bar-fill);
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
   transform: translateY(var(--drag, 0px));
@@ -56,7 +58,7 @@
 /* the app's own look: liquid glass, nearly solid. The page only shimmers through, blurred and a
    little brighter, light catching its top edge, a soft shadow under it so it floats. */
 :root:not([data-ui]) .pill {
-  --glass: color-mix(in srgb, var(--surface-bar) 86%, transparent);
+  --glass: color-mix(in srgb, var(--bar-fill) 86%, transparent);
   --glass-edge: color-mix(in srgb, #fff 16%, transparent);
   background:
     linear-gradient(180deg, color-mix(in srgb, #fff 9%, transparent), transparent 55%),
@@ -74,7 +76,7 @@
 /* frosted becomes solid: reduce transparency, more contrast, no blur in the browser */
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   :root:not([data-ui]) .pill {
-    background: var(--surface-bar);
+    background: var(--bar-fill);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     border-color: var(--border-strong);
@@ -83,7 +85,19 @@
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   :root:not([data-ui]) .pill {
-    background: var(--surface-bar);
+    background: var(--bar-fill);
+  }
+}
+
+/* dark: the capsule lifts off the page by a lighter fill, not by a rim. No edge, no light
+   along the top; the shadow under it stays. More contrast keeps the edge (above). */
+@media not (prefers-contrast: more) {
+  :root:not([data-ui]):not([data-theme="light"]) .pill {
+    --bar-fill: color-mix(in srgb, var(--surface-strong) 60%, var(--surface));
+    border-color: transparent;
+    box-shadow:
+      0 12px 32px -10px rgb(0 0 0 / 0.5),
+      0 2px 6px -2px rgb(0 0 0 / 0.25);
   }
 }
 
@@ -291,7 +305,7 @@
   color: var(--primary-text);
   background-color: var(--primary);
   border-radius: 999px;
-  box-shadow: 0 0 0 2px var(--surface-bar);
+  box-shadow: 0 0 0 2px var(--bar-fill, var(--surface-bar));
 }
 
 /* friends online: a small green dot at the foot of the icon, apart from counts and news */
@@ -303,7 +317,7 @@
   height: 0.45rem;
   background-color: var(--online);
   border-radius: 999px;
-  box-shadow: 0 0 0 2px var(--surface-bar);
+  box-shadow: 0 0 0 2px var(--bar-fill, var(--surface-bar));
 }
 
 .dot {
@@ -314,5 +328,5 @@
   height: 0.5rem;
   background-color: var(--primary);
   border-radius: 999px;
-  box-shadow: 0 0 0 2px var(--surface-bar);
+  box-shadow: 0 0 0 2px var(--bar-fill, var(--surface-bar));
 }
