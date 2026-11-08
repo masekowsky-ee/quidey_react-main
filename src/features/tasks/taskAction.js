@@ -1,5 +1,5 @@
 import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, GET_NOTES, REFRESH_TASKS, TASK_REPLACED, SET_TASK_INVITES, TASK_INVITE_ACCEPTED, TASK_INVITE_REMOVED, TASK_SHARE_REMOVED, SET_EVENT_TYPES, EVENT_TYPE_SAVED, EVENT_TYPE_REMOVED } from './taskActionTypes';
-import { trackAction } from '../usage/track';
+import { track } from '../usage/usage';
 import { apiFetch, toInputDate } from '../helperFunction';
 import { askDeleteScope, isRepeating } from './deleteScope';
 import { dateKey } from '../calendar/calendar';
@@ -309,7 +309,7 @@ export const createNote = (taskId, note) => {
             method: "POST",
             body: JSON.stringify({ content: note })
         });
-        trackAction('note_written');
+        track('note_written');
 
 
         dispatch({

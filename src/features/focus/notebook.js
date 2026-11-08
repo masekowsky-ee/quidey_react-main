@@ -5,7 +5,7 @@
 // (pasted or picked, made small here first: at most IMAGE_MAX_SIDE pixels and IMAGE_MAX_BYTES).
 
 import { apiFetch } from '../helperFunction';
-import { trackAction } from '../usage/track';
+import { track } from '../usage/usage';
 
 export const NOTE_IMAGES_MAX = 4;
 export const NOTE_ATTACHMENTS_MAX = 10;
@@ -17,7 +17,7 @@ export const fetchNote = (id) => apiFetch(`/api/notebook/${id}`);
 // a new note counts once (not every autosave of it)
 export const createNote = async (note) => {
     const saved = await apiFetch('/api/notebook', { method: 'POST', body: JSON.stringify(note) });
-    trackAction('note_written');
+    track('note_written');
     return saved;
 };
 export const updateNote = (id, change) => apiFetch(`/api/notebook/${id}`, { method: 'PUT', body: JSON.stringify(change) });
