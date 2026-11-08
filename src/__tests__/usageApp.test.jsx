@@ -15,7 +15,7 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
     apiFetch: vi.fn(),
 }))
 
-const queued = () => JSON.parse(sessionStorage.getItem('usageQueue') ?? '[]')
+const queued = () => JSON.parse(sessionStorage.getItem('usageQueue') ?? 'null')?.events ?? []
 
 beforeEach(() => {
     apiFetch.mockReset()
@@ -40,6 +40,7 @@ describe('App and the usage statistics', () => {
             render(<Provider store={store}><MemoryRouter initialEntries={['/stats']}><App /></MemoryRouter></Provider>)
         })
         await act(async () => { await store.dispatch(loginSuccess('ann', 'secret')) })
+        expect(JSON.parse(sessionStorage.getItem('usageQueue')).userId).toBe(1)
         const metrics = queued().map(e => e.metric)
         expect(metrics.filter(m => m === 'view:stats')).toHaveLength(1)
         expect(metrics).toContain('app_open')
@@ -57,7 +58,7 @@ describe('accounts and the queue', () => {
         localStorage.setItem('token', 'tokA')
         localStorage.setItem('accounts', JSON.stringify([{ username: 'bob', token: 'tokB' }]))
         away()
-        setUsageEnabled(true)
+        setUsageEnabled(true, 1)
         track('app_open')
         switchAccount('bob')
         document.dispatchEvent(new Event('visibilitychange'))
@@ -70,7 +71,7 @@ describe('accounts and the queue', () => {
         localStorage.setItem('token', 'tokA')
         const store = configureStore({ reducer: rootReducer })
         away()
-        setUsageEnabled(true)
+        setUsageEnabled(true, 1)
         track('app_open')
         store.dispatch(logout())
         expect(sessionStorage.getItem('usageQueue')).toBe(null)

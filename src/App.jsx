@@ -272,7 +272,7 @@ function App(){
   // the page view below: effects run in order, so the first view finds counting already on. Nothing is
   // decided before the server answered (a reload keeps its queue); sign-out and account switches switch it off themselves.
   const usageOn = allowed && access.usageConsent.choice === 'granted';
-  useEffect(() => { if (access.checked) setUsageEnabled(usageOn); }, [access.checked, usageOn]);
+  useEffect(() => { if (access.checked) setUsageEnabled(usageOn, access.userId); }, [access.checked, usageOn, access.userId]);
   // the pages by name: Android's Firebase analytics and Quidey's statistics, each with its own consent (usage/track.js)
   useEffect(() => { if (allowed) trackView(location.pathname); }, [allowed, location.pathname]);
   useAppOpen(usageOn);

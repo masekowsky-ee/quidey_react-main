@@ -2,6 +2,8 @@
 // the Quidey server as POST /api/usage, only while the account said yes (setUsageEnabled). The
 // queue is kept in sessionStorage so a reload loses nothing; saying no or signing out empties it
 // without sending. Never content, names or ids: only metric names from the lists below.
+// The queue belongs to the account that made it (`{ userId, events }`): events of another account
+// (another tab signed in as someone else, a queue left from before) are dropped, never sent.
 import { apiUrl, SIGNED_OUT_EVENT } from '../helperFunction';
 import { platform } from './platform';
 
@@ -24,14 +26,32 @@ export const isClientMetric = (metric) => ACTIONS.includes(metric)
     || (typeof metric === 'string' && metric.startsWith('view:') && AREAS.includes(metric.slice(5)));
 
 let enabled = false;
+let owner = null;
 let queue = [];
 let timer = null;
 let listening = false;
 
-const readStored = () => {
+const readToken = () => {
+    try { return localStorage.getItem('token'); } catch { return null; /* blocked storage */ }
+};
+
+// the account a sign-in token belongs to (its payload carries userId), null when it can't be read
+const tokenUser = (token) => {
     try {
-        const list = JSON.parse(sessionStorage.getItem(KEY) ?? '[]');
-        return Array.isArray(list) ? list.filter(e => e && isClientMetric(e.metric) && Number.isFinite(e.at)).slice(-QUEUE_MAX) : [];
+        const part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const id = JSON.parse(atob(part.padEnd(part.length + ((4 - (part.length % 4)) % 4), '='))).userId;
+        return id ?? null;
+    } catch {
+        return null;
+    }
+};
+
+// what a reload left, only when it belongs to this account (the old plain list has no account: dropped)
+const readStored = (userId) => {
+    try {
+        const stored = JSON.parse(sessionStorage.getItem(KEY) ?? 'null');
+        if (!stored || Array.isArray(stored) || userId == null || stored.userId !== userId || !Array.isArray(stored.events)) return [];
+        return stored.events.filter(e => e && isClientMetric(e.metric) && Number.isFinite(e.at)).slice(-QUEUE_MAX);
     } catch {
         return [];
     }
@@ -39,7 +59,7 @@ const readStored = () => {
 
 const store = () => {
     try {
-        if (queue.length) sessionStorage.setItem(KEY, JSON.stringify(queue));
+        if (queue.length) sessionStorage.setItem(KEY, JSON.stringify({ userId: owner, events: queue }));
         else sessionStorage.removeItem(KEY);
     } catch { /* blocked storage: the queue stays in memory */ }
 };
@@ -48,6 +68,9 @@ const clear = () => {
     queue = [];
     try { sessionStorage.removeItem(KEY); } catch { /* blocked storage */ }
 };
+
+// a start without a sign-in: whatever an earlier one left in this tab goes
+if (!readToken()) clear();
 
 function onVisibility() {
     if (document.visibilityState === 'hidden') flushUsage({ keepalive: true });
@@ -61,17 +84,22 @@ function listen(on) {
     window[method](SIGNED_OUT_EVENT, clear);
 }
 
-export function setUsageEnabled(value) {
+// userId: the account counting is for (access.userId); the queue is bound to it
+export function setUsageEnabled(value, userId = null) {
     const next = Boolean(value);
-    if (next && enabled && timer) return;
+    if (next && enabled && timer && owner === userId) return;
+    if (next && owner !== userId) queue = [];
     enabled = next;
     if (next) {
-        queue = [...readStored(), ...queue].slice(-QUEUE_MAX);
+        owner = userId;
+        queue = [...readStored(userId), ...queue].slice(-QUEUE_MAX);
+        store();
         listen(true);
         if (!timer) timer = setInterval(() => { flushUsage(); }, FLUSH_MS);
     } else {
         clearInterval(timer);
         timer = null;
+        owner = null;
         listen(false);
         clear();
     }
@@ -99,12 +127,14 @@ function takeChunk(keepalive) {
 }
 
 export async function flushUsage({ keepalive = false } = {}) {
-    let token = null;
-    try { token = localStorage.getItem('token'); } catch { /* blocked storage */ }
-    while (enabled && token && queue.length) {
+    const token = readToken();
+    if (!enabled || !token || !queue.length) return;
+    // signed in as somebody else meanwhile (another tab): these events are not theirs
+    if (owner == null || tokenUser(token) !== owner) { clear(); return; }
+    while (enabled && queue.length) {
         const events = takeChunk(keepalive);
         store();
-        let retry;
+        let status;
         try {
             const response = await fetch(apiUrl('/api/usage'), {
                 method: 'POST',
@@ -112,15 +142,16 @@ export async function flushUsage({ keepalive = false } = {}) {
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, 'X-Quidey-Platform': platform() },
                 body: body(events),
             });
-            retry = response.status >= 500;
+            status = response.status;
         } catch {
-            retry = true;
+            status = 0;
         }
-        if (retry) {
-            // not sent: back in front, and no more tries until the next beat
-            if (enabled) { queue = [...events, ...queue].slice(-QUEUE_MAX); store(); }
-            return;
-        }
+        if (status >= 200 && status < 300) continue;
+        // the account is no longer valid: nothing of it is kept
+        if (status === 401 || status === 403) { clear(); return; }
+        // not taken (offline, 429, 5xx …): back in front, and no more tries until the next beat
+        if (enabled) { queue = [...events, ...queue].slice(-QUEUE_MAX); store(); }
+        return;
     }
 }
 

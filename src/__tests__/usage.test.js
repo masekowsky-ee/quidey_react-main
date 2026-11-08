@@ -20,14 +20,17 @@ vi.mock('@capacitor/core', async (importOriginal) => {
 let fetchMock
 const usageCalls = () => fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/api/usage'))
 const bodyOf = (call) => JSON.parse(call[1].body)
-const queued = () => JSON.parse(sessionStorage.getItem('usageQueue') ?? '[]')
+const queued = () => JSON.parse(sessionStorage.getItem('usageQueue') ?? 'null')?.events ?? []
+// a sign-in token as the server makes it (only the payload is read here)
+const ME = 7
+const tokenFor = (userId) => `h.${btoa(JSON.stringify({ userId, username: 'u', tv: 0 })).replace(/=+$/, '')}.sig`
 
 beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-11-07T10:00:00Z'))
     localStorage.clear()
     sessionStorage.clear()
-    localStorage.setItem('token', 'tok')
+    localStorage.setItem('token', tokenFor(ME))
     resetUsage()
     fetchMock = vi.fn(async () => ({ ok: true, status: 204, json: async () => ({}) }))
     vi.stubGlobal('fetch', fetchMock)
@@ -49,7 +52,7 @@ describe('track', () => {
     })
 
     it('flushes three events as one POST /api/usage with the platform', async () => {
-        setUsageEnabled(true)
+        setUsageEnabled(true, ME)
         track('app_open')
         track('view:home')
         track('focus_start')
@@ -57,7 +60,7 @@ describe('track', () => {
         expect(usageCalls()).toHaveLength(1)
         const call = usageCalls()[0]
         expect(call[1].method).toBe('POST')
-        expect(call[1].headers.Authorization).toBe('Bearer tok')
+        expect(call[1].headers.Authorization).toBe(`Bearer ${tokenFor(ME)}`)
         const body = bodyOf(call)
         expect(body.platform).toBe('web')
         expect(body.events.map(e => e.metric)).toEqual(['app_open', 'view:home', 'focus_start'])
@@ -65,14 +68,14 @@ describe('track', () => {
     })
 
     it('sends a value along when there is one', async () => {
-        setUsageEnabled(true)
+        setUsageEnabled(true, ME)
         track('active_minute', 1)
         await flushUsage()
         expect(bodyOf(usageCalls()[0]).events[0]).toMatchObject({ metric: 'active_minute', value: 1 })
     })
 
     it('drops metrics the server does not take from the client', async () => {
-        setUsageEnabled(true)
+        setUsageEnabled(true, ME)
         track('task_created')
         track('task_done')
         track('focus_done')
@@ -84,7 +87,7 @@ describe('track', () => {
     })
 
     it('empties the queue and never sends when switched off with a full queue', async () => {
-        setUsageEnabled(true)
+        setUsageEnabled(true, ME)
         for (let i = 0; i < 50; i++) track('app_open')
         expect(queued()).toHaveLength(50)
         setUsageEnabled(false)
@@ -95,7 +98,7 @@ describe('track', () => {
     })
 
     it('flushes with keepalive when the tab gets hidden', async () => {
-        setUsageEnabled(true)
+        setUsageEnabled(true, ME)
         track('app_open')
         Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' })
         document.dispatchEvent(new Event('visibilitychange'))
@@ -103,11 +106,11 @@ describe('track', () => {
         Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' })
         expect(usageCalls()).toHaveLength(1)
         expect(usageCalls()[0][1].keepalive).toBe(true)
-        expect(usageCalls()[0][1].headers.Authorization).toBe('Bearer tok')
+        expect(usageCalls()[0][1].headers.Authorization).toBe(`Bearer ${tokenFor(ME)}`)
     })
 
     it('sends in chunks of at most 200 events and keeps at most 500', async () => {
-        setUsageEnabled(true)
+        setUsageEnabled(true, ME)
         for (let i = 0; i < 520; i++) track('app_open')
         expect(queued()).toHaveLength(500)
         await flushUsage()
@@ -116,7 +119,7 @@ describe('track', () => {
     })
 
     it('keeps the events when the server cannot be reached', async () => {
-        setUsageEnabled(true)
+        setUsageEnabled(true, ME)
         track('app_open')
         fetchMock.mockRejectedValueOnce(new Error('offline'))
         await flushUsage()
@@ -127,7 +130,7 @@ describe('track', () => {
     })
 
     it('clears the queue without sending on sign-out', async () => {
-        setUsageEnabled(true)
+        setUsageEnabled(true, ME)
         track('app_open')
         window.dispatchEvent(new Event(SIGNED_OUT_EVENT))
         await vi.advanceTimersByTimeAsync(120_000)
@@ -136,10 +139,84 @@ describe('track', () => {
     })
 
     it('picks up events a reload left in sessionStorage', async () => {
-        sessionStorage.setItem('usageQueue', JSON.stringify([{ metric: 'app_open', at: Date.now() }]))
-        setUsageEnabled(true)
+        sessionStorage.setItem('usageQueue', JSON.stringify({ userId: ME, events: [{ metric: 'app_open', at: Date.now() }] }))
+        setUsageEnabled(true, ME)
         await flushUsage()
         expect(bodyOf(usageCalls()[0]).events).toHaveLength(1)
+    })
+
+    it('stops at a refusal and keeps what is not sent (429, 5xx)', async () => {
+        setUsageEnabled(true, ME)
+        for (let i = 0; i < 300; i++) track('app_open')
+        fetchMock.mockResolvedValueOnce({ ok: false, status: 429, json: async () => ({}) })
+        await flushUsage()
+        expect(usageCalls()).toHaveLength(1)
+        expect(queued()).toHaveLength(300)
+        fetchMock.mockResolvedValueOnce({ ok: false, status: 503, json: async () => ({}) })
+        await flushUsage()
+        expect(usageCalls()).toHaveLength(2)
+        expect(queued()).toHaveLength(300)
+        await flushUsage()
+        expect(usageCalls().map(c => bodyOf(c).events.length).slice(2)).toEqual([200, 100])
+        expect(queued()).toEqual([])
+    })
+
+    it('drops the events when the account is no longer valid (401, 403)', async () => {
+        for (const status of [401, 403]) {
+            setUsageEnabled(true, ME)
+            for (let i = 0; i < 300; i++) track('app_open')
+            fetchMock.mockResolvedValueOnce({ ok: false, status, json: async () => ({}) })
+            const before = usageCalls().length
+            await flushUsage()
+            expect(usageCalls().length - before).toBe(1)
+            expect(queued()).toEqual([])
+        }
+    })
+
+    it('keeps the queue with the account it belongs to', () => {
+        setUsageEnabled(true, ME)
+        track('app_open')
+        expect(JSON.parse(sessionStorage.getItem('usageQueue')).userId).toBe(ME)
+    })
+
+    it('sends nothing of one account under another signed in from another tab', async () => {
+        setUsageEnabled(true, ME)
+        track('app_open')
+        localStorage.setItem('token', tokenFor(8))
+        await flushUsage()
+        expect(usageCalls()).toHaveLength(0)
+        expect(queued()).toEqual([])
+    })
+
+    it('drops a queue another account left in this tab', async () => {
+        sessionStorage.setItem('usageQueue', JSON.stringify({ userId: 8, events: [{ metric: 'app_open', at: Date.now() }] }))
+        setUsageEnabled(true, ME)
+        track('view:home')
+        await flushUsage()
+        expect(bodyOf(usageCalls()[0]).events.map(e => e.metric)).toEqual(['view:home'])
+    })
+
+    it('drops a queue without an account (the old list shape)', async () => {
+        sessionStorage.setItem('usageQueue', JSON.stringify([{ metric: 'app_open', at: Date.now() }]))
+        setUsageEnabled(true, ME)
+        await flushUsage()
+        expect(usageCalls()).toHaveLength(0)
+        expect(sessionStorage.getItem('usageQueue')).toBe(null)
+    })
+
+    it('drops the queue when counting goes on for another account', async () => {
+        setUsageEnabled(true, ME)
+        track('app_open')
+        setUsageEnabled(true, 8)
+        expect(queued()).toEqual([])
+    })
+
+    it('clears what is left from before on a start without a sign-in', async () => {
+        localStorage.removeItem('token')
+        sessionStorage.setItem('usageQueue', JSON.stringify({ userId: ME, events: [{ metric: 'app_open', at: Date.now() }] }))
+        vi.resetModules()
+        await import('../features/usage/usage')
+        expect(sessionStorage.getItem('usageQueue')).toBe(null)
     })
 })
 
@@ -161,7 +238,7 @@ describe('apiFetch', () => {
 
 describe('trackView / trackAction', () => {
     it('queues the area of a page by name, never the path', async () => {
-        setUsageEnabled(true)
+        setUsageEnabled(true, ME)
         trackView('/u/anna')
         trackView('/notes')
         trackView('/study')
@@ -170,7 +247,7 @@ describe('trackView / trackAction', () => {
     })
 
     it('queues client actions and keeps task_created for Firebase only', async () => {
-        setUsageEnabled(true)
+        setUsageEnabled(true, ME)
         trackAction('group_created')
         trackAction('task_created')
         await flushUsage()
@@ -195,7 +272,7 @@ describe('setUsageConsent', () => {
 
     it('a no switches counting off and empties the queue', async () => {
         const store = configureStore({ reducer: rootReducer })
-        setUsageEnabled(true)
+        setUsageEnabled(true, ME)
         track('app_open')
         fetchMock.mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ choice: 'denied', at: 'x', version: 1 }) })
         await store.dispatch(setUsageConsent(false))

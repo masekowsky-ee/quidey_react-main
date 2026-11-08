@@ -272,7 +272,7 @@ export const setUsageConsent = (granted) => {
             body: JSON.stringify({ granted: Boolean(granted) }),
         });
         dispatch({ type: SET_ACCESS, payload: { ...getState().auth.access, usageConsent } });
-        setUsageEnabled(usageConsent.choice === 'granted');
+        setUsageEnabled(usageConsent.choice === 'granted', getState().auth.access.userId);
         return usageConsent;
     };
 };
