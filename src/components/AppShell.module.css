@@ -50,9 +50,9 @@
     overflow-x: clip;
   }
 
-  /* swiped away (TabBar.jsx): only its handle at the bottom edge is left */
+  /* swiped away (TabBar.jsx): only its tab at the bottom edge is left */
   .shell:has([data-part="tabbar"][data-collapsed]) {
-    --tabbar-h: 2.75rem;
+    --tabbar-h: 1.75rem;
   }
 }
 
