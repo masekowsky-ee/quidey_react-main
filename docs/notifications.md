@@ -34,6 +34,7 @@ Stand: 2026-11-05. Bei jeder Änderung an Benachrichtigungen hier mitpflegen.
 | … dieselbe, wenn an der Aufgabe „Auch per Mail“ an ist | ich (nur Besitzer) | Mail | pro Aufgabe |
 | Erinnerungszeit eines **Familien-Eintrags** (Zeitzone und Ganztags-Uhrzeit der Familien-Besitzerin bzw. des Besitzers) | alle beigetretenen Mitglieder | Push, einmal pro Erinnerungszeit | `plan` |
 | Mein Fokus-Countdown / eine Pomodoro-Phase endet | ich | Push vom Server (auch bei ausgeschaltetem Handy); in der App Ton + Toast | `plan` |
+| Ich bin während einer laufenden Fokusrunde 20 s in einer anderen App / einem anderen Tab (nur Android-App und Browser am Computer; nie bei ausgeschaltetem Bildschirm oder schlafendem Computer) | ich | einmal pro Verlassen eine Benachrichtigung vom Gerät selbst („Noch 18 Min. Fokus“ + Aufgabe), weg, sobald ich zurück bin; Android: Kanal „Fokus-Erinnerung“ (`focus_nudge`), Browser: nur wenn Benachrichtigungen schon erlaubt sind | – (kein Push, `features/focus/useFocusAway.js`) |
 | Uhrzeit einer Routine | ich | Push + Toast in der App | `plan` |
 | Erinnerungen (Tester) | ich | Push (nicht an Geräte, die selbst klingeln); Android-App: Wecker; offene Web-App: Hinweis über die ganze Seite | `plan` |
 | Morgens 07:30–11:00 (Ortszeit), wenn heute etwas offen ist | ich | Push „Dein Tag“ | `digest` |

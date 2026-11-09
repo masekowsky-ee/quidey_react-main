@@ -789,3 +789,48 @@
   color: var(--task-color, var(--text-muted));
   text-align: center;
 }
+
+/* the head's buttons: "Zurück zur App" (calm mode, features/focus/calm.js) and the settings, wrapping as one */
+.headActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+/* Fokus-Einstellungen → Ruhemodus */
+.switchRow {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.switchRow input {
+    flex: none;
+    width: 1.05rem;
+    height: 1.05rem;
+    margin: 0.15rem 0 0;
+    accent-color: var(--primary);
+}
+
+/* the Pomodoro break's recap: was the round without time elsewhere? (useFocusAway.js) */
+.awayMark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    width: fit-content;
+    margin: 0;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--surface-inset);
+    border-radius: var(--radius-pill);
+}
+
+.awayMark[data-clean] {
+    color: var(--text-h);
+}

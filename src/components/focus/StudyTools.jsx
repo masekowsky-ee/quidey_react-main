@@ -11,6 +11,8 @@ import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import Icon from '../icons.jsx';
 import styles from './FocusRoom.module.css';
+import { useAwayTally } from '../../features/focus/away';
+import { awayPlatform } from '../../features/focus/useFocusAway';
 
 // Gedankenparkplatz: a thought that comes up while focusing is parked here instead of followed;
 // later it becomes a task or goes
@@ -121,8 +123,13 @@ export function RoundRecap({ focusTask, onSaved }) {
     const dispatch = useDispatch();
     const { timerMode, pomodoro } = useSelector(state => state.session);
     const [text, setText] = useState('');
+    const { lastRound } = useAwayTally();
     const onBreak = timerMode === 'pomodoro' && pomodoro.phase !== 'focus' && pomodoro.round > 0;
     if (!onBreak) return null;
+    // the round just done, where time elsewhere can be told (useFocusAway.js)
+    const mark = awayPlatform() !== null && lastRound
+        ? (lastRound.count ? fill(t('awayRoundCount'), { n: lastRound.count }) : t('awayRoundClean'))
+        : null;
 
     const save = async (e) => {
         e.preventDefault();
@@ -145,6 +152,7 @@ export function RoundRecap({ focusTask, onSaved }) {
     return (
         <form className={styles.recap} onSubmit={save}>
             <h3 className={styles.toolTitle}><Icon name="coffee" size={16} /> {t('recapTitle')}</h3>
+            {mark && <p className={styles.awayMark} data-clean={!lastRound.count || undefined}>{!lastRound.count && <Icon name="check" size={14} />}{mark}</p>}
             <p className={styles.toolHint}>{t('recapHint')}</p>
             <textarea value={text} onChange={e => setText(e.target.value)} rows={3} maxLength={2000} placeholder={t('recapPlaceholder')} aria-label={t('recapTitle')} />
             <button type="submit" className={styles.smallBtn} disabled={!text.trim()}>{t('recapSave')}</button>

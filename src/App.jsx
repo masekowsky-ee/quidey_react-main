@@ -27,7 +27,9 @@ import { useWorkReporter } from './features/together/work.js'
 import { useLinkedWork } from './features/together/linkedWork.js'
 import { useFocusClock } from './features/session/useFocusClock.js'
 import { useFocusNotification } from './features/session/focusNotification';
-import { useFocusTitle } from './features/session/focusTitle';
+import { useFocusTitle } from './features/session/focusTitle'
+import { useFocusAway } from './features/focus/useFocusAway';
+import { useCalm } from './features/focus/calm';
 import { useRoutineReminders } from './features/routines/routines.js'
 import { useReminders } from './features/reminders/reminders.js'
 import ReminderAlert from './components/reminders/ReminderAlert.jsx'
@@ -259,6 +261,8 @@ function App(){
   // a lasting notification with the time while a focus session is on (features/session/focusNotification.js)
   useFocusNotification(allowed);
   useFocusTitle(allowed);
+  // leaving the app during focus: counted, nudged, welcomed back (only where a screen turned off can be told apart)
+  useFocusAway(allowed);
   // phones: a sideways swipe goes to the tab beside it (and past the ends, the menu)
   useTabSwipe({ enabled: allowed });
   // phones: the on-screen keyboard's height, so sheets (the add form) stand above it
@@ -267,6 +271,8 @@ function App(){
   useEffect(() => { if (allowed) return preloadPages(); }, [allowed]);
 
   const location = useLocation();
+  // calm mode: while a focus round runs in the Fokusraum, the navigation steps back (features/focus/calm.js)
+  const calm = useCalm(location.pathname);
   // Quidey's own anonymous statistics: counting follows my answer (access.usageConsent). Declared before
   // the page view below: effects run in order, so the first view finds counting already on. Nothing is
   // decided before the server answered (a reload keeps its queue); sign-out and account switches switch it off themselves.
@@ -309,7 +315,7 @@ function App(){
     // "minimal" as the default there), so it isn't applied a second time here
     <MotionConfig reducedMotion="never">
     {/* the frame: sidebar (desktop) or drawer, header, tab bar (phones); see AppShell.module.css */}
-    <div className={shell.shell} data-nav={navModel} data-part="shell">
+    <div className={shell.shell} data-nav={navModel} data-part="shell" data-calm={calm || undefined}>
         <Header/>
         <Menu/>
         <TabBar/>

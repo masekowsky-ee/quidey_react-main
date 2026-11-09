@@ -665,7 +665,7 @@ function Privacy() {
                 <li>dein Anmelde-Token (7 Tage gültig, wird beim Abmelden gelöscht). Meldest du auf demselben Gerät
                     mehrere Konten an, um zwischen ihnen zu wechseln, liegen für jedes davon Token, Benutzer- und
                     Anzeigename (höchstens fünf Konten); beim Abmelden eines Kontos wird sein Eintrag gelöscht;</li>
-                <li>deine Einstellungen: Sprache (bis du eine wählst, nimmt Quidey die deines Geräts), Design, Farbpalette, Akzentfarbe, Animationen, Töne, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer, Pomodoro oder Stoppuhr und die Pomodoro-Längen, dein Tagesziel für die Fokuszeit, im Fokusraum gewähltes Fokus-Geräusch, Lautstärke und Lernmethode, Kalenderansicht, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
+                <li>deine Einstellungen: Sprache (bis du eine wählst, nimmt Quidey die deines Geräts), Design, Farbpalette, Akzentfarbe, Animationen, Töne, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer, Pomodoro oder Stoppuhr und die Pomodoro-Längen, dein Tagesziel für die Fokuszeit, im Fokusraum gewähltes Fokus-Geräusch, Lautstärke und Lernmethode, ob der Ruhemodus an ist, Kalenderansicht, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
                 <li>bei einem neuen Konto, wie viele Dinge du schon erledigt oder angelegt hast und ob Quidey dich schon
                     gefragt hat, ob du es installieren möchtest und ob es dir gefällt (nur eine Zahl und zwei Merker,
                     keine Inhalte);</li>
@@ -676,6 +676,10 @@ function Privacy() {
                 <li>was du im Fokusraum nur für dich notierst: das Ziel der Sitzung und die Gedanken auf dem
                     Gedankenparkplatz (sie bleiben auf diesem Gerät und werden nicht an den Server geschickt, außer du
                     machst eine Aufgabe daraus);</li>
+                <li>in der Android-App und im Browser am Computer, wie oft und wie lange du heute während einer
+                    laufenden Fokusrunde woanders warst, und dasselbe für die laufende und die letzte Runde (nur Anzahl
+                    und Dauer, keine Apps oder Seiten; Zeit mit ausgeschaltetem Bildschirm oder schlafendem Computer
+                    zählt nicht; es bleibt auf diesem Gerät und wird nicht an den Server geschickt);</li>
                 <li>welche Erinnerungen schon angezeigt wurden, an welchem Tag dich Quidey zuletzt an deine Serie erinnert hat und welche gemeinsame Sitzung gerade gestoppt wird;</li>
                 <li>als Tester, an welchem Tag du den Hinweis „Plan anpassen“ bei den Lernzielen auf „Später“ gestellt hast (nur das Datum);</li>
                 <li>ob auf diesem Gerät Benachrichtigungen an sind, die Adresse dafür beim Push-Dienst (siehe Abschnitt {privacyNo(6)}) und ob Quidey dich danach schon gefragt hat;</li>

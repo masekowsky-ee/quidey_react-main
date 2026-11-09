@@ -8,6 +8,9 @@ import { useTranslation } from '../../i18n/useTranslation';
 import SheetGrabber from '../SheetGrabber.jsx';
 import Icon from '../icons.jsx';
 import { PomodoroLengths } from './FocusTimer.jsx';
+import { useAwayTally, todaysAway } from '../../features/focus/away';
+import { useCalmSetting, setCalm } from '../../features/focus/calm';
+import { awayPlatform } from '../../features/focus/useFocusAway';
 import { ParkingLot, FocusSounds, StudyMethod } from './StudyTools.jsx';
 import styles from './FocusRoom.module.css';
 
@@ -20,12 +23,33 @@ function TodayLine() {
     const today = new Date();
     const todays = saved.filter(session => { const d = parseDate(session.date); return d && sameDay(d, today); });
     const minutes = Math.round((todays.reduce((sum, s) => sum + (s.totalTime ?? 0), 0) + current) / 60);
+    // time elsewhere during focus, only where a screen turned off can be told apart (useFocusAway.js)
+    const away = todaysAway(useAwayTally());
+    const tracked = awayPlatform() !== null;
     return (
         <p className={styles.todayLine}>
             <span>{fill(t('focusTodayMinutes'), { n: minutes })}</span>
             <span>{fill(t(todays.length === 1 ? 'focusTodaySessionsOne' : 'focusTodaySessions'), { n: todays.length })}</span>
             {round > 0 && <span>{fill(t('focusTodayPomodoros'), { n: round })}</span>}
+            {tracked && (minutes > 0 || away.count > 0) &&
+                <span>{away.count ? fill(t('awayToday'), { n: away.count, min: Math.max(1, Math.round(away.ms / 60000)) }) : t('awayTodayNone')}</span>}
         </p>
+    );
+}
+
+// calm mode on / off (features/focus/calm.js)
+function CalmSwitch() {
+    const { t } = useTranslation();
+    const on = useCalmSetting();
+    return (
+        <section className={styles.tool} aria-labelledby="focus-calm-title">
+            <h3 id="focus-calm-title" className={styles.toolTitle}><Icon name="eyeOff" size={16} /> {t('focusCalmTitle')}</h3>
+            <label className={styles.switchRow}>
+                <input type="checkbox" checked={on} onChange={e => setCalm(e.target.checked)} />
+                <span>{t('focusCalmLabel')}</span>
+            </label>
+            <p className={styles.toolHint}>{t('focusCalmHint')}</p>
+        </section>
     );
 }
 
@@ -70,6 +94,7 @@ export default function FocusSettingsSheet({ onClose, fullscreen }) {
                         <h3 id="focus-today-title" className={styles.toolTitle}><Icon name="focus" size={16} /> {t('focusSettingsToday')}</h3>
                         <TodayLine />
                     </section>
+                    <CalmSwitch />
                     <section className={styles.tool} aria-labelledby="focus-lengths-title">
                         <h3 id="focus-lengths-title" className={styles.toolTitle}><Icon name="timer" size={16} /> {t('focusSettingsLengths')}</h3>
                         <PomodoroLengths />

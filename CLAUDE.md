@@ -277,7 +277,19 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   (`PomodoroLengths`), focus sounds (`features/focus/noise.js`, Web Audio brown/pink/rain; they play on when the
   sheet closes and stop when the Fokusraum is left), study methods, thought parking lot (→ task via
   `parseQuickEntry`), routines, full screen (only in a browser tab, `runsInBrowser()` in install.js: not in the
-  Android app or the installed web app). Testers: the timer folds into a sticky bar on start, `MiniTimer` in
+  Android app or the installed web app), and **Ruhemodus** (calm mode, `features/focus/calm.js`, on by default,
+  localStorage `focusCalm` 'off'): while a focus round runs (not paused, not a Pomodoro break) in the Fokusraum, App sets
+  `data-calm` on the shell and AppShell.module.css fades out the header, tab bar and add button (`data-part` header /
+  tabbar / add-fab); the Fokusraum shows "Zurück zur App" instead. **Leaving during focus** (`features/focus/away.js`,
+  `useFocusAway.js`, mounted in App): only where a screen turned off can be told from another app: the Android app
+  (plugin `QuideyAway`, `AwayPlugin.java` in quidey_android: away time counts only with the screen on and unlocked;
+  event `away` { awakeMs, totalMs, focusing } on resume; `arm`/`disarm` for one nudge on channel `focus_nudge`) and a
+  computer's browser (fine pointer: a worker beats twice a second while the tab is hidden, gaps > 3 s = asleep, not
+  counted). A phone's browser and the installed web app count nothing (`awayPlatform()` null). Back after ≥ 10 s away
+  during a running round: toast "Willkommen zurück – N Min. warst du woanders"; one nudge after 20 s away ("Noch N Min.
+  Fokus" + task; browser only with notifications allowed). Tally in localStorage `focusAway` (day count/ms, the round
+  going on, the last round): "Dein Tag" shows "N× woanders" / "Heute nicht abgelenkt", the Pomodoro recap "Ohne
+  Ablenkung" / "N× woanders in dieser Runde". Nothing of it goes to the server. Testers: the timer folds into a sticky bar on start, `MiniTimer` in
   `FocusTimer.jsx`, "Groß zeigen" opens it, big again once nothing runs. The **notebook** (`Notebook.jsx`, `features/focus/notebook.js`, API
   `/api/notebook`; the server reads its bigger bodies only after sign-in, checks pictures by their
   magic bytes and keeps all pictures of an account under 25 MB, `NOTEBOOK_STORAGE_FULL`): notes with `- [ ]` checklists, `# ` headings, link and picture attachments (pictures shrunk
@@ -638,7 +650,7 @@ for the app's own files: `token` (JWT), `accounts` (several accounts on one devi
 `[{ username, displayName, token }]`, max 5, `src/features/auth/accounts.js`; switching reloads
 the app as the other one, signing out takes over the next remembered account), `language`, `accent`,
 `theme`, `palette`, `motion`, `sound`, `analytics` (Android app: the answer to the usage data question), `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
-`teamSessionId`, `arcadeMode` (ranked | casual), `reminderSeen` (testers' reminders already shown in the page), `notesSort` / `notesLayout` (testers' notes area), `streakNudge` (day of the last streak reminder), `studyLater` (testers: the day the "plan is behind" card on Home was put off), `uiVariant` and `uiColors`
+`teamSessionId`, `arcadeMode` (ranked | casual), `reminderSeen` (testers' reminders already shown in the page), `notesSort` / `notesLayout` (testers' notes area), `streakNudge` (day of the last streak reminder), `focusAway` / `focusCalm` (time elsewhere during focus, calm mode), `studyLater` (testers: the day the "plan is behind" card on Home was put off), `uiVariant` and `uiColors`
 (testers' interface variant and the colours picked per variant), `push`, `pushEndpoint`,
 `pushAsked` (push notifications on this device), `onboarding:<username>` (a new account's action
 count, whether install / rating were asked). `public/theme-init.js` applies

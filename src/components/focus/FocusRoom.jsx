@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { Link, useLocation } from 'react-router-dom';
+import { useCalm } from '../../features/focus/calm';
 import { runsInBrowser } from '../../features/pwa/install';
 import { selectFocusTask } from '../../features/session/sessionAction';
 import { stopNoise } from '../../features/focus/noise';
@@ -38,6 +40,7 @@ export default function FocusRoom() {
     const [notesVersion, setNotesVersion] = useState(0);
     const [settings, setSettings] = useState(false);
     const fullscreen = useFullscreen();
+    const calm = useCalm(useLocation().pathname);
 
     // focus sounds play on while the settings are closed, and stop when the Fokusraum is left
     useEffect(() => () => stopNoise(), []);
@@ -46,9 +49,13 @@ export default function FocusRoom() {
         <div className={styles.page} data-part="focus-room">
             <header className={styles.head}>
                 <h1 className={styles.title}>{t('focusRoom')}</h1>
-                <button type="button" className={styles.ghostLink} onClick={() => setSettings(true)} aria-haspopup="dialog">
-                    <Icon name="settings" size={16} /> {t('focusSettings')}
-                </button>
+                <div className={styles.headActions}>
+                    {/* calm mode hides the navigation while the round runs: the one way out */}
+                    {calm && <Link to="/" className={styles.ghostLink}><Icon name="release" size={16} /> {t('focusCalmLeave')}</Link>}
+                    <button type="button" className={styles.ghostLink} onClick={() => setSettings(true)} aria-haspopup="dialog">
+                        <Icon name="settings" size={16} /> {t('focusSettings')}
+                    </button>
+                </div>
             </header>
 
             <div className={styles.columns}>

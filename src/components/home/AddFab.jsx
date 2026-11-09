@@ -16,7 +16,7 @@ export default function AddFab() {
     if (!showsAddFab(pathname)) return null;
     return (
         <button type="button" className={styles.fab} onClick={() => dispatch(showForms(true))}
-            aria-label={t('newEntry')} title={t('newEntry')} aria-keyshortcuts="N">
+            aria-label={t('newEntry')} title={t('newEntry')} aria-keyshortcuts="N" data-part="add-fab">
             <Icon name="plus" className={styles.icon} strokeWidth={2} />
         </button>
     );

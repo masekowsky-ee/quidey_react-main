@@ -6,7 +6,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
 import { apiFetch } from '../features/helperFunction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
-import { setFocusTask } from '../features/session/sessionAction'
+import { setFocusTask, setTimer } from '../features/session/sessionAction'
 import FocusRoom from '../components/focus/FocusRoom.jsx'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
@@ -41,7 +41,7 @@ async function renderRoom() {
     const store = configureStore({ reducer: rootReducer })
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks: [essay], groups: [], notes: [] } })
     await act(async () => {
-        render(<Provider store={store}><MemoryRouter><FocusRoom /></MemoryRouter></Provider>)
+        render(<Provider store={store}><MemoryRouter initialEntries={['/focus']}><FocusRoom /></MemoryRouter></Provider>)
     })
     return store
 }
@@ -99,5 +99,38 @@ describe('Fokusraum: goal, timer, notes', () => {
         await renderRoom()
         expect(screen.queryByRole('button', { name: 'In dieser Sitzung notieren' })).not.toBeInTheDocument()
         expect(posts()).toBe(1)
+    })
+})
+
+describe('Fokusraum: staying in it', () => {
+    it('calm mode: while the round runs the only way out is "Zurück zur App"', async () => {
+        const store = await renderRoom()
+        expect(screen.queryByRole('link', { name: 'Zurück zur App' })).not.toBeInTheDocument()
+        act(() => { store.dispatch(setTimer(25 * 60000, true)) })
+        expect(screen.getByRole('link', { name: 'Zurück zur App' })).toHaveAttribute('href', '/')
+        act(() => { store.dispatch(setTimer(20 * 60000, false)) })
+        expect(screen.queryByRole('link', { name: 'Zurück zur App' })).not.toBeInTheDocument()
+    })
+
+    it('calm mode can be switched off in the focus settings', async () => {
+        const store = await renderRoom()
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Fokus-Einstellungen' })) })
+        const calm = within(screen.getByRole('dialog', { name: 'Fokus-Einstellungen' })).getByRole('checkbox', { name: 'Ablenkungen ausblenden, solange der Timer läuft' })
+        expect(calm).toBeChecked()
+        fireEvent.click(calm)
+        expect(localStorage.getItem('focusCalm')).toBe('off')
+        act(() => { store.dispatch(setTimer(25 * 60000, true)) })
+        expect(screen.queryByRole('link', { name: 'Zurück zur App' })).not.toBeInTheDocument()
+    })
+
+    it("the break's recap says whether the round went without time elsewhere (where that can be told)", async () => {
+        window.matchMedia = (query) => ({ matches: query === '(pointer: fine)', media: query, addEventListener() {}, removeEventListener() {} })
+        localStorage.setItem('focusAway', JSON.stringify({ day: new Date().toDateString(), count: 0, ms: 0, round: { count: 0, ms: 0 }, lastRound: { count: 0, ms: 0 } }))
+        const store = await renderRoom()
+        act(() => {
+            store.dispatch({ type: 'SET_TIMER_MODE', payload: 'pomodoro' })
+        })
+        act(() => { store.dispatch({ type: 'SET_POMODORO', payload: { phase: 'short', round: 1 } }) })
+        expect(await screen.findByText('Ohne Ablenkung')).toBeInTheDocument()
     })
 })
