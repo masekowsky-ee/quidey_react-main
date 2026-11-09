@@ -121,9 +121,17 @@ export const saveSessionData = () => {
     }
 }
 
-// The focus time so far is saved, if there is any (a finished countdown, a Pomodoro round)
+// A session needs at least this much focus to be saved (the server refuses shorter ones):
+// a start by mistake or a stop during a break isn't a session.
+export const SESSION_MIN_SECONDS = 60;
+
+// The focus time so far is saved when it's a session (a finished countdown, a Pomodoro round, a
+// stop); anything shorter is let go, so the next run starts fresh
 const saveIfWorked = () => (dispatch, getState) => {
-    if (getState().session.currentSessionData.totalTime <= 0) return Promise.resolve();
+    if (getState().session.currentSessionData.totalTime < SESSION_MIN_SECONDS) {
+        dispatch(updateCurrentSessionData({ totalTime: 0, workedTasks: [], date: new Date().toISOString() }));
+        return Promise.resolve();
+    }
     return dispatch(saveSessionData()).catch(err => console.error("Saving session failed:", err));
 };
 
@@ -198,7 +206,7 @@ export const stopFocus = () => (dispatch, getState) => {
         dispatch(setTimer(0, false));
     }
     if (wasRunning) cancelAlarm();
-    return dispatch(saveSessionData()).catch(err => console.error("Saving session failed:", err));
+    return dispatch(saveIfWorked());
 };
 
 // the name of each Pomodoro phase (translation keys)

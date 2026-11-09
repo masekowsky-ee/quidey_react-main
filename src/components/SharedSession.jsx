@@ -9,6 +9,7 @@ import {
     endSharedSession, deleteSharedSession, removeSharedMember, renameSharedSession,
 } from '../features/together/togetherAction';
 import { stopWork } from '../features/together/work';
+import { dropSharedFocus } from '../features/together/linkedWork';
 import { useSharedSession, useTogetherRun } from '../features/together/hooks';
 import WorkPanel from './together/WorkPanel';
 import SharedTaskList from './together/SharedTaskList';
@@ -70,6 +71,8 @@ export function SessionActions({ session, onGone }) {
     const handleConfirmed = async () => {
         const action = confirm;
         setConfirm(null);
+        // its task leaves the focus timer (which runs on without one)
+        dispatch(dropSharedFocus(session.id));
         await dispatch(stopWork());
         if (action === 'end') {
             run(endSharedSession(session.id), 'toast_sessionEnded');

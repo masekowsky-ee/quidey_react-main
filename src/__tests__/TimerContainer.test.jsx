@@ -133,7 +133,7 @@ describe('TimerContainer', () => {
             renderTimer()
             fireEvent.click(screen.getByRole('button', { name: 'Stoppuhr' }))
             fireEvent.click(screen.getByRole('button', { name: 'start timer' }))
-            await advance(2000)
+            await advance(61000) // a session is at least a minute
             expect(screen.getByRole('button', { name: 'Timer' })).toBeDisabled()
 
             fireEvent.click(screen.getByRole('button', { name: 'pause timer' }))
@@ -283,7 +283,7 @@ describe('TimerContainer', () => {
     it('stop ends the session: timer at zero, session saved', async () => {
         renderTimer()
         fireEvent.click(screen.getByRole('button', { name: 'start timer' }))
-        await advance(1000)
+        await advance(61000) // a session is at least a minute
 
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'stop timer' })) })
 

@@ -24,11 +24,10 @@ import { fetchFriendRequests, fetchFriends } from "./features/friends/friendsAct
 import { usePresenceRealtime } from "./features/presence/presence.js"
 import { fetchSharedSessions, fetchMySharedTasks } from './features/together/togetherAction.js'
 import { useWorkReporter } from './features/together/work.js'
-import { useSoloSharedWork } from './features/together/useSoloSharedWork.js'
+import { useLinkedWork } from './features/together/linkedWork.js'
 import { useFocusClock } from './features/session/useFocusClock.js'
 import { useFocusNotification } from './features/session/focusNotification';
 import { useFocusTitle } from './features/session/focusTitle';
-import { selectFocusTask } from './features/session/sessionAction.js'
 import { useRoutineReminders } from './features/routines/routines.js'
 import { useReminders } from './features/reminders/reminders.js'
 import ReminderAlert from './components/reminders/ReminderAlert.jsx'
@@ -148,10 +147,10 @@ function App(){
   const motionLevel = useMotionLevel();
   // the team stopwatch keeps running on every page
   useWorkReporter();
-  // the focus timer runs on every page, by the wall clock (also while the phone is off); time on
-  // a task from a shared session is booked in that session too
+  // the focus timer runs on every page, by the wall clock (also while the phone is off); on a
+  // task from a shared session the session's stopwatch follows it (one timer for both)
   useFocusClock();
-  useSoloSharedWork(useSelector(selectFocusTask));
+  useLinkedWork();
   const homeLayout = useSelector((state) => state.settings.homeLayout);
 
   useEffect(() => {

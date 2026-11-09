@@ -4,7 +4,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
 import { formatClock, displayName } from '../../features/helperFunction';
 import { timeOf, setSharedTaskDone } from '../../features/together/togetherAction';
-import { selectWork, startWork, stopWork, localMs, useNow } from '../../features/together/work';
+import { selectWork, stopWork, localMs, useNow } from '../../features/together/work';
+import { workOnSharedTask, dropSharedFocus } from '../../features/together/linkedWork';
+import { pauseFocus } from '../../features/session/sessionAction';
 import { useTogetherRun } from '../../features/together/hooks';
 
 import Icon from '../icons';
@@ -24,6 +26,7 @@ export default function WorkPanel({ session, large = false }) {
     const elsewhere = work.taskId && !here;
 
     const finish = async () => {
+        dispatch(dropSharedFocus(session.id, current.id));
         await dispatch(stopWork());
         run(setSharedTaskDone(session.id, current.id, true), 'toast_taskDone');
     };
@@ -50,7 +53,7 @@ export default function WorkPanel({ session, large = false }) {
                     </div>
                     <span className={styles.clock}>{formatClock(timeOf(current, session.me) + localMs(work, current.id, now))}</span>
                     <div className={styles.workButtons}>
-                        <button className={styles.secondaryBtn} onClick={() => dispatch(stopWork())}>{t('pause')}</button>
+                        <button className={styles.secondaryBtn} onClick={() => dispatch(pauseFocus())}>{t('pause')}</button>
                         <button className={styles.acceptBtn} onClick={finish}>{t('markDone')}</button>
                     </div>
                 </div>
@@ -65,7 +68,7 @@ export default function WorkPanel({ session, large = false }) {
                         <ul className={styles.suggestions}>
                             {suggestions.map(task => (
                                 <li key={task.id}>
-                                    <button className={styles.suggestion} onClick={() => dispatch(startWork(session, task))}>
+                                    <button className={styles.suggestion} onClick={() => dispatch(workOnSharedTask(session, task))}>
                                         <span className={styles.playIcon} aria-hidden="true"><Icon name="play" size={14} /></span>
                                         <span className={styles.suggestionName}>{task.name}</span>
                                         {task.assignee?.id === session.me && <span className={styles.assignedChip}>{t('forYou')}</span>}

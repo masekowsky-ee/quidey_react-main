@@ -6,6 +6,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
 import { apiFetch } from '../features/helperFunction'
 import { useWorkReporter } from '../features/together/work'
+import { useLinkedWork } from '../features/together/linkedWork'
 import SharedSession from '../components/SharedSession'
 import Together from '../components/Together'
 
@@ -76,9 +77,11 @@ function mockApi() {
 
 const activity = () => calls.filter(c => c.url.endsWith('/activity'))
 
-// like App: the reporter that sends the stopwatch's reports runs outside the page
+// like App: the reporter that sends the stopwatch's reports, and the link that lets the
+// stopwatch follow the focus timer, run outside the page
 function Harness() {
     useWorkReporter()
+    useLinkedWork()
     return (
         <Routes>
             <Route path="/together/:id" element={<SharedSession />} />
