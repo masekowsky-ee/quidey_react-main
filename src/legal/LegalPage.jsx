@@ -452,6 +452,19 @@ function Privacy() {
                 (Auftragsverarbeitung, EU-Standardvertragsklauseln).
             </p>
             <p>
+                <strong>Lernmaterial scannen (Anthropic):</strong> Mit „Scannen“ (im Notizbuch und unter „Lernen“) kannst
+                du ein PDF, bis zu fünf Fotos, eine deiner Notizen oder eingefügten Text von der KI lesen lassen, damit
+                daraus Notizen, Termine und Aufgaben oder ein Lernziel werden. Nur nach deinem Tippen auf „Scannen“
+                schickt der Quidey-Server dieses Material zusammen mit dem heutigen Datum und dem, was daraus werden
+                soll, an Anthropic. Fotos werden vorher auf deinem Gerät verkleinert. Quidey speichert das Material
+                nicht; zurück kommt ein Vorschlag, den du in einer Vorschau prüfst, und angelegt wird nur, was du dort
+                übernimmst (dann wie jede Notiz, Aufgabe oder jedes Lernziel). Bitte scanne kein Material mit Angaben
+                über andere Personen (etwa Namenslisten), soweit sie für dich nicht nötig sind. Pro Konto und Tag ist
+                derzeit ein Scan möglich; dafür zählt der Server die Scans je Tag (nur die Zahl, nach einer Woche
+                gelöscht). Rechtsgrundlage ist deine Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO durch das Tippen auf
+                „Scannen“. Für die Verarbeitung durch Anthropic gilt dasselbe wie bei den KI-Schätzungen oben.
+            </p>
+            <p>
                 <strong>Spracheingabe:</strong> Tippst du auf das Mikrofon (bei neuen Aufgaben, Terminen und Erinnerungen
                 und in Notizen), wandelt die Spracherkennung deines Browsers bzw. Handys das Gesprochene in Text um:
                 im Browser die Web-Speech-Funktion des Browsers (in Chrome und Edge über Dienste von Google bzw.

@@ -42,6 +42,20 @@
     border-color: var(--border-strong);
 }
 
+/* "Scannen" beside it: quieter still (only where the AI is set up) */
+.smallGhost {
+    composes: ghostBtn from '../ui.module.css';
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 2.25rem;
+    padding: 0 0.8rem;
+    font-size: 0.85rem;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+}
+
 /* "Neu": a quiet tonal button (the timer's start is the room's one filled button) */
 .smallPrimary {
     color: var(--text-h);

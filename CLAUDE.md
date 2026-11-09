@@ -766,6 +766,15 @@ false without `ANTHROPIC_API_KEY`: the app hides the buttons). Frontend `feature
 - Reading a line: `POST /api/ai/parse-entry { text }` (≤ 500 chars; sends the line, today, colour names, my event
   type names) → `{ entry: { kind, name, due, time, durationMinutes, color, eventTypeId, reminders, prio }, quota }`;
   TaskForm fills its fields with it. Privacy: "Zeilen mit KI lesen" in § 5.
+- Scanning: `POST /api/ai/scan { wants: plan|notes|entries, source }` (source: a PDF ≤ 10 MB / 20 pages, ≤ 5 pictures ≤ 2 MB
+  each — both checked by their first bytes, pictures shrunk in the browser first —, one of my notes, or text ≤ 60 000
+  chars) → `{ result: { plan, notes, entries }, quota }`: a study goal (name, kind, due, subject, parts with minutes
+  15–600), notes in the editor's line format, dated tasks/events; only what was asked for. Nothing of the material is
+  stored. `components/scan/ScanSheet.jsx` (from the notebook's "Scannen" and the Lernen page): source tabs (Datei /
+  Notiz / Text einfügen), what to make (Lernplan only for testers), then a preview where each part is kept or left
+  out; "Übernehmen" makes them through the usual routes (`createNote`, `addTask`, Lernen's `saveSubject` + `createGoal`
+  with `estimateSource: 'ai'`). `features/ai/scan.js` (`filesToSource`, `scanMaterial`). Privacy: "Lernmaterial
+  scannen" in § 5.
 - Voice input (no allowance needed, not AI): `features/voice/voice.js` (`voiceSupport()` 'web' | 'native' | null,
   `startDictation`, `speechLang`), `components/voice/MicButton.jsx` (hidden where unsupported, e.g. Firefox) beside the
   new-entry name (what is said becomes the line, read like typing) and `DictateButton.jsx` in the notes editor's tools

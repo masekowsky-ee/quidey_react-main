@@ -7,6 +7,8 @@ import { showToast } from '../../features/toast/toast';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import NoteEditor from '../notes/NoteEditor.jsx';
+import ScanSheet from '../scan/ScanSheet.jsx';
+import { useAiQuota } from '../../features/ai/ai';
 import NotePreview from '../notes/NotePreview.jsx';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
@@ -20,6 +22,8 @@ export default function Notebook({ focusTask }) {
     const dispatch = useDispatch();
     const isTester = useIsTester();
     const [notes, setNotes] = useState(null);
+    const aiQuota = useAiQuota();
+    const [scanning, setScanning] = useState(false);
     const [folders, setFolders] = useState([]);
     const [openId, setOpenId] = useState(null);
     const [query, setQuery] = useState('');
@@ -89,6 +93,9 @@ export default function Notebook({ focusTask }) {
                     <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('noteSearch')} aria-label={t('noteSearch')} />
                 </div>
                 <button type="button" className={styles.smallPrimary} onClick={startNote}><Icon name="plus" size={16} /> {t('noteNew')}</button>
+                {/* study material read by the AI into notes, entries (and for testers a study plan) */}
+                {aiQuota?.available &&
+                    <button type="button" className={styles.smallGhost} onClick={() => setScanning(true)}><Icon name="brain" size={16} /> {t('scanTitle')}</button>}
             </div>
             {focusTask &&
                 <label className={styles.filter}>
@@ -124,7 +131,8 @@ export default function Notebook({ focusTask }) {
                             );
                         })}
                     </ul>}
+            {scanning && <ScanSheet onClose={() => setScanning(false)}
+                onDone={(made) => { if (made.notes) fetchNotes().then(setNotes).catch(() => {}); }} />}
         </div>
     );
 }
-

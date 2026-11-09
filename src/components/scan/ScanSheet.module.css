@@ -1,0 +1,254 @@
+/* The scan sheet (ScanSheet.jsx); its frame comes from the focus settings sheet */
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 0 1.25rem 1.25rem;
+    overflow-y: auto;
+}
+
+.tabs {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.2rem;
+    background: var(--surface-inset);
+    border-radius: var(--radius-pill);
+    width: fit-content;
+}
+
+.tabs button {
+    min-height: 2rem;
+    padding: 0 0.85rem;
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+}
+
+.tabs button[aria-selected="true"] {
+    color: var(--text-h);
+    background: var(--surface);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+}
+
+.drop {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 4.5rem;
+    padding: 0.9rem 1rem;
+    color: var(--text);
+    font-size: 0.9rem;
+    border: 1px dashed var(--control-border);
+    border-radius: var(--radius-md, 12px);
+    cursor: pointer;
+}
+
+.drop:focus-within {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.fileInput {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.select,
+.text,
+.planFields select,
+.planFields input {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 0.9rem;
+}
+
+.text {
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.wants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.1rem;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.wants legend {
+    margin-bottom: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.want,
+.partHead,
+.entries label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.want input,
+.partHead input,
+.entries input {
+    margin-top: 0.2rem;
+    accent-color: var(--primary);
+}
+
+.notice {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.error {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--danger, #b42318);
+}
+
+.primary,
+.secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.6rem;
+    padding: 0 1.1rem;
+    font: inherit;
+    font-weight: 600;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+}
+
+.primary {
+    color: var(--on-primary, #fff);
+    background: var(--text-h);
+    border: none;
+}
+
+.primary:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.secondary {
+    color: var(--text);
+    background: none;
+    border: 1px solid var(--control-border);
+}
+
+.left {
+    font-weight: 400;
+    opacity: 0.75;
+}
+
+.part {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 0.85rem 0.95rem;
+    background: var(--surface-inset);
+    border-radius: var(--radius-md, 12px);
+}
+
+.partHead span,
+.partTitle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.partTitle {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.planFields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.6rem;
+}
+
+.planFields label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.parts,
+.entries {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: part;
+}
+
+.parts li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.88rem;
+}
+
+.parts li::before {
+    counter-increment: part;
+    content: counter(part) ".";
+    min-width: 1.2rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.parts li > span:first-child {
+    flex: 1;
+}
+
+.entries label {
+    flex-wrap: wrap;
+}
+
+.muted {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+
+.notePreview {
+    max-height: 14rem;
+    overflow-y: auto;
+    padding: 0.5rem 0.75rem;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+}
+
+@media (max-width: 480px) {
+    .planFields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

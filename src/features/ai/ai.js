@@ -28,6 +28,12 @@ export function loadAiQuota() {
     return loading;
 }
 
+// reads what is left again (after a scan, which may have used or given back the day's one)
+export function refreshAiQuota() {
+    loading = null;
+    return loadAiQuota();
+}
+
 const setQuota = (next) => { quota = { ...quota, ...next }; notify(); };
 
 export function useAiQuota() {

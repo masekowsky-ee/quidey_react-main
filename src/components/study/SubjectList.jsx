@@ -13,6 +13,8 @@ import { Bone, Skeleton } from '../skeleton/Skeleton.jsx';
 import { ProgressBar } from './GoalProgress.jsx';
 import { countdownText, useStudyError } from './studyUi';
 import styles from './Study.module.css';
+import ScanSheet from '../scan/ScanSheet.jsx';
+import { useAiQuota } from '../../features/ai/ai';
 
 const NAME_MAX = 60;
 
@@ -54,6 +56,8 @@ export default function SubjectList() {
     const errorText = useStudyError();
     const subjects = useSelector(selectSubjects);
     const [loaded, setLoaded] = useState(false);
+    const aiQuota = useAiQuota();
+    const [scanning, setScanning] = useState(false);
     const [name, setName] = useState('');
     const [showArchived, setShowArchived] = useState(false);
 
@@ -84,12 +88,18 @@ export default function SubjectList() {
 
     return (
         <div className={styles.page} data-part="study">
+            {scanning && <ScanSheet onClose={() => setScanning(false)} onDone={(made) => { if (made.plan) dispatch(fetchSubjects()).catch(() => {}); }} />}
             <header className={styles.head}>
                 <div>
                     <h1 className={styles.title}>{t('studyTitle')}</h1>
                     <p className={styles.subtitle}>{t('studySubtitle')}</p>
                 </div>
                 <div className={styles.actions}>
+                    {/* a syllabus or exam plan read by the AI into a study goal (ScanSheet) */}
+                    {aiQuota?.available &&
+                        <button type="button" className={styles.btn} onClick={() => setScanning(true)}>
+                            <Icon name="brain" size={14} /> {t('scanTitle')}
+                        </button>}
                     <button type="button" className={styles.btn} onClick={() => navigate({ search: '?new=goal' })}>
                         <Icon name="plus" size={14} /> {t('studyAddGoal')}
                     </button>
