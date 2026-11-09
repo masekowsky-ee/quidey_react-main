@@ -246,6 +246,13 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   `pauseFocus`, `stopFocus`, `skipPhase`); start sets `PUT /api/focus/alarm` {endsAt, phase}, pause/stop
   `DELETE`: the server pushes the end (kind `plan`) even with the phone off. The header's chip links to /focus.
   Stop and pause first book the seconds since the last tick (`catchUpClock`, also what useFocusClock runs). A
+  session is saved only with at least a minute of focus (`SESSION_MIN_SECONDS`; the server refuses shorter ones,
+  400 `SESSION_TOO_SHORT`): a shorter run, or a stop during a Pomodoro break, is let go and the next starts fresh.
+  **One timer for both** (`features/together/linkedWork.js`, `useLinkedWork` in App): while the focus timer runs
+  on a shared session's task, outside a Pomodoro break, that session's stopwatch runs on it, anything else stops it;
+  the session's "Daran arbeiten" / "Pause" (task list, `WorkPanel`, header pill) go through the focus timer
+  (`workOnSharedTask`, `pauseFocus`), ticking the task off or leaving the session takes it out of focus
+  (`dropSharedFocus`, the timer runs on). A
   session is dated when its time starts (SET_TIMER with nothing booked sets `currentSessionData.date`): the empty
   one made after the last save, kept overnight in focusRun, used to put the day's first session on the day
   before. Start on a countdown that is over (or stopped) runs the last length again (`sessionParams.time`, a
@@ -260,12 +267,18 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   notifications are already allowed. In the browser the running timer also stands in the tab's title ("▶ 24:13 ·
   Essay", `features/session/focusTitle.js`, `useFocusTitle` in App; worked out from `runningSince`, the beat from the
   worker `titleTick.worker.js`, since a background tab slows the page's own timers; not while the team stopwatch has it).
-- `/focus` — **Fokusraum** (`components/focus/`): big ring timer (`FocusTimer`, mode switch, Pomodoro lengths),
-  session goal, task in focus (pick / done), recap after a Pomodoro (into the notebook), thought parking lot
-  (→ task via `parseQuickEntry`), focus sounds (`features/focus/noise.js`, Web Audio brown/pink/rain), study
-  methods, full screen (only in a browser tab, `runsInBrowser()` in install.js: not in the Android app or the
-  installed web app; testers: the timer folds into a sticky bar on start, `MiniTimer` in `FocusTimer.jsx`,
-  "Groß zeigen" opens it, big again once nothing runs); the **notebook** beside it (`Notebook.jsx`, `features/focus/notebook.js`, API
+- `/focus` — **Fokusraum** (`components/focus/`), three steps and nothing else in sight: the goal ("Was willst du
+  schaffen?", serif, localStorage `focusIntent`) with a task chip (`FocusGoal.jsx`: pick own / session task, done),
+  the big ring timer (`FocusTimer`, mode switch, the countdown's length), and the session's note waiting beside it
+  (`SessionNotes.jsx`: nothing is made until "In dieser Sitzung notieren"; the note takes the goal as title and the
+  task in focus; the same goal on the same day reopens it, localStorage `focusSessionNote` { id, goal, day };
+  "Alle Notizen" shows the notebook). The recap shows up in a Pomodoro break (into the notebook). Everything else is
+  in the sheet "Fokus-Einstellungen" (`FocusSettingsSheet.jsx`): today's numbers, Pomodoro lengths
+  (`PomodoroLengths`), focus sounds (`features/focus/noise.js`, Web Audio brown/pink/rain; they play on when the
+  sheet closes and stop when the Fokusraum is left), study methods, thought parking lot (→ task via
+  `parseQuickEntry`), routines, full screen (only in a browser tab, `runsInBrowser()` in install.js: not in the
+  Android app or the installed web app). Testers: the timer folds into a sticky bar on start, `MiniTimer` in
+  `FocusTimer.jsx`, "Groß zeigen" opens it, big again once nothing runs. The **notebook** (`Notebook.jsx`, `features/focus/notebook.js`, API
   `/api/notebook`; the server reads its bigger bodies only after sign-in, checks pictures by their
   magic bytes and keeps all pictures of an account under 25 MB, `NOTEBOOK_STORAGE_FULL`): notes with `- [ ]` checklists, `# ` headings, link and picture attachments (pictures shrunk
   in the browser, at most 4 per note), "plan as task" for the cursor's line, autosave. A task's notes (Home's focus sheet, the focus column) are these notes about the task (`TaskNoteRow`: one-line ones edited in place, fuller ones open the notebook; `refreshTaskNotes` on mount). The editor is
@@ -425,8 +438,11 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   `src/features/stats/period.js`). Overview from `GET /api/stats?from&to`: tiles, stacked columns
   focus + event time (`stats/TimeChart.jsx`, fixed validated pair blue/orange, table view), bars per
   event type and per group, "In Sitzungen & Familien" (`stats/TogetherStats.jsx`: team stopwatch time, per place
-  done / events, from `together`), then the all-time `ProfileStats` ("Aktivität"). Sessions list in
-  `stats/SessionList.jsx`, completed tasks in `CompletedTasks.jsx` (events left out; a second part from
+  done / events, from `together`), then the all-time `ProfileStats` ("Aktivität"). Focus time (here and in the
+  profile's numbers) = own sessions + team stopwatch time beyond what those sessions already hold for session tasks,
+  per day (backend `FOCUS_DAYS_CTES`, the rule XP uses); a session counts from a minute. Sessions list in
+  `stats/SessionList.jsx` (sittings: rounds with only a break between them are one row, "N Runden",
+  `features/stats/sittings.js`; runs under a minute not shown), completed tasks in `CompletedTasks.jsx` (events left out; a second part from
   `together.done`). Session and family work counts in `tasksDone` and the events: tasks I ticked off
   (`done_by`) or that were given to me, events I added or was given (a session copy of my own task isn't counted twice).
 - Repeats: `tasks.repeat_left` (how many more times, null = no end; "Endet: nie / nach N") and

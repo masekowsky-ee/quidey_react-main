@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useStored } from '../../features/focus/useStored';
 import { useDispatch, useSelector } from 'react-redux';
 import { createNote } from '../../features/focus/notebook';
-import { playNoise, stopNoise, setNoiseVolume } from '../../features/focus/noise';
+import { playNoise, stopNoise, setNoiseVolume, noisePlaying } from '../../features/focus/noise';
 import { FOCUS_NOISES, readStoredFocusNoise, storeFocusNoise } from '../../features/settings/preferences';
 import { parseQuickEntry } from '../../features/tasks/quickParse';
 import { addTask } from '../../features/tasks/taskAction';
@@ -10,29 +11,6 @@ import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import Icon from '../icons.jsx';
 import styles from './FocusRoom.module.css';
-
-// small things kept on this device only (localStorage), never sent anywhere
-function useStored(key, fallback) {
-    const [value, setValue] = useState(() => {
-        try { return JSON.parse(localStorage.getItem(key) ?? 'null') ?? fallback; } catch { return fallback; }
-    });
-    useEffect(() => {
-        try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* only for this visit */ }
-    }, [key, value]);
-    return [value, setValue];
-}
-
-// What this session is for: one sentence, in sight the whole time
-export function SessionIntent() {
-    const { t } = useTranslation();
-    const [intent, setIntent] = useStored('focusIntent', '');
-    return (
-        <label className={styles.intent}>
-            <span className={styles.toolLabel}><Icon name="focus" size={16} /> {t('focusIntentLabel')}</span>
-            <input value={intent} maxLength={140} onChange={e => setIntent(e.target.value)} placeholder={t('focusIntentPlaceholder')} />
-        </label>
-    );
-}
 
 // Gedankenparkplatz: a thought that comes up while focusing is parked here instead of followed;
 // later it becomes a task or goes
@@ -87,10 +65,9 @@ export function FocusSounds() {
     const { t } = useTranslation();
     const [noise, setNoise] = useState(readStoredFocusNoise);
     const [volume, setVolume] = useStored('focusNoiseVolume', 0.5);
-    const [on, setOn] = useState(false);
-
-    // nothing plays by itself (browsers need a click), and it stops when the Fokusraum is left
-    useEffect(() => () => stopNoise(), []);
+    // nothing plays by itself (browsers need a click); it plays on when the settings close and
+    // stops when the Fokusraum is left (FocusRoom)
+    const [on, setOn] = useState(noisePlaying);
 
     const pick = (kind) => {
         setNoise(kind);

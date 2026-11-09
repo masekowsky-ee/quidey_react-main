@@ -35,6 +35,25 @@ function PomodoroField({ name, label, value, onChange, unit }) {
     );
 }
 
+// The Pomodoro lengths and the rounds before the long break (Fokus-Einstellungen); they can't
+// change in the middle of a run
+export function PomodoroLengths() {
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const pomodoro = useSelector(state => state.session.pomodoro);
+    const inProgress = useSelector(selectTimerInProgress);
+    const timerMode = useSelector(state => state.session.timerMode);
+    const running = inProgress && timerMode === 'pomodoro';
+    const setLength = (key, minutes) => dispatch(setPomodoro({ config: { [key]: minutes } }));
+    return (
+        <fieldset className={styles.lengths} disabled={running}>
+            {[['focus', 'pomodoroFocus'], ['short', 'pomodoroShort'], ['long', 'pomodoroLong'], ['every', 'pomodoroEvery']].map(([key, label]) =>
+                <PomodoroField key={key} name={key} label={t(label)} value={pomodoro.config[key]}
+                    unit={key === 'every' ? '×' : 'min'} onChange={value => setLength(key, value)} />)}
+        </fieldset>
+    );
+}
+
 // Testers (in test): once the timer starts, the big card folds into a slim bar that stays at the
 // top while scrolling (time, a thin progress line, the controls), so the room below gets the
 // space. "Groß zeigen" opens it again; once nothing runs any more it is big again by itself.
@@ -107,8 +126,6 @@ export default function FocusTimer() {
     const onBreak = isPomodoro && pomodoro.phase !== 'focus';
     const inCycle = pomodoro.round % pomodoro.config.every;
 
-    const setLength = (key, minutes) => dispatch(setPomodoro({ config: { [key]: minutes } }));
-
     if (minimized) return <MiniTimer onExpand={() => setMinimized(false)} />;
 
     return (
@@ -163,18 +180,12 @@ export default function FocusTimer() {
                     </button>}
             </div>
 
-            {/* lengths: only while nothing runs */}
-            {!inProgress && (isPomodoro
-                ? <div className={styles.lengths}>
-                    {[['focus', 'pomodoroFocus'], ['short', 'pomodoroShort'], ['long', 'pomodoroLong'], ['every', 'pomodoroEvery']].map(([key, label]) =>
-                        <PomodoroField key={key} name={key} label={t(label)} value={pomodoro.config[key]}
-                            unit={key === 'every' ? '×' : 'min'} onChange={value => setLength(key, value)} />)}
-                </div>
-                : timerMode === 'timer' &&
+            {/* the countdown's length: only while nothing runs (Pomodoro lengths: Fokus-Einstellungen) */}
+            {!inProgress && timerMode === 'timer' &&
                 <div className={styles.lengths}>
                     <DurationInput label={t('focusLength')} ms={sessionParams.time} presets={[...SESSION_LENGTHS, 90]}
                         onChange={time => dispatch(setSessionParams({ ...sessionParams, time }))} />
-                </div>)}
+                </div>}
             {isTester && inProgress &&
                 <button type="button" className={styles.minimizeBtn} onClick={() => setMinimized(true)} aria-expanded="true">
                     {t('focusTimerMinimize')}
