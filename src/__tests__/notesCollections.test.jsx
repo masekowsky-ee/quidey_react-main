@@ -10,7 +10,7 @@ import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { setLanguage } from '../features/settings/settingsAction'
 import { noteLines, richParts } from '../features/focus/notebook'
 import {
-    parseView, notesInView, sortNotes, tagCounts, cleanTag, continueList, wrapSelection, wordCount,
+    parseView, notesInView, sortNotes, tagCounts, cleanTag, wordCount,
     noteMarkdown, noteFileName, templateNote, duplicateOf, daysLeftInTrash,
 } from '../features/notes/notes'
 import collectionsReducer, { collectionContents, collectionsOf } from '../features/collections/collections'
@@ -111,19 +111,6 @@ describe('notes: views, search, order', () => {
 })
 
 describe('notes: writing', () => {
-    it('goes on with a list on Enter and ends it on an empty item', () => {
-        expect(continueList('- Milch', 7)).toEqual({ body: '- Milch\n- ', cursor: 10 })
-        expect(continueList('1. Eins', 7)).toEqual({ body: '1. Eins\n2. ', cursor: 11 })
-        expect(continueList('- [x] Fertig', 12)).toEqual({ body: '- [x] Fertig\n- [ ] ', cursor: 19 })
-        expect(continueList('a\n- ', 4)).toEqual({ body: 'a\n', cursor: 2 })
-        expect(continueList('Nur Text', 8)).toBeNull()
-    })
-
-    it('puts **bold** around the selection and takes it off again', () => {
-        expect(wrapSelection('ein Wort', 4, 8, '**')).toEqual({ body: 'ein **Wort**', start: 6, end: 10 })
-        expect(wrapSelection('ein **Wort**', 4, 12, '**')).toEqual({ body: 'ein Wort', start: 4, end: 8 })
-    })
-
     it('reads the richer lines and marks only when asked', () => {
         const body = '## Teil\n- Punkt\n2. Zwei\n> Zitat\n---\n- [ ] offen'
         expect(noteLines(body, true).map(line => line.kind)).toEqual(['subheading', 'bullet', 'numbered', 'quote', 'divider', 'check'])

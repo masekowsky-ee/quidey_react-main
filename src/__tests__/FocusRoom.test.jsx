@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, act, within } from '@testing-library/react'
+import { render, screen, fireEvent, act, within, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
@@ -84,7 +84,8 @@ describe('Fokusraum: goal, timer, notes', () => {
         const posted = apiFetch.mock.calls.find(([url, o]) => url === '/api/notebook' && o?.method === 'POST')
         expect(JSON.parse(posted[1].body)).toMatchObject({ title: 'Kapitel 4 zusammenfassen', taskId: 7 })
         // the editor is open, ready to type into
-        expect(document.activeElement.tagName).toBe('TEXTAREA')
+        const text = await screen.findByRole('textbox', { name: 'Text der Notiz' })
+        await waitFor(() => expect(document.activeElement).toBe(text))
     })
 
     it('the same goal on the same day opens the same note again', async () => {

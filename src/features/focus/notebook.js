@@ -9,6 +9,7 @@ import { track } from '../usage/usage';
 
 export const NOTE_IMAGES_MAX = 4;
 export const NOTE_ATTACHMENTS_MAX = 10;
+export const NOTE_BODY_MAX = 20000;
 const IMAGE_MAX_SIDE = 1400;
 const IMAGE_MAX_BYTES = 380 * 1024;
 

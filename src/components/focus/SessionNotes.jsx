@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchNotes, createNote, removeNote } from '../../features/focus/notebook';
 import { showToast } from '../../features/toast/toast';
@@ -34,8 +34,8 @@ export default function SessionNotes({ goal, focusTask }) {
     const [showAll, setShowAll] = useState(false);
     const [stored, setStored] = useState(readSessionNote);
     const [creating, setCreating] = useState(false);
-    const editorWrap = useRef(null);
-    const focusEditor = useRef(false);
+    // a note made from the click: the cursor goes straight into it
+    const [justMade, setJustMade] = useState(null);
 
     useEffect(() => {
         fetchNotes().then(setNotes).catch(() => setNotes([]));
@@ -45,13 +45,6 @@ export default function SessionNotes({ goal, focusTask }) {
     const note = stored && stored.day === today() && stored.goal === wanted
         ? notes?.find(item => item.id === stored.id && !item.trashed && !item.archived)
         : null;
-
-    // a note made from the click: the cursor goes straight into it
-    useEffect(() => {
-        if (!note || !focusEditor.current) return;
-        focusEditor.current = false;
-        editorWrap.current?.querySelector('textarea')?.focus();
-    }, [note]);
 
     const onChange = useCallback((saved) => {
         setNotes(prev => prev?.map(item => item.id === saved.id ? saved : item) ?? prev);
@@ -69,7 +62,7 @@ export default function SessionNotes({ goal, focusTask }) {
             });
             const next = { id: made.id, goal: wanted, day: today() };
             storeSessionNote(next);
-            focusEditor.current = true;
+            setJustMade(made.id);
             setNotes(prev => [made, ...(prev ?? [])]);
             setStored(next);
         } catch (err) {
@@ -99,10 +92,8 @@ export default function SessionNotes({ goal, focusTask }) {
                 : notes === null
                     ? <Bone h="12rem" />
                     : note
-                        ? <div ref={editorWrap}>
-                            <NoteEditor key={note.id} note={note} focusTask={focusTask} onChange={onChange}
-                                onDelete={() => deleteNote(note.id)} onClose={() => setShowAll(true)} />
-                        </div>
+                        ? <NoteEditor key={note.id} note={note} focusTask={focusTask} onChange={onChange} autoFocus={justMade === note.id}
+                            onDelete={() => deleteNote(note.id)} onClose={() => setShowAll(true)} />
                         : <div className={styles.waiting}>
                             {wanted && <p className={styles.waitingTitle}>{wanted}</p>}
                             <p className={styles.toolHint}>{t('sessionNotesHint')}</p>

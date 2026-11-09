@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { fetchNote, updateNote, noteLines, toggleCheck, checklistCount, linkParts, richParts, isWebUrl, shrinkImage, NOTE_IMAGES_MAX, NOTE_ATTACHMENTS_MAX } from '../../features/focus/notebook';
-import { cleanTag, continueList, wrapSelection, wordCount, readingMinutes, downloadNote, TAGS_MAX } from '../../features/notes/notes';
+import { fetchNote, updateNote, checklistCount, isWebUrl, shrinkImage, NOTE_IMAGES_MAX, NOTE_ATTACHMENTS_MAX, NOTE_BODY_MAX } from '../../features/focus/notebook';
+import { cleanTag, wordCount, readingMinutes, downloadNote, TAGS_MAX } from '../../features/notes/notes';
 import { parseQuickEntry } from '../../features/tasks/quickParse';
 import { addTask } from '../../features/tasks/taskAction';
 import { showToast } from '../../features/toast/toast';
@@ -13,48 +13,11 @@ import CollectionPicker from '../collections/CollectionPicker.jsx';
 import PinToBoards from '../board/PinToBoards.jsx';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
+import NoteText from './NoteText.jsx';
 import styles from '../focus/Notebook.module.css';
 import own from './Notes.module.css';
 
 const SAVE_AFTER_MS = 700;
-
-// A line's text with its links (and, rich, **bold** and `code`) as React parts, never HTML
-function LineText({ text, rich }) {
-    return (rich ? richParts(text) : linkParts(text)).map((part, i) => {
-        if (part.link) return <a key={i} href={part.text} target="_blank" rel="noopener noreferrer">{part.text}</a>;
-        if (part.bold) return <strong key={i}>{part.text}</strong>;
-        if (part.code) return <code key={i} className={own.code}>{part.text}</code>;
-        return <span key={i}>{part.text}</span>;
-    });
-}
-
-// A note's text as it reads: checklist lines can be ticked right here, "# " lines are headings,
-// links can be opened. rich (the notes area): also "## ", bullets, numbered lines, quotes, dividers.
-// Without onToggle (somebody else's note on a board) the checklist is only read.
-export function NoteView({ body, onToggle, rich = false }) {
-    const lines = noteLines(body, rich);
-    return (
-        <div className={styles.view}>
-            {lines.map(line => {
-                const text = <LineText text={line.text} rich={rich} />;
-                switch (line.kind) {
-                    case 'check': return (
-                        <label key={line.index} className={styles.checkLine} data-done={line.done || undefined}>
-                            <input type="checkbox" checked={line.done} disabled={!onToggle} onChange={() => onToggle?.(line.index)} />
-                            <span>{text}</span>
-                        </label>);
-                    case 'heading': return <h4 key={line.index} className={styles.heading}>{text}</h4>;
-                    case 'subheading': return <h5 key={line.index} className={own.subheading}>{text}</h5>;
-                    case 'bullet': return <p key={line.index} className={own.listLine}><span className={own.bullet} aria-hidden="true">•</span><span>{text}</span></p>;
-                    case 'numbered': return <p key={line.index} className={own.listLine}><span className={own.number}>{line.number}.</span><span>{text}</span></p>;
-                    case 'quote': return <blockquote key={line.index} className={own.quote}>{text}</blockquote>;
-                    case 'divider': return <hr key={line.index} className={own.divider} />;
-                    default: return <p key={line.index} className={styles.textLine}>{line.text ? text : ' '}</p>;
-                }
-            })}
-        </div>
-    );
-}
 
 // Tags as chips; a new one is typed and taken with Enter, a comma or a space
 function TagField({ tags, onChange }) {
@@ -88,24 +51,33 @@ function TagField({ tags, onChange }) {
     );
 }
 
-// The open note: title, text (write / read), attachments, saved on its own while typing.
+// The open note: title, text, attachments, saved on its own while typing. The text is written
+// like in any notes app, without visible marks (NoteText → RichNoteEditor), always editable.
 // full (testers, the notes area): also folder, tags, colour, collections, archive, a copy, the
-// note as a Markdown file, more formatting (lists go on with Enter, Ctrl/⌘ B bold), words and
-// reading time; "delete" puts it into the trash then (onTrash). folders: [{ id, name, emoji }].
-export default function NoteEditor({ note, focusTask, onChange, onDelete, onClose, full = false, folders = [], onTrash, onDuplicate }) {
+// note as a Markdown file, words and reading time; "delete" puts it into the trash then
+// (onTrash). folders: [{ id, name, emoji }]. autoFocus: the cursor goes into the text.
+export default function NoteEditor({ note, focusTask, onChange, onDelete, onClose, full = false, folders = [], onTrash, onDuplicate, autoFocus = false }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const [draft, setDraft] = useState(note);
-    const [writing, setWriting] = useState(!note.body.trim());
     const [status, setStatus] = useState('saved');
     const [linkField, setLinkField] = useState(null);
     const [bigImage, setBigImage] = useState(null);
-    const area = useRef(null);
     const fileInput = useRef(null);
     const pending = useRef(null);
     // the draft as it is now, for the saves that run later (timeouts, async picture work)
     const latest = useRef(draft);
     useEffect(() => { latest.current = draft; }, [draft]);
+    // the editor's text since the last save, worked out only when it is saved
+    const bodyFrom = useRef(null);
+    const takeBody = (keep = true) => {
+        if (!bodyFrom.current) return latest.current.body;
+        const body = bodyFrom.current();
+        bodyFrom.current = null;
+        latest.current = { ...latest.current, body };
+        if (keep) setDraft(prev => ({ ...prev, body }));
+        return body;
+    };
 
     // the pictures' data comes with the single note
     useEffect(() => {
@@ -135,74 +107,42 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [note.id, onChange, dispatch]);
 
-    // text and title: saved a moment after the last key; the rest at once
+    // title and text as they are now; a text over the limit isn't sent (the status says so)
+    const textChange = () => {
+        const body = takeBody();
+        if (body.length > NOTE_BODY_MAX) { setStatus('tooLong'); return null; }
+        return { title: latest.current.title, body };
+    };
+    // text and title: saved a moment after the last key; the rest at once (with any text still waiting)
     const edit = (change, now = false) => {
         setDraft(prev => ({ ...prev, ...change }));
+        latest.current = { ...latest.current, ...change };
+        const waiting = pending.current;
         clearTimeout(pending.current);
-        if (now) { pending.current = null; save(change); return; }
+        pending.current = null;
+        if (now) { save({ ...(waiting ? textChange() : null), ...change }); return; }
         setStatus('typing');
-        pending.current = setTimeout(() => { pending.current = null; save({ title: latest.current.title, body: latest.current.body }); }, SAVE_AFTER_MS);
+        pending.current = setTimeout(() => {
+            pending.current = null;
+            const text = textChange();
+            if (text) save(text);
+        }, SAVE_AFTER_MS);
+    };
+    const editBody = (getBody) => {
+        bodyFrom.current = getBody;
+        edit({});
     };
     // what is still waiting is saved when the note is closed
     useEffect(() => () => {
         if (pending.current) {
             clearTimeout(pending.current);
-            updateNote(note.id, { title: latest.current.title, body: latest.current.body }).then(onChange).catch(() => {});
+            const body = takeBody(false);
+            if (body.length <= NOTE_BODY_MAX) updateNote(note.id, { title: latest.current.title, body }).then(onChange).catch(() => {});
         }
     }, [note.id, onChange]);
 
-    // the text with the cursor / selection put back where it belongs afterwards
-    const setBody = (body, start, end = start) => {
-        edit({ body });
-        requestAnimationFrame(() => { area.current?.focus(); area.current?.setSelectionRange(start, end); });
-    };
-
-    // writes text at the start of the line the cursor is in
-    const prefixLine = (prefix) => {
-        const el = area.current;
-        const body = draft.body;
-        const at = el ? el.selectionStart : body.length;
-        const start = body.lastIndexOf('\n', at - 1) + 1;
-        setBody(body.slice(0, start) + prefix + body.slice(start), at + prefix.length);
-    };
-
-    const wrap = (mark) => {
-        const el = area.current;
-        const next = wrapSelection(draft.body, el?.selectionStart ?? draft.body.length, el?.selectionEnd ?? draft.body.length, mark);
-        setBody(next.body, next.start, next.end);
-    };
-
-    const divider = () => {
-        const el = area.current;
-        const body = draft.body;
-        const at = el ? el.selectionEnd : body.length;
-        const end = body.indexOf('\n', at);
-        const cut = end === -1 ? body.length : end;
-        const insert = `${cut > 0 ? '\n' : ''}---\n`;
-        setBody(body.slice(0, cut) + insert + body.slice(cut).replace(/^\n/, ''), cut + insert.length);
-    };
-
-    const onAreaKeyDown = (e) => {
-        if (!full) return;
-        if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey && e.currentTarget.selectionStart === e.currentTarget.selectionEnd) {
-            const next = continueList(draft.body, e.currentTarget.selectionStart);
-            if (next) { e.preventDefault(); setBody(next.body, next.cursor); }
-        }
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') { e.preventDefault(); wrap('**'); }
-    };
-
-    const currentLine = () => {
-        const el = area.current;
-        const body = draft.body;
-        const at = el ? el.selectionStart : 0;
-        const start = body.lastIndexOf('\n', at - 1) + 1;
-        const end = body.indexOf('\n', at);
-        return body.slice(start, end === -1 ? body.length : end).replace(/^\s*(- \[( |x|X)\] |#{1,2} |[-*] |\d{1,3}\. |> )/, '').trim();
-    };
-
     // "Lernen für Klausur morgen 14 Uhr" → a task tomorrow at 14:00
-    const planLine = async () => {
-        const line = currentLine();
+    const planLine = async (line) => {
         if (!line) { dispatch(showToast(t('notePlanEmpty'))); return; }
         const parsed = parseQuickEntry(line);
         try {
@@ -230,14 +170,11 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
         }
     };
 
-    const onPaste = (e) => {
-        const files = [...(e.clipboardData?.files ?? [])].filter(file => file.type.startsWith('image/'));
-        if (files.length) { e.preventDefault(); addImages(files); return; }
-        // a link pasted on its own becomes an attachment too (and stays in the text)
-        const text = e.clipboardData?.getData('text') ?? '';
-        if (isWebUrl(text) && !attachments.some(item => item.url === text.trim()) && attachments.length < NOTE_ATTACHMENTS_MAX) {
-            setTimeout(() => setAttachments([...latest.current.attachments, { kind: 'link', url: text.trim() }]), 0);
-        }
+    // a link pasted on its own becomes an attachment too (and stays in the text)
+    const onPasteLink = (url) => {
+        const now = latest.current.attachments;
+        if (now.some(item => item.url === url) || now.length >= NOTE_ATTACHMENTS_MAX) return;
+        setTimeout(() => setAttachments([...latest.current.attachments, { kind: 'link', url }]), 0);
     };
 
     const addLink = (e) => {
@@ -250,7 +187,7 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
 
     const checks = checklistCount(draft.body);
     const words = full ? wordCount(draft.body) : 0;
-    const statusText = { saved: t('noteSaved'), saving: t('noteSaving'), typing: '', error: t('noteSaveFailed') }[status];
+    const statusText = { saved: t('noteSaved'), saving: t('noteSaving'), typing: '', error: t('noteSaveFailed'), tooLong: t('noteTooLong') }[status];
 
     return (
         <article className={styles.editor} aria-label={draft.title || t('noteUntitled')} data-task-color={full && draft.color ? draft.color : undefined}>
@@ -272,10 +209,6 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
             </div>
 
             <div className={styles.metaRow}>
-                <div className={styles.segmentedSmall} role="group" aria-label={t('noteMode')}>
-                    <button type="button" aria-pressed={!writing} onClick={() => setWriting(false)}>{t('noteRead')}</button>
-                    <button type="button" aria-pressed={writing} onClick={() => setWriting(true)}>{t('noteWrite')}</button>
-                </div>
                 {checks.total > 0 && <span className={styles.metaText}>{fill(t('noteChecks'), checks)}</span>}
                 {full && words > 0 && <span className={styles.metaText}>{fill(t(words === 1 ? 'noteWordsOne' : 'noteWords'), { n: words, min: readingMinutes(words) })}</span>}
                 {draft.archived && <span className={own.badge}><Icon name="archive" size={12} /> {t('noteArchived')}</span>}
@@ -303,44 +236,14 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
                     <div className={own.colorRow}><TaskColorPicker value={draft.color ?? null} onChange={color => edit({ color }, true)} hideLabel /></div>
                 </div>}
 
-            {writing
-                ? <>
-                    <div className={styles.toolbar} role="toolbar" aria-label={t('noteTools')}>
-                        <button type="button" onClick={() => prefixLine('- [ ] ')} title={t('noteToolCheck')}><Icon name="checklist" size={16} /><span>{t('noteToolCheck')}</span></button>
-                        <button type="button" onClick={() => prefixLine('# ')} title={t('noteToolHeading')}><span className={styles.hMark}>H</span><span>{t('noteToolHeading')}</span></button>
-                        {full && <>
-                            <button type="button" onClick={() => prefixLine('## ')} title={t('noteToolSubheading')}><span className={styles.hMark}>H2</span></button>
-                            <button type="button" onClick={() => prefixLine('- ')} title={t('noteToolBullet')}><Icon name="list" size={16} /><span>{t('noteToolBullet')}</span></button>
-                            <button type="button" onClick={() => prefixLine('1. ')} title={t('noteToolNumbered')}><span className={styles.hMark}>1.</span></button>
-                            <button type="button" onClick={() => prefixLine('> ')} title={t('noteToolQuote')}><span className={styles.hMark}>„</span></button>
-                            <button type="button" onClick={() => wrap('**')} title={`${t('noteToolBold')} (Ctrl/⌘ B)`}><strong className={styles.hMark}>B</strong></button>
-                            <button type="button" onClick={() => wrap('`')} title={t('noteToolCode')}><span className={`${styles.hMark} ${own.mono}`}>{'</>'}</span></button>
-                            <button type="button" onClick={divider} title={t('noteToolDivider')}><span className={styles.hMark}>—</span></button>
-                        </>}
-                        <button type="button" onClick={() => setLinkField({ url: '', title: '' })} title={t('noteToolLink')}><Icon name="link" size={16} /><span>{t('noteToolLink')}</span></button>
-                        <button type="button" onClick={() => fileInput.current?.click()} title={t('noteToolImage')}><Icon name="image" size={16} /><span>{t('noteToolImage')}</span></button>
-                        <button type="button" onClick={planLine} title={t('noteToolPlanHint')}><Icon name="calendar" size={16} /><span>{t('noteToolPlan')}</span></button>
-                        <input ref={fileInput} type="file" accept="image/*" multiple hidden onChange={e => { addImages([...e.target.files]); e.target.value = ''; }} />
-                    </div>
-                    {/* writing: how it reads stays in view, beside the text when there is room, else under it */}
-                    <div className={own.writeSplit}>
-                        <div className={own.writeSplitInner}>
-                            <textarea ref={area} className={styles.area} value={draft.body} maxLength={20000} onPaste={onPaste} onKeyDown={onAreaKeyDown}
-                                placeholder={t(full ? 'notePlaceholderRich' : 'notePlaceholder')} aria-label={t('noteText')} onChange={e => edit({ body: e.target.value })} />
-                            <section className={own.livePreview} aria-label={t('notePreviewLabel')}>
-                                <p className={own.livePreviewLabel} aria-hidden="true">{t('notePreviewLabel')}</p>
-                                {draft.body.trim()
-                                    ? <NoteView body={draft.body} rich={full} onToggle={(index) => edit({ body: toggleCheck(draft.body, index) }, true)} />
-                                    : <p className={styles.emptyText}>{t('notePreviewEmptyWrite')}</p>}
-                            </section>
-                        </div>
-                    </div>
-                </>
-                : <div className={styles.readArea} onDoubleClick={() => setWriting(true)}>
-                    {draft.body.trim()
-                        ? <NoteView body={draft.body} rich={full} onToggle={(index) => edit({ body: toggleCheck(draft.body, index) }, true)} />
-                        : <p className={styles.emptyText}>{t('noteEmptyRead')}</p>}
-                </div>}
+            <NoteText body={note.body} onChange={editBody} label={t('noteText')} placeholder={t('notePlaceholder')} autoFocus={autoFocus}
+                onPasteFiles={addImages} onPasteLink={onPasteLink}
+                tools={({ currentLine }) => <>
+                    <button type="button" onClick={() => setLinkField({ url: '', title: '' })} title={t('noteToolLink')}><Icon name="link" size={16} /><span>{t('noteToolLink')}</span></button>
+                    <button type="button" onClick={() => fileInput.current?.click()} title={t('noteToolImage')}><Icon name="image" size={16} /><span>{t('noteToolImage')}</span></button>
+                    <button type="button" onClick={() => planLine(currentLine())} title={t('noteToolPlanHint')}><Icon name="calendar" size={16} /><span>{t('noteToolPlan')}</span></button>
+                    <input ref={fileInput} type="file" accept="image/*" multiple hidden onChange={e => { addImages([...e.target.files]); e.target.value = ''; }} />
+                </>} />
 
             {linkField &&
                 <form className={styles.linkForm} onSubmit={addLink}>

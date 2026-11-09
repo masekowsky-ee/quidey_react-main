@@ -114,41 +114,6 @@ export function wordCount(body) {
 // about 200 words a minute, at least one once there is something to read
 export const readingMinutes = (words) => (words === 0 ? 0 : Math.max(1, Math.round(words / 200)));
 
-// Enter at the end of a list line goes on with the list: "- [ ] " (unticked), "- ", "* ",
-// "1. " (counted up), "> ". On a line that is only the mark the list ends (the mark goes).
-// → { body, cursor } or null when Enter should do what it always does.
-const LIST_MARK = /^(\s*)(- \[(?: |x|X)\] |[-*] |(\d{1,3})\. |> )/;
-export function continueList(body, cursor) {
-    const start = body.lastIndexOf('\n', cursor - 1) + 1;
-    const endAt = body.indexOf('\n', cursor);
-    const end = endAt === -1 ? body.length : endAt;
-    const line = body.slice(start, end);
-    const match = line.match(LIST_MARK);
-    if (!match || cursor < start + match[0].length) return null;
-    if (line.slice(match[0].length).trim() === '' && cursor === end) {
-        return { body: body.slice(0, start) + body.slice(end), cursor: start };
-    }
-    const [, indent, mark, number] = match;
-    const next = indent + (number ? `${Number(number) + 1}. ` : mark.startsWith('- [') ? '- [ ] ' : mark);
-    const insert = `\n${next}`;
-    return { body: body.slice(0, cursor) + insert + body.slice(cursor), cursor: cursor + insert.length };
-}
-
-// **bold** / `code` around the selection (or the mark alone, with the cursor between)
-// → { body, start, end } (the selection afterwards)
-export function wrapSelection(body, start, end, mark) {
-    const inner = body.slice(start, end);
-    if (inner.startsWith(mark) && inner.endsWith(mark) && inner.length >= mark.length * 2) {
-        const plain = inner.slice(mark.length, inner.length - mark.length);
-        return { body: body.slice(0, start) + plain + body.slice(end), start, end: start + plain.length };
-    }
-    return {
-        body: body.slice(0, start) + mark + inner + mark + body.slice(end),
-        start: start + mark.length,
-        end: end + mark.length,
-    };
-}
-
 // ---------- templates for new notes ----------
 // texts in notesTexts (noteTpl_<key>_title, noteTpl_<key>_body); {date} is today
 export const NOTE_TEMPLATES = ['lecture', 'summary', 'exam', 'group', 'week'];

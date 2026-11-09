@@ -73,7 +73,10 @@ const notesTexts = {
         noteToolBold: 'Fett',
         noteToolCode: 'Code',
         noteToolDivider: 'Trennlinie',
-        notePlaceholderRich: 'Schreib los … „- [ ] “ Checkliste, „- “ Liste, „1. “ nummeriert, „# “ / „## “ Überschriften, „> “ Zitat, **fett**. Listen gehen mit Enter weiter.',
+        noteToolMore: 'Mehr Formate',
+        noteCheckLabel: 'Erledigt: {text}',
+        noteCheckEmpty: 'leerer Punkt',
+        noteTooLong: 'Zu lang zum Speichern (höchstens 20.000 Zeichen)',
 
         // templates: name in the menu, the new note's title and text ({date} = today)
         noteTpl_lecture_name: 'Vorlesung',
@@ -227,7 +230,10 @@ const notesTexts = {
         noteToolBold: 'Bold',
         noteToolCode: 'Code',
         noteToolDivider: 'Divider',
-        notePlaceholderRich: 'Start writing … "- [ ] " checklist, "- " list, "1. " numbered, "# " / "## " headings, "> " quote, **bold**. Lists go on with Enter.',
+        noteToolMore: 'More formats',
+        noteCheckLabel: 'Done: {text}',
+        noteCheckEmpty: 'empty item',
+        noteTooLong: 'Too long to save (20,000 characters at most)',
 
         noteTpl_lecture_name: 'Lecture',
         noteTpl_lecture_title: 'Lecture of {date}',

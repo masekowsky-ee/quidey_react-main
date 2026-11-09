@@ -272,11 +272,6 @@
     color: var(--text-h);
 }
 
-.hMark {
-    font-weight: 700;
-    font-size: 0.85rem;
-    line-height: 1;
-}
 
 .area {
     width: 100%;

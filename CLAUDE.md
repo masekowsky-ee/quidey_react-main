@@ -282,8 +282,17 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   `/api/notebook`; the server reads its bigger bodies only after sign-in, checks pictures by their
   magic bytes and keeps all pictures of an account under 25 MB, `NOTEBOOK_STORAGE_FULL`): notes with `- [ ]` checklists, `# ` headings, link and picture attachments (pictures shrunk
   in the browser, at most 4 per note), "plan as task" for the cursor's line, autosave. A task's notes (Home's focus sheet, the focus column) are these notes about the task (`TaskNoteRow`: one-line ones edited in place, fuller ones open the notebook; `refreshTaskNotes` on mount). The editor is
-  `components/notes/NoteEditor.jsx` (shared with `/notes`; `full` = testers' extras). Writing keeps a live preview of
-  how it reads beside the text (under it when narrow, container query in Notes.module.css); every list row shows a
+  `components/notes/NoteEditor.jsx` (shared with `/notes`; `full` = testers' extras). **Writing has no visible Markdown,
+  for everybody**: the text is a TipTap editor (`notes/RichNoteEditor.jsx`, its own lazy chunk via `notes/NoteText.jsx`:
+  the note shows read-only while it loads, a plain textarea if the chunk can't load), always editable. The stored body
+  stays the old line format (`features/notes/noteDoc.js`: `bodyToDoc` / `docToBody`, round trips keep a note as it was;
+  only what the lines hold is offered: `# `/`## `, checklists, lists nested by 2 spaces, `1. `, `> `, `---`, bold, code,
+  links), so boards, previews, export, server and older apps read it as before. Toolbar: Checkliste, Überschrift, Liste,
+  Fett, "Mehr Formate" (Zwischenüberschrift, nummeriert, Zitat, Code, Trennlinie), then Link / Bild / Als Aufgabe
+  planen; typing `# `, `- `, `[ ] `, `1. `, `> ` converts the line, Ctrl/⌘ B bold. The body is worked out only on save
+  (700 ms after the last change, `NOTE_BODY_MAX` 20 000, longer is not sent: "Zu lang zum Speichern"); opening a note
+  never rewrites it. CSP: `injectCSS: false`, TipTap's base CSS lives in RichNoteEditor.module.css. Others' notes on
+  boards are shown by `notes/NoteView.jsx`. Every list row shows a
   preview line (`notePreview`, `notes/NotePreview.jsx`: the text after the title line, else "only attachments (n)" /
   "nothing written yet"). "An Board heften" (`board/PinToBoards.jsx`) pins it to a family's / open session's board.
 - `/notes` — **Notizen**, testers only (`components/notes/NotesPage.jsx`, `features/notes/notes.js`): the
@@ -291,8 +300,7 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   `?note=<id>`), search (words, `#tag`), sort + list/tiles (localStorage `notesSort`, `notesLayout`),
   templates (`NOTE_TEMPLATES`, texts `noteTpl_*`), folders (`/api/tester/note-folders`), tags, colour,
   archive, trash (30 days, `GET /api/notebook?trash=1`, `DELETE /api/tester/notebook/trash`), duplicate,
-  Markdown export, rich text (`noteLines(body, rich)`: `## `, lists that go on with Enter, `1. `, `> `,
-  `---`, `**bold**`, `` `code` ``). The server takes folderId/tags/color/archived/trashed only from testers
+  Markdown export. The server takes folderId/tags/color/archived/trashed only from testers
   (`TESTER_REQUIRED`); `GET /api/notebook` leaves the trash out for everybody. Migration 036.
 - `/collections`, `/collections/:id` — **Sammlungen**, testers only (`components/collections/`, slice
   `collections` in `features/collections/collections.js`, API `/api/tester/collections`): tasks, events and

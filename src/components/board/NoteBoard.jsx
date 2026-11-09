@@ -11,7 +11,7 @@ import { useNow } from '../../features/together/work';
 import { showToast } from '../../features/toast/toast';
 import { displayName, fill, formatRelative } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
-import { NoteView } from '../notes/NoteEditor.jsx';
+import { NoteView } from '../notes/NoteView.jsx';
 import NotePreview from '../notes/NotePreview.jsx';
 import Avatar from '../together/Avatar';
 import SheetGrabber from '../SheetGrabber.jsx';
@@ -73,7 +73,7 @@ function PinnedNote({ kind, boardId, pin, onClose, onRemove }) {
                 </p>
                 <div className={styles.readBody} data-task-color={note.color ?? undefined}>
                     {note.body.trim()
-                        ? <NoteView body={note.body} rich />
+                        ? <NoteView body={note.body} />
                         : <p className={styles.muted}>{t('notePreviewEmpty')}</p>}
                 </div>
                 {links.length > 0 &&
