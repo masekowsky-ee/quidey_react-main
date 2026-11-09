@@ -4,8 +4,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.9rem;
-    padding: 0 1.25rem 1.25rem;
-    overflow-y: auto;
+    /* the sheet scrolls as a whole; room under the buttons so they're never cut off */
+    padding: 0.25rem 0.25rem 1rem;
 }
 
 .tabs {
