@@ -26,6 +26,7 @@ import TaskForm from './TaskForm.jsx';
 import { FormSheet } from './QuickAdd.jsx';
 import Icon from './calendar/icons.jsx';
 import { useMediaQuery } from '../features/layout/breakpoints';
+import { useUntisLessons, useShowLessons, setShowLessons, useUntisStatus } from '../features/untis/untis';
 
 const VIEW_LABELS = { month: 'calendarViewMonth', week: 'calendarViewWeek', agenda: 'calendarViewAgenda' };
 const VIEW_KEYS = { m: 'month', w: 'week', a: 'agenda' };
@@ -78,13 +79,18 @@ export default function Calendar() {
     const sharedEvents = source.kind === 'session' || source.kind === 'family';
     const remindsAll = source.kind === 'family';
     const allDayTime = useSelector(selectAllDayTime);
-    const tasks = isShared ? shared.tasks : ownTasks;
+    const baseTasks = isShared ? shared.tasks : ownTasks;
     // my focus sessions belong to my own calendar only
     const sessions = isShared ? null : ownSessions;
     const [storedView] = useState(readStoredCalendarView);
     const view = CALENDAR_VIEWS.includes(params.get('view')) ? params.get('view') : storedView;
     const today = toDateOnly(new Date());
     const focusedDate = fromKey(params.get('date')) ?? today;
+    // my Untis timetable beside my own entries (read-only, features/untis/untis.js): a month around the shown day
+    const untisConnected = useUntisStatus()?.connected;
+    const showLessons = useShowLessons();
+    const lessons = useUntisLessons(!isShared && showLessons, dateKey(addDays(focusedDate, -31)), dateKey(addDays(focusedDate, 31)));
+    const tasks = useMemo(() => (lessons.length ? [...baseTasks, ...lessons] : baseTasks), [baseTasks, lessons]);
     const openDay = fromKey(params.get('day'));
     // the task to open in the day panel; a link can name one
     // with ?task=<id>, e.g. "open in calendar" from the task list
@@ -122,6 +128,9 @@ export default function Calendar() {
 
     const shown = useMemo(() => filterTasks(tasks, { groupId, showDone, query, inGroup }), [tasks, groupId, showDone, query, inGroup]);
     const tasksByDay = useMemo(() => groupByDay(shown), [shown]);
+    // the agenda lists what I plan: not the timetable's lessons
+    const agendaTasks = useMemo(() => shown.filter(task => !task.lesson), [shown]);
+    const agendaByDay = useMemo(() => groupByDay(agendaTasks), [agendaTasks]);
     // the month and week grids also show the coming repeats of repeating tasks (a year ahead of
     // the shown day), as previews; the agenda and the day panel list only real tasks
     const gridTasksByDay = useMemo(
@@ -286,7 +295,8 @@ export default function Calendar() {
     const openGroup = (group) => { if (!group.shared && group.id) setGroupFilter(group.id); };
 
     const exportIcs = () => {
-        const withDay = shown.filter(task => task.due);
+        // the timetable isn't mine to export
+        const withDay = shown.filter(task => task.due && !task.lesson);
         if (withDay.length === 0) { toast(t('nothingToExport'), 'info'); return; }
         const groupName = (task) => groupsOf(task).map(group => group.name).join(', ');
         downloadFile(isShared ? `quidey-${source.kind}-${source.id}.ics` : 'quidey-tasks.ics', toIcs(withDay, { groupName, allDayTime }), 'text/calendar');
@@ -368,6 +378,12 @@ export default function Calendar() {
                 <span className={styles.doneBox} aria-hidden="true" />
                 {t('showDoneTasks')}
             </button>
+            {untisConnected && !isShared &&
+                <button type="button" className={`${styles.doneToggle} ${showLessons ? styles.doneToggleOn : ''}`}
+                    aria-pressed={showLessons} onClick={() => setShowLessons(!showLessons)}>
+                    <span className={styles.doneBox} aria-hidden="true" />
+                    {t('untisShowLessons')}
+                </button>}
             <div className={styles.filterDivider} role="separator" />
             <button type="button" className={styles.exportBtn} onClick={() => { setFiltersOpen(false); exportIcs(); }} title={t('exportIcsHint')}>
                 <Icon name="download" size={18} />
@@ -497,7 +513,7 @@ export default function Calendar() {
             {view === 'month' && <MonthView {...viewProps} tasksByDay={gridTasksByDay} drag={drag} startDrag={startDrag} onOpenWeek={(date) => setView('week', date)} />}
             {view === 'week' && <WeekView {...viewProps} tasksByDay={gridTasksByDay} drag={drag} startDrag={startDrag} />}
             {view === 'agenda' &&
-                <AgendaView {...viewProps} tasks={shown} onToggleDone={toggleDone} onSchedule={moveTask}
+                <AgendaView {...viewProps} tasksByDay={agendaByDay} tasks={agendaTasks} onToggleDone={toggleDone} onSchedule={moveTask}
                     onOpenGroup={openGroup} filtersActive={filtersActive} onClearFilters={clearFilters} />}
 
             {view !== 'agenda' &&

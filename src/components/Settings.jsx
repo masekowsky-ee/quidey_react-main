@@ -19,6 +19,7 @@ import EventTypeSettings from './EventTypeSettings.jsx';
 import { Link, useLocation } from 'react-router-dom';
 import { useHashTarget } from '../features/layout/hashTarget';
 import { SECTION_AREAS } from '../features/search/places';
+import UntisSettings from './untis/UntisSettings.jsx';
 import { isNativeApp } from '../features/native/native';
 import { APK_URL, apkOffer, formatSize } from '../features/native/androidApk';
 import { setAnalyticsConsent, useAnalytics } from '../features/native/analytics';
@@ -439,6 +440,10 @@ export default function Settings(){
 
                     <SettingSection id="event-types" title={t('eventTypes')} description={t('eventTypesHint')}>
                         <EventTypeSettings embedded />
+                    </SettingSection>
+
+                    <SettingSection id="untis" title={t('untisSettingsTitle')} description={t('untisSettingsHint')}>
+                        <UntisSettings />
                     </SettingSection>
 
                     {isTester &&

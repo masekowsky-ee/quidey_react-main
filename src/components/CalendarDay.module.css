@@ -1029,6 +1029,26 @@
     outline-offset: -1px;
 }
 
+/* a lesson of my Untis timetable: a flat grey block, only to read */
+.entryLesson,
+.entryLesson:hover{
+    background: color-mix(in oklab, var(--text-muted) 12%, var(--surface));
+    border-color: transparent;
+    cursor: default;
+}
+
+.entryCancelled .entryName{
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.lessonState{
+    margin-left: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--danger);
+}
+
 /* the entry being dragged stays as a trace where it was */
 .entryDragging{
     opacity: 0.35;

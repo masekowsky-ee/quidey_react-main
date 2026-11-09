@@ -465,6 +465,20 @@ function Privacy() {
                 „Scannen“. Für die Verarbeitung durch Anthropic gilt dasselbe wie bei den KI-Schätzungen oben.
             </p>
             <p>
+                <strong>Stundenplan aus WebUntis:</strong> Verbindest du unter Einstellungen → Planen deinen Stundenplan,
+                ruft der Quidey-Server ihn bei WebUntis ab, dem Dienst, den deine Schule bei der Untis GmbH nutzt. Mit
+                Untis-Login speichert Quidey dafür den Namen und Server deiner Schule, deinen Untis-Benutzernamen und dein
+                Untis-Passwort, das Passwort nur verschlüsselt (AES-256) und nur, um den Stundenplan abzurufen; mit dem
+                iCal-Link speichert Quidey stattdessen diesen Link verschlüsselt. Gespeichert werden außerdem die Stunden
+                der letzten Woche und der nächsten drei Wochen: Tag, Uhrzeit, Fach, Raum, Klasse, ob sie entfällt oder
+                geändert ist, und der Hinweistext dazu; Namen von Lehrkräften speichert Quidey nicht. Abgerufen wird,
+                wenn du den Kalender öffnest und der letzte Abruf älter als 15 Minuten ist. Die Daten siehst nur du.
+                „Trennen“ löscht Zugangsdaten und alle gespeicherten Stunden sofort, ebenso das Löschen deines Kontos.
+                Rechtsgrundlage ist deine Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO, die du mit dem Verbinden erteilst
+                und mit „Trennen“ jederzeit widerrufen kannst. Bitte verbinde nur dein eigenes Untis-Konto und nur, wenn
+                deine Schule das erlaubt.
+            </p>
+            <p>
                 <strong>Spracheingabe:</strong> Tippst du auf das Mikrofon (bei neuen Aufgaben, Terminen und Erinnerungen
                 und in Notizen), wandelt die Spracherkennung deines Browsers bzw. Handys das Gesprochene in Text um:
                 im Browser die Web-Speech-Funktion des Browsers (in Chrome und Edge über Dienste von Google bzw.
@@ -704,7 +718,7 @@ function Privacy() {
                 <li>dein Anmelde-Token (7 Tage gültig, wird beim Abmelden gelöscht). Meldest du auf demselben Gerät
                     mehrere Konten an, um zwischen ihnen zu wechseln, liegen für jedes davon Token, Benutzer- und
                     Anzeigename (höchstens fünf Konten); beim Abmelden eines Kontos wird sein Eintrag gelöscht;</li>
-                <li>deine Einstellungen: Sprache (bis du eine wählst, nimmt Quidey die deines Geräts), Design, Farbpalette, Akzentfarbe, Animationen, Töne, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer, Pomodoro oder Stoppuhr und die Pomodoro-Längen, dein Tagesziel für die Fokuszeit, im Fokusraum gewähltes Fokus-Geräusch, Lautstärke und Lernmethode, ob der Ruhemodus an ist, Kalenderansicht, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
+                <li>deine Einstellungen: Sprache (bis du eine wählst, nimmt Quidey die deines Geräts), Design, Farbpalette, Akzentfarbe, Animationen, Töne, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer, Pomodoro oder Stoppuhr und die Pomodoro-Längen, dein Tagesziel für die Fokuszeit, im Fokusraum gewähltes Fokus-Geräusch, Lautstärke und Lernmethode, ob der Ruhemodus an ist, Kalenderansicht, ob dein Stundenplan im Kalender erscheint, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
                 <li>bei einem neuen Konto, wie viele Dinge du schon erledigt oder angelegt hast und ob Quidey dich schon
                     gefragt hat, ob du es installieren möchtest und ob es dir gefällt (nur eine Zahl und zwei Merker,
                     keine Inhalte);</li>

@@ -24,7 +24,7 @@ export function useTimelineDrag({ gridRef, scrollerRef, onMove }) {
     useEffect(() => () => endRef.current?.(), []);
 
     const startDrag = useCallback((e, task) => {
-        if (!task || task.projected || task.shared) return;
+        if (!task || task.projected || task.shared || task.lesson) return;
         // where in the block it was grabbed, so it doesn't jump under the finger
         const block = e.currentTarget.closest?.('[data-block]');
         const grabOffset = block ? e.clientY - block.getBoundingClientRect().top : 12;

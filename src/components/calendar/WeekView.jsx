@@ -49,9 +49,9 @@ export default function WeekView({ focusedDate, today, tasksByDay, focusByDay, d
                                 ? <ul className={styles.weekList}>
                                     {dayTasks.map(task => (
                                         <li key={task.id}>
-                                            <TaskChip task={task} today={today} startDrag={task.projected ? undefined : startDrag} showDescription
+                                            <TaskChip task={task} today={today} startDrag={task.projected || task.lesson ? undefined : startDrag} showDescription
                                                 dragging={drag?.task.id === task.id}
-                                                onOpen={() => onOpenDate(date, task.projected ? null : task.id)} />
+                                                onOpen={() => onOpenDate(date, task.projected || task.lesson ? null : task.id)} />
                                         </li>
                                     ))}
                                 </ul>

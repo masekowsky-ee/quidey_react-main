@@ -83,9 +83,9 @@ export default function MonthView({ focusedDate, today, tasksByDay, focusByDay, 
                                             <ul className={styles.chips}>
                                                 {dayTasks.slice(0, MAX_VISIBLE_TASKS).map(task => (
                                                     <li key={task.id}>
-                                                        <TaskChip task={task} today={today} startDrag={task.projected ? undefined : startDrag}
+                                                        <TaskChip task={task} today={today} startDrag={task.projected || task.lesson ? undefined : startDrag}
                                                             dragging={drag?.task.id === task.id}
-                                                            onOpen={() => onOpenDate(date, task.projected || coarsePointer() ? null : task.id)} />
+                                                            onOpen={() => onOpenDate(date, task.projected || task.lesson || coarsePointer() ? null : task.id)} />
                                                     </li>
                                                 ))}
                                                 {dayTasks.length > MAX_VISIBLE_TASKS &&

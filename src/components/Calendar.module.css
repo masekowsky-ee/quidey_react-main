@@ -1235,6 +1235,19 @@ button.agendaName:hover{
     background: transparent;
 }
 
+/* a lesson of my Untis timetable: quiet and flat (it can't be moved), a cancelled one struck through */
+.chipLesson{
+    background: color-mix(in oklab, var(--text-muted) 10%, transparent);
+    border-color: transparent;
+    color: var(--text);
+    cursor: default;
+}
+
+.chipCancelled{
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
 /* ---------- Which calendar: mine, a shared session's or a family's ----------
    A pill like "Filters" beside it: an icon for whose it is, the name, a chevron. The select itself
    spans the pill (the phone's own picker opens), the icons lie over it. */

@@ -775,6 +775,19 @@ false without `ANTHROPIC_API_KEY`: the app hides the buttons). Frontend `feature
   out; "Übernehmen" makes them through the usual routes (`createNote`, `addTask`, Lernen's `saveSubject` + `createGoal`
   with `estimateSource: 'ai'`). `features/ai/scan.js` (`filesToSource`, `scanMaterial`). Privacy: "Lernmaterial
   scannen" in § 5.
+- Untis timetable (no allowance; backend `untis.js` router at `/api/untis`, `utils/untis.js`, migration 047
+  `untis_accounts` / `untis_lessons`): connect in Settings → Planen → "Stundenplan (Untis)"
+  (`components/untis/UntisSettings.jsx`) with a WebUntis login (school search via `mobile.webuntis.com/ms/schoolquery2`,
+  or server + school by hand; JSON-RPC `authenticate` / `getTimetable` / `logout`, the password AES-256-GCM encrypted
+  with `UNTIS_SECRET`; wrong details → 400 `UNTIS_LOGIN_FAILED`, nothing stored) or the timetable's iCal link (also
+  encrypted). Only `*.webuntis.com` over https is ever fetched. Lessons of the last week and the next three (double
+  lessons merged; status normal / cancelled / irregular; no teacher names) are fetched again when the calendar asks
+  (`GET /api/untis/lessons?from&to`, ≤ 62 days) and the last fetch is older than 15 min; "Trennen" deletes login and
+  lessons. Without `UNTIS_SECRET` `available` is false. Frontend `features/untis/untis.js` (`useUntisStatus`,
+  `useUntisLessons`, `lessonsToEntries` → entries with a `lesson` field, `useShowLessons`, localStorage `untisShow`):
+  my own calendar shows them read-only (no drag, no editor; MonthView / WeekView / DayTimeline / useTimelineDrag check
+  `task.lesson`), a filter toggle "Stundenplan zeigen", not in the agenda or the .ics export. Tests: a local fake
+  WebUntis (`scripts/test/fakeUntis.mjs`, `UNTIS_TEST_BASE`). Privacy: "Stundenplan aus WebUntis" in § 5.
 - Voice input (no allowance needed, not AI): `features/voice/voice.js` (`voiceSupport()` 'web' | 'native' | null,
   `startDictation`, `speechLang`), `components/voice/MicButton.jsx` (hidden where unsupported, e.g. Firefox) beside the
   new-entry name (what is said becomes the line, read like typing) and `DictateButton.jsx` in the notes editor's tools

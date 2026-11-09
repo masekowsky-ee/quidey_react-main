@@ -623,3 +623,40 @@ describe('week strip on the home page', () => {
         expect(screen.queryByRole('link', { name: /^Calendar/ })).not.toBeInTheDocument()
     })
 })
+
+describe('the Untis timetable in my calendar', () => {
+    const LESSONS = [
+        { id: 5, day: '2026-10-19', start: '08:00', end: '09:35', subject: 'M', subjectLong: 'Mathematik', room: 'R12', className: '10b', status: 'normal', info: '' },
+        { id: 6, day: '2026-10-19', start: '09:55', end: '10:40', subject: 'E', subjectLong: 'Englisch', room: 'R3', className: '10b', status: 'cancelled', info: 'Entfall' },
+    ]
+    beforeEach(async () => {
+        const { rememberUntisStatus } = await import('../features/untis/untis')
+        rememberUntisStatus(null)
+        apiFetch.mockImplementation(async (url) => {
+            if (url === '/api/untis') return { available: true, connected: true, mode: 'login', schoolLabel: 'Gym', username: 'lena' }
+            if (url.startsWith('/api/untis/lessons')) return { lessons: LESSONS, lastSyncAt: null }
+            return []
+        })
+    })
+
+    it('shows the lessons beside my entries, read-only, a cancelled one marked', async () => {
+        await act(async () => { setup('/calendar?date=2026-10-19&day=2026-10-19') })
+        await act(async () => {})
+        const lesson = await screen.findByLabelText('Timetable: Mathematik')
+        // no button to open an editor, no way to drag it
+        expect(lesson.tagName).toBe('SPAN')
+        expect(screen.getByLabelText('Timetable: Englisch')).toHaveTextContent('Cancelled')
+        expect(apiFetch.mock.calls.some(([url]) => /^\/api\/untis\/lessons\?from=2026-09-18&to=2026-11-19$/.test(url))).toBe(true)
+    })
+
+    it('can be hidden in the filters, and stays out of the agenda and the export', async () => {
+        await act(async () => { setup('/calendar?date=2026-10-19&view=agenda') })
+        await act(async () => {})
+        expect(screen.queryByText('Mathematik')).toBeNull()
+        fireEvent.click(screen.getByRole('button', { name: /Filters/ }))
+        const toggle = screen.getByRole('button', { name: 'Show timetable' })
+        expect(toggle).toHaveAttribute('aria-pressed', 'true')
+        fireEvent.click(toggle)
+        expect(localStorage.getItem('untisShow')).toBe('off')
+    })
+})

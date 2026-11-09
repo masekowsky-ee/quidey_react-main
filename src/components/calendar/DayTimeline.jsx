@@ -96,7 +96,7 @@ export default function DayTimeline({
     }, [dayKey]);
 
     const onEntryKey = (e, task) => {
-        if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') || task.projected) return;
+        if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') || task.projected || task.lesson) return;
         e.preventDefault();
         e.stopPropagation();
         onShiftTime(task, e.key === 'ArrowUp' ? -15 : 15);
@@ -119,6 +119,8 @@ export default function DayTimeline({
             event ? styles.entryEvent : PRIO_CLASS[prioLevel(task.prio)],
             task.done && styles.entryDone,
             task.projected && styles.entryPreview,
+            task.lesson && styles.entryLesson,
+            task.lesson?.status === 'cancelled' && styles.entryCancelled,
             isOverdue(task, today) && styles.entryOverdue,
             drag?.task.id === task.id && styles.entryDragging,
         ].filter(Boolean).join(' ');
@@ -138,15 +140,23 @@ export default function DayTimeline({
                             {task.projected && <Icon name="repeat" size={12} />}
                             {taskTimeText(task)}
                         </span>}
-                    <button type="button" className={styles.entryOpen} data-entry-open=""
-                        aria-label={task.projected ? `${t('repeatPreview')}: ${task.name}` : `${t('editTask')}: ${task.name}`}
-                        aria-describedby={task.projected ? undefined : hintId}
-                        onClick={() => onOpen(task)} onKeyDown={(e) => onEntryKey(e, task)}>
-                        {!timed && task.projected && <Icon name="repeat" size={12} />}
-                        <span className={styles.entryName}>{task.name}</span>
-                    </button>
+                    {task.lesson
+                        // a lesson of my timetable: only to read (Untis is where it changes)
+                        ? <span className={styles.entryOpen} aria-label={fill(t('untisLessonLabel'), { name: task.name })}>
+                            <span className={styles.entryName}>{task.name}</span>
+                            {task.lesson.status !== 'normal' &&
+                                <span className={styles.lessonState}>{t(task.lesson.status === 'cancelled' ? 'untisCancelled' : 'untisChanged')}</span>}
+                        </span>
+                        : <button type="button" className={styles.entryOpen} data-entry-open=""
+                            aria-label={task.projected ? `${t('repeatPreview')}: ${task.name}` : `${t('editTask')}: ${task.name}`}
+                            aria-describedby={task.projected ? undefined : hintId}
+                            onClick={() => onOpen(task)} onKeyDown={(e) => onEntryKey(e, task)}>
+                            {!timed && task.projected && <Icon name="repeat" size={12} />}
+                            <span className={styles.entryName}>{task.name}</span>
+                        </button>}
                     {!short && <TaskMeta task={task} showTime={false} />}
-                    {!short && personal && <TaskLabels task={task} onOpenGroup={onOpenGroup} />}
+                    {!short && personal && !task.lesson && <TaskLabels task={task} onOpenGroup={onOpenGroup} />}
+                    {!short && task.lesson?.info && <span className={styles.entryMeta}>{task.lesson.info}</span>}
                     {/* in a shared calendar who added it matters, on a short block too */}
                     {byWhom && <span className={styles.entryMeta}>{byWhom}</span>}
                 </div>

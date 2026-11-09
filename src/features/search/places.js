@@ -13,6 +13,7 @@ const SETTINGS = [
     ['start', 'sharedTasksSetting', 'plan'],
     ['timer', 'defaultSessionLength', 'plan'],
     ['event-types', 'eventTypes', 'plan'],
+    ['untis', 'untisSettingsTitle', 'plan'],
     ['notifications', 'pushTitle', 'app'],
     ['notifications', 'allDayReminderTime', 'app'],
     ['install', 'installApp', 'app'],

@@ -24,6 +24,9 @@ export default function TaskChip({ task, today, onOpen, startDrag, dragging, sho
         isOverdue(task, today) && styles.chipOverdue,
         dragging && styles.chipDragging,
         task.projected && styles.chipProjected,
+        // a lesson from the Untis timetable: quiet, a cancelled one struck through
+        task.lesson && styles.chipLesson,
+        task.lesson?.status === 'cancelled' && styles.chipCancelled,
     ].filter(Boolean).join(' ');
     // the month view only has room for the start
     const time = showDescription ? taskTimeText(task) : (task.due_time ?? '');
