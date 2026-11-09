@@ -158,10 +158,14 @@ Order of checks on every render:
    Sitzungen / Family: `features/layout/addFab.js`, `main[data-fab]` keeps room under it; Home's folded
    timer has the same shape bottom left, `.fab` in ui.module.css, only the colours differ) opens the
    new-task form over any page (`QuickAdd`, `settings.showForms` via `showForms(true|false)`).
-   Its name field takes a day, time and priority written into it ("Essay morgen 14 Uhr !hoch",
-   German and English, `features/tasks/quickParse.js`): a line under the name says what was
-   found, saving fills the still-empty fields with it and keeps only the rest as the name;
-   "Ignorieren" keeps the name as typed.
+   Its name field takes a whole line ("Study 19.11. 13:00 - 15:00 blue type: school, reminder 15 mins prior.",
+   German and English, `features/tasks/quickParse.js` `parseQuickEntry(text, now, { eventTypes })`): day, time or
+   time range (a bare "3-5" is not one: it needs a colon, Uhr, am/pm or von…bis), length ("90 min", "2h"), colour
+   (the eight names, de/en), type ("type:"/"Typ:" + one of my event types), reminders ("Erinnerung 1 Tag vorher",
+   "30 min vorher"), priority; a time range or a type makes it an event, "Erinnere mich …" a reminder (testers:
+   "Als Erinnerung anlegen"). A line under the name says what was found, saving fills the still-empty fields with it
+   and keeps only the rest as the name; "Ignorieren" keeps the name as typed. A long line whose rest still talks
+   about time (`needsAiHelp`) offers "Mit KI lesen" (branch `pro-features`, see "AI features" below).
    Row actions in lists appear on hover/focus with a mouse (always on touch).
    Quick ways through the app, for everybody: the command bar (`variants/CommandPalette.jsx`,
    Ctrl/⌘ K, "/" or the header's search button, a cross or Escape closes it; finds my open tasks
@@ -749,6 +753,19 @@ the theme before React loads.
   account field, paging, detail sheet, `GET /api/admin/users/export`, logged as `export_users`, migration 045); both
   export .xlsx / CSV (`features/admin/exportTable.js`, write-excel-file). Adding a metric: both whitelists (client
   usage.js, backend usage.js) and the privacy text's list.
+
+## AI features (branch `pro-features`, later Quidey Pro)
+
+Claude Haiku 5.5 (`AI_MODEL`, default `claude-haiku-5-5`) through the backend only (`ai.js` router at `/api/ai`,
+`utils/ai.js`: `messages.parse` with a JSON schema, low effort; every answer checked like input). For now with daily
+allowances per account and day of its time zone (`utils/quota.js`, table `daily_quota`, migration 046): `scan` 1,
+`aiLine` 5 (`QUOTA_SCAN`, `QUOTA_AI_LINE`), booked in one statement, given back when the AI fails, 429
+`QUOTA_REACHED { kind, max, resetsAt }`. `GET /api/ai/quota` → `{ available, scan, aiLine, resetsAt }` (`available`
+false without `ANTHROPIC_API_KEY`: the app hides the buttons). Frontend `features/ai/ai.js` (`useAiQuota`,
+`readLineWithAi`, `left`). Tests: `AI_FAKE` (JSON answers per job, never in production; "AI_FAIL" in the input fails).
+- Reading a line: `POST /api/ai/parse-entry { text }` (≤ 500 chars; sends the line, today, colour names, my event
+  type names) → `{ entry: { kind, name, due, time, durationMinutes, color, eventTypeId, reminders, prio }, quota }`;
+  TaskForm fills its fields with it. Privacy: "Zeilen mit KI lesen" in § 5.
 
 ## API access
 

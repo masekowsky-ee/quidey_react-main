@@ -436,6 +436,21 @@ function Privacy() {
                 die EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) in diesem Vertrag. Ohne diese Einwilligung nutzt du „Lernen“ ohne
                 Einschränkung weiter, nur ohne KI-Schätzungen.
             </p>
+            <p>
+                <strong>Zeilen mit KI lesen (Anthropic):</strong> Verstehen Quidey&apos;s eigene Regeln eine lange Zeile im
+                Eingabefeld für neue Aufgaben, Termine und Erinnerungen nicht (z. B. „nächste Woche nachmittags mit Lena
+                Chemie lernen“), kannst du auf „Mit KI lesen“ tippen. Nur dann übermittelt der Quidey-Server an Anthropic:
+                diese eine Zeile, das heutige Datum, die Namen der Farben und die Namen deiner eigenen Event-Typen.
+                Nicht übermittelt werden dein Name, Benutzername, deine E-Mail-Adresse, Nutzer-ID oder andere Daten;
+                schreib deshalb möglichst keine Angaben über andere Personen in die Zeile. Anthropic liefert einen
+                Vorschlag (Name, Tag, Uhrzeit, Dauer, Farbe, Typ, Erinnerungen) zurück, den Quidey prüft und ins
+                Formular einträgt; gespeichert wird erst, was du dann anlegst. Die Zeile selbst speichert Quidey nicht.
+                Damit die Hilfe begrenzt bleibt, zählt der Server pro Konto und Tag, wie oft du sie benutzt hast (nur
+                die Zahl, nach einer Woche gelöscht). Rechtsgrundlage ist deine Einwilligung nach Art. 6 Abs. 1 lit. a
+                DSGVO, die du durch das Tippen auf „Mit KI lesen“ erteilst; tippst du nicht, wird nichts übermittelt.
+                Für die Verarbeitung durch Anthropic gilt dasselbe wie bei den KI-Schätzungen oben
+                (Auftragsverarbeitung, EU-Standardvertragsklauseln).
+            </p>
 
             <h2>{privacyNo(6)}. Freunde und gemeinsame Funktionen</h2>
             <p>

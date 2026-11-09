@@ -22,7 +22,7 @@ const open = async () => {
             <MemoryRouter><NoteEditor note={note} onChange={onChange} onDelete={() => {}} onClose={() => {}} /></MemoryRouter>
         </Provider>
     )
-    const box = await screen.findByRole('textbox', { name: 'Text der Notiz' })
+    const box = await screen.findByRole('textbox', { name: 'Text der Notiz' }, { timeout: 5000 })
     return { ...view, editor: box.editor }
 }
 

@@ -17,10 +17,11 @@ import { endOf, fromEnd } from '../features/tasks/eventTimes';
 import { EventTypePicker, KindSwitch } from './task/KindFields.jsx';
 import { matchEventType } from '../features/tasks/kinds';
 import { dueText, fill } from '../features/helperFunction';
-import { parseQuickEntry, stripFound } from '../features/tasks/quickParse';
-import { prioLevel } from '../features/calendar/calendar';
+import { parseQuickEntry, stripFound, needsAiHelp } from '../features/tasks/quickParse';
+import { useAiQuota, readLineWithAi, left } from '../features/ai/ai';
+import { prioLevel, durationText } from '../features/calendar/calendar';
 import { dateKey, minutesOfDay, timeText } from '../features/calendar/calendar';
-import { defaultReminders } from '../features/tasks/reminders';
+import { defaultReminders, reminderLabel } from '../features/tasks/reminders';
 import { addSharedTask, selectSharedGroups, togetherErrorText } from '../features/together/togetherAction';
 import { shownSubGroup } from '../features/tasks/subGroups';
 import { addToShownCollection } from '../features/collections/collections';
@@ -74,7 +75,8 @@ export default function TaskForm(props){
     const collection = intoGroup?.collection ? intoGroup : null;
 
     const [kind, setKind] = useState(initialKind);
-    const event = kind === 'event';
+    // the switch used by hand: what the name says no longer decides
+    const [kindByHand, setKindByHand] = useState(initialKind !== 'task');
     const [eventTypeId, setEventTypeId] = useState(null);
     // a task's planned time, an event's length (minutes)
     const [duration, setDuration] = useState(null);
@@ -101,31 +103,81 @@ export default function TaskForm(props){
     // a day, time or priority written into the name ("morgen 14 Uhr !hoch") is taken over on
     // saving, for the fields still empty; "Ignore" keeps the name as it was typed
     const [ignoreQuick, setIgnoreQuick] = useState(false);
-    const parsed = useMemo(() => parseQuickEntry(name), [name]);
+    const parsed = useMemo(() => parseQuickEntry(name, undefined, { eventTypes: types }), [name, types]);
+    // a time range or one of my types in the name makes it an event (where events can go)
+    const nameMakesEvent = !ignoreQuick && !kindByHand && kind === 'task' && parsed.kind === 'event' && (!target || target.events);
+    const effectiveKind = nameMakesEvent ? 'event' : kind;
+    const event = effectiveKind === 'event';
     const quick = ignoreQuick ? {} : {
         ...(!due && parsed.due && { due: parsed.due }),
         ...(!time && parsed.time && { time: parsed.time }),
         ...(!event && prio === null && parsed.prio !== null && { prio: parsed.prio }),
+        ...(duration === null && parsed.durationMinutes && { duration: parsed.durationMinutes }),
+        ...(color === null && parsed.color && { color: parsed.color }),
+        ...(event && !elsewhere && !typeByHand && parsed.eventTypeId && { type: parsed.eventTypeId }),
+        ...(!elsewhere && parsed.reminders.length > 0 && { reminder: parsed.reminders }),
     };
+    // the words in the name for what was taken over (a time range is read as 'time')
     const quickKinds = Object.keys(quick);
     // what is saved: the typed fields, with what the name said in the empty ones
     const saved = {
         name: quickKinds.length > 0 ? stripFound(name, parsed.found, quickKinds) : name,
+        kind: effectiveKind,
         due: quick.due ?? due,
         time: quick.time ?? time,
         prio: quick.prio ?? prio,
+        duration: quick.duration ?? duration,
+        color: quick.color ?? color,
+        eventTypeId: quick.type ?? eventTypeId,
+        reminders: quick.reminder ?? extras.reminders,
     };
+    const typeName = (id) => types.find(type => type.id === id)?.name;
     const quickParts = [
+        nameMakesEvent && t('quickAddEvent'),
         quick.due && dueText(quick.due, t),
-        quick.time && fill(t('quickAddAt'), { time: quick.time }),
+        quick.time && (parsed.end ? fill(t('quickAddRange'), { from: quick.time, to: parsed.end }) : fill(t('quickAddAt'), { time: quick.time })),
+        quick.duration && !parsed.end && fill(t('quickAddLength'), { time: durationText(quick.duration) }),
         quick.prio !== undefined && t(`quickAddPrio_${prioLevel(quick.prio)}`),
+        quick.color && t(`taskColor_${quick.color}`),
+        quick.type && fill(t('quickAddType'), { name: typeName(quick.type) }),
+        ...(quick.reminder ?? []).map(minutes => reminderLabel(t, minutes, Boolean(saved.time))),
     ].filter(Boolean);
+
+    // a long line the rules hardly understood: the AI may read it (one of today's helps)
+    const aiQuota = useAiQuota();
+    const [aiState, setAiState] = useState(null);
+    const offerAi = !elsewhere && !ignoreQuick && aiQuota?.available && needsAiHelp(name, parsed);
+    const aiLeft = left(aiQuota?.aiLine);
+    async function readWithAi() {
+        const text = name;
+        setAiState({ reading: true });
+        try {
+            const entry = await readLineWithAi(text);
+            setAiState(null);
+            if (entry.kind === 'reminder' && onReminder && isTester) { onReminder(text); return; }
+            setName(entry.name);
+            if (entry.due) setDue(entry.due);
+            if (entry.time) setTime(entry.time);
+            if (entry.durationMinutes) setDuration(entry.durationMinutes);
+            if (entry.color) setColor(entry.color);
+            if (entry.prio != null) setPrio(entry.prio);
+            if (entry.kind === 'event' && (!target || target.events)) { setKind('event'); setKindByHand(true); }
+            if (entry.eventTypeId) { setEventTypeId(entry.eventTypeId); setTypeByHand(true); }
+            if (entry.reminders.length > 0) setExtras(prev => ({ ...prev, reminders: entry.reminders }));
+        } catch (err) {
+            const back = err.data?.resetsAt ? new Date(err.data.resetsAt) : null;
+            setAiState({ message: err.code === 'QUOTA_REACHED'
+                ? fill(t('aiNoneLeft'), { time: back ? timeText(back.getHours() * 60 + back.getMinutes()) : '0:00' })
+                : t('aiFailed') });
+        }
+    }
 
     const friends = useFriends();
 
     async function handleSubmit(e){
         e.preventDefault();
-        const { name, due, time, prio } = saved;
+        const { name, due, time, prio, kind, duration, color, eventTypeId } = saved;
+        const event = kind === 'event';
         if (!name.trim()) {
             dispatch( setCustomError({bool: true, message: t('nameTaskError') }) );
             return;
@@ -198,9 +250,9 @@ export default function TaskForm(props){
                 due_time: due && time ? time : null,
                 duration_minutes: duration,
                 // reminders need a day (without a time they count from my all-day time)
-                reminders: due ? extras.reminders : [],
+                reminders: due ? saved.reminders : [],
                 // only a reminder can come by mail
-                reminder_email: Boolean(due && extras.reminders.length > 0 && extras.reminder_email),
+                reminder_email: Boolean(due && saved.reminders.length > 0 && extras.reminder_email),
                 color,
                 location: extras.location.trim(),
                 link: extras.link.trim(),
@@ -240,10 +292,10 @@ export default function TaskForm(props){
                 <p className={styles.shareHint}>{fill(t('createInCollection'), { name: collection.name })}</p>}
             <form className={`${styles.form}`} onSubmit={handleSubmit} noValidate>
                 {(!target || target.events) &&
-                <KindSwitch value={kind} kinds={onReminder && isTester && !elsewhere ? ['task', 'event', 'reminder'] : undefined}
+                <KindSwitch value={effectiveKind} kinds={onReminder && isTester && !elsewhere ? ['task', 'event', 'reminder'] : undefined}
                     onChange={(next) => {
                         if (next === 'reminder') { onReminder(name); return; }
-                        setKind(next); followName(name, next);
+                        setKind(next); setKindByHand(true); followName(name, next);
                     }} />}
                 {/* the form opens to be typed into: the name has the focus (on a touch screen once the sheet is up) */}
                 <input ref={nameRef} className={styles.input} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}
@@ -257,6 +309,18 @@ export default function TaskForm(props){
                         </span>
                         <button type="button" className={styles.quickIgnore} onClick={() => setIgnoreQuick(true)}>{t('quickAddIgnore')}</button>
                     </p>}
+                {/* "Erinnere mich …": testers make a reminder of it */}
+                {parsed.kind === 'reminder' && onReminder && isTester && !elsewhere && !ignoreQuick &&
+                    <button type="button" className={styles.typeHint} onClick={() => onReminder(stripFound(name, parsed.found, ['asReminder']))}>
+                        <Icon name="alarm" size={14} /> {t('quickAddAsReminder')}
+                    </button>}
+                {offerAi &&
+                    <button type="button" className={styles.aiHelp} onClick={readWithAi} disabled={aiLeft === 0 || aiState?.reading}>
+                        <Icon name="brain" size={14} />
+                        <span>{aiState?.reading ? t('aiReading') : t('aiReadLine')}</span>
+                        <span className={styles.aiLeft}>{fill(t('aiLeft'), { n: aiLeft })}</span>
+                    </button>}
+                {aiState?.message && <p className={styles.aiStatus} role="status" aria-label={t('aiHelpStatus')}>{aiState.message}</p>}
                 {/* a task whose name fits a type: one tap makes it such an event */}
                 {!event && !elsewhere && match &&
                     <button type="button" className={styles.typeHint} data-task-color={match.type.color ?? undefined}

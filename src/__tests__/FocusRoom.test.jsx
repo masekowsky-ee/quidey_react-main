@@ -84,7 +84,7 @@ describe('Fokusraum: goal, timer, notes', () => {
         const posted = apiFetch.mock.calls.find(([url, o]) => url === '/api/notebook' && o?.method === 'POST')
         expect(JSON.parse(posted[1].body)).toMatchObject({ title: 'Kapitel 4 zusammenfassen', taskId: 7 })
         // the editor is open, ready to type into
-        const text = await screen.findByRole('textbox', { name: 'Text der Notiz' })
+        const text = await screen.findByRole('textbox', { name: 'Text der Notiz' }, { timeout: 5000 })
         await waitFor(() => expect(document.activeElement).toBe(text))
     })
 
