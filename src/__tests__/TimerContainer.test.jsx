@@ -133,7 +133,7 @@ describe('TimerContainer', () => {
             renderTimer()
             fireEvent.click(screen.getByRole('button', { name: 'Stoppuhr' }))
             fireEvent.click(screen.getByRole('button', { name: 'start timer' }))
-            await advance(2000)
+            await advance(61000) // a session is at least a minute
             expect(screen.getByRole('button', { name: 'Timer' })).toBeDisabled()
 
             fireEvent.click(screen.getByRole('button', { name: 'pause timer' }))
@@ -283,7 +283,7 @@ describe('TimerContainer', () => {
     it('stop ends the session: timer at zero, session saved', async () => {
         renderTimer()
         fireEvent.click(screen.getByRole('button', { name: 'start timer' }))
-        await advance(1000)
+        await advance(61000) // a session is at least a minute
 
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'stop timer' })) })
 
@@ -300,10 +300,10 @@ describe('TimerContainer', () => {
 
         // used to show "null : null : null"
         expect(screen.queryByText('null')).not.toBeInTheDocument()
-        const [h, m, s] = screen.getAllByRole('heading', { level: 2 })
-            .filter(el => /^\d{2}$/.test(el.textContent))
-            .map(el => el.textContent)
-        expect([h, m, s]).toEqual(['00', '30', '00'])
+        // the parts are fields to type into (any length, not only the arrows' steps)
+        expect(['Stunden', 'Minuten', 'Sekunden'].map(name => screen.getByLabelText(name).value)).toEqual(['00', '30', '00'])
+        fireEvent.change(screen.getByLabelText('Minuten'), { target: { value: '307' } })
+        expect(screen.getByLabelText('Minuten').value).toBe('07')
     })
 
     it('confirming a new time also makes it the session length', async () => {

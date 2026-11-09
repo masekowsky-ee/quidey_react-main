@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { fetchRoutines, saveRoutine, deleteRoutine, templateRoutine, planText, totalMinutes, ROUTINE_TEMPLATES, ROUTINE_EMOJIS, readRoutineRun } from '../../features/routines/routines';
@@ -10,7 +10,7 @@ import { Bone } from '../skeleton/Skeleton.jsx';
 import Icon from '../icons.jsx';
 import RoutineRunner from './RoutineRunner.jsx';
 import SheetGrabber from '../SheetGrabber.jsx';
-import { useSheet } from '../../features/layout/dragDismiss';
+import { useFocusOnArrival, useSheet } from '../../features/layout/dragDismiss';
 import styles from './Routines.module.css';
 
 const EMPTY = { name: '', emoji: '✨', steps: [{ title: '', minutes: 5 }], days: [], atTime: null, remind: true };
@@ -25,6 +25,8 @@ function RoutineEditor({ initial, onClose }) {
     const [saving, setSaving] = useState(false);
     // slides in; on phones a sheet that is pulled down to cancel
     const sheet = useSheet(onClose);
+    const nameRef = useRef(null);
+    useFocusOnArrival(nameRef);
     const { dismiss } = sheet;
     const set = (change) => setRoutine(prev => ({ ...prev, ...change }));
     const setStep = (i, change) => set({ steps: routine.steps.map((step, j) => j === i ? { ...step, ...change } : step) });
@@ -64,7 +66,7 @@ function RoutineEditor({ initial, onClose }) {
                 <div className={styles.nameRow}>
                     <label className={styles.field}>
                         <span>{t('routineName')}</span>
-                        <input autoFocus value={routine.name} maxLength={60} onChange={e => set({ name: e.target.value })} placeholder={t('routineNamePlaceholder')} required />
+                        <input ref={nameRef} value={routine.name} maxLength={60} onChange={e => set({ name: e.target.value })} placeholder={t('routineNamePlaceholder')} required />
                     </label>
                 </div>
                 <div className={styles.emojiRow} role="radiogroup" aria-label={t('routineEmoji')}>

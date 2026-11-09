@@ -281,3 +281,73 @@
         font-size: 0.75rem;
     }
 }
+
+/* ---------- the app's own look ("Demnächst" on Home): days as columns, not cards ----------
+   Each day is a column under a 2px rule in ink, its entries as plain lines; a day without
+   anything keeps a hairline. Today's rule is the accent. Testers' variants keep their own. */
+:global(:root:not([data-ui])) .day{
+    min-height: 0;
+    padding: 0.65rem 0.15rem 0.5rem;
+    background-color: transparent;
+    border: 0;
+    border-top: 2px solid var(--text-h);
+    border-radius: 0;
+}
+
+:global(:root:not([data-ui])) .day:hover{
+    background-color: var(--hover-wash);
+}
+
+:global(:root:not([data-ui])) .day:has(.empty){
+    border-top: 1px solid var(--border);
+    padding-top: calc(0.65rem + 1px);
+}
+
+:global(:root:not([data-ui])) .today::before{
+    display: none;
+}
+
+:global(:root:not([data-ui])) .day.today{
+    border-top-color: var(--primary);
+}
+
+:global(:root:not([data-ui])) .weekday{
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+:global(:root:not([data-ui])) .dayNum{
+    font-weight: 450;
+    color: var(--text-muted);
+}
+
+/* plain lines under the day's rule, as in a diary: no chips, no coloured edges */
+:global(:root:not([data-ui])) .dayList li{
+    padding: 0;
+    font-size: 0.875rem;
+    color: var(--text);
+    background-color: transparent;
+    border-left: none;
+    border-radius: 0;
+    white-space: normal;
+}
+
+:global(:root:not([data-ui])) .dayList li.prioHigh .name{
+    color: var(--text-h);
+    font-weight: 500;
+}
+
+:global(:root:not([data-ui])) .dayList .name{
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+:global(:root:not([data-ui])) .dayList li.event{
+    background-color: transparent;
+}
+
+:global(:root:not([data-ui])) .dayList li.more{
+    padding-left: 0;
+}

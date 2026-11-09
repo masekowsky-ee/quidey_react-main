@@ -1,0 +1,25 @@
+/* New task / event: the shared floating shape (ui.module.css .fab) in the bottom right, the
+   timer's twin in shape; filled inverted, the one filled control on the page. */
+.fab{
+    composes: fab from '../ui.module.css';
+    right: calc(1rem + env(safe-area-inset-right, 0px));
+    color: var(--contrast-text);
+    background-color: var(--contrast-top);
+}
+
+.fab:hover{
+    color: var(--contrast-text);
+    background-color: color-mix(in srgb, var(--contrast-top) 86%, var(--bg));
+}
+
+.icon{
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: none;
+}
+
+@media (max-width: 640px) {
+    .fab{
+        right: calc(0.75rem + env(safe-area-inset-right, 0px));
+    }
+}

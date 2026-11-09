@@ -5,15 +5,22 @@
 // (pasted or picked, made small here first: at most IMAGE_MAX_SIDE pixels and IMAGE_MAX_BYTES).
 
 import { apiFetch } from '../helperFunction';
+import { track } from '../usage/usage';
 
 export const NOTE_IMAGES_MAX = 4;
 export const NOTE_ATTACHMENTS_MAX = 10;
+export const NOTE_BODY_MAX = 20000;
 const IMAGE_MAX_SIDE = 1400;
 const IMAGE_MAX_BYTES = 380 * 1024;
 
 export const fetchNotes = () => apiFetch('/api/notebook');
 export const fetchNote = (id) => apiFetch(`/api/notebook/${id}`);
-export const createNote = (note) => apiFetch('/api/notebook', { method: 'POST', body: JSON.stringify(note) });
+// a new note counts once (not every autosave of it)
+export const createNote = async (note) => {
+    const saved = await apiFetch('/api/notebook', { method: 'POST', body: JSON.stringify(note) });
+    track('note_written');
+    return saved;
+};
 export const updateNote = (id, change) => apiFetch(`/api/notebook/${id}`, { method: 'PUT', body: JSON.stringify(change) });
 export const removeNote = (id) => apiFetch(`/api/notebook/${id}`, { method: 'DELETE' });
 
@@ -21,10 +28,20 @@ export const removeNote = (id) => apiFetch(`/api/notebook/${id}`, { method: 'DEL
 const CHECK_LINE = /^(\s*)- \[( |x|X)\] (.*)$/;
 
 // the lines of a note as parts to show: { kind: 'check', done, text, index } | { kind: 'heading' } | { kind: 'text' }
-export function noteLines(body) {
+// rich (the notes area, testers): also "## " a smaller heading, "- " / "* " a bullet, "1. " a
+// numbered line (number), "> " a quote and "---" a divider
+export function noteLines(body, rich = false) {
     return (body ?? '').split('\n').map((line, index) => {
         const check = line.match(CHECK_LINE);
         if (check) return { kind: 'check', done: check[2] !== ' ', text: check[3], index };
+        if (rich) {
+            if (line.startsWith('## ')) return { kind: 'subheading', text: line.slice(3), index };
+            if (/^\s*[-*] /.test(line)) return { kind: 'bullet', text: line.replace(/^\s*[-*] /, ''), index };
+            const numbered = line.match(/^\s*(\d{1,3})\. (.*)$/);
+            if (numbered) return { kind: 'numbered', number: numbered[1], text: numbered[2], index };
+            if (line.startsWith('> ')) return { kind: 'quote', text: line.slice(2), index };
+            if (/^\s*-{3,}\s*$/.test(line)) return { kind: 'divider', text: '', index };
+        }
         if (line.startsWith('# ')) return { kind: 'heading', text: line.slice(2), index };
         return { kind: 'text', text: line, index };
     });
@@ -47,6 +64,14 @@ export const checklistCount = (body) => {
 // the text split into plain parts and links (shown as links, never as HTML)
 const URL_IN_TEXT = /(https?:\/\/[^\s<>"')]+)/g;
 export const linkParts = (text) => text.split(URL_IN_TEXT).map((part, i) => ({ link: i % 2 === 1, text: part }));
+
+// rich: also **bold** and `code` (as marks to show, still never HTML):
+// [{ text, link?, bold?, code? }]
+const MARKS = /(\*\*[^*\n]+\*\*|`[^`\n]+`)/g;
+export const richParts = (text) => text.split(MARKS).flatMap((part, i) => {
+    if (i % 2 === 1) return part.startsWith('**') ? [{ text: part.slice(2, -2), bold: true }] : [{ text: part.slice(1, -1), code: true }];
+    return linkParts(part);
+}).filter(part => part.text !== '');
 
 export const isWebUrl = (value) => /^https?:\/\/[^\s]+$/i.test(value.trim());
 

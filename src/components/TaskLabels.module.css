@@ -1,26 +1,27 @@
+/* A task's groups as plain words in the details line, a colour dot before a group that has one */
 .labels{
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 0.25rem;
-    margin-top: 0.2rem;
+    gap: 0.125rem 0.75rem;
+    margin-top: 0;
 }
 
 .label,
 .sessionLabel{
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    max-width: 10rem;
+    gap: 0.35rem;
+    max-width: 12rem;
     height: auto;
-    padding: 0.05rem 0.5rem;
-    font-size: 0.7rem;
-    font-weight: 600;
-    line-height: 1.3;
-    color: var(--text);
-    background-color: var(--surface-inset);
-    border: 1px solid var(--btn-border);
-    border-radius: 999px;
+    padding: 0;
+    font-size: inherit;
+    font-weight: 400;
+    line-height: inherit;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-radius: 0;
     box-shadow: none;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -28,10 +29,19 @@
     cursor: pointer;
 }
 
-.label:hover,
-.sessionLabel:hover{
-    color: var(--text-h);
-    border-color: var(--btn-border-hover);
+@media (hover: hover){
+    .label:hover,
+    .sessionLabel:hover{
+        color: var(--text-h);
+        background: none;
+        box-shadow: none;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+}
+
+.label:active,
+.sessionLabel:active{
     transform: none;
 }
 
@@ -47,13 +57,10 @@
 /* tasks from a shared session: the team color */
 .sessionLabel{
     color: var(--primary-fg);
-    background-color: color-mix(in srgb, var(--primary) 12%, transparent);
-    border-color: color-mix(in srgb, var(--primary) 35%, transparent);
 }
 
 .assignee{
-    padding: 0.05rem 0.3rem;
-    font-size: 0.7rem;
+    font-size: inherit;
     color: var(--text-muted);
     white-space: nowrap;
 }
@@ -63,15 +70,10 @@
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    max-width: 12rem;
-    padding: 0.05rem 0.5rem;
-    font-size: 0.7rem;
-    font-weight: 600;
-    line-height: 1.3;
+    max-width: 14rem;
+    font-size: inherit;
+    font-weight: 400;
     color: var(--primary-fg);
-    background-color: color-mix(in srgb, var(--primary) 12%, transparent);
-    border: 1px dashed color-mix(in srgb, var(--primary) 45%, transparent);
-    border-radius: 999px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

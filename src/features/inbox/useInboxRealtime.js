@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -27,10 +28,14 @@ export function useInboxRealtime() {
         if (!reading) dispatch(showToast(fill(t('inboxLiveMessage'), { name: displayName(user) }), 'info',
             { to: `/inbox?with=${user.id}`, detail: message.body }));
     });
+    // a notice that grows ("Ann added 3 entries") comes again with the same id: it pops up once
+    const shown = useRef(new Set());
     useRealtime('notification:new', (notice) => {
         refreshBadge();
         const reading = onInbox && params.get('tab') === 'notices';
         if (!notice?.title || reading) return;
+        if (shown.current.has(notice.id)) return;
+        shown.current.add(notice.id);
         const view = noticeView(t, notice);
         playSound('notify');
         // a task given to me opens its session; a notice from the team the notices

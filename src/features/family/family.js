@@ -1,6 +1,7 @@
 import { useDispatch, useStore } from 'react-redux';
 import { COMMUNITY_PATHS } from '../community/paths';
 import { apiFetch, displayName, fill } from '../helperFunction';
+import { dateKey } from '../calendar/calendar';
 import { LOGOUT } from '../auth/authActionTypes';
 import { showToast } from '../toast/toast';
 import { noteAction } from '../onboarding/onboarding';
@@ -88,9 +89,21 @@ export const deleteFamily = (id) => async (dispatch) => {
 
 // ---------- the shared calendar (answers with the whole family) ----------
 
-// task: { name, and optionally due, due_time, prio, description, duration_minutes, location, link, details, color,
-// assignee_id (a joined member, or null), group_id (a sub-group, testers) }. Without a day it is an item on the family's list.
+// task: { name, and optionally kind ('task' | 'event', an event needs a day), due, due_time, prio, description,
+// duration_minutes, location, link, details, color, reminders (reach every member; only with a day),
+// assignee_id (a joined member, or null), group_id (a sub-group) }. Without a day it is an item on the family's list.
 export const addFamilyTask = (id, task) => apiFetch(`${familyUrl(id)}/tasks`, send('POST', task));
+// One of my own open tasks / events moves in (it leaves my list): extra { group_id?, assignee_id? }.
+// Resolves to the family; rejects with TASK_REPEATS, TASK_SHARED, TASK_DONE or TASK_NOT_FOUND.
+export const moveToFamily = (id, taskId, extra = {}) => apiFetch(`${familyUrl(id)}/tasks`, send('POST', { taskId, ...extra }));
+
+// What of mine can move into a family: my own open tasks and coming events, not repeating ones
+// (a family's entries don't repeat) and not ones shared with somebody (they'd lose them)
+export function movableTasks(tasks, today = new Date()) {
+    const todayKey = dateKey(today);
+    return tasks.filter(task => task.isOwner !== false && !task.done && !task.repeat && !(task.sharedWith?.length)
+        && (task.kind !== 'event' || (task.due && dateKey(task.due) >= todayKey)));
+}
 export const updateFamilyTask = (id, taskId, changes) => apiFetch(`${familyUrl(id)}/tasks/${taskId}`, send('PATCH', changes));
 export const removeFamilyTask = (id, taskId) => apiFetch(`${familyUrl(id)}/tasks/${taskId}`, send('DELETE'));
 

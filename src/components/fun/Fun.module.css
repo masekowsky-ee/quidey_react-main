@@ -1,7 +1,8 @@
-/* The hidden playground: hero with today's line, a game picker and the game itself */
+/* The Arcade's quiz games (word guess, letter salad, number sequence) */
 
-.page{
-    composes: page from '../ui.module.css';
+/* ---------- shared game parts ---------- */
+
+.game{
     /* Result colors, the same whatever accent is chosen: green = right spot,
        yellow = in the word elsewhere, grey = not in the word */
     --res-correct: #2ea44f;
@@ -10,151 +11,17 @@
     --res-present-text: #1f1600;
     --res-absent: #3d3a37;
     --res-absent-text: #ebe7e3;
-    width: min(760px, calc(100% - 2 * var(--page-gutter, 1rem)));
-    margin: 0 auto;
-    padding-bottom: 3rem;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-}
-
-:global(:root[data-theme="light"]) .page{
-    --res-correct: #1f9d47;
-    --res-present: #e3ac1c;
-    --res-absent: #8f8a85;
-    --res-absent-text: #ffffff;
-}
-
-/* ---------- hero ---------- */
-
-.hero{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.6rem;
-    padding-top: 1.75rem;
-}
-
-.secret{
-    padding: 0.2rem 0.75rem;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    color: var(--primary-fg);
-    border: 1px dashed color-mix(in srgb, var(--primary) 60%, transparent);
-    border-radius: 999px;
-}
-
-.title{
-    margin: 0;
-    font-size: clamp(1.5rem, 4vw, 2rem);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1.15;
-    color: var(--text-h);
-}
-
-.intro{
-    max-width: 32rem;
-    color: var(--text-muted);
-}
-
-/* Today's line as a quote card */
-.lineCard{
-    composes: card from '../ui.module.css';
-    position: relative;
-    width: 100%;
-    margin: 0.75rem 0 0;
-    box-sizing: border-box;
-    text-align: left;
-    overflow: hidden;
-}
-
-.lineCard::before{
-    content: '\201C';
-    position: absolute;
-    top: -1.5rem;
-    right: 1rem;
-    font-size: 7rem;
-    font-weight: 800;
-    line-height: 1;
-    color: color-mix(in srgb, var(--primary) 18%, transparent);
-    pointer-events: none;
-}
-
-.lineLabel{
-    margin-bottom: 0.4rem;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    color: var(--primary-fg);
-}
-
-.lineText{
-    position: relative;
-    margin: 0;
-    font-size: 1.1rem;
-    line-height: 1.5;
-    color: var(--text-h);
-}
-
-/* ---------- game picker ---------- */
-
-.picker{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-}
-
-.pick{
-    composes: panel from '../ui.module.css';
-    min-width: 0;
-    padding: 0.9rem 0.75rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.3rem;
-    text-align: center;
-    background: var(--surface);
-    box-shadow: none;
-}
-
-.pickActive,
-.pickActive:hover{
-    border-color: var(--text-h);
-    background: var(--surface-hover);
-    box-shadow: none;
-}
-
-.pickGlyph{
-    font-family: var(--mono);
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--primary-fg);
-}
-
-.pickTitle{
-    font-weight: 700;
-    color: var(--text-h);
-}
-
-.pickDesc{
-    font-size: 0.8rem;
-    line-height: 1.35;
-    color: var(--text-muted);
-}
-
-/* ---------- shared game parts ---------- */
-
-.stage{
-    composes: card from '../ui.module.css';
-    padding: 1.5rem 1rem;
-}
-
-.game{
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
+}
+
+:global(:root[data-theme="light"]) .game{
+    --res-correct: #1f9d47;
+    --res-present: #e3ac1c;
+    --res-absent: #8f8a85;
+    --res-absent-text: #ffffff;
 }
 
 .stats{
@@ -250,36 +117,6 @@
     color: var(--res-absent-text);
     background: var(--res-absent);
     border-color: var(--res-absent);
-}
-
-/* ---------- difficulty ---------- */
-
-.levelBar{
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-}
-
-.levelLabel{
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--text-muted);
-}
-
-.segmented{
-    composes: segmented from '../ui.module.css';
-}
-
-.segmentActive{
-    composes: segmentActive from '../ui.module.css';
-}
-
-.levelHint{
-    margin: 0.5rem 0 1.25rem;
-    font-size: 0.85rem;
-    color: var(--text-muted);
 }
 
 /* typed answer (hard number sequences) */
@@ -531,37 +368,7 @@
     border-color: var(--danger);
 }
 
-/* ---------- footer ---------- */
-
-.backLink{
-    align-self: center;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-}
-
-.backLink:hover{
-    color: var(--text-h);
-}
-
 @media (max-width: 640px){
-    .picker{
-        gap: 0.5rem;
-    }
-
-    .pick{
-        padding: 0.7rem 0.4rem;
-    }
-
-    .pickDesc{
-        display: none;
-    }
-
-    /* long German titles ("Buchstabensalat") must fit a third of a phone */
-    .pickTitle{
-        font-size: 0.85rem;
-        overflow-wrap: anywhere;
-    }
-
     .tile{
         width: 2.9rem;
         height: 2.9rem;
@@ -583,7 +390,6 @@
 }
 
 @media (prefers-reduced-motion: reduce){
-    .title,
     .shake,
     .tileFilled,
     .tile.correct,
@@ -596,7 +402,7 @@
     }
 }
 
-/* ---------- "extreme" motion: bigger flips and pops, hopping cards ---------- */
+/* ---------- "extreme" motion: bigger flips and pops ---------- */
 :global(:root[data-motion="extreme"]) .tile.correct,
 :global(:root[data-motion="extreme"]) .tile.present,
 :global(:root[data-motion="extreme"]) .tile.absent{
@@ -609,15 +415,6 @@
 
 :global(:root[data-motion="extreme"]) .shake{
     animation: shakeExtreme 0.55s ease-in-out;
-}
-
-:global(:root[data-motion="extreme"]) .pick:hover{
-    translate: 0 -6px;
-    rotate: -2deg;
-}
-
-:global(:root[data-motion="extreme"]) .pick:nth-child(even):hover{
-    rotate: 2deg;
 }
 
 :global(:root[data-motion="extreme"]) .letter:not(:disabled):hover{
@@ -634,16 +431,7 @@
     animation: shakeExtreme 0.5s ease-in-out;
 }
 
-/* "normal" motion: cards and letters hop a little */
-:global(:root[data-motion="normal"]) .pick:hover{
-    translate: 0 -3px;
-    rotate: -1deg;
-}
-
-:global(:root[data-motion="normal"]) .pick:nth-child(even):hover{
-    rotate: 1deg;
-}
-
+/* "normal" motion: letters hop a little */
 :global(:root[data-motion="normal"]) .letter:not(:disabled):hover{
     rotate: -5deg;
     scale: 1.1;

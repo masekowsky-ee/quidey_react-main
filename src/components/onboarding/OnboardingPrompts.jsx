@@ -13,6 +13,9 @@ import SheetGrabber from '../SheetGrabber.jsx';
 import { useSheet } from '../../features/layout/dragDismiss';
 import { analyticsQuestionDue, askAnalyticsLater, setAnalyticsConsent, useAnalytics } from '../../features/native/analytics';
 import { usePushState } from '../../features/pwa/push';
+import { selectUsageConsent, setUsageConsent } from '../../features/auth/authAction';
+import { showToast } from '../../features/toast/toast';
+import { askUsageLater, usageAskedLater } from '../../features/usage/askLater';
 
 // the analytics question waits a moment after the app is there (and after any other question)
 export const ANALYTICS_DELAY_MS = 1500;
@@ -28,10 +31,22 @@ export default function OnboardingPrompts() {
     const { asking } = useOnboarding();
     const pushAsking = usePushState().asking;
     useAnalytics();
-    const analyticsDue = analyticsQuestionDue() && !asking && !pushAsking && !tourOpen;
+    const [, bump] = useState(0);
+    const usageChoice = useSelector((state) => selectUsageConsent(state).choice);
+    const accessChecked = useSelector((state) => state.auth.access.checked);
+    const free = !asking && !pushAsking && !tourOpen;
+    const usageDue = usageChoice === null && accessChecked && !usageAskedLater() && free;
+    const [usageReady, setUsageReady] = useState(false);
+    // the usage card goes first; the analytics card follows once it is answered or put aside
+    const analyticsDue = analyticsQuestionDue() && free && !usageDue;
     const [analyticsReady, setAnalyticsReady] = useState(false);
 
     useEffect(() => { setOnboardingAccount(username); }, [username]);
+    useEffect(() => {
+        if (!usageDue) return;
+        const timer = setTimeout(() => setUsageReady(true), ANALYTICS_DELAY_MS);
+        return () => { clearTimeout(timer); setUsageReady(false); };
+    }, [usageDue]);
     useEffect(() => {
         if (!analyticsDue) return;
         const timer = setTimeout(() => setAnalyticsReady(true), ANALYTICS_DELAY_MS);
@@ -41,12 +56,13 @@ export default function OnboardingPrompts() {
     if (asking === 'next') return <NextSteps />;
     if (asking === 'install') return <InstallQuestion />;
     if (asking === 'rating') return <RatingQuestion />;
+    if (usageDue && usageReady) return <UsageQuestion onLater={() => { askUsageLater(); bump((n) => n + 1); }} />;
     if (analyticsDue && analyticsReady) return <AnalyticsQuestion />;
     return null;
 }
 
 // The centred card; Escape, a click beside it or the no closes it
-function Card({ icon, title, text, children, wide = false, onClose = closeOnboarding }) {
+function Card({ icon, title, text, children, wide = false, focusTitle = false, onClose = closeOnboarding }) {
     const titleId = useId();
     const textId = useId();
     const cardRef = useRef(null);
@@ -56,7 +72,8 @@ function Card({ icon, title, text, children, wide = false, onClose = closeOnboar
 
     useEffect(() => {
         const previous = document.activeElement;
-        cardRef.current?.querySelector('button, textarea')?.focus();
+        const first = focusTitle ? cardRef.current?.querySelector('h2') : cardRef.current?.querySelector('button, textarea');
+        first?.focus();
         const onKey = (e) => {
             if (e.key !== 'Escape') return;
             e.preventDefault();
@@ -68,7 +85,7 @@ function Card({ icon, title, text, children, wide = false, onClose = closeOnboar
             window.removeEventListener('keydown', onKey, true);
             previous?.focus?.();
         };
-    }, [dismiss]);
+    }, [dismiss, focusTitle]);
 
     return createPortal(
         <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
@@ -76,7 +93,7 @@ function Card({ icon, title, text, children, wide = false, onClose = closeOnboar
                 aria-labelledby={titleId} aria-describedby={text ? textId : undefined}>
                 <SheetGrabber />
                 <span className={styles.badge} aria-hidden="true" data-sheet-drag><Icon name={icon} size={20} /></span>
-                <h2 id={titleId} className={styles.title} data-sheet-drag>{title}</h2>
+                <h2 id={titleId} className={styles.title} data-sheet-drag tabIndex={focusTitle ? -1 : undefined}>{title}</h2>
                 {text && <p id={textId} className={styles.text}>{text}</p>}
                 {children}
             </div>
@@ -154,13 +171,40 @@ function AnalyticsQuestion() {
     const answer = (granted) => setAnalyticsConsent(granted);
 
     return (
-        <Card icon="lightbulb" title={t('analyticsAskTitle')} text={t('analyticsAskText')} onClose={askAnalyticsLater}>
+        <Card focusTitle icon="lightbulb" title={t('analyticsAskTitle')} text={t('analyticsAskText')} onClose={askAnalyticsLater}>
             <div className={styles.answers}>
                 <button type="button" className={styles.no} onClick={() => answer(true)}>{t('analyticsAskYes')}</button>
                 <button type="button" className={styles.no} onClick={() => answer(false)}>{t('analyticsAskNo')}</button>
             </div>
             <p className={styles.fine}>
                 {t('analyticsAskLater')} <Link to="/datenschutz" onClick={askAnalyticsLater}>{t('analyticsAskPrivacy')}</Link>
+            </p>
+        </Card>
+    );
+}
+
+// Consent to Quidey's own anonymous usage statistics (every platform). Closing it without an
+// answer asks again on the next start; yes and no look the same.
+function UsageQuestion({ onLater }) {
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const answer = async (granted) => {
+        try {
+            await dispatch(setUsageConsent(granted));
+        } catch {
+            dispatch(showToast(t('pushErrorSave'), 'error'));
+            onLater();
+        }
+    };
+
+    return (
+        <Card focusTitle icon="lightbulb" title={t('usageAskTitle')} text={t('usageAskText')} onClose={onLater}>
+            <div className={styles.answers}>
+                <button type="button" className={styles.no} onClick={() => answer(true)}>{t('usageAskYes')}</button>
+                <button type="button" className={styles.no} onClick={() => answer(false)}>{t('usageAskNo')}</button>
+            </div>
+            <p className={styles.fine}>
+                {t('usageAskLater')} <Link to="/datenschutz#nutzungsstatistik" onClick={onLater}>{t('usageAskPrivacy')}</Link>
             </p>
         </Card>
     );

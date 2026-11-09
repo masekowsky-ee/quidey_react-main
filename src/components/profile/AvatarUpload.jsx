@@ -1,29 +1,37 @@
 import { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { squarePicture, saveAvatar, removeAvatar, useAvatarUrl } from '../../features/profile/avatars';
+import { openPicture, circlePicture, saveAvatar, removeAvatar, useAvatarUrl } from '../../features/profile/avatars';
 import { showToast } from '../../features/toast/toast';
 import { useTranslation } from '../../i18n/useTranslation';
 import Icon from '../icons.jsx';
+import AvatarCropper from './AvatarCropper.jsx';
 import styles from './ProfileParts.module.css';
 
-// "Profil gestalten" for testers: a picture instead of emoji or initials. Cut to a square from the
-// middle and made small on this device before it is sent; shown to friends and the people in
-// open sessions and families (testers among them, while it is in test).
+// "Profil gestalten": a picture instead of emoji or initials. Placed in a circle first
+// (AvatarCropper), cut to that circle and made small on this device before it is sent; shown to
+// friends and the people in open sessions and families.
 export default function AvatarUpload() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const myId = useSelector(state => state.auth.access.userId);
     const current = useAvatarUrl(myId);
     const [busy, setBusy] = useState(false);
+    const [picked, setPicked] = useState(null);
     const input = useRef(null);
 
     const pick = async (file) => {
         if (!file) return;
+        const image = await openPicture(file).catch(() => null);
+        if (!image) { dispatch(showToast(t('avatarFailed'), 'error')); return; }
+        setPicked(image);
+    };
+    const save = async (placement) => {
         setBusy(true);
         try {
-            const data = await squarePicture(file);
+            const data = circlePicture(picked, placement);
             if (!data) { dispatch(showToast(t('avatarTooBig'), 'error')); return; }
             await saveAvatar(myId, data);
+            setPicked(null);
             dispatch(showToast(t('avatarSaved'), 'success'));
         } catch {
             dispatch(showToast(t('avatarFailed'), 'error'));
@@ -45,7 +53,7 @@ export default function AvatarUpload() {
 
     return (
         <div className={styles.field}>
-            <span className={styles.fieldLabelRow}>{t('avatarTitle')} <span className={styles.testBadge}>{t('avatarInTest')}</span></span>
+            <span className={styles.fieldLabelRow}>{t('avatarTitle')}</span>
             <div className={styles.avatarUpload}>
                 <span className={styles.avatarUploadPreview} aria-hidden="true">
                     {current ? <img src={current} alt="" /> : <Icon name="image" size={22} />}
@@ -60,6 +68,7 @@ export default function AvatarUpload() {
                 </div>
             </div>
             <p className={styles.hint}>{t('avatarHint')}</p>
+            {picked && <AvatarCropper image={picked} busy={busy} onDone={save} onClose={() => setPicked(null)} />}
         </div>
     );
 }

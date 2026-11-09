@@ -1,10 +1,10 @@
 import styles from './Calendar.module.css';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
-import { addTask, deleteTaskAsking, leaveTask, updateTaskProps } from '../features/tasks/taskAction';
+import { deleteTaskAsking, leaveTask, updateTaskProps } from '../features/tasks/taskAction';
 import TaskInvites from './task/TaskInvites.jsx';
 import { fetchSharedHistory, togetherErrorText } from '../features/together/togetherAction';
 import { familyErrorText, selectFamilies } from '../features/family/family';
@@ -16,19 +16,39 @@ import {
     groupByDay, projectRepeats, isoWeek, readStoredCalendarView, startOfWeek, storeCalendarView, toIcs,
 } from '../features/calendar/calendar';
 import { useTaskDrag } from '../features/calendar/useTaskDrag';
-import { matchEventType } from '../features/tasks/kinds';
-import { defaultReminders, selectAllDayTime } from '../features/tasks/reminders';
+import { selectAllDayTime } from '../features/tasks/reminders';
+import { useTaskGroups } from '../features/collections/collections';
 import MonthView from './calendar/MonthView.jsx';
 import WeekView from './calendar/WeekView.jsx';
 import AgendaView from './calendar/AgendaView.jsx';
 import DayPanel from './calendar/DayPanel.jsx';
+import TaskForm from './TaskForm.jsx';
+import { FormSheet } from './QuickAdd.jsx';
 import Icon from './calendar/icons.jsx';
+import { useMediaQuery } from '../features/layout/breakpoints';
 
 const VIEW_LABELS = { month: 'calendarViewMonth', week: 'calendarViewWeek', agenda: 'calendarViewAgenda' };
 const VIEW_KEYS = { m: 'month', w: 'week', a: 'agenda' };
-const NEW_TASK_PRIO = 50; // the middle of the slider, like the task form
 
 const isTyping = (el) => el?.closest?.('input, textarea, select, [contenteditable="true"]');
+
+// phones: the toolbar folds into one row of icons (the same width as the grid's phone layout)
+const COMPACT_QUERY = '(max-width: 640px)';
+
+// A popover that closes on a click elsewhere or Escape
+function useDismiss(open, close, ref) {
+    useEffect(() => {
+        if (!open) return undefined;
+        const onDown = (e) => { if (!ref.current?.contains(e.target)) close(); };
+        const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
+        document.addEventListener('pointerdown', onDown);
+        document.addEventListener('keydown', onKey);
+        return () => {
+            document.removeEventListener('pointerdown', onDown);
+            document.removeEventListener('keydown', onKey);
+        };
+    }, [open, close, ref]);
+}
 
 // The calendar: month, week and agenda view of my tasks by their day. Tasks can be added,
 // edited, done and moved (drag them onto another day) right here. View, day and open day
@@ -41,7 +61,8 @@ export default function Calendar() {
     const dispatch = useDispatch();
 
     const ownTasks = useSelector(state => state.task.tasks);
-    const allGroups = useSelector(state => state.task.groups);
+    // my groups, or for testers my collections in their place
+    const taskGroups = useTaskGroups();
     const ownSessions = useSelector(state => state.session.workedSessionData);
     const sharedHistory = useSelector(state => state.together.history);
     const sharedSessions = useSelector(state => state.together.sessions);
@@ -52,9 +73,10 @@ export default function Calendar() {
     const source = parseCalendarSource(params.get('cal'));
     const shared = useSharedCalendar(source);
     const isShared = source.kind !== 'mine';
-    // a shared session's calendar holds events too (a family's only tasks)
-    const sharedEvents = source.kind === 'session';
-    const eventTypes = useSelector(state => state.task.eventTypes);
+    // a shared session's and a family's calendar hold events too; a family's entries also
+    // have reminders, which reach every member
+    const sharedEvents = source.kind === 'session' || source.kind === 'family';
+    const remindsAll = source.kind === 'family';
     const allDayTime = useSelector(selectAllDayTime);
     const tasks = isShared ? shared.tasks : ownTasks;
     // my focus sessions belong to my own calendar only
@@ -64,12 +86,14 @@ export default function Calendar() {
     const today = toDateOnly(new Date());
     const focusedDate = fromKey(params.get('date')) ?? today;
     const openDay = fromKey(params.get('day'));
-    // the task to open in the day panel ('new': start in the add field); a link can name one
+    // the task to open in the day panel; a link can name one
     // with ?task=<id>, e.g. "open in calendar" from the task list
     const [openTaskId, setOpenTaskId] = useState(() => (openDay && Number(params.get('task'))) || null);
 
     // filters
-    const groups = isShared ? [] : allGroups.filter(group => group.name !== 'all');
+    const groups = isShared ? [] : taskGroups.groups;
+    const { groupsOf } = taskGroups;
+    const inGroup = useMemo(() => (task, id) => groupsOf(task).some(group => group.id === id), [groupsOf]);
     const [groupFilter, setGroupFilter] = useState('all');
     const groupId = groups.some(group => group.id === groupFilter) ? groupFilter : 'all';
     const [showDone, setShowDone] = useState(true);
@@ -79,21 +103,24 @@ export default function Calendar() {
     const hiddenFilters = (groupId !== 'all' ? 1 : 0) + (showDone ? 0 : 1);
     const [filtersOpen, setFiltersOpen] = useState(false);
     const filterRef = useRef(null);
-    // a click elsewhere or Escape closes the filters
-    useEffect(() => {
-        if (!filtersOpen) return undefined;
-        const onDown = (e) => { if (!filterRef.current?.contains(e.target)) setFiltersOpen(false); };
-        const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); setFiltersOpen(false); } };
-        document.addEventListener('pointerdown', onDown);
-        document.addEventListener('keydown', onKey);
-        return () => {
-            document.removeEventListener('pointerdown', onDown);
-            document.removeEventListener('keydown', onKey);
-        };
-    }, [filtersOpen]);
+    const closeFilters = useCallback(() => setFiltersOpen(false), []);
+    useDismiss(filtersOpen, closeFilters, filterRef);
+
+    // phones: views behind a menu button, search behind a magnifier
+    const compact = useMediaQuery(COMPACT_QUERY);
+    const [viewsOpen, setViewsOpen] = useState(false);
+    const viewsRef = useRef(null);
+    const closeViews = useCallback(() => setViewsOpen(false), []);
+    useDismiss(viewsOpen, closeViews, viewsRef);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const searchRef = useRef(null);
+    // a search typed stays in view until it's cleared
+    const searchShown = searchOpen || query !== '';
+    useEffect(() => { if (searchOpen) searchRef.current?.focus(); }, [searchOpen]);
+    const closeSearch = () => { setQuery(''); setSearchOpen(false); };
     const clearFilters = () => { setGroupFilter('all'); setShowDone(true); setQuery(''); };
 
-    const shown = useMemo(() => filterTasks(tasks, { groupId, showDone, query }), [tasks, groupId, showDone, query]);
+    const shown = useMemo(() => filterTasks(tasks, { groupId, showDone, query, inGroup }), [tasks, groupId, showDone, query, inGroup]);
     const tasksByDay = useMemo(() => groupByDay(shown), [shown]);
     // the month and week grids also show the coming repeats of repeating tasks (a year ahead of
     // the shown day), as previews; the agenda and the day panel list only real tasks
@@ -105,10 +132,10 @@ export default function Calendar() {
     // coming repeats on that day (each can be deleted on its own there)
     const openDayKey = openDay ? dateKey(openDay) : null;
     const panelTasksByDay = useMemo(() => {
-        const inGroup = filterTasks(tasks, { groupId });
+        const ofGroup = filterTasks(tasks, { groupId, inGroup });
         const until = openDayKey ? fromKey(openDayKey) : null;
-        return groupByDay(isShared || !until ? inGroup : [...inGroup, ...projectRepeats(inGroup, until)]);
-    }, [tasks, groupId, isShared, openDayKey]);
+        return groupByDay(isShared || !until ? ofGroup : [...ofGroup, ...projectRepeats(ofGroup, until)]);
+    }, [tasks, groupId, isShared, openDayKey, inGroup]);
     const focusByDay = useMemo(() => toFocusByDay(sessions), [sessions]);
     const overdueCount = shown.filter(task => isOverdue(task, today)).length;
 
@@ -171,6 +198,10 @@ export default function Calendar() {
         const format = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' });
         title = format.formatRange ? format.formatRange(start, addDays(start, 6)) : `${format.format(start)} – ${format.format(addDays(start, 6))}`;
     }
+    // phones: month and year; the week view adds its number and shortens the month to fit
+    const compactTitle = view === 'week'
+        ? `${t('weekShort')} ${isoWeek(focusedDate)} · ${focusedDate.toLocaleDateString(locale, { month: 'short', year: 'numeric' })}`
+        : `${t('months', focusedDate.getMonth())} ${focusedDate.getFullYear()}`;
     const isCurrentPeriod = view === 'week'
         ? sameDay(startOfWeek(focusedDate), startOfWeek(today))
         : focusedDate.getFullYear() === today.getFullYear() && focusedDate.getMonth() === today.getMonth();
@@ -188,20 +219,19 @@ export default function Calendar() {
     // a change to a task: in my own list, or in the shared calendar shown
     const changeTask = (task, changes) => (isShared ? shared.update(task.id, changes) : dispatch(updateTaskProps(changes, task)));
 
-    // kind: 'task' or 'event' (only in my own calendar; an event has no priority)
-    const addTaskOn = async (name, key, time = null, kind = 'task') => {
-        try {
-            if (isShared) await shared.add({ name, due: key, ...(time ? { due_time: time } : {}), ...(sharedEvents && kind === 'event' ? { kind } : {}) });
-            // a new event of mine takes the type its name points to (a keyword of the type)
-            else await dispatch(addTask(name, key, '', kind === 'event' ? null : NEW_TASK_PRIO, newTaskGroup?.id ?? null, undefined,
-                // with notifications on, it reminds at its start (or at my all-day time on the day)
-                { ...(time ? { due_time: time } : {}), reminders: defaultReminders(), ...(kind === 'event' ? { kind, event_type_id: matchEventType(name, eventTypes)?.type.id ?? null } : {}) }));
-            return true;
-        } catch (err) {
-            reportError(err);
-            return false;
-        }
-    };
+    // ---------- adding ----------
+
+    // the new-task form, opened on a day (a day's plus, the day's timeline: also at a time).
+    // In a shared calendar the entry goes there (target); in mine into the filtered group.
+    const [createAt, setCreateAt] = useState(null);
+    const openCreate = (date, time = null) => setCreateAt({ due: dateKey(date), time });
+    const createTarget = isShared ? {
+        kind: source.kind,
+        name: shared.data?.name ?? '',
+        events: sharedEvents,
+        save: (fields) => shared.add(fields),
+        errorText: (err) => (errorText ? errorText(t, err) : t('friendError_generic')),
+    } : null;
 
     // an event is done once it's over, not by hand
     const toggleDone = (task) => {
@@ -258,10 +288,7 @@ export default function Calendar() {
     const exportIcs = () => {
         const withDay = shown.filter(task => task.due);
         if (withDay.length === 0) { toast(t('nothingToExport'), 'info'); return; }
-        const groupName = (task) => (task.group_ids ?? [])
-            .map(id => groups.find(group => group.id === id)?.name)
-            .filter(Boolean)
-            .join(', ');
+        const groupName = (task) => groupsOf(task).map(group => group.name).join(', ');
         downloadFile(isShared ? `quidey-${source.kind}-${source.id}.ics` : 'quidey-tasks.ics', toIcs(withDay, { groupName, allDayTime }), 'text/calendar');
     };
 
@@ -276,7 +303,7 @@ export default function Calendar() {
     const chooseSource = (value) => update({ cal: value === 'mine' ? null : value, day: null, task: null });
     const sharedPage = source.kind === 'session' ? `/together/${source.id}` : `/family/${source.id}`;
 
-    const { drag, startDrag, onClickCapture } = useTaskDrag(moveTask);
+    const { drag, startDrag } = useTaskDrag(moveTask);
 
     // T: today, M / W / A: view (not while typing or with the day open)
     useEffect(() => {
@@ -292,102 +319,178 @@ export default function Calendar() {
     });
 
     const openKey = openDay ? dateKey(openDay) : null;
-    const viewProps = { focusedDate, today, tasksByDay, focusByDay, onFocusDate: focusDate, onOpenDate: openDate, dayLabel, longDate };
+    const viewProps = { focusedDate, today, tasksByDay, focusByDay, onFocusDate: focusDate, onOpenDate: openDate, onCreateOn: openCreate, dayLabel, longDate };
+
+    // which calendar (only when there's a choice): a pill beside the other controls, on phones in the filters
+    const sourceChoice = openSessions.length > 0 || families.length > 0 || isShared;
+    const sourcePicker = (
+        <div className={styles.source}>
+            <label className={`${styles.sourcePick} ${isShared ? styles.sourcePickShared : ''}`}>
+                <Icon name={isShared ? 'team' : 'calendar'} size={16} />
+                <select className={styles.sourceSelect} value={sourceValue} onChange={(e) => chooseSource(e.target.value)} aria-label={t('calendarOf')}>
+                    <option value="mine">{t('calendarMine')}</option>
+                    {!sourceListed && <option value={sourceValue}>{shared.data?.name ?? '…'}</option>}
+                    {openSessions.length > 0 &&
+                        <optgroup label={t('calendarSessions')}>
+                            {openSessions.map(s => <option key={s.id} value={`session-${s.id}`}>{s.name}</option>)}
+                        </optgroup>}
+                    {families.length > 0 &&
+                        <optgroup label={t('calendarFamilies')}>
+                            {families.map(f => <option key={f.id} value={`family-${f.id}`}>{f.name}</option>)}
+                        </optgroup>}
+                </select>
+                <span className={styles.sourceChevron}><Icon name="expand" size={18} /></span>
+            </label>
+            {isShared && shared.data &&
+                <Link to={sharedPage} className={styles.sourceLink}
+                    aria-label={t(source.kind === 'session' ? 'calendarOpenSession' : 'calendarOpenFamily')}
+                    title={t(source.kind === 'session' ? 'calendarOpenSession' : 'calendarOpenFamily')}>
+                    <Icon name="open" size={18} />
+                </Link>}
+        </div>
+    );
+
+    // the rarer controls behind one button: group, done ones, export (on phones also the calendar)
+    const filterMenu = (
+        <div className={styles.filterMenu} id="calendarFilters" role="group" aria-label={t('calendarFilters')}>
+            {compact && sourceChoice && sourcePicker}
+            {groups.length > 0 &&
+                <label className={styles.filterField}>
+                    <span>{t(taskGroups.collections ? 'collectionFilter' : 'filterGroup')}</span>
+                    <select className={styles.groupSelect} value={String(groupId)}
+                        onChange={(e) => setGroupFilter(e.target.value === 'all' ? 'all' : groups.find(group => String(group.id) === e.target.value)?.id ?? 'all')}>
+                        <option value="all">{t(taskGroups.collections ? 'collectionAllFilter' : 'allGroups')}</option>
+                        {groups.map(group => <option key={group.id} value={String(group.id)}>{group.emoji ? `${group.emoji} ${group.name}` : group.name}</option>)}
+                    </select>
+                </label>}
+            <button type="button" className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}
+                aria-pressed={showDone} onClick={() => setShowDone(!showDone)}>
+                <span className={styles.doneBox} aria-hidden="true" />
+                {t('showDoneTasks')}
+            </button>
+            <div className={styles.filterDivider} role="separator" />
+            <button type="button" className={styles.exportBtn} onClick={() => { setFiltersOpen(false); exportIcs(); }} title={t('exportIcsHint')}>
+                <Icon name="download" size={18} />
+                <span>{t('exportIcs')}</span>
+            </button>
+        </div>
+    );
 
     return (
-        <div className={styles.page} onClickCapture={onClickCapture}>
-            <header className={styles.toolbar}>
-                {(openSessions.length > 0 || families.length > 0 || isShared) &&
-                    <div className={styles.sourceRow}>
-                        <label className={styles.sourceLabel}>
-                            <span>{t('calendarOf')}</span>
-                            <select className={styles.sourceSelect} value={sourceValue} onChange={(e) => chooseSource(e.target.value)}>
-                                <option value="mine">{t('calendarMine')}</option>
-                                {!sourceListed && <option value={sourceValue}>{shared.data?.name ?? '…'}</option>}
-                                {openSessions.length > 0 &&
-                                    <optgroup label={t('calendarSessions')}>
-                                        {openSessions.map(s => <option key={s.id} value={`session-${s.id}`}>{s.name}</option>)}
-                                    </optgroup>}
-                                {families.length > 0 &&
-                                    <optgroup label={t('calendarFamilies')}>
-                                        {families.map(f => <option key={f.id} value={`family-${f.id}`}>{f.name}</option>)}
-                                    </optgroup>}
-                            </select>
-                        </label>
-                        {isShared && shared.data &&
-                            <Link to={sharedPage} className={styles.sourceLink}>
-                                {t(source.kind === 'session' ? 'calendarOpenSession' : 'calendarOpenFamily')} →
-                            </Link>}
-                        {shared.readOnly && <span className={styles.sourceNote}>{t('calendarSessionEnded')}</span>}
-                    </div>}
-                <div className={styles.titleRow}>
-                    <h1 className={styles.title} aria-live="polite">
-                        {title}
-                        {view === 'week' && <span className={styles.weekBadge}>{fill(t('weekNumber'), { week: isoWeek(focusedDate) })}</span>}
-                    </h1>
-                    <div className={styles.nav}>
-                        {overdueCount > 0 &&
-                            <button type="button" className={styles.overdueBtn} onClick={() => setView('agenda', today)}>
-                                {fill(t('overdueCount'), { count: overdueCount })}
-                            </button>}
-                        <button type="button" className={`${styles.todayBtn} ${isCurrentPeriod ? styles.todayBtnQuiet : ''}`} onClick={goToday} title={`${t('today')} (T)`}>
-                            {t('today')}
-                        </button>
-                        <button type="button" className={styles.navBtn} onClick={() => shift(-1)} aria-label={prevLabel} title={prevLabel}><Icon name="prev" /></button>
-                        <button type="button" className={styles.navBtn} onClick={() => shift(1)} aria-label={nextLabel} title={nextLabel}><Icon name="next" /></button>
-                    </div>
-                </div>
-
-                <div className={styles.controls}>
-                    <div className={styles.segmented} role="group" aria-label={t('calendarViews')}>
-                        {CALENDAR_VIEWS.map(name => (
-                            <button key={name} type="button" aria-pressed={view === name}
-                                className={view === name ? styles.segmentActive : undefined}
-                                onClick={() => setView(name)} title={`${t(VIEW_LABELS[name])} (${name[0].toUpperCase()})`}>
-                                {t(VIEW_LABELS[name])}
+        <div className={styles.page}>
+            {compact
+                ? <header className={`${styles.toolbar} ${styles.toolbarCompact}`}>
+                    <div className={styles.compactBar}>
+                        {/* the views (and today) behind one menu button */}
+                        <div className={styles.menuWrap} ref={viewsRef}>
+                            <button type="button" className={styles.barBtn} aria-label={t('calendarViews')} title={t('calendarViews')}
+                                aria-expanded={viewsOpen} aria-controls={viewsOpen ? 'calendarViewMenu' : undefined}
+                                onClick={() => setViewsOpen(open => !open)}>
+                                <Icon name="menu" size={22} />
+                                {overdueCount > 0 && <span className={styles.barDot} aria-hidden="true" />}
                             </button>
-                        ))}
-                    </div>
-                    <div className={styles.filters}>
-                        <label className={styles.search}>
-                            <Icon name="search" size={18} />
-                            <input type="search" value={query} onChange={(e) => setQuery(e.target.value)}
-                                placeholder={t('searchTasks')} aria-label={t('searchTasks')} />
-                        </label>
-                        {/* the rarer controls wait behind one button: group, done ones, export */}
-                        <div className={styles.filterWrap} ref={filterRef}>
-                            <button type="button" className={`${styles.filterBtn} ${hiddenFilters > 0 ? styles.filterBtnOn : ''}`}
-                                aria-expanded={filtersOpen} aria-controls={filtersOpen ? 'calendarFilters' : undefined}
-                                onClick={() => setFiltersOpen(open => !open)}>
-                                <Icon name="filter" size={18} />
-                                <span>{hiddenFilters > 0 ? fill(t('calendarFiltersActive'), { count: hiddenFilters }) : t('calendarFilters')}</span>
-                            </button>
-                            {filtersOpen &&
-                                <div className={styles.filterMenu} id="calendarFilters" role="group" aria-label={t('calendarFilters')}>
-                                    {groups.length > 0 &&
-                                        <label className={styles.filterField}>
-                                            <span>{t('filterGroup')}</span>
-                                            <select className={styles.groupSelect} value={String(groupId)}
-                                                onChange={(e) => setGroupFilter(e.target.value === 'all' ? 'all' : groups.find(group => String(group.id) === e.target.value)?.id ?? 'all')}>
-                                                <option value="all">{t('allGroups')}</option>
-                                                {groups.map(group => <option key={group.id} value={String(group.id)}>{group.name}</option>)}
-                                            </select>
-                                        </label>}
-                                    <button type="button" className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}
-                                        aria-pressed={showDone} onClick={() => setShowDone(!showDone)}>
-                                        <span className={styles.doneBox} aria-hidden="true" />
-                                        {t('showDoneTasks')}
-                                    </button>
+                            {viewsOpen &&
+                                <div className={`${styles.filterMenu} ${styles.viewMenu}`} id="calendarViewMenu" role="menu" aria-label={t('calendarViews')}>
+                                    {CALENDAR_VIEWS.map(name => (
+                                        <button key={name} type="button" role="menuitemradio" aria-checked={view === name} className={styles.viewItem}
+                                            onClick={() => { setView(name); setViewsOpen(false); }}>
+                                            {t(VIEW_LABELS[name])}
+                                            {view === name && <Icon name="check" size={18} />}
+                                        </button>
+                                    ))}
                                     <div className={styles.filterDivider} role="separator" />
-                                    <button type="button" className={styles.exportBtn} onClick={() => { setFiltersOpen(false); exportIcs(); }} title={t('exportIcsHint')}>
-                                        <Icon name="download" size={18} />
-                                        <span>{t('exportIcs')}</span>
+                                    <button type="button" role="menuitem" className={styles.viewItem} onClick={() => { goToday(); setViewsOpen(false); }}>
+                                        {t('today')}
                                     </button>
+                                    {overdueCount > 0 &&
+                                        <button type="button" role="menuitem" className={`${styles.viewItem} ${styles.viewItemDanger}`}
+                                            onClick={() => { setView('agenda', today); setViewsOpen(false); }}>
+                                            {fill(t('overdueCount'), { count: overdueCount })}
+                                        </button>}
                                 </div>}
                         </div>
+                        <h1 className={styles.compactTitle} aria-live="polite">{compactTitle}</h1>
+                        <button type="button" className={`${styles.barBtn} ${searchShown ? styles.barBtnOn : ''}`}
+                            aria-label={t('searchTasks')} title={t('searchTasks')} aria-expanded={searchShown}
+                            onClick={() => (searchShown ? closeSearch() : setSearchOpen(true))}>
+                            <Icon name="search" size={22} />
+                        </button>
+                        <div className={styles.filterWrap} ref={filterRef}>
+                            <button type="button" className={`${styles.barBtn} ${hiddenFilters > 0 || isShared ? styles.barBtnOn : ''}`}
+                                aria-label={hiddenFilters > 0 ? fill(t('calendarFiltersActive'), { count: hiddenFilters }) : t('calendarFilters')}
+                                title={t('calendarFilters')}
+                                aria-expanded={filtersOpen} aria-controls={filtersOpen ? 'calendarFilters' : undefined}
+                                onClick={() => setFiltersOpen(open => !open)}>
+                                <Icon name="filter" size={22} />
+                                {hiddenFilters > 0 && <span className={styles.barCount} aria-hidden="true">{hiddenFilters}</span>}
+                            </button>
+                            {filtersOpen && filterMenu}
+                        </div>
+                        <button type="button" className={styles.barBtn} onClick={() => shift(-1)} aria-label={prevLabel} title={prevLabel}><Icon name="prev" size={22} /></button>
+                        <button type="button" className={styles.barBtn} onClick={() => shift(1)} aria-label={nextLabel} title={nextLabel}><Icon name="next" size={22} /></button>
                     </div>
-                </div>
-            </header>
+                    {searchShown &&
+                        <label className={styles.compactSearch}>
+                            <Icon name="search" size={18} />
+                            <input ref={searchRef} type="search" value={query} onChange={(e) => setQuery(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); closeSearch(); } }}
+                                placeholder={t('searchTasks')} aria-label={t('searchTasks')} />
+                            <button type="button" className={styles.searchClose} onClick={closeSearch} aria-label={t('close')} title={t('close')}>
+                                <Icon name="close" size={18} />
+                            </button>
+                        </label>}
+                    {shared.readOnly && <p className={styles.sourceNote}>{t('calendarSessionEnded')}</p>}
+                </header>
+                : <header className={styles.toolbar}>
+                    <div className={styles.titleRow}>
+                        <h1 className={styles.title} aria-live="polite">
+                            {title}
+                            {view === 'week' && <span className={styles.weekBadge}>{fill(t('weekNumber'), { week: isoWeek(focusedDate) })}</span>}
+                        </h1>
+                        <div className={styles.nav}>
+                            {overdueCount > 0 &&
+                                <button type="button" className={styles.overdueBtn} onClick={() => setView('agenda', today)}>
+                                    {fill(t('overdueCount'), { count: overdueCount })}
+                                </button>}
+                            <button type="button" className={`${styles.todayBtn} ${isCurrentPeriod ? styles.todayBtnQuiet : ''}`} onClick={goToday} title={`${t('today')} (T)`}>
+                                {t('today')}
+                            </button>
+                            <button type="button" className={styles.navBtn} onClick={() => shift(-1)} aria-label={prevLabel} title={prevLabel}><Icon name="prev" /></button>
+                            <button type="button" className={styles.navBtn} onClick={() => shift(1)} aria-label={nextLabel} title={nextLabel}><Icon name="next" /></button>
+                        </div>
+                    </div>
+
+                    <div className={styles.controls}>
+                        <div className={styles.segmented} role="group" aria-label={t('calendarViews')}>
+                            {CALENDAR_VIEWS.map(name => (
+                                <button key={name} type="button" aria-pressed={view === name}
+                                    className={view === name ? styles.segmentActive : undefined}
+                                    onClick={() => setView(name)} title={`${t(VIEW_LABELS[name])} (${name[0].toUpperCase()})`}>
+                                    {t(VIEW_LABELS[name])}
+                                </button>
+                            ))}
+                        </div>
+                        <div className={styles.filters}>
+                            {sourceChoice && sourcePicker}
+                            <label className={styles.search}>
+                                <Icon name="search" size={18} />
+                                <input type="search" value={query} onChange={(e) => setQuery(e.target.value)}
+                                    placeholder={t('searchTasks')} aria-label={t('searchTasks')} />
+                            </label>
+                            {/* the rarer controls wait behind one button: group, done ones, export */}
+                            <div className={styles.filterWrap} ref={filterRef}>
+                                <button type="button" className={`${styles.filterBtn} ${hiddenFilters > 0 ? styles.filterBtnOn : ''}`}
+                                    aria-expanded={filtersOpen} aria-controls={filtersOpen ? 'calendarFilters' : undefined}
+                                    onClick={() => setFiltersOpen(open => !open)}>
+                                    <Icon name="filter" size={18} />
+                                    <span>{hiddenFilters > 0 ? fill(t('calendarFiltersActive'), { count: hiddenFilters }) : t('calendarFilters')}</span>
+                                </button>
+                                {filtersOpen && filterMenu}
+                            </div>
+                        </div>
+                    </div>
+                    {shared.readOnly && <p className={styles.sourceNote}>{t('calendarSessionEnded')}</p>}
+                </header>}
 
             {!isShared && <div className={styles.invites}><TaskInvites /></div>}
 
@@ -397,7 +500,11 @@ export default function Calendar() {
                 <AgendaView {...viewProps} tasks={shown} onToggleDone={toggleDone} onSchedule={moveTask}
                     onOpenGroup={openGroup} filtersActive={filtersActive} onClearFilters={clearFilters} />}
 
-            {view !== 'agenda' && <p className={styles.hint}>{t('calendarDragHint')} {t('calendarKeyHint')}</p>}
+            {view !== 'agenda' &&
+                <p className={styles.hint}>
+                    <span className={styles.hintPointer}>{t('calendarDragHint')} {t('calendarKeyHint')}</span>
+                    <span className={styles.hintTouch}>{t('calendarDragHintTouch')}</span>
+                </p>}
 
             {openDay &&
                 <DayPanel
@@ -408,13 +515,14 @@ export default function Calendar() {
                     sharedEntries={isShared ? [] : (sharedHistory ?? []).filter(entry => entry.lastWorkedAt && sameDay(new Date(entry.lastWorkedAt), openDay))}
                     personal={!isShared}
                     allowEvents={sharedEvents}
+                    remindsAll={remindsAll}
                     initialTaskId={openTaskId}
-                    newTaskGroup={newTaskGroup}
                     locale={locale}
                     longDate={longDate}
                     onClose={closeDay}
                     onShiftDay={shiftDay}
-                    onAddTask={addTaskOn}
+                    onCreate={(time) => openCreate(openDay, time)}
+                    paused={createAt !== null}
                     onToggleDone={toggleDone}
                     onSaveTask={saveTask}
                     onDeleteTask={removeTask}
@@ -422,6 +530,17 @@ export default function Calendar() {
                     onLeaveTask={isShared ? undefined : leaveSharedTask}
                     onOpenGroup={openGroup}
                 />}
+
+            {createAt && createPortal(
+                <FormSheet onClose={() => setCreateAt(null)}>
+                    {(sheet, close) => (
+                        <TaskForm sheet={sheet} initialDue={createAt.due} initialTime={createAt.time ?? ''}
+                            target={createTarget} group={isShared ? undefined : newTaskGroup ?? null}
+                            setCreateTask={(open) => { if (!open) close(); }} />
+                    )}
+                </FormSheet>,
+                document.body
+            )}
 
             {drag && createPortal(
                 <div className={styles.dragGhost} style={{ left: drag.x, top: drag.y }} aria-hidden="true">{drag.task.name}</div>,

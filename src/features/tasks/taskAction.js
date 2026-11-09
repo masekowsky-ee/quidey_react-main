@@ -1,4 +1,5 @@
 import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, GET_NOTES, REFRESH_TASKS, TASK_REPLACED, SET_TASK_INVITES, TASK_INVITE_ACCEPTED, TASK_INVITE_REMOVED, TASK_SHARE_REMOVED, SET_EVENT_TYPES, EVENT_TYPE_SAVED, EVENT_TYPE_REMOVED } from './taskActionTypes';
+import { track } from '../usage/usage';
 import { apiFetch, toInputDate } from '../helperFunction';
 import { askDeleteScope, isRepeating } from './deleteScope';
 import { dateKey } from '../calendar/calendar';
@@ -243,8 +244,9 @@ export const deleteGroup = (groupId) => {
 
 export const editDisplaygroup = (group, groupToDisplayId) => {
     return async (dispatch) => {
-        // a shared session's group: its tasks come from the session (TaskContainer reads them live)
-        if (group.shared && groupToDisplayId !== group.id) {
+        // a shared session's group: its tasks come from the session; a collection (testers, in
+        // place of groups): from my tasks (TaskContainer reads both live)
+        if ((group.shared || group.collection) && groupToDisplayId !== group.id) {
             dispatch({ type: EDIT_DISPLAYGROUP, payload: { group, tasks: [] } });
             return;
         }
@@ -307,6 +309,7 @@ export const createNote = (taskId, note) => {
             method: "POST",
             body: JSON.stringify({ content: note })
         });
+        track('note_written');
 
 
         dispatch({
@@ -342,14 +345,12 @@ export const editNote = (taskId, noteId, noteContent) => {
     };
 };
 
-export const getNotes = (taskId) => {
+// A task's notes are notebook notes about it (the server's /api/notes reads them from there), so
+// one written or changed in the Fokusraum or on /notes shows here once this has run again
+export const refreshTaskNotes = () => {
     return async (dispatch) => {
-        const notes = await apiFetch(`/api/notes?taskId=${taskId}`, {method: "GET"});
-
-        dispatch({
-            type: GET_NOTES,
-            payload: { taskId, notes },
-        });
+        const notes = await apiFetch("/api/notes");
+        dispatch({ type: GET_NOTES, payload: notes });
     };
 };
 

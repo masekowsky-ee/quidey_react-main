@@ -31,17 +31,20 @@ const REPEAT_LEFT_DEFAULT = 10;
 // hasDate: reminders and repeating count from the day, so without one they are off.
 // canMail: "also by mail" (value.reminder_email) is offered, only to the task's owner.
 // personal: false for a task in a shared session, which has no reminder and no repeating.
-export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = true, canMail = true, personal = true }) {
+// remindsAll: a family's entry (not personal): it has reminders, which reach every member (no
+// mail, no repeating; its all-day time is the family owner's, so mine isn't named).
+export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = true, canMail = true, personal = true, remindsAll = false }) {
     const { t } = useTranslation();
     const id = useId();
     const allDayTime = useSelector(selectAllDayTime);
     const push = usePushState();
     const linkOk = linkIsValid(value.link);
+    const reminds = personal || remindsAll;
     const reminders = value.reminders ?? [];
     const hasReminder = hasDate && reminders.length > 0;
     const choices = withCurrent(hasTime ? TIMED_REMINDERS : ALL_DAY_REMINDERS, reminders);
     const pushOff = hasReminder && !['on', 'unknown'].includes(push.status);
-    const hint = !hasDate || !hasTime || pushOff;
+    const hint = !hasDate || (!hasTime && personal) || pushOff || !personal;
 
     const toggleReminder = (minutes) => {
         const on = reminders.includes(minutes);
@@ -51,7 +54,7 @@ export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = 
 
     return (
         <div className={styles.options}>
-            {personal &&
+            {reminds &&
             <fieldset className={styles.reminders} disabled={!hasDate} aria-describedby={hint ? `${id}-reminder-hint` : undefined}>
                 <legend className={styles.remindersLegend}>{t('reminders')}</legend>
                 <div className={styles.reminderChoices}>
@@ -66,11 +69,12 @@ export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = 
                     })}
                 </div>
             </fieldset>}
-            {personal && hint &&
+            {reminds && hint &&
                 <p id={`${id}-reminder-hint`} className={styles.hint}>
                     {!hasDate ? t('reminderNeedsDate')
                         : <>
-                            {!hasTime && fill(t('reminderAllDayAt'), { time: allDayTime })}
+                            {!personal && t('remindsAllHint')}
+                            {!hasTime && personal && fill(t('reminderAllDayAt'), { time: allDayTime })}
                             {/* the phone only rings with notifications on for this device */}
                             {pushOff && <> {t('reminderPushOff')} <Link to="/settings#app">{t('reminderPushOffLink')}</Link></>}
                         </>}

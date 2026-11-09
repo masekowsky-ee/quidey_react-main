@@ -162,6 +162,18 @@
     color: var(--text-muted);
 }
 
+.quietLink{
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.quietLink:hover{
+    color: var(--text-h);
+}
+
 .quietBtn:hover{
     color: var(--text-h);
     border-color: var(--btn-border);

@@ -19,6 +19,7 @@ import Profile from '../components/Profile'
 import SharedTaskList from '../components/together/SharedTaskList'
 import Settings from '../components/Settings'
 import Header from '../components/Header'
+import AddFab from '../components/home/AddFab'
 import QuickAdd from '../components/QuickAdd'
 import { LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 
@@ -271,10 +272,11 @@ describe('fewer choices at once', () => {
         window.history.replaceState(null, '', '/')
     })
 
-    it('"New" in the header opens the task form from any page; Escape closes it', () => {
+    it("Home's add button opens the task form; Escape closes it; the header has the inbox", () => {
         const store = makeStore()
         store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
-        wrap(store, <><Header /><QuickAdd /></>)
+        wrap(store, <><Header /><AddFab /><QuickAdd /></>)
+        expect(screen.getByRole('link', { name: 'Inbox' })).toHaveAttribute('href', '/inbox')
         expect(screen.queryByRole('heading', { name: 'Create Task' })).not.toBeInTheDocument()
         fireEvent.click(screen.getByRole('button', { name: 'New task or event' }))
         expect(screen.getByRole('heading', { name: 'Create Task' })).toBeInTheDocument()

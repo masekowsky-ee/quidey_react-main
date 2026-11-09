@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import styles from './WorkingPage.module.css'
 import { useSelector, useDispatch } from "react-redux";
-import { createNote, deleteNote, editNote, updateTaskProps } from "../features/tasks/taskAction.js";
+import { createNote, refreshTaskNotes, updateTaskProps } from "../features/tasks/taskAction.js";
+import TaskNoteRow from "./task/TaskNoteRow.jsx";
 import {useTranslation} from '../i18n/useTranslation'
 import { dueText, formatClock } from '../features/helperFunction'
 import { selectTaskTime } from '../features/session/sessionAction'
@@ -52,6 +53,8 @@ export default function WorkingContainer (props) {
     };
 
     const notes = useSelector(state => state.task.notes);
+    // notes about the task written in the notebook (Fokusraum, Notizen) since the list was loaded
+    useEffect(() => { dispatch(refreshTaskNotes()).catch(() => {}); }, [dispatch]);
     const taskSeconds = useSelector(state => activeTask ? selectTaskTime(state, activeTask.id) : 0);
 
     const [addingNote, setAddingNote] = useState(false);
@@ -166,15 +169,8 @@ export default function WorkingContainer (props) {
                             onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); if (e.key === 'Escape') setAddingNote(false); }} />}
                         <ul className={styles.notesList}>
                             {notes?.filter(note => note.task_id === activeTask.id).map(note =>
-                                <li className={styles.noteRow} key={note.id}>
-                                    <input type="text" className={styles.noteInput} defaultValue={note.content} aria-label={t('taskNotes')}
-                                        onBlur={(e) => dispatch(editNote(activeTask.id, note.id, e.target.value))}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }} />
-                                    <button className={styles.noteDelete} onClick={() => dispatch(deleteNote(activeTask.id, note.id))}
-                                        aria-label={`${t('deleteNote')}: ${note.content}`} title={t('deleteNote')}>
-                                        <Icon name="trash" className={styles.noteIcon} />
-                                    </button>
-                                </li>)}
+                                <TaskNoteRow key={note.id} taskId={activeTask.id} note={note} className={styles.noteRow} inputClassName={styles.noteInput}
+                                    buttonClassName={styles.noteDelete} iconClassName={styles.noteIcon} />)}
                         </ul>
                         <p className={styles.swipeHint}>{t('releaseTaskHint')}</p>
                     </motion.div>}

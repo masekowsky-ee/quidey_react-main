@@ -24,6 +24,7 @@ import { setShowSharedTasks } from '../features/settings/settingsAction'
 import { isEvent } from '../features/tasks/kinds'
 import { dateKey, minutesOfDay } from '../features/calendar/calendar'
 import TodayEvents from './task/TodayEvents.jsx'
+import { selectCollections, taskIdsIn, updateCollection, deleteCollection, removeFromCollection } from '../features/collections/collections'
 
 // seconds between two rows when the list cascades in
 const CASCADE_STEP = { minimal: 0.025, normal: 0.035, extreme: 0.045 };
@@ -56,8 +57,19 @@ export function TaskListSkeleton() {
     );
 }
 
+// open tasks shown at first on Home (own look)
+const PLAIN_ROWS = 6;
+
 export default function TaskContainer(props){
     const { handlePointerDown, draggedTask, dragPosition, dragOffset, setCreateTask, activeTask, releasedIds = [], onActivate } = props;
+    // plain: the app's own Home (today's events are in "Dein Tag" beside it, the list doesn't fold,
+    // "5 erledigt" and "Neue Aufgabe" are quiet text buttons; the add button in the corner is the loud one)
+    const plain = Boolean(props.plain);
+    // Home's own look shows the first few open tasks, the rest one tap away, so the list stays
+    // about as long as the column beside it
+    const [expanded, setExpanded] = useState(false);
+    // "All": the study plan's later sessions shown too (see plannedStudy)
+    const [showPlanned, setShowPlanned] = useState(false);
 
     // whether the Done list is shown; only this component uses it
     const [showDone, setShowDone] = useState(false);
@@ -103,8 +115,11 @@ export default function TaskContainer(props){
     const sharedInAll = showSharedTasks ? sharedTasks : [];
     const hiddenSharedCount = showingAll && !showSharedTasks ? sharedTasks.filter(task => !task.done).length : 0;
     const toggleSharedTasks = () => dispatch(setShowSharedTasks(!showSharedTasks));
-    // the shown group as stored (one of my own, not "all" or a session's), or undefined
-    const shownGroupRow = showingAll || shownGroup?.shared ? undefined : groups.find(g => g.id === shownGroup.id);
+    // the shown group as stored (one of my own, not "all", a session's or a collection), or undefined
+    const shownGroupRow = showingAll || shownGroup?.shared || shownGroup?.collection ? undefined : groups.find(g => g.id === shownGroup.id);
+    // testers: a collection in place of a group, its tasks (events among them) found in mine
+    const collections = useSelector(selectCollections);
+    const shownCollection = shownGroup?.collection ? collections.find(c => c.id === shownGroup.collectionId) : undefined;
     // a session's group: one of its sub-groups can be picked too (kept on the shown group, so
     // the new-task form puts new tasks there too; picking the session's chip again starts at all)
     const shownShared = shownGroup?.shared ? sharedGroups.find(group => group.sessionId === shownGroup.sessionId) : undefined;
@@ -115,8 +130,10 @@ export default function TaskContainer(props){
         dispatch(showToast(togetherErrorText(t, err), 'error'));
         return null;
     });
+    const collectionTaskIds = shownCollection ? taskIdsIn(shownCollection) : null;
     const groupTasks = shownGroup?.shared
         ? inSubGroup(shownShared?.tasks ?? [], subGroup)
+        : shownGroup?.collection ? tasks.filter(task => collectionTaskIds?.has(task.id))
         : showingAll ? [...groupToDisplay.tasks, ...sharedInAll] : groupToDisplay.tasks;
     // tasks put back from the work area go to the end, in the order they were put back
     const releasedRank = (task) => releasedIds.indexOf(task.id);
@@ -129,6 +146,11 @@ export default function TaskContainer(props){
     const openTasks = todoTasks.filter(task => !task.done && task.id !== activeTask?.id);
     const doneTasks = todoTasks.filter(task => task.done && task.id !== activeTask?.id);
     const todayKey = dateKey(new Date());
+    // The study plan (Lernen) puts many sessions into the list, days ahead. In "All" only today's
+    // and overdue ones are rows; the later ones wait behind one row that shows them. A subject's
+    // own group (or any other one picked) shows everything.
+    const plannedStudy = showingAll ? openTasks.filter(task => task.study && task.due && dateKey(task.due) > todayKey) : [];
+    const listedOpen = showPlanned || plannedStudy.length === 0 ? openTasks : openTasks.filter(task => !plannedStudy.includes(task));
     const todayEvents = listTasks
         .filter(task => isEvent(task) && dateKey(task.due) === todayKey)
         .sort((a, b) => (minutesOfDay(a.due_time) ?? -1) - (minutesOfDay(b.due_time) ?? -1));
@@ -175,10 +197,11 @@ export default function TaskContainer(props){
 
     const [editGroupDescription, setEditGroupDescription] = useState(false);
     const setGroupDescriptionHandler = (description) => {
-        dispatch(editGroup(groupToDisplay.group.id, {description: description}, groupToDisplay.group));
+        if (shownCollection) dispatch(updateCollection(shownCollection.id, { description })).catch(reportError);
+        else dispatch(editGroup(groupToDisplay.group.id, {description: description}, groupToDisplay.group));
         setEditGroupDescription(false);
     }
-    const groupDescription = shownGroupRow?.description;
+    const groupDescription = shownGroupRow?.description ?? shownCollection?.description;
 
     const inOwnGroup = Boolean(groupToDisplay.group.name) && !showingAll && !shownGroup?.shared;
 
@@ -213,20 +236,25 @@ export default function TaskContainer(props){
             deleteLabel: t(leaving ? 'leaveTask' : 'deleteTask'),
             onFocus: onActivate ? () => onActivate(task) : undefined,
             onDragStart: (e) => handlePointerDown(e, task),
-            onRemoveFromGroup: inOwnGroup ? () => dispatch(deleteGroupTasks(task.id, groupToDisplay.group.id)) : undefined,
+            onRemoveFromGroup: shownCollection
+                ? () => dispatch(removeFromCollection(shownCollection.id, { kind: 'task', id: task.id })).catch(reportError)
+                : inOwnGroup ? () => dispatch(deleteGroupTasks(task.id, groupToDisplay.group.id)) : undefined,
+            removeLabel: shownCollection ? t('collectionRemoveTask') : undefined,
         };
     };
 
     return (
-        <section className={styles.section} aria-labelledby="tasks-title" data-part="task-list">
+        <section className={styles.section} aria-labelledby="tasks-title" data-part="task-list" data-plain={plain || undefined}>
             {taskInEditor && <TaskEditDialog task={taskInEditor} onClose={closeEditor} />}
             <div className={styles.sectionHead}>
-                <button className={styles.collapseBtn} onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed}
+                {!plain && <button className={styles.collapseBtn} onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed}
                     title={t(collapsed ? 'expandTasks' : 'collapseTasks')} aria-label={t(collapsed ? 'expandTasks' : 'collapseTasks')}>
                     <Icon name="chevronDown" className={collapsed ? styles.chevronClosed : styles.chevron} />
-                </button>
+                </button>}
                 <h2 id="tasks-title" className={styles.sectionTitle}>
-                    {shownGroup?.name && !showingAll ? shownGroup.name : t('taskContainer')}
+                    {shownCollection
+                        ? `${shownCollection.emoji ? `${shownCollection.emoji} ` : ''}${shownCollection.name}`
+                        : shownGroup?.name && !showingAll ? shownGroup.name : t('taskContainer')}
                 </h2>
                 {/* "All" has its count in the page's title row */}
                 {!showingAll && <span className={styles.openCount}>{fill(t('openTasksCount'), { count: openTasks.length })}</span>}
@@ -238,6 +266,17 @@ export default function TaskContainer(props){
                 {shownGroupRow &&
                     <ConfirmDeleteButton label={`${t('deleteGroup')}: ${shownGroupRow.name}`} title={t('deleteGroup')}
                         onConfirm={() => dispatch(deleteGroup(shownGroupRow.id)).catch(reportError)} />}
+                {/* a collection: the same, and its own page (with its events and notes) */}
+                {shownCollection && <>
+                    <TaskColorButton task={shownCollection} label={t('collectionColor')}
+                        onChange={(color) => dispatch(updateCollection(shownCollection.id, { color })).catch(reportError)} />
+                    <Link to={`/collections/${shownCollection.id}`} className={styles.openCollection}
+                        title={t('collectionOpenPage')} aria-label={`${t('collectionOpenPage')}: ${shownCollection.name}`}>
+                        <Icon name="collection" />
+                    </Link>
+                    <ConfirmDeleteButton label={`${t('collectionDelete')}: ${shownCollection.name}`} title={t('collectionDeleteHint')}
+                        onConfirm={() => dispatch(deleteCollection(shownCollection.id)).catch(reportError)} />
+                </>}
                 <div className={styles.headActions}>
                     {showingAll && sharedTasks.length > 0 &&
                         <button className={`${styles.sharedToggle} ${showSharedTasks ? '' : styles.sharedToggleOff}`}
@@ -247,16 +286,25 @@ export default function TaskContainer(props){
                             <Icon name={showSharedTasks ? 'eye' : 'eyeOff'} className={styles.sharedToggleIcon} />
                             <span className={styles.sharedToggleLabel}>{t('sessionTasks')}</span>
                         </button>}
-                    {doneTasks.length > 0 && !collapsed &&
-                        <button className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}
+                    {doneTasks.length > 0 && !collapsed && (plain
+                        ? <button className={`${styles.textBtn} ${showDone ? styles.textBtnOn : ''}`}
+                            onClick={() => setShowDone(!showDone)} aria-pressed={showDone}>
+                            {fill(t('homeListDone'), { count: doneTasks.length })}
+                        </button>
+                        : <button className={`${styles.doneToggle} ${showDone ? styles.doneToggleOn : ''}`}
                             onClick={() => setShowDone(!showDone)} aria-pressed={showDone}>
                             {t('done')}
                             <span className={styles.doneCount}>{doneTasks.length}</span>
+                        </button>)}
+                    {plain
+                        ? <button className={styles.textBtn} onClick={() => setCreateTask(true)}>
+                            <Icon name="plus" className={styles.addIcon} strokeWidth={2} />
+                            {t('homeListAdd')}
+                        </button>
+                        : <button className={styles.addBtn} onClick={() => setCreateTask(true)}>
+                            <Icon name="plus" className={styles.addIcon} strokeWidth={2} />
+                            {t('createTaskH2')}
                         </button>}
-                    <button className={styles.addBtn} onClick={() => setCreateTask(true)}>
-                        <Icon name="plus" className={styles.addIcon} strokeWidth={2} />
-                        {t('createTaskH2')}
-                    </button>
                 </div>
             </div>
             {hiddenSharedCount > 0 &&
@@ -282,18 +330,28 @@ export default function TaskContainer(props){
                 </p>)}
 
             {!collapsed && <>
-                {todayEvents.length > 0 && <TodayEvents events={todayEvents} onOpen={(task) => setEditTaskId(task.id)} />}
-                {!loaded ? <SkeletonPanel /> : <div className={styles.panel}>
-                    {openTasks.length === 0
+                {todayEvents.length > 0 && !plain && <TodayEvents events={todayEvents} onOpen={(task) => setEditTaskId(task.id)} />}
+                {!loaded ? <SkeletonPanel /> : <div className={plain ? styles.plainList : styles.panel}>
+                    {listedOpen.length === 0 && plannedStudy.length === 0
                         ? <div className={styles.empty}>
                             <p className={styles.emptyTitle}>{t('noOpenTasks')}</p>
                             <p className={styles.emptyText}>{t('noOpenTasksHint')}</p>
                         </div>
-                        : <ul className={styles.list} aria-label={t('toDo')}>
+                        : <ul className={styles.list} aria-label={t('toDo')} data-scrolls={!plain || expanded || undefined}>
                             <AnimatePresence>
-                                {openTasks.map((task, index) => <TaskRow key={task.id} {...rowProps(task, index)} />)}
+                                {(plain && !expanded ? listedOpen.slice(0, PLAIN_ROWS) : listedOpen)
+                                    .map((task, index) => <TaskRow key={task.id} {...rowProps(task, index)} />)}
                             </AnimatePresence>
                         </ul>}
+                    {plain && listedOpen.length > PLAIN_ROWS &&
+                        <button type="button" className={styles.moreRows} onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>
+                            {expanded ? t('homeListLess') : fill(t('homeListMore'), { count: listedOpen.length - PLAIN_ROWS })}
+                        </button>}
+                    {plannedStudy.length > 0 &&
+                        <button type="button" className={styles.plannedRow} onClick={() => setShowPlanned(!showPlanned)} aria-expanded={showPlanned}>
+                            <Icon name="book" size={16} />
+                            <span>{showPlanned ? t('studyPlannedHide') : fill(t(plannedStudy.length === 1 ? 'studyPlannedOne' : 'studyPlannedShow'), { count: plannedStudy.length })}</span>
+                        </button>}
                 </div>}
 
                 {showDone && doneTasks.length > 0 &&

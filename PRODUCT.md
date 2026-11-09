@@ -24,7 +24,7 @@ Success means people come back daily to plan and focus. They also return to stud
 
 The social motivation is the core difference. Shared live study sessions count focus time for everyone in them. A stopwatch runs for the whole group, and the session has a shared task list and a chat. On top of that, the Gemeinschaft area (feed, cheering, daily and weekly challenges, levels and XP that grow from seed to ancient forest) is a central pillar, not an add-on.
 
-The calm promise applies to planning: the task list, focus and calendar stay quiet and uncluttered. All of this is privacy-first, built by one person, and free during the beta.
+The calm promise applies to planning: the task list, focus and calendar stay quiet and uncluttered. All of this is privacy-first (no ads or tracking; external services only when you trigger them), built by one person, and free during the beta.
 
 ## Operating Context
 
@@ -49,7 +49,7 @@ The calm promise applies to planning: the task list, focus and calendar stay qui
 
 - Name: Quidey. The wordmark and logo are in `public/icons/` and `../quidey_landing/src/components/Logo.astro`.
 - Voice: a personal solo-maker voice ("ich schalte dich frei"). Direct, warm and plain, with informal "du" and gender-inclusive forms ("Freund:innen"). Tagline idea: "Eine Sache nach der anderen." / "Fang mit einer Sache an."
-- Privacy is a product promise: no ads, no tracking, no cookies (only localStorage). Data is hosted at STRATO in Germany, and the account can be deleted at any time with everything in it.
+- Privacy is a product promise: no ads, no tracking, no cookies (only localStorage). Data is hosted at STRATO in Germany, external services only when you trigger or switch them on (the optional AI estimates in Lernen), and the account can be deleted at any time with everything in it.
 - Free during the beta: there is no payment system, and no pricing claims are made.
 
 ## Evidence on Hand
@@ -62,7 +62,7 @@ The calm promise applies to planning: the task list, focus and calendar stay qui
 
 1. **Together beats alone.** The social layer (live sessions, cheering, shared progress) is the reason to choose Quidey. It should feel encouraging, never like a competition that shames.
 2. **One thing at a time.** Planning and focus surfaces stay calm and uncluttered, and the current task is always the clearest thing on screen.
-3. **Privacy is not negotiable.** No ads, tracking or third-party calls, data stays in Germany, and every data change is reflected in the legal texts.
+3. **Privacy stays a promise.** No ads or tracking, data hosted in Germany. External services only when you trigger or switch them on (AI estimates), and only with the data they need.
 4. **The user sets the intensity.** Motion, theme, accent and how much shared content appears are the user's choice, and the quietest setting is a full product.
 5. **A person, not a corporation.** Copy sounds like the one person who builds Quidey: honest about the beta, never inflated.
 

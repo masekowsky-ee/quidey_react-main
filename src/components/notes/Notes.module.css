@@ -1,0 +1,718 @@
+/* The notes area (/notes, testers): the views beside the list beside the open note, and what the
+   notebook's editor gets on top here (folder, tags, colour, formatting, actions) */
+
+.page {
+    composes: page from '../ui.module.css';
+    width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
+    margin: 0 auto;
+    padding-bottom: 5rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    text-align: left;
+    /* the columns below follow the page's width (not the window's: the menu takes some) */
+    container: notes / inline-size;
+}
+
+.head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    padding-top: 1.75rem;
+}
+
+.title {
+    margin: 0;
+    font-size: 1.5rem;
+    line-height: 1.25;
+}
+
+.subtitle {
+    margin: 0.25rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+}
+
+.headActions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ghostLink {
+    composes: ghostBtn from '../ui.module.css';
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2.25rem;
+    padding: 0 0.9rem;
+    font-size: 0.875rem;
+    color: var(--text);
+    text-decoration: none;
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-pill);
+}
+
+.primary {
+    composes: btnPrimary from '../ui.module.css';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.templateSelect {
+    height: 2.25rem;
+    max-width: 12rem;
+    font-size: 0.85rem;
+    border-radius: var(--radius-pill);
+}
+
+/* ---------- the three columns ---------- */
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.side {
+    display: flex;
+    gap: 0.35rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 0.15rem;
+}
+
+.sideGroup {
+    display: contents;
+}
+
+.sideHeading {
+    display: none;
+}
+
+.viewBtn {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    height: 2.1rem;
+    padding: 0 0.8rem;
+    font-size: 0.85rem;
+    color: var(--text);
+    background: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    box-shadow: none;
+    white-space: nowrap;
+}
+
+.viewBtn:hover {
+    color: var(--text-h);
+    border-color: var(--control-border);
+}
+
+.viewBtn[aria-current="true"] {
+    color: var(--text-h);
+    background: var(--surface-strong);
+    border-color: var(--control-border);
+    font-weight: 600;
+}
+
+.viewCount {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.newFolder {
+    flex: none;
+    display: inline-flex;
+    gap: 0.35rem;
+    align-items: center;
+}
+
+.newFolder input {
+    width: 9rem;
+    height: 2.1rem;
+    font-size: 0.85rem;
+}
+
+.newFolder select {
+    height: 2.1rem;
+    width: 3.4rem;
+    padding: 0 0.3rem;
+}
+
+.listCol,
+.editorCol {
+    min-width: 0;
+}
+
+.editorCol {
+    display: none;
+}
+
+.layout[data-open] .listCol {
+    display: none;
+}
+
+.layout[data-open] .editorCol {
+    display: block;
+}
+
+.editorPanel {
+    composes: panel from '../ui.module.css';
+    padding: 1rem 1.1rem 1.25rem;
+}
+
+.editorEmpty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 18rem;
+    padding: 2rem 1rem;
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 0.875rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.editorEmpty p {
+    margin: 0;
+    max-width: 20rem;
+}
+
+/* side beside the rest */
+@container notes (min-width: 44rem) {
+    .layout {
+        grid-template-columns: 12.5rem minmax(0, 1fr);
+    }
+
+    .side {
+        position: sticky;
+        top: calc(var(--header-h) + 1rem);
+        flex-direction: column;
+        overflow: visible;
+    }
+
+    .sideGroup {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .sideGroup + .sideGroup {
+        margin-top: 0.85rem;
+    }
+
+    .sideHeading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 0 0.2rem;
+        padding: 0 0.6rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+    }
+
+    .viewBtn {
+        width: 100%;
+        height: 2.15rem;
+        padding: 0 0.6rem;
+        background: none;
+        border-color: transparent;
+        border-radius: var(--radius-sm);
+        text-align: left;
+    }
+
+    .viewBtn > span:not(.viewCount) {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .viewBtn[aria-current="true"] {
+        background: var(--surface-inset);
+        border-color: transparent;
+    }
+
+    .newFolder {
+        flex-wrap: wrap;
+        padding: 0.25rem 0.1rem;
+    }
+
+    .newFolder input {
+        flex: 1;
+        width: auto;
+        min-width: 0;
+    }
+}
+
+/* list and open note side by side */
+@container notes (min-width: 64rem) {
+    .layout {
+        grid-template-columns: 12.5rem minmax(17rem, 22rem) minmax(0, 1fr);
+    }
+
+    .layout[data-open] .listCol,
+    .editorCol {
+        display: block;
+    }
+
+    .editorCol {
+        position: sticky;
+        top: calc(var(--header-h) + 1rem);
+    }
+}
+
+/* ---------- the list ---------- */
+.listHead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.listTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 1 1 100%;
+    min-width: 0;
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-h);
+}
+
+.listTitle > span:first-of-type {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.listCount {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.titleActions {
+    display: inline-flex;
+    gap: 0.15rem;
+    margin-left: auto;
+}
+
+.iconBtn {
+    composes: iconHover from '../ui.module.css';
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+}
+
+.search {
+    flex: 1 1 100%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 0.65rem;
+    background: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    color: var(--text-muted);
+}
+
+.search input {
+    flex: 1;
+    min-width: 0;
+    height: 2.1rem;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.search input:focus-visible {
+    outline: none;
+}
+
+.search:focus-within {
+    border-color: var(--border-strong);
+}
+
+.sortSelect {
+    flex: 1;
+    height: 2.1rem;
+    font-size: 0.8rem;
+    max-width: 10rem;
+}
+
+.layoutSwitch {
+    composes: segmented from '../ui.module.css';
+}
+
+.layoutSwitch > button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+}
+
+.layoutSwitch > button[aria-pressed="true"] {
+    background: var(--surface-strong);
+    color: var(--text-h);
+}
+
+.rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rows[data-layout="grid"] {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 0.6rem;
+}
+
+.row {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0.6rem 0.75rem 0.6rem 0.9rem;
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+    height: auto;
+    overflow: hidden;
+}
+
+.row[data-task-color]::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--task-color);
+}
+
+.row:hover {
+    border-color: var(--control-border);
+    background: var(--surface);
+}
+
+.row[aria-current="true"] {
+    border-color: var(--border-strong);
+    background: var(--surface-inset);
+}
+
+.rows[data-layout="grid"] .row {
+    height: 100%;
+    min-height: 8.5rem;
+}
+
+.rowTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    max-width: 100%;
+    font-weight: 600;
+    color: var(--text-h);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rowPreview {
+    max-width: 100%;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rowPreview[data-empty] {
+    font-style: italic;
+    opacity: 0.75;
+}
+
+.rows[data-layout="grid"] .rowPreview {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+    flex: 1;
+}
+
+.rowMeta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.15rem 0.65rem;
+    max-width: 100%;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.rowMeta > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.rowTag {
+    color: var(--text);
+}
+
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2.5rem 1rem;
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.empty p {
+    margin: 0;
+    max-width: 22rem;
+}
+
+/* ---------- the trash ---------- */
+.trashBar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.trashBar p {
+    margin: 0;
+}
+
+.trashRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.5rem 0.55rem 0.85rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.trashText {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.textBtn {
+    composes: ghostBtn from '../ui.module.css';
+    height: 2rem;
+    padding: 0 0.7rem;
+    font-size: 0.8rem;
+}
+
+/* ---------- the editor's extras ---------- */
+.details {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+}
+
+.folderField {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text-muted);
+}
+
+.folderField select {
+    height: 2rem;
+    font-size: 0.8rem;
+    max-width: 12rem;
+}
+
+.tagField {
+    flex: 1 1 12rem;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 2rem;
+    padding: 0.15rem 0.5rem;
+    color: var(--text-muted);
+    background: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+}
+
+.tagField:focus-within {
+    border-color: var(--border-strong);
+}
+
+.tagField input {
+    flex: 1;
+    min-width: 5rem;
+    height: 1.6rem;
+    padding: 0;
+    font-size: 0.8rem;
+    background: transparent;
+    border: none;
+}
+
+.tagField input:focus-visible {
+    outline: none;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.05rem 0.15rem 0.05rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-h);
+    background: var(--surface-strong);
+    border-radius: var(--radius-pill);
+}
+
+.tag button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    box-shadow: none;
+    color: var(--text-muted);
+}
+
+.colorRow {
+    flex: 1 1 100%;
+}
+
+.colorRow fieldset {
+    margin: 0;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--text-muted);
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.actionBtn {
+    composes: ghostBtn from '../ui.module.css';
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 2rem;
+    padding: 0 0.75rem;
+    font-size: 0.8rem;
+}
+
+.mono,
+.code {
+    font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+}
+
+.code {
+    padding: 0.05rem 0.3rem;
+    font-size: 0.88em;
+    background: var(--surface-inset);
+    border-radius: 4px;
+}
+
+.subheading {
+    margin: 0.45rem 0 0.1rem;
+    font-size: 0.92rem;
+    color: var(--text-h);
+}
+
+.listLine {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.bullet,
+.number {
+    flex: none;
+    min-width: 1.1rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.quote {
+    margin: 0.15rem 0;
+    padding: 0.1rem 0 0.1rem 0.75rem;
+    border-left: 3px solid var(--border-strong);
+    color: var(--text);
+    font-style: italic;
+}
+
+.divider {
+    width: 100%;
+    margin: 0.6rem 0;
+    border: none;
+    border-top: 1px solid var(--border);
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+

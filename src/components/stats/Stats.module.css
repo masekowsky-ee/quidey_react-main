@@ -2,7 +2,7 @@
 
 .page{
     composes: pageColumn from '../ui.module.css';
-    width: min(760px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
     /* the two chart series (validated pair, both themes): focus and events */
     --series-focus: #3987e5;
     --series-events: #d95926;
@@ -121,33 +121,35 @@
 
 /* ---------- number tiles ---------- */
 
+/* the period's numbers as a ledger line: each under an ink rule (as Home's coming days), the
+   figure in the serif; no boxes around them */
 .tiles{
-    margin: 0;
+    margin: 0.5rem 0 0.75rem;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.75rem;
+    gap: 1rem;
 }
 
 .tile{
-    composes: panel from '../ui.module.css';
+    border-top: 2px solid var(--text-h);
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
-    padding: 0.9rem 1rem;
+    padding: 0.75rem 0 0;
     min-width: 0;
 }
 
 .tile dt{
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 500;
     color: var(--text-muted);
 }
 
 .tile dd{
-    margin: 0;
-    font-size: 1.375rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    margin: 0.25rem 0 0;
+    font: 400 2.125rem/1.1 var(--serif);
+    letter-spacing: -0.015em;
+    font-variant-numeric: lining-nums tabular-nums;
     color: var(--text-h);
     white-space: nowrap;
 }
@@ -158,7 +160,7 @@
     }
 
     .tile dd{
-        font-size: 1.2rem;
+        font-size: 1.75rem;
     }
 }
 
@@ -481,4 +483,64 @@
     .stepper{
         justify-content: space-between;
     }
+}
+
+/* "In sessions & families": the team time, then one row per session / family */
+.togetherTime{
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin: 0.4rem 0 0.8rem;
+}
+
+.togetherTime dt{
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.togetherTime dd{
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--text-h);
+}
+
+.places{
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.place{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    color: inherit;
+    text-decoration: none;
+    border-top: 1px solid var(--border);
+}
+
+.place:hover .placeName{
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.placeName{
+    min-width: 0;
+    font-weight: 550;
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+}
+
+.placeCounts{
+    flex: none;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
 }

@@ -54,6 +54,32 @@ export function useSheet(onClose, ref, open = true) {
 
 const SHEET_HANDLES = '[data-sheet-grabber], [data-sheet-drag]';
 
+// A sheet that opens to be typed into: the field gets the focus once the sheet is in place. With a
+// mouse at once; on a touch screen only after the slide-in, since the on-screen keyboard shrinks the
+// window (the Android app, phone browsers) and the sheet, resting on the bottom edge, would jump
+// while it still moves. So the sheet comes up first, then the keyboard. A field tapped meanwhile
+// keeps the focus. Returns a cleanup (the sheet closed before it arrived: nothing happens).
+export function focusOnArrival(field) {
+    if (!field) return () => {};
+    const moving = field.closest('[data-sheet]')?.getAnimations?.().filter(animation => animation.playState === 'running') ?? [];
+    if (moving.length === 0 || window.matchMedia?.('(pointer: fine)')?.matches) {
+        field.focus();
+        return () => {};
+    }
+    let gone = false;
+    const arrive = () => {
+        if (gone || !field.isConnected || document.activeElement?.closest?.(KEEP)) return;
+        field.focus({ preventScroll: true });
+    };
+    Promise.all(moving.map(animation => animation.finished)).then(arrive, arrive);
+    return () => { gone = true; };
+}
+
+// the same as the field's autoFocus
+export function useFocusOnArrival(ref) {
+    useEffect(() => focusOnArrival(ref.current), [ref]);
+}
+
 // a few pixels before it counts as a drag, so taps (the close button in a sheet's head) still tap
 const SLOP = 10;
 // fields keep their own gestures (selecting text, sliders)

@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import {useTranslation} from '../../i18n/useTranslation'
 import { fetchSharedHistory } from '../../features/together/togetherAction';
 import { inPeriod } from '../../features/stats/period';
+import { groupSittings, sittingGapMs } from '../../features/stats/sittings';
+import { fill } from '../../features/helperFunction';
 
 import Icon from '../icons';
 // 95 -> "1 h 35 min", 40 -> "40 min"
@@ -27,9 +29,10 @@ function TeamIcon() {
     return <svg xmlns="http://www.w3.org/2000/svg" height="13px" viewBox="0 -960 960 960" width="13px" fill="currentColor" aria-hidden="true"><path d="M40-272q0-34 17.5-62.5T104-378q62-31 126-46.5T360-440q66 0 130 15.5T616-378q29 15 46.5 43.5T680-272v32q0 33-23.5 56.5T600-160H120q-33 0-56.5-23.5T40-240v-32Zm320-208q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47Z"/></svg>;
 }
 
-// My focus sessions in a period (see features/stats/period.js), newest first: solo sessions
-// with the tasks worked on, and my work in shared sessions between them (by when I last worked
-// on it). Numbers for the period above the list.
+// My focus sessions in a period (see features/stats/period.js), newest first: solo sittings
+// (Pomodoro rounds of one run together, features/stats/sittings.js) with the tasks worked on,
+// and my work in shared sessions between them (by when I last worked on it). Numbers for the
+// period above the list.
 export default function SessionList({ period }){
     const { t } = useTranslation();
     const dispatch = useDispatch();
@@ -43,6 +46,10 @@ export default function SessionList({ period }){
 
     const allSessions = useSelector(state => state.session.workedSessionData);
     const workedSessionData = allSessions.filter(ws => inPeriod(period, ws.date));
+    // rounds with only a break between them are one row; runs under a minute aren't shown
+    const pomodoro = useSelector(state => state.session.pomodoro.config);
+    const sittings = groupSittings(workedSessionData, sittingGapMs(pomodoro));
+    const sessionCount = sittings.reduce((sum, sitting) => sum + sitting.rounds, 0);
     const language = useSelector(state => state.settings.language);
     const locale = language === 'de' ? 'de-DE' : 'en-GB';
 
@@ -52,7 +59,7 @@ export default function SessionList({ period }){
     const sharedMinutes = Math.round(sharedHistory.reduce((sum, entry) => sum + entry.myMs, 0) / 60000);
 
     const timeline = [
-        ...workedSessionData.map(ws => ({ kind: 'solo', key: `solo-${ws.id}`, date: new Date(ws.date), data: ws })),
+        ...sittings.map(sitting => ({ kind: 'solo', key: `solo-${sitting.key}`, date: sitting.date, data: sitting })),
         ...sharedHistory.map(entry => ({ kind: 'shared', key: `shared-${entry.id}`, date: new Date(entry.lastWorkedAt), data: entry })),
     ].sort((a, b) => b.date - a.date);
 
@@ -72,7 +79,7 @@ export default function SessionList({ period }){
                 <>
                     <div className={styles.stats}>
                         <div className={styles.stat}>
-                            <span className={styles.statValue}>{workedSessionData.length}</span>
+                            <span className={styles.statValue}>{sessionCount}</span>
                             <span className={styles.statLabel}>{t('sessions')}</span>
                         </div>
                         <div className={styles.stat}>
@@ -126,17 +133,16 @@ export default function SessionList({ period }){
                                             </p>
                                             <p className={styles.sessionMeta}>
                                                 {date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', timeZone: browserTZ })}
-                                                {ws.group && ws.group !== 'all' && ` · ${ws.group}`}
+                                                {ws.rounds > 1 && ` · ${fill(t('sittingRounds'), { n: ws.rounds })}`}
+                                                {ws.group && ` · ${ws.group}`}
                                             </p>
                                         </div>
-                                        <span className={styles.duration}>{`${Math.ceil(ws.totalTime / 60)} min`}</span>
+                                        <span className={styles.duration}>{formatMinutes(Math.ceil(ws.totalTime / 60))}</span>
                                     </div>
                                     {lengthBar(entry)}
                                     {ws.workedTasks.length > 0 &&
                                         <ul className={styles.tags}>
-                                            {[...ws.workedTasks]
-                                                .sort((a, b) => (b.time ?? 0) - (a.time ?? 0))
-                                                .map((task) => {
+                                            {ws.workedTasks.map((task) => {
                                                     const time = formatTaskTime(task.time);
                                                     return (
                                                         <li key={task.id} className={task.shared ? `${styles.tag} ${styles.sharedTag}` : styles.tag}

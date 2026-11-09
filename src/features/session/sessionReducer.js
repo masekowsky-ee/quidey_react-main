@@ -88,12 +88,18 @@ const sessionReducer = (state = initialState(), action) => {
                 ...state,
                 currentSessionData: { ...state.currentSessionData, ...action.payload },
             };
-        case SET_TIMER:
+        case SET_TIMER: {
+            const now = action.now ?? Date.now();
+            // a session is dated when its time starts: the empty one may have been made the evening
+            // before (after the last save, kept overnight in focusRun), and would land on that day
+            const starts = action.payload.active && state.currentSessionData.totalTime === 0;
             return {
                 ...state,
                 timer: action.payload,
-                runningSince: action.payload.active ? (action.now ?? Date.now()) : null,
+                runningSince: action.payload.active ? now : null,
+                ...(starts ? { currentSessionData: { ...state.currentSessionData, date: new Date(now).toISOString() } } : {}),
             }
+        }
         case CLOCK_TICK: {
             // whole seconds that passed on the wall clock (also while the phone slept): the
             // countdown goes down by them, the stopwatch up, and in focus they are booked

@@ -126,7 +126,8 @@ describe('Social page', () => {
 
             await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Annehmen' })) })
 
-            expect(apiFetch).toHaveBeenLastCalledWith('/api/friends/requests/10/accept', { method: 'POST' })
+            // (a profile picture lookup for the new friend may come after it)
+            expect(apiFetch).toHaveBeenCalledWith('/api/friends/requests/10/accept', { method: 'POST' })
             expect(screen.queryByRole('button', { name: 'Annehmen' })).not.toBeInTheDocument()
             fireEvent.click(tab('Freunde'))
             expect(screen.getByText(/@ben · Freunde seit/)).toBeInTheDocument()

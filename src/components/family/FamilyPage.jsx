@@ -24,10 +24,13 @@ import { useNow } from '../../features/together/work';
 import { useFamilyRun } from './useFamilyRun';
 import Avatar from '../together/Avatar';
 import TaskEditDialog from '../task/TaskEditDialog';
+import { KindSwitch } from '../task/KindFields';
+import MoveMyTasks from './MoveMyTasks.jsx';
 import Icon from '../calendar/icons.jsx';
 // the app's outline set, for what the calendar's icons don't have (flame, chevron)
 import AppIcon from '../icons';
 import FriendPicker from '../together/FriendPicker';
+import NoteBoard from '../board/NoteBoard.jsx';
 
 const UPCOMING_MAX = 8;
 const MESSAGE_MAX = 1000;
@@ -194,6 +197,9 @@ function FamilyBoard({ family, onChanged }) {
                         </p>
                     </>
                     : <p className={styles.emptyLine}>{t('familyBoardEmpty')}</p>}
+            <div className={own.boardNotes}>
+                <NoteBoard kind="family" id={family.id} />
+            </div>
         </section>
     );
 }
@@ -296,8 +302,9 @@ function FamilyTitle({ family, onChanged }) {
 }
 
 // What's coming up in the family calendar: tick entries off, edit or delete them (who added one,
-// or the owner, may delete it), and add new ones. subGroup / subGroups: the shown sub-group and
-// all of them (testers; subGroups undefined for everybody else).
+// or the owner, may delete it), and add new ones, tasks or events (an event has no tick: it is
+// done once it's over). Their reminders reach every member. subGroup / subGroups: the shown
+// sub-group and all of them.
 function Upcoming({ family, onChanged, subGroup, subGroups }) {
     const { t, language } = useTranslation();
     const locale = language === 'de' ? 'de-DE' : 'en-GB';
@@ -306,6 +313,7 @@ function Upcoming({ family, onChanged, subGroup, subGroups }) {
     const today = toDateOnly(new Date());
     const todayKey = dateKey(today);
     const [name, setName] = useState('');
+    const [kind, setKind] = useState('task');
     const [day, setDay] = useState(todayKey);
     const [time, setTime] = useState('');
     const [assignee, setAssignee] = useState(null);
@@ -331,7 +339,7 @@ function Upcoming({ family, onChanged, subGroup, subGroups }) {
         setBusy(true);
         const changed = await run(addFamilyTask(family.id, {
             name: name.trim(), due: day, ...(time ? { due_time: time } : {}), ...(assignee ? { assignee_id: assignee } : {}),
-            ...(subGroup ? { group_id: subGroup } : {}),
+            ...(subGroup ? { group_id: subGroup } : {}), ...(kind === 'event' ? { kind } : {}),
         }));
         setBusy(false);
         if (changed) {
@@ -362,10 +370,14 @@ function Upcoming({ family, onChanged, subGroup, subGroups }) {
                 : <ul className={own.upcoming}>
                     {upcoming.map(task => (
                         <li key={task.id} className={own.entry} title={createdText(task, t, language, myUsername) || undefined}>
-                            <button type="button" className={own.entryCheck} aria-pressed={false} onClick={() => toggleDone(task)}
-                                aria-label={`${t('markDone')}: ${task.name}`} title={t('markDone')}>
-                                <Icon name="check" size={14} />
-                            </button>
+                            {task.kind === 'event'
+                                ? <span className={own.entryEvent} role="img" aria-label={t('kind_event')} title={t('kind_event')}>
+                                    <Icon name="calendar" size={14} />
+                                </span>
+                                : <button type="button" className={own.entryCheck} aria-pressed={false} onClick={() => toggleDone(task)}
+                                    aria-label={`${t('markDone')}: ${task.name}`} title={t('markDone')}>
+                                    <Icon name="check" size={14} />
+                                </button>}
                             <span className={`${own.entryWhen} ${sameDay(parseDate(task.due), today) ? own.entryToday : ''}`}>
                                 {dayText(task.due)}{task.due_time ? ` · ${taskTimeText(task)}` : ''}
                             </span>
@@ -398,8 +410,11 @@ function Upcoming({ family, onChanged, subGroup, subGroups }) {
                             ? () => change(removeFamilyTask(family.id, editing.id))
                             : undefined,
                         subGroups,
+                        allowEvents: true,
+                        remindsAll: true,
                     }}
                 />}
+            <KindSwitch value={kind} onChange={setKind} />
             <form className={own.quickAdd} onSubmit={add}>
                 <input value={name} maxLength={200} onChange={(e) => setName(e.target.value)}
                     placeholder={t('familyAddEntry')} aria-label={t('familyAddEntry')} />
@@ -655,6 +670,7 @@ export default function FamilyPage() {
                     <FamilyBoard family={family} onChanged={show} />
                     <Upcoming family={family} onChanged={show} subGroup={subGroup} subGroups={subGroups} />
                     <FamilyList family={family} onChanged={show} subGroup={subGroup} />
+                    <MoveMyTasks family={family} onChanged={show} subGroup={subGroup} />
                     <Members family={family} onChanged={show} />
                 </div>
                 <div className={styles.roomSide}>

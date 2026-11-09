@@ -18,11 +18,14 @@ import { fetchMySharedTasks, selectSharedSoloTasks } from '../features/together/
 import { selectTasksLoaded } from '../features/tasks/taskAction.js'
 import { Bone } from './skeleton/Skeleton.jsx'
 import Today from './home/Today.jsx'
+import DayPlan from './home/DayPlan.jsx'
+import FocusSheet, { FocusSheetSkeleton } from './home/FocusSheet.jsx'
+import ReplanCard from './study/ReplanCard.jsx'
 import { DESKTOP_QUERY, useMediaQuery } from '../features/layout/breakpoints.js'
 import { fill, isOverdue, sameDay, parseDate } from '../features/helperFunction.js'
 import { isEvent } from '../features/tasks/kinds.js'
 import { useTranslation } from '../i18n/useTranslation.js'
-import { useUiVariant } from '../features/tester/variants.js'
+import { DEFAULT_UI_VARIANT, useUiVariant } from '../features/tester/variants.js'
 import DepartureBoard from './variants/DepartureBoard.jsx'
 import Seats from './variants/Seats.jsx'
 
@@ -35,26 +38,75 @@ function useTodayTitle() {
         { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
 }
 
-// The day as the title and how it looks: open tasks, due today, overdue (the tasks the list
-// shows, so both say the same number); the Solo | Team switch on the right. Until my tasks are
-// there the line under the title is grey, not "all done".
-function TitleRow({ tasks }) {
+// "Guten Morgen" / "Guten Tag" / "Guten Abend" by the hour
+function greetingKey(hour) {
+    if (hour >= 5 && hour < 11) return 'greetMorning';
+    if (hour >= 11 && hour < 17) return 'greetDay';
+    return 'greetEvening';
+}
+
+// The app's own look says the day in sentences under the greeting: the date, what is due today
+// (unless the grey line already says it), the next event today with its time, and the overdue
+// ones as a link to the agenda.
+function DaySentence({ date, dueToday, overdue, nextEvent, leadSaysDue, today }) {
+    const { t } = useTranslation();
+    const due = dueToday === 0 ? t('homeSumNone')
+        : fill(t(dueToday === 1 ? 'homeSumDueOne' : 'homeSumDue'), { count: dueToday });
+    return (
+        <p className={styles.sentence}>
+            {date}.{' '}
+            {!leadSaysDue && <>{due}{' '}</>}
+            {nextEvent && <>{fill(t('homeSumEvent'), { time: nextEvent.due_time.slice(0, 5), name: nextEvent.name })}{' '}</>}
+            {overdue > 0 && <>
+                <Link to={`/calendar?view=agenda&date=${dateKey(today)}`} className={styles.overdue}>
+                    {fill(t(overdue === 1 ? 'homeSumOverdueOne' : 'homeSumOverdue'), { count: overdue })}
+                </Link>.
+            </>}
+        </p>
+    );
+}
+
+// Home's title: a greeting with the first name, and under it in grey what today is about (the
+// task in focus, else how many are due). Then the day's numbers as one line: the date, open, due
+// today, overdue (a link to the agenda) and today's events (the tasks the list shows, so both say
+// the same number); the Solo | Team switch on the right. Until my tasks are there the numbers are
+// grey, not "all done". sentence: the app's own look, the numbers said as sentences.
+function TitleRow({ tasks, focusTask = null, sentence = false }) {
     const { t } = useTranslation();
     const today = new Date();
-    const title = useTodayTitle();
+    const date = useTodayTitle();
     const loaded = useSelector(selectTasksLoaded);
+    const user = useSelector(state => state.auth.user);
+    const firstName = (user?.display_name || user?.username || '').trim().split(/\s+/)[0];
+    const hello = t(greetingKey(today.getHours()));
     const isToday = (task) => { const due = parseDate(task.due); return due && sameDay(due, today); };
     // events aren't to-dos: they only count as today's events still to come
     const open = tasks.filter(task => !task.done && !isEvent(task));
     const dueToday = open.filter(isToday).length;
     const overdue = open.filter(task => isOverdue(task, today)).length;
     const eventsToday = tasks.filter(task => isEvent(task) && !task.done && isToday(task)).length;
+    const nowText = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+    const nextEvent = tasks
+        .filter(task => isEvent(task) && !task.done && isToday(task) && task.due_time && task.due_time.slice(0, 5) >= nowText)
+        .sort((a, b) => a.due_time.localeCompare(b.due_time))[0];
+    const lead = !loaded ? null
+        : focusTask ? fill(t('homeLeadFocus'), { name: focusTask.name })
+        : dueToday > 0 ? fill(t(dueToday === 1 ? 'homeLeadDueOne' : 'homeLeadDue'), { count: dueToday })
+        : t('homeLeadFree');
     return (
         <header className={styles.titleRow} data-part="home-title">
             <div className={styles.titleText}>
-            <h1 className={styles.title}>{title}</h1>
-            <p className={styles.summary}>
-                {!loaded ? <Bone w="13rem" h="0.9375rem" style={{ margin: '0.25rem 0' }} />
+            <h1 className={`${styles.title} ${styles.greeting}`}>
+                <span>{firstName ? `${hello}, ${firstName}.` : `${hello}.`}</span>
+                {lead && <span className={styles.lead}>{lead}</span>}
+            </h1>
+            {sentence
+                ? (loaded
+                    ? <DaySentence date={date} dueToday={dueToday} overdue={overdue} nextEvent={nextEvent} today={today} leadSaysDue={!focusTask} />
+                    : <p className={styles.sentence}>{date}. <Bone w="14rem" h="1.0625rem" style={{ display: 'inline-block', verticalAlign: 'middle' }} /></p>)
+                : <p className={styles.summary}>
+                <span>{date}</span>
+                {!loaded ? <Bone w="11rem" h="0.9375rem" style={{ margin: '0.25rem 0' }} />
                     : open.length === 0
                     ? <span>{t('allDoneToday')}</span>
                     : <>
@@ -67,7 +119,7 @@ function TitleRow({ tasks }) {
                             </Link>}
                     </>}
                 {eventsToday > 0 && <span>{fill(t(eventsToday === 1 ? 'eventsTodayOne' : 'eventsTodayCount'), { count: eventsToday })}</span>}
-            </p>
+            </p>}
             </div>
             <SoloTogetherStrip />
         </header>
@@ -78,15 +130,26 @@ function TitleRow({ tasks }) {
 // layout, the parts that need no data as they are, grey where tasks and progress will be
 export function HomeSkeleton() {
     const desktop = useMediaQuery(DESKTOP_QUERY);
+    const own = useUiVariant() === DEFAULT_UI_VARIANT;
+    if (own) return (
+        <div className={styles.page} data-part="home">
+            <TitleRow tasks={[]} sentence />
+            <div className={styles.board} data-part="home-columns">
+                <div className={styles.focusArea}><FocusSheetSkeleton /></div>
+                <div className={styles.dayArea}><DayPlan tasks={[]} /></div>
+                <div className={`${styles.listArea} ${styles.listBlock}`} data-part="home-list">
+                    <GroupBtnContainer setCreateGroup={() => {}} />
+                    <TaskListSkeleton />
+                </div>
+                <aside className={styles.sideArea}>
+                    <MomentumSkeleton stacked />
+                </aside>
+            </div>
+        </div>
+    );
     return (
         <div className={styles.page} data-part="home">
-            <header className={styles.titleRow} data-part="home-title">
-                <div className={styles.titleText}>
-                    <h1 className={styles.title}>{useTodayTitle()}</h1>
-                    <p className={styles.summary}><Bone w="13rem" h="0.9375rem" style={{ margin: '0.25rem 0' }} /></p>
-                </div>
-                <SoloTogetherStrip />
-            </header>
+            <TitleRow tasks={[]} />
             <MomentumSkeleton />
             <WeekDaysContainer />
             <div className={styles.columns} data-part="home-columns">
@@ -222,27 +285,55 @@ export default function Home(){
     const timerPanel = <TimerContainer inline={desktop} />;
 
     const listedTasks = showSharedTasks ? [...tasks, ...sharedTasks] : tasks;
-    return (
+    const groupForm = createGroup && <FormSheet onClose={() => setCreateGroup(false)}>
+        {(sheet, close) => <GroupForm sheet={sheet} setCreateGroup={(value) => { if (!value) close(); }} />}
+    </FormSheet>;
+    const taskList = (
+        <TaskContainer
+            activeTask={activeTask}
+            releasedIds={releasedIds}
+            onActivate={activateTask}
+            setCreateTask={setCreateTask}
+            handlePointerDown={handlePointerDown}
+            draggedTask={draggedTask}
+            dragPosition={dragPosition}
+            dragOffset={dragOffset}
+        />
+    );
+    const working = (
+        <WorkingContainer
+            dropZoneRef={dropZoneRef}
+            activeTask={activeTask}
+            setActiveTask={setActiveTask}
+            onRelease={releaseActiveTask}
+            dragging={Boolean(draggedTask)}
+        />
+    );
+
+    // The app's own look: the greeting, then the task in focus on its own white sheet with the
+    // timer (the one lifted thing), the list under it; beside it what keeps the day going (today's
+    // dashboard, streak, challenges, friends), and the coming days at the end. Narrower, all of
+    // it in one column, the focus first.
+    if (uiVariant === DEFAULT_UI_VARIANT) return (
         <div className={styles.page} data-part="home">
-            <TitleRow tasks={listedTasks} />
-            {uiVariant === 'tafel' && <DepartureBoard tasks={listedTasks} activeTask={activeTask} />}
-            {/* streak, today's challenges and level, friends: what keeps one going */}
-            <div data-part="home-momentum" data-label={t('momentumTitle')}>
-                <Momentum />
-            </div>
-            {/* the day at a glance: focus goal, routines, what's next, a quick note */}
-            <Today tasks={listedTasks} />
+            <TitleRow tasks={listedTasks} focusTask={activeTask} sentence />
+            <ReplanCard />
             <TaskInvites />
-            <div data-part="home-week" data-label={t('calendar')}>
-                <WeekDaysContainer />
-            </div>
-            {createGroup && <FormSheet onClose={() => setCreateGroup(false)}>
-                {(sheet, close) => <GroupForm sheet={sheet} setCreateGroup={(value) => { if (!value) close(); }} />}
-            </FormSheet>}
-            <div className={styles.columns} data-part="home-columns">
-                <div className={styles.mainCol} data-part="home-list" data-label={t('taskContainer')}>
+            {groupForm}
+            {/* 8 + 4 columns: the focus sheet beside the day, the list beside what keeps one going;
+                one column on narrower screens, in that order */}
+            <div className={styles.board} data-part="home-columns">
+                <div className={styles.focusArea}>
+                    <FocusSheet dropZoneRef={dropZoneRef} activeTask={activeTask} setActiveTask={setActiveTask}
+                        onRelease={releaseActiveTask} dragging={Boolean(draggedTask)} />
+                </div>
+                <div className={styles.dayArea}>
+                    <DayPlan tasks={listedTasks} />
+                </div>
+                <section className={`${styles.listArea} ${styles.listBlock}`} aria-label={t('taskContainer')} data-part="home-list">
                     <GroupBtnContainer setCreateGroup={setCreateGroup} />
                     <TaskContainer
+                        plain
                         activeTask={activeTask}
                         releasedIds={releasedIds}
                         onActivate={activateTask}
@@ -252,19 +343,47 @@ export default function Home(){
                         dragPosition={dragPosition}
                         dragOffset={dragOffset}
                     />
+                </section>
+                <aside className={styles.sideArea} aria-label={t('momentumTitle')} data-part="home-momentum">
+                    <Momentum stacked />
+                </aside>
+            </div>
+            <section className={styles.weekBlock} aria-labelledby="home-week-title" data-part="home-week">
+                <h2 id="home-week-title" className={styles.blockTitle}>{t('homeComing')}</h2>
+                <WeekDaysContainer />
+            </section>
+        </div>
+    );
+
+    // testers' interface variants: the arrangement their stylesheets (src/ui-variants) expect
+    return (
+        <div className={styles.page} data-part="home">
+            <TitleRow tasks={listedTasks} focusTask={activeTask} />
+            {uiVariant === 'tafel' && <DepartureBoard tasks={listedTasks} activeTask={activeTask} />}
+            {/* streak, today's challenges and level, friends: what keeps one going */}
+            <div data-part="home-momentum" data-label={t('momentumTitle')}>
+                <Momentum />
+            </div>
+            {/* the day at a glance: focus goal, routines, what's next, a quick note */}
+            <ReplanCard />
+            <Today tasks={listedTasks} />
+            <TaskInvites />
+            <div data-part="home-week" data-label={t('calendar')}>
+                <WeekDaysContainer />
+            </div>
+            {groupForm}
+            <div className={styles.columns} data-part="home-columns">
+                <div className={styles.mainCol} data-part="home-list" data-label={t('taskContainer')}>
+                    <GroupBtnContainer setCreateGroup={setCreateGroup} />
+                    {taskList}
                 </div>
                 <aside className={styles.focusCol} aria-label={t('focusTitle')} data-part="home-focus" data-label={t('focusTitle')}>
-                    <WorkingContainer
-                        dropZoneRef={dropZoneRef}
-                        activeTask={activeTask}
-                        setActiveTask={setActiveTask}
-                        onRelease={releaseActiveTask}
-                        dragging={Boolean(draggedTask)}
-                    />
+                    {working}
                     {desktop && timerPanel}
                     {uiVariant === 'lesesaal' && <Seats />}
                 </aside>
             </div>
+            {/* folded in the bottom left (the add button, from App, is in the bottom right) */}
             {!desktop && timerPanel}
         </div>
     );

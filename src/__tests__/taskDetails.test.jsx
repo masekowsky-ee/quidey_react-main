@@ -277,7 +277,7 @@ describe('calendar with times and sharing', () => {
     it('shows the time on the chip, sorted after whole-day tasks', () => {
         renderCalendar('/calendar?date=2026-10-22', makeStore([lunch, fromAlice]))
         const day = document.querySelector('[data-date="2026-10-22"]')
-        const chips = within(day).getAllByRole('button').map(b => b.textContent)
+        const chips = within(day).getAllByRole('button').filter(b => !b.getAttribute('aria-label')?.startsWith('New entry')).map(b => b.textContent)
         expect(chips[0]).toContain('Movie night')
         expect(chips[1]).toContain('12:30')
         expect(chips[1]).toContain('Lunch')
@@ -297,9 +297,10 @@ describe('calendar with times and sharing', () => {
         const store = makeStore([])
         renderCalendar('/calendar?date=2026-10-22&day=2026-10-22', store)
         apiFetch.mockResolvedValueOnce({ id: 20, name: 'Gym', due: apiDate(2026, 10, 22), due_time: '18:00' })
-        fireEvent.change(screen.getByRole('textbox', { name: 'New task for this day…' }), { target: { value: 'Gym' } })
+        fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'New entry on 22 October 2026' }))
+        fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Gym' } })
         fireEvent.change(screen.getByLabelText(/^Time/), { target: { value: '18:00' } })
-        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Add' })) })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Create' })) })
         expect(bodyOf('/api/tasks', 'POST')).toMatchObject({ name: 'Gym', due: '2026-10-22', due_time: '18:00' })
     })
 

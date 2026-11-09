@@ -9,6 +9,9 @@ import { useTranslation } from '../i18n/useTranslation';
 import Icon from './icons.jsx';
 
 const MODES = ['timer', 'pomodoro', 'stopwatch'];
+
+// a two-digit part of the length as typed: the last two digits count ("05" + "7" → 57), at most max
+const typedPart = (raw, max) => Math.min(max, Number(String(raw).replace(/\D/g, '').slice(-2)) || 0);
 const MODE_LABEL = { timer: 'timerModeTimer', pomodoro: 'timerModePomodoro', stopwatch: 'timerModeStopwatch' };
 
 // The inline timer as it will look, for the start screen (AppSkeleton): its mode and time come
@@ -56,7 +59,7 @@ export function PomodoroLine({ className }) {
 }
 
 // The focus timer. inline: a panel in the page (Home's focus column on wide screens); otherwise
-// folded into a round button at the bottom right until it's opened (then a small panel there).
+// folded into a round button at the bottom left until it's opened (then a small panel there).
 // Three modes: "timer" counts the session length down, "pomodoro" counts focus and breaks down
 // in turns, "stopwatch" counts up from zero until stopped. Every second of focus is booked on
 // the task in focus. The counting itself happens in useFocusClock, by the wall clock, so it goes
@@ -208,7 +211,7 @@ export default function TimerContainer(props){
                         <div className={styles.editTimerDiv}>
                             <div>
                             <svg className={styles.timerArrow} onClick={()=>setNewH(prev => prev + 1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
-                            <h2 className={styles.setTimerH2} id="timerH">{`${String(newH).padStart(2, '0')}`}</h2>
+                            <input className={styles.setTimerInput} id="timerH" inputMode="numeric" pattern="[0-9]*" autoComplete="off" aria-label={t('durationHours')} value={String(newH).padStart(2, '0')} onFocus={e => e.target.select()} onChange={e => setNewH(typedPart(e.target.value, 23))} />
                             <svg className={styles.timerArrow} onClick={()=>{if (newH === 0) return;setNewH(prev => prev - 1)}} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
                             </div>
 
@@ -216,7 +219,7 @@ export default function TimerContainer(props){
 
                             <div>
                             <svg className={styles.timerArrow} onClick={()=>minSetter(5)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
-                            <h2 className={styles.setTimerH2} id="timerM">{`${String(newM).padStart(2, '0')}`}</h2>
+                            <input className={styles.setTimerInput} id="timerM" inputMode="numeric" pattern="[0-9]*" autoComplete="off" aria-label={t('durationMinutes')} value={String(newM).padStart(2, '0')} onFocus={e => e.target.select()} onChange={e => setNewM(typedPart(e.target.value, 59))} />
                             <svg className={styles.timerArrow} onClick={()=>minSetter(-5)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
                             </div>
 
@@ -224,7 +227,7 @@ export default function TimerContainer(props){
 
                             <div>
                             <svg className={styles.timerArrow} onClick={()=>secSetter(1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M328-400q-9 0-14.5-6t-5.5-14q0-2 6-14l145-145q5-5 10-7t11-2q6 0 11 2t10 7l145 145q3 3 4.5 6.5t1.5 7.5q0 8-5.5 14t-14.5 6H328Z"/></svg>
-                            <h2 className={styles.setTimerH2} id="timerS">{`${String(newS).padStart(2, '0')}`}</h2>
+                            <input className={styles.setTimerInput} id="timerS" inputMode="numeric" pattern="[0-9]*" autoComplete="off" aria-label={t('durationSeconds')} value={String(newS).padStart(2, '0')} onFocus={e => e.target.select()} onChange={e => setNewS(typedPart(e.target.value, 59))} />
                             <svg className={styles.timerArrow} onClick={()=>secSetter(-1)} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M459-381 314-526q-3-3-4.5-6.5T308-540q0-8 5.5-14t14.5-6h304q9 0 14.5 6t5.5 14q0 2-6 14L501-381q-5 5-10 7t-11 2q-6 0-11-2t-10-7Z"/></svg>
                             </div>
                         </div>
@@ -235,7 +238,8 @@ export default function TimerContainer(props){
                         <div style={{width: `${percentWidth}%`}} className={styles.progressFill}></div>
                     </div>}
                 <div className={styles.timerNav}>
-                    {!timer.active && (stopwatch || timer.time !== 0) && !editTimer &&
+                    {/* also once a countdown is over: it starts again with the last length */}
+                    {!timer.active && !editTimer &&
                         <button className={styles.btnGo} onClick={()=>timerAction('start')} aria-label="start timer">
                             <Icon name="play" className={styles.ctrlIcon} strokeWidth={2} />
                         </button>

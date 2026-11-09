@@ -11,8 +11,8 @@ const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styl
 const isShared = (task) => Boolean(task.owner) || (task.sharedWith ?? []).some(share => share.status === 'accepted');
 
 // One task inside a day of the month or week view: its start time (in the week view with the
-// end and the location), name and a mark when it's shared. Clicking opens it, dragging (mouse
-// or pen) moves it to another day. The day itself is the tab stop, so the chip is left out of
+// end and the location), name and a mark when it's shared. Clicking opens it, dragging moves it
+// to another day (mouse or pen at once, a finger after holding it a moment). The day itself is the tab stop, so the chip is left out of
 // the tab order unless asked for.
 export default function TaskChip({ task, today, onOpen, startDrag, dragging, showDescription = false, tabIndex = -1 }) {
     const { t } = useTranslation();
@@ -43,6 +43,7 @@ export default function TaskChip({ task, today, onOpen, startDrag, dragging, sho
                 {time && <span className={styles.chipTime}>{time}</span>}
                 {/* before the name: a long name is cut off at the end */}
                 {task.repeat && <span className={styles.chipRepeat} role="img" aria-label={t(`repeat_${task.repeat}`)}>↻</span>}
+                {task.study && <span className={styles.chipStudy} data-study-mark role="img" aria-label={task.study.subjectName}><Icon name="book" size={12} /></span>}
                 {task.name}
                 {shared && <span className={styles.chipShared} title={t('sharedWithLabel')} role="img" aria-label={t('sharedWithLabel')}><Icon name="team" size={12} /></span>}
             </span>

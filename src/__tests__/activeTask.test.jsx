@@ -40,8 +40,8 @@ describe('the task in focus', () => {
         wrap(makeStore(), <WorkingContainer activeTask={tasks[0]} setActiveTask={vi.fn()} onRelease={onRelease} dropZoneRef={{ current: null }} />)
         fireEvent.click(screen.getByRole('button', { name: 'Zurücklegen (nicht erledigt)' }))
         expect(onRelease).toHaveBeenCalled()
-        // nothing was marked done
-        expect(apiFetch).not.toHaveBeenCalled()
+        // nothing was marked done (the card only reloads the task notes)
+        expect(apiFetch.mock.calls.filter(([url]) => url !== '/api/notes')).toEqual([])
     })
 
     it('a put-back task is listed last, the latest one at the very end', () => {

@@ -1,5 +1,9 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { setShowMenu } from '../../features/settings/settingsAction';
+import { selectIsTester } from '../../features/auth/tester';
+import { selectMenuBadgeCount } from '../../features/inbox/inbox';
+import { selectHasNews } from '../../features/realtime/news';
 import styles from './TopNav.module.css';
 import Icon from '../icons';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -25,10 +29,16 @@ function Tab({ to, end, match, icon, label, count = 0, countLabel, news = false,
     );
 }
 
-// Interface variants with "tabs on top" (wide screens): the main places as a row of tabs under
-// the header's bar; settings, feedback, admin and the account stay in the drawer (header button)
-export default function TopNav() {
+// The main places as tabs on wide screens. `inline`: the app's own look, the tabs sit in the
+// header's one row as plain words, with "Mehr" at the end opening the drawer (everything else, the
+// account, the settings). Without it, testers' variants with "tabs on top" get them as a second
+// header row; their drawer opens from the header's menu button.
+export default function TopNav({ inline = false }) {
     const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const isTester = useSelector(selectIsTester);
+    const menuBadge = useSelector(selectMenuBadgeCount);
+    const hasNews = useSelector(selectHasNews);
     const news = useSelector(state => state.news);
     const inboxCount = useSelector(selectInboxCount);
     const inviteCount = useSelector(selectInviteCount);
@@ -37,20 +47,28 @@ export default function TopNav() {
     const familyInvites = useSelector(selectFamilyInviteCount);
 
     return (
-        <nav className={styles.bar} aria-label={t('mainNav')} data-part="topnav">
+        <nav className={inline ? styles.inline : styles.bar} aria-label={t('mainNav')} data-part="topnav">
             <div className={styles.tabs}>
                 <Tab to="/" end icon="home" label={t('home')} />
                 <Tab to="/calendar" icon="calendar" label={t('calendar')}
                     count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
+                <Tab to="/focus" icon="focus" label={t('focusRoom')} />
+                {inline && isTester && <Tab to="/study" icon="book" label={t('studyNav')} />}
                 <Tab to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')}
                     count={inviteCount + friendRequests + familyInvites} countLabel={t('communityCount')}
                     news={news.together || news.social || news.feed} newsLabel={t('menuNews')} />
                 <Tab to="/inbox" icon="inbox" label={t('inbox')} count={inboxCount} countLabel={t('inboxUnread')} />
                 <Tab to="/stats" icon="history" label={t('history')} />
             </div>
-            <div className={styles.tabs}>
-                <Tab to="/tester" icon="flask" label={t('testerNav')} />
-            </div>
+            {inline
+                ? <button type="button" className={styles.tab} onClick={() => dispatch(setShowMenu(true))}
+                    aria-label={menuBadge > 0 ? `${t('more')}, ${menuBadge} ${t('inboxUnread')}` : hasNews ? `${t('more')}, ${t('menuNews')}` : t('more')}>
+                    <span>{t('more')}</span>
+                    {menuBadge === 0 && hasNews && <span className={styles.dot} aria-hidden="true" />}
+                </button>
+                : <div className={styles.tabs}>
+                    <Tab to="/tester" icon="flask" label={t('testerNav')} />
+                </div>}
         </nav>
     );
 }

@@ -23,7 +23,13 @@ const LEGAL_PAGES = {
 // built in; the sections after them move up when they aren't. n(number as with Pro).
 const PRIVACY_PRO = 7;
 const TERMS_PRO = 8;
-const privacyNo = (no) => (proBuilt() || no < PRIVACY_PRO ? no : no - 1);
+// The section on the anonymous usage statistics is privacy § 4 (USAGE_NO); the numbers below it
+// are given here as before it existed and move up by one.
+const USAGE_NO = 4;
+const privacyNo = (no) => {
+    const n = proBuilt() || no < PRIVACY_PRO ? no : no - 1;
+    return n >= USAGE_NO ? n + 1 : n;
+};
 const termsNo = (no) => (proBuilt() || no < TERMS_PRO ? no : no - 2);
 
 // A value from owner.js; unfilled placeholders stand out so they can't slip through
@@ -161,12 +167,17 @@ function Privacy() {
             <h2>2. Das Wichtigste in Kürze</h2>
             <ul>
                 <li>Quidey verarbeitet nur die Daten, die für die App nötig sind.</li>
-                <li>Es gibt keine Werbung und keine Cookies. Im Browser gibt es kein Tracking und keine Analyse-Tools;
-                    in der Android-App nutze ich Google Analytics für Firebase, aber nur, wenn du einwilligst (Abschnitt 3).</li>
+                <li>Es gibt keine Werbung und keine Cookies. Mit deiner Einwilligung zählt Quidey mit, wann und welche
+                    Bereiche genutzt werden: nur als Summen ohne Konto, Benutzernummer oder Inhalte, auf dem eigenen Server
+                    (Abschnitt {USAGE_NO}).
+                    In der Android-App nutze ich zusätzlich Google Analytics für Firebase, nur wenn du einwilligst (Abschnitt 3).</li>
                 <li>Schriften und alle Dateien der App werden von Quidey selbst ausgeliefert, nicht von Dritten.</li>
+                <li>Externe Dienste kommen nur zum Einsatz, wenn du sie auslöst oder einschaltest: Die optionalen
+                    KI-Schätzungen im Bereich „Lernen“ gehen an Anthropic (Abschnitt {privacyNo(5)}), und nur mit den Angaben, die dafür
+                    nötig sind.</li>
                 <li>Du kannst dein Konto jederzeit im Profil selbst löschen. Dabei werden deine Daten gelöscht.</li>
                 {proBuilt() && <li>Bezahlst du für Quidey Pro, läuft das über Stripe bzw. Google Play; deine Karten- oder Kontodaten
-                    sehe ich nicht (Abschnitt 7).</li>}
+                    sehe ich nicht (Abschnitt {privacyNo(7)}).</li>}
                 <li>Mit Google anmelden ist freiwillig; ein Konto mit E-Mail-Adresse und Passwort geht genauso.</li>
             </ul>
 
@@ -246,7 +257,51 @@ function Privacy() {
                 oder der Abmeldung endet sie. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
             </p>
 
-            <h2>4. Dein Konto</h2>
+            <h2 id="nutzungsstatistik">{USAGE_NO}. Anonyme Nutzungsstatistik (nur mit Einwilligung)</h2>
+            <p>
+                Damit ich sehe, was in Quidey genutzt wird und was ich verbessern sollte, kann Quidey mitzählen,
+                wann und welche Bereiche genutzt werden. Das geschieht nur, wenn du einwilligst; ohne dein Ja wird
+                nichts gezählt.
+            </p>
+            <p>
+                <strong>Was gezählt wird:</strong> dass die App geöffnet wurde; die Minuten, in denen du sie aktiv
+                benutzt hast; welche Bereiche du öffnest (nur als Name des Bereichs, etwa Start, Kalender, Fokusraum,
+                Statistiken, Notizen, Lernen, Routinen, Gemeinschaft, Sitzungen, Family, Postfach, Profil oder
+                Einstellungen, ohne Benutzernamen oder Nummern); dass eine Aufgabe angelegt oder erledigt wurde; dass
+                ein Fokus gestartet wurde und wie viel Fokuszeit eine gespeicherte Sitzung hatte; dass eine Gruppe,
+                eine gemeinsame Sitzung oder eine Family angelegt, eine Freundschaftsanfrage gesendet oder ein Freund
+                hinzugefügt wurde; dass eine Routine durchgeführt, eine Notiz geschrieben, ein Lernplan übernommen oder
+                eine Erinnerung angelegt wurde. Jeweils nur die Art der Handlung, nie ihr Inhalt.
+            </p>
+            <p>
+                <strong>Dazu gehört:</strong> die Plattform (Web, installierte Web-App oder Android-App), die Sprache,
+                dein Plan (kostenlos, Tester oder Pro) sowie Stunde und Wochentag in deiner Zeitzone.
+            </p>
+            <p>
+                <strong>Wie das geht:</strong> Die App schickt diese Ereignisse mit deinem Konto an den Quidey-Server.
+                Der Server rechnet sie in Summen ein und speichert die einzelnen Ereignisse nicht. Damit Personen nur
+                einmal gezählt werden, merkt er sich pro Stunde, Tag und Woche mit deiner Benutzernummer, dass du
+                schon gezählt wurdest („schon gezählt“-Marken). Diese Marken werden spätestens nach 8 Tagen gelöscht.
+                Die Summen enthalten kein Konto, keine Benutzernummer und keine Inhalte; sie werden ohne zeitliche
+                Begrenzung aufbewahrt. Nutzen nur sehr wenige Menschen Quidey, kann eine Summe (etwa für eine Sprache,
+                einen Plan, eine Plattform oder eine Stunde) auch nur eine einzelne Person betreffen. Quidey nutzt sie
+                nur als Summen und versucht nie herauszufinden, wer dahintersteht. Noch nicht gesendete Ereignisse
+                wartet die App kurz auf deinem Gerät ab (Abschnitt {privacyNo(9)}).
+            </p>
+            <p>
+                Es gibt dabei keine Dritten und keine Cookies; alles läuft auf dem Quidey-Server (Abschnitt 3).
+                Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, für das Speichern und Auslesen auf
+                deinem Gerät § 25 Abs. 1 TDDDG).
+            </p>
+            <p>
+                Quidey fragt dich einmal danach; „Ja“ und „Nein“ sind gleich einfach, und die Antwort ist kein
+                Nachteil. Du kannst sie jederzeit unter Einstellungen → Datenschutz („Anonyme Nutzungsstatistik“)
+                ändern. Widerrufst du, wird sofort nicht mehr gezählt und deine „schon gezählt“-Marken werden gelöscht.
+                Die bereits eingerechneten Summen bleiben, weil sie kein Konto und keine Benutzernummer enthalten. Quidey funktioniert ohne
+                deine Einwilligung genauso.
+            </p>
+
+            <h2>{privacyNo(4)}. Dein Konto</h2>
             <p>Für die Registrierung verarbeite ich:</p>
             <ul>
                 <li><strong>Benutzername und Anzeigename</strong> – zur Anmeldung und damit Freunde dich finden und erkennen können;</li>
@@ -293,8 +348,17 @@ function Privacy() {
                 ich deine Begründung und die Entscheidung. Administratoren sehen dafür Benutzername, Anzeigename und
                 E-Mail-Adresse; Entscheidungen werden protokolliert (Art. 6 Abs. 1 lit. b und f DSGVO).
             </p>
+            <p>
+                <strong>Arcade:</strong> In den kleinen Spielen (auch im Warteraum vor dem Beta-Zugang) speichert Quidey
+                zu deinem Konto je Spiel und Schwierigkeit deine beste Punktzahl, wie oft du Punkte geschickt hast und
+                wann zuletzt. Spielst du im Modus „Rangliste“, kommt deine beste Punktzahl in diesem Modus mit dem
+                Zeitpunkt dazu; dann sehen alle angemeldeten Nutzer in der Rangliste deinen Anzeigenamen, deinen
+                Benutzernamen und diese Punktzahl. Im Modus „Nur für mich“ sieht deine Punkte nur du. Mit „Mich aus
+                allen Ranglisten nehmen“ löschst du deine Ranglisten-Einträge jederzeit; alles wird mit deinem Konto
+                gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+            </p>
 
-            <h2>5. Deine Inhalte</h2>
+            <h2>{privacyNo(5)}. Deine Inhalte</h2>
             <p>
                 Gespeichert wird, was du in Quidey anlegst: Aufgaben und Events (mit Tag, Uhrzeit, geplanter Zeit bzw.
                 Dauer, Erinnerung, Wiederholung, Farbe, Ort, Link, Beschreibung und Notizen sowie dem Zeitpunkt, zu dem
@@ -305,7 +369,7 @@ function Privacy() {
                 diesen Daten berechnet Quidey deine Statistiken für Woche, Monat, Jahr oder insgesamt (Fokuszeit,
                 Event-Zeit pro Typ, Fokuszeit pro Gruppe, erledigte Aufgaben); sie werden bei jedem Aufruf berechnet
                 und nicht zusätzlich gespeichert. Die Event-Zeit pro Typ siehst nur du, auch deine Freunde nicht.
-                Diese Inhalte sieht nur du – außer du teilst sie bewusst (Abschnitt 6). Rechtsgrundlage ist Art. 6
+                Diese Inhalte sieht nur du – außer du teilst sie bewusst (Abschnitt {privacyNo(6)}). Rechtsgrundlage ist Art. 6
                 Abs. 1 lit. b DSGVO. Bitte gib in Aufgaben, Events, Event-Typen, Notizen und Bildern keine besonders
                 sensiblen Daten ein (z. B. Gesundheitsdaten), die die App nicht braucht.
             </p>
@@ -315,16 +379,65 @@ function Privacy() {
                 zuletzt geändert wurden, und ihre Anhänge: Links (Adresse und Titel) und Bilder, die du einfügst oder
                 auswählst. Bilder werden vorher auf deinem Gerät verkleinert und dann als Teil der Notiz auf dem Server
                 gespeichert; achte darauf, keine Bilder mit Daten anderer Personen hochzuladen, die das nicht möchten.
+                Wenn du sie ordnest, kommen dazu: in welchem deiner Ordner (Name und Symbol) eine Notiz liegt, ihre
+                Schlagwörter und Farbe, ob sie archiviert ist und seit wann sie im Papierkorb liegt; Notizen im
+                Papierkorb werden nach 30 Tagen endgültig gelöscht. In Sammlungen speichert Quidey Name, Symbol, Farbe
+                und Beschreibung einer Sammlung und welche deiner Aufgaben, Events und Notizen seit wann darin sind.
                 Von deinen Routinen speichert Quidey Name, Symbol, die Schritte (Text und Minuten), an welchen
                 Wochentagen und zu welcher Uhrzeit du sie eingeplant hast, ob du erinnert werden möchtest und an welchem
                 Tag zuletzt erinnert wurde, sowie jeden Durchgang (Beginn, Ende, wie viele Schritte geschafft wurden und
-                wie lange es dauerte). Läuft der Fokus-Timer, speichert der Server, wann er endet und welche Phase
+                wie lange es dauerte). Als Tester kannst du Erinnerungen ohne Aufgabe anlegen: Von ihnen speichert
+                Quidey den Text, den Zeitpunkt oder die Wochentage mit Uhrzeit, ob und bis wann du eine verschoben hast,
+                wann du sie erledigt hast und für welchen Zeitpunkt sie zuletzt gemeldet wurde; erledigte werden nach
+                30 Tagen gelöscht. In der Android-App stellt Quidey die kommenden Zeiten deiner Erinnerungen (Text und
+                Uhrzeit, für die nächsten 14 Tage) als Wecker auf deinem Gerät; was du dort antippst („Erledigt“ oder
+                „Später“), bleibt auf dem Gerät, bis es an den Server geschickt ist, und beim Abmelden werden die Wecker
+                gelöscht. Für dieses Gerät merkt sich der Server, dass es die Erinnerungen selbst klingeln lässt, und
+                schickt ihm dazu keine Benachrichtigung. Läuft der Fokus-Timer, speichert der Server, wann er endet und welche Phase
                 (Timer, Fokus, kurze oder lange Pause) es ist, damit er dir dann eine Benachrichtigung schicken kann,
                 auch wenn dein Handy aus ist; der Eintrag wird beim Pausieren, Beenden oder nach der Benachrichtigung
-                gelöscht. Diese Inhalte sieht nur du. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+                gelöscht. Diese Inhalte siehst nur du, mit einer Ausnahme: Heftest du eine Notiz an das Board einer
+                Family oder einer gemeinsamen Sitzung, speichert Quidey, an welchem Board sie seit wann hängt, und die
+                Mitglieder dort sehen ihren Titel, Text, ihre Farbe und Anhänge (Links und Bilder), wann sie zuletzt
+                geändert wurde und dass sie von dir ist, und zwar immer so, wie sie gerade ist, bis du (oder die Person,
+                der die Family oder Sitzung gehört) sie wieder abnimmst, sie löschst oder in den Papierkorb legst oder
+                du nicht mehr dabei bist. Ändern können sie sie nicht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+            </p>
+            <p>
+                <strong>Lernen (Fächer und Lernziele):</strong> Als Tester kannst du im Bereich „Lernen“ Fächer und
+                Lernziele (Klausur, Abgabe, Referat, Sonstiges) anlegen. Quidey speichert zu deinem Konto: bei Fächern
+                Name, Symbol und Farbe; bei Zielen das Fach, die Art, den Namen, den Termin (Tag, optional Uhrzeit), den
+                Status und die Planungsart; bei den Themen und Schritten eines Ziels Name, Reihenfolge, geschätzte
+                Dauer samt Herkunft der Schätzung (aus deinem Verlauf, aus der Seitenzahl, KI-Schätzung, Standardwert
+                oder von dir eingegeben), wann du sie erledigt hast und wie lange du daran gearbeitet hast; deine
+                Lernzeiten (Wochentage und Uhrzeiten), Länge einer Lernsitzung, Höchstdauer pro Tag und ob KI-Schätzungen
+                automatisch erfolgen sollen. Daraus legt Quidey Lernsitzungen als Aufgaben in deinem Kalender an
+                (Abschnitt {privacyNo(5)}, Aufgaben). Diese Inhalte sieht nur du. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+                Mit deinem Konto werden sie gelöscht.
+            </p>
+            <p>
+                <strong>KI-Schätzungen (Anthropic):</strong> Quidey kann die Dauer der Themen und Schritte eines Ziels
+                mit Hilfe künstlicher Intelligenz schätzen. Das geschieht nur, wenn du auf „Schätzen lassen“ tippst
+                oder in den Einstellungen unter „Lernen“ automatische KI-Schätzungen einschaltest; ohne das wird
+                nichts an Anthropic übermittelt. Der Dienst wird von <V>{PROCESSORS.aiProvider}</V> („Anthropic“) erbracht,
+                die der Quidey-Server über eine Programmierschnittstelle aufruft (nicht dein Gerät). Übermittelt werden
+                ausschließlich: die Namen der Themen bzw. Schritte, der Name des Fachs, die Art des Ziels (z. B.
+                Klausur) und die Zahl der Tage bis zum Termin. Nicht übermittelt werden dein Name, Benutzername,
+                deine E-Mail-Adresse, Nutzer-ID, Notizen, Aufgaben oder andere Daten. Bitte schreib deshalb keine
+                Namen oder Angaben über Personen in Fach- und Themennamen, wenn du KI-Schätzungen nutzt. Anthropic
+                liefert eine Zahl in Minuten je Thema zurück; sie wird bei dem Thema gespeichert und als „KI-Schätzung“
+                gekennzeichnet. Dauert die Antwort länger als 8 Sekunden oder gibt es einen Fehler, schätzt Quidey
+                ohne KI weiter. Pro Konto sind höchstens 20 Anfragen innerhalb von 24 Stunden möglich. Rechtsgrundlage ist deine
+                Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO, die du durch das Tippen auf „Schätzen lassen“ bzw. das
+                Einschalten des Schalters erteilst; du kannst sie jederzeit widerrufen, indem du den Schalter
+                ausschaltest und nicht mehr tippst (die Rechtmäßigkeit der bisherigen Verarbeitung bleibt davon
+                unberührt). Anthropic verarbeitet die Daten als Auftragsverarbeiter auf Grundlage eines
+                Auftragsverarbeitungsvertrags (Art. 28 DSGVO) und kann sie in den USA verarbeiten; Grundlage dafür sind
+                die EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) in diesem Vertrag. Ohne diese Einwilligung nutzt du „Lernen“ ohne
+                Einschränkung weiter, nur ohne KI-Schätzungen.
             </p>
 
-            <h2>6. Freunde und gemeinsame Funktionen</h2>
+            <h2>{privacyNo(6)}. Freunde und gemeinsame Funktionen</h2>
             <p>
                 Wenn du Freundschaftsanfragen sendest oder annimmst, sehen deine Freunde deinen Benutzernamen und
                 Anzeigenamen. In gemeinsamen Sitzungen sehen alle Mitglieder deinen Namen, die Aufgaben der Sitzung
@@ -333,7 +446,10 @@ function Privacy() {
                 gearbeitet hat und den Verlauf der Sitzung. Untergruppen speichern ihren Namen,
                 wer sie angelegt hat und wann. Fügst du
                 eine eigene Aufgabe zu einer Sitzung hinzu, werden diese Angaben in die Sitzung übernommen; deine
-                Erinnerungen, Wiederholungen und Gruppen bleiben privat. Aufgaben, die du mit
+                Erinnerungen, Wiederholungen und Gruppen bleiben privat. Verschiebst du eine eigene Aufgabe oder einen
+                eigenen Termin in eine Family, wird daraus ein Eintrag der Family (mit seinen Angaben und Erinnerungen)
+                und deine Aufgabe gelöscht. Bei Aufgaben einer Sitzung wird gespeichert, wer sie wann abgehakt hat; was
+                du in Sitzungen und Families erledigst, zählt in deinen eigenen Statistiken mit. Aufgaben, die du mit
                 Freunden teilst, sehen diese Freunde. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
                 Verlässt du eine Sitzung oder löschst du dein Konto, bleibt im Verlauf der Sitzung nur ein Eintrag
                 ohne Bezug zu deinem Konto. Jede Sitzung hat einen gemeinsamen Kalender: Er zeigt die Aufgaben der
@@ -343,8 +459,9 @@ function Privacy() {
                 <strong>Quidey Family</strong>: Eine Family ist eine feste Gruppe, zu der du
                 Freunde einlädst. Gespeichert werden Name der Family, wer sie gegründet hat, wer eingeladen wurde
                 (von wem, wann) und wer beigetreten ist. Alle Mitglieder sehen die Namen der anderen Mitglieder, den
-                gemeinsamen Kalender mit allem, was ihr eintragt (z. B. Tag, Uhrzeit, Priorität, Dauer, Ort, Link,
-                Beschreibung, weitere Infos, Farbe, erledigt, wer den Eintrag wann angelegt hat, Untergruppe – diese
+                gemeinsamen Kalender mit allem, was ihr eintragt (z. B. Aufgabe oder Termin, Tag, Uhrzeit, Priorität,
+                Dauer, Ort, Link, Beschreibung, weitere Infos, Farbe, Erinnerungen – die bekommen alle Mitglieder –,
+                erledigt, wer den Eintrag wann angelegt und wer ihn wann abgehakt hat, Untergruppe – diese
                 speichern ihren Namen, wer sie angelegt hat und wann), und den Chat der Family
                 (Text, Absender, Zeitpunkt). Dazu kommen die Pinnwand der Family (ein kurzer Text, den alle Mitglieder
                 ändern können, mit wer ihn zuletzt geändert hat und wann), Emoji und Farbe der Family, die Liste
@@ -370,11 +487,11 @@ function Privacy() {
                 Art. 6 Abs. 1 lit. b DSGVO.
             </p>
             <p>
-                <strong>Profilbild</strong> (derzeit nur für Tester): Lädst du freiwillig ein Profilbild hoch, wird es
-                auf deinem Gerät quadratisch zugeschnitten und verkleinert (dabei fallen Angaben wie Aufnahmeort und
-                Kamera weg) und dann mit dem Zeitpunkt der letzten Änderung zu deinem Konto gespeichert. Es sehen nur
-                Personen, die auch deinen Online-Status sehen können: deine Freunde und die Mitglieder deiner laufenden
-                gemeinsamen Sitzungen und Families; solange die Funktion im Test ist, wird es nur Testern angezeigt.
+                <strong>Profilbild</strong>: Lädst du freiwillig ein Profilbild hoch, wählst du einen kreisrunden
+                Ausschnitt; nur dieser wird auf deinem Gerät ausgeschnitten und verkleinert (dabei fallen Angaben wie
+                Aufnahmeort und Kamera weg) und dann mit dem Zeitpunkt der letzten Änderung zu deinem Konto gespeichert.
+                Der Rest des Bildes verlässt dein Gerät nicht. Es sehen nur Personen, die auch deinen Online-Status sehen
+                können: deine Freunde und die Mitglieder deiner laufenden gemeinsamen Sitzungen und Families.
                 Du kannst es jederzeit unter „Profil gestalten“ entfernen; es wird auch gelöscht, wenn du dein Konto
                 löschst. Verstößt ein Bild gegen die Nutzungsbedingungen, kann der Betreiber es entfernen (das wird
                 im Admin-Protokoll vermerkt). Lade bitte nur Bilder hoch, an denen du die Rechte hast, und keine Bilder
@@ -403,7 +520,7 @@ function Privacy() {
                 Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
             </p>
             <p>
-                <strong>Feed:</strong> Im Feed unter „Gemeinschaft“ sehen deine Freunde – und nur sie – was du teilst:
+                <strong>Feed:</strong> Im Feed unter „Sozial“ sehen deine Freunde – und nur sie – was du teilst:
                 deine Fokuszeit und erledigten Aufgaben des Tages, geschaffte Challenges, neue Level und Lernserien,
                 sowie kurze Beiträge (bis zu 280 Zeichen), die du selbst schreibst. Die automatischen Einträge kannst
                 du im Profil unter „Profil gestalten“ mit „Meine Erfolge im Feed teilen“ abschalten; deine Beiträge
@@ -430,7 +547,7 @@ function Privacy() {
                 <strong>Erinnerungen per E-Mail:</strong> Schaltest du bei einer Aufgabe „Auch per E-Mail erinnern“ ein,
                 schickt dir Quidey zur eingestellten Zeit eine Mail an deine E-Mail-Adresse. Sie enthält den Namen der
                 Aufgabe, Tag und Uhrzeit sowie – falls angegeben – Ort, Link und Beschreibung. Der Versand erfolgt über
-                {' '}<V>{PROCESSORS.mailProvider}</V> als Auftragsverarbeiter (siehe Abschnitt 4). Gespeichert wird nur,
+                {' '}<V>{PROCESSORS.mailProvider}</V> als Auftragsverarbeiter (siehe Abschnitt {privacyNo(4)}). Gespeichert wird nur,
                 für welchen Zeitpunkt die Erinnerung schon verschickt wurde, damit sie nicht doppelt kommt. Bei geteilten
                 Aufgaben bekommt nur die Person die Mail, der die Aufgabe gehört. Du kannst die Mail-Erinnerung jederzeit
                 in der Aufgabe wieder ausschalten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
@@ -439,17 +556,24 @@ function Privacy() {
                 <strong>Benachrichtigungen auf deinem Gerät (Push):</strong> Nur wenn du sie einschaltest (in den
                 Einstellungen unter „App“ oder auf die Frage nach deiner ersten Aufgabe) und dein Browser es erlaubt,
                 meldet sich Quidey auch bei geschlossener App: zu den Erinnerungen deiner Aufgaben und Termine (neue
-                bekommen dann von selbst eine zum Beginn), wenn dein Fokus-Timer oder eine Pomodoro-Pause abgelaufen ist,
-                zur geplanten Uhrzeit deiner Routinen, morgens mit einem Überblick über deinen Tag, bei Nachrichten, Freundschaftsanfragen,
-                Einladungen, geteilten oder zugewiesenen Aufgaben und Meldungen des Quidey-Teams. Welche Arten du
+                bekommen dann von selbst eine zum Beginn) und zu den Erinnerungen an Einträge deiner Families (die
+                bekommen alle Mitglieder), wenn dein Fokus-Timer oder eine Pomodoro-Pause abgelaufen ist,
+                zur geplanten Uhrzeit deiner Routinen und Erinnerungen, morgens mit einem Überblick über deinen Tag, bei Nachrichten, Freundschaftsanfragen,
+                Einladungen, geteilten oder zugewiesenen Aufgaben, wenn jemand anderes in einer deiner Families oder
+                Sitzungen etwas einträgt oder in deren Chat schreibt, bei Meldungen des Quidey-Teams und, als Tester, in der
+                Art „Lernen“, wenn eines deiner Lernziele hinter dem Plan liegt (höchstens einmal am Tag und nur zwischen
+                8 und 19 Uhr; die Benachrichtigung enthält den Namen des Ziels und die fehlende Zeit). Welche Arten du
                 bekommst, stellst du je Gerät ein. Dafür erzeugt dein Browser bei seinem Push-Dienst eine Adresse; welcher
                 Dienst das ist, bestimmt der Hersteller deines Browsers bzw. Betriebssystems (z. B. Google bei Chrome und
                 Android, Apple bei Safari und auf iPhone/iPad, Mozilla bei Firefox), nicht Quidey. Gespeichert werden je
                 Gerät diese Adresse, zwei Schlüssel zum Verschlüsseln, die gewählten Arten und wann das Gerät angemeldet
-                bzw. zuletzt bestätigt wurde, zusammen mit deinem Konto; außerdem, für welchen Zeitpunkt eine Aufgabe schon
-                gemeldet wurde und an welchem Tag der Tagesüberblick kam, damit nichts doppelt kommt. Eine Benachrichtigung
-                enthält je nach Art den Namen und die Uhrzeit der Aufgabe (und den Ort), den Namen der Person, die dir
-                schreibt oder dich einlädt, den Anfang der Nachricht bzw. den Namen der Sitzung, Family oder Aufgabe. Sie
+                bzw. zuletzt bestätigt wurde, zusammen mit deinem Konto; außerdem, für welchen Zeitpunkt eine Aufgabe oder
+                ein Family-Eintrag schon gemeldet wurde und an welchem Tag der Tagesüberblick kam, damit nichts doppelt
+                kommt. Eine Benachrichtigung enthält je nach Art den Namen und die Uhrzeit der Aufgabe (und den Ort), den
+                Text einer Erinnerung, den Namen der Person, die dir schreibt, dich einlädt oder etwas einträgt, den
+                Anfang der Nachricht (auch aus dem Chat einer Family oder Sitzung, also von anderen Mitgliedern
+                geschrieben) bzw. den Namen der Sitzung, Family oder Aufgabe. Was jemand anderes in eine Family oder
+                Sitzung einträgt, kommt außerdem als Hinweis in dein Postfach (mehrere kurz nacheinander als einer). Sie
                 wird Ende-zu-Ende verschlüsselt (RFC 8291) übermittelt: Der Push-Dienst sieht nur verschlüsselte Daten
                 und technische Angaben wie Adresse, Zeitpunkt und Größe; er kann sie auch in den USA verarbeiten.
                 Benachrichtigungen erscheinen je nach Einstellung deines Geräts auch auf dem Sperrbildschirm. Ausschalten
@@ -471,7 +595,7 @@ function Privacy() {
             </p>
 
             {proBuilt() && <>
-            <h2>7. Quidey Pro (Bezahlung)</h2>
+            <h2>{privacyNo(7)}. Quidey Pro (Bezahlung)</h2>
             <p>
                 Quidey ist kostenlos nutzbar. Wer die Entwicklung unterstützen möchte, kann Quidey Pro abonnieren
                 (Nutzungsbedingungen, Abschnitt 8). Dafür speichere ich zu deinem Konto: Plan (monatlich oder jährlich),
@@ -498,7 +622,7 @@ function Privacy() {
             <p>
                 <strong>Kündigungsbutton:</strong> Über „Verträge hier kündigen“ kannst du ohne Anmeldung kündigen. Dabei
                 verarbeite ich Namen, E-Mail-Adresse, optional Benutzername, Art der Kündigung, gegebenenfalls den Grund
-                und den Zeitpunkt des Eingangs, schicke dir sofort eine Bestätigung (über Resend, Abschnitt 4) und mir eine
+                und den Zeitpunkt des Eingangs, schicke dir sofort eine Bestätigung (über Resend, Abschnitt {privacyNo(4)}) und mir eine
                 Kopie zur Bearbeitung. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b und c DSGVO (§ 312k BGB).
             </p>
             <p>
@@ -541,7 +665,7 @@ function Privacy() {
                 <li>dein Anmelde-Token (7 Tage gültig, wird beim Abmelden gelöscht). Meldest du auf demselben Gerät
                     mehrere Konten an, um zwischen ihnen zu wechseln, liegen für jedes davon Token, Benutzer- und
                     Anzeigename (höchstens fünf Konten); beim Abmelden eines Kontos wird sein Eintrag gelöscht;</li>
-                <li>deine Einstellungen: Sprache (bis du eine wählst, nimmt Quidey die deines Geräts), Design, Farbpalette, Akzentfarbe, Animationen, Töne, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer, Pomodoro oder Stoppuhr und die Pomodoro-Längen, dein Tagesziel für die Fokuszeit, im Fokusraum gewähltes Fokus-Geräusch, Lautstärke und Lernmethode, Kalenderansicht, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
+                <li>deine Einstellungen: Sprache (bis du eine wählst, nimmt Quidey die deines Geräts), Design, Farbpalette, Akzentfarbe, Animationen, Töne, Startseite, ob Aufgaben aus gemeinsamen Sitzungen in deiner Liste stehen, Sitzungsdauer, Timer, Pomodoro oder Stoppuhr und die Pomodoro-Längen, dein Tagesziel für die Fokuszeit, im Fokusraum gewähltes Fokus-Geräusch, Lautstärke und Lernmethode, ob der Ruhemodus an ist, Kalenderansicht, als Tester die gewählte Gestaltung der App und die Farben, die du ihr gegeben hast;</li>
                 <li>bei einem neuen Konto, wie viele Dinge du schon erledigt oder angelegt hast und ob Quidey dich schon
                     gefragt hat, ob du es installieren möchtest und ob es dir gefällt (nur eine Zahl und zwei Merker,
                     keine Inhalte);</li>
@@ -552,14 +676,23 @@ function Privacy() {
                 <li>was du im Fokusraum nur für dich notierst: das Ziel der Sitzung und die Gedanken auf dem
                     Gedankenparkplatz (sie bleiben auf diesem Gerät und werden nicht an den Server geschickt, außer du
                     machst eine Aufgabe daraus);</li>
+                <li>in der Android-App und im Browser am Computer, wie oft und wie lange du heute während einer
+                    laufenden Fokusrunde woanders warst, und dasselbe für die laufende und die letzte Runde (nur Anzahl
+                    und Dauer, keine Apps oder Seiten; Zeit mit ausgeschaltetem Bildschirm oder schlafendem Computer
+                    zählt nicht; es bleibt auf diesem Gerät und wird nicht an den Server geschickt);</li>
                 <li>welche Erinnerungen schon angezeigt wurden, an welchem Tag dich Quidey zuletzt an deine Serie erinnert hat und welche gemeinsame Sitzung gerade gestoppt wird;</li>
-                <li>ob auf diesem Gerät Benachrichtigungen an sind, die Adresse dafür beim Push-Dienst (siehe Abschnitt 6) und ob Quidey dich danach schon gefragt hat;</li>
+                <li>als Tester, an welchem Tag du den Hinweis „Plan anpassen“ bei den Lernzielen auf „Später“ gestellt hast (nur das Datum);</li>
+                <li>ob auf diesem Gerät Benachrichtigungen an sind, die Adresse dafür beim Push-Dienst (siehe Abschnitt {privacyNo(6)}) und ob Quidey dich danach schon gefragt hat;</li>
                 <li>Schwierigkeit und Bestwerte der Spiele;</li>
                 <li>in der Android-App deine Antwort auf die Frage nach den Nutzungsdaten (Abschnitt 3).</li>
             </ul>
             <p>
                 Während einer Anmeldung mit Google merkt sich dein Browser bis zur Rückkehr von Google einen Zufallswert
                 (sessionStorage), damit nur eine von dir begonnene Anmeldung angenommen wird; er wird danach gelöscht.
+                Hast du der anonymen Nutzungsstatistik zugestimmt (Abschnitt {USAGE_NO}), liegen die noch nicht gesendeten
+                Ereignisse (nur Art der Handlung und Zeitpunkt, keine Inhalte) dort, zusammen mit deiner Benutzernummer,
+                damit sie nur für dein Konto gesendet werden, und höchstens bis sie gesendet sind; sagst du Nein, meldest
+                dich ab oder ist inzwischen ein anderes Konto angemeldet, wird die Warteschlange ohne Senden geleert.
                 In der Android-App liegt dasselbe im Speicher der App; es wird nicht in Datensicherungen deines Handys
                 übernommen. Die App braucht keinen Service Worker und keinen Cache-Speicher (unten): Ihre Dateien sind
                 in der App selbst enthalten.
@@ -575,7 +708,7 @@ function Privacy() {
             <p>
                 Das ist für die von dir gewünschten Funktionen unbedingt erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG);
                 eine Einwilligung und ein Cookie-Banner sind dafür nicht nötig. Diese Daten verlassen dein Gerät nicht
-                (außer dem Token bei Anfragen an Quidey und der Sprache, siehe Abschnitt 4). Du kannst sie jederzeit in deinem Browser löschen.
+                (außer dem Token bei Anfragen an Quidey und der Sprache, siehe Abschnitt {privacyNo(4)}). Du kannst sie jederzeit in deinem Browser löschen.
                 Setzt Cloudflare zur Abwehr von Bots im Einzelfall ein technisch notwendiges Sicherheits-Cookie,
                 dient es allein der Sicherheit des Dienstes (§ 25 Abs. 2 Nr. 2 TDDDG, Art. 6 Abs. 1 lit. f DSGVO).
             </p>
@@ -584,26 +717,33 @@ function Privacy() {
             <p>
                 Deine Konto- und Inhaltsdaten speichere ich, solange dein Konto besteht. Löschst du dein Konto, werden
                 Konto, Aufgaben, Events, Event-Typen, Gruppen, Sitzungen, Freundschaften, Mitgliedschaften, deine Meldungen,
-                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen, deine Bewertungen als Tester, die für Benachrichtigungen angemeldeten Geräte, deine Notizen (mit ihren Bildern), dein Profilbild, Routinen und ihre Durchgänge, der Wecker deines Fokus-Timers und alle
+                geschafften Challenges, deine Feed-Einträge und Beiträge (mit dem Anfeuern darauf), dein Anfeuern bei anderen, deine Bewertungen als Tester, die für Benachrichtigungen angemeldeten Geräte, deine Notizen (mit ihren Bildern und wo sie angeheftet sind), Ordner und Sammlungen, dein Profilbild, deine Arcade-Punkte, Routinen und ihre Durchgänge, deine Erinnerungen, der Wecker deines Fokus-Timers und alle
                 Nachrichten, die du geschrieben oder bekommen hast, sofort gelöscht – auch beim Gegenüber, auch deine
                 Nachrichten in Family-Chats. Einträge in Protokollen (Verlauf gemeinsamer Sitzungen, Admin-Protokoll)
                 und von dir angelegte Einträge in Family-Kalendern verlieren den Bezug zu deinem Konto. Hast du eine
                 Family gegründet, übernimmt das am längsten beigetretene Mitglied sie; ist niemand sonst darin, wird
                 sie mit Kalender und Chat gelöscht.
                 Wie lange Feedback und Kontaktanfragen aufbewahrt werden, steht in Abschnitt {privacyNo(8)}
-                {proBuilt() && ', wie lange Zahlungsbelege, in Abschnitt 7'}.
+                {proBuilt() && ', wie lange Zahlungsbelege, in Abschnitt ' + privacyNo(7)}.
                 In Datensicherungen können Daten bis zu deren turnusmäßiger Überschreibung (höchstens 30 Tage)
                 erhalten bleiben. Gesetzliche Aufbewahrungspflichten bleiben unberührt.
+            </p>
+
+            <p>
+                Die „schon gezählt“-Marken zur anonymen Nutzungsstatistik (Abschnitt {USAGE_NO}) werden nach höchstens 8 Tagen
+                gelöscht, die Summen ohne zeitliche Begrenzung aufbewahrt, da sie kein Konto und keine Benutzernummer
+                enthalten. Deine Antwort auf die Frage nach der Statistik (Ja oder Nein, Zeitpunkt und Version der Frage)
+                bleibt so lange gespeichert, wie dein Konto besteht.
             </p>
 
             <h2>{privacyNo(11)}. Empfänger</h2>
             <p>
                 Daten erhalten nur die oben genannten Auftragsverarbeiter (Hosting, E-Mail-Versand, in der Android-App
-                Firebase Cloud Messaging) sowie – soweit du es veranlasst – deine Freunde (auch als Empfänger deiner
+                Firebase Cloud Messaging, bei KI-Schätzungen Anthropic, Abschnitt {privacyNo(5)}) sowie – soweit du es veranlasst – deine Freunde (auch als Empfänger deiner
                 Nachrichten), Mitglieder gemeinsamer Sitzungen und Families, wenn du Benachrichtigungen eingeschaltet
-                hast der Push-Dienst deines Browsers (nur verschlüsselt, siehe Abschnitt 6), wenn du dich mit Google
-                anmeldest Google (Abschnitt 4), wenn du in der Android-App in die Analyse einwilligst Google
-                (Abschnitt 3){proBuilt() ? ' und wenn du Quidey Pro bezahlst Stripe bzw. Google (Abschnitt 7)' : ''}. Ich verkaufe keine Daten und gebe
+                hast der Push-Dienst deines Browsers (nur verschlüsselt, siehe Abschnitt {privacyNo(6)}), wenn du dich mit Google
+                anmeldest Google (Abschnitt {privacyNo(4)}), wenn du in der Android-App in die Analyse einwilligst Google
+                (Abschnitt 3){proBuilt() ? ' und wenn du Quidey Pro bezahlst Stripe bzw. Google (Abschnitt ' + privacyNo(7) + ')' : ''}. Ich verkaufe keine Daten und gebe
                 sie nicht für Werbung weiter. Eine automatisierte Entscheidungsfindung oder Profilbildung
                 (Art. 22 DSGVO) findet nicht statt.
             </p>
@@ -666,6 +806,10 @@ function Terms() {
                 geändert, eingeschränkt oder eingestellt werden. Wird der Dienst eingestellt, kündige ich das nach
                 Möglichkeit vorher an.
             </p>}
+            <p>
+                Die anonyme Nutzungsstatistik ist freiwillig; alle Funktionen von Quidey funktionieren genauso, wenn du
+                sie nicht einschaltest.
+            </p>
 
             <h2>3. Konto</h2>
             <p>

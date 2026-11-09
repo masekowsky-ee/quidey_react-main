@@ -9,6 +9,26 @@
   padding: 3px;
   margin: -3px;
   scrollbar-width: none;
+  /* let go, it rests with a chip's start at the edge, never half a name */
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 3px;
+  /* where more chips are hidden, that edge fades out (GroupBtnContainer.jsx) */
+  --fade-before: 0px;
+  --fade-after: 0px;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fade-before), #000 calc(100% - var(--fade-after)), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 var(--fade-before), #000 calc(100% - var(--fade-after)), transparent);
+}
+
+.bar[data-more-before] {
+  --fade-before: 2rem;
+}
+
+.bar[data-more-after] {
+  --fade-after: 2rem;
+}
+
+.bar > * {
+  scroll-snap-align: start;
 }
 
 .bar::-webkit-scrollbar {
@@ -23,23 +43,22 @@
   font-size: 0.875rem;
   font-weight: 500;
   white-space: nowrap;
-  color: var(--text);
+  color: var(--text-muted);
   background: transparent;
-  border: 1px solid var(--control-border);
+  border: none;
   border-radius: var(--radius-pill);
 }
 
 .chip:hover {
   color: var(--text-h);
-  background: var(--surface-hover);
+  background: var(--hover-wash);
 }
 
-/* the shown one: a neutral filled pill, the label in full ink */
+/* the shown one: a quiet tone behind it, the label in full ink */
 .active,
 .active:hover {
   color: var(--text-h);
-  background: var(--surface-strong);
-  border-color: transparent;
+  background: color-mix(in oklab, var(--text-h) 9%, transparent);
 }
 
 /* a group's colour is a dot before its name */
@@ -78,7 +97,7 @@
   width: 2rem;
   height: 2rem;
   color: var(--text-muted);
-  border: 1px dashed var(--control-border);
+  border: none;
   border-radius: 50%;
   corner-shape: round;
 }
@@ -92,4 +111,10 @@
 .addIcon {
   width: 1rem;
   height: 1rem;
+}
+
+/* a collection's emoji (testers: collections in place of groups) stands where a group's dot does */
+.emoji {
+  font-size: 0.9375rem;
+  line-height: 1;
 }

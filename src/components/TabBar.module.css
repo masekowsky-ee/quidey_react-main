@@ -1,51 +1,188 @@
-/* Phones only: five equal tabs on the page ground, above the iPhone's home indicator.
-   The current page: the label and icon in full ink, the others muted (no coloured pill). */
+/* Phones only: a capsule floating above the page, clear of the screen's edges and the iPhone's
+   home indicator. Icons only (the words are there for screen readers, not on screen), so the
+   icons are large. The current page: a neutral pill behind its icon that slides from tab to tab,
+   the icon drawn bolder and in full ink; the others muted (the accent stays off the nav).
+   Swiped down (TabBar.jsx) the capsule sinks away and a small handle stays at the bottom edge.
+   The room it takes is --tabbar-h (AppShell.module.css): capsule plus the gap under it. */
 .bar {
   display: none;
 }
 
 @media (max-width: 720px) {
   .bar {
+    --pill-h: 3.25rem;
+    --pill-gap: 0.75rem;
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
     z-index: var(--z-header);
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
-    padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    display: flex;
+    justify-content: center;
+    padding: 0 calc(0.75rem + env(safe-area-inset-right, 0px)) calc(var(--pill-gap) + env(safe-area-inset-bottom, 0px)) calc(0.75rem + env(safe-area-inset-left, 0px));
     box-sizing: border-box;
-    background-color: var(--surface-bar);
-    border-top: 1px solid var(--border);
-  }
-
-  /* the app's own look: a translucent material the page scrolls on under (on a ::before, like
-     the header), with the light catching its top edge instead of a drawn line */
-  :root:not([data-ui]) .bar {
-    background-color: transparent;
-    border-top-color: transparent;
-  }
-
-  :root:not([data-ui]) .bar::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
+    /* only the capsule and the handle take touches, the page between stays usable */
     pointer-events: none;
-    background-color: var(--material-bar);
-    -webkit-backdrop-filter: var(--material-blur);
-    backdrop-filter: var(--material-blur);
-    box-shadow: inset 0 1px 0 var(--material-edge);
   }
 }
 
+.pill {
+  position: relative;
+  display: grid;
+  /* as many equal columns as there are tabs */
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  justify-items: stretch;
+  width: 100%;
+  max-width: 28rem;
+  height: var(--pill-h);
+  padding: 0 0.35rem;
+  box-sizing: border-box;
+  pointer-events: auto;
+  touch-action: none;
+  color: var(--text-muted);
+  /* the capsule's fill; the badges' rings (below) take it too */
+  --bar-fill: var(--surface-bar);
+  background-color: var(--bar-fill);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  transform: translateY(var(--drag, 0px));
+  transition: transform 0.45s var(--spring-bounce), opacity 0.3s ease-out;
+}
+
+/* while the finger drags it, it follows without lag */
+.pill[style*="--drag"] {
+  transition: none;
+}
+
+/* the app's own look: one flat fill, see-through, the page blurred behind it, a soft shadow
+   under it so it floats. No sheen, no lit edge. The same material as the header (--material-bar:
+   72 % fill, --material-blur, index.css); the folded tab (.handleBar) too. */
+:root:not([data-ui]) :is(.pill, .handleBar) {
+  background: color-mix(in srgb, var(--bar-fill) 72%, transparent);
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+}
+
+:root:not([data-ui]) .pill {
+  box-shadow:
+    0 12px 32px -10px rgb(0 0 0 / 0.5),
+    0 2px 6px -2px rgb(0 0 0 / 0.25);
+}
+
+/* frosted becomes solid: reduce transparency, more contrast, no blur in the browser */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  :root:not([data-ui]) :is(.pill, .handleBar) {
+    background: var(--bar-fill);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-color: var(--border-strong);
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root:not([data-ui]) :is(.pill, .handleBar) {
+    background: var(--bar-fill);
+  }
+}
+
+/* folded away: the capsule sinks below the screen's edge */
+.bar[data-collapsed] .pill {
+  opacity: 0;
+  transform: translateY(calc(100% + var(--pill-gap) + env(safe-area-inset-bottom, 0px))) scale(0.92);
+  pointer-events: none;
+}
+
+/* what is left at the bottom edge: the top half of a rounded block, its lower half cut off by
+   the screen's edge (it runs on under the iPhone's home indicator). A tap or a swipe up brings
+   the capsule back. The button is the full touch target, the tab drawn at its foot. */
+.handle {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  display: grid;
+  justify-items: center;
+  align-items: end;
+  width: 9rem;
+  height: calc(2.75rem + env(safe-area-inset-bottom, 0px));
+  padding: 0;
+  pointer-events: auto;
+  touch-action: none;
+  background: none;
+  border: none;
+  border-radius: var(--radius-pill);
+  translate: -50% 0;
+  -webkit-tap-highlight-color: transparent;
+  animation: handleIn 0.3s ease-out 0.12s both;
+}
+
+.handle:hover {
+  background: none;
+  box-shadow: none;
+}
+
+.handleBar {
+  --bar-fill: var(--surface-bar);
+  display: grid;
+  justify-items: center;
+  width: 8rem;
+  height: calc(1.75rem + env(safe-area-inset-bottom, 0px));
+  padding-top: 0.6rem;
+  box-sizing: border-box;
+  background-color: var(--bar-fill);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 1.25rem 1.25rem 0 0;
+  box-shadow: 0 -4px 16px -6px rgb(0 0 0 / 0.35);
+  transform-origin: 50% 100%;
+  transition: transform var(--ease-out);
+}
+
+/* a small grip line in the tab, so it reads as something to pull */
+.handleBar::before {
+  content: "";
+  width: 2.25rem;
+  height: 0.25rem;
+  background: color-mix(in srgb, var(--text-h) 40%, transparent);
+  border-radius: var(--radius-pill);
+}
+
+.handle:active .handleBar {
+  transform: scale(0.96);
+  transition-duration: var(--press);
+}
+
+/* it rises out of the screen's edge */
+@keyframes handleIn {
+  from { transform: translateY(100%); }
+}
+
+/* little motion: no travel, only fading */
+:root[data-motion="minimal"] .pill {
+  transition: opacity 0.2s ease-out;
+}
+
+:root[data-motion="minimal"] .bar[data-collapsed] .pill {
+  transform: none;
+}
+
+:root[data-motion="minimal"] .handle {
+  animation-name: handleFade;
+}
+
+@keyframes handleFade {
+  from { opacity: 0; }
+}
+
 .tab {
+  /* above the sliding mark */
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.2rem;
   min-width: 0;
   padding: 0;
   font: inherit;
@@ -69,52 +206,99 @@
   transition-duration: var(--press);
 }
 
+.tab {
+  transition: color var(--ease);
+}
+
 .active {
   color: var(--text-h);
 }
 
-/* the current page also gets a soft pill behind its icon */
 .iconWrap {
   position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 3.5rem;
-  height: 1.75rem;
+  height: 2.25rem;
   border-radius: var(--radius-pill);
   transition: background-color var(--ease-out), transform 0.45s var(--spring-bounce);
 }
 
-.active .iconWrap {
+/* the mark of the current tab (TabBar.jsx Indicator): a track one column wide that slides by
+   whole columns (--tab of --tabs), the pill centred in it behind the icon */
+.track {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0.35rem;
+  width: calc((100% - 0.7rem) / var(--tabs));
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  transform: translateX(calc(var(--tab) * 100%));
+  transition: transform 0.4s var(--spring-curve), opacity 0.2s ease-out;
+}
+
+.track[data-hidden] {
+  opacity: 0;
+}
+
+:root[data-motion="extreme"] .track {
+  transition: transform 0.5s var(--spring-bounce), opacity 0.2s ease-out;
+}
+
+/* little motion: no travel, the mark fades over */
+:root[data-motion="minimal"] .track {
+  transition: opacity 0.2s ease-out;
+}
+
+.indicator {
+  width: 3.5rem;
+  height: 2.25rem;
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in srgb, var(--text-h) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-h) 8%, transparent);
+}
+
+/* the interface variants have their own mark on the icon's box (see ui-variants/*.css) */
+:root[data-ui] .track {
+  display: none;
+}
+
+:root[data-ui] .active .iconWrap {
   background-color: var(--surface-strong);
 }
 
+/* more contrast: a solid step instead of the wash */
+@media (prefers-contrast: more) {
+  .indicator {
+    background-color: var(--surface-strong);
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+  }
+}
+
 .icon {
-  width: 1.375rem;
-  height: 1.375rem;
+  width: 1.625rem;
+  height: 1.625rem;
 }
 
+/* the tab's name: read out, not shown */
 .label {
-  max-width: 100%;
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
-  text-overflow: ellipsis;
+  clip-path: inset(50%);
   white-space: nowrap;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  line-height: 1;
-  /* small type gets a little air */
-  letter-spacing: 0.006em;
-}
-
-.active .label {
-  font-weight: 600;
 }
 
 /* unread / open, on the icon's corner */
 .count {
   position: absolute;
-  top: -0.3rem;
-  right: 0.45rem;
+  top: -0.2rem;
+  right: 0.35rem;
   min-width: 1.05rem;
   padding: 0 0.25rem;
   box-sizing: border-box;
@@ -126,36 +310,28 @@
   color: var(--primary-text);
   background-color: var(--primary);
   border-radius: 999px;
-  box-shadow: 0 0 0 2px var(--surface-bar);
+  box-shadow: 0 0 0 2px var(--bar-fill, var(--surface-bar));
 }
 
 /* friends online: a small green dot at the foot of the icon, apart from counts and news */
 .online {
   position: absolute;
-  bottom: 0.1rem;
-  right: 1rem;
+  bottom: 0.2rem;
+  right: 0.85rem;
   width: 0.45rem;
   height: 0.45rem;
   background-color: var(--online);
   border-radius: 999px;
-  box-shadow: 0 0 0 2px var(--surface-bar);
+  box-shadow: 0 0 0 2px var(--bar-fill, var(--surface-bar));
 }
 
 .dot {
   position: absolute;
-  top: 0.05rem;
-  right: 0.9rem;
+  top: 0.15rem;
+  right: 0.8rem;
   width: 0.5rem;
   height: 0.5rem;
   background-color: var(--primary);
   border-radius: 999px;
-  box-shadow: 0 0 0 2px var(--surface-bar);
-}
-
-/* six tabs on a narrow phone: the labels a little smaller, so "Gemeinschaft" still fits */
-@media (max-width: 420px) {
-  .label {
-    font-size: 0.625rem;
-    letter-spacing: -0.03em;
-  }
+  box-shadow: 0 0 0 2px var(--bar-fill, var(--surface-bar));
 }

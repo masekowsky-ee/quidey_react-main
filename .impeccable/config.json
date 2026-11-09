@@ -11,6 +11,33 @@
         ],
         "createdAt": "2026-10-25T16:24:55.169Z",
         "reason": "Claude triage: the tour's calendar scene replicates the app's real calendar chips, which carry border-left: 2px solid var(--task-color) (CalendarDay.module.css:188, Calendar.module.css:464)"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/components/notes/Notes.module.css"
+        ],
+        "createdAt": "2026-11-03T19:45:11.371Z",
+        "reason": "agent decided: note rows carry the task colour as a 3px edge, the app's existing pattern (index.css task-colour comment 'its left edge', TaskRow.module.css:21 inset 3px); .quote is a neutral grey blockquote rule"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/components/collections/Collections.module.css"
+        ],
+        "createdAt": "2026-11-03T19:45:11.655Z",
+        "reason": "agent decided: collection cards/rows carry the task/collection colour as a 3px edge, the app's existing pattern (index.css task-colour comment, TaskRow.module.css:21 inset 3px)"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/components/board/NoteBoard.module.css"
+        ],
+        "createdAt": "2026-11-04T13:59:11.717Z",
+        "reason": "agent decision: the 3px task-colour edge repeats the app's existing convention for coloured notes/tasks (Notes.module.css .row[data-task-color]::before), not a new accent"
       }
     ]
   }

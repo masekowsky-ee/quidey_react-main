@@ -4,9 +4,10 @@ import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
+import { setLanguage } from '../features/settings/settingsAction'
 import { apiFetch } from '../features/helperFunction'
 import LegalPage from '../legal/LegalPage'
-import { OWNER } from '../legal/owner'
+import { OWNER, LEGAL_VERSION_DATE } from '../legal/owner'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
     ...(await importOriginal()),
@@ -34,6 +35,40 @@ describe('legal pages', () => {
         for (const [name, href] of [['Impressum', '/impressum'], ['Datenschutz', '/datenschutz'], ['Nutzungsbedingungen', '/nutzungsbedingungen'], ['Kontakt', '/kontakt']]) {
             expect(screen.getByRole('link', { name })).toHaveAttribute('href', href)
         }
+    })
+})
+
+describe('privacy page: study goals', () => {
+    // The language is read from localStorage only when the settings reducer loads, so set it on the store.
+    const renderPrivacyIn = (lang) => {
+        const store = configureStore({ reducer: rootReducer })
+        store.dispatch(setLanguage(lang))
+        return render(
+            <Provider store={store}>
+                <MemoryRouter initialEntries={['/datenschutz']}><LegalPage /></MemoryRouter>
+            </Provider>
+        )
+    }
+
+    it.each([
+        ['de', false],
+        ['en', true],
+    ])('names Anthropic for the AI estimates and the study push kind (%s)', (lang, englishNote) => {
+        const { container } = renderPrivacyIn(lang)
+        const text = container.textContent
+        expect(text).toContain('KI-Schätzungen')
+        expect(text).toContain('Anthropic')
+        expect(text).toContain('Art. 6 Abs. 1 lit. a DSGVO')
+
+        const push = [...container.querySelectorAll('p')]
+            .find((p) => p.textContent.includes('Benachrichtigungen auf deinem Gerät (Push)'))
+        expect(push).toBeDefined()
+        expect(push.textContent).toContain('in der Art „Lernen“')
+        expect(push.textContent).toContain('hinter dem Plan')
+
+        const note = container.querySelector('p[lang="en"]')
+        if (englishNote) expect(note?.textContent).toBe('This legal information is provided in German, as required by German law.')
+        else expect(note).toBeNull()
     })
 })
 
@@ -75,5 +110,48 @@ describe('contact form', () => {
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Nachricht senden' })) })
         expect(screen.getByRole('alert')).toHaveTextContent('Zu viele Nachrichten')
         expect(screen.getByLabelText('Nachricht')).toHaveValue('Hallo, ich habe eine Frage zu Quidey.')
+    })
+})
+
+describe('anonymous usage statistics in the legal texts', () => {
+    const textOf = (path) => renderAt(path).container.textContent
+    const norm = (t) => t.replace(/\s+/g, ' ')
+
+    it('has the current version date', () => {
+        expect(LEGAL_VERSION_DATE).toBe('07.11.2026 (anonyme Nutzungsstatistik mit Einwilligung)')
+    })
+
+    it('the privacy page explains the opt-in statistics', () => {
+        const text = norm(textOf('/datenschutz'))
+        expect(text).toContain('Mit deiner Einwilligung zählt Quidey mit, wann und welche Bereiche genutzt werden: nur als Summen ohne Konto, Benutzernummer oder Inhalte, auf dem eigenen Server (Abschnitt 4).')
+        // with few people a total can concern one person: said plainly, no promise of "no reference"
+        expect(text).toContain('Nutzen nur sehr wenige Menschen Quidey, kann eine Summe (etwa für eine Sprache, einen Plan, eine Plattform oder eine Stunde) auch nur eine einzelne Person betreffen. Quidey nutzt sie nur als Summen und versucht nie herauszufinden, wer dahintersteht.')
+        expect(text).toContain('Die bereits eingerechneten Summen bleiben, weil sie kein Konto und keine Benutzernummer enthalten.')
+        expect(text).toContain('die Summen ohne zeitliche Begrenzung aufbewahrt, da sie kein Konto und keine Benutzernummer enthalten.')
+        // the queue on the device carries the account it belongs to
+        expect(text).toContain('zusammen mit deiner Benutzernummer, damit sie nur für dein Konto gesendet werden')
+        for (const promise of ['ohne Bezug zu dir', 'keinen Bezug zu dir', 'keinen Bezug zu einer Person', 'zählt Quidey anonym', 'anonym mitzählen']) {
+            expect(text).not.toContain(promise)
+        }
+        expect(text).not.toContain('Im Browser gibt es kein Tracking')
+        expect(screen.getByRole('heading', { name: '4. Anonyme Nutzungsstatistik (nur mit Einwilligung)' })).toBeInTheDocument()
+        for (const part of [
+            'höchstens 8 Tage', 'ohne zeitliche Begrenzung', 'Art. 6 Abs. 1 lit. a DSGVO', '§ 25 Abs. 1 TDDDG',
+            'Einstellungen → Datenschutz', 'Anonyme Nutzungsstatistik', 'Aufgabe angelegt', 'Fokuszeit',
+            'keine Cookies', 'Plan (kostenlos, Tester oder Pro)',
+        ]) expect(text).toContain(part)
+        expect(text).not.toContain('2 Stunden')
+        expect(text).not.toContain('<3')
+    })
+
+    it('numbers the privacy sections one after the other', () => {
+        renderAt('/datenschutz')
+        const numbers = screen.getAllByRole('heading', { level: 2 }).map((h) => parseInt(h.textContent, 10))
+        expect(numbers).toEqual(numbers.map((_, i) => i + 1))
+    })
+
+    it('the terms say the statistics are optional', () => {
+        const text = norm(textOf('/nutzungsbedingungen'))
+        expect(text).toContain('Die anonyme Nutzungsstatistik ist freiwillig; alle Funktionen von Quidey funktionieren genauso, wenn du sie nicht einschaltest.')
     })
 })

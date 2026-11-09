@@ -10,6 +10,7 @@ export const ACCENT_COLORS = {
     violet: '#a78bfa',
     rose: '#fb7185',
     gold: '#facc15',
+    pine: '#3f9e7f',
 };
 
 // The logo as an SVG file in one color (see components/Logo.jsx)

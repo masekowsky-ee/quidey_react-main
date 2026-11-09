@@ -1,0 +1,387 @@
+/* Home's white sheet: name and details | the time, the timer's line under both, the controls.
+   Grid: two columns (the name takes what is left, the time its own width), as in direction B. */
+.sheet {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 1.25rem 2rem;
+  padding: 1.75rem 1.875rem 1.5rem;
+  min-width: 0;
+  background-color: var(--sheet);
+  border-radius: var(--radius-lg);
+  text-align: left;
+  transition: box-shadow var(--ease-out), background-color var(--ease-out);
+}
+
+/* a task on its way here: the sheet takes it */
+.sheet[data-dragging] {
+  box-shadow: inset 0 0 0 2px var(--text-h);
+}
+
+.what {
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font: 400 2rem/1.12 var(--serif);
+  letter-spacing: -0.012em;
+  color: var(--text-h);
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.titleEmpty {
+  color: var(--text-muted);
+}
+
+/* "40 min of 2 h worked · Uni · today": the parts with a dot between them */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+  margin-top: 0.625rem;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.meta > * + *::before {
+  content: '·';
+  margin-right: 0.5rem;
+}
+
+.sheet[data-empty] .meta {
+  max-width: 34rem;
+}
+
+/* the time: large, plain figures; a countdown that isn't running opens its length on a click */
+.clock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.phase {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.sheet[data-break] .phase {
+  color: var(--primary-fg);
+}
+
+.time {
+  padding: 0;
+  font: 400 3.5rem/1 var(--sans);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-h);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+button.time:hover {
+  background: none;
+  color: var(--text-muted);
+}
+
+/* the timer's line: grows with the session (a transform, so only compositing moves) */
+.progress {
+  grid-column: 1 / -1;
+  height: 6px;
+  overflow: hidden;
+  background-color: var(--panel);
+  border-radius: 3px;
+}
+
+.progress i {
+  display: block;
+  height: 100%;
+  background-color: var(--primary);
+  border-radius: inherit;
+  transform-origin: left;
+  transition: transform 0.25s linear;
+}
+
+/* the task against its plan (nothing running): the same line, a step quieter */
+.progress i.plan {
+  background-color: color-mix(in oklab, var(--primary) 70%, var(--sheet));
+}
+
+/* the stopwatch has no end: a slow breathing line while it runs */
+.progress i.live {
+  opacity: 0.45;
+}
+
+:root:not([data-motion="minimal"]) .progress i.live {
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  50% { opacity: 0.2; }
+}
+
+.length {
+  grid-column: 1 / -1;
+}
+
+/* start | stop | skip | timer · pomodoro · stopwatch ........ notes | room | put back | done */
+.controls {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+/* the screen's one filled button */
+.go {
+  height: 2.625rem;
+  padding: 0 1.25rem 0 1rem;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--contrast-text);
+  background: var(--contrast-top);
+  border: none;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+}
+
+.go svg {
+  fill: currentColor;
+}
+
+@media (hover: hover) {
+  .go:hover {
+    background: color-mix(in oklab, var(--contrast-top), var(--bg) 14%);
+    box-shadow: none;
+  }
+}
+
+.modes {
+  display: flex;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.mode {
+  height: 2.625rem;
+  padding: 0 1rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+}
+
+@media (hover: hover) {
+  .mode:hover:not(:disabled) {
+    color: var(--text-h);
+    background: var(--surface-hover);
+  }
+}
+
+.mode[aria-pressed="true"],
+.mode[aria-pressed="true"]:hover {
+  color: var(--text-h);
+  background: var(--panel);
+}
+
+.mode:disabled {
+  opacity: 0.4;
+}
+
+.taskActions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-grid;
+  place-items: center;
+  color: var(--text-muted);
+  border-radius: var(--radius-pill);
+}
+
+.icon:hover {
+  color: var(--text-h);
+}
+
+a.icon:hover {
+  background: var(--surface-hover);
+}
+
+/* done: the round outline that fills on hover */
+.check {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--text-h);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 50%;
+}
+
+@media (hover: hover) {
+  .check:hover {
+    color: var(--contrast-text);
+    background: var(--contrast-top);
+    border-color: var(--contrast-top);
+    box-shadow: none;
+  }
+}
+
+.text {
+  height: 2.5rem;
+  padding: 0 0.875rem;
+  gap: 0.375rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+}
+
+@media (hover: hover) {
+  .text:hover {
+    color: var(--text-h);
+    background: var(--surface-hover);
+    box-shadow: none;
+  }
+}
+
+.count {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-h);
+}
+
+.note {
+  grid-column: 1 / -1;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
+.note a {
+  color: var(--text-h);
+  text-underline-offset: 3px;
+}
+
+/* description and notes, opened on request */
+.details {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.description {
+  width: 100%;
+  min-height: 3.5rem;
+  resize: vertical;
+  background: var(--surface-inset);
+}
+
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notes li {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.notes input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border-color: transparent;
+}
+
+.notes input:hover,
+.notes input:focus {
+  background: var(--surface-inset);
+}
+
+@media (max-width: 720px) {
+  .sheet {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1.375rem 1.25rem 1.25rem;
+  }
+
+  .title {
+    font-size: 1.625rem;
+  }
+
+  .clock {
+    align-items: flex-start;
+  }
+
+  .time {
+    font-size: 2.75rem;
+  }
+
+  /* three tidy lines instead of whatever wraps where:
+       timer · pomodoro · stopwatch   (one switch across the card, equal parts)
+       start (the whole width) | stop | skip
+       notes ................ room | put back | done */
+  .controls {
+    gap: 0.75rem 0.5rem;
+  }
+
+  .modes {
+    order: -1;
+    flex: 1 1 100%;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+    padding: 0.25rem;
+    background: color-mix(in oklab, var(--text-h) 6%, transparent);
+    border-radius: var(--radius-pill);
+  }
+
+  .mode {
+    height: 2.25rem;
+    padding: 0 0.5rem;
+    border-radius: var(--radius-pill);
+  }
+
+  .go {
+    flex: 1 1 auto;
+    justify-content: center;
+    height: 2.75rem;
+  }
+
+  .taskActions {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+
+  /* notes at the start of the line, its words level with the card's edge */
+  .taskActions > .text {
+    margin-right: auto;
+    margin-left: -0.875rem;
+  }
+}

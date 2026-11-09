@@ -28,7 +28,10 @@ function StreakCard({ progress }) {
 
     return (
         <section className={styles.card} data-streak={state} aria-labelledby="streak-title">
-            <h2 id="streak-title" className={styles.cardLabel}>{t('streakTitle')}</h2>
+            <div className={styles.cardHead}>
+                <h2 id="streak-title">{t('streakTitle')}</h2>
+                {bestStreak > 0 && <small>{fill(t('streakBest'), { days: formatNumber(bestStreak, language) })}</small>}
+            </div>
             <div className={styles.streakTop}>
                 <span className={styles.flame} aria-hidden="true"><Icon name="flame" size={28} strokeWidth={1.6} /></span>
                 <p className={styles.streakNumber}>
@@ -53,7 +56,6 @@ function StreakCard({ progress }) {
             </p>
             <p className={styles.streakMeta}>
                 {next && streak > 0 && <span>{fill(t(next - streak === 1 ? 'streakToMilestoneOne' : 'streakToMilestone'), { days: next - streak, goal: next })}</span>}
-                {bestStreak > 0 && <span>{fill(t('streakBest'), { days: formatNumber(bestStreak, language) })}</span>}
             </p>
         </section>
     );
@@ -70,8 +72,8 @@ function TodayCard({ progress }) {
     return (
         <section className={styles.card} aria-labelledby="today-title">
             <div className={styles.cardHead}>
-                <h2 id="today-title" className={styles.cardLabel}>{t('momentumToday')}</h2>
-                <span className={styles.cardMeta}>{fill(t('momentumChallengesDone'), { done, all: progress.daily.length })}</span>
+                <h2 id="today-title">{t('momentumToday')}</h2>
+                <small>{fill(t('momentumChallengesDone'), { done, all: progress.daily.length })}</small>
             </div>
             <ul className={styles.challenges}>
                 {progress.daily.map(challenge => (
@@ -111,7 +113,7 @@ function FriendsCard() {
     if (friends.length === 0) {
         return (
             <section className={styles.card} aria-labelledby="friends-title">
-                <h2 id="friends-title" className={styles.cardLabel}>{t('momentumFriends')}</h2>
+                <h2 id="friends-title" className={styles.cardHead}>{t('momentumFriends')}</h2>
                 <p className={styles.empty}>{t('momentumNoFriends')}</p>
                 <Link to={friendsPath('add')} className={styles.cardLink}>{t('addFriend')} →</Link>
             </section>
@@ -121,12 +123,12 @@ function FriendsCard() {
     return (
         <section className={styles.card} aria-labelledby="friends-title">
             <div className={styles.cardHead}>
-                <h2 id="friends-title" className={styles.cardLabel}>{t('momentumFriends')}</h2>
-                <span className={styles.cardMeta}>
+                <h2 id="friends-title">{t('momentumFriends')}</h2>
+                <small>
                     {online.length > 0
                         ? fill(t(online.length === 1 ? 'onlineFriendsOne' : 'onlineFriendsCount'), { count: online.length })
                         : t('momentumNobodyOnline')}
-                </span>
+                </small>
             </div>
             {online.length > 0 && (
                 <ul className={styles.faces} aria-label={t('onlineNowTitle')}>
@@ -159,15 +161,15 @@ function FriendsCard() {
 
 // The strip's shape until my progress is there: the three cards with their titles, the last
 // seven days (known already), grey where streak, challenges, level and friends will be
-export function MomentumSkeleton() {
+export function MomentumSkeleton({ stacked = false }) {
     const { t, language } = useTranslation();
     const weekday = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { weekday: 'narrow' });
     const lastDays = Array.from({ length: 7 }, (_, i) => { const day = new Date(); day.setDate(day.getDate() - 6 + i); return day; });
     return (
         // as tall as the loaded cards, so the week below doesn't move
-        <Skeleton className={styles.strip} style={{ minHeight: '16rem' }}>
+        <Skeleton className={`${styles.strip} ${stacked ? styles.stacked : ''}`} style={{ minHeight: '16rem' }}>
             <section className={styles.card}>
-                <h2 className={styles.cardLabel}>{t('streakTitle')}</h2>
+                <h2 className={styles.cardHead}>{t('streakTitle')}</h2>
                 <div className={styles.streakTop}>
                     <Bone w="1.75rem" h="1.75rem" />
                     <Bone w="7.5rem" h="2.25rem" />
@@ -183,10 +185,7 @@ export function MomentumSkeleton() {
                 <Bone w="80%" />
             </section>
             <section className={styles.card}>
-                <div className={styles.cardHead}>
-                    <h2 className={styles.cardLabel}>{t('momentumToday')}</h2>
-                    <Bone w="3rem" h="0.75rem" />
-                </div>
+                <h2 className={styles.cardHead}>{t('momentumToday')}</h2>
                 <ul className={styles.challenges}>
                     {['75%', '88%', '62%'].map(w => (
                         <li key={w}>
@@ -205,10 +204,7 @@ export function MomentumSkeleton() {
                 </div>
             </section>
             <section className={styles.card}>
-                <div className={styles.cardHead}>
-                    <h2 className={styles.cardLabel}>{t('momentumFriends')}</h2>
-                    <Bone w="6.5rem" h="0.75rem" />
-                </div>
+                <h2 className={styles.cardHead}>{t('momentumFriends')}</h2>
                 <Bone w="7rem" h="0.875rem" style={{ marginTop: 'auto' }} />
             </section>
         </Skeleton>
@@ -217,7 +213,8 @@ export function MomentumSkeleton() {
 
 // Home's motivation strip, under the day's title: streak, today's challenges and level,
 // friends. Its shape until my progress is loaded (App loads it once signed in).
-export default function Momentum() {
+// stacked: one panel under the other (Home's side column on wide screens)
+export default function Momentum({ stacked = false }) {
     const dispatch = useDispatch();
     const progress = useSelector(state => state.progress.data);
     const failed = useSelector(state => state.progress.failed);
@@ -227,9 +224,9 @@ export default function Momentum() {
     useEffect(() => { dispatch(fetchRanking()).catch(() => {}); }, [dispatch]);
 
     // nothing when it couldn't be loaded (the rest of Home works without it)
-    if (!progress) return failed ? null : <MomentumSkeleton />;
+    if (!progress) return failed ? null : <MomentumSkeleton stacked={stacked} />;
     return (
-        <div className={styles.strip} role="region" aria-label={t('momentumTitle')}>
+        <div className={`${styles.strip} ${stacked ? styles.stacked : ''}`} role="region" aria-label={t('momentumTitle')}>
             <StreakCard progress={progress} />
             <TodayCard progress={progress} />
             <FriendsCard />

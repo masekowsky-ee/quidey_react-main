@@ -9,6 +9,7 @@ import {
     endSharedSession, deleteSharedSession, removeSharedMember, renameSharedSession,
 } from '../features/together/togetherAction';
 import { stopWork } from '../features/together/work';
+import { dropSharedFocus } from '../features/together/linkedWork';
 import { useSharedSession, useTogetherRun } from '../features/together/hooks';
 import WorkPanel from './together/WorkPanel';
 import SharedTaskList from './together/SharedTaskList';
@@ -16,6 +17,7 @@ import TeamPresence from './together/TeamPresence';
 import ActivityFeed from './together/ActivityFeed';
 import WorkSummary from './together/WorkSummary';
 import { calendarLink } from '../features/calendar/sources';
+import NoteBoard from './board/NoteBoard.jsx';
 
 import Icon from './icons';
 // Title of a session; the owner can click it to rename the session
@@ -69,6 +71,8 @@ export function SessionActions({ session, onGone }) {
     const handleConfirmed = async () => {
         const action = confirm;
         setConfirm(null);
+        // its task leaves the focus timer (which runs on without one)
+        dispatch(dropSharedFocus(session.id));
         await dispatch(stopWork());
         if (action === 'end') {
             run(endSharedSession(session.id), 'toast_sessionEnded');
@@ -139,6 +143,9 @@ export default function SharedSession() {
                 <div className={styles.roomMain}>
                     <WorkPanel session={session} />
                     <SharedTaskList session={session} />
+                    <section className={styles.card} aria-label={t('noteBoardNotes')}>
+                        <NoteBoard kind="session" id={session.id} canPin={!session.endedAt} />
+                    </section>
                     <WorkSummary session={session} />
                 </div>
                 <div className={styles.roomSide}>

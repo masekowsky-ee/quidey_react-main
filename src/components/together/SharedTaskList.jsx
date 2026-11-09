@@ -11,7 +11,9 @@ import {
 import { createdText } from '../../features/tasks/created';
 import { inSubGroup, openCounts, shownSubGroup } from '../../features/tasks/subGroups';
 import SubGroupBar from '../subgroups/SubGroupBar.jsx';
-import { selectWork, startWork, stopWork, localMs, othersRunningMs, othersWorking, useNow } from '../../features/together/work';
+import { selectWork, stopWork, localMs, othersRunningMs, othersWorking, useNow } from '../../features/together/work';
+import { workOnSharedTask, dropSharedFocus } from '../../features/together/linkedWork';
+import { pauseFocus } from '../../features/session/sessionAction';
 import { useTogetherRun } from '../../features/together/hooks';
 import { taskColorAttr } from '../../features/tasks/taskColors';
 import Avatar from './Avatar';
@@ -86,6 +88,8 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
     };
 
     const handleDone = async (task) => {
+        // a task that is done is no longer in focus (the focus timer runs on without it)
+        if (!task.done) dispatch(dropSharedFocus(id, task.id));
         if (!task.done && workingOn === task.id) await dispatch(stopWork());
         if (await run(setSharedTaskDone(id, task.id, !task.done)) && task.sourceTaskId) {
             // it's one of my own tasks, which was marked too
@@ -167,8 +171,8 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                 {isOpen && !task.done && (
                     <div className={styles.actions}>
                         {!event && (mine
-                            ? <button className={styles.secondaryBtn} onClick={() => dispatch(stopWork())}>{t('pause')}</button>
-                            : <button className={styles.acceptBtn} onClick={() => dispatch(startWork(session, task))}>{t('workOnThis')}</button>)}
+                            ? <button className={styles.secondaryBtn} onClick={() => dispatch(pauseFocus())}>{t('pause')}</button>
+                            : <button className={styles.acceptBtn} onClick={() => dispatch(workOnSharedTask(session, task))}>{t('workOnThis')}</button>)}
                         <button className={styles.quietBtn} onClick={() => setEditTaskId(task.id)} aria-label={`${t('editTask')}: ${task.name}`} title={t('editTask')}>
                             <Icon name="edit" size={18} />
                         </button>

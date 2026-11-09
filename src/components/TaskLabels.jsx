@@ -1,15 +1,16 @@
 import styles from './TaskLabels.module.css';
-import { useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
 import { displayName, fill } from '../features/helperFunction';
 import { groupColorAttr } from '../features/tasks/taskColors';
+import { useTaskGroups } from '../features/collections/collections';
 
 // Small labels under a task's name: the groups it is in, or for a task from a shared
 // session that session (and who it's assigned to). A click on a label opens that group.
-// A group with a colour shows a dot in it.
+// A group with a colour shows a dot in it. For testers the collections it is in take the
+// place of groups (with their emoji).
 export default function TaskLabels({ task, onOpenGroup }) {
     const { t } = useTranslation();
-    const groups = useSelector(state => state.task.groups);
+    const { groupsOf, collections } = useTaskGroups();
 
     if (task.shared) {
         return (
@@ -24,9 +25,7 @@ export default function TaskLabels({ task, onOpenGroup }) {
         );
     }
 
-    const names = (task.group_ids ?? [])
-        .map(id => groups.find(group => group.id === id))
-        .filter(group => group && group.name !== 'all');
+    const names = groupsOf(task);
     // a task a friend shared with me, or my task that friends joined
     const joined = (task.sharedWith ?? []).filter(share => share.status === 'accepted');
     const sharedText = task.owner
@@ -41,8 +40,11 @@ export default function TaskLabels({ task, onOpenGroup }) {
                     {task.owner ? sharedText : <><span className={styles.srOnly}>{t('sharedWithLabel')}: </span>{sharedText}</>}
                 </span>}
             {names.map(group => (
-                <button key={group.id} className={styles.label} data-task-color={groupColorAttr(group)} onClick={() => onOpenGroup?.(group)} title={t('openGroup')}>
-                    {groupColorAttr(group) && <span className={styles.dot} aria-hidden="true" />}
+                <button key={group.id} className={styles.label} data-task-color={groupColorAttr(group)} onClick={() => onOpenGroup?.(group)}
+                    title={t(collections ? 'collectionShow' : 'openGroup')}>
+                    {group.emoji
+                        ? <span aria-hidden="true">{group.emoji}</span>
+                        : groupColorAttr(group) && <span className={styles.dot} aria-hidden="true" />}
                     {group.name}
                 </button>
             ))}

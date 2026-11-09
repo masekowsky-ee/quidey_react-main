@@ -13,10 +13,10 @@
 }
 
 :root[data-theme="light"]{
-    --boot-bg: #f5f5f3;
+    --boot-bg: #f4f3ef;
     --boot-surface: #ffffff;
-    --boot-surface-strong: #e6e5e2;
-    --boot-border: #e9e8e5;
+    --boot-surface-strong: #e3e0d9;
+    --boot-border: #e2dfd8;
 }
 
 :root[data-palette="graphite"]{ --boot-bg: #0d0e10; --boot-surface: #16181b; --boot-surface-strong: #2a2d32; --boot-border: #24262a; }
@@ -27,6 +27,8 @@
 :root[data-theme="light"][data-palette="forest"]{ --boot-bg: #f3f6f2; --boot-surface: #ffffff; --boot-surface-strong: #dde6da; --boot-border: #e1e8de; }
 :root[data-palette="plum"]{ --boot-bg: #100c12; --boot-surface: #19141c; --boot-surface-strong: #2e2533; --boot-border: #261f2a; }
 :root[data-theme="light"][data-palette="plum"]{ --boot-bg: #f7f4f8; --boot-surface: #ffffff; --boot-surface-strong: #e7e0ea; --boot-border: #ebe5ed; }
+:root[data-palette="papier"]{ --boot-bg: #111311; --boot-surface: #1a1c1a; --boot-surface-strong: #2d302d; --boot-border: #252825; }
+:root[data-theme="light"][data-palette="papier"]{ --boot-bg: #f3f3f0; --boot-surface: #ffffff; --boot-surface-strong: #dedfd8; --boot-border: #e0e0d9; }
 :root[data-palette="mono"]{ --boot-bg: #000000; --boot-surface: #0f0f0f; --boot-surface-strong: #242424; --boot-border: #1c1c1c; }
 :root[data-theme="light"][data-palette="mono"]{ --boot-bg: #ffffff; --boot-surface: #ffffff; --boot-surface-strong: #e8e8e8; --boot-border: #e3e3e3; }
 
@@ -110,6 +112,14 @@ body{
 .boot .l9{ width: 5rem; }
 .boot .av{ width: 2rem; height: 2rem; }
 .boot .t1{ width: 15rem; height: 1.6rem; }
+.boot .g1{ width: 13rem; height: 2.6rem; }
+.boot .g2{ width: min(30rem, 80vw); height: 2.6rem; }
+.boot .n1{ width: 2.6rem; }
+.boot .n2{ width: 4rem; }
+.boot .n3{ width: 4.5rem; }
+.boot .n4{ width: 3.2rem; }
+.boot .n5{ width: 3.6rem; }
+.boot .n6{ width: 5.5rem; }
 .boot .t2{ width: 12rem; height: 0.95rem; }
 .boot .sw{ width: 8.75rem; height: 2.5rem; }
 .boot .c1{ width: 3.5rem; height: 2rem; }
@@ -117,17 +127,18 @@ body{
 .boot .c3{ width: 4.75rem; height: 2rem; }
 .boot .ft{ width: 3.5rem; height: 1.1rem; margin-top: 0.45rem; }
 .boot .pt{ width: 12rem; height: 1.6rem; margin: 2.5rem 0 0.5rem; }
-.boot .ti{ width: 1.4rem; height: 1.4rem; }
-.boot .tl{ height: 0.6rem; }
-.boot .tl1{ width: 2rem; }
-.boot .tl2{ width: 3rem; }
-.boot .tl3{ width: 4.5rem; }
+.boot .ti{ width: 1.625rem; height: 1.625rem; border-radius: 6px; }
 .boot .about{ width: 6.5rem; }
 
 .boot .card{
-    background-color: var(--boot-surface);
-    border: 1px solid var(--boot-border);
+    background-color: color-mix(in oklab, var(--boot-surface), var(--boot-surface-strong) 35%);
     border-radius: 18px;
+}
+
+/* the task in focus: the one white sheet (a step up in the dark) */
+.boot .boot-sheet{
+    height: 13.5rem;
+    background-color: var(--boot-surface);
 }
 
 /* which of the three is shown */
@@ -146,7 +157,7 @@ body{
     display: block;
 }
 
-/* ---------- the frame: header, sidebar (wide), tab bar (phones) ---------- */
+/* ---------- the frame: header (with the main places on wide screens), tab bar (phones) ---------- */
 
 .boot-header{
     position: fixed;
@@ -174,77 +185,42 @@ body{
     gap: 1.25rem;
 }
 
-.boot-side{
-    display: none;
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: var(--sidebar-w);
-    padding: 0 12px 16px;
-    flex-direction: column;
-    gap: 2px;
-    background-color: var(--boot-bg);
-    border-right: 1px solid var(--boot-border);
-}
 
-.boot-side-head{
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    height: 3.5rem;
-    margin-bottom: 12px;
-    padding-left: 12px;
-}
 
-.boot-item{
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    height: 2.5rem;
-    padding: 0 12px;
-}
 
-.boot .boot-label{
-    width: 2.5rem;
-    height: 0.7rem;
-    margin: 24px 12px 6px;
-}
 
-.boot-account{
-    height: 3.25rem;
-}
 
 .boot-chips{
     display: flex;
     gap: 0.5rem;
 }
 
-.boot-side-foot{
-    margin-top: auto;
-    padding-top: 12px;
-    border-top: 1px solid var(--boot-border);
-}
 
+/* the floating capsule (TabBar.module.css): 0.75rem clear of the edges, at most 28rem wide,
+   icons only, the header's material (its fill at 72 %, blurred) */
 .boot-tabs{
     display: none;
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    left: calc(0.75rem + env(safe-area-inset-left, 0px));
+    right: calc(0.75rem + env(safe-area-inset-right, 0px));
+    bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    max-width: 28rem;
+    height: 3.25rem;
+    margin: 0 auto;
+    padding: 0 0.35rem;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     place-items: center;
-    background-color: var(--boot-bg);
-    border-top: 1px solid var(--boot-border);
+    background-color: color-mix(in srgb, var(--boot-bg) 72%, transparent);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    backdrop-filter: blur(20px) saturate(170%);
+    border: 1px solid var(--boot-border);
+    border-radius: 999px;
+    box-shadow: 0 12px 32px -10px rgb(0 0 0 / 0.5), 0 2px 6px -2px rgb(0 0 0 / 0.25);
 }
 
 .boot-tab{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.35rem;
+    display: grid;
+    place-items: center;
 }
 
 /* ---------- pages ---------- */
@@ -256,7 +232,16 @@ body{
 }
 
 .boot-home{
-    width: min(76rem, calc(100% - 2 * var(--gutter)));
+    width: min(70rem, calc(100% - 2 * var(--gutter)));
+}
+
+/* the main places as words in the header (wide screens only) */
+.boot-nav{
+    display: none;
+    align-items: center;
+    gap: 1.6rem;
+    margin-right: auto;
+    margin-left: 1.5rem;
 }
 
 .boot-page{
@@ -269,7 +254,7 @@ body{
     align-items: flex-end;
     justify-content: space-between;
     gap: 1rem;
-    padding-top: 1.75rem;
+    padding: 3rem 0 1.5rem;
 }
 
 .boot-stack{
@@ -278,35 +263,32 @@ body{
     gap: 0.6rem;
 }
 
-.boot-strip{
-    display: grid;
-    grid-template-columns: 1.15fr 1fr 1fr;
-    gap: 1rem;
-    margin-top: 1.5rem;
-}
 
-.boot-strip .card{
-    height: 16rem;
-}
 
-.boot-week{
-    display: grid;
-    grid-template-columns: repeat(8, minmax(6.5rem, 1fr));
-    gap: 0.5rem;
-    margin-top: 1.5rem;
-    overflow: hidden;
-}
 
-.boot-week .card{
-    height: 6.5rem;
-    border-radius: 14px;
-}
 
 .boot-columns{
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 1.5rem;
-    margin-top: 1.5rem;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.boot-main,
+.boot-aside{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.boot-aside .card{
+    height: 9rem;
+}
+
+/* "Dein Tag" beside the focus sheet, as tall as it */
+.boot-aside .card:first-child{
+    height: 13.5rem;
 }
 
 .boot-list{
@@ -314,12 +296,6 @@ body{
     margin-top: 1rem;
 }
 
-.boot-focus{
-    height: 6.5rem;
-    border: 1px dashed var(--boot-border);
-    border-radius: 18px;
-    margin-top: 0.75rem;
-}
 
 .boot-page .card{
     height: 14rem;
@@ -349,56 +325,37 @@ body{
 
 @media (min-width: 1100px){
     .boot{
-        --sidebar-w: 15rem;
         --gutter: 2.5rem;
     }
 
-    .boot-side{
+    .boot-header{
+        padding-left: max(var(--gutter), calc((100% - 70rem) / 2));
+        padding-right: max(var(--gutter), calc((100% - 70rem) / 2));
+    }
+
+    .boot-nav{
         display: flex;
     }
 
-    .boot-header .boot-brand{
-        visibility: hidden;
-    }
-
     .boot-columns{
-        grid-template-columns: minmax(0, 1fr) 22rem;
+        grid-template-columns: minmax(0, 1fr) 22.25rem;
     }
 }
 
 @media (max-width: 1099px){
-    .boot-strip{
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .boot-strip > :last-child{
-        grid-column: 1 / -1;
-    }
-
-    .boot-aside{
-        order: -1;
+    .boot-aside > :not(:first-child){
+        display: none;
     }
 }
 
 @media (max-width: 720px){
     .boot{
-        --tabbar-h: 3.75rem;
+        --tabbar-h: 4rem;
         --gutter: 1rem;
     }
 
     .boot-tabs{
         display: grid;
-    }
-
-    .boot-strip{
-        grid-template-columns: none;
-        grid-auto-flow: column;
-        grid-auto-columns: min(82%, 20rem);
-        overflow: hidden;
-    }
-
-    .boot-strip > :last-child{
-        grid-column: auto;
     }
 
     /* "New" is a round button on phones */
@@ -408,18 +365,12 @@ body{
         border-radius: 50%;
     }
 
-    .boot-week{
-        grid-template-columns: repeat(8, minmax(5.75rem, 1fr));
-        gap: 0.4rem;
+    .boot-title{
+        padding: 1.5rem 0 0.75rem;
     }
 
-    .boot-week .card{
-        height: 5.5rem;
-    }
-
-    .boot-columns,
-    .boot-strip,
-    .boot-week{
-        margin-top: 1rem;
+    .boot .g1,
+    .boot .g2{
+        height: 1.9rem;
     }
 }

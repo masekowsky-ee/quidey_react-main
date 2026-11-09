@@ -93,6 +93,33 @@ export function taskTimeText(task) {
     return duration > 0 ? `${timeText(start)}–${timeText(start + duration)}` : timeText(start);
 }
 
+// The day's timeline: places timed entries in lanes: entries that overlap sit side by side, each cluster of overlapping
+// ones shares its lanes. Returns [{ task, start, end, col, cols }] (minutes of the day).
+export function layoutDay(items) {
+    const sorted = [...items].sort((a, b) => a.start - b.start || b.end - a.end);
+    const placed = [];
+    let cluster = [];
+    let clusterEnd = -1;
+    const flush = () => {
+        const lanes = [];
+        for (const item of cluster) {
+            let col = lanes.findIndex(end => end <= item.start);
+            if (col === -1) { col = lanes.length; lanes.push(item.end); } else lanes[col] = item.end;
+            item.col = col;
+        }
+        for (const item of cluster) item.cols = lanes.length;
+        placed.push(...cluster);
+        cluster = [];
+    };
+    for (const item of sorted) {
+        if (cluster.length && item.start >= clusterEnd) flush();
+        cluster.push(item);
+        clusterEnd = Math.max(clusterEnd, item.end);
+    }
+    flush();
+    return placed;
+}
+
 // 90 -> "1 h 30 min", 45 -> "45 min", 1440 -> "1 d"
 export function durationText(minutes) {
     const total = Number(minutes) || 0;
@@ -163,12 +190,14 @@ export function groupByDay(tasks) {
     return days;
 }
 
-// Filters from the calendar toolbar: group id (or 'all'), whether done tasks show, search text
-export function filterTasks(tasks, { groupId = 'all', showDone = true, query = '' } = {}) {
+// Filters from the calendar toolbar: group id (or 'all'), whether done tasks show, search text.
+// inGroup(task, groupId): whether a task is in that group (testers: their collections)
+const inOwnGroup = (task, groupId) => (task.group_ids ?? []).includes(groupId);
+export function filterTasks(tasks, { groupId = 'all', showDone = true, query = '', inGroup = inOwnGroup } = {}) {
     const needle = query.trim().toLowerCase();
     return tasks.filter(task =>
         (showDone || !task.done)
-        && (groupId === 'all' || (task.group_ids ?? []).includes(groupId))
+        && (groupId === 'all' || inGroup(task, groupId))
         && (!needle || [task.name, task.description, task.location, task.details]
             .some(text => String(text ?? '').toLowerCase().includes(needle))));
 }

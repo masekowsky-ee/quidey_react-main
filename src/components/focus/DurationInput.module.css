@@ -1,0 +1,81 @@
+/* A length typed freely: three small fields (h, min, s) and a row of quick lengths (DurationInput.jsx) */
+
+.field {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    border: none;
+    min-width: 0;
+}
+
+.legend {
+    padding: 0;
+    margin-bottom: 0.2rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.parts {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.part {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.2rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.part input {
+    width: 3.2rem;
+    height: 2.4rem;
+    padding: 0 0.3rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    color: var(--text-h);
+}
+
+.presets {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.presets button {
+    min-width: 2.4rem;
+    height: 1.9rem;
+    padding: 0 0.55rem;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    background: var(--surface-inset);
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    box-shadow: none;
+}
+
+.presets button:hover {
+    color: var(--text-h);
+    border-color: var(--control-border);
+}
+
+.presets button[aria-pressed="true"] {
+    color: var(--text-h);
+    background: var(--surface-strong);
+}
+
+.presetUnit {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}

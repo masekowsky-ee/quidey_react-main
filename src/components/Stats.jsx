@@ -6,11 +6,12 @@ import { useTranslation } from '../i18n/useTranslation';
 import { apiFetch, fill, mondayIndex } from '../features/helperFunction';
 import { fetchOwnProfile, profileColorAttr } from '../features/profile/profileOptions';
 import { RANGES, hoursText, periodOf, periodQuery, sumByBucket } from '../features/stats/period';
-import { TASK_COLORS, groupColorAttr } from '../features/tasks/taskColors';
+import { isTaskColor, groupColorAttr } from '../features/tasks/taskColors';
 import ProfileStats from './profile/ProfileStats.jsx';
 import CompletedTasks from './CompletedTasks.jsx';
 import SessionList from './stats/SessionList.jsx';
 import TimeChart from './stats/TimeChart.jsx';
+import TogetherStats from './stats/TogetherStats.jsx';
 import Icon from './calendar/icons.jsx';
 import { Bone, Skeleton } from './skeleton/Skeleton.jsx';
 import { usePlan } from '../features/pro/pro';
@@ -125,11 +126,15 @@ function Overview({ period, stats, error, t, locale }) {
     const typeRows = stats.events.types.map(type => ({
         key: type.id ?? 'none',
         label: type.name ?? t('eventTypeNone'),
-        color: TASK_COLORS.includes(type.color) ? type.color : undefined,
+        color: isTaskColor(type.color) ? type.color : undefined,
         ms: type.ms,
         note: fill(t(type.count === 1 ? 'eventCountOne' : 'eventCount'), { n: type.count }),
     }));
-    const groupRows = stats.groups.map(group => ({ key: group.name, label: group.name, color: groupColorAttr(group), ms: group.ms }));
+    // testers get focus per collection in place of per group (the server sends it only to them)
+    const byCollection = Array.isArray(stats.collections);
+    const groupRows = byCollection
+        ? stats.collections.map(c => ({ key: c.id, label: c.emoji ? `${c.emoji} ${c.name}` : c.name, color: groupColorAttr(c), ms: c.ms }))
+        : stats.groups.map(group => ({ key: group.name, label: group.name, color: groupColorAttr(group), ms: group.ms }));
 
     return (
         <>
@@ -154,10 +159,11 @@ function Overview({ period, stats, error, t, locale }) {
                     <Link to="/settings#event-types" className={styles.cardLink}>{t('eventTypesManage')}</Link>
                 </section>
                 <section className={styles.card} aria-labelledby="stats-groups">
-                    <h2 id="stats-groups" className={styles.cardTitle}>{t('statsByGroup')}</h2>
-                    <Bars rows={groupRows} empty={t('statsNoGroups')} />
+                    <h2 id="stats-groups" className={styles.cardTitle}>{t(byCollection ? 'statsByCollection' : 'statsByGroup')}</h2>
+                    <Bars rows={groupRows} empty={t(byCollection ? 'statsNoCollections' : 'statsNoGroups')} />
                 </section>
             </div>
+            <TogetherStats together={stats.together} />
         </>
     );
 }
@@ -266,7 +272,7 @@ export default function Stats() {
                         <ProfileStats stats={profile.stats} title={t('statsActivity')} colorAttr={profileColorAttr(profile)} />}
                 </>}
             {tab === 'sessions' && <SessionList period={period} />}
-            {tab === 'done' && <CompletedTasks />}
+            {tab === 'done' && <CompletedTasks together={shownStats.data?.together} />}
         </div>
     );
 }

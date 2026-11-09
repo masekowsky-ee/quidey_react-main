@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { editDisplaygroup, selectTasksLoaded } from '../features/tasks/taskAction';
 import { selectSharedGroups } from '../features/together/togetherAction';
@@ -7,37 +7,70 @@ import { groupColorAttr } from '../features/tasks/taskColors';
 import {useTranslation} from '../i18n/useTranslation'
 import Icon from './icons';
 import { Bone } from './skeleton/Skeleton.jsx';
+import { useTaskGroups, selectCollectionsLoaded } from '../features/collections/collections';
 
 // Which tasks the list shows: all of them, one of my groups, or a shared session's tasks.
-// A row of chips that scrolls sideways when there are many; "+" makes a new group.
+// A row of chips that scrolls sideways when there are many; "+" makes a new group. Where more
+// chips are hidden, that edge fades out (data-more-before / -after) instead of cutting a name.
+// (a callback ref: the bar comes after the loading shapes, not with the first render)
+function useEdgeFades() {
+    const cleanup = useRef(null);
+    return useCallback((bar) => {
+        cleanup.current?.();
+        cleanup.current = null;
+        if (!bar) return;
+        const update = () => {
+            bar.toggleAttribute('data-more-before', bar.scrollLeft > 1);
+            bar.toggleAttribute('data-more-after', bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 1);
+        };
+        update();
+        bar.addEventListener('scroll', update, { passive: true });
+        const resize = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(update);
+        resize?.observe(bar);
+        // chips come and go (a new group, a session ended)
+        const mutations = typeof MutationObserver === 'undefined' ? null : new MutationObserver(update);
+        mutations?.observe(bar, { childList: true, subtree: true, characterData: true });
+        cleanup.current = () => {
+            bar.removeEventListener('scroll', update);
+            resize?.disconnect();
+            mutations?.disconnect();
+        };
+    }, []);
+}
 // (A group's colour and its deletion sit in the list's title row while it is shown.)
+// For testers my collections take the place of my groups (useTaskGroups): "+" makes a collection.
 export default function GroupBtnContainer({ setCreateGroup }){
     const {t} = useTranslation();
     const dispatch = useDispatch();
+    const barRef = useEdgeFades();
 
-    // a group named "all" from older accounts is the "All" chip itself
-    const groups = useSelector(state => state.task.groups).filter(group => group.name !== 'all');
+    // my groups (or collections), without a group named "all" from older accounts: that is the "All" chip itself
+    const { groups, collections: asCollections } = useTaskGroups();
     const groupToDisplay = useSelector(state => state.task.groupToDisplay);
-    // my groups come with my tasks: until then two chips' shapes
-    const loaded = useSelector(selectTasksLoaded);
+    // my groups come with my tasks, collections on their own: until then two chips' shapes
+    const tasksLoaded = useSelector(selectTasksLoaded);
+    const collectionsLoaded = useSelector(selectCollectionsLoaded);
+    const loaded = asCollections ? collectionsLoaded : tasksLoaded;
     const shown = groupToDisplay.group;
     const showingAll = !shown?.id || shown.name === 'all';
 
     // one group per shared session I'm in; not deletable, they go away when I leave or it ends
     const sharedGroups = useSelector(selectSharedGroups);
     const shownSharedGone = shown?.shared && !sharedGroups.some(g => g.id === shown.id);
+    // a collection deleted (here or on its page), or one shown before the test ended
+    const shownCollectionGone = shown?.collection && (!asCollections || (collectionsLoaded && !groups.some(g => g.id === shown.id)));
 
-    // the shown session's group just went away: back to all tasks
+    // the shown session's group (or collection) just went away: back to all tasks
     useEffect(() => {
-        if (shownSharedGone) dispatch(editDisplaygroup(shown, shown.id));
-    }, [shownSharedGone, shown, dispatch]);
+        if (shownSharedGone || shownCollectionGone) dispatch(editDisplaygroup(shown, shown.id));
+    }, [shownSharedGone, shownCollectionGone, shown, dispatch]);
 
     // the shown group again means "all" (see editDisplaygroup)
     const show = (group) => dispatch(editDisplaygroup(group, shown?.id));
     const showAll = () => { if (!showingAll) dispatch(editDisplaygroup(shown, shown.id)); };
 
     return (
-        <div className={styles.bar} role="group" aria-label={t('groups')}>
+        <div className={styles.bar} role="group" aria-label={t('groups')} ref={barRef}>
             <button type="button" className={`${styles.chip} ${showingAll ? styles.active : ''}`}
                 aria-pressed={showingAll} onClick={showAll}>
                 {t('all')}
@@ -47,7 +80,9 @@ export default function GroupBtnContainer({ setCreateGroup }){
                 <button type="button" key={group.id} className={`${styles.chip} ${shown?.id === group.id ? styles.active : ''}`}
                     aria-pressed={shown?.id === group.id} onClick={() => show(group)}
                     data-task-color={groupColorAttr(group)}>
-                    {groupColorAttr(group) && <span className={styles.dot} aria-hidden="true" />}
+                    {group.emoji
+                        ? <span className={styles.emoji} aria-hidden="true">{group.emoji}</span>
+                        : groupColorAttr(group) && <span className={styles.dot} aria-hidden="true" />}
                     {group.name}
                 </button>
             ))}
@@ -61,7 +96,7 @@ export default function GroupBtnContainer({ setCreateGroup }){
                 </button>
             ))}
             <button type="button" className={styles.addChip} onClick={() => setCreateGroup(true)}
-                title={t('createGroupH2')} aria-label={t('createGroupH2')}>
+                title={t(asCollections ? 'collectionNew' : 'createGroupH2')} aria-label={t(asCollections ? 'collectionNew' : 'createGroupH2')}>
                 <Icon name="plus" className={styles.addIcon} strokeWidth={2} />
             </button>
         </div>

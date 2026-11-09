@@ -42,8 +42,11 @@
     border-color: var(--border-strong);
 }
 
+/* "Neu": a quiet tonal button (the timer's start is the room's one filled button) */
 .smallPrimary {
-    composes: btnPrimary from '../ui.module.css';
+    color: var(--text-h);
+    background: color-mix(in oklab, var(--text-h) 8%, transparent);
+    border: none;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
@@ -119,10 +122,18 @@
 }
 
 .rowPreview {
-    max-width: 14rem;
+    max-width: 100%;
+    font-size: 0.8rem;
+    color: var(--text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* nothing written yet / only attachments: quieter than a note's own words */
+.rowPreview[data-empty] {
+    font-style: italic;
+    opacity: 0.75;
 }
 
 .empty {
@@ -261,11 +272,6 @@
     color: var(--text-h);
 }
 
-.hMark {
-    font-weight: 700;
-    font-size: 0.85rem;
-    line-height: 1;
-}
 
 .area {
     width: 100%;

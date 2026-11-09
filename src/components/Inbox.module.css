@@ -101,7 +101,7 @@ button.rowSelected:hover{
 /* ---------- wide screens: conversations beside the open one ---------- */
 .pageWide{
     composes: page from './ui.module.css';
-    width: min(1100px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
     margin: 0 auto;
     padding-bottom: 4rem;
     box-sizing: border-box;

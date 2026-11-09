@@ -277,3 +277,50 @@
     display: none;
   }
 }
+
+/* ---------- on Home's white sheet (the app's own look, [data-flat] on the sheet) ----------
+   The sheet is the card: no box inside it. The task in focus is the page's biggest words after
+   the greeting, in the serif; "Fokus" above it is a quiet label in the panel titles' size. */
+:global([data-flat]) .focus {
+  gap: 0.35rem;
+}
+
+:global([data-flat]) .focusTitle {
+  min-height: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+:global([data-flat]) .currentTaskDiv {
+  padding: 0;
+  background-color: transparent;
+  border-color: transparent;
+  border-radius: var(--radius);
+}
+
+:global([data-flat]) .currentTaskDiv.dropZoneEmpty {
+  padding: 1rem 1.1rem;
+  border-color: var(--control-border);
+}
+
+:global([data-flat]) .currentTaskDiv.dropReady {
+  padding: 1rem 1.1rem;
+  border-color: var(--primary);
+}
+
+:global([data-flat]) .taskTitle {
+  font-family: var(--serif);
+  font-size: 2rem;
+  font-weight: 450;
+  line-height: 1.12;
+  letter-spacing: -0.012em;
+  color: var(--text-h);
+  text-wrap: balance;
+}
+
+@media (max-width: 720px) {
+  :global([data-flat]) .taskTitle {
+    font-size: 1.625rem;
+  }
+}

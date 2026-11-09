@@ -11,12 +11,13 @@ import GroupPicker from '../GroupPicker.jsx';
 import Icon from '../calendar/icons.jsx';
 import SheetGrabber from '../SheetGrabber.jsx';
 import { useSheet } from '../../features/layout/dragDismiss';
+import { useIsTester } from '../../features/auth/tester';
 
 // The calendar's task editor as a dialog (a sheet from the bottom on phones), for the task
 // list on Home: every option (time, reminder, repeat, colour, sharing, groups) in one place.
 // Escape, the close button or a click next to it closes without saving.
 // shared: { sessionId, canRemove, subGroups? } for a task in a shared session (its own fields, no groups).
-// handlers: { save(changes), remove?, subGroups? } (promises) for a task kept somewhere else, e.g. a
+// handlers: { save(changes), remove?, subGroups?, allowEvents?, remindsAll? } (promises) for a task kept somewhere else, e.g. a
 // family's calendar: the same fields as a shared session's task; without remove there is no delete
 // button. subGroups (testers): the session's / family's sub-groups to move it between.
 export default function TaskEditDialog({ task, onClose, shared, handlers }) {
@@ -25,6 +26,8 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
     const titleId = useId();
     const panelRef = useRef(null);
     const [pickerTask, setPickerTask] = useState(null);
+    // testers sort tasks into collections (in the editor) instead of groups
+    const groupsOn = !useIsTester();
     const closePicker = useCallback(() => setPickerTask(null), []);
     // on phones a sheet: pulled down, it closes like a click next to it (without saving)
     const sheet = useSheet(onClose, panelRef);
@@ -79,6 +82,8 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
                     ? <TaskEditor
                         task={task}
                         personal={false}
+                        allowEvents={Boolean(handlers.allowEvents)}
+                        remindsAll={Boolean(handlers.remindsAll)}
                         subGroups={handlers.subGroups}
                         onSave={(changes) => run(handlers.save(changes))}
                         onCancel={() => dismiss()}
@@ -100,7 +105,7 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
                         onCancel={() => dismiss()}
                         onDelete={() => run(deleteTaskAsking(task), t('taskDeleted'))}
                         onLeave={() => run(leaveTask(task), t('taskLeft'))}
-                        onPickGroups={setPickerTask}
+                        onPickGroups={groupsOn ? setPickerTask : undefined}
                     />}
             </div>
             {pickerTask && <GroupPicker task={pickerTask} onClose={closePicker} />}

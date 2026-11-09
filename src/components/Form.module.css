@@ -1,5 +1,6 @@
+/* the form card floats over the page: the lifted sheet (white on the paper) */
 .div{
-    composes: panel from './ui.module.css';
+    composes: lifted from './ui.module.css';
     margin-top: 1rem;
     padding-top: 20px;
     width: fit-content;

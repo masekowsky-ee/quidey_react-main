@@ -10,7 +10,7 @@
 }
 
 .dialog{
-    composes: panel from './ui.module.css';
+    composes: lifted from './ui.module.css'; /* floats over the page: the white sheet */
     width: min(24rem, 100%);
     max-height: calc(100vh - 2rem);
     display: flex;

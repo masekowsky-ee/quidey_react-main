@@ -4,6 +4,8 @@ import { forgetAccount, forgetToken, listAccounts, rememberAccount, switchAccoun
 import { forgetPushOnSignOut, refreshPush } from '../pwa/push';
 import { resetFocus } from '../session/sessionAction';
 import { clearFocusRun } from '../session/focusRun';
+import { cancelAlarms } from '../native/alarms';
+import { setUsageEnabled } from '../usage/usage';
 
 // Signed in (password, Google): { token, username } from the server
 const finishSignIn = (data) => {
@@ -91,6 +93,8 @@ export const requestBetaAccess = (reason) => {
 // (the app loads again as that one); otherwise it's the sign-in.
 export const logout = () => {
     return (dispatch, getState) => {
+        // this account's queued usage events are gone with it
+        setUsageEnabled(false);
         const token = localStorage.getItem('token');
         forgetToken(token);
         forgetAccount(getState().auth.user?.username);
@@ -98,6 +102,8 @@ export const logout = () => {
         // no more push notifications for this account here (with another one taking over,
         // they go over to that one on its start)
         forgetPushOnSignOut(token, Boolean(next));
+        // the reminders' alarm clock (Android app) rings for nobody now; the next account sets its own
+        cancelAlarms();
         if (next) {
             switchAccount(next.username);
             return;
@@ -256,3 +262,17 @@ export const register = (username, display_name, email, birth_date, password) =>
         });
     };
 }
+export const selectUsageConsent = (state) => state.auth.access.usageConsent;
+
+// Answer the question about the anonymous usage statistics (works before beta access too)
+export const setUsageConsent = (granted) => {
+    return async (dispatch, getState) => {
+        const usageConsent = await apiFetch('/api/profile/usage-consent', {
+            method: 'PUT',
+            body: JSON.stringify({ granted: Boolean(granted) }),
+        });
+        dispatch({ type: SET_ACCESS, payload: { ...getState().auth.access, usageConsent } });
+        setUsageEnabled(usageConsent.choice === 'granted', getState().auth.access.userId);
+        return usageConsent;
+    };
+};

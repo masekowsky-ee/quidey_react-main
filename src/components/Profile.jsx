@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import CustomError from './CustomError.jsx'
 import ProfileView from './ProfileView.jsx'
 import ResendVerification from './ResendVerification.jsx'
+import MailSpamHint from './auth/MailSpamHint.jsx'
 import { listAccounts, switchAccount } from '../features/auth/accounts'
 import {useTranslation} from '../i18n/useTranslation'
 import PasswordInput from './PasswordInput.jsx';
@@ -210,6 +211,7 @@ export default function Profile({ initialSignState = 0, initialEmail = '', googl
                             <p>{verifyNotice.kind === 'registered'
                                 ? `${t('verifyRegisteredText')} ${verifyNotice.email}`
                                 : t('verifyUnverifiedText')}</p>
+                            <MailSpamHint />
                             <ResendVerification key={verifyNotice.kind} initialEmail={verifyNotice.email} />
                         </div>
                     )}

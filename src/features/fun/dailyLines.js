@@ -224,7 +224,7 @@ const LINES = [
     ['slogan', 'Go on, be the reason your to-do list gets shorter.', 'Los, sei der Grund, warum deine Liste kürzer wird.'],
     ['slogan', 'Slow progress is still progress.', 'Langsamer Fortschritt ist auch Fortschritt.'],
     ['slogan', 'Turn "someday" into a due date.', 'Mach aus "irgendwann" ein Fälligkeitsdatum.'],
-    ['slogan', 'Psst: there\'s a secret playground behind this line.', 'Psst: Hinter dieser Zeile liegt ein geheimer Spielplatz.'],
+    ['slogan', 'Psst: a tap on this line opens the Arcade.', 'Psst: Ein Tipp auf diese Zeile öffnet das Arcade.'],
 ];
 
 export const DAILY_LINES = LINES.map(([type, en, de, year = null, about = false]) => ({ type, en, de, year, about }));

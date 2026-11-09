@@ -1,0 +1,15 @@
+.hint{
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+    text-align: left;
+}
+
+.hint svg{
+    flex: none;
+    margin-top: 0.05rem;
+}

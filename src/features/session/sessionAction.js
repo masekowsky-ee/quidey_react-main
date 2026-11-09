@@ -3,6 +3,7 @@ import { apiFetch } from '../helperFunction';
 import { isSharedTaskId, sharedTaskIdOf, selectSharedSoloTasks } from '../together/togetherAction';
 import { storeTimerMode, storePomodoro } from '../settings/preferences';
 import { playSound } from '../settings/sound';
+import { trackAction } from '../usage/track';
 import { trackEvent } from '../native/analytics';
 import { phaseMs } from './sessionReducer';
 
@@ -120,9 +121,17 @@ export const saveSessionData = () => {
     }
 }
 
-// The focus time so far is saved, if there is any (a finished countdown, a Pomodoro round)
+// A session needs at least this much focus to be saved (the server refuses shorter ones):
+// a start by mistake or a stop during a break isn't a session.
+export const SESSION_MIN_SECONDS = 60;
+
+// The focus time so far is saved when it's a session (a finished countdown, a Pomodoro round, a
+// stop); anything shorter is let go, so the next run starts fresh
 const saveIfWorked = () => (dispatch, getState) => {
-    if (getState().session.currentSessionData.totalTime <= 0) return Promise.resolve();
+    if (getState().session.currentSessionData.totalTime < SESSION_MIN_SECONDS) {
+        dispatch(updateCurrentSessionData({ totalTime: 0, workedTasks: [], date: new Date().toISOString() }));
+        return Promise.resolve();
+    }
     return dispatch(saveSessionData()).catch(err => console.error("Saving session failed:", err));
 };
 
@@ -141,23 +150,42 @@ function cancelAlarm() {
     apiFetch('/api/focus/alarm', { method: 'DELETE' }).catch(() => {});
 }
 
+// Brings the running timer up to the wall clock: the whole seconds since `runningSince` are
+// booked (useFocusClock does this every quarter second; stop and pause first, so a late or
+// frozen clock loses nothing). Answers whether a countdown ran out by it.
+export const catchUpClock = () => (dispatch, getState) => {
+    const state = getState();
+    const { timer, runningSince, timerMode } = state.session;
+    if (!timer.active || runningSince == null) return false;
+    const passed = Math.floor((Date.now() - runningSince) / 1000);
+    if (passed < 1) return false;
+    const seconds = timerMode === 'stopwatch' ? passed : Math.min(passed, Math.ceil(timer.time / 1000));
+    dispatch(clockTick(seconds, selectFocusTask(state)));
+    return !getState().session.timer.active;
+};
+
 // ---------- the controls (timer panel, Fokusraum, shortcuts) ----------
 export const startFocus = () => (dispatch, getState) => {
-    const { timer, timerMode, pomodoro } = getState().session;
+    const { timer, timerMode, pomodoro, sessionParams } = getState().session;
     if (timer.active) return;
-    if (timerMode !== 'stopwatch' && timer.time < 1000) return;
-    dispatch(setTimer(timer.time, true));
+    // a countdown that is over (or was stopped) starts again with the last length
+    const from = timerMode !== 'stopwatch' && timer.time < 1000
+        ? (timerMode === 'pomodoro' ? phaseMs(pomodoro) : sessionParams.time)
+        : timer.time;
+    if (timerMode !== 'stopwatch' && from < 1000) return;
+    dispatch(setTimer(from, true));
     playSound('focusStart');
     // the Android app's analytics, with consent only (features/native/analytics.js)
-    trackEvent('focus_start', { mode: timerMode });
+    trackAction('focus_start', { mode: timerMode });
     const task = selectFocusTask(getState());
     if (task && (timerMode !== 'pomodoro' || pomodoro.phase === 'focus')) dispatch(addWorkedTask(task));
     scheduleAlarm(getState());
 };
 
 export const pauseFocus = () => (dispatch, getState) => {
+    if (!getState().session.timer.active) return;
+    dispatch(catchUpClock());
     const { timer } = getState().session;
-    if (!timer.active) return;
     playSound('pause');
     dispatch(setTimer(timer.time, false));
     cancelAlarm();
@@ -167,8 +195,10 @@ export const pauseFocus = () => (dispatch, getState) => {
 // over from the beginning
 export const stopFocus = () => (dispatch, getState) => {
     playSound('pause');
-    const { timerMode, timer } = getState().session;
-    const wasRunning = timer.active;
+    const wasRunning = getState().session.timer.active;
+    // the seconds since the last tick count too
+    dispatch(catchUpClock());
+    const { timerMode } = getState().session;
     if (timerMode === 'pomodoro') {
         dispatch(setTimer(0, false));
         dispatch({ type: SET_POMODORO, payload: { phase: 'focus', round: 0 } });
@@ -176,7 +206,7 @@ export const stopFocus = () => (dispatch, getState) => {
         dispatch(setTimer(0, false));
     }
     if (wasRunning) cancelAlarm();
-    return dispatch(saveSessionData()).catch(err => console.error("Saving session failed:", err));
+    return dispatch(saveIfWorked());
 };
 
 // the name of each Pomodoro phase (translation keys)

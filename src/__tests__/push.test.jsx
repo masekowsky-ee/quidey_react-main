@@ -20,7 +20,7 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 }))
 
 const KEY = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U'
-const ALL_ON = { plan: true, digest: true, messages: true, social: true }
+const ALL_ON = { plan: true, digest: true, messages: true, social: true, groups: true }
 const callsTo = (path, method) => apiFetch.mock.calls.filter(([url, options]) => url === path && (options?.method ?? 'GET') === method)
 const bodyOf = (path, method) => JSON.parse(callsTo(path, method).at(-1)[1].body)
 
@@ -156,6 +156,12 @@ describe('notifications on this device', () => {
         fireEvent.click(digest.querySelector('button[aria-pressed="false"]'))
         await waitFor(() => expect(bodyOf('/api/push/subscription', 'PUT').kinds).toEqual({ digest: false }))
         expect(screen.getByRole('group', { name: 'Dein Tag' }).querySelector('[aria-pressed="true"]').textContent).toBe('Aus')
+
+        // new entries by others and chat messages in families and sessions: a switch of its own
+        expect(screen.getByText('Neue Einträge von anderen und Nachrichten im Chat')).toBeInTheDocument()
+        const groups = screen.getByRole('group', { name: 'Familien und Sitzungen' })
+        fireEvent.click(groups.querySelector('button[aria-pressed="false"]'))
+        await waitFor(() => expect(bodyOf('/api/push/subscription', 'PUT').kinds).toEqual({ groups: false }))
 
         fireEvent.click(screen.getByRole('button', { name: 'Test senden' }))
         expect(await screen.findByText('Verschickt. Sie sollte gleich erscheinen.')).toBeInTheDocument()

@@ -5,7 +5,7 @@
 /* two columns: what a group is about beside its settings (div.page: it has to beat the
    composed column's width, whatever order the stylesheets load in) */
 div.page{
-    width: min(1100px, calc(100% - 2 * var(--page-gutter, 1rem)));
+    width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
 }
 
 /* the title and the three areas on one line */
@@ -80,7 +80,7 @@ div.page{
 .sectionPanel{
     min-width: 0;
     padding: 1.1rem 1.25rem;
-    background: var(--surface);
+    background: var(--panel);
     border-radius: var(--radius-lg);
 }
 
@@ -357,6 +357,18 @@ div.page{
     border-radius: 1px;
     background: var(--ink);
     opacity: 0.7;
+}
+
+/* a colour scheme: the same two halves, the ink line in the scheme's accent */
+.schemeSwatch .palettePreview{
+    width: 4.5rem;
+    height: 2.5rem;
+}
+
+.schemeSwatch .palettePreview > span::after{
+    background: var(--dot);
+    opacity: 1;
+    height: 3px;
 }
 
 @media (max-width: 520px) {

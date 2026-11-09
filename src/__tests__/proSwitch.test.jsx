@@ -56,8 +56,8 @@ describe('Quidey Pro is switched off until it is turned on by hand', () => {
     it('numbers the privacy policy without the payment section, and names Google Analytics for the app', () => {
         render(<Provider store={storeWith({})}><MemoryRouter initialEntries={['/datenschutz']}><LegalPage /></MemoryRouter></Provider>)
         expect(screen.queryByText(/Stripe/)).not.toBeInTheDocument()
-        expect(screen.getByRole('heading', { name: '7. Kontaktformular, Feedback und E-Mail' })).toBeInTheDocument()
-        expect(screen.getByRole('heading', { name: '13. Änderungen' })).toBeInTheDocument()
+        expect(screen.getByRole('heading', { name: '8. Kontaktformular, Feedback und E-Mail' })).toBeInTheDocument()
+        expect(screen.getByRole('heading', { name: '14. Änderungen' })).toBeInTheDocument()
         expect(screen.getByText(/Google Analytics für Firebase \(nur Android-App\)/)).toBeInTheDocument()
     })
 

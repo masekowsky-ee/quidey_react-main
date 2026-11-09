@@ -238,3 +238,15 @@ export function useCelebrate(delay = 0) {
         }, delay);
     };
 }
+
+// A page reached by a sideways swipe (features/layout/tabSwipe.js): it comes in from the side the
+// finger came from. from: 1 from the right (the next tab), -1 from the left (the one before).
+// "minimal" keeps its cross-fade.
+export function pageSwipeMotion(from, level) {
+    if (level === 'minimal') return MOTION.page.minimal;
+    return {
+        initial: { opacity: 0, x: `${from * 30}%` },
+        animate: { opacity: 1, x: '0%' },
+        transition: { ...(level === 'extreme' ? BOUNCE : SETTLE), opacity: { duration: 0.2, ease: 'easeOut' } },
+    };
+}

@@ -137,20 +137,37 @@
     flex-direction: column;
 }
 
+/* names and addresses are shown in full: they wrap instead of ending in "…" */
 .name{
     color: var(--text-h);
     font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: break-word; /* not anywhere: that lets the row squeeze them to one letter per line */
 }
 
 .meta{
     font-size: 0.8rem;
     color: var(--text-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: break-word;
+}
+
+/* the person area of a users row: a button that opens the detail sheet */
+.personBtn{
+    composes: person;
+    justify-content: flex-start; /* buttons centre their content by default */
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 0.2rem 0.4rem;
+    margin: -0.2rem -0.4rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+}
+
+.personBtn:hover{
+    background: var(--hover-wash);
 }
 
 /* ---------- chips ---------- */
@@ -287,6 +304,40 @@
     min-width: 0;
 }
 
+.userTools{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.sortSelect{
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.exports{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-left: auto;
+}
+
+.exportBtn{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    padding: 0.3rem 0.8rem;
+    white-space: nowrap;
+}
+
+.loadMore{
+    display: block;
+    margin: 1rem auto 0;
+}
+
 .userRow{
     display: flex;
     flex-direction: row;
@@ -294,6 +345,12 @@
     align-items: center;
     gap: 0.5rem 1rem;
     padding: 0.8rem 0;
+}
+
+/* the person keeps a readable width; chips and switches wrap below it when the row is narrow */
+.userRow > .personBtn,
+.userRow > .person{
+    flex: 1 1 16rem;
 }
 
 .userInfo{

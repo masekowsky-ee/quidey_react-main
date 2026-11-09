@@ -1,0 +1,117 @@
+/* Admin → Benutzer: the detail sheet of one account. Sheet motion comes from index.css
+   ([data-sheet]); colours only from the theme's tokens. */
+
+.backdrop{
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-alert);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: var(--overlay);
+    overscroll-behavior: contain;
+}
+
+.dialog{
+    width: min(30rem, 100%);
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem 1.25rem 1rem;
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+}
+
+.head{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.who{
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.title{
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+}
+
+.sub{
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
+.close{
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-radius: var(--radius-pill);
+}
+
+.close:hover{
+    color: var(--text-h);
+    background: var(--hover-wash);
+}
+
+.fields{
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.field{
+    display: grid;
+    grid-template-columns: 9.5rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--btn-border);
+    font-size: 0.9rem;
+}
+
+.field dt{
+    color: var(--text-muted);
+}
+
+.field dd{
+    margin: 0;
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+    .backdrop{
+        padding: 0;
+        place-items: end stretch;
+    }
+
+    .dialog{
+        width: 100%;
+        max-height: 90dvh;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .field{
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.1rem;
+    }
+}

@@ -1,4 +1,4 @@
-import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, REFRESH_TASKS, TASK_REPLACED, SET_TASK_INVITES, TASK_INVITE_ACCEPTED, TASK_INVITE_REMOVED, TASK_SHARE_REMOVED, SET_EVENT_TYPES, EVENT_TYPE_SAVED, EVENT_TYPE_REMOVED } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, GET_NOTES, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, REFRESH_TASKS, TASK_REPLACED, SET_TASK_INVITES, TASK_INVITE_ACCEPTED, TASK_INVITE_REMOVED, TASK_SHARE_REMOVED, SET_EVENT_TYPES, EVENT_TYPE_SAVED, EVENT_TYPE_REMOVED } from './taskActionTypes';
 
 // task.group_ids: the groups a task is in (for its labels)
 const withGroupIds = (task, change) => ({ ...task, group_ids: change(task.group_ids ?? []) });
@@ -201,6 +201,11 @@ const taskReducer = (state = initialState, action) => {
             return {
                 ...state,
                 notes: state.notes.filter(note => note.id !== action.payload.noteId),
+            }
+        case GET_NOTES:
+            return {
+                ...state,
+                notes: Array.isArray(action.payload) ? action.payload : state.notes,
             }
         case EDIT_NOTE:
             return {

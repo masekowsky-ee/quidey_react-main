@@ -2,6 +2,7 @@ import styles from './Profile.module.css';
 import { useState } from 'react';
 import { useTranslation } from '../i18n/useTranslation';
 import { requestVerificationMail } from '../features/auth/authAction';
+import MailSpamHint from './auth/MailSpamHint.jsx';
 
 // "Send the link again" for someone who can't sign in yet: asks for the email address.
 // The server answers the same for every address, so this always says "sent".
@@ -22,7 +23,12 @@ export default function ResendVerification({ initialEmail = '' }) {
         }
     };
 
-    if (state === 'sent') return <p className={styles.success} role="status">{t('verifyMailSentIfExists')}</p>;
+    if (state === 'sent') return (
+        <>
+            <p className={styles.success} role="status">{t('verifyMailSentIfExists')}</p>
+            <MailSpamHint />
+        </>
+    );
 
     return (
         <form className={styles.resendForm} onSubmit={submit}>

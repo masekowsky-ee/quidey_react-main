@@ -194,6 +194,19 @@ export function playSound(name) {
     else ctx.resume().then(() => { if (Date.now() - asked < 400) run(); }).catch(() => {});
 }
 
+// The arcade's pattern pads: one bell each, on Quidey's pentatonic (A, C♯, E, A)
+const PAD_STEPS = [0, 4, 7, 12];
+export function playPad(index) {
+    const step = PAD_STEPS[index];
+    if (step === undefined || level === 'off' || typeof document === 'undefined' || document.hidden || !audio()) return;
+    const run = () => {
+        master.gain.value = VOLUME[level];
+        bell(ctx.currentTime + 0.01, step, 0.4, 0.4);
+    };
+    if (ctx.state === 'running') run();
+    else ctx.resume().then(run).catch(() => {});
+}
+
 // The first click or key press unlocks the audio, so sounds that come in later (a message) can play
 if (typeof window !== 'undefined') {
     const unlock = () => {

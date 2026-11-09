@@ -1,4 +1,4 @@
-import { SET_SHOW_MENU, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS, SET_PALETTE, SET_UI_VARIANT, SET_UI_COLORS, SET_SOUND } from "./settingsActionTypes";
+import { SET_SHOW_MENU, SET_MENU_SIDE, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS, SET_PALETTE, SET_UI_VARIANT, SET_UI_COLORS, SET_SOUND } from "./settingsActionTypes";
 import { UI_VARIANT_IDS, readStoredUiVariant, readStoredUiColors } from "../tester/variants";
 import { THEMES, readStoredTheme } from "./theme";
 import { HOME_LAYOUTS, readStoredHomeLayout } from "./homeLayout";
@@ -8,6 +8,7 @@ import { LANGUAGES, readStoredLanguage, ACCENTS, readStoredAccent, SESSION_LENGT
 
 const intitialState = {
     showMenu: false,
+    menuSide: 'left', // phones: the drawer's side, see setMenuSide
     showDoneTasks: false,
     showForms: false,
     showTutorial: false, // the intro tour, opened for new users and from the menu
@@ -29,6 +30,8 @@ const settingsReducer = (state = intitialState, action) => {
     switch(action.type){
         case SET_SHOW_MENU:
             return { ...state, showMenu: typeof action.payload === 'boolean' ? action.payload : !state.showMenu };
+        case SET_MENU_SIDE:
+            return { ...state, menuSide: action.payload };
         case SET_SHOW_DONE_TASKS:
             return { ...state, showDoneTasks: !state.showDoneTasks };
         case SET_LANGUAGE:
@@ -36,7 +39,8 @@ const settingsReducer = (state = intitialState, action) => {
         case SET_CUSTOM_ERROR:
             return { ...state, customError: action.payload };
         case SET_SHOW_FORMS:
-            return { ...state, showForms: typeof action.payload === 'boolean' ? action.payload : !state.showForms };
+            // 'reminder': opened on the testers' reminder form (command bar "Neue Erinnerung")
+            return { ...state, showForms: typeof action.payload === 'boolean' || action.payload === 'reminder' ? action.payload : !state.showForms };
         case SET_THEME:
             return THEMES.includes(action.payload) ? { ...state, theme: action.payload } : state;
         case SET_SHOW_SHARED_TASKS:

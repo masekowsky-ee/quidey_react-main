@@ -18,7 +18,8 @@ import Tutorial from '../components/Tutorial'
 import Menu from '../components/Menu'
 import Settings from '../components/Settings'
 import DailyTicker from '../components/DailyTicker'
-import FunPage from '../components/fun/FunPage'
+import WordGuess from '../components/fun/WordGuess'
+import Sequence from '../components/fun/Sequence'
 
 const makeStore = () => configureStore({ reducer: rootReducer })
 
@@ -373,37 +374,34 @@ describe('tutorial', () => {
     })
 })
 
-describe('fun page', () => {
-    const renderAt = (entry) => render(
-        <Provider store={makeStore()}>
-            <MemoryRouter initialEntries={[entry]}>
-                <DailyTicker />
-                <Routes>
-                    <Route path="/" element={<p>home page</p>} />
-                    <Route path="/fun" element={<FunPage />} />
-                </Routes>
-            </MemoryRouter>
-        </Provider>
-    )
-
-    it('typed in directly, it sends you home', () => {
-        renderAt('/fun')
-        expect(screen.getByText('home page')).toBeInTheDocument()
-    })
-
-    it('opens through the daily line', () => {
-        renderAt('/')
+describe('the daily line', () => {
+    it('leads to the Arcade (the old playground /fun went there)', () => {
+        render(
+            <Provider store={makeStore()}>
+                <MemoryRouter initialEntries={['/']}>
+                    <DailyTicker />
+                    <Routes>
+                        <Route path="/" element={<p>home page</p>} />
+                        <Route path="/arcade" element={<p>arcade page</p>} />
+                    </Routes>
+                </MemoryRouter>
+            </Provider>
+        )
         const label = translations.de[`lineOf_${lineOfDay().type}`]
         // hidden behind the bulb until it is tapped
         expect(screen.queryByRole('link', { name: new RegExp(`^${label}`) })).not.toBeInTheDocument()
         fireEvent.click(screen.getByRole('button', { name: label }))
         fireEvent.click(screen.getByRole('link', { name: new RegExp(`^${label}`) }))
-        expect(screen.getByRole('heading', { name: 'Quidey-Spielwiese' })).toBeInTheDocument()
+        expect(screen.getByText('arcade page')).toBeInTheDocument()
     })
+})
+
+describe('the quiz games (played in the Arcade)', () => {
+    const renderGame = (game) => render(<Provider store={makeStore()}>{game}</Provider>)
 
     it('plays a round of word guess with the keyboard', () => {
         vi.spyOn(Math, 'random').mockReturnValue(0) // first word of the list: APFEL
-        renderAt({ pathname: '/fun', state: { fromTicker: true } })
+        renderGame(<WordGuess level="normal" />)
 
         for (const key of 'APF') fireEvent.keyDown(window, { key })
         fireEvent.keyDown(window, { key: 'Enter' })
@@ -417,14 +415,9 @@ describe('fun page', () => {
         vi.restoreAllMocks()
     })
 
-    it('the difficulty changes the game and is remembered', () => {
+    it('easy word guess: seven rows of four letters', () => {
         vi.spyOn(Math, 'random').mockReturnValue(0) // first four-letter word: BAUM
-        renderAt({ pathname: '/fun', state: { fromTicker: true } })
-
-        fireEvent.click(screen.getByRole('button', { name: 'Leicht' }))
-        expect(screen.getByRole('button', { name: 'Leicht' })).toHaveAttribute('aria-pressed', 'true')
-        expect(localStorage.getItem('funLevel:guess')).toBe('easy')
-        // seven rows of four tiles
+        renderGame(<WordGuess level="easy" />)
         expect(screen.getAllByRole('row')).toHaveLength(7)
         expect(screen.getAllByRole('row')[0].children).toHaveLength(4)
 
@@ -437,7 +430,7 @@ describe('fun page', () => {
 
     it('marks letters green, yellow and grey', () => {
         vi.spyOn(Math, 'random').mockReturnValue(0) // APFEL
-        renderAt({ pathname: '/fun', state: { fromTicker: true } })
+        renderGame(<WordGuess level="normal" />)
         // A right spot, L elsewhere, X/Y/Z not in the word
         for (const key of 'ALXYZ') fireEvent.keyDown(window, { key })
         fireEvent.keyDown(window, { key: 'Enter' })
@@ -447,21 +440,16 @@ describe('fun page', () => {
     })
 
     it('hard number sequences are typed in', () => {
-        localStorage.setItem('funLevel:sequence', 'hard')
-        renderAt({ pathname: '/fun', state: { fromTicker: true } })
-        fireEvent.click(screen.getByRole('tab', { name: /Was kommt danach\?/ }))
+        renderGame(<Sequence level="hard" />)
         const input = screen.getByRole('spinbutton', { name: 'Deine Antwort' })
         fireEvent.change(input, { target: { value: '1' } })
         fireEvent.click(screen.getByRole('button', { name: 'Prüfen' }))
         expect(screen.getByRole('button', { name: 'Nächstes Rätsel' })).toBeInTheDocument()
     })
 
-    it('switches games', () => {
-        renderAt({ pathname: '/fun', state: { fromTicker: true } })
-        fireEvent.click(screen.getByRole('tab', { name: /Was kommt danach\?/ }))
+    it('any answer to a number sequence shows the rule behind it', () => {
+        renderGame(<Sequence level="normal" />)
         expect(screen.getByText('Welche Zahl kommt als Nächstes?')).toBeInTheDocument()
-
-        // any answer shows the rule behind the numbers
         fireEvent.click(screen.getAllByRole('button').find((b) => /^\d[\d.]*$/.test(b.textContent)))
         expect(screen.getByRole('button', { name: 'Nächstes Rätsel' })).toBeInTheDocument()
     })

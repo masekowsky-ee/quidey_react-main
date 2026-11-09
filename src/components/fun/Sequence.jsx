@@ -8,7 +8,8 @@ import Stats from './Stats';
 
 // "What comes next?": spot the rule behind five numbers and name the sixth.
 // Easy has only simple rules, hard adds trickier ones and the answer must be typed in.
-export default function Sequence({ level = 'normal' }) {
+// onScore(streak): every right answer (the arcade sends it, see features/arcade/arcade.js)
+export default function Sequence({ level = 'normal', onScore }) {
     const { t, language } = useTranslation();
     const typed = sequenceIsTyped(level);
     const [puzzle, setPuzzle] = useState(() => makeSequence(Math.random, undefined, level));
@@ -31,6 +32,7 @@ export default function Sequence({ level = 'normal' }) {
             const nextStreak = streak + 1;
             setStreak(nextStreak);
             setBest(saveBest('sequence', level, nextStreak));
+            onScore?.(nextStreak);
             celebrate();
         } else {
             setStreak(0);

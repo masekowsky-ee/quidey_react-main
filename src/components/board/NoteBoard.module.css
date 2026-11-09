@@ -1,0 +1,402 @@
+/* Notes pinned to a family's or a session's board (NoteBoard.jsx): cards in a grid like notes
+   on a corkboard (calm, the note's colour as an edge), the open note and the picker as sheets. */
+
+.board {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.boardHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.boardTitle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.boardTitle svg {
+    color: var(--text-muted);
+}
+
+.pinBtn {
+    composes: ghostBtn from '../ui.module.css';
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    height: 2rem;
+    padding: 0 0.7rem;
+    font-size: 0.82rem;
+    border-radius: var(--radius-pill);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 6.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    padding: 0.7rem 0.8rem 0.65rem;
+    overflow: hidden;
+    text-align: left;
+    background: var(--surface-inset);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+}
+
+.card:hover {
+    background: var(--surface-inset);
+    border-color: var(--control-border);
+}
+
+.card[data-task-color]::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--task-color);
+}
+
+.cardTitle {
+    max-width: 100%;
+    font-weight: 600;
+    color: var(--text-h);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.preview {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+    flex: 1;
+}
+
+.preview[data-empty] {
+    font-style: italic;
+    opacity: 0.75;
+}
+
+.cardMeta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem;
+    max-width: 100%;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.attach {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    margin-left: auto;
+}
+
+.muted {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* ---------- sheets ---------- */
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-alert);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: var(--overlay);
+    overscroll-behavior: contain;
+}
+
+.dialog {
+    width: min(28rem, 100%);
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem 1.25rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+}
+
+.dialog[data-wide] {
+    width: min(38rem, 100%);
+}
+
+.head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.title {
+    margin: 0;
+    min-width: 0;
+    font-size: 1.1rem;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+}
+
+.close {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-radius: var(--radius-pill);
+}
+
+.close:hover {
+    color: var(--text-h);
+    background: var(--hover-wash);
+}
+
+.byline {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.readBody {
+    position: relative;
+    padding: 0.75rem 0.9rem;
+    background: var(--surface-inset);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.readBody[data-task-color]::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--task-color);
+}
+
+.links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+}
+
+.links li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.links a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.thumb {
+    display: block;
+    width: 5rem;
+    height: 5rem;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-inset);
+}
+
+.thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-alert);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: var(--overlay);
+    cursor: zoom-out;
+}
+
+.lightbox img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-modal);
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.quiet {
+    composes: ghostBtn from '../ui.module.css';
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 2.3rem;
+    padding: 0 0.85rem;
+    font-size: 0.875rem;
+    color: var(--text-h);
+    text-decoration: none;
+    border-radius: var(--radius-pill);
+}
+
+.search {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 0.7rem;
+    color: var(--text-muted);
+    background: var(--surface-inset);
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-pill);
+}
+
+.search input {
+    flex: 1;
+    min-width: 0;
+    height: 2.3rem;
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.search input:focus-visible {
+    outline: none;
+}
+
+.search:focus-within {
+    border-color: var(--text-muted);
+}
+
+.pickList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pickRow {
+    position: relative;
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    padding: 0.55rem 0.75rem;
+    overflow: hidden;
+    text-align: left;
+    background: var(--surface-inset);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+}
+
+.pickRow:hover:not(:disabled) {
+    background: var(--surface-inset);
+    border-color: var(--control-border);
+}
+
+.pickRow:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.pickRow[data-task-color]::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--task-color);
+}
+
+.pickRow .preview {
+    -webkit-line-clamp: 1;
+}
+
+.pickTitle {
+    max-width: 100%;
+    font-weight: 600;
+    color: var(--text-h);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pickHere {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}

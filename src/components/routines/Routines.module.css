@@ -2,7 +2,7 @@
 .page {
     composes: page from '../ui.module.css';
     width: min(56rem, calc(100% - 2 * var(--page-gutter, 1rem)));
-    margin: 0 auto;
+    margin: 0 auto 0 var(--page-start);
     padding-bottom: 5rem;
     box-sizing: border-box;
     display: flex;
@@ -148,11 +148,8 @@
 .emptyText,
 .missing {
     margin: 0;
-    padding: 1.5rem;
-    text-align: center;
+    padding: 0.5rem 0;
     color: var(--text-muted);
-    border: 1px dashed var(--control-border);
-    border-radius: var(--radius);
 }
 
 .templates {
@@ -162,43 +159,55 @@
     margin-top: 0.5rem;
 }
 
+/* the templates as one list on a tonal panel: emoji, name, length; a hairline between them */
 .templateGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-    gap: 0.6rem;
+    composes: panel from '../ui.module.css';
+    display: flex;
+    flex-direction: column;
     margin: 0.5rem 0 0;
-    padding: 0;
+    padding: 0.375rem 1rem;
     list-style: none;
+}
+
+.templateGrid > li + li {
+    border-top: 1px solid color-mix(in oklab, var(--text-h) 10%, transparent);
 }
 
 .template {
     width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.4rem;
-    padding: 0.9rem;
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.25rem;
     text-align: left;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
     box-shadow: none;
 }
 
 .template:hover {
-    border-color: var(--control-border);
-    background: var(--surface-hover);
+    background: var(--hover-wash);
+    border: none;
+}
+
+.template .cardEmoji {
+    width: auto;
+    height: auto;
+    font-size: 1.25rem;
+    background: none;
 }
 
 .templateName {
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text-h);
 }
 
 .templateMeta {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
 }
 
 /* ---------- editor ---------- */

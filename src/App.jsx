@@ -24,10 +24,15 @@ import { fetchFriendRequests, fetchFriends } from "./features/friends/friendsAct
 import { usePresenceRealtime } from "./features/presence/presence.js"
 import { fetchSharedSessions, fetchMySharedTasks } from './features/together/togetherAction.js'
 import { useWorkReporter } from './features/together/work.js'
-import { useSoloSharedWork } from './features/together/useSoloSharedWork.js'
+import { useLinkedWork } from './features/together/linkedWork.js'
 import { useFocusClock } from './features/session/useFocusClock.js'
-import { selectFocusTask } from './features/session/sessionAction.js'
+import { useFocusNotification } from './features/session/focusNotification';
+import { useFocusTitle } from './features/session/focusTitle'
+import { useFocusAway } from './features/focus/useFocusAway';
+import { useCalm } from './features/focus/calm';
 import { useRoutineReminders } from './features/routines/routines.js'
+import { useReminders } from './features/reminders/reminders.js'
+import ReminderAlert from './components/reminders/ReminderAlert.jsx'
 import { useAvatarRealtime } from './features/profile/avatars.js'
 import Toaster from './components/Toaster.jsx';
 import Tutorial from './components/Tutorial.jsx';
@@ -35,6 +40,10 @@ import DeleteScopeDialog from './components/task/DeleteScopeDialog.jsx';
 import PushOffer from './components/PushOffer.jsx';
 import OnboardingPrompts from './components/onboarding/OnboardingPrompts.jsx';
 import QuickAdd from './components/QuickAdd.jsx';
+import AddFab from './components/home/AddFab.jsx';
+import { showsAddFab } from './features/layout/addFab.js';
+import { useTabSwipe } from './features/layout/tabSwipe.js';
+import { useKeyboardInset } from './features/layout/keyboardInset.js';
 import { fetchInboxUnread } from './features/inbox/inbox.js';
 import { useInboxRealtime } from './features/inbox/useInboxRealtime.js';
 import { connectRealtime, disconnectRealtime, useRealtime, useSafetyPoll, REALTIME_REJECTED } from './features/realtime/socket.js';
@@ -47,7 +56,7 @@ import { COMMUNITY_PATHS } from './features/community/paths.js';
 import { LegalFooter } from './legal/LegalFooter.jsx';
 import { LEGAL_PATHS } from './legal/paths.js';
 import { useApplyTheme } from './features/settings/theme.js';
-import { MOTION, useApplyMotion, useMotionLevel } from './features/settings/motion.js';
+import { MOTION, pageSwipeMotion, useApplyMotion, useMotionLevel } from './features/settings/motion.js';
 import { useApplyUiVariant, useNavModel } from './features/tester/variants.js';
 import TesterOnly from './components/TesterOnly.jsx';
 import CommandPalette from './components/variants/CommandPalette.jsx';
@@ -55,7 +64,9 @@ import ShortcutsDialog from './components/ShortcutsDialog.jsx';
 import LimitDialog from './components/pro/LimitDialog.jsx';
 import { restorePlayPurchases } from './features/pro/pro.js';
 import { useProOn } from './features/pro/flag.js';
-import { trackScreen } from './features/native/analytics.js';
+import { trackView } from './features/usage/track.js';
+import { setUsageEnabled } from './features/usage/usage.js';
+import { useActiveMinutes, useAppOpen } from './features/usage/useActiveMinutes.js';
 
 const REQUEST_REFRESH_MS = 60 * 1000;
 
@@ -78,10 +89,13 @@ const PAGES = {
   SharedSession: () => import('./components/SharedSession.jsx'),
   Admin: () => import('./components/Admin.jsx'),
   FamilyPage: () => import('./components/family/FamilyPage.jsx'),
-  FunPage: () => import('./components/fun/FunPage.jsx'),
+  ArcadePage: () => import('./components/arcade/ArcadePage.jsx'),
   Tester: () => import('./components/tester/Tester.jsx'),
   FocusRoom: () => import('./components/focus/FocusRoom.jsx'),
   Routines: () => import('./components/routines/Routines.jsx'),
+  NotesPage: () => import('./components/notes/NotesPage.jsx'),
+  Collections: () => import('./components/collections/Collections.jsx'),
+  StudyPage: () => import('./components/study/StudyPage.jsx'),
   ProPage: () => import('./components/pro/ProPage.jsx'),
 };
 const SignIn = lazy(PAGES.SignIn);
@@ -99,10 +113,13 @@ const Community = lazy(PAGES.Community);
 const SharedSession = lazy(PAGES.SharedSession);
 const Admin = lazy(PAGES.Admin);
 const FamilyPage = lazy(PAGES.FamilyPage);
-const FunPage = lazy(PAGES.FunPage);
+const ArcadePage = lazy(PAGES.ArcadePage);
 const Tester = lazy(PAGES.Tester);
 const FocusRoom = lazy(PAGES.FocusRoom);
 const Routines = lazy(PAGES.Routines);
+const NotesPage = lazy(PAGES.NotesPage);
+const Collections = lazy(PAGES.Collections);
+const StudyPage = lazy(PAGES.StudyPage);
 const ProPage = lazy(PAGES.ProPage);
 
 // the app's pages (not the sign-in or legal texts) in the background, when nothing else runs
@@ -132,10 +149,10 @@ function App(){
   const motionLevel = useMotionLevel();
   // the team stopwatch keeps running on every page
   useWorkReporter();
-  // the focus timer runs on every page, by the wall clock (also while the phone is off); time on
-  // a task from a shared session is booked in that session too
+  // the focus timer runs on every page, by the wall clock (also while the phone is off); on a
+  // task from a shared session the session's stopwatch follows it (one timer for both)
   useFocusClock();
-  useSoloSharedWork(useSelector(selectFocusTask));
+  useLinkedWork();
   const homeLayout = useSelector((state) => state.settings.homeLayout);
 
   useEffect(() => {
@@ -239,12 +256,32 @@ function App(){
   usePushSync(allowed, token, navigate);
   // routines planned for a time of day: a toast while the app is open
   useRoutineReminders(allowed);
+  // testers' reminders: loaded, live, handed to the Android app's alarm clock
+  useReminders(allowed);
+  // a lasting notification with the time while a focus session is on (features/session/focusNotification.js)
+  useFocusNotification(allowed);
+  useFocusTitle(allowed);
+  // leaving the app during focus: counted, nudged, welcomed back (only where a screen turned off can be told apart)
+  useFocusAway(allowed);
+  // phones: a sideways swipe goes to the tab beside it (and past the ends, the menu)
+  useTabSwipe({ enabled: allowed });
+  // phones: the on-screen keyboard's height, so sheets (the add form) stand above it
+  useKeyboardInset();
 
   useEffect(() => { if (allowed) return preloadPages(); }, [allowed]);
 
   const location = useLocation();
-  // the Android app's analytics count the pages by name, with consent only (native/analytics.js)
-  useEffect(() => { if (allowed) trackScreen(location.pathname); }, [allowed, location.pathname]);
+  // calm mode: while a focus round runs in the Fokusraum, the navigation steps back (features/focus/calm.js)
+  const calm = useCalm(location.pathname);
+  // Quidey's own anonymous statistics: counting follows my answer (access.usageConsent). Declared before
+  // the page view below: effects run in order, so the first view finds counting already on. Nothing is
+  // decided before the server answered (a reload keeps its queue); sign-out and account switches switch it off themselves.
+  const usageOn = allowed && access.usageConsent.choice === 'granted';
+  useEffect(() => { if (access.checked) setUsageEnabled(usageOn, access.userId); }, [access.checked, usageOn, access.userId]);
+  // the pages by name: Android's Firebase analytics and Quidey's statistics, each with its own consent (usage/track.js)
+  useEffect(() => { if (allowed) trackView(location.pathname); }, [allowed, location.pathname]);
+  useAppOpen(usageOn);
+  useActiveMinutes(usageOn);
   // while a page's code is on its way (only the first time, and briefly): that page's shape
   const pageLoading = <RouteSkeleton pathname={location.pathname} fade />;
 
@@ -261,6 +298,8 @@ function App(){
       <>
         <Routes>
           <Route path="/beta" element={<BetaGate />} />
+          {/* the waiting room: the arcade, while access is still to come */}
+          <Route path="/arcade" element={<Suspense fallback={pageLoading}><ArcadePage waiting /></Suspense>} />
           {/* Pro gets into the app during the beta too */}
           {proOn && <Route path="/pro" element={<Suspense fallback={pageLoading}><ProPage /></Suspense>} />}
           <Route path="*" element={<Navigate to="/beta" replace />} />
@@ -276,7 +315,7 @@ function App(){
     // "minimal" as the default there), so it isn't applied a second time here
     <MotionConfig reducedMotion="never">
     {/* the frame: sidebar (desktop) or drawer, header, tab bar (phones); see AppShell.module.css */}
-    <div className={shell.shell} data-nav={navModel} data-part="shell">
+    <div className={shell.shell} data-nav={navModel} data-part="shell" data-calm={calm || undefined}>
         <Header/>
         <Menu/>
         <TabBar/>
@@ -287,15 +326,20 @@ function App(){
         <PushOffer/>
         <OnboardingPrompts/>
         <QuickAdd/>
+        <ReminderAlert/>
+        {/* the round add button, bottom right, on the planning pages */}
+        <AddFab/>
         {/* Ctrl/⌘ K or "/": search tasks, jump, do; "?": the keyboard shortcuts */}
         <CommandPalette/>
         <ShortcutsDialog/>
         {/* the free plan is full (after the beta): the way to Quidey Pro */}
         {proOn && <LimitDialog/>}
-        <main className={shell.main} data-part="main">
+        <main className={shell.main} data-part="main" data-fab={showsAddFab(location.pathname) || undefined}>
         {/* each page comes in as the motion setting says */}
         {/* ...the tabs of the Gemeinschaft page are one page: switching them doesn't */}
-        <motion.div key={location.pathname.startsWith(COMMUNITY_PATHS.feed) ? COMMUNITY_PATHS.feed : location.pathname} {...MOTION.page[motionLevel]}>
+        {/* ...a tab reached by a sideways swipe (phones) slides in from that side */}
+        <motion.div key={location.pathname.startsWith(COMMUNITY_PATHS.feed) ? COMMUNITY_PATHS.feed : location.pathname}
+            {...(location.state?.tabSwipe ? pageSwipeMotion(location.state.tabSwipe, motionLevel) : MOTION.page[motionLevel])}>
         <Suspense fallback={pageLoading}>
         <Routes location={location}>
           <Route path="/" element={homeLayout === 'team' ? <TeamHome/> : <Home/>} />
@@ -304,6 +348,13 @@ function App(){
           <Route path="/focus" element={<FocusRoom/>} />
           <Route path="/routines" element={<Routines/>} />
           <Route path="/routines/:id/run" element={<Routines/>} />
+          {/* testers: the notes area, and collections of tasks, events and notes */}
+          <Route path="/notes" element={<TesterOnly fallback={<Navigate to="/focus" replace />}><NotesPage/></TesterOnly>} />
+          <Route path="/collections" element={<TesterOnly fallback={<Navigate to="/" replace />}><Collections/></TesterOnly>} />
+          <Route path="/collections/:id" element={<TesterOnly fallback={<Navigate to="/" replace />}><Collections/></TesterOnly>} />
+          <Route path="/study" element={<TesterOnly fallback={<Navigate to="/" replace />}><StudyPage/></TesterOnly>} />
+          <Route path="/study/goals/:id" element={<TesterOnly fallback={<Navigate to="/" replace />}><StudyPage/></TesterOnly>} />
+          <Route path="/study/:subjectId" element={<TesterOnly fallback={<Navigate to="/" replace />}><StudyPage/></TesterOnly>} />
           <Route path="/stats" element={<Stats />} />
           {/* the old address of the statistics (bookmarks, ?tab=done links) */}
           <Route path="/history" element={<Navigate to={{ pathname: '/stats', search: location.search }} replace />} />
@@ -325,7 +376,10 @@ function App(){
           {/* testers: interface variants and the features in test, with their ratings */}
           <Route path="/tester" element={<TesterOnly fallback={<Navigate to="/" replace />}><Tester/></TesterOnly>} />
           {/* hidden: only reachable through the daily line in the header */}
-          <Route path="/fun" element={<FunPage/>} />
+          {/* the old hidden playground: its games live in the Arcade now */}
+          <Route path="/fun" element={<Navigate to="/arcade" replace />} />
+          {/* small games and their leaderboard (the beta screen's waiting room, too) */}
+          <Route path="/arcade" element={<ArcadePage/>} />
           {/* Quidey Pro: supporting the development */}
           <Route path="/pro" element={proOn ? <ProPage/> : <Navigate to="/" replace />} />
           <Route path="/beta" element={<Navigate to="/" replace />} />

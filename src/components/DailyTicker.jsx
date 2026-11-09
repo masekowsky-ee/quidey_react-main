@@ -4,11 +4,8 @@ import styles from './Header.module.css';
 import { useTranslation } from '../i18n/useTranslation';
 import { lineOfDay, yearText } from '../features/fun/dailyLines';
 
-// Secret marker: the fun page only opens when reached through this link
-const FUN_PAGE_STATE = { fromTicker: true };
-
 // Today's fact, quote or slogan, tucked away behind a small bulb in the header: a tap shows it,
-// and the line itself leads to the hidden fun page.
+// and the line itself leads to the Arcade (a few minutes of games).
 export default function DailyTicker() {
     const { t, language } = useTranslation();
     const [open, setOpen] = useState(false);
@@ -46,8 +43,7 @@ export default function DailyTicker() {
             </button>
             {open && (
                 <Link
-                    to="/fun"
-                    state={FUN_PAGE_STATE}
+                    to="/arcade"
                     className={styles.linePopover}
                     title={t('tickerHint')}
                     aria-label={`${label}: ${text}`}

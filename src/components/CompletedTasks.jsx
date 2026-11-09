@@ -10,8 +10,9 @@ const NO_DATE = 'unknown';
 
 // The "completed tasks" folder of the history: every done task, grouped by the day it was
 // completed, newest first. Tasks done before the app recorded the moment sit at the end.
-// A task can be reopened from here.
-export default function CompletedTasks() {
+// A task can be reopened from here. together: the statistics' { done } (what I ticked off or was
+// given in sessions and families in the period), listed under them with where it was done.
+export default function CompletedTasks({ together }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const tasks = useSelector(state => state.task.tasks);
@@ -22,8 +23,9 @@ export default function CompletedTasks() {
     const done = tasks
         .filter(task => task.done && task.kind !== 'event')
         .sort((a, b) => (b.completed_at ? Date.parse(b.completed_at) : 0) - (a.completed_at ? Date.parse(a.completed_at) : 0));
+    const elsewhere = together?.done ?? [];
 
-    if (done.length === 0) return <div className={`${styles.card} ${styles.empty}`}>{t('noCompletedTasks')}</div>;
+    if (done.length === 0 && elsewhere.length === 0) return <div className={`${styles.card} ${styles.empty}`}>{t('noCompletedTasks')}</div>;
 
     // by day of completion, in the order above
     const days = [];
@@ -68,6 +70,23 @@ export default function CompletedTasks() {
                     </li>
                 ))}
             </ul>
+            {elsewhere.length > 0 &&
+                <section aria-labelledby="done-together" className={styles.session}>
+                    <h2 id="done-together" className={styles.sessionDate}>{t('statsTogether')}</h2>
+                    <ul className={styles.doneList}>
+                        {elsewhere.map(task => (
+                            <li key={`${task.where.kind}-${task.id}`} className={styles.doneRow}>
+                                <span className={styles.doneCheck} aria-hidden="true"><Icon name="check" size={14} strokeWidth={2.2} /></span>
+                                <div className={styles.doneText}>
+                                    <span className={styles.doneName}>{task.name}</span>
+                                    <span className={styles.sessionMeta}>
+                                        {[task.where.name, task.completedAt && `${t('completedAt')} ${new Date(task.completedAt).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}, ${timeText(new Date(task.completedAt))}`].filter(Boolean).join(' · ')}
+                                    </span>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </section>}
         </>
     );
 }

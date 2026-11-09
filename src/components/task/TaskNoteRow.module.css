@@ -1,0 +1,37 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* a note with more lines: its first line, opening the notebook */
+.open {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--ease-out);
+}
+
+.open:hover,
+.open:focus-visible {
+  background: var(--surface-inset);
+}
+
+.open svg {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

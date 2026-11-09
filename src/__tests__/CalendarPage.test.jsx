@@ -32,10 +32,10 @@ function LocationSpy() {
     return <output data-testid="location" hidden>{search}</output>
 }
 
-function setup(path = '/calendar?date=2026-10-19') {
+function setup(path = '/calendar?date=2026-10-19', tasks = TASKS) {
     const store = configureStore({ reducer: rootReducer })
     store.dispatch(setLanguage('en'))
-    store.dispatch({ type: SET_TASK_STATE, payload: { tasks: TASKS, groups: GROUPS, notes: [] } })
+    store.dispatch({ type: SET_TASK_STATE, payload: { tasks, groups: GROUPS, notes: [] } })
     render(
         <Provider store={store}>
             <MemoryRouter initialEntries={[path]}>
@@ -131,6 +131,64 @@ describe('month view', () => {
     })
 })
 
+describe('toolbar on a phone', () => {
+    // a 390px wide screen: only the phone's width query matches
+    beforeEach(() => {
+        window.matchMedia = vi.fn((query) => ({
+            matches: /max-width: (640|720)px/.test(query),
+            media: query,
+            addEventListener: () => {},
+            removeEventListener: () => {},
+        }))
+    })
+    afterEach(() => { delete window.matchMedia })
+
+    it('is one row: views menu, month and year, search, filters, back and forth', () => {
+        setup()
+        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('October 2026')
+        for (const name of ['Calendar view', 'Search tasks', 'Filters', 'Previous month', 'Next month']) {
+            expect(screen.getByRole('button', { name })).toBeInTheDocument()
+        }
+        // no view switch and no search field until asked for
+        expect(screen.queryByRole('group', { name: 'Calendar view' })).not.toBeInTheDocument()
+        expect(screen.queryByRole('searchbox')).not.toBeInTheDocument()
+    })
+
+    it('the menu switches the view and jumps to today', () => {
+        setup('/calendar?date=2026-12-01')
+        fireEvent.click(screen.getByRole('button', { name: 'Calendar view' }))
+        fireEvent.click(screen.getByRole('menuitemradio', { name: 'Week' }))
+        expect(params().get('view')).toBe('week')
+        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('W 49 · Dec 2026')
+        expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+
+        fireEvent.click(screen.getByRole('button', { name: 'Calendar view' }))
+        expect(screen.getByRole('menuitemradio', { name: 'Week' })).toHaveAttribute('aria-checked', 'true')
+        fireEvent.click(screen.getByRole('menuitem', { name: 'Today' }))
+        expect(params().get('date')).toBe('2026-10-19')
+    })
+
+    it('the magnifier opens the search; its cross clears and closes it', () => {
+        setup()
+        fireEvent.click(screen.getByRole('button', { name: 'Search tasks' }))
+        const field = screen.getByRole('searchbox', { name: 'Search tasks' })
+        expect(document.activeElement).toBe(field)
+        fireEvent.change(field, { target: { value: 'dent' } })
+        expect(screen.queryByText('Report')).not.toBeInTheDocument()
+        fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+        expect(screen.queryByRole('searchbox')).not.toBeInTheDocument()
+        expect(screen.getByText('Report')).toBeInTheDocument()
+    })
+
+    it('the filter icon opens the filters', () => {
+        setup()
+        fireEvent.click(screen.getByRole('button', { name: 'Filters' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Show done' }))
+        expect(screen.queryByText('Finished thing')).not.toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Filters (1)' })).toHaveAttribute('aria-expanded', 'true')
+    })
+})
+
 describe('week and agenda view', () => {
     it('the week view lists the week with descriptions', () => {
         setup('/calendar?view=week&date=2026-10-21')
@@ -189,16 +247,18 @@ describe('day panel', () => {
         expect(params().get('day')).toBeNull()
     })
 
-    it('adds a task on that day', async () => {
+    it('the plus opens the new-task form on that day', async () => {
         setup('/calendar?date=2026-10-22&day=2026-10-22')
+        fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'New entry on 22 October 2026' }))
+        expect(screen.getByLabelText('Due Date')).toHaveValue('2026-10-22')
         apiFetch.mockResolvedValueOnce({ id: 50, name: 'Call mom', due: apiDate(2026, 10, 22), prio: 50, done: false })
-        fireEvent.change(screen.getByRole('textbox', { name: 'New task for this day…' }), { target: { value: '  Call mom ' } })
+        fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: '  Call mom ' } })
         await act(async () => {
-            fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+            fireEvent.click(screen.getByRole('button', { name: 'Create' }))
         })
         expect(apiFetch).toHaveBeenCalledWith('/api/tasks', expect.objectContaining({ method: 'POST' }))
         const body = JSON.parse(apiFetch.mock.calls.find(call => call[0] === '/api/tasks')[1].body)
-        expect(body).toMatchObject({ name: 'Call mom', due: '2026-10-22', prio: 50 })
+        expect(body).toMatchObject({ name: 'Call mom', due: '2026-10-22' })
         expect(within(screen.getByRole('dialog')).getByText('Call mom')).toBeInTheDocument()
         expect(within(cell('2026-10-22')).getByText('Call mom')).toBeInTheDocument()
     })
@@ -254,6 +314,21 @@ describe('day panel', () => {
     })
 })
 
+describe('adding from the grid', () => {
+    it("a day's plus opens the new-task form on that day, without opening the day", () => {
+        setup()
+        fireEvent.click(within(cell('2026-10-21')).getByRole('button', { name: 'New entry on 21 October 2026' }))
+        expect(screen.getByLabelText('Due Date')).toHaveValue('2026-10-21')
+        expect(params().get('day')).toBeNull()
+    })
+
+    it("the week's plus does the same", () => {
+        setup('/calendar?view=week&date=2026-10-21')
+        fireEvent.click(within(cell('2026-10-23')).getByRole('button', { name: 'New entry on 23 October 2026' }))
+        expect(screen.getByLabelText('Due Date')).toHaveValue('2026-10-23')
+    })
+})
+
 describe('drag and drop', () => {
     it('dropping a task on another day reschedules it', async () => {
         setup()
@@ -291,6 +366,146 @@ describe('drag and drop', () => {
     })
 })
 
+describe('drag and drop with a finger', () => {
+    const wait = (ms) => act(() => new Promise(resolve => setTimeout(resolve, ms)))
+
+    it('holding a task lifts it, then it moves to another day', async () => {
+        setup()
+        const chip = within(cell('2026-10-21')).getByText('Report').closest('button')
+        const target = cell('2026-10-23')
+        document.elementFromPoint = vi.fn(() => target)
+        apiFetch.mockResolvedValueOnce({ ...TASKS[1], due: apiDate(2026, 10, 23) })
+
+        fireEvent.pointerDown(chip, { button: 0, pointerType: 'touch', clientX: 10, clientY: 10 })
+        await wait(350)
+        await act(async () => {
+            window.dispatchEvent(new MouseEvent('pointermove', { clientX: 80, clientY: 30 }))
+        })
+        expect(target.className).toMatch(/dropTarget/)
+        await act(async () => {
+            window.dispatchEvent(new MouseEvent('pointerup', { clientX: 80, clientY: 30 }))
+        })
+        const body = JSON.parse(apiFetch.mock.calls.find(call => call[0] === '/api/tasks/2')[1].body)
+        expect(body.due).toBe('2026-10-23')
+        delete document.elementFromPoint
+    })
+
+    it('a swipe before the hold is a scroll, not a drag', async () => {
+        setup()
+        const chip = within(cell('2026-10-21')).getByText('Report').closest('button')
+        document.elementFromPoint = vi.fn(() => cell('2026-10-23'))
+        fireEvent.pointerDown(chip, { button: 0, pointerType: 'touch', clientX: 10, clientY: 10 })
+        window.dispatchEvent(new MouseEvent('pointermove', { clientX: 10, clientY: 60 }))
+        await wait(350)
+        window.dispatchEvent(new MouseEvent('pointermove', { clientX: 80, clientY: 90 }))
+        window.dispatchEvent(new MouseEvent('pointerup', { clientX: 80, clientY: 90 }))
+        expect(cell('2026-10-23').className).not.toMatch(/dropTarget/)
+        expect(apiFetch.mock.calls.some(call => call[0] === '/api/tasks/2')).toBe(false)
+        delete document.elementFromPoint
+    })
+})
+
+describe('day timeline', () => {
+    const TIMED = [
+        ...TASKS,
+        { id: 6, name: 'Lecture', kind: 'event', due: apiDate(2026, 10, 20), due_time: '09:00', duration_minutes: 90, done: false, group_ids: [] },
+        { id: 7, name: 'Read chapter', due: apiDate(2026, 10, 20), due_time: '09:30', prio: 50, done: false, group_ids: [] },
+        { id: 8, name: 'Laundry', due: apiDate(2026, 10, 20), prio: 20, done: false, group_ids: [] },
+    ]
+    const HOUR = 48
+    const dialog = () => screen.getByRole('dialog')
+    const block = (name) => within(dialog()).getByRole('button', { name: `Edit: ${name}` })
+
+    // jsdom has no layout: the grid gets 48px per hour, the scrolling box a tall window onto it
+    function layout() {
+        const scroller = within(dialog()).getByRole('region', { name: 'Schedule' })
+        const grid = scroller.firstElementChild
+        scroller.getBoundingClientRect = () => ({ top: 0, bottom: 2000, left: 0, right: 400, height: 2000, width: 400 })
+        grid.getBoundingClientRect = () => ({ top: 0, bottom: 24 * HOUR, left: 0, right: 400, height: 24 * HOUR, width: 400 })
+        return { scroller, grid }
+    }
+
+    async function dragTo(from, overEl, y) {
+        document.elementFromPoint = vi.fn(() => overEl)
+        fireEvent.pointerDown(from, { button: 0, pointerType: 'mouse', clientX: 50, clientY: 0 })
+        await act(async () => { window.dispatchEvent(new MouseEvent('pointermove', { clientX: 60, clientY: y })) })
+        await act(async () => { window.dispatchEvent(new MouseEvent('pointerup', { clientX: 60, clientY: y })) })
+        delete document.elementFromPoint
+    }
+
+    it('shows timed entries on the hours and the rest in the all-day row', () => {
+        setup('/calendar?date=2026-10-20&day=2026-10-20', TIMED)
+        const lecture = block('Lecture').closest('[data-block]')
+        const reading = block('Read chapter').closest('[data-block]')
+        expect(lecture.style.getPropertyValue('--start')).toBe('540')
+        expect(lecture.style.getPropertyValue('--length')).toBe('90')
+        // they overlap, so they share the width
+        expect(reading.style.getPropertyValue('--cols')).toBe('2')
+        expect(block('Laundry').closest('[data-drop-allday]')).not.toBeNull()
+        expect(within(dialog()).getByText('09:00–10:30')).toBeInTheDocument()
+    })
+
+    it('dragging a block to another hour changes its time', async () => {
+        setup('/calendar?date=2026-10-20&day=2026-10-20', TIMED)
+        const { grid } = layout()
+        apiFetch.mockResolvedValueOnce({ ...TIMED[5], due_time: '14:15' })
+        await dragTo(block('Read chapter'), grid, 14.25 * HOUR)
+        const body = JSON.parse(apiFetch.mock.calls.find(call => call[0] === '/api/tasks/7')[1].body)
+        expect(body).toMatchObject({ due: '2026-10-20', due_time: '14:15' })
+        // the drop didn't also open the editor
+        expect(screen.queryByRole('textbox', { name: 'Name' })).not.toBeInTheDocument()
+    })
+
+    it('an all-day task dragged onto the hours gets a time; a timed one dropped on the all-day row loses it', async () => {
+        setup('/calendar?date=2026-10-20&day=2026-10-20', TIMED)
+        const { grid } = layout()
+        apiFetch.mockResolvedValueOnce({ ...TIMED[6], due_time: '08:00' })
+        await dragTo(block('Laundry'), grid, 8 * HOUR)
+        expect(JSON.parse(apiFetch.mock.calls.find(call => call[0] === '/api/tasks/8')[1].body).due_time).toBe('08:00')
+
+        const allDay = document.querySelector('[data-drop-allday]')
+        apiFetch.mockResolvedValueOnce({ ...TIMED[4], due_time: null })
+        await dragTo(block('Lecture'), allDay, 0)
+        expect(JSON.parse(apiFetch.mock.calls.find(call => call[0] === '/api/tasks/6')[1].body).due_time).toBeNull()
+    })
+
+    it('dropped on the arrow for the next day, it moves there', async () => {
+        setup('/calendar?date=2026-10-20&day=2026-10-20', TIMED)
+        layout()
+        apiFetch.mockResolvedValueOnce({ ...TIMED[5], due: apiDate(2026, 10, 21) })
+        await dragTo(block('Read chapter'), screen.getByRole('button', { name: 'Next day' }), 0)
+        const body = JSON.parse(apiFetch.mock.calls.find(call => call[0] === '/api/tasks/7')[1].body)
+        expect(body).toMatchObject({ due: '2026-10-21', due_time: '09:30' })
+    })
+
+    it('Alt and an arrow move the focused block by a quarter hour', async () => {
+        setup('/calendar?date=2026-10-20&day=2026-10-20', TIMED)
+        apiFetch.mockResolvedValueOnce({ ...TIMED[5], due_time: '09:45' })
+        await act(async () => { fireEvent.keyDown(block('Read chapter'), { key: 'ArrowDown', altKey: true }) })
+        expect(JSON.parse(apiFetch.mock.calls.find(call => call[0] === '/api/tasks/7')[1].body).due_time).toBe('09:45')
+    })
+
+    it('a tap on a free spot of the hours opens the new-task form at that quarter hour', () => {
+        setup('/calendar?date=2026-10-20&day=2026-10-20', TIMED)
+        const { grid } = layout()
+        fireEvent.click(grid, { clientX: 200, clientY: 14.25 * HOUR + 5 })
+        expect(screen.getByLabelText('Due Date')).toHaveValue('2026-10-20')
+        expect(screen.getByLabelText(/^Time/)).toHaveValue('14:15')
+        // the day stays open underneath, and Escape only closes the form
+        fireEvent.keyDown(window, { key: 'Escape' })
+        expect(screen.getByRole('dialog', { name: /20 October 2026/ })).toBeInTheDocument()
+    })
+
+    it('a click opens the editor in place of the timeline, Cancel goes back', () => {
+        setup('/calendar?date=2026-10-20&day=2026-10-20', TIMED)
+        fireEvent.click(block('Lecture'))
+        expect(screen.getByRole('textbox', { name: 'Event name' })).toHaveValue('Lecture')
+        expect(within(dialog()).queryByRole('region', { name: 'Schedule' })).not.toBeInTheDocument()
+        fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+        expect(within(dialog()).getByRole('region', { name: 'Schedule' })).toBeInTheDocument()
+    })
+})
+
 describe('shared calendars', () => {
     const SESSION = {
         id: 5, name: 'Exam prep', me: 1, isOwner: false, endedAt: null, people: [], events: [],
@@ -324,15 +539,18 @@ describe('shared calendars', () => {
         expect(within(cell('2026-10-22')).getByText('Mock exam')).toBeInTheDocument()
         expect(screen.queryByText('Dentist')).not.toBeInTheDocument()
         expect(screen.getByRole('combobox', { name: 'Calendar' })).toHaveValue('session-5')
-        expect(screen.getByRole('link', { name: 'Open session →' })).toHaveAttribute('href', '/together/5')
+        expect(screen.getByRole('link', { name: 'Open session' })).toHaveAttribute('href', '/together/5')
 
         fireEvent.click(cell('2026-10-22'))
         const dialog = screen.getByRole('dialog')
         expect(within(dialog).getByText('by Bo')).toBeInTheDocument()
-        fireEvent.change(within(dialog).getByRole('textbox', { name: 'New task for this day…' }), { target: { value: 'Group call' } })
-        await act(async () => { fireEvent.click(within(dialog).getByRole('button', { name: 'Add' })) })
+        fireEvent.click(within(dialog).getByRole('button', { name: 'New entry on 22 October 2026' }))
+        // the form says where it goes, and leaves out what's personal
+        expect(screen.getByText(/Goes into the session “Exam prep”/)).toBeInTheDocument()
+        fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Group call' } })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Create' })) })
         const call = apiFetch.mock.calls.find(([url, options]) => url === '/api/shared-sessions/5/tasks' && options?.method === 'POST')
-        expect(JSON.parse(call[1].body)).toEqual({ name: 'Group call', due: '2026-10-22' })
+        expect(JSON.parse(call[1].body)).toMatchObject({ name: 'Group call', due: '2026-10-22', due_time: null })
         expect(within(cell('2026-10-22')).getByText('Group call')).toBeInTheDocument()
         expect(apiFetch.mock.calls.some(([url]) => url === '/api/tasks')).toBe(false)
     })
@@ -373,6 +591,15 @@ describe('shared calendars', () => {
         fireEvent.change(picker, { target: { value: 'mine' } })
         expect(params().get('cal')).toBeNull()
         expect(within(cell('2026-10-19')).getByText('Dentist')).toBeInTheDocument()
+    })
+
+    it("a family's entries can be events and remind every member", async () => {
+        answer({ 'GET /api/families/3': FAMILY })
+        await act(async () => { setup('/calendar?date=2026-10-19&day=2026-10-24&cal=family-3') })
+        fireEvent.click(screen.getByRole('button', { name: 'Edit: Grandma visits' }))
+        expect(screen.getAllByRole('radio', { name: /Event/ }).length).toBeGreaterThan(0)
+        fireEvent.click(screen.getByRole('button', { name: /More options/ }))
+        expect(screen.getByText('Reminds every member.')).toBeInTheDocument()
     })
 
     it("a calendar I'm not in leads back to my own", async () => {

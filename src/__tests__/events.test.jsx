@@ -216,15 +216,16 @@ describe('events on Home and in the calendar', () => {
         if (now.getHours() < 23) expect(within(strip).getByText('now')).toBeInTheDocument()
     })
 
-    it('an event has no tick in the day panel; the quick add makes events too', async () => {
+    it('an event has no tick in the day panel; its plus makes events too', async () => {
         const store = makeStore([event], [WORK])
         wrap(store, <Calendar />, `/calendar?date=${todayKey()}&day=${todayKey()}`)
         const dialog = screen.getByRole('dialog')
         expect(within(dialog).queryByRole('button', { name: /Mark as done: Lecture/ })).not.toBeInTheDocument()
-        fireEvent.click(within(dialog).getByRole('radio', { name: 'Event' }))
-        fireEvent.change(within(dialog).getByRole('textbox', { name: 'New event on this day…' }), { target: { value: 'Gym' } })
+        fireEvent.click(within(dialog).getByRole('button', { name: /^New entry on/ }))
+        fireEvent.click(screen.getByRole('radio', { name: /^Event/ }))
+        fireEvent.change(screen.getByRole('textbox', { name: 'Event name' }), { target: { value: 'Gym' } })
         apiFetch.mockResolvedValueOnce({ id: 9, name: 'Gym', kind: 'event', due: todayKey() })
-        await act(async () => { fireEvent.click(within(dialog).getByRole('button', { name: 'Add' })) })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Create' })) })
         expect(bodyOf('/api/tasks', 'POST')).toMatchObject({ name: 'Gym', kind: 'event', prio: null })
     })
 })
@@ -256,6 +257,42 @@ describe('statistics page', () => {
         await act(async () => { fireEvent.click(screen.getByRole('radio', { name: 'Month' })) })
         expect(screen.getByText('This month')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Next period' })).toBeDisabled()
+    })
+
+    const together = {
+        teamMs: 2 * 3600000,
+        places: [
+            { kind: 'family', id: 3, name: 'The Bergs', emoji: '🏡', color: null, done: 2, events: 1 },
+            { kind: 'session', id: 5, name: 'Study group', emoji: null, color: null, done: 1, events: 0 },
+        ],
+        done: [{ id: 40, name: 'Wash up', completedAt: new Date().toISOString(), where: { kind: 'family', id: 3, name: 'The Bergs' } }],
+    }
+
+    it('shows what I did in sessions and families, linked to them', async () => {
+        apiFetch.mockImplementation(async (url) => (url.startsWith('/api/stats') ? { ...stats, together } : url === '/api/profile' ? {} : []))
+        await act(async () => { wrap(makeStore(), <Stats />, '/stats') })
+        const card = screen.getByRole('region', { name: 'In sessions & families' })
+        expect(within(card).getByText('Team time')).toBeInTheDocument()
+        expect(within(card).getByText('2 h')).toBeInTheDocument()
+        const family = within(card).getByRole('link', { name: /The Bergs/ })
+        expect(family).toHaveAttribute('href', '/family/3')
+        expect(family).toHaveTextContent('2 done')
+        expect(family).toHaveTextContent('1 event')
+        expect(within(card).getByRole('link', { name: /Study group/ })).toHaveAttribute('href', '/together/5')
+    })
+
+    it('without anything together there is no such section', async () => {
+        apiFetch.mockImplementation(async (url) => (url.startsWith('/api/stats') ? { ...stats, together: { teamMs: 0, places: [], done: [] } } : url === '/api/profile' ? {} : []))
+        await act(async () => { wrap(makeStore(), <Stats />, '/stats') })
+        expect(screen.queryByRole('region', { name: 'In sessions & families' })).not.toBeInTheDocument()
+    })
+
+    it('the done tab lists what I did in families and sessions too', async () => {
+        apiFetch.mockImplementation(async (url) => (url.startsWith('/api/stats') ? { ...stats, together } : url === '/api/profile' ? {} : []))
+        await act(async () => { wrap(makeStore(), <Stats />, '/stats?tab=done') })
+        const section = screen.getByRole('region', { name: 'In sessions & families' })
+        const row = within(section).getByText('Wash up').closest('li')
+        expect(row).toHaveTextContent('The Bergs')
     })
 
     it('the chart has a table with the same numbers', async () => {

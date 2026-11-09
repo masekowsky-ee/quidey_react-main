@@ -116,7 +116,10 @@
 .item{
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 0.65rem;
+    /* the profile is a link, the others buttons: all of them as wide as the menu, padding included */
+    box-sizing: border-box;
     width: 100%;
     padding: 0.5rem 0.55rem;
     font: inherit;

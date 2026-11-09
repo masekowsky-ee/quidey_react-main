@@ -11,7 +11,8 @@
 
 /* ---------- task | event: two cards side by side ---------- */
 
-.kind{
+.kind,
+.kindThree{
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
@@ -19,6 +20,10 @@
     padding: 0;
     border: none;
     min-width: 0;
+}
+
+.kindThree{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .kindOption,

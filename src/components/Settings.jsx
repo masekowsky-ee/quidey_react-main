@@ -6,20 +6,25 @@ import {setLanguage, setTheme, setAccent, setPalette, setDefaultSessionMinutes, 
 import {MOTION_LEVELS} from '../features/settings/motion';
 import {SOUND_LEVELS, SOUND_NAMES, playSound} from '../features/settings/sound';
 import {setSessionParams} from '../features/session/sessionAction';
-import {SESSION_LENGTHS, PALETTES, ACCENT_SWATCHES as ACCENT_OPTIONS} from '../features/settings/preferences';
+import {SESSION_LENGTHS, PALETTES, COLOR_SCHEMES, ACCENT_SWATCHES as ACCENT_OPTIONS} from '../features/settings/preferences';
 import { DEFAULT_UI_VARIANT, OWN_COLORS, VARIANT_COLORS, setUiColors, useColorChoice } from '../features/tester/variants';
 import HomeLayoutSwitch from './together/HomeLayoutSwitch';
 import {useInstallState, promptInstall} from '../features/pwa/install';
 import { PUSH_KINDS, disablePush, enablePush, refreshPush, sendTestPush, setPushKind, usePushState } from '../features/pwa/push';
-import { fill } from '../features/helperFunction';
+import { fill, formatDate } from '../features/helperFunction';
+import { selectUsageConsent, setUsageConsent } from '../features/auth/authAction';
+import { showToast } from '../features/toast/toast';
 import { saveAllDayTime, selectAllDayTime } from '../features/tasks/reminders';
 import EventTypeSettings from './EventTypeSettings.jsx';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useHashTarget } from '../features/layout/hashTarget';
 import { SECTION_AREAS } from '../features/search/places';
 import { isNativeApp } from '../features/native/native';
 import { APK_URL, apkOffer, formatSize } from '../features/native/androidApk';
 import { setAnalyticsConsent, useAnalytics } from '../features/native/analytics';
+import { useIsTester } from '../features/auth/tester';
+import AlarmSettings from './reminders/AlarmSettings.jsx';
+import StudySettings from './study/StudySettings.jsx';
 
 const LANGUAGES = [
     { code: 'de', label: 'german' },
@@ -108,6 +113,9 @@ function PushSettings() {
     const [tested, setTested] = useState(false);
     useEffect(() => { refreshPush(); }, []);
     const on = push.status === 'on';
+    // the study kind belongs to the testers' feature
+    const isTester = useIsTester();
+    const kinds = PUSH_KINDS.filter(kind => kind !== 'study' || isTester);
 
     return (
         <>
@@ -122,7 +130,7 @@ function PushSettings() {
                         }} />
                 )}
             </SettingRow>
-            {on && push.kinds && PUSH_KINDS.map(kind => (
+            {on && push.kinds && kinds.map(kind => (
                 <SettingRow key={kind} title={t(`pushKind_${kind}`)} hint={t(`pushKindHint_${kind}`)}>
                     <Choice label={t(`pushKind_${kind}`)} value={push.kinds[kind] !== false} disabled={push.busy} options={ON_OFF}
                         onChange={(next) => { if (next !== (push.kinds[kind] !== false)) setPushKind(kind, next); }} />
@@ -170,6 +178,35 @@ function AnalyticsSetting() {
             <Choice label={t('analyticsRow')} value={on} options={ON_OFF}
                 onChange={(next) => { if (next !== on) setAnalyticsConsent(next); }} />
         </SettingRow>
+    );
+}
+
+// Quidey's own anonymous usage statistics (every platform): my answer and when I gave it.
+// A failed save leaves the choice as it was.
+function UsageSetting() {
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const { choice, at } = useSelector(selectUsageConsent);
+    const on = choice === 'granted';
+    const hint = choice === null ? t('usageRowNotAsked')
+        : fill(t(on ? 'usageRowGranted' : 'usageRowDenied'), { date: formatDate(at) });
+    const change = async (next) => {
+        if (next === on) return;
+        try {
+            await dispatch(setUsageConsent(next));
+        } catch {
+            dispatch(showToast(t('pushErrorSave'), 'error'));
+        }
+    };
+    return (
+        <>
+            <SettingRow title={t('usageRow')} hint={hint}>
+                <Choice label={t('usageRow')} value={on} options={ON_OFF} onChange={change} />
+            </SettingRow>
+            <SettingRow title={t('usageRowPolicy')}>
+                <Link to="/datenschutz#nutzungsstatistik" className={styles.tourButton}>{t('usageRowPolicy')}</Link>
+            </SettingRow>
+        </>
     );
 }
 
@@ -238,6 +275,7 @@ export default function Settings(){
     const apk = apkOffer();
     // the Android app with Firebase: may it count how it is used
     const analytics = useAnalytics();
+    const isTester = useIsTester();
     const dispatch = useDispatch();
     const { hash, key } = useLocation();
     const [chosenArea, setArea] = useState(() => areaFromHash(hash));
@@ -295,6 +333,32 @@ export default function Settings(){
                         <SettingRow title={t('settingsThemeRow')}>
                             <Choice label={t('appearance')} value={theme} onChange={(value) => dispatch(setTheme(value))} options={THEME_OPTIONS} />
                         </SettingRow>
+                        {!inVariant && <div className={styles.rowStack}>
+                            <span className={styles.rowText}>
+                                <span className={styles.rowLabel}>{t('schemeSetting')}</span>
+                                <span className={styles.rowHint}>{t('schemeSettingHint')}</span>
+                            </span>
+                            {/* a palette and its accent in one go; each tile shows both halves with the accent on them */}
+                            <div className={styles.swatches} role="group" aria-label={t('schemeSetting')}>
+                                {COLOR_SCHEMES.map((scheme) => {
+                                    const chosen = palette === scheme.palette && accent === scheme.accent;
+                                    const { dark, light } = PALETTES[scheme.palette];
+                                    const color = ACCENT_OPTIONS.find(option => option.value === scheme.accent)?.color;
+                                    return (
+                                        <button key={scheme.id} type="button"
+                                            className={`${styles.swatch} ${styles.schemeSwatch} ${chosen ? styles.swatchActive : ''}`}
+                                            aria-pressed={chosen}
+                                            onClick={() => { dispatch(setPalette(scheme.palette)); dispatch(setAccent(scheme.accent)); }}>
+                                            <span className={styles.palettePreview} aria-hidden="true">
+                                                <span style={{ '--ground': dark[0], '--card': dark[1], '--ink': dark[2], '--dot': color }} />
+                                                <span style={{ '--ground': light[0], '--card': light[1], '--ink': light[2], '--dot': scheme.accent === 'pine' ? '#1e6b55' : '#f97316' }} />
+                                            </span>
+                                            <span className={styles.swatchLabel}>{t(scheme.label)}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>}
                         <div className={styles.rowStack}>
                             <span className={styles.rowText}>
                                 <span className={styles.rowLabel}>{t('paletteSetting')}</span>
@@ -376,6 +440,11 @@ export default function Settings(){
                     <SettingSection id="event-types" title={t('eventTypes')} description={t('eventTypesHint')}>
                         <EventTypeSettings embedded />
                     </SettingSection>
+
+                    {isTester &&
+                        <SettingSection id="study" title={t('studySettingsTitle')} description={t('studySettingsHint')}>
+                            <StudySettings />
+                        </SettingSection>}
                 </>}
 
                 {area === 'app' && <>
@@ -389,6 +458,14 @@ export default function Settings(){
                                 {t('settingsTourStart')}
                             </button>
                         </SettingRow>
+                    </SettingSection>
+                    {/* testers' reminders ring like an alarm clock in the Android app: what that needs */}
+                    {isTester && isNativeApp() &&
+                        <SettingSection id="alarms" title={t('reminderAlarmSetting')} description={t('reminderAlarmHint')}>
+                            <AlarmSettings />
+                        </SettingSection>}
+                    <SettingSection id="privacy" title={t('privacySetting')} description={t('privacySettingHint')}>
+                        <UsageSetting />
                     </SettingSection>
                     {analytics.available &&
                         <SettingSection id="analytics" title={t('analyticsSetting')} description={t('analyticsSettingHint')}>

@@ -8,8 +8,10 @@ import { apiFetch } from '../features/helperFunction'
 import { SET_TASK_STATE, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, DELETE_GROUP } from '../features/tasks/taskActionTypes'
 import { SET_MY_SHARED_TASKS, SET_SHARED_SESSION, SHARED_SESSION_GONE } from '../features/together/togetherActionTypes'
 import { selectSharedGroups, selectSharedSoloTasks, isSharedTaskId, sharedTaskIdOf } from '../features/together/togetherAction'
-import { saveSessionData, addTaskTime, setTimer } from '../features/session/sessionAction'
-import { useSoloSharedWork } from '../features/together/useSoloSharedWork'
+import { saveSessionData, addTaskTime, setTimer, setTimerMode, setFocusTask, startFocus } from '../features/session/sessionAction'
+import { SET_POMODORO } from '../features/session/sessionActionTypes'
+import { useLinkedWork, workOnSharedTask, dropSharedFocus } from '../features/together/linkedWork'
+import { startWork } from '../features/together/work'
 import { WORKED_SESSIONS_FIXTURE } from './fixtures/history.js'
 import GroupPicker from '../components/GroupPicker'
 import TaskContainer from '../components/TaskContainer'
@@ -98,27 +100,102 @@ describe('solo sessions with shared tasks', () => {
         ])
     })
 
-    it('the solo timer on a shared task runs the team stopwatch for that session', async () => {
-        const store = makeStore()
-        apiFetch.mockResolvedValue({ id: 5, name: 'Lerngruppe', me: 1, people: [], tasks: [], events: [] })
-        const shared = selectSharedSoloTasks(store.getState())[0]
-        const wrapper = ({ children }) => <Provider store={store}>{children}</Provider>
-        const { rerender, unmount } = renderHook(({ task }) => useSoloSharedWork(task), { wrapper, initialProps: { task: shared } })
+    // like App: the link between the focus timer and the session's stopwatch
+    const renderLink = (store) => renderHook(() => useLinkedWork(), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> })
+    const session5 = { id: 5, name: 'Lerngruppe', me: 1 }
+    const slides = { id: 12, name: 'Slides', myMs: 90000 }
 
+    it('the focus timer on a session task runs the session stopwatch, an own task stops it', async () => {
+        const store = makeStore()
+        // the server answers with the session as it is now (the task still there)
+        apiFetch.mockResolvedValue({ id: 5, name: 'Lerngruppe', me: 1, endedAt: null, people: [], events: [],
+            tasks: [{ id: 12, name: 'Slides', description: null, done: false, assignee: null, totalMs: 200000, time: [{ userId: 1, ms: 90000 }] }] })
+        const shared = selectSharedSoloTasks(store.getState())[0]
+        renderLink(store)
+        store.dispatch(setTimerMode('timer'))
+        await act(async () => { store.dispatch(setFocusTask(shared)) })
         expect(apiFetch).not.toHaveBeenCalled() // timer not running yet
         await act(async () => { store.dispatch(setTimer(60000, true)) })
         expect(apiFetch).toHaveBeenLastCalledWith('/api/shared-sessions/5/activity', expect.objectContaining({ body: JSON.stringify({ currentTaskId: 12 }) }))
         expect(store.getState().together.work).toMatchObject({ sessionId: 5, taskId: 12, baseMs: 90000 })
 
-        // switching to an own task stops it
-        await act(async () => { rerender({ task: ownTasks[0] }) })
+        await act(async () => { store.dispatch(setFocusTask(ownTasks[0])) })
+        expect(store.getState().together.work.taskId).toBeNull()
+        await act(async () => { store.dispatch(setFocusTask(shared)) })
+        expect(store.getState().together.work.taskId).toBe(12)
+        await act(async () => { store.dispatch(setTimer(30000, false)) })
+        expect(store.getState().together.work.taskId).toBeNull()
+    })
+
+    it('a Pomodoro break pauses the session stopwatch', async () => {
+        const store = makeStore()
+        apiFetch.mockResolvedValue({})
+        renderLink(store)
+        store.dispatch(setTimerMode('pomodoro'))
+        await act(async () => { store.dispatch(setFocusTask(selectSharedSoloTasks(store.getState())[0])) })
+        await act(async () => { store.dispatch({ type: SET_POMODORO, payload: { phase: 'short', round: 1 } }) })
+        await act(async () => { store.dispatch(setTimer(300000, true)) })
+        expect(store.getState().together.work.taskId).toBeNull()
+        await act(async () => { store.dispatch({ type: SET_POMODORO, payload: { phase: 'focus', round: 1 } }) })
+        expect(store.getState().together.work.taskId).toBe(12)
+    })
+
+    it('"Daran arbeiten" in a session picks the task in the focus timer and starts it', async () => {
+        const store = makeStore()
+        apiFetch.mockResolvedValue({})
+        renderLink(store)
+        store.dispatch(setTimerMode('timer'))
+        await act(async () => { await store.dispatch(workOnSharedTask(session5, slides)) })
+        expect(store.getState().session.focusTask).toMatchObject({ id: 'shared-12', name: 'Slides', shared: { sessionId: 5, taskId: 12 } })
+        expect(store.getState().session.timer.active).toBe(true)
+        expect(store.getState().together.work).toMatchObject({ sessionId: 5, taskId: 12 })
+    })
+
+    it('switching to a session task while the timer runs books the time so far on the old task', async () => {
+        vi.useFakeTimers()
+        vi.setSystemTime(new Date('2026-11-09T10:00:00Z'))
+        const store = makeStore()
+        apiFetch.mockResolvedValue({})
+        renderLink(store)
+        store.dispatch(setTimerMode('stopwatch'))
+        store.dispatch(setFocusTask(ownTasks[0]))
+        store.dispatch(startFocus())
+        vi.setSystemTime(new Date('2026-11-09T10:02:00Z'))
+        await act(async () => { await store.dispatch(workOnSharedTask(session5, slides)) })
+        const worked = store.getState().session.currentSessionData.workedTasks
+        expect(worked.find(t => t.id === 10).time).toBe(120)
+        expect(store.getState().session.timer.active).toBe(true)
+        expect(store.getState().together.work.taskId).toBe(12)
+        vi.useRealTimers()
+    })
+
+    it('the session stopwatch never runs on its own beside the focus timer', async () => {
+        const store = makeStore()
+        apiFetch.mockResolvedValue({})
+        renderLink(store)
+        store.dispatch(setTimerMode('timer'))
+        await act(async () => { store.dispatch(setFocusTask(ownTasks[0])) })
+        await act(async () => { store.dispatch(setTimer(60000, true)) })
+        await act(async () => { await store.dispatch(startWork(session5, slides)) })
+        expect(store.getState().together.work.taskId).toBeNull()
+    })
+
+    it('ticking off or leaving the session takes its task out of the focus timer, the timer runs on', async () => {
+        const store = makeStore()
+        apiFetch.mockResolvedValue({})
+        renderLink(store)
+        store.dispatch(setTimerMode('timer'))
+        await act(async () => { await store.dispatch(workOnSharedTask(session5, slides)) })
+        await act(async () => { store.dispatch(dropSharedFocus(5, 99)) })
+        expect(store.getState().session.focusTask.id).toBe('shared-12') // another task: stays
+        await act(async () => { store.dispatch(dropSharedFocus(5, 12)) })
+        expect(store.getState().session.focusTask).toBeNull()
+        expect(store.getState().session.timer.active).toBe(true)
         expect(store.getState().together.work.taskId).toBeNull()
 
-        // back on the shared task, then leaving the page stops it too
-        await act(async () => { rerender({ task: shared }) })
-        expect(store.getState().together.work.taskId).toBe(12)
-        await act(async () => { unmount() })
-        expect(store.getState().together.work.taskId).toBeNull()
+        await act(async () => { await store.dispatch(workOnSharedTask(session5, slides)) })
+        await act(async () => { store.dispatch(dropSharedFocus(5)) }) // the whole session
+        expect(store.getState().session.focusTask).toBeNull()
     })
 })
 

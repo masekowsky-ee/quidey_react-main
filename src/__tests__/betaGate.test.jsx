@@ -35,6 +35,8 @@ function mockApi(me) {
         if (url === '/api/sessions') return []
         if (url === '/api/friends/requests') return { incoming: [], outgoing: [] }
         if (url === '/api/shared-sessions') return { sessions: [], invites: [] }
+        if (url === '/api/arcade/me') return []
+        if (url.startsWith('/api/arcade/leaderboard')) return { top: [{ rank: 1, user: { id: 9, username: 'zoe', displayName: 'Zoe' }, score: 42, me: false }], me: null }
         throw new Error(`unexpected call ${options.method ?? 'GET'} ${url}`)
     })
     return state
@@ -62,9 +64,9 @@ beforeEach(() => {
 describe('access state', () => {
     it('is unknown until the server answers, and reset on logout', () => {
         let state = authReducer(undefined, { type: '@@INIT' })
-        expect(state.access).toEqual({ checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null, allDayReminderTime: '12:00', tourSeen: true, userId: null, pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false })
+        expect(state.access).toEqual({ checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null, allDayReminderTime: '12:00', tourSeen: true, userId: null, pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false, usageConsent: { choice: null, at: null, version: null } })
         state = authReducer(state, { type: SET_ACCESS, payload: { isPro: false, betaRequest: pending } })
-        expect(state.access).toEqual({ checked: true, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: pending, allDayReminderTime: '12:00', tourSeen: true, userId: null, pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false })
+        expect(state.access).toEqual({ checked: true, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: pending, allDayReminderTime: '12:00', tourSeen: true, userId: null, pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false, usageConsent: { choice: null, at: null, version: null } })
         state = authReducer(state, { type: LOGOUT })
         expect(state.access.checked).toBe(false)
     })
@@ -74,7 +76,7 @@ describe('access state', () => {
         apiFetch.mockResolvedValue(pending)
         await store.dispatch(requestBetaAccess('I want to plan my study group'))
         expect(apiFetch).toHaveBeenCalledWith('/api/beta-requests', { method: 'POST', body: JSON.stringify({ reason: 'I want to plan my study group' }) })
-        expect(store.getState().auth.access).toEqual({ checked: true, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: pending, allDayReminderTime: '12:00', tourSeen: true, userId: null, pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false })
+        expect(store.getState().auth.access).toEqual({ checked: true, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: pending, allDayReminderTime: '12:00', tourSeen: true, userId: null, pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false, usageConsent: { choice: null, at: null, version: null } })
     })
 })
 
@@ -88,6 +90,20 @@ describe('closed beta', () => {
         const called = apiFetch.mock.calls.map(([url]) => url)
         expect(called).not.toContain('/api/tasks')
         expect(called).not.toContain('/api/shared-sessions')
+    })
+
+    it('offers three ways on: the form, the landing page, and the waiting room with the arcade', async () => {
+        mockApi({ userId: 1, username: 'ann', isPro: false, betaRequest: null })
+        const store = await renderApp('/beta')
+        await signIn(store)
+        expect(screen.getByRole('textbox')).toBeInTheDocument()
+        expect(screen.getByRole('link', { name: 'Zur Startseite' })).toHaveAttribute('href', 'https://quidey.com')
+
+        await act(async () => { fireEvent.click(screen.getByRole('link', { name: /Ab in den Warteraum/ })) })
+        expect(await screen.findByRole('heading', { name: 'Arcade' })).toBeInTheDocument()
+        expect(screen.getByText('Warteraum')).toBeInTheDocument()
+        expect(await screen.findByText('Zoe')).toBeInTheDocument()
+        expect(apiFetch.mock.calls.map(([url]) => url)).not.toContain('/api/tasks')
     })
 
     it('asks for access once, with a reason of at least 10 characters', async () => {

@@ -55,7 +55,7 @@ describe('menu', () => {
     it('lists the statistics with the other places, without a "More" heading', () => {
         renderWith(makeStore(), <Menu />)
         const nav = screen.getByRole('navigation', { name: 'Menü' })
-        expect(within(nav).getAllByRole('link').map(link => link.textContent)).toEqual(['Start', 'Kalender', 'Fokusraum', 'Routinen', 'Gemeinschaft', 'Postfach', 'Statistiken'])
+        expect(within(nav).getAllByRole('link').map(link => link.textContent)).toEqual(['Start', 'Kalender', 'Fokusraum', 'Routinen', 'Sozial', 'Postfach', 'Statistiken', 'Arcade'])
         expect(within(nav).queryByText('Mehr')).not.toBeInTheDocument()
     })
 })
@@ -141,7 +141,7 @@ describe('streak', () => {
         expect(within(streak).getByText('Rekord: 9')).toBeInTheDocument()
         expect(within(streak).getAllByRole('listitem')).toHaveLength(7)
 
-        const today = screen.getByRole('heading', { name: 'Heute' }).closest('section')
+        const today = screen.getByRole('heading', { name: 'Herausforderungen' }).closest('section')
         expect(within(today).getByText('1 von 3')).toBeInTheDocument()
 
         const friends = screen.getByRole('heading', { name: 'Freunde' }).closest('section')

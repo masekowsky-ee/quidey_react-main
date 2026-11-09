@@ -5,7 +5,7 @@ import { fill } from '../../features/helperFunction';
 import { durationText, taskTimeText } from '../../features/calendar/calendar';
 import { isEvent } from '../../features/tasks/kinds';
 import { plannedProgress, selectFocusByTask } from '../../features/tasks/plannedTime';
-import { TASK_COLORS } from '../../features/tasks/taskColors';
+import { isTaskColor } from '../../features/tasks/taskColors';
 
 // One line under a task: its time, an event's type (and length when it has no time), a task's
 // planned time against the focus spent on it, location and link. Nothing when none is set.
@@ -23,7 +23,7 @@ export default function TaskMeta({ task, showTime = true }) {
         <span className={styles.meta}>
             {time && <span className={styles.metaTime}>{time}</span>}
             {type &&
-                <span className={styles.metaType} data-task-color={TASK_COLORS.includes(type.color) ? type.color : undefined}>
+                <span className={styles.metaType} data-task-color={isTaskColor(type.color) ? type.color : undefined}>
                     {type.name}
                 </span>}
             {length && <span>{length}</span>}
@@ -33,9 +33,6 @@ export default function TaskMeta({ task, showTime = true }) {
                     {progress.spent > 0
                         ? `${durationText(progress.spent)} / ${durationText(progress.planned)}`
                         : fill(t('plannedShort'), { time: durationText(progress.planned) })}
-                    {progress.spent > 0 &&
-                        <span className={styles.metaPlannedBar} aria-hidden="true"
-                            style={{ '--share': Math.min(1, progress.share) }} data-over={progress.share > 1 ? '' : undefined} />}
                 </span>}
             {task.location && <span className={styles.metaLocation} title={t('location')}>{task.location}</span>}
             {task.link &&

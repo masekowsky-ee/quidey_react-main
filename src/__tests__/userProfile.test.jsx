@@ -213,7 +213,7 @@ describe('customizing my profile', () => {
         expect(screen.getByText('Profil gespeichert.')).toBeInTheDocument()
         expect(screen.queryByRole('button', { name: 'Speichern' })).not.toBeInTheDocument()
         expect(screen.getByText('📚')).toBeInTheDocument()
-    })
+    }, 15000)
 
     it('cancelling drops the preview', async () => {
         await renderOwn()

@@ -1,3 +1,5 @@
+import { platform } from './usage/platform';
+
 // Full URL for an API path. VITE_API_URL is the backend's address in production builds
 // (e.g. https://api.quidey.example.com); locally it's empty and Vite's proxy forwards /api.
 export function apiUrl(path) {
@@ -27,6 +29,8 @@ export async function apiFetch(url, options = {}) {
         headers: {
             ...options.headers,
             "Content-Type": "application/json",
+            // the usage statistics' platform: web, pwa or android
+            "X-Quidey-Platform": platform(),
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
     });
@@ -39,6 +43,8 @@ export async function apiFetch(url, options = {}) {
         error.code = errorData.code;
         // which input the server refused (INVALID_INPUT)
         error.field = errorData.field;
+        // the whole error body (a 409 plan_changed carries the fresh preview)
+        error.data = errorData;
         // pro / tester was taken away while the app is open: App checks access again
         // (and shows the beta screen, or hides what only testers see)
         if (ACCESS_CODES.includes(errorData.code)) window.dispatchEvent(new Event(PRO_REQUIRED_EVENT));

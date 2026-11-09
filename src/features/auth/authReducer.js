@@ -20,6 +20,8 @@ const initialState = {
     access: {
         checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null, allDayReminderTime: '12:00', tourSeen: true, userId: null,
         pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false,
+        // anonymous usage statistics: my answer (choice 'granted' | 'denied' | null = not asked), when, which version of the question
+        usageConsent: { choice: null, at: null, version: null },
     },
 };
 
@@ -62,6 +64,7 @@ const authReducer = (state = initialState, action) => {
                     usage: action.payload.usage ?? null,
                     hasPassword: action.payload.hasPassword !== false,
                     googleLinked: Boolean(action.payload.googleLinked),
+                    usageConsent: action.payload.usageConsent ?? initialState.access.usageConsent,
                 },
             };
         case TOUR_SEEN:
