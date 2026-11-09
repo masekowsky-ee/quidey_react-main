@@ -237,6 +237,18 @@
     color: var(--text-h);
 }
 
+/* the name with the microphone beside it */
+.nameRow{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nameRow > input{
+    flex: 1;
+    min-width: 0;
+}
+
 /* a long line the rules hardly understood: "Mit KI lesen" with today's helps left (features/ai/ai.js) */
 .aiHelp{
     display: inline-flex;

@@ -451,6 +451,17 @@ function Privacy() {
                 Für die Verarbeitung durch Anthropic gilt dasselbe wie bei den KI-Schätzungen oben
                 (Auftragsverarbeitung, EU-Standardvertragsklauseln).
             </p>
+            <p>
+                <strong>Spracheingabe:</strong> Tippst du auf das Mikrofon (bei neuen Aufgaben, Terminen und Erinnerungen
+                und in Notizen), wandelt die Spracherkennung deines Browsers bzw. Handys das Gesprochene in Text um:
+                im Browser die Web-Speech-Funktion des Browsers (in Chrome und Edge über Dienste von Google bzw.
+                Microsoft, in Safari über Apple), in der Android-App die Spracherkennung von Android (meist Google).
+                Die Aufnahme geht dabei vom Gerät an diesen Anbieter, nach dessen Datenschutzbestimmungen; Quidey selbst
+                erhält und speichert keine Aufnahme, nur den erkannten Text, der wie getippter Text im Feld landet.
+                Das Mikrofon wird nur nach deinem Tippen und mit der Erlaubnis deines Browsers bzw. Handys benutzt;
+                ohne Tippen wird nichts aufgenommen. Rechtsgrundlage ist deine Einwilligung nach Art. 6 Abs. 1 lit. a
+                DSGVO durch das Tippen auf das Mikrofon.
+            </p>
 
             <h2>{privacyNo(6)}. Freunde und gemeinsame Funktionen</h2>
             <p>

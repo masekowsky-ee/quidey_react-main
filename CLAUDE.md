@@ -766,6 +766,12 @@ false without `ANTHROPIC_API_KEY`: the app hides the buttons). Frontend `feature
 - Reading a line: `POST /api/ai/parse-entry { text }` (≤ 500 chars; sends the line, today, colour names, my event
   type names) → `{ entry: { kind, name, due, time, durationMinutes, color, eventTypeId, reminders, prio }, quota }`;
   TaskForm fills its fields with it. Privacy: "Zeilen mit KI lesen" in § 5.
+- Voice input (no allowance needed, not AI): `features/voice/voice.js` (`voiceSupport()` 'web' | 'native' | null,
+  `startDictation`, `speechLang`), `components/voice/MicButton.jsx` (hidden where unsupported, e.g. Firefox) beside the
+  new-entry name (what is said becomes the line, read like typing) and `DictateButton.jsx` in the notes editor's tools
+  (continuous, each finished sentence inserted once at the cursor via the editor's `insertText`). Browser: Web Speech
+  API; Android app: plugin `QuideyVoice` (`VoicePlugin.java` in quidey_android: SpeechRecognizer, RECORD_AUDIO asked on
+  first start, events partial / final / error / end). Privacy: "Spracheingabe" in § 5.
 
 ## API access
 

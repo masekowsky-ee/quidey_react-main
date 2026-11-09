@@ -14,6 +14,7 @@ import PinToBoards from '../board/PinToBoards.jsx';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
 import NoteText from './NoteText.jsx';
+import DictateButton from '../voice/DictateButton.jsx';
 import styles from '../focus/Notebook.module.css';
 import own from './Notes.module.css';
 
@@ -238,7 +239,8 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
 
             <NoteText body={note.body} onChange={editBody} label={t('noteText')} placeholder={t('notePlaceholder')} autoFocus={autoFocus}
                 onPasteFiles={addImages} onPasteLink={onPasteLink}
-                tools={({ currentLine }) => <>
+                tools={({ currentLine, insertText }) => <>
+                    <DictateButton insert={insertText} />
                     <button type="button" onClick={() => setLinkField({ url: '', title: '' })} title={t('noteToolLink')}><Icon name="link" size={16} /><span>{t('noteToolLink')}</span></button>
                     <button type="button" onClick={() => fileInput.current?.click()} title={t('noteToolImage')}><Icon name="image" size={16} /><span>{t('noteToolImage')}</span></button>
                     <button type="button" onClick={() => planLine(currentLine())} title={t('noteToolPlanHint')}><Icon name="calendar" size={16} /><span>{t('noteToolPlan')}</span></button>

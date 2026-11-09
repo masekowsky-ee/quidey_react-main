@@ -1,0 +1,55 @@
+.mic {
+    position: relative;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    color: var(--text);
+    background: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.mic:hover {
+    color: var(--text-h);
+    border-color: var(--control-border);
+}
+
+/* listening: filled, with a slow ring that says the microphone is open */
+.mic[data-listening] {
+    color: var(--on-primary, #fff);
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.mic[data-listening]::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    opacity: 0.5;
+    animation: listen 1.4s ease-out infinite;
+}
+
+@keyframes listen {
+    from { transform: scale(0.92); opacity: 0.55; }
+    to { transform: scale(1.25); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mic[data-listening]::after {
+        animation: none;
+    }
+}
+
+@media (pointer: coarse) {
+    .mic {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+}

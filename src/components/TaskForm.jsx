@@ -27,6 +27,7 @@ import { shownSubGroup } from '../features/tasks/subGroups';
 import { addToShownCollection } from '../features/collections/collections';
 
 import Icon from './icons';
+import MicButton from './voice/MicButton.jsx';
 import SheetGrabber from './SheetGrabber.jsx';
 import { useFocusOnArrival } from '../features/layout/dragDismiss';
 import { useIsTester } from '../features/auth/tester';
@@ -298,9 +299,13 @@ export default function TaskForm(props){
                         setKind(next); setKindByHand(true); followName(name, next);
                     }} />}
                 {/* the form opens to be typed into: the name has the focus (on a touch screen once the sheet is up) */}
-                <input ref={nameRef} className={styles.input} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}
-                    aria-describedby={quickParts.length > 0 ? 'quick-add-hint' : undefined}
-                    value={name} maxLength={200} onChange={(e) => { setName(e.target.value); followName(e.target.value, kind); }} />
+                <div className={styles.nameRow}>
+                    <input ref={nameRef} className={styles.input} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}
+                        aria-describedby={quickParts.length > 0 ? 'quick-add-hint' : undefined}
+                        value={name} maxLength={200} onChange={(e) => { setName(e.target.value); followName(e.target.value, kind); }} />
+                    {/* speaking the line instead of typing it: read the same way (features/voice/voice.js) */}
+                    <MicButton onText={(text) => { const line = text.slice(0, 200); setName(line); setIgnoreQuick(false); followName(line, kind); }} />
+                </div>
                 {quickParts.length > 0 &&
                     <p id="quick-add-hint" className={styles.quickHint} aria-live="polite">
                         <span>

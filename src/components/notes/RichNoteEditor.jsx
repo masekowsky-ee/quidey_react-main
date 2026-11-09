@@ -7,7 +7,7 @@
 //
 // onChange(getBody) after every change: getBody() turns the document into the stored text, so the
 // caller only pays for it when saving. tools({ currentLine }) adds buttons at the end of the
-// toolbar. onPasteFiles(files) takes pasted pictures (they never go into the text), onPasteLink(url)
+// toolbar (with currentLine() and insertText(text)). onPasteFiles(files) takes pasted pictures (they never go into the text), onPasteLink(url)
 // hears about a link pasted on its own (it still goes into the text).
 
 import { useEffect, useRef, useState } from 'react';
@@ -105,6 +105,8 @@ export default function RichNoteEditor({ body, onChange, label, placeholder = ''
 
     const run = (step) => step(editor.chain().focus()).run();
     const currentLine = () => editor.state.selection.$from.parent.textContent.trim();
+    // dictation: plain words at the cursor
+    const insertText = (text) => editor.chain().focus().insertContent(text).run();
 
     const toolButton = (key, pressed, step, content) => (
         <button type="button" aria-pressed={pressed} onClick={() => run(step)} title={t(key)} aria-label={t(key)}>
@@ -134,7 +136,7 @@ export default function RichNoteEditor({ body, onChange, label, placeholder = ''
                         </div>}
                 </div>
                 {tools && <span className={styles.split} aria-hidden="true" />}
-                {tools?.({ currentLine })}
+                {tools?.({ currentLine, insertText })}
             </div>
             <EditorContent editor={editor} className={styles.content} />
         </div>

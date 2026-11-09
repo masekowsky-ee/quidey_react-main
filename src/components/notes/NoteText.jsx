@@ -21,6 +21,15 @@ function PlainNoteText({ body, onChange, label, placeholder, autoFocus, tools, o
         const end = value.indexOf('\n', at);
         return value.slice(start, end === -1 ? value.length : end).replace(/^\s*(- \[( |x|X)\] |#{1,2} |[-*] |\d{1,3}\. |> )/, '').trim();
     };
+    // dictation into the plain field: at the cursor, handed over like typing
+    const insertText = (text) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const at = el.selectionStart ?? el.value.length;
+        el.setRangeText(text, at, el.selectionEnd ?? at, 'end');
+        const value = el.value;
+        onChange(() => value);
+    };
     const onPaste = (e) => {
         const files = [...(e.clipboardData?.files ?? [])].filter(file => file.type.startsWith('image/'));
         if (files.length) { e.preventDefault(); onPasteFiles?.(files); return; }
@@ -29,7 +38,7 @@ function PlainNoteText({ body, onChange, label, placeholder, autoFocus, tools, o
     };
     return (
         <>
-            {tools && <div className={styles.toolbar}>{tools({ currentLine })}</div>}
+            {tools && <div className={styles.toolbar}>{tools({ currentLine, insertText })}</div>}
             <textarea id={id} className={styles.area} defaultValue={body} maxLength={NOTE_BODY_MAX} aria-label={label}
                 placeholder={placeholder} autoFocus={autoFocus} onPaste={onPaste} onChange={e => { const value = e.target.value; onChange(() => value); }} />
         </>

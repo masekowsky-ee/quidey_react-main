@@ -83,6 +83,15 @@ describe('the notes editor', () => {
         expect(onPlan).toHaveBeenCalledWith('Lernen morgen 14 Uhr')
     })
 
+    it('lets the extra tools put text in at the cursor (dictation)', () => {
+        const { editor, body } = setup('Notiz', {
+            tools: ({ insertText }) => <button type="button" onClick={() => insertText(' diktiert')}>Diktat</button>,
+        })
+        act(() => { editor.commands.setTextSelection(6) })
+        fireEvent.click(tool('Diktat'))
+        expect(body()).toBe('Notiz diktiert')
+    })
+
     it('hands pasted pictures and a pasted link on', () => {
         const onPasteFiles = vi.fn()
         const onPasteLink = vi.fn()
