@@ -1,7 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setShowMenu } from '../../features/settings/settingsAction';
-import { selectIsTester } from '../../features/auth/tester';
 import { selectMenuBadgeCount } from '../../features/inbox/inbox';
 import { selectHasNews } from '../../features/realtime/news';
 import styles from './TopNav.module.css';
@@ -36,7 +35,6 @@ function Tab({ to, end, match, icon, label, count = 0, countLabel, news = false,
 export default function TopNav({ inline = false }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const isTester = useSelector(selectIsTester);
     const menuBadge = useSelector(selectMenuBadgeCount);
     const hasNews = useSelector(selectHasNews);
     const news = useSelector(state => state.news);
@@ -53,7 +51,7 @@ export default function TopNav({ inline = false }) {
                 <Tab to="/calendar" icon="calendar" label={t('calendar')} tip="nav-calendar"
                     count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
                 <Tab to="/focus" icon="focus" label={t('focusRoom')} tip="nav-focus" />
-                {inline && isTester && <Tab to="/study" icon="book" label={t('studyNav')} tip="nav-study" />}
+                {inline && <Tab to="/study" icon="book" label={t('studyNav')} tip="nav-study" />}
                 <Tab to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} tip="nav-community"
                     count={inviteCount + friendRequests + familyInvites} countLabel={t('communityCount')}
                     news={news.together || news.social || news.feed} newsLabel={t('menuNews')} />

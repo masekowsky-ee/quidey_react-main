@@ -4,7 +4,6 @@ import { selectFocusTask, selectTimerProgress, selectTimerInProgress, setTimerMo
 import { formatClock, fill } from '../../features/helperFunction';
 import { POMODORO_LIMITS, validPomodoroValue, SESSION_LENGTHS } from '../../features/settings/preferences';
 import { useTranslation } from '../../i18n/useTranslation';
-import { useIsTester } from '../../features/auth/tester';
 import Icon from '../icons.jsx';
 import DurationInput from './DurationInput.jsx';
 import styles from './FocusRoom.module.css';
@@ -118,9 +117,8 @@ export default function FocusTimer() {
     const { timer, timerMode, pomodoro, sessionParams } = useSelector(state => state.session);
     const percent = useSelector(selectTimerProgress);
     const inProgress = useSelector(selectTimerInProgress);
-    const isTester = useIsTester();
     const study = useSelector(selectFocusTask)?.study;
-    const [minimized, setMinimized] = useMinimized(isTester);
+    const [minimized, setMinimized] = useMinimized(true);
     const isPomodoro = timerMode === 'pomodoro';
     const stopwatch = timerMode === 'stopwatch';
     const onBreak = isPomodoro && pomodoro.phase !== 'focus';
@@ -186,7 +184,7 @@ export default function FocusTimer() {
                     <DurationInput label={t('focusLength')} ms={sessionParams.time} presets={[...SESSION_LENGTHS, 90]}
                         onChange={time => dispatch(setSessionParams({ ...sessionParams, time }))} />
                 </div>}
-            {isTester && inProgress &&
+            {inProgress &&
                 <button type="button" className={styles.minimizeBtn} onClick={() => setMinimized(true)} aria-expanded="true">
                     {t('focusTimerMinimize')}
                 </button>}

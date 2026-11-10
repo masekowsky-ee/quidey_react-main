@@ -14,7 +14,6 @@ import { selectFamilyInviteCount } from '../features/family/family';
 import { useOnlineFriends } from '../features/presence/presence';
 import { fill } from '../features/helperFunction';
 import { tabIndexOf } from '../features/layout/tabSwipe';
-import { useIsTester } from '../features/auth/tester';
 
 function Count({ count, label }) {
     if (count <= 0) return null;
@@ -78,7 +77,8 @@ export default function TabBar() {
     const friendRequests = useSelector(selectIncomingCount);
     const familyInvites = useSelector(selectFamilyInviteCount);
     const adminPending = useSelector(selectAdminPendingCount);
-    const study = Boolean(useIsTester());
+    // Lernen has the fourth tab (Sozial behind "Mehr"); tabPaths(false) keeps the old order
+    const study = true;
     const communityCount = inviteCount + friendRequests + familyInvites;
     const communityNews = news.together || news.social || news.feed;
     const menuOpen = useSelector(state => state.settings.showMenu);

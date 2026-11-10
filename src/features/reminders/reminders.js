@@ -15,7 +15,6 @@ import { track } from '../usage/usage';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiFetch } from '../helperFunction';
 import { useRealtime, useSafetyPoll } from '../realtime/socket';
-import { useIsTester } from '../auth/tester';
 import { isoWeekday } from '../routines/routines';
 import { LOGOUT } from '../auth/authActionTypes';
 
@@ -173,8 +172,7 @@ const REFRESH_MS = 60 * 1000;
 
 export function useReminders(allowed) {
     const dispatch = useDispatch();
-    const isTester = useIsTester();
-    const enabled = Boolean(allowed && isTester);
+    const enabled = Boolean(allowed);
     const list = useSelector(selectReminders);
     const loaded = useSelector(state => state.reminders.loaded);
     const language = useSelector(state => state.settings.language);

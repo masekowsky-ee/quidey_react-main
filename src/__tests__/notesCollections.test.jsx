@@ -158,9 +158,9 @@ describe('collections: the store and what is in one', () => {
         expect(state.list.map(c => c.id)).toEqual([4])
     })
 
-    it('are listed among the features in test, for testers only', () => {
+    it('are listed among the features in test, out for everybody now', () => {
         for (const id of ['notes', 'collections', 'focusminimize']) {
-            expect(TEST_FEATURES.find(feature => feature.id === id)).toMatchObject({ testerOnly: true })
+            expect(TEST_FEATURES.find(feature => feature.id === id).testerOnly).toBeUndefined()
             expect(translations.de[`testerFeature_${id}`]).toBeTruthy()
         }
     })
@@ -180,12 +180,11 @@ describe('the Fokusraum timer folds while it runs (testers)', () => {
         expect(screen.getByRole('button', { name: new RegExp(t('focusTimerExpand')) })).toBeTruthy()
     })
 
-    it('stays big for everybody else', async () => {
+    it('folds for everybody, not only testers', async () => {
         serve({})
         wrap(<FocusTimer />, makeStore({ isTester: false }), '/focus')
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'start timer' })) })
-        expect(screen.queryByRole('button', { name: new RegExp(t('focusTimerExpand')) })).toBeNull()
-        expect(screen.getByRole('button', { name: 'pause timer' })).toBeTruthy()
+        expect(screen.getByRole('button', { name: new RegExp(t('focusTimerExpand')) })).toBeTruthy()
     })
 })
 
@@ -292,12 +291,12 @@ describe('collections', () => {
         expect(screen.getByRole('link', { name: /Klausur Mathe/ }).getAttribute('href')).toBe('/collections/8')
     })
 
-    it('stay out of the task editor for everybody else', async () => {
-        serve({})
+    it('are in the task editor for everybody, not only testers', async () => {
+        serve({ 'GET /api/tester/collections': [] })
         wrap(<TaskEditor task={tasks[1]} onSave={vi.fn()} onCancel={vi.fn()} />, makeStore({ isTester: false, tasks }))
         await act(async () => {})
-        expect(screen.queryByText(t('collectionsIn'))).toBeNull()
-        expect(apiFetch.mock.calls.some(([url]) => url === '/api/tester/collections')).toBe(false)
+        expect(screen.getByText(t('collectionAddTo'))).toBeTruthy()
+        expect(apiFetch.mock.calls.some(([url]) => url === '/api/tester/collections')).toBe(true)
     })
 })
 
@@ -343,12 +342,12 @@ describe('collections in place of groups (testers)', () => {
         await waitFor(() => expect(screen.queryByRole('list', { name: t('toDo') })).toBeNull())
     })
 
-    it('stay groups for everybody else', async () => {
-        serve({})
+    it('take the place of groups for everybody, not only testers', async () => {
+        serve({ 'GET /api/tester/collections': [] })
         home(homeStore(false))
         await act(async () => {})
-        expect(within(screen.getByRole('group', { name: t('groups') })).getByRole('button', { name: 'Uni' })).toBeInTheDocument()
-        expect(apiFetch.mock.calls.some(([url]) => url === '/api/tester/collections')).toBe(false)
+        expect(apiFetch.mock.calls.some(([url]) => url === '/api/tester/collections')).toBe(true)
+        expect(screen.queryByRole('button', { name: 'Uni' })).toBeNull()
     })
 
     it('"+" makes a collection', async () => {

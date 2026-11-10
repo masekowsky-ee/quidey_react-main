@@ -142,12 +142,11 @@ Order of checks on every render:
 5. Pro → full app in the frame `AppShell.module.css`: `Header`, `Menu`, `TabBar`, `Toaster`,
    `Tutorial`, animated page routes in `<main>`. Widths (`src/features/layout/breakpoints.js`,
    `useMediaQuery`): ≥1100px the app's own look (`current`, nav model `bar`) has no sidebar: the header
-   carries the main places as words (`TopNav inline`: Start, Kalender, Fokusraum, Lernen for testers,
+   carries the main places as words (`TopNav inline`: Start, Kalender, Fokusraum, Lernen,
    Sozial, Postfach, Statistiken, then "Mehr" opening the drawer), and header and pages line up on
    `--content-w` (70rem; narrower pages start at `--page-start`, the same left edge);
    721–1099px the menu is a drawer behind the header's button; ≤720px a bottom `TabBar` (Start,
-   Kalender, Fokus, Lernen (`/study`; Sozial instead for non-testers, who have no study plan; for testers Sozial
-   is in the drawer and its counts, news dot and online dot sit on "Mehr"), Mehr → drawer; icons only, the words for screen readers; a capsule
+   Kalender, Fokus, Lernen (`/study`; Sozial is in the drawer and its counts, news dot and online dot sit on "Mehr"), Mehr → drawer; icons only, the words for screen readers; a capsule
    floating 0.75rem above the bottom edge, the current tab marked by a neutral pill behind a bolder
    icon that slides between tabs (one CSS track in the capsule, `--tab` index, not a layoutId:
    a shared layout animation flew in from the old scroll position), only "Mehr" while the menu is open; swiped down it sinks
@@ -340,7 +339,7 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   during a running round: toast "Willkommen zurück – N Min. warst du woanders"; one nudge after 20 s away ("Noch N Min.
   Fokus" + task; browser only with notifications allowed). Tally in localStorage `focusAway` (day count/ms, the round
   going on, the last round): "Dein Tag" shows "N× woanders" / "Heute nicht abgelenkt", the Pomodoro recap "Ohne
-  Ablenkung" / "N× woanders in dieser Runde". Nothing of it goes to the server. Testers: the timer folds into a sticky bar on start, `MiniTimer` in
+  Ablenkung" / "N× woanders in dieser Runde". Nothing of it goes to the server. The timer folds into a sticky bar on start (everybody), `MiniTimer` in
   `FocusTimer.jsx`, "Groß zeigen" opens it, big again once nothing runs. The **notebook** (`Notebook.jsx`, `features/focus/notebook.js`, API
   `/api/notebook`; the server reads its bigger bodies only after sign-in, checks pictures by their
   magic bytes and keeps all pictures of an account under 25 MB, `NOTEBOOK_STORAGE_FULL`): notes with `- [ ]` checklists, `# ` headings, link and picture attachments (pictures shrunk
@@ -358,7 +357,7 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   boards are shown by `notes/NoteView.jsx`. Every list row shows a
   preview line (`notePreview`, `notes/NotePreview.jsx`: the text after the title line, else "only attachments (n)" /
   "nothing written yet"). "An Board heften" (`board/PinToBoards.jsx`) pins it to a family's / open session's board.
-- `/notes` — **Notizen**, testers only (`components/notes/NotesPage.jsx`, `features/notes/notes.js`): the
+- `/notes` — **Notizen**, for everybody (testers only until 2026-11-10; `components/notes/NotesPage.jsx`, `features/notes/notes.js`): the
   notebook's notes in views (all, pinned, folders, tags, archive, trash; `?view=folder:<id>|tag:<word>|…`,
   `?note=<id>`), search (words, `#tag`), sort + list/tiles (localStorage `notesSort`, `notesLayout`),
   templates (`NOTE_TEMPLATES`, texts `noteTpl_*`), folders (`/api/tester/note-folders`; "Neuer Ordner" is a grey
@@ -366,12 +365,12 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   archive, trash (30 days, `GET /api/notebook?trash=1`, `DELETE /api/tester/notebook/trash`), duplicate,
   Markdown export. The server takes folderId/tags/color/archived/trashed only from testers
   (`TESTER_REQUIRED`); `GET /api/notebook` leaves the trash out for everybody. Migration 036.
-- `/collections`, `/collections/:id` — **Sammlungen**, testers only (`components/collections/`, slice
+- `/collections`, `/collections/:id` — **Sammlungen**, for everybody (testers only until 2026-11-10; `components/collections/`, slice
   `collections` in `features/collections/collections.js`, API `/api/tester/collections`): tasks, events and
   notes together (`collection_items`, gone with their task/note). Put in from the collection (search or
   make new) or from the other side: `CollectionPicker` in `TaskEditor` (own tasks/events) and the notes'
   editor ("Neue Sammlung damit" names it after the thing). Texts of notes + collections in `i18n/notesTexts.js`.
-  **For testers collections replace groups** (`useTaskGroups()`, `asGroup` in collections.js: a collection goes
+  **Collections replace groups** (for everybody since 2026-11-10) (`useTaskGroups()`, `asGroup` in collections.js: a collection goes
   around as `{ id: 'collection-<id>', collection: true, collectionId, … }`): Home's chips ("+" makes one,
   `GroupForm`), the list of the shown one (its colour, its page, delete, take a task out), a task's labels,
   the new-task form and the calendar's quick add put new ones into the shown one (`addToShownCollection`), the
@@ -381,7 +380,7 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   groups over once (`users.groups_imported_at`; same name, colour, description, tasks; not a group whose name a
   collection has already); the groups themselves stay for when the test ends. Profile "top groups" still
   come from groups. Session / family sub-groups are separate and unchanged.
-- `/study`, `/study/:subjectId`, `/study/goals/:id` — **Lernen**, testers only (`TesterOnly`, `src/features/study/`, `components/study/`,
+- `/study`, `/study/:subjectId`, `/study/goals/:id` — **Lernen**, for everybody (testers only until 2026-11-10; `src/features/study/`, `components/study/`,
   API `/api/tester/study`, backend migration 041, Settings section `/settings#study` "Lernen"): subjects (Fächer), goals (exam /
   assignment / presentation / other with a due date) split into parts with estimated minutes, and a planner that puts
   study sessions as ordinary tasks (`tasks.goal_part_id`, `plan_pinned`) into the free gaps of the calendar within the user's
@@ -410,7 +409,7 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   (localStorage `routineRun`), runs booked. Home's dashboard (`home/Today.jsx`, under the motivation strip):
   focus today vs. the daily goal (localStorage `focusGoal`), today's routines, up next, quick note (→ notebook).
   Texts of all of this in `i18n/focusTexts.js`. Menu and tab bar (5 tabs) have Fokusraum; shortcuts G F / G R.
-- **Erinnerungen** — testers only, no tab of their own (`features/reminders/reminders.js`, slice `reminders`,
+- **Erinnerungen** — for everybody (testers only until 2026-11-10), no tab of their own (`features/reminders/reminders.js`, slice `reminders`,
   `useReminders` in App; `components/reminders/`; texts `i18n/reminderTexts.js`; API `/api/tester/reminders`,
   migration 039): a text and a time, no task. Once (`at`) or on weekdays (`days` 1 = Monday + `atTime`), "Erledigt"
   ends a once one, "10 Min. später" snoozes (`snoozedUntil`). They live in Postfach → Erinnerungen (`ReminderList`
@@ -576,6 +575,10 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
 - `/admin` — only for `isAdmin`: overview, beta requests (approve/decline), users (pro/admin
   toggles), broadcasts, tester feedback (`?tab=testers`, `tester/AdminTesterFeedback.jsx`:
   average, star spread, "favourite of N", comments per topic), admin action log.
+- Tester-only features are gone (2026-11-10): everything is everybody's (with app access); the old
+  `/api/tester/...` addresses stay and need app access (`requirePro`), only `/api/tester/feedback` (the
+  ratings) needs a tester. What stays the testers': the Testbereich below (interface variants + ratings),
+  and the tester role itself (beta access, Admin).
 - `/tester` — **Testbereich**, testers only (`TesterOnly` route guard; menu entry "Tester" beside
   Admin, also in the top tabs and the command bar). `components/tester/Tester.jsx`: the interface
   variants (preview, "Verwenden", stars 1–5 + comment each), "Dein Vergleich" (my variants by my

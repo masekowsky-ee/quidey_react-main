@@ -13,11 +13,11 @@ import { UI_VARIANT_IDS } from './variants';
 // (texts: testerFeature_<id>, _<id>Hint in i18n/testerTexts.js), take it out once it's settled.
 // No change on the server needed.
 export const TEST_FEATURES = [
-    { id: 'study', to: '/study', testerOnly: true, since: '2026-11-05' },
-    { id: 'reminders', to: '/inbox?tab=reminders', testerOnly: true, since: '2026-11-04' },
-    { id: 'notes', to: '/notes', testerOnly: true, since: '2026-11-03' },
-    { id: 'collections', to: '/collections', testerOnly: true, since: '2026-11-03' },
-    { id: 'focusminimize', to: '/focus', testerOnly: true, since: '2026-11-03' },
+    { id: 'study', to: '/study', since: '2026-11-05' },
+    { id: 'reminders', to: '/inbox?tab=reminders', since: '2026-11-04' },
+    { id: 'notes', to: '/notes', since: '2026-11-03' },
+    { id: 'collections', to: '/collections', since: '2026-11-03' },
+    { id: 'focusminimize', to: '/focus', since: '2026-11-03' },
     { id: 'focusroom', to: '/focus', since: '2026-10-28' },
     { id: 'routines', to: '/routines', since: '2026-10-28' },
     { id: 'avatars', to: '/profile#customize', since: '2026-10-28' },

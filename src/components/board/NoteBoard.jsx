@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import { useBoard, fetchBoardNote, pinToBoard, unpinFromBoard, boardErrorText, BOARD_NOTES_MAX } from '../../features/board/board';
 import { fetchNotes } from '../../features/focus/notebook';
 import { firstLine, matchesQuery, sortNotes } from '../../features/notes/notes';
-import { useIsTester } from '../../features/auth/tester';
 import { useSheet, useFocusOnArrival } from '../../features/layout/dragDismiss';
 import { useNow } from '../../features/together/work';
 import { showToast } from '../../features/toast/toast';
@@ -52,7 +51,6 @@ function BoardSheet({ title, onClose, children, wide = false }) {
 // One pinned note, read in full (with its pictures); mine: a way to my notes, canRemove: off the board
 function PinnedNote({ kind, boardId, pin, onClose, onRemove }) {
     const { t, language } = useTranslation();
-    const isTester = useIsTester();
     const now = useNow(true, 60 * 1000);
     const locale = language === 'de' ? 'de-DE' : 'en-GB';
     const [full, setFull] = useState(null);
@@ -97,8 +95,8 @@ function PinnedNote({ kind, boardId, pin, onClose, onRemove }) {
                     </ul>}
                 <div className={styles.actions}>
                     {pin.mine &&
-                        <Link className={styles.quiet} to={isTester ? `/notes?note=${pin.noteId}` : '/focus'}>
-                            <Icon name="edit" size={15} /> {t(isTester ? 'noteBoardEditInNotes' : 'noteBoardEditInFocus')}
+                        <Link className={styles.quiet} to={`/notes?note=${pin.noteId}`}>
+                            <Icon name="edit" size={15} /> {t('noteBoardEditInNotes')}
                         </Link>}
                     {pin.canRemove &&
                         <button type="button" className={styles.quiet} onClick={() => dismiss(() => onRemove(pin))}>

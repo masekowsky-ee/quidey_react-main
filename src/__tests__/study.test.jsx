@@ -195,10 +195,10 @@ describe('Settings → Lernen', () => {
         expect(await screen.findByRole('heading', { name: 'Lernen' })).toBeInTheDocument()
     })
 
-    it('hides it from everybody else and loads nothing', () => {
+    it('is there for everybody, not only testers', async () => {
         renderSettings({ tester: false })
-        expect(screen.queryByRole('heading', { name: 'Lernen' })).not.toBeInTheDocument()
-        expect(calls('/api/tester/study/settings')).toHaveLength(0)
+        expect(await screen.findByRole('group', { name: 'Mo' })).toBeInTheDocument()
+        expect(calls('/api/tester/study/settings').length).toBeGreaterThan(0)
     })
 
     it('adds a window and saves everything with one Speichern', async () => {
@@ -275,10 +275,10 @@ describe('Settings → Lernen', () => {
         expect(await screen.findByRole('alert')).toHaveTextContent(/Lernzeit/)
     })
 
-    it('the push list hides the study kind from non-testers', async () => {
+    it('the push list has the study kind for everybody, not only testers', async () => {
         renderSettings({ hash: '#app', tester: false })
         expect(await screen.findByText('Aufgaben und Termine')).toBeInTheDocument()
-        expect(screen.queryByText('Wenn ein Ziel hinter seinem Plan liegt, höchstens einmal am Tag.')).not.toBeInTheDocument()
+        expect(screen.getByText('Wenn ein Ziel hinter seinem Plan liegt, höchstens einmal am Tag.')).toBeInTheDocument()
     })
 
     it('a second visit shows the fresh settings, not the cached ones', async () => {

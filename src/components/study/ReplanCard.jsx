@@ -4,7 +4,6 @@ import {
     fetchStudyStatus, fetchStudySettings, fetchGoals, dismissBehind, formatHours,
     selectStudyStatus, selectStudySettings,
 } from '../../features/study/study';
-import { useIsTester } from '../../features/auth/tester';
 import { fill, toInputDate } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import PlanPreview from './PlanPreview.jsx';
@@ -85,5 +84,5 @@ function ReplanCardContent() {
 }
 
 export default function ReplanCard() {
-    return useIsTester() ? <ReplanCardContent /> : null;
+    return <ReplanCardContent />;
 }

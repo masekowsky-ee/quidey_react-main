@@ -28,7 +28,6 @@ import { addToShownCollection } from '../features/collections/collections';
 import Icon from './icons';
 import SheetGrabber from './SheetGrabber.jsx';
 import { useFocusOnArrival } from '../features/layout/dragDismiss';
-import { useIsTester } from '../features/auth/tester';
 const EMPTY_EXTRAS = { reminders: [], reminder_email: false, location: '', link: '', details: '', repeat: null, repeat_left: null };
 
 // New task or event. A task needs only its name; optionally a day and time (no time: the whole
@@ -50,7 +49,6 @@ export default function TaskForm(props){
     // onReminder(name): testers' "Erinnerung" choice, QuickAdd swaps in the reminder form;
     // initialKind / initialName: coming back from there
     const {setCreateTask, sheet, onReminder, initialKind = 'task', initialName = '', initialDue = '', initialTime = '', target = null, group} = props;
-    const isTester = useIsTester();
     const nameRef = useRef(null);
     useFocusOnArrival(nameRef);
 
@@ -240,7 +238,7 @@ export default function TaskForm(props){
                 <p className={styles.shareHint}>{fill(t('createInCollection'), { name: collection.name })}</p>}
             <form className={`${styles.form}`} onSubmit={handleSubmit} noValidate>
                 {(!target || target.events) &&
-                <KindSwitch value={kind} kinds={onReminder && isTester && !elsewhere ? ['task', 'event', 'reminder'] : undefined}
+                <KindSwitch value={kind} kinds={onReminder && !elsewhere ? ['task', 'event', 'reminder'] : undefined}
                     onChange={(next) => {
                         if (next === 'reminder') { onReminder(name); return; }
                         setKind(next); followName(name, next);

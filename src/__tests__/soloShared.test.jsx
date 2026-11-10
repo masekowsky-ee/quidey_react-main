@@ -35,10 +35,17 @@ const mine = [{ id: 5, name: 'Lerngruppe', me: 1, tasks: [
     { id: 13, name: 'Done one', description: null, done: true, assignee: null, myMs: 0, totalMs: 0 },
 ] }]
 
+// collections took the place of groups: the same two, holding what the groups held
+const collections = groups.map(group => ({
+    id: group.id, name: group.name, emoji: null, color: null, description: group.description,
+    items: ownTasks.filter(task => task.group_ids.includes(group.id)).map(task => ({ kind: 'task', id: task.id })),
+}))
+
 function makeStore() {
     const store = configureStore({ reducer: rootReducer })
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks: ownTasks, groups, notes: [] } })
     store.dispatch({ type: SET_MY_SHARED_TASKS, payload: mine })
+    store.dispatch({ type: 'SET_COLLECTIONS', payload: collections })
     return store
 }
 
@@ -255,14 +262,14 @@ describe('solo task list', () => {
         )
     }
 
-    it('shows shared tasks with their session label, read-only, next to own tasks with group labels', () => {
+    it('shows shared tasks with their session label, read-only, next to own tasks with collection labels', () => {
         const store = makeStore()
         renderList(store)
         const slides = screen.getByText('Slides').closest('li')
         expect(within(slides).getByRole('button', { name: /Lerngruppe/ })).toBeInTheDocument()
         expect(within(slides).getByText('→ Ben')).toBeInTheDocument()
         expect(within(slides).getByText('1 min')).toBeInTheDocument() // my time in the session
-        expect(within(slides).queryByText('Zu Gruppe hinzufügen')).not.toBeInTheDocument()
+        expect(within(slides).queryByText('In Sammlung legen …')).not.toBeInTheDocument()
         expect(within(slides).getByRole('link', { name: 'Sitzung öffnen' })).toHaveAttribute('href', '/together/5')
 
         const own = screen.getByText('Own task').closest('li')
@@ -310,16 +317,14 @@ describe('solo task list', () => {
         expect(apiFetch).toHaveBeenCalledWith('/api/shared-sessions/5/tasks/12', { method: 'PATCH', body: JSON.stringify({ done: true }) })
     })
 
-    it('opens the group picker and closes it with Escape', async () => {
+    it('the editor offers collections, not groups', async () => {
         const store = makeStore()
         renderList(store)
-        // groups are picked from the task's editor
         fireEvent.click(within(screen.getByText('Own task').closest('li')).getByRole('button', { name: 'Bearbeiten: Own task' }))
-        fireEvent.click(within(screen.getByRole('dialog')).getByText('Zu Gruppe hinzufügen'))
-        expect(screen.getAllByRole('dialog')).toHaveLength(2)
-        // Escape closes the picker, the editor stays
-        fireEvent.keyDown(window, { key: 'Escape' })
-        expect(screen.getAllByRole('dialog')).toHaveLength(1)
+        const dialog = screen.getByRole('dialog')
+        // it is in "Uni" already: another one can be added
+        expect(within(dialog).getByText('In weitere Sammlung …')).toBeInTheDocument()
+        expect(within(dialog).queryByText('Zu Gruppe hinzufügen')).not.toBeInTheDocument()
     })
 })
 

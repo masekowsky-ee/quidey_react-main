@@ -6,7 +6,6 @@ import { addGroup } from '../features/tasks/taskAction';
 import {useTranslation} from '../i18n/useTranslation';
 import {setCustomError} from '../features/settings/settingsAction';
 import SheetGrabber from './SheetGrabber.jsx';
-import { useIsTester } from '../features/auth/tester';
 import { createCollection, COLLECTION_NAME_MAX } from '../features/collections/collections';
 import { noteAction } from '../features/onboarding/onboarding';
 import { showToast } from '../features/toast/toast';
@@ -21,7 +20,7 @@ export default function GroupForm(props){
     const { t } = useTranslation();
 
     const groups = useSelector(state => state.task.groups);
-    const asCollection = useIsTester();
+    const asCollection = true;
     // the group's colour: its tasks get a dot in it
     const [color, setColor] = useState(null);
 

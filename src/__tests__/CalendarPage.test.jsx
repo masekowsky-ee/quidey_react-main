@@ -25,6 +25,7 @@ const TASKS = [
     { id: 4, name: 'Finished thing', due: apiDate(2026, 10, 21), prio: 10, done: true, group_ids: [] },
 ]
 const GROUPS = [{ id: 10, name: 'Health' }, { id: 99, name: 'all' }]
+const COLLECTIONS = [{ id: 10, name: 'Health', emoji: null, color: null, items: [{ kind: 'task', id: 1 }] }]
 
 // where the router is, to check the address the calendar writes
 function LocationSpy() {
@@ -36,6 +37,8 @@ function setup(path = '/calendar?date=2026-10-19', tasks = TASKS) {
     const store = configureStore({ reducer: rootReducer })
     store.dispatch(setLanguage('en'))
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks, groups: GROUPS, notes: [] } })
+    // collections took the place of groups: "Health" holds the dentist
+    store.dispatch({ type: 'SET_COLLECTIONS', payload: COLLECTIONS })
     render(
         <Provider store={store}>
             <MemoryRouter initialEntries={[path]}>
@@ -120,12 +123,12 @@ describe('month view', () => {
         expect(screen.getByRole('button', { name: 'Filters (1)' })).toHaveAttribute('aria-expanded', 'true')
     })
 
-    it('filters by group', () => {
+    it('filters by collection (in place of groups)', () => {
         setup()
         // the hidden "all" group is not offered
         fireEvent.click(screen.getByRole('button', { name: 'Filters' }))
         expect(screen.queryByRole('option', { name: 'all' })).not.toBeInTheDocument()
-        fireEvent.change(screen.getByRole('combobox', { name: 'Filter by group' }), { target: { value: '10' } })
+        fireEvent.change(screen.getByRole('combobox', { name: 'Filter by collection' }), { target: { value: 'collection-10' } })
         expect(screen.getByText('Dentist')).toBeInTheDocument()
         expect(screen.queryByText('Report')).not.toBeInTheDocument()
     })

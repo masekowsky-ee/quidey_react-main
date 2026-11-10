@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { showForms } from '../features/settings/settingsAction';
 import { useSheet } from '../features/layout/dragDismiss';
-import { useIsTester } from '../features/auth/tester';
 import TaskForm from './TaskForm.jsx';
 import ReminderForm from './reminders/ReminderForm.jsx';
 
@@ -22,10 +21,9 @@ export default function QuickAdd() {
 }
 
 function QuickAddForm({ sheet, close, reminder }) {
-    const isTester = useIsTester();
     // what was typed goes along when switching between the two forms
-    const [form, setForm] = useState(() => ({ kind: reminder && isTester ? 'reminder' : 'task', text: '' }));
-    if (form.kind === 'reminder' && isTester) {
+    const [form, setForm] = useState(() => ({ kind: reminder ? 'reminder' : 'task', text: '' }));
+    if (form.kind === 'reminder') {
         return <ReminderForm sheet={sheet} initialText={form.text} onDone={close}
             onKind={(kind, text) => setForm({ kind, text })} />;
     }

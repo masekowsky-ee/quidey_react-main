@@ -27,6 +27,8 @@ const tasks = [
 function makeStore(list = tasks) {
     const store = configureStore({ reducer: rootReducer })
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks: list, groups: [], notes: [] } })
+    // collections (in place of groups) already loaded: no request of their own in these tests
+    store.dispatch({ type: 'SET_COLLECTIONS', payload: [] })
     return store
 }
 
@@ -169,7 +171,7 @@ describe('editing a task on Home', () => {
         expect(apiFetch).not.toHaveBeenCalled()
     })
 
-    it('a row stays short: colour, groups and description are set in the editor', () => {
+    it('a row stays short: colour, collections and description are set in the editor', () => {
         home(makeStore())
         const row = screen.getByText('Erste').closest('li')
         expect(within(row).queryByRole('button', { name: /^Farbe/ })).toBeNull()
@@ -178,7 +180,7 @@ describe('editing a task on Home', () => {
         fireEvent.click(within(row).getByRole('button', { name: 'Bearbeiten: Erste' }))
         const dialog = screen.getByRole('dialog', { name: 'Bearbeiten' })
         expect(within(dialog).getByRole('radio', { name: 'Türkis' })).toBeInTheDocument()
-        expect(within(dialog).getByText('Zu Gruppe hinzufügen')).toBeInTheDocument()
+        expect(within(dialog).getByText('In Sammlung legen …')).toBeInTheDocument()
     })
 
     it('deletes a task only on the second click', async () => {

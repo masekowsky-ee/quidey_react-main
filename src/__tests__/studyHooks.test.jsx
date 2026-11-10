@@ -180,12 +180,11 @@ describe('ReplanCard', () => {
         await waitFor(() => expect(calls(`${BASE}/plan`)).toHaveLength(1))
     })
 
-    it('non-testers never see it and trigger no study request', async () => {
+    it('shows for everybody, not only testers', async () => {
         status.goals = [behind(10, 'Statistik II', 90)]
         open(makeStore(false))
         await new Promise(r => setTimeout(r, 20))
-        expect(screen.queryByText(/Plan anpassen/)).toBeNull()
-        expect(apiFetch.mock.calls.filter(([url]) => url.startsWith(BASE))).toHaveLength(0)
+        expect(apiFetch.mock.calls.filter(([url]) => url.startsWith(BASE)).length).toBeGreaterThan(0)
     })
 })
 

@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { COMMUNITY_PATHS, isCommunityPath } from '../community/paths';
 import { openMenu } from '../settings/settingsAction';
 import { PHONE_QUERY } from './breakpoints';
-import { useIsTester } from '../auth/tester';
 
 // Phones: a sideways swipe across the page goes to the tab beside it, in the tab bar's order.
 // Finger to the left: the next tab (Kalender → Fokus); to the right: the one before (Kalender →
@@ -79,7 +78,8 @@ export function useTabSwipe({ enabled = true } = {}) {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const menuOpen = useSelector(state => state.settings.showMenu);
-    const study = Boolean(useIsTester());
+    // the tab bar's order: Lernen fourth (TabBar.jsx)
+    const study = true;
     const current = useRef({ pathname, menuOpen, study });
     // the listeners below are set up once and read the latest of these
     useEffect(() => { current.current = { pathname, menuOpen, study }; }, [pathname, menuOpen, study]);
