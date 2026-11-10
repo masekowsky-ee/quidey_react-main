@@ -74,3 +74,34 @@ export function startDictation(options) {
     options.onEnd?.();
     return () => {};
 }
+
+// ---------- the microphone permission ----------
+// 'granted' | 'denied' | 'prompt' | null (not known: the browser doesn't say)
+export async function microphoneState() {
+    if (isNativeApp()) {
+        const answer = await QuideyVoice.permission().catch(() => null);
+        return answer?.state ?? null;
+    }
+    try {
+        const status = await navigator.permissions?.query({ name: 'microphone' });
+        return status?.state ?? null;
+    } catch {
+        return null;
+    }
+}
+
+// asks for the microphone (shows the browser's / Android's question while it isn't blocked) → the state after
+export async function askForMicrophone() {
+    if (isNativeApp()) {
+        const answer = await QuideyVoice.requestPermission().catch(() => null);
+        return answer?.state ?? null;
+    }
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop());
+    } catch { /* blocked or no microphone: the state below says which */ }
+    return microphoneState();
+}
+
+// the Android app: Android's settings page for Quidey (Berechtigungen → Mikrofon); the web can't do this
+export const openVoiceSettings = () => (isNativeApp() ? QuideyVoice.openSettings().catch(() => {}) : Promise.resolve());

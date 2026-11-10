@@ -107,7 +107,7 @@ describe('dictating into a note', () => {
         const insert = vi.fn()
         const store = configureStore({ reducer: rootReducer })
         store.dispatch(setLanguage('en'))
-        render(<Provider store={store}><DictateButton insert={insert} /></Provider>)
+        render(<Provider store={store}><MemoryRouter><DictateButton insert={insert} /></MemoryRouter></Provider>)
         fireEvent.click(screen.getByRole('button', { name: 'Speak' }))
         expect(current.continuous).toBe(true)
         act(() => { current.say('Die Zelle', false) })
@@ -116,5 +116,46 @@ describe('dictating into a note', () => {
         act(() => { current.say('Die Zelle atmet. Mitochondrien', false) })
         act(() => { current.say('Die Zelle atmet. Mitochondrien machen ATP.', true) })
         expect(insert.mock.calls).toEqual([['Die Zelle atmet.'], [' Mitochondrien machen ATP.']])
+    })
+})
+
+describe('when the microphone is blocked', () => {
+    beforeEach(() => { window.SpeechRecognition = FakeRecognition })
+    afterEach(() => { delete window.SpeechRecognition })
+
+    it('the warning leads to the settings where it can be allowed', async () => {
+        const { default: Toaster } = await import('../components/Toaster')
+        const { MemoryRouter: Router, Routes, Route, useLocation } = await import('react-router-dom')
+        const Where = () => <output data-testid="where">{useLocation().pathname + useLocation().hash}</output>
+        const store = configureStore({ reducer: rootReducer })
+        store.dispatch(setLanguage('de'))
+        render(<Provider store={store}><Router initialEntries={['/']}><Routes><Route path="*" element={<><DictateButton insert={() => {}} /><Toaster /><Where /></>} /></Routes></Router></Provider>)
+        fireEvent.click(screen.getByRole('button', { name: 'Sprechen' }))
+        act(() => { current.onerror?.({ error: 'not-allowed' }) })
+        await act(async () => { fireEvent.click(await screen.findByRole('button', { name: 'Erlauben' })) })
+        expect(screen.getByTestId('where')).toHaveTextContent('/settings#microphone')
+    })
+})
+
+describe('the microphone in the settings', () => {
+    let state
+    afterEach(() => { delete window.SpeechRecognition })
+    beforeEach(() => {
+        window.SpeechRecognition = FakeRecognition
+        state = 'denied'
+        Object.defineProperty(navigator, 'permissions', { configurable: true, value: { query: vi.fn(async () => ({ state, addEventListener() {}, removeEventListener() {} })) } })
+        Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia: vi.fn(async () => { state = 'granted'; return { getTracks: () => [{ stop() {} }] } }) } })
+    })
+
+    it('says it is blocked and how to allow it; asking again shows when it works', async () => {
+        const { default: MicrophoneSettings } = await import('../components/voice/MicrophoneSettings')
+        const store = configureStore({ reducer: rootReducer })
+        store.dispatch(setLanguage('de'))
+        await act(async () => { render(<Provider store={store}><MicrophoneSettings /></Provider>) })
+        expect(screen.getByText(/blockiert/)).toBeInTheDocument()
+        expect(screen.getByText(/Schloss/)).toBeInTheDocument()
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Nochmal fragen' })) })
+        expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({ audio: true })
+        expect(screen.getByText(/darf das Mikrofon benutzen/)).toBeInTheDocument()
     })
 })

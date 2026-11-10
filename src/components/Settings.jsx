@@ -20,6 +20,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useHashTarget } from '../features/layout/hashTarget';
 import { SECTION_AREAS } from '../features/search/places';
 import UntisSettings from './untis/UntisSettings.jsx';
+import MicrophoneSettings from './voice/MicrophoneSettings.jsx';
 import { isNativeApp } from '../features/native/native';
 import { APK_URL, apkOffer, formatSize } from '../features/native/androidApk';
 import { setAnalyticsConsent, useAnalytics } from '../features/native/analytics';
@@ -469,6 +470,9 @@ export default function Settings(){
                     <SettingSection id="notifications" title={t('pushTitle')} description={t('pushHint')}>
                         <PushSettings />
                         <AllDayTimeSetting />
+                    </SettingSection>
+                    <SettingSection id="microphone" title={t('micTitle')} description={t('micHint')}>
+                        <MicrophoneSettings />
                     </SettingSection>
                     <SettingSection id="tour" title={t('tutorial')} description={t('settingsTourHint')}>
                         <SettingRow title={t('settingsTourRow')} hint={t('settingsTourRowHint')}>

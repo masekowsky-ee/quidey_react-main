@@ -4,7 +4,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { voiceSupport, startDictation, speechLang } from '../../features/voice/voice';
+import { voiceSupport, startDictation, speechLang, openVoiceSettings } from '../../features/voice/voice';
+import { isNativeApp } from '../../features/native/native';
+import { useNavigate } from 'react-router-dom';
 import { showToast } from '../../features/toast/toast';
 import { useTranslation } from '../../i18n/useTranslation';
 import Icon from '../icons.jsx';
@@ -13,6 +15,7 @@ import styles from './MicButton.module.css';
 export default function MicButton({ onText, continuous = false, className = '', size = 16, onListening }) {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [listening, setListening] = useState(false);
     const stop = useRef(null);
     const calls = useRef({ onText, onListening });
@@ -32,7 +35,11 @@ export default function MicButton({ onText, continuous = false, className = '', 
             onEnd: () => { stop.current = null; setOn(false); },
             onError: (code) => {
                 if (code === 'no-speech' || code === 'aborted') return;
-                dispatch(showToast(t(code === 'not-allowed' ? 'voiceNotAllowed' : 'voiceFailed'), 'error'));
+                if (code !== 'not-allowed') { dispatch(showToast(t('voiceFailed'), 'error')); return; }
+                // blocked: one tap to where it can be allowed (the app: Android's page; the browser: how to)
+                dispatch(showToast(t('voiceNotAllowed'), 'error', {
+                    action: { label: t('voiceAllow'), run: () => (isNativeApp() ? openVoiceSettings() : navigate('/settings#microphone')) },
+                }));
             },
         });
     };

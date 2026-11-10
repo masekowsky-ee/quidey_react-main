@@ -17,6 +17,7 @@ const SETTINGS = [
     ['notifications', 'pushTitle', 'app'],
     ['notifications', 'allDayReminderTime', 'app'],
     ['install', 'installApp', 'app'],
+    ['microphone', 'micTitle', 'app'],
     ['android', 'androidApp', 'app'],
     ['privacy', 'privacySetting', 'app'],
     ['analytics', 'analyticsSetting', 'app'],
