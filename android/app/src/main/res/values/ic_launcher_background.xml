@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- the dark theme's ground and the default accent (sunset), as in public/icons -->
+    <color name="ic_launcher_background">#0E0D0C</color>
+    <color name="quidey_accent">#FB923C</color>
+</resources>

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchNotes, createNote, updateNote, removeNote, checklistCount } from '../../features/focus/notebook';
 import { fetchFolders, duplicateOf, firstLine } from '../../features/notes/notes';
-import { useIsTester } from '../../features/auth/tester';
 import { showToast } from '../../features/toast/toast';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -20,7 +19,6 @@ import styles from './Notebook.module.css';
 export default function Notebook({ focusTask }) {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
-    const isTester = useIsTester();
     const [notes, setNotes] = useState(null);
     const aiQuota = useAiQuota();
     const [scanning, setScanning] = useState(false);
@@ -33,8 +31,8 @@ export default function Notebook({ focusTask }) {
         fetchNotes().then(setNotes).catch(() => setNotes([]));
     }, []);
     useEffect(() => {
-        if (isTester) fetchFolders().then(setFolders).catch(() => {});
-    }, [isTester]);
+        fetchFolders().then(setFolders).catch(() => {});
+    }, []);
 
     const onChange = useCallback((saved) => {
         setNotes(prev => prev?.map(note => note.id === saved.id ? saved : note) ?? prev);
@@ -82,7 +80,7 @@ export default function Notebook({ focusTask }) {
 
     const open = notes?.find(note => note.id === openId);
     if (open) return <NoteEditor key={open.id} note={open} focusTask={focusTask} onChange={onChange} onDelete={() => deleteNote(open.id)} onClose={() => setOpenId(null)}
-        full={isTester} folders={folders} onTrash={() => trashNote(open.id)} onDuplicate={(note) => newNote({ copy: duplicateOf(note, t('noteCopyWord')) })} />;
+        full folders={folders} onTrash={() => trashNote(open.id)} onDuplicate={(note) => newNote({ copy: duplicateOf(note, t('noteCopyWord')) })} />;
 
     const dateFmt = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short' });
     return (

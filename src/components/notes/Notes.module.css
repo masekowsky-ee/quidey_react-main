@@ -326,6 +326,26 @@
     height: 2rem;
 }
 
+/* "Neuer Ordner" beside "Neue Notiz": a quiet grey folder */
+.folderBtn {
+    composes: iconHover from '../ui.module.css';
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    color: var(--text-muted);
+    background: none;
+    border: 0;
+    border-radius: var(--radius-pill, 999px);
+}
+
+.folderBtn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 1px;
+}
+
 .search {
     flex: 1 1 100%;
     min-width: 0;

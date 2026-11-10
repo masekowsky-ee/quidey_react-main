@@ -1,7 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setShowMenu } from '../../features/settings/settingsAction';
-import { selectIsTester } from '../../features/auth/tester';
 import { selectMenuBadgeCount } from '../../features/inbox/inbox';
 import { selectHasNews } from '../../features/realtime/news';
 import styles from './TopNav.module.css';
@@ -14,11 +13,11 @@ import { selectTaskInviteCount } from '../../features/tasks/taskAction';
 import { selectInboxCount } from '../../features/inbox/inbox';
 import { selectFamilyInviteCount } from '../../features/family/family';
 
-function Tab({ to, end, match, icon, label, count = 0, countLabel, news = false, newsLabel }) {
+function Tab({ to, end, match, icon, label, count = 0, countLabel, news = false, newsLabel, tip }) {
     const { pathname } = useLocation();
     const matched = match?.(pathname);
     return (
-        <NavLink to={to} end={end} data-part="topnav-tab"
+        <NavLink to={to} end={end} data-part="topnav-tab" data-tip={tip}
             className={({ isActive }) => `${styles.tab} ${isActive || matched ? styles.active : ''}`}
             data-active={matched || undefined}>
             <Icon name={icon} className={styles.icon} />
@@ -36,7 +35,6 @@ function Tab({ to, end, match, icon, label, count = 0, countLabel, news = false,
 export default function TopNav({ inline = false }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const isTester = useSelector(selectIsTester);
     const menuBadge = useSelector(selectMenuBadgeCount);
     const hasNews = useSelector(selectHasNews);
     const news = useSelector(state => state.news);
@@ -49,19 +47,19 @@ export default function TopNav({ inline = false }) {
     return (
         <nav className={inline ? styles.inline : styles.bar} aria-label={t('mainNav')} data-part="topnav">
             <div className={styles.tabs}>
-                <Tab to="/" end icon="home" label={t('home')} />
-                <Tab to="/calendar" icon="calendar" label={t('calendar')}
+                <Tab to="/" end icon="home" label={t('home')} tip="nav-home" />
+                <Tab to="/calendar" icon="calendar" label={t('calendar')} tip="nav-calendar"
                     count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
-                <Tab to="/focus" icon="focus" label={t('focusRoom')} />
-                {inline && isTester && <Tab to="/study" icon="book" label={t('studyNav')} />}
-                <Tab to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')}
+                <Tab to="/focus" icon="focus" label={t('focusRoom')} tip="nav-focus" />
+                {inline && <Tab to="/study" icon="book" label={t('studyNav')} tip="nav-study" />}
+                <Tab to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} tip="nav-community"
                     count={inviteCount + friendRequests + familyInvites} countLabel={t('communityCount')}
                     news={news.together || news.social || news.feed} newsLabel={t('menuNews')} />
-                <Tab to="/inbox" icon="inbox" label={t('inbox')} count={inboxCount} countLabel={t('inboxUnread')} />
-                <Tab to="/stats" icon="history" label={t('history')} />
+                <Tab to="/inbox" icon="inbox" label={t('inbox')} tip="nav-inbox" count={inboxCount} countLabel={t('inboxUnread')} />
+                <Tab to="/stats" icon="history" label={t('history')} tip="nav-stats" />
             </div>
             {inline
-                ? <button type="button" className={styles.tab} onClick={() => dispatch(setShowMenu(true))}
+                ? <button type="button" className={styles.tab} onClick={() => dispatch(setShowMenu(true))} data-tip="nav-more"
                     aria-label={menuBadge > 0 ? `${t('more')}, ${menuBadge} ${t('inboxUnread')}` : hasNews ? `${t('more')}, ${t('menuNews')}` : t('more')}>
                     <span>{t('more')}</span>
                     {menuBadge === 0 && hasNews && <span className={styles.dot} aria-hidden="true" />}

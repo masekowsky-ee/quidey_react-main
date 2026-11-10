@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ic_launcher_foreground without the gap in the ring: Android 13+ tints a themed icon in one
+     colour, so a stroke in the background colour would show as part of the logo -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="1.1"
+        android:scaleY="1.1"
+        android:translateX="17.04"
+        android:translateY="21.44">
+        <path
+            android:pathData="M13,27a12,12 0,1 0,24 0a12,12 0,1 0,-24 0"
+            android:strokeColor="@color/quidey_accent"
+            android:strokeWidth="6" />
+        <path
+            android:pathData="M27,32L36,44L54,24"
+            android:strokeColor="@color/quidey_accent"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeWidth="6.5" />
+    </group>
+</vector>

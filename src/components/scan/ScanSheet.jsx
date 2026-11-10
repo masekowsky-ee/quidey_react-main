@@ -1,5 +1,5 @@
 // "Scannen": study material read by the AI (features/ai/scan.js, one scan a day for now) into a study
-// plan (testers: Lernen), notes and tasks/events. Three steps in one sheet: what to read and what to
+// plan (Lernen), notes and tasks/events. Three steps in one sheet: what to read and what to
 // make → reading → what was found, each part kept or left out → made through the usual routes.
 // onDone({ notes, entries, plan }) says how much was made.
 
@@ -12,7 +12,6 @@ import { filesToSource, scanMaterial } from '../../features/ai/scan';
 import { createNote, fetchNotes } from '../../features/focus/notebook';
 import { addTask } from '../../features/tasks/taskAction';
 import { fetchSubjects, saveSubject, createGoal, fetchStudySettings } from '../../features/study/study';
-import { useIsTester } from '../../features/auth/tester';
 import { showToast } from '../../features/toast/toast';
 import { fill, dueText } from '../../features/helperFunction';
 import { durationText, timeText } from '../../features/calendar/calendar';
@@ -32,7 +31,6 @@ export default function ScanSheet({ onClose, onDone }) {
     const closeRef = useRef(null);
     const sheet = useSheet(onClose);
     const { dismiss } = sheet;
-    const isTester = useIsTester();
     const quota = useAiQuota();
     const scansLeft = left(quota?.scan);
 
@@ -41,7 +39,7 @@ export default function ScanSheet({ onClose, onDone }) {
     const [text, setText] = useState('');
     const [notes, setNotes] = useState(null);
     const [noteId, setNoteId] = useState('');
-    const [wants, setWants] = useState(() => new Set([...(isTester ? ['plan'] : []), 'notes', 'entries']));
+    const [wants, setWants] = useState(() => new Set(['plan', 'notes', 'entries']));
     const [step, setStep] = useState('pick');
     const [error, setError] = useState(null);
     const [result, setResult] = useState(null);
@@ -112,7 +110,7 @@ export default function ScanSheet({ onClose, onDone }) {
                 }));
                 made.entries += 1;
             }
-            if (result.plan && keep.plan && isTester) {
+            if (result.plan && keep.plan) {
                 let id = Number(subjectId);
                 if (subjectId === 'new' || !id) {
                     const subject = await dispatch(saveSubject(null, { name: result.plan.subject || result.plan.name }));
@@ -136,7 +134,7 @@ export default function ScanSheet({ onClose, onDone }) {
     }
 
     const back = quota?.resetsAt ? new Date(quota.resetsAt) : null;
-    const planNeedsDay = result?.plan && keep.plan && isTester && !planDue;
+    const planNeedsDay = result?.plan && keep.plan && !planDue;
 
     return createPortal(
         <div className={frame.settingsBackdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
@@ -175,7 +173,7 @@ export default function ScanSheet({ onClose, onDone }) {
 
                         <fieldset className={styles.wants}>
                             <legend>{t('scanMake')}</legend>
-                            {[...(isTester ? ['plan'] : []), 'notes', 'entries'].map(want =>
+                            {['plan', 'notes', 'entries'].map(want =>
                                 <label key={want} className={styles.want}>
                                     <input type="checkbox" checked={wants.has(want)} onChange={() => toggleWant(want)} />
                                     <span>{t(`scanWant_${want}`)}</span>
@@ -196,7 +194,7 @@ export default function ScanSheet({ onClose, onDone }) {
                 {(step === 'preview' || step === 'making') && result &&
                     <section className={styles.body} aria-label={t('scanFound')}>
                         {!result.plan && !result.notes && result.entries.length === 0 && <p className={styles.notice}>{t('scanNothing')}</p>}
-                        {result.plan && isTester &&
+                        {result.plan &&
                             <div className={styles.part}>
                                 <label className={styles.partHead}>
                                     <input type="checkbox" checked={keep.plan} onChange={() => setKeep(prev => ({ ...prev, plan: !prev.plan }))} />

@@ -16,7 +16,7 @@ export function KindSwitch({ value, onChange, kinds = ['task', 'event'] }) {
         <fieldset className={kinds.length > 2 ? styles.kindThree : styles.kind}>
             <legend className={styles.srOnly}>{t('kindLegend')}</legend>
             {kinds.map(kind => (
-                <label key={kind} className={value === kind ? styles.kindOn : styles.kindOption}>
+                <label key={kind} className={value === kind ? styles.kindOn : styles.kindOption} data-tip={kind === 'reminder' ? 'kind-reminder' : undefined}>
                     <input type="radio" name={name} value={kind} checked={value === kind} onChange={() => onChange(kind)} />
                     <span className={styles.kindName}>{t(`kind_${kind}`)}</span>
                     <small className={styles.kindHint}>{t(`kind_${kind}_hint`)}</small>

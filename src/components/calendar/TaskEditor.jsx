@@ -15,7 +15,6 @@ import { endOf, endDayOffset, fromEnd } from '../../features/tasks/eventTimes';
 import { EventTypePicker, KindSwitch } from '../task/KindFields.jsx';
 import { matchEventType } from '../../features/tasks/kinds';
 import { createdText } from '../../features/tasks/created';
-import { selectIsTester } from '../../features/auth/tester';
 import CollectionPicker from '../collections/CollectionPicker.jsx';
 import Icon from './icons.jsx';
 
@@ -109,7 +108,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
     const focusedSeconds = useSelector(state => selectFocusByTask(state)[task.id] ?? 0);
-    const showCollections = useSelector(selectIsTester) && personal && Number.isInteger(task.id);
+    const showCollections = personal && Number.isInteger(task.id);
 
     useEffect(() => { nameRef.current?.focus(); }, []);
 

@@ -20,7 +20,6 @@ import TaskInvites from './task/TaskInvites.jsx';
 import { Bone, Skeleton, SkeletonRows } from './skeleton/Skeleton.jsx';
 
 import Icon from './icons';
-import { useIsTester } from '../features/auth/tester';
 import ReminderList from './reminders/ReminderList.jsx';
 const TABS = ['messages', 'requests', 'notices', 'reminders'];
 const SEEN_DELAY_MS = 1500;
@@ -370,9 +369,7 @@ function Notices() {
 // ---------- reminders (worked out from the tasks) ----------
 
 function Reminders() {
-    const isTester = useIsTester();
-    if (!isTester) return <TaskReminders />;
-    // testers: their own reminders on top, the tasks' below
+    // my own reminders on top, the tasks' below
     return (
         <>
             <ReminderList />

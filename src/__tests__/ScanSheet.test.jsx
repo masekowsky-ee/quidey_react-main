@@ -67,13 +67,12 @@ describe('scanning study material', () => {
         open()
         expect(await screen.findByText(/noch 1 heute/)).toBeInTheDocument()
         expect(screen.getByText(/an Anthropic/)).toBeInTheDocument()
-        // the study plan only where there is Lernen (testers)
-        expect(screen.queryByRole('checkbox', { name: 'Lernplan' })).toBeNull()
-        expect(screen.getByRole('checkbox', { name: 'Notizen' })).toBeChecked()
+        for (const want of ['Lernplan', 'Notizen', 'Termine & Aufgaben']) expect(screen.getByRole('checkbox', { name: want })).toBeChecked()
     })
 
     it('shows what it found and makes only what is kept', async () => {
         const { onDone } = open()
+        fireEvent.click(await screen.findByRole('checkbox', { name: 'Lernplan' }))
         await pasteAndScan()
         expect(posts('/api/ai/scan')[0]).toEqual({ wants: ['notes', 'entries'], source: { kind: 'text', text: 'Klausur Biologie am 2.12., Themen: Zellatmung, Fotosynthese' } })
         const preview = screen.getByRole('region', { name: 'Gefunden' })
@@ -86,8 +85,8 @@ describe('scanning study material', () => {
         expect(onDone).toHaveBeenCalledWith(expect.objectContaining({ notes: 1, entries: 1, plan: 0 }))
     })
 
-    it('testers can keep the study plan, in a subject they have', async () => {
-        open({ isTester: true })
+    it('the study plan goes into a subject I have', async () => {
+        open()
         expect(await screen.findByRole('checkbox', { name: 'Lernplan' })).toBeChecked()
         fireEvent.click(screen.getByRole('checkbox', { name: 'Notizen' }))
         fireEvent.click(screen.getByRole('checkbox', { name: 'Termine & Aufgaben' }))

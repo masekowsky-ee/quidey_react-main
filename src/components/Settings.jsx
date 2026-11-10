@@ -23,9 +23,9 @@ import UntisSettings from './untis/UntisSettings.jsx';
 import { isNativeApp } from '../features/native/native';
 import { APK_URL, apkOffer, formatSize } from '../features/native/androidApk';
 import { setAnalyticsConsent, useAnalytics } from '../features/native/analytics';
-import { useIsTester } from '../features/auth/tester';
 import AlarmSettings from './reminders/AlarmSettings.jsx';
 import StudySettings from './study/StudySettings.jsx';
+import { resetTips } from '../features/tips/tips';
 
 const LANGUAGES = [
     { code: 'de', label: 'german' },
@@ -115,8 +115,7 @@ function PushSettings() {
     useEffect(() => { refreshPush(); }, []);
     const on = push.status === 'on';
     // the study kind belongs to the testers' feature
-    const isTester = useIsTester();
-    const kinds = PUSH_KINDS.filter(kind => kind !== 'study' || isTester);
+    const kinds = PUSH_KINDS;
 
     return (
         <>
@@ -242,6 +241,22 @@ function AllDayTimeSetting() {
     );
 }
 
+// The feature tips (components/tips/FeatureTips.jsx): every one once more, from the next page on
+function TipsSetting() {
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const reset = () => dispatch(resetTips())
+        .then(() => dispatch(showToast(t('settingsTipsResetDone'))))
+        .catch(() => dispatch(showToast(t('settingsTipsResetFailed'), 'error')));
+    return (
+        <SettingRow title={t('settingsTipsRow')} hint={t('settingsTipsRowHint')}>
+            <button type="button" className={styles.tourButton} onClick={reset}>
+                {t('settingsTipsReset')}
+            </button>
+        </SettingRow>
+    );
+}
+
 export default function Settings(){
     const { t } = useTranslation();
     const language = useSelector((state) => state.settings.language);
@@ -276,7 +291,6 @@ export default function Settings(){
     const apk = apkOffer();
     // the Android app with Firebase: may it count how it is used
     const analytics = useAnalytics();
-    const isTester = useIsTester();
     const dispatch = useDispatch();
     const { hash, key } = useLocation();
     const [chosenArea, setArea] = useState(() => areaFromHash(hash));
@@ -446,10 +460,9 @@ export default function Settings(){
                         <UntisSettings />
                     </SettingSection>
 
-                    {isTester &&
-                        <SettingSection id="study" title={t('studySettingsTitle')} description={t('studySettingsHint')}>
-                            <StudySettings />
-                        </SettingSection>}
+                    <SettingSection id="study" title={t('studySettingsTitle')} description={t('studySettingsHint')}>
+                        <StudySettings />
+                    </SettingSection>
                 </>}
 
                 {area === 'app' && <>
@@ -463,9 +476,10 @@ export default function Settings(){
                                 {t('settingsTourStart')}
                             </button>
                         </SettingRow>
+                        <TipsSetting />
                     </SettingSection>
-                    {/* testers' reminders ring like an alarm clock in the Android app: what that needs */}
-                    {isTester && isNativeApp() &&
+                    {/* reminders ring like an alarm clock in the Android app: what that needs */}
+                    {isNativeApp() &&
                         <SettingSection id="alarms" title={t('reminderAlarmSetting')} description={t('reminderAlarmHint')}>
                             <AlarmSettings />
                         </SettingSection>}

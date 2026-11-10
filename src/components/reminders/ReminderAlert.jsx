@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
-import { useIsTester } from '../../features/auth/tester';
 import { selectReminders, dueOccurrence, reminderDone, snoozeReminder } from '../../features/reminders/reminders';
 import { ringsNatively } from '../../features/native/alarms';
 import { playSound } from '../../features/settings/sound';
@@ -37,14 +36,13 @@ const hhmm = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(dat
 export default function ReminderAlert() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const isTester = useIsTester();
     const list = useSelector(selectReminders);
     const [ringing, setRinging] = useState(null); // { reminder, at, key }
     const [busy, setBusy] = useState(false);
     const doneRef = useRef(null);
 
     const check = useCallback(() => {
-        if (!isTester || ringsNatively() || document.visibilityState === 'hidden') return;
+        if (ringsNatively() || document.visibilityState === 'hidden') return;
         const now = new Date();
         const seen = readSeen();
         for (const reminder of list) {
@@ -55,7 +53,7 @@ export default function ReminderAlert() {
             setRinging(current => current?.key === key ? current : { reminder, at, key });
             return;
         }
-    }, [isTester, list]);
+    }, [list]);
 
     useEffect(() => {
         // the first look right after this render (the list may just have come)

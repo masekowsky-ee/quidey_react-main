@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Quidey logo (public/quidey-logo.svg) on the 108dp canvas of an adaptive icon, inside its
+     66dp safe zone. The SVG's mask (the gap in the ring where the tick crosses it) is drawn as a
+     stroke in the background colour, since vector drawables have no masks. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="1.1"
+        android:scaleY="1.1"
+        android:translateX="17.04"
+        android:translateY="21.44">
+        <path
+            android:pathData="M13,27a12,12 0,1 0,24 0a12,12 0,1 0,-24 0"
+            android:strokeColor="@color/quidey_accent"
+            android:strokeWidth="6" />
+        <path
+            android:pathData="M27,32L36,44"
+            android:strokeColor="@color/ic_launcher_background"
+            android:strokeLineCap="round"
+            android:strokeWidth="10.5" />
+        <path
+            android:pathData="M27,32L36,44L54,24"
+            android:strokeColor="@color/quidey_accent"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeWidth="6.5" />
+    </group>
+</vector>

@@ -134,8 +134,9 @@ describe('formatHours', () => {
 })
 
 describe('study area', () => {
-    it('is a tester feature with texts in both languages', () => {
-        expect(TEST_FEATURES.find(f => f.id === 'study')).toMatchObject({ to: '/study', testerOnly: true })
+    it('is listed among the features in test (out for everybody) with texts in both languages', () => {
+        expect(TEST_FEATURES.find(f => f.id === 'study')).toMatchObject({ to: '/study' })
+        expect(TEST_FEATURES.find(f => f.id === 'study').testerOnly).toBeUndefined()
         for (const language of ['de', 'en']) {
             expect(translations[language].testerFeature_study).toBeTruthy()
             expect(translations[language].testerFeatureHint_study).toBeTruthy()

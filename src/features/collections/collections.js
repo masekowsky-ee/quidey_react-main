@@ -8,7 +8,6 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiFetch } from '../helperFunction';
-import { selectIsTester } from '../auth/tester';
 
 const SET_COLLECTIONS = 'SET_COLLECTIONS';
 const COLLECTION_SAVED = 'COLLECTION_SAVED';
@@ -42,8 +41,10 @@ const saved = (dispatch) => (collection) => {
 // one request at a time: every task row's labels ask for them when they first show
 let loading = null;
 export const fetchCollections = () => (dispatch) => {
-    loading ??= apiFetch('/api/tester/collections')
-        .then(list => {
+    // (an answer that isn't a list, an older server say, counts as none)
+    loading ??= Promise.resolve(apiFetch('/api/tester/collections'))
+        .then(answer => {
+            const list = Array.isArray(answer) ? answer : [];
             dispatch({ type: SET_COLLECTIONS, payload: list });
             return list;
         })
@@ -95,19 +96,18 @@ export function collectionContents(collection, tasks, notes) {
     };
 }
 
-// loads my collections once (testers only; for everybody else the list stays empty)
+// loads my collections once
 export function useCollections() {
     const dispatch = useDispatch();
-    const isTester = useSelector(selectIsTester);
     const loaded = useSelector(selectCollectionsLoaded);
     useEffect(() => {
-        if (isTester && !loaded) dispatch(fetchCollections()).catch(() => {});
-    }, [isTester, loaded, dispatch]);
+        if (!loaded) dispatch(fetchCollections()).catch(() => {});
+    }, [loaded, dispatch]);
     return useSelector(selectCollections);
 }
 
-// ---------- in place of groups (testers) ----------
-// For testers collections take the place of groups: Home's chips and list, a task's labels, the
+// ---------- in place of groups ----------
+// Collections take the place of groups: Home's chips and list, a task's labels, the
 // calendar's filter, the new-task form and the statistics (their groups were taken over once by
 // the server). A collection then goes around as a group:
 // { id: 'collection-<id>', collection: true, collectionId, name, emoji, color }.
@@ -119,29 +119,18 @@ export const asGroup = (collection) => ({
 // the ids of the tasks (events among them) in a collection
 export const taskIdsIn = (collection) => new Set(collection.items.filter(item => item.kind === 'task').map(item => item.id));
 
-// what tasks are sorted into here: my groups, or for testers my collections (as groups).
+// what tasks are sorted into here: my collections (as groups; the server took my groups over once).
 // { collections, groups: [group], groupsOf(task): [group] }
 export function useTaskGroups() {
-    const isTester = useSelector(selectIsTester);
     const collections = useCollections();
-    const groups = useSelector(state => state.task.groups);
     return useMemo(() => {
-        if (!isTester) {
-            // a group named "all" from older accounts is "all" itself
-            const own = groups.filter(group => group.name !== 'all');
-            return {
-                collections: false,
-                groups: own,
-                groupsOf: (task) => (task.group_ids ?? []).map(id => own.find(group => group.id === id)).filter(Boolean),
-            };
-        }
         const list = collections.map(asGroup);
         const byTask = new Map();
         collections.forEach((collection, index) => {
             for (const id of taskIdsIn(collection)) byTask.set(id, [...(byTask.get(id) ?? []), list[index]]);
         });
         return { collections: true, groups: list, groupsOf: (task) => byTask.get(task.id) ?? [] };
-    }, [isTester, collections, groups]);
+    }, [collections]);
 }
 
 // a new task goes into the group shown where it was made: a collection takes it after it is made

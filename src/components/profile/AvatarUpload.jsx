@@ -54,7 +54,7 @@ export default function AvatarUpload() {
     return (
         <div className={styles.field}>
             <span className={styles.fieldLabelRow}>{t('avatarTitle')}</span>
-            <div className={styles.avatarUpload}>
+            <div className={styles.avatarUpload} data-tip="avatar-upload">
                 <span className={styles.avatarUploadPreview} aria-hidden="true">
                     {current ? <img src={current} alt="" /> : <Icon name="image" size={22} />}
                 </span>

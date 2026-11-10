@@ -123,12 +123,11 @@ describe('reminders in the app (testers)', () => {
         expect(JSON.parse(apiFetch.mock.calls[0][1].body)).toEqual(expect.objectContaining({ text: 'Tabletten', days: [1, 5] }))
     })
 
-    it('nobody else gets the reminder choice', () => {
+    it('everybody gets the reminder choice, not only testers', () => {
         const store = makeStore({ isTester: false })
         store.dispatch(showForms('reminder'))
         wrap(<QuickAdd />, store)
-        expect(screen.getByLabelText('Name')).toBeInTheDocument()
-        expect(screen.queryByLabelText(/Erinnerung/)).toBeNull()
+        expect(screen.getAllByLabelText(/Erinnerung/).length).toBeGreaterThan(0)
     })
 
     it('the inbox lists mine; a due one can be marked done', async () => {

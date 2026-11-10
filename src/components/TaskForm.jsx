@@ -30,7 +30,6 @@ import Icon from './icons';
 import MicButton from './voice/MicButton.jsx';
 import SheetGrabber from './SheetGrabber.jsx';
 import { useFocusOnArrival } from '../features/layout/dragDismiss';
-import { useIsTester } from '../features/auth/tester';
 const EMPTY_EXTRAS = { reminders: [], reminder_email: false, location: '', link: '', details: '', repeat: null, repeat_left: null };
 
 // New task or event. A task needs only its name; optionally a day and time (no time: the whole
@@ -52,7 +51,6 @@ export default function TaskForm(props){
     // onReminder(name): testers' "Erinnerung" choice, QuickAdd swaps in the reminder form;
     // initialKind / initialName: coming back from there
     const {setCreateTask, sheet, onReminder, initialKind = 'task', initialName = '', initialDue = '', initialTime = '', target = null, group} = props;
-    const isTester = useIsTester();
     const nameRef = useRef(null);
     useFocusOnArrival(nameRef);
 
@@ -155,7 +153,7 @@ export default function TaskForm(props){
         try {
             const entry = await readLineWithAi(text);
             setAiState(null);
-            if (entry.kind === 'reminder' && onReminder && isTester) { onReminder(text); return; }
+            if (entry.kind === 'reminder' && onReminder) { onReminder(text); return; }
             setName(entry.name);
             if (entry.due) setDue(entry.due);
             if (entry.time) setTime(entry.time);
@@ -293,7 +291,7 @@ export default function TaskForm(props){
                 <p className={styles.shareHint}>{fill(t('createInCollection'), { name: collection.name })}</p>}
             <form className={`${styles.form}`} onSubmit={handleSubmit} noValidate>
                 {(!target || target.events) &&
-                <KindSwitch value={effectiveKind} kinds={onReminder && isTester && !elsewhere ? ['task', 'event', 'reminder'] : undefined}
+                <KindSwitch value={effectiveKind} kinds={onReminder && !elsewhere ? ['task', 'event', 'reminder'] : undefined}
                     onChange={(next) => {
                         if (next === 'reminder') { onReminder(name); return; }
                         setKind(next); setKindByHand(true); followName(name, next);
@@ -315,7 +313,7 @@ export default function TaskForm(props){
                         <button type="button" className={styles.quickIgnore} onClick={() => setIgnoreQuick(true)}>{t('quickAddIgnore')}</button>
                     </p>}
                 {/* "Erinnere mich …": testers make a reminder of it */}
-                {parsed.kind === 'reminder' && onReminder && isTester && !elsewhere && !ignoreQuick &&
+                {parsed.kind === 'reminder' && onReminder && !elsewhere && !ignoreQuick &&
                     <button type="button" className={styles.typeHint} onClick={() => onReminder(stripFound(name, parsed.found, ['asReminder']))}>
                         <Icon name="alarm" size={14} /> {t('quickAddAsReminder')}
                     </button>}

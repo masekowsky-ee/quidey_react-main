@@ -64,9 +64,9 @@ beforeEach(() => {
 describe('access state', () => {
     it('is unknown until the server answers, and reset on logout', () => {
         let state = authReducer(undefined, { type: '@@INIT' })
-        expect(state.access).toEqual({ checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null, allDayReminderTime: '12:00', tourSeen: true, userId: null, pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false, usageConsent: { choice: null, at: null, version: null } })
+        expect(state.access).toEqual({ checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null, allDayReminderTime: '12:00', tourSeen: true, userId: null, savedColors: [], tipsSeen: [], tipsOff: false, pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false, usageConsent: { choice: null, at: null, version: null } })
         state = authReducer(state, { type: SET_ACCESS, payload: { isPro: false, betaRequest: pending } })
-        expect(state.access).toEqual({ checked: true, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: pending, allDayReminderTime: '12:00', tourSeen: true, userId: null, pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false, usageConsent: { choice: null, at: null, version: null } })
+        expect(state.access).toEqual({ checked: true, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: pending, allDayReminderTime: '12:00', tourSeen: true, userId: null, savedColors: [], tipsSeen: [], tipsOff: false, pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false, usageConsent: { choice: null, at: null, version: null } })
         state = authReducer(state, { type: LOGOUT })
         expect(state.access.checked).toBe(false)
     })
@@ -76,7 +76,7 @@ describe('access state', () => {
         apiFetch.mockResolvedValue(pending)
         await store.dispatch(requestBetaAccess('I want to plan my study group'))
         expect(apiFetch).toHaveBeenCalledWith('/api/beta-requests', { method: 'POST', body: JSON.stringify({ reason: 'I want to plan my study group' }) })
-        expect(store.getState().auth.access).toEqual({ checked: true, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: pending, allDayReminderTime: '12:00', tourSeen: true, userId: null, pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false, usageConsent: { choice: null, at: null, version: null } })
+        expect(store.getState().auth.access).toEqual({ checked: true, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: pending, allDayReminderTime: '12:00', tourSeen: true, userId: null, savedColors: [], tipsSeen: [], tipsOff: false, pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false, usageConsent: { choice: null, at: null, version: null } })
     })
 })
 

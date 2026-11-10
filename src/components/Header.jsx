@@ -88,7 +88,7 @@ export default function Header(){
                         <TeamWorkPill />
                         {commandBar &&
                             <button type="button" className={styles.commandBtn} onClick={openCommands}
-                                aria-label={`${t('commandOpen')} (${t('commandShortcut')})`} aria-keyshortcuts="Control+K Meta+K">
+                                aria-label={`${t('commandOpen')} (${t('commandShortcut')})`} aria-keyshortcuts="Control+K Meta+K" data-tip="search">
                                 <Icon name="search" size={16} />
                                 <span className={styles.commandText}>{t('commandPlaceholder')}</span>
                                 <kbd className={styles.commandKbd}>{t('commandShortcut')}</kbd>

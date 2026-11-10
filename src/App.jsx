@@ -36,6 +36,7 @@ import ReminderAlert from './components/reminders/ReminderAlert.jsx'
 import { useAvatarRealtime } from './features/profile/avatars.js'
 import Toaster from './components/Toaster.jsx';
 import Tutorial from './components/Tutorial.jsx';
+import FeatureTips from './components/tips/FeatureTips.jsx';
 import DeleteScopeDialog from './components/task/DeleteScopeDialog.jsx';
 import PushOffer from './components/PushOffer.jsx';
 import OnboardingPrompts from './components/onboarding/OnboardingPrompts.jsx';
@@ -322,6 +323,7 @@ function App(){
         <CustomError/>
         <Toaster/>
         <Tutorial/>
+        <FeatureTips/>
         <DeleteScopeDialog/>
         <PushOffer/>
         <OnboardingPrompts/>
@@ -349,12 +351,12 @@ function App(){
           <Route path="/routines" element={<Routines/>} />
           <Route path="/routines/:id/run" element={<Routines/>} />
           {/* testers: the notes area, and collections of tasks, events and notes */}
-          <Route path="/notes" element={<TesterOnly fallback={<Navigate to="/focus" replace />}><NotesPage/></TesterOnly>} />
-          <Route path="/collections" element={<TesterOnly fallback={<Navigate to="/" replace />}><Collections/></TesterOnly>} />
-          <Route path="/collections/:id" element={<TesterOnly fallback={<Navigate to="/" replace />}><Collections/></TesterOnly>} />
-          <Route path="/study" element={<TesterOnly fallback={<Navigate to="/" replace />}><StudyPage/></TesterOnly>} />
-          <Route path="/study/goals/:id" element={<TesterOnly fallback={<Navigate to="/" replace />}><StudyPage/></TesterOnly>} />
-          <Route path="/study/:subjectId" element={<TesterOnly fallback={<Navigate to="/" replace />}><StudyPage/></TesterOnly>} />
+          <Route path="/notes" element={<NotesPage/>} />
+          <Route path="/collections" element={<Collections/>} />
+          <Route path="/collections/:id" element={<Collections/>} />
+          <Route path="/study" element={<StudyPage/>} />
+          <Route path="/study/goals/:id" element={<StudyPage/>} />
+          <Route path="/study/:subjectId" element={<StudyPage/>} />
           <Route path="/stats" element={<Stats />} />
           {/* the old address of the statistics (bookmarks, ?tab=done links) */}
           <Route path="/history" element={<Navigate to={{ pathname: '/stats', search: location.search }} replace />} />

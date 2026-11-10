@@ -18,6 +18,7 @@ import Icon from './icons';
 import TourPreview from './tour/TourPreview';
 import SheetGrabber from './SheetGrabber.jsx';
 import { useSheet } from '../features/layout/dragDismiss';
+import { markTipSeen } from '../features/tips/tips';
 
 // The chapters of the tour, in the order a student meets them: plan, focus, see the week, grow,
 // do it with friends, look back, make it yours. Texts per step (tourTexts.js): tut_<id>_short,
@@ -58,8 +59,8 @@ function useNavPlace() {
 }
 
 // The intro tour: one card per chapter, each with a small scene of the page it is about, a few
-// tips and a way straight there. Opens by itself once for a new account (access.tourSeen is false
-// until it is closed, on any device), and any time from Settings → App. Closing that first one
+// tips and a way straight there. Opened from Settings → App and the command bar (a new account
+// gets the feature tips instead; access.tourSeen is set for it at once). Closing that first one
 // without picking a way out asks what to do first (onboarding/NextSteps). Arrow keys, the dots, the chapter chips or a swipe
 // move through it.
 export default function Tutorial() {
@@ -89,12 +90,14 @@ export default function Tutorial() {
     const step = steps[current];
     const last = current === steps.length - 1;
 
-    // a new account: show the tour once
+    // a new account: the feature tips (components/tips/FeatureTips.jsx) show it around now, the tour
+    // waits in Settings → App; its questions of the first days start all the same
     useEffect(() => {
         if (!username || tourSeen) return;
-        firstTour.current = true;
         startOnboarding(username);
-        dispatch(setShowTutorial(true));
+        dispatch(markTourSeen());
+        // "Sozial ist jetzt unter Mehr" is news only to who knew it in the tab bar
+        dispatch(markTipSeen('navMoreSocial'));
     }, [username, tourSeen, dispatch]);
 
     // focus goes to the main button, so Enter walks through the tour

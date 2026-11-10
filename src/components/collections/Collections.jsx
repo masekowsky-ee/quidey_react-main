@@ -78,7 +78,7 @@ function CollectionList() {
                 <Link to="/notes" className={styles.ghostLink}><Icon name="note" size={16} /> {t('notesTitle')}</Link>
             </header>
 
-            <form className={styles.newCollection} onSubmit={create}>
+            <form className={styles.newCollection} onSubmit={create} data-tip="collection-new">
                 <select value={emoji} onChange={e => setEmoji(e.target.value)} aria-label={t('collectionEmoji')}>
                     {COLLECTION_EMOJIS.map(item => <option key={item} value={item}>{item}</option>)}
                 </select>

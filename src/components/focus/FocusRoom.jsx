@@ -52,7 +52,7 @@ export default function FocusRoom() {
                 <div className={styles.headActions}>
                     {/* calm mode hides the navigation while the round runs: the one way out */}
                     {calm && <Link to="/" className={styles.ghostLink}><Icon name="release" size={16} /> {t('focusCalmLeave')}</Link>}
-                    <button type="button" className={styles.ghostLink} onClick={() => setSettings(true)} aria-haspopup="dialog">
+                    <button type="button" className={styles.ghostLink} onClick={() => setSettings(true)} aria-haspopup="dialog" data-tip="focus-settings">
                         <Icon name="settings" size={16} /> {t('focusSettings')}
                     </button>
                 </div>

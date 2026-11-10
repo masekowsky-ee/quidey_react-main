@@ -8,8 +8,8 @@ import GoalView from './GoalView.jsx';
 import GoalSheet from './GoalSheet.jsx';
 import PlanPreview from './PlanPreview.jsx';
 
-// /study (subjects), /study/:subjectId (its goals), /study/goals/:id (one goal). Wrapped in
-// TesterOnly by App. The sheets hang on query parameters: ?new=goal (create sheet, on the subject
+// /study (subjects), /study/:subjectId (its goals), /study/goals/:id (one goal).
+// For everybody (it was tester only until 2026-11-10). The sheets hang on query parameters: ?new=goal (create sheet, on the subject
 // list and a subject's page) and ?replan=1 (plan preview, on every study page). Closing removes them.
 export default function StudyPage() {
     const dispatch = useDispatch();

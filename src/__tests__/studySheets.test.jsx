@@ -34,11 +34,19 @@ const previewOf = (extra = {}) => ({
             changes: [
                 { type: 'new', partName: 'Grenzwerte', to: { date: inDays(2), time: '15:00' }, minutes: 45 },
                 { type: 'new', partName: 'Ableitungen', to: { date: inDays(3), time: null }, minutes: 45 },
+            ],
+            sessions: [
+                { key: 0, partId: 200, partName: 'Grenzwerte', date: inDays(2), time: '15:00', minutes: 45, change: 'new' },
+                { key: 1, partId: 201, partName: 'Ableitungen', date: inDays(3), time: null, minutes: 45, change: 'new' },
             ] },
         { goalId: 11, name: 'Abgabe Übung', summary: { moved: 1, added: 0, dropped: 1, unchanged: 2 },
             changes: [
                 { type: 'moved', partName: 'Aufgabe 1', from: { date: inDays(2), time: '16:00' }, to: { date: inDays(4), time: '17:00' }, minutes: 45 },
                 { type: 'dropped', partName: 'Aufgabe 2', from: { date: inDays(5), time: null }, minutes: 45 },
+            ],
+            sessions: [
+                { key: 2, partId: 110, partName: 'Aufgabe 1', date: inDays(4), time: '17:00', minutes: 45, change: 'moved', from: { date: inDays(2), time: '16:00' } },
+                { key: 3, partId: 112, partName: 'Aufgabe 3', date: inDays(6), time: null, minutes: 45, change: 'same' },
             ] },
     ],
     ...extra,
@@ -331,18 +339,21 @@ describe('create sheet', () => {
 })
 
 describe('plan preview', () => {
-    it('opens with ?replan=1, groups by goal with summary, rows, shortfall; Übernehmen applies and closes', async () => {
+    it('opens with ?replan=1, an agenda per goal with summary, sessions by day, shortfall; Übernehmen applies and closes', async () => {
         open('/study/goals/20?replan=1')
         const dialog = await screen.findByRole('dialog')
         await within(dialog).findByText('Abgabe Übung')
         const first = within(dialog).getByRole('group', { name: 'Klausur Analysis' })
         expect(within(first).getByText('2 neu')).toBeTruthy()
         expect(within(first).getByText(/Es fehlen 3 h bis zur Klausur: mehr Lernzeiten freigeben oder Themen kürzer schätzen\?/)).toBeTruthy()
-        expect(within(first).getByText(/neu: .* 15:00/)).toBeTruthy()
+        expect(within(first).getByRole('button', { name: /^Grenzwerte, .* 15:00, neu\. Verschieben$/ })).toBeTruthy()
+        expect(within(first).getByText('15:00 · 45 Min.')).toBeTruthy()
         const second = within(dialog).getByRole('group', { name: 'Abgabe Übung' })
         expect(within(second).getByText('1 Sitzung verschoben · 1 entfällt')).toBeTruthy()
-        expect(within(second).getByText(/16:00 → .* 17:00/)).toBeTruthy()
-        expect(within(second).getByText('entfällt', { selector: 'span' })).toBeTruthy()
+        expect(within(second).getByText(/^verschoben, vorher .* 16:00$/)).toBeTruthy()
+        expect(within(second).getByRole('button', { name: /^Aufgabe 3, / })).toBeTruthy()
+        expect(within(second).getByText('1 entfällt')).toBeTruthy()
+        expect(within(second).getByText('Aufgabe 2')).toBeTruthy()
         expect(within(second).queryByText(/Es fehlen/)).toBeNull()
         fireEvent.click(within(dialog).getByRole('button', { name: 'Übernehmen' }))
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
@@ -353,6 +364,7 @@ describe('plan preview', () => {
     it('a 409 shows the changed-plan line and the fresh rows without closing', async () => {
         const fresh = previewOf({ inputHash: 'b'.repeat(64) })
         fresh.goals[0].changes = [{ type: 'new', partName: 'Neues Thema', to: { date: inDays(6), time: '09:00' }, minutes: 45 }]
+        fresh.goals[0].sessions = [{ key: 0, partId: 200, partName: 'Neues Thema', date: inDays(6), time: '09:00', minutes: 45, change: 'new' }]
         replanAnswers = [Object.assign(new Error('changed'), { status: 409, code: 'plan_changed', data: { code: 'plan_changed', preview: fresh } })]
         open('/study/goals/20?replan=1')
         const dialog = await screen.findByRole('dialog')
@@ -363,6 +375,32 @@ describe('plan preview', () => {
         fireEvent.click(within(dialog).getByRole('button', { name: 'Übernehmen' }))
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
         expect(bodyOf(calls(`${BASE}/replan`, 'POST')[1])).toEqual({ inputHash: 'b'.repeat(64) })
+    })
+
+    it('a session moved in the preview goes along with Übernehmen; back to the plan takes the move away', async () => {
+        open('/study/goals/20?replan=1')
+        const dialog = await screen.findByRole('dialog')
+        const session = await within(dialog).findByRole('button', { name: /^Grenzwerte, / })
+        fireEvent.click(session)
+        expect(session.getAttribute('aria-expanded')).toBe('true')
+        const mover = within(dialog).getByRole('group', { name: 'Grenzwerte verschieben' })
+        fireEvent.click(within(mover).getByRole('button', { name: 'Einen Tag später' }))
+        fireEvent.change(within(mover).getByLabelText('Uhrzeit'), { target: { value: '09:30' } })
+        expect(within(dialog).getByText('1 Sitzung von dir verschoben')).toBeTruthy()
+        expect(within(dialog).getByRole('button', { name: /^Grenzwerte, .* 09:30, von dir verschoben/ })).toBe(session)
+
+        // Aufgabe 1 moved and put back: not sent
+        fireEvent.click(within(dialog).getByRole('button', { name: /^Aufgabe 1, / }))
+        const other = within(dialog).getByRole('group', { name: 'Aufgabe 1 verschieben' })
+        fireEvent.click(within(other).getByRole('button', { name: 'Einen Tag früher' }))
+        fireEvent.click(within(other).getByRole('button', { name: 'Wieder wie geplant' }))
+        expect(within(dialog).getByText('1 Sitzung von dir verschoben')).toBeTruthy()
+
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Übernehmen' }))
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+        expect(bodyOf(calls(`${BASE}/replan`, 'POST')[0])).toEqual({
+            inputHash: 'a'.repeat(64), moves: [{ key: 0, date: inDays(3), time: '09:30' }],
+        })
     })
 
     it('Abbrechen closes without applying and removes the param', async () => {

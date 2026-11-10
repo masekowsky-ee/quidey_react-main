@@ -399,7 +399,7 @@ export default function Calendar() {
                     <div className={styles.compactBar}>
                         {/* the views (and today) behind one menu button */}
                         <div className={styles.menuWrap} ref={viewsRef}>
-                            <button type="button" className={styles.barBtn} aria-label={t('calendarViews')} title={t('calendarViews')}
+                            <button type="button" className={styles.barBtn} aria-label={t('calendarViews')} title={t('calendarViews')} data-tip="calendar-views"
                                 aria-expanded={viewsOpen} aria-controls={viewsOpen ? 'calendarViewMenu' : undefined}
                                 onClick={() => setViewsOpen(open => !open)}>
                                 <Icon name="menu" size={22} />
@@ -477,7 +477,7 @@ export default function Calendar() {
                     </div>
 
                     <div className={styles.controls}>
-                        <div className={styles.segmented} role="group" aria-label={t('calendarViews')}>
+                        <div className={styles.segmented} role="group" aria-label={t('calendarViews')} data-tip="calendar-views">
                             {CALENDAR_VIEWS.map(name => (
                                 <button key={name} type="button" aria-pressed={view === name}
                                     className={view === name ? styles.segmentActive : undefined}

@@ -36,7 +36,7 @@ export default function FocusGoal({ goal, onGoal, task }) {
     };
 
     return (
-        <section className={styles.goal} aria-label={t('focusGoalQuestion')}>
+        <section className={styles.goal} aria-label={t('focusGoalQuestion')} data-tip="focus-goal">
             <label className={styles.goalLabel} htmlFor="focus-goal">{t('focusGoalQuestion')}</label>
             <input id="focus-goal" className={styles.goalInput} value={goal} maxLength={140}
                 onChange={e => onGoal(e.target.value)} placeholder={t('focusGoalPlaceholder')} autoComplete="off" />

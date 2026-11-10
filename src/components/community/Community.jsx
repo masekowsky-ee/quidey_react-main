@@ -70,7 +70,7 @@ export default function Community() {
                 )}
             </header>
 
-            <nav className={styles.tabs} aria-label={t('communityTabs')}>
+            <nav className={styles.tabs} aria-label={t('communityTabs')} data-tip="community-tabs">
                 {tabs.map(key => (
                     <NavLink key={key} to={COMMUNITY_PATHS[key]} end
                         className={({ isActive }) => `${styles.tab} ${isActive ? styles.tabActive : ''}`}>

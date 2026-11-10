@@ -29,3 +29,6 @@ public/download/
 *.njsproj
 *.sln
 *.sw?
+
+# Firebase config (per machine, not in the repo)
+android/app/google-services.json

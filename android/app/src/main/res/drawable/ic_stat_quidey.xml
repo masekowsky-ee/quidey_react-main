@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The small icon of notifications: the logo in white on transparent (Android tints it) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="50"
+    android:viewportHeight="50">
+    <group
+        android:translateX="-9"
+        android:translateY="-5">
+        <path
+            android:pathData="M13,27a12,12 0,1 0,24 0a12,12 0,1 0,-24 0"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="6" />
+        <path
+            android:pathData="M27,32L36,44L54,24"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeWidth="6.5" />
+    </group>
+</vector>
