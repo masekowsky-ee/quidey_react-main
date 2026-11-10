@@ -36,6 +36,7 @@ import ReminderAlert from './components/reminders/ReminderAlert.jsx'
 import { useAvatarRealtime } from './features/profile/avatars.js'
 import Toaster from './components/Toaster.jsx';
 import Tutorial from './components/Tutorial.jsx';
+import FeatureTips from './components/tips/FeatureTips.jsx';
 import DeleteScopeDialog from './components/task/DeleteScopeDialog.jsx';
 import PushOffer from './components/PushOffer.jsx';
 import OnboardingPrompts from './components/onboarding/OnboardingPrompts.jsx';
@@ -322,6 +323,7 @@ function App(){
         <CustomError/>
         <Toaster/>
         <Tutorial/>
+        <FeatureTips/>
         <DeleteScopeDialog/>
         <PushOffer/>
         <OnboardingPrompts/>

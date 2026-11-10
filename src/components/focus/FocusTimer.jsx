@@ -129,7 +129,7 @@ export default function FocusTimer() {
     if (minimized) return <MiniTimer onExpand={() => setMinimized(false)} />;
 
     return (
-        <section className={styles.timerCard} data-break={onBreak || undefined} aria-label={t('focusTimerTitle')}>
+        <section className={styles.timerCard} data-break={onBreak || undefined} aria-label={t('focusTimerTitle')} data-tip="focus-timer">
             <div className={styles.segmented} role="group" aria-label={t('timerMode')}>
                 {MODES.map(([mode, label]) =>
                     <button key={mode} type="button" aria-pressed={timerMode === mode} disabled={inProgress && timerMode !== mode}

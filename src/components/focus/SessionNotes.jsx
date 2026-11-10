@@ -80,7 +80,7 @@ export default function SessionNotes({ goal, focusTask }) {
     };
 
     return (
-        <aside className={styles.notesCol} aria-labelledby="session-notes-title">
+        <aside className={styles.notesCol} aria-labelledby="session-notes-title" data-tip="focus-notes">
             <div className={styles.notesHead}>
                 <h2 id="session-notes-title" className={styles.cardLabel}><Icon name="note" size={16} /> {t('sessionNotesTitle')}</h2>
                 <button type="button" className={styles.textBtn} onClick={() => setShowAll(all => !all)} aria-pressed={showAll}>

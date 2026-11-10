@@ -221,6 +221,16 @@ describe('the notes area', () => {
         expect(screen.getByRole('button', { name: t('noteRestore') })).toBeTruthy()
     })
 
+    it('offers a new folder beside "new note" also once there are folders', async () => {
+        await openPage()
+        const buttons = screen.getAllByRole('button', { name: t('noteFolderNew') })
+        // the head's folder button, not only the side's heading (hidden on phones)
+        const head = buttons.find(b => !b.closest('nav'))
+        expect(head).toBeTruthy()
+        fireEvent.click(head)
+        expect(screen.getByRole('textbox', { name: t('noteFolderName') })).toBeTruthy()
+    })
+
     it('makes a new note in the folder being looked at', async () => {
         await openPage('/notes?view=folder:3')
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: new RegExp(t('noteNewLong')) })) })

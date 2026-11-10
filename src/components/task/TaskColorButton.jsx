@@ -57,9 +57,9 @@ export default function TaskColorButton({ task, onChange, label }) {
         popEl.style.visibility = 'visible';
     }, [open]);
 
-    // a named colour closes the swatches; an own colour keeps them open while it is being found
+    // a pick closes the swatches (an own colour is picked once it is added, not while it is found)
     const pick = (next) => {
-        if (!isOwnColor(next)) setOpen(false);
+        setOpen(false);
         if (next !== color) onChange(next);
     };
 

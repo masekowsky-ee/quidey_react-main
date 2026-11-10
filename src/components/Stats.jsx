@@ -222,7 +222,7 @@ export default function Stats() {
         <div className={styles.page}>
             <h1 className={styles.title}>{t('history')}</h1>
 
-            <div className={styles.tabs} role="tablist" aria-label={t('history')}>
+            <div className={styles.tabs} role="tablist" aria-label={t('history')} data-tip="stats-tabs">
                 {TABS.map(name => (
                     <button key={name} role="tab" aria-selected={tab === name} className={tab === name ? styles.tabActive : undefined}
                         onClick={() => update({ tab: name })}>
@@ -232,7 +232,7 @@ export default function Stats() {
             </div>
 
             {tab !== 'done' &&
-                <div className={styles.periodBar}>
+                <div className={styles.periodBar} data-tip="stats-period">
                     <div className={styles.ranges} role="radiogroup" aria-label={t('statsPeriod')}>
                         {RANGES.map(name => (
                             <button key={name} type="button" role="radio" aria-checked={range === name}

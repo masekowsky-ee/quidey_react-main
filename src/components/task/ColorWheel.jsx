@@ -26,8 +26,9 @@ export default function ColorWheel({ value, onCommit }) {
         setHsl(next);
         setText(hslToHex(next));
     };
-    const commit = (next = draft.current) => {
-        const hex = hslToHex(next);
+    // exact: a code typed in, kept as it is (the way through hue/saturation/lightness rounds it)
+    const commit = (next = draft.current, exact = null) => {
+        const hex = exact ?? hslToHex(next);
         if (hex === sent.current) return;
         sent.current = hex;
         onCommit(hex);
@@ -110,8 +111,8 @@ export default function ColorWheel({ value, onCommit }) {
                     <span className={styles.srOnly}>{t('colorCode')}</span>
                     <input type="text" value={text} maxLength={7} spellCheck="false" autoComplete="off"
                         onChange={e => typed(e.target.value)}
-                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); if (HEX_COLOR.test(text)) commit(hexToHsl(text)); } }}
-                        onBlur={() => { if (HEX_COLOR.test(text)) commit(hexToHsl(text)); else setText(hex); }} />
+                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); if (HEX_COLOR.test(text)) commit(hexToHsl(text), text); } }}
+                        onBlur={() => { if (HEX_COLOR.test(text)) commit(hexToHsl(text), text); else setText(hex); }} />
                 </label>
             </div>
         </div>

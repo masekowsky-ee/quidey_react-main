@@ -14,6 +14,7 @@ import { selectFamilyInviteCount } from '../features/family/family';
 import { useOnlineFriends } from '../features/presence/presence';
 import { fill } from '../features/helperFunction';
 import { tabIndexOf } from '../features/layout/tabSwipe';
+import { useIsTester } from '../features/auth/tester';
 
 function Count({ count, label }) {
     if (count <= 0) return null;
@@ -46,12 +47,13 @@ function TabInner({ on, icon, label, count = 0, countLabel, news, newsLabel, onl
 
 // online: how many friends have the app open (a green dot at the icon's foot)
 // While the menu ("More") is open, only "More" carries the mark.
-function Tab({ to, end, match, menuOpen, ...inner }) {
+// tip: the feature tip pointing at it (features/tips/tips.js)
+function Tab({ to, end, match, menuOpen, tip, ...inner }) {
     const { pathname } = useLocation();
     const matched = match?.(pathname);
     return (
         <NavLink to={to} end={end} className={({ isActive }) => `${styles.tab} ${(isActive || matched) && !menuOpen ? styles.active : ''}`}
-            data-active={matched || undefined}>
+            data-active={matched || undefined} data-tip={tip}>
             {({ isActive }) => <TabInner on={Boolean(isActive || matched) && !menuOpen} {...inner} />}
         </NavLink>
     );
@@ -60,8 +62,10 @@ function Tab({ to, end, match, menuOpen, ...inner }) {
 // a swipe: this far (px) along y, and more along y than along x
 const SWIPE = 24;
 
-// Phones: the main pages at the thumb (Start, Kalender, Fokus, Sozial), the rest of the menu
-// behind "More" (with the count of what is in there: beta requests); the inbox sits in the header.
+// Phones: the main pages at the thumb (Start, Kalender, Fokus, Lernen), the rest of the menu
+// behind "More" (with the count of what is in there: beta requests, and Sozial's invites, requests
+// and online friends now that Sozial lives there); the inbox sits in the header. Without the study
+// plan (not a tester yet) the fourth tab stays Sozial.
 // The bar floats above the page as a glass capsule. Swiped down it folds away into a small handle
 // at the bottom edge; a tap on the handle or a swipe up brings it back.
 export default function TabBar() {
@@ -74,9 +78,13 @@ export default function TabBar() {
     const friendRequests = useSelector(selectIncomingCount);
     const familyInvites = useSelector(selectFamilyInviteCount);
     const adminPending = useSelector(selectAdminPendingCount);
-    const moreCount = isAdmin ? adminPending : 0;
+    const study = Boolean(useIsTester());
+    const communityCount = inviteCount + friendRequests + familyInvites;
+    const communityNews = news.together || news.social || news.feed;
     const menuOpen = useSelector(state => state.settings.showMenu);
     const onlineFriends = useOnlineFriends().length;
+    const onlineLabel = fill(t(onlineFriends === 1 ? 'onlineFriendsOne' : 'onlineFriendsCount'), { count: onlineFriends });
+    const moreCount = (isAdmin ? adminPending : 0) + (study ? communityCount : 0);
     const { pathname } = useLocation();
     const [collapsed, setCollapsed] = useState(false);
     const pillRef = useRef(null);
@@ -107,20 +115,23 @@ export default function TabBar() {
 
     return (
         <nav className={styles.bar} aria-label={t('mainNav')} data-part="tabbar" data-collapsed={collapsed || undefined}>
-            <div ref={pillRef} className={styles.pill} style={{ '--tabs': 5 }} inert={collapsed} aria-hidden={collapsed || undefined} {...swipe}>
-                <Indicator index={menuOpen ? 4 : tabIndexOf(pathname)} />
-                <Tab menuOpen={menuOpen} to="/" end icon="home" label={t('home')} />
-                <Tab menuOpen={menuOpen} to="/calendar" icon="calendar" label={t('calendar')}
+            <div ref={pillRef} className={styles.pill} style={{ '--tabs': 5 }} inert={collapsed} aria-hidden={collapsed || undefined} {...swipe} data-tip="tabbar">
+                <Indicator index={menuOpen ? 4 : tabIndexOf(pathname, study)} />
+                <Tab menuOpen={menuOpen} to="/" end icon="home" label={t('home')} tip="nav-home" />
+                <Tab menuOpen={menuOpen} to="/calendar" icon="calendar" label={t('calendar')} tip="nav-calendar"
                     count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
-                <Tab menuOpen={menuOpen} to="/focus" icon="focus" label={t('focusTab')} />
-                <Tab menuOpen={menuOpen} to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')}
-                    count={inviteCount + friendRequests + familyInvites} countLabel={t('communityCount')}
-                    news={news.together || news.social || news.feed} newsLabel={t('menuNews')}
-                    online={onlineFriends}
-                    onlineLabel={fill(t(onlineFriends === 1 ? 'onlineFriendsOne' : 'onlineFriendsCount'), { count: onlineFriends })} />
+                <Tab menuOpen={menuOpen} to="/focus" icon="focus" label={t('focusTab')} tip="nav-focus" />
+                {study
+                    ? <Tab menuOpen={menuOpen} to="/study" icon="book" label={t('studyNav')} tip="nav-study" />
+                    : <Tab menuOpen={menuOpen} to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} tip="nav-community"
+                        count={communityCount} countLabel={t('communityCount')}
+                        news={communityNews} newsLabel={t('menuNews')}
+                        online={onlineFriends} onlineLabel={onlineLabel} />}
                 <button type="button" className={`${styles.tab} ${menuOpen ? styles.active : ''}`}
-                    onClick={() => dispatch(setShowMenu(true))} aria-expanded={menuOpen} aria-haspopup="dialog">
-                    <TabInner on={menuOpen} icon="more" label={t('more')} count={moreCount} countLabel={t('menuNews')} />
+                    onClick={() => dispatch(setShowMenu(true))} aria-expanded={menuOpen} aria-haspopup="dialog" data-tip="nav-more" data-holds-social={study || undefined}>
+                    <TabInner on={menuOpen} icon="more" label={t('more')} count={moreCount} countLabel={t('menuNews')}
+                        news={study && communityNews} newsLabel={t('menuNews')}
+                        online={study ? onlineFriends : 0} onlineLabel={onlineLabel} />
                 </button>
             </div>
             {collapsed &&

@@ -6,6 +6,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
 import { LOGIN_SUCCESS, SET_ACCESS } from '../features/auth/authActionTypes'
 import { resetOnboarding, useOnboarding } from '../features/onboarding/onboarding'
+import { setShowTutorial } from '../features/settings/settingsAction'
 import { DAILY_LINES, LINE_TYPES, lineOfDay, dayNumber, yearText } from '../features/fun/dailyLines'
 import { GUESS_WORDS, SCRAMBLE_WORDS } from '../features/fun/words'
 import {
@@ -192,11 +193,13 @@ describe('best scores and difficulty', () => {
 describe('tutorial', () => {
     beforeEach(() => resetOnboarding())
 
-    // signed in as ann; `fresh`: a new account that hasn't closed the tour yet
-    const signIn = ({ fresh = false } = {}) => {
+    // signed in as ann; `fresh`: a new account that hasn't closed the tour yet; `open`: the tour
+    // opened (Settings → App, the command bar)
+    const signIn = ({ fresh = false, open = false } = {}) => {
         const store = makeStore()
         store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
         store.dispatch({ type: SET_ACCESS, payload: { isPro: true, tourSeen: !fresh } })
+        if (open) store.dispatch(setShowTutorial(true))
         return store
     }
 
@@ -209,7 +212,7 @@ describe('tutorial', () => {
         </Provider>
     )
 
-    it('opens by itself for a new account, and only once', () => {
+    it('no longer opens by itself for a new account: the feature tips show it around', () => {
         const store = signIn({ fresh: true })
         let asking = null
         const Probe = () => { asking = useOnboarding().asking; return null }
@@ -222,19 +225,12 @@ describe('tutorial', () => {
             </Provider>
         )
 
-        expect(screen.getByRole('dialog')).toBeInTheDocument()
-        expect(screen.getByRole('heading', { name: 'Willkommen bei Quidey!' })).toBeInTheDocument()
-
-        fireEvent.click(screen.getByRole('button', { name: 'Überspringen' }))
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-        // the server is told, and skipping still asks what to do first
+        // the server is told at once, and the first days' questions start counting all the same
         expect(store.getState().auth.access.tourSeen).toBe(true)
-        expect(asking).toBe('next')
+        expect(asking).toBe(null)
+        expect(localStorage.getItem('onboarding:ann')).not.toBeNull()
         unmount()
-
-        // next visit: stays closed
-        renderTutorial(store)
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     })
 
     it('an account that existed before (tour seen) never gets it by itself', () => {
@@ -286,7 +282,7 @@ describe('tutorial', () => {
     })
 
     it('greets by name, shows tips and opens the page a step is about', () => {
-        const store = signIn({ fresh: true })
+        const store = signIn({ open: true })
         render(
             <Provider store={store}>
                 <MemoryRouter>
@@ -313,7 +309,7 @@ describe('tutorial', () => {
     })
 
     it('jumps to a chapter from the welcome card', () => {
-        const store = signIn({ fresh: true })
+        const store = signIn({ open: true })
         renderTutorial(store)
         const chapters = screen.getByRole('navigation', { name: 'Spring direkt zu einem Kapitel' })
         fireEvent.click(within(chapters).getByRole('button', { name: 'Wachsen' }))
@@ -321,7 +317,7 @@ describe('tutorial', () => {
     })
 
     it('opens the new-task form from the planning step', () => {
-        const store = signIn({ fresh: true })
+        const store = signIn({ open: true })
         renderTutorial(store)
         fireEvent.keyDown(window, { key: 'ArrowRight' })
         fireEvent.click(screen.getByRole('button', { name: 'Erste Aufgabe anlegen' }))
@@ -331,7 +327,7 @@ describe('tutorial', () => {
     })
 
     it('changes the accent and the theme right in the tour', () => {
-        const store = signIn({ fresh: true })
+        const store = signIn({ open: true })
         renderTutorial(store)
         fireEvent.click(within(screen.getByRole('navigation', { name: 'Spring direkt zu einem Kapitel' })).getByRole('button', { name: 'Dein Stil' }))
         fireEvent.click(screen.getByRole('button', { name: 'Ozean' }))
@@ -342,7 +338,7 @@ describe('tutorial', () => {
     })
 
     it('ends with where the navigation is and first steps', () => {
-        const store = signIn({ fresh: true })
+        const store = signIn({ open: true })
         renderTutorial(store)
         fireEvent.keyDown(window, { key: 'End' })
         expect(screen.getByRole('heading', { name: 'Alles griffbereit' })).toBeInTheDocument()
@@ -366,7 +362,7 @@ describe('tutorial', () => {
     })
 
     it('closes with Escape', () => {
-        const store = signIn({ fresh: true })
+        const store = signIn({ open: true })
         renderTutorial(store)
         fireEvent.keyDown(window, { key: 'Escape' })
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()

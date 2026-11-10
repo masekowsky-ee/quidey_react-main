@@ -24,7 +24,7 @@ export default function MonthView({ focusedDate, today, tasksByDay, focusByDay, 
     const weeks = Array.from({ length: 6 }, (_, i) => days.slice(i * 7, i * 7 + 7));
 
     return (
-        <div className={styles.monthCard}>
+        <div className={styles.monthCard} data-tip="calendar-grid">
             <div className={styles.month} role="grid" ref={gridRef} onKeyDown={onKeyDown} aria-label={`${t('months', focusedDate.getMonth())} ${focusedDate.getFullYear()}`}>
                 <div className={styles.monthRow} role="row">
                     <span className={styles.weekNumHead} role="columnheader" aria-label={t('weekShort')}>{t('weekShort')}</span>

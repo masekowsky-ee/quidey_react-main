@@ -26,10 +26,10 @@ import { useDragDismiss } from '../features/layout/dragDismiss';
 
 // One entry: icon, label and an optional count badge (or a dot: something changed there);
 // the current page is highlighted (`match`: also on other addresses that belong to it)
-function MenuLink({ to, end, match, icon, label, onClick, count = 0, countLabel, news = false, newsLabel }) {
+function MenuLink({ to, end, match, icon, label, onClick, count = 0, countLabel, news = false, newsLabel, tip }) {
     const { pathname } = useLocation();
     return (
-        <NavLink to={to} end={end} onClick={onClick} data-part="menu-item" data-active={match?.(pathname) || undefined}
+        <NavLink to={to} end={end} onClick={onClick} data-part="menu-item" data-active={match?.(pathname) || undefined} data-tip={tip}
             className={({ isActive }) => `${styles.menuItem} ${isActive || match?.(pathname) ? styles.active : ''}`}>
             <Icon name={icon} className={styles.menuIcon} />
             <span className={styles.menuLabel}>{label}</span>
@@ -182,10 +182,10 @@ export default function Menu(){
                             count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
                         {/* the place to work and study (Pomodoro, notes), and guided routines */}
                         <MenuLink to="/focus" icon="focus" label={t('focusRoom')} onClick={onClose} />
-                        <MenuLink to="/routines" icon="routine" label={t('routines')} onClick={onClose} />
+                        <MenuLink to="/routines" icon="routine" label={t('routines')} onClick={onClose} tip="menu-routines" />
                         {/* testers: the notes area and collections (tasks, events and notes together) */}
-                        {isTester && <MenuLink to="/notes" icon="note" label={t('notesTitle')} onClick={onClose} />}
-                        {isTester && <MenuLink to="/collections" icon="collection" label={t('collections')} onClick={onClose} />}
+                        {isTester && <MenuLink to="/notes" icon="note" label={t('notesTitle')} onClick={onClose} tip="menu-notes" />}
+                        {isTester && <MenuLink to="/collections" icon="collection" label={t('collections')} onClick={onClose} tip="menu-collections" />}
                         {isTester && <MenuLink to="/study" icon="book" label={t('studyNav')} onClick={onClose} />}
                         {/* friends, shared sessions, families and the feed: one place for other people */}
                         <MenuLink to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} onClick={onClose}
@@ -195,9 +195,9 @@ export default function Menu(){
                         <OnlineFriendsRow onClick={onClose} />
                         <MenuLink to="/inbox" icon="inbox" label={t('inbox')} onClick={onClose}
                             count={inboxCount} countLabel={t('inboxUnread')} />
-                        <MenuLink to="/stats" icon="history" label={t('history')} onClick={onClose} />
+                        <MenuLink to="/stats" icon="history" label={t('history')} onClick={onClose} tip="menu-stats" />
                         {/* small games, with a leaderboard (also the beta screen's waiting room) */}
-                        <MenuLink to="/arcade" icon="gamepad" label={t('arcade')} onClick={onClose} />
+                        <MenuLink to="/arcade" icon="gamepad" label={t('arcade')} onClick={onClose} tip="menu-arcade" />
                     </div>
                 </nav>
 

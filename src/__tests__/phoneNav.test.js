@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
-import { TAB_PATHS, tabIndexOf } from '../features/layout/tabSwipe'
+import { TAB_PATHS, tabPaths, tabIndexOf } from '../features/layout/tabSwipe'
 import { keyboardInset } from '../features/layout/keyboardInset'
 import { openMenu, setShowMenu } from '../features/settings/settingsAction'
 
@@ -15,6 +15,14 @@ describe('swiping between the tabs (phones)', () => {
         expect(tabIndexOf('/u/anna')).toBe(3)
         expect(tabIndexOf('/settings')).toBe(-1)
         expect(tabIndexOf('/calendarx')).toBe(-1)
+    })
+
+    it('has Lernen as the fourth tab where the study plan is open (testers); Sozial is behind "Mehr" then', () => {
+        expect(tabPaths(true)).toEqual(['/', '/calendar', '/focus', '/study'])
+        expect(tabIndexOf('/study', true)).toBe(3)
+        expect(tabIndexOf('/study/goals/4', true)).toBe(3)
+        expect(tabIndexOf('/community/friends', true)).toBe(-1)
+        expect(tabIndexOf('/study', false)).toBe(-1)
     })
 })
 

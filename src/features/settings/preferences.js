@@ -30,7 +30,7 @@ export const readStoredLanguage = () => readStored('language', LANGUAGES, device
 export const storeLanguage = (language) => store('language', language);
 
 // Accent color palettes; the values live in index.css under [data-accent]
-export const ACCENTS = ['green', 'ocean', 'violet', 'sunset', 'rose', 'gold', 'pine'];
+export const ACCENTS = ['green', 'ocean', 'violet', 'sunset', 'rose', 'cherry', 'gold', 'pine'];
 // "Abendrot" (sunset) unless another one was chosen
 export const DEFAULT_ACCENT = 'sunset';
 export const readStoredAccent = () => readStored('accent', ACCENTS, DEFAULT_ACCENT);
@@ -41,6 +41,7 @@ export const ACCENT_SWATCHES = [
     { value: 'ocean', label: 'accentOcean', color: '#38bdf8' },
     { value: 'violet', label: 'accentViolet', color: '#a78bfa' },
     { value: 'rose', label: 'accentRose', color: '#fb7185' },
+    { value: 'cherry', label: 'accentCherry', color: '#f0445a' },
     { value: 'gold', label: 'accentGold', color: '#facc15' },
     { value: 'pine', label: 'accentPine', color: '#5cc49f' },
 ];

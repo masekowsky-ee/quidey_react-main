@@ -4,21 +4,27 @@ import { useDispatch, useSelector } from 'react-redux';
 import { COMMUNITY_PATHS, isCommunityPath } from '../community/paths';
 import { openMenu } from '../settings/settingsAction';
 import { PHONE_QUERY } from './breakpoints';
+import { useIsTester } from '../auth/tester';
 
 // Phones: a sideways swipe across the page goes to the tab beside it, in the tab bar's order.
 // Finger to the left: the next tab (Kalender → Fokus); to the right: the one before (Kalender →
-// Start). Past the last tab (Sozial) the menu comes in from the right, before the first (Start)
-// from the left, where it always comes from.
+// Start). Past the last tab (Lernen, or Sozial for those without the study plan) the menu comes in
+// from the right, before the first (Start) from the left, where it always comes from.
 // The page follows the finger a little while it moves; let go far enough, it slides out that way
 // and the next one slides in from the other side (App.jsx, pageSwipeMotion), otherwise it springs
 // back. On "minimal" motion nothing moves, the pages only cross-fade.
-export const TAB_PATHS = ['/', '/calendar', '/focus', COMMUNITY_PATHS.feed];
+// study: the fourth tab is Lernen (the study plan, testers for now) instead of Sozial; Sozial then
+// lives behind "Mehr".
+export const tabPaths = (study = false) => ['/', '/calendar', '/focus', study ? '/study' : COMMUNITY_PATHS.feed];
+export const TAB_PATHS = tabPaths(false);
 
-export function tabIndexOf(pathname) {
+const isStudyPath = (pathname) => pathname === '/study' || pathname.startsWith('/study/');
+
+export function tabIndexOf(pathname, study = false) {
     if (pathname === '/') return 0;
     if (pathname === '/calendar' || pathname.startsWith('/calendar/')) return 1;
     if (pathname === '/focus' || pathname.startsWith('/focus/')) return 2;
-    if (isCommunityPath(pathname)) return 3;
+    if (study ? isStudyPath(pathname) : isCommunityPath(pathname)) return 3;
     return -1;
 }
 
@@ -73,8 +79,10 @@ export function useTabSwipe({ enabled = true } = {}) {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const menuOpen = useSelector(state => state.settings.showMenu);
-    const current = useRef({ pathname, menuOpen });
-    current.current = { pathname, menuOpen };
+    const study = Boolean(useIsTester());
+    const current = useRef({ pathname, menuOpen, study });
+    // the listeners below are set up once and read the latest of these
+    useEffect(() => { current.current = { pathname, menuOpen, study }; }, [pathname, menuOpen, study]);
 
     useEffect(() => {
         if (!enabled || typeof window === 'undefined' || !window.matchMedia) return undefined;
@@ -85,7 +93,7 @@ export function useTabSwipe({ enabled = true } = {}) {
         const onStart = (e) => {
             gesture = null;
             if (!phone.matches || e.touches.length !== 1 || current.current.menuOpen || overlayOpen()) return;
-            if (tabIndexOf(current.current.pathname) < 0 || ownsSwipe(e.target)) return;
+            if (tabIndexOf(current.current.pathname, current.current.study) < 0 || ownsSwipe(e.target)) return;
             const touch = e.touches[0];
             gesture = { x: touch.clientX, y: touch.clientY, t: e.timeStamp, sideways: false, page: null };
         };
@@ -120,13 +128,14 @@ export function useTabSwipe({ enabled = true } = {}) {
             if (!swiped) { if (page) springBack(page); return; }
 
             const step = dx < 0 ? 1 : -1;
-            const next = tabIndexOf(current.current.pathname) + step;
-            if (next < 0 || next >= TAB_PATHS.length) {
+            const paths = tabPaths(current.current.study);
+            const next = tabIndexOf(current.current.pathname, current.current.study) + step;
+            if (next < 0 || next >= paths.length) {
                 if (page) springBack(page);
                 dispatch(openMenu(next < 0 ? 'left' : 'right'));
                 return;
             }
-            const go = () => navigate(TAB_PATHS[next], { state: { tabSwipe: step } });
+            const go = () => navigate(paths[next], { state: { tabSwipe: step } });
             if (!page) { go(); return; }
             // the old page carries on the way the finger threw it, then the new one comes in
             page.style.transition = `transform ${OUT_MS}ms ease-in, opacity ${OUT_MS}ms ease-in`;

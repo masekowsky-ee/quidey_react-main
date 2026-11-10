@@ -132,25 +132,43 @@
     margin-top: 0.25rem;
 }
 
+/* ---------- the plan preview: one agenda per goal ---------- */
 .group{
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.6rem;
     margin: 0;
     padding: 0;
-    border: 0;
     min-width: 0;
 }
 
+.group + .group{
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border);
+}
+
+.groupHead{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.5rem;
+}
+
+.groupShape{
+    align-self: center;
+    flex: none;
+}
+
 .groupName{
-    padding: 0;
-    font-weight: 600;
+    margin: 0;
+    font: var(--type-headline);
     color: var(--text-h);
 }
 
 .summary{
     margin: 0;
-    font-size: 0.85rem;
+    flex-basis: 100%;
+    font: var(--type-footnote);
     color: var(--text-muted);
 }
 
@@ -164,26 +182,281 @@
     border-radius: var(--radius-md, 0.6rem);
 }
 
-.changes{
+/* a day: its date in a narrow column, its sessions beside it */
+.agenda{
     display: flex;
     flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.day{
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: 0.75rem;
+    padding: 0.45rem 0;
+}
+
+.day + .day{
+    border-top: 1px solid var(--border);
+}
+
+.dayLabel{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 0.15rem;
+    line-height: 1;
+}
+
+.dayWeek,
+.dayMonth{
+    font: var(--type-caption);
+    color: var(--text-muted);
+}
+
+.dayNumber{
+    margin: 0.15rem 0 0.1rem;
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: var(--text-h);
+    font-variant-numeric: lining-nums;
+}
+
+.daySessions{
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* a session: the subject's colour as a short bar at its start */
+.session{
+    border-radius: var(--radius-md, 0.6rem);
+    transition: background-color 0.2s var(--ease-out, ease-out);
+}
+
+.session[data-open]{
+    background-color: var(--surface-inset);
+}
+
+.sessionMain{
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.1rem 0.5rem;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.4rem 0.6rem 0.4rem 0.9rem;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    background: none;
+    border: 0;
+    border-radius: inherit;
+}
+
+.sessionMain::before{
+    content: "";
+    position: absolute;
+    left: 0.25rem;
+    top: 0.55rem;
+    bottom: 0.55rem;
+    width: 3px;
+    border-radius: 2px;
+    background-color: var(--task-color, var(--border-strong));
+}
+
+button.sessionMain{
+    cursor: pointer;
+}
+
+@media (hover: hover){
+    button.sessionMain:hover{
+        background-color: var(--surface-hover);
+    }
+}
+
+button.sessionMain:active{
+    transform: scale(var(--press, 0.98));
+}
+
+button.sessionMain:focus-visible{
+    outline: 2px solid var(--primary);
+    outline-offset: 1px;
+}
+
+.sessionName{
+    grid-column: 1;
+    min-width: 0;
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+}
+
+.sessionMeta{
+    grid-column: 1;
+    font: var(--type-footnote);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.sessionTag{
+    grid-column: 1;
+    display: inline-flex;
+    align-items: center;
     gap: 0.25rem;
+    justify-self: start;
+    font: var(--type-caption);
+    color: var(--text);
+}
+
+.sessionTag[data-kind="same"]{
+    display: none;
+}
+
+.sessionChevron{
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    color: var(--text-muted);
+    transition: transform 0.25s var(--ease, ease);
+}
+
+.session[data-open] .sessionChevron{
+    transform: rotate(180deg);
+}
+
+/* moving it: a day back, the day, the time, a day on */
+.mover{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.5rem;
+    padding: 0.15rem 0.6rem 0.65rem 0.9rem;
+}
+
+.moverField{
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    flex: 1 1 7.5rem;
+    min-width: 0;
+}
+
+.moverField input{
+    width: 100%;
+    min-height: 2.5rem;
+    box-sizing: border-box;
+}
+
+.moverLabel{
+    font: var(--type-caption);
+    color: var(--text-muted);
+}
+
+.moverStep{
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    color: var(--text-h);
+    background-color: var(--surface);
+    border: 1px solid var(--control-border, var(--border));
+    border-radius: var(--radius-pill, 999px);
+    cursor: pointer;
+}
+
+.moverStep:active{
+    transform: scale(var(--press, 0.96));
+}
+
+.back{
+    transform: rotate(90deg);
+}
+
+.on{
+    transform: rotate(-90deg);
+}
+
+.moverReset{
+    flex-basis: 100%;
+    justify-self: start;
+    align-self: flex-start;
+    padding: 0.2rem 0;
+    font: var(--type-footnote);
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+/* sessions that go away: quiet, at the end */
+.dropped{
+    padding-left: 3.75rem;
+}
+
+.droppedTitle{
+    margin: 0 0 0.2rem;
+    font: var(--type-footnote);
+    color: var(--text-muted);
+}
+
+.droppedList{
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
     margin: 0;
     padding: 0;
     list-style: none;
     font-size: 0.875rem;
 }
 
-.change{
+.droppedList li{
     display: flex;
     flex-wrap: wrap;
-    gap: 0.1rem 0.6rem;
+    gap: 0 0.6rem;
 }
 
-.changePart{
-    color: var(--text-h);
-}
-
-.changeWhen{
+.droppedName{
     color: var(--text);
+    text-decoration: line-through;
+    text-decoration-color: var(--text-muted);
+}
+
+.droppedWhen{
+    color: var(--text-muted);
+}
+
+.footerNote{
+    margin: 0 auto 0 0;
+    align-self: center;
+    font: var(--type-footnote);
+    color: var(--text-muted);
+}
+
+@media (max-width: 420px){
+    .day{
+        grid-template-columns: 2.5rem 1fr;
+        gap: 0.5rem;
+    }
+
+    .dropped{
+        padding-left: 3rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .sessionChevron,
+    .session{
+        transition: none;
+    }
 }

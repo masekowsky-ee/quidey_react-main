@@ -190,7 +190,7 @@ export default function Routines() {
                     <h1 className={styles.title}>{t('routines')}</h1>
                     <p className={styles.subtitle}>{t('routinesSubtitle')}</p>
                 </div>
-                <button type="button" className={styles.primary} onClick={() => setEditing({})}><Icon name="plus" size={16} /> {t('routineNew')}</button>
+                <button type="button" className={styles.primary} onClick={() => setEditing({})} data-tip="routine-new"><Icon name="plus" size={16} /> {t('routineNew')}</button>
             </header>
 
             {pendingRoutine &&

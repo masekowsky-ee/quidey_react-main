@@ -197,9 +197,10 @@ export const fetchPlanPreview = () => async (dispatch) => {
 
 // A 409 means the plan changed since the preview: the fresh one is stored, nothing was applied.
 // Applying rewrites the goals' sessions: the goals in the store are read again (an open goal page shows them).
-export const applyPlan = (inputHash) => async (dispatch, getState) => {
+// moves: sessions put elsewhere in the preview, [{ key, date, time }]; they are written pinned.
+export const applyPlan = (inputHash, moves = []) => async (dispatch, getState) => {
     try {
-        await apiFetch(`${BASE}/replan`, send('POST', { inputHash }));
+        await apiFetch(`${BASE}/replan`, send('POST', moves.length > 0 ? { inputHash, moves } : { inputHash }));
     } catch (err) {
         if (err.code === 'plan_changed' && err.data?.preview) dispatch({ type: PREVIEW_SET, payload: err.data.preview });
         throw err;

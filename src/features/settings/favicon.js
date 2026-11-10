@@ -9,6 +9,7 @@ export const ACCENT_COLORS = {
     ocean: '#38bdf8',
     violet: '#a78bfa',
     rose: '#fb7185',
+    cherry: '#f0445a',
     gold: '#facc15',
     pine: '#3f9e7f',
 };

@@ -220,7 +220,12 @@ export default function NotesPage() {
                         <option value="">{t('noteFromTemplate')}</option>
                         {NOTE_TEMPLATES.map(key => <option key={key} value={key}>{t(`noteTpl_${key}_name`)}</option>)}
                     </select>
-                    <button type="button" className={styles.primary} onClick={() => newNote()}>
+                    {/* always here, also on phones, where the side's heading (and its plus) is hidden */}
+                    <button type="button" className={styles.folderBtn} onClick={() => setAddingFolder(true)} aria-expanded={addingFolder} data-tip="notes-folder"
+                        aria-label={t('noteFolderNew')} title={t('noteFolderNew')}>
+                        <Icon name="folder" size={18} />
+                    </button>
+                    <button type="button" className={styles.primary} onClick={() => newNote()} data-tip="notes-new">
                         <Icon name="plus" size={16} /> {t('noteNewLong')}
                     </button>
                 </div>
@@ -289,7 +294,7 @@ export default function NotesPage() {
                                         title={t('noteFolderDeleteHint')} confirmText={t('noteFolderDeleteConfirm')} />
                                 </span>}
                         </h2>
-                        <label className={styles.search}>
+                        <label className={styles.search} data-tip="notes-search">
                             <Icon name="search" size={16} />
                             <input type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder={t('notesSearch')} aria-label={t('notesSearch')} />
                         </label>

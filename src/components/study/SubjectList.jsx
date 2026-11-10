@@ -90,13 +90,13 @@ export default function SubjectList() {
                     <p className={styles.subtitle}>{t('studySubtitle')}</p>
                 </div>
                 <div className={styles.actions}>
-                    <button type="button" className={styles.btn} onClick={() => navigate({ search: '?new=goal' })}>
+                    <button type="button" className={styles.btn} onClick={() => navigate({ search: '?new=goal' })} data-tip="study-new-goal">
                         <Icon name="plus" size={14} /> {t('studyAddGoal')}
                     </button>
                 </div>
             </header>
 
-            <form className={styles.newRow} onSubmit={add}>
+            <form className={styles.newRow} onSubmit={add} data-tip="study-new-subject">
                 <input value={name} maxLength={NAME_MAX} onChange={e => setName(e.target.value)}
                     placeholder={t('studyNewSubject')} aria-label={t('studySubjectName')} />
                 <button type="submit" className={styles.btnPrimary} disabled={!name.trim()}>

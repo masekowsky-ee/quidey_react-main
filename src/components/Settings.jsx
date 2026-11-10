@@ -25,6 +25,7 @@ import { setAnalyticsConsent, useAnalytics } from '../features/native/analytics'
 import { useIsTester } from '../features/auth/tester';
 import AlarmSettings from './reminders/AlarmSettings.jsx';
 import StudySettings from './study/StudySettings.jsx';
+import { resetTips } from '../features/tips/tips';
 
 const LANGUAGES = [
     { code: 'de', label: 'german' },
@@ -237,6 +238,22 @@ function AllDayTimeSetting() {
         <SettingRow title={t('allDayReminderTime')} hint={t(failed ? 'pushErrorSave' : 'allDayReminderTimeHint')}>
             <input type="time" className={styles.timeInput} value={value} aria-label={t('allDayReminderTime')}
                 onChange={(e) => change(e.target.value)} />
+        </SettingRow>
+    );
+}
+
+// The feature tips (components/tips/FeatureTips.jsx): every one once more, from the next page on
+function TipsSetting() {
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const reset = () => dispatch(resetTips())
+        .then(() => dispatch(showToast(t('settingsTipsResetDone'))))
+        .catch(() => dispatch(showToast(t('settingsTipsResetFailed'), 'error')));
+    return (
+        <SettingRow title={t('settingsTipsRow')} hint={t('settingsTipsRowHint')}>
+            <button type="button" className={styles.tourButton} onClick={reset}>
+                {t('settingsTipsReset')}
+            </button>
         </SettingRow>
     );
 }
@@ -458,6 +475,7 @@ export default function Settings(){
                                 {t('settingsTourStart')}
                             </button>
                         </SettingRow>
+                        <TipsSetting />
                     </SettingSection>
                     {/* testers' reminders ring like an alarm clock in the Android app: what that needs */}
                     {isTester && isNativeApp() &&

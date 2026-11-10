@@ -146,7 +146,8 @@ Order of checks on every render:
    Sozial, Postfach, Statistiken, then "Mehr" opening the drawer), and header and pages line up on
    `--content-w` (70rem; narrower pages start at `--page-start`, the same left edge);
    721–1099px the menu is a drawer behind the header's button; ≤720px a bottom `TabBar` (Start,
-   Kalender, Fokus, Sozial, Mehr → drawer; icons only, the words for screen readers; a capsule
+   Kalender, Fokus, Lernen (`/study`; Sozial instead for non-testers, who have no study plan; for testers Sozial
+   is in the drawer and its counts, news dot and online dot sit on "Mehr"), Mehr → drawer; icons only, the words for screen readers; a capsule
    floating 0.75rem above the bottom edge, the current tab marked by a neutral pill behind a bolder
    icon that slides between tabs (one CSS track in the capsule, `--tab` index, not a layoutId:
    a shared layout animation flew in from the old scroll position), only "Mehr" while the menu is open; swiped down it sinks
@@ -154,7 +155,7 @@ Order of checks on every render:
    the shell's `--tabbar-h` follows via `:has`) replaces the header's button. A sideways swipe on the page
    (`features/layout/tabSwipe.js`, phones) goes to the tab beside it: the page follows the finger,
    slides out, the next slides in (`pageSwipeMotion`, via `location.state.tabSwipe`); past Start the
-   drawer comes from the left, past Sozial from the right (`openMenu(side)`, `settings.menuSide`,
+   drawer comes from the left, past the fourth tab (Lernen / Sozial, `tabPaths(study)`) from the right (`openMenu(side)`, `settings.menuSide`,
    `.fromRight`; it goes back to the left once closed). Swipes are left alone on inputs, sideways
    scrollers, anything with its own `touch-action`, and `[data-no-tab-swipe]`. Sheets stand on the
    on-screen keyboard: `features/layout/keyboardInset.js` keeps `--keyboard-inset` on `<html>`
@@ -166,8 +167,25 @@ Order of checks on every render:
    Statistiken (one list, no "Mehr" heading), at the bottom Admin/Einstellungen/Feedback and the
    `AccountSwitcher` (profile, switch account, add account, sign out). Under Gemeinschaft a row of
    the friends online right now (faces + "N Freunde online", `useOnlineFriends`); the tab bar puts
-   a green dot on Gemeinschaft while any friend is online. The tour ("Einführung", `Tutorial.jsx`)
-   opens by itself only for a new account (`access.tourSeen` from `/api/me` = `users.tour_seen_at`;
+   a green dot on Gemeinschaft while any friend is online. **Feature tips** (`features/tips/tips.js` `TIPS`, `components/tips/FeatureTips.jsx`, mounted
+   in App; texts `tip_<id>_title/_text` in moreTexts.js): first the navigation's, on whatever page the app opens (one
+   per place: `data-tip="nav-…"` on the TabBar's tabs and the header's TopNav tabs, whichever is visible, then the tab
+   bar's capsule); then on a page's first visit its tips show one at a time as an
+   inverted little card with an arrow beside the control (`data-tip="…"` or a `data-part` hook) and a ring exactly on its
+   box (and corners); both are put on the control every animation frame by writing their style directly (no React
+   render, no transitions on position), so they never lag behind scrolling; scrolled out of sight they hide;
+   "Weiter"/"Verstanden" marks one seen, "Tipps ausblenden" ends all, Escape skips one. A tip waits while a sheet /
+   dialog / the drawer / calm mode covers the page or while its control isn't on the screen (other width). Seen per
+   account on the server (`users.tips_seen` / `tips_off`, migration 047; `/api/me` → `tipsSeen` / `tipsOff`,
+   `POST /api/users/tips/seen { ids }` adds, `PUT /api/users/tips { off }`, `DELETE /api/users/tips` = Settings → App
+   → Einführung "Tipps wieder zeigen"); answers are merged with what is seen locally meanwhile; a copy on the device (localStorage `tips:<username>` { seen, off }) keeps a tip seen while the server couldn't be reached from coming back on a reload, and `syncTips` sends it once the server answers. Migration 047 marks
+   `BASIC_TIPS` (what the old tour showed; the same list in tips.js and the migration) seen for every account with
+   `tour_seen_at`, so those only get the tips about newer features. **Every new feature gets a tip** (an entry in
+   `TIPS` + `tip_<id>_title/_text` de/en, a test checks both): nobody has it seen, so everybody gets it once after
+   the deploy. While a sheet / dialog / the drawer is open only a control on it gets its tip (the colour "+" in a
+   form, the drawer's newer entries); Escape on a tip is caught before the sheet's own. They replaced the tour for new accounts: the tour ("Einführung", `Tutorial.jsx`)
+   no longer opens by itself (a new account gets `markTourSeen` + `startOnboarding` at once, no "Was möchtest du als
+   Erstes machen?"); it stays in Settings → App and the command bar. Formerly it opened by itself only for a new account (`access.tourSeen` from `/api/me` = `users.tour_seen_at`;
    migration 031 set it for every account that existed; closing calls `markTourSeen` →
    `PUT /api/users/tour-seen`, so no device shows it again) and any time from Settings → App: 9 chapters (welcome, plan,
    focus, calendar, grow, together, stats, yours, ready), each with a small animated scene
@@ -343,7 +361,8 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
 - `/notes` — **Notizen**, testers only (`components/notes/NotesPage.jsx`, `features/notes/notes.js`): the
   notebook's notes in views (all, pinned, folders, tags, archive, trash; `?view=folder:<id>|tag:<word>|…`,
   `?note=<id>`), search (words, `#tag`), sort + list/tiles (localStorage `notesSort`, `notesLayout`),
-  templates (`NOTE_TEMPLATES`, texts `noteTpl_*`), folders (`/api/tester/note-folders`), tags, colour,
+  templates (`NOTE_TEMPLATES`, texts `noteTpl_*`), folders (`/api/tester/note-folders`; "Neuer Ordner" is a grey
+  folder button beside "Neue Notiz", always there, also on phones where the side's heading is hidden), tags, colour,
   archive, trash (30 days, `GET /api/notebook?trash=1`, `DELETE /api/tester/notebook/trash`), duplicate,
   Markdown export. The server takes folderId/tags/color/archived/trashed only from testers
   (`TESTER_REQUIRED`); `GET /api/notebook` leaves the trash out for everybody. Migration 036.
@@ -374,7 +393,10 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   AI is asked once per new topic name when the list is left (typing estimates send `ai: false`). Push kind `study`
   (label "Lernen"/"Studying", `docs/notifications.md`). New goals plan in the study times by default when there are any.
   Goal page: "Ziel bearbeiten" (`GoalSettingsSheet`: name, kind, date + time, mode, done / archive); a new date, time or
-  mode opens the preview, part edits only offer it ("Plan anpassen?"); saving Settings → Lernen opens it too while a goal
+  mode opens the preview (`PlanPreview.jsx`: per goal an agenda of days, the date large in the serif; a tap on a
+  session opens day back / day / time / day on / "Wieder wie geplant", the row stays put while open and takes its new
+  day once closed; `GET /plan` answers each goal's whole plan as `sessions` with a `key` = place in the planner's
+  result, `POST /replan { inputHash, moves: [{ key, date, time }] }` writes moved ones pinned), part edits only offer it ("Plan anpassen?"); saving Settings → Lernen opens it too while a goal
   is planned. Subject page: "Fach bearbeiten" (`SubjectEditSheet`: name, emoji, colour; a new colour recolours its
   sessions). Every subject has a colour (a new one without takes the first of the eight not in use; the list has a
   colour dot per row) and every goal a **shape** (`goals.shape`, migration 042: circle, square, triangle, diamond,
@@ -514,7 +536,7 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   Glut mit Abendrot = warm + sunset, the default; Papier mit Tanne = papier + pine; sets both below), colour palette
   (the ground: warm (default), papier, graphite, nord, forest, plum, mono — `<html data-palette>`, values in
   `index.css` and `public/boot.css`, swatches in `preferences.js` `PALETTES`), accent colour (green, ocean, violet,
-  sunset (default), rose, gold, pine — also recolours the favicon), motion level, home layout. "App": the tour and (where possible) installing.
+  sunset (default), rose, cherry (Kirsche), gold, pine — also recolours the favicon), motion level, home layout. "App": the tour and (where possible) installing.
   Password fields use `PasswordInput` (eye button to show/hide).
 - Friends tab (`Social.jsx`) — friends and friend requests; names link to `/u/:username`, the Add
   tab can open a profile before sending a request.
@@ -609,7 +631,11 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   colour wheel: `task/ColorWheel.jsx`, the last swatch of `TaskColorPicker`; `isTaskColor`, `hexToHsl` /
   `hslToHex`); rows and chips set `data-task-color`, the tones of the names live in `index.css` as `--task-color`
   per theme, an own colour gets its rule from `features/tasks/ownColors.js` (a constructed stylesheet + a
-  MutationObserver, started in main.jsx; CSP unchanged). Own colours are allowed on tasks, groups, event types,
+  MutationObserver, started in main.jsx; CSP unchanged). **My colours**: every `TaskColorPicker` shows the eight, then
+  the account's saved own colours (`users.saved_colors`, migration 046, ≤ 16, newest first; `/api/me` → `savedColors`,
+  `PUT /api/users/colors { colors }`; `features/tasks/savedColors.js`: `addSavedColor`, `removeSavedColor`), then a
+  small dashed "+" that opens the wheel with "Hinzufügen" (adds + picks it) and, for a picked saved colour, "Aus meinen
+  Farben entfernen"; a typed code is kept exactly. Own colours are allowed on tasks, groups, event types,
   session / family entries, subjects, collections and notes (api `cleanColor`, migration 042 widens the CHECKs;
   families and profiles keep the eight). An event without its own colour takes its type's.
 - Tasks vs. events (`tasks.kind`, `src/features/tasks/kinds.js`): a task is ticked off by hand, an
@@ -797,7 +823,7 @@ the theme before React loads.
   `utils/verificationToken.js`.
 - PostgreSQL 18 locally (`quidey_db`). Schema in `schema.sql` (regenerated from pg_dump, see
   memory), incremental `migrations/001…019` (015: performance indexes, 017: task colour +
-  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment, 028: push_subscriptions, tasks.push_sent_for, users.push_digest_on, 029: tasks.reminders (replaces reminder_minutes), 030: sub-groups — shared_session_groups, family_groups, shared_session_tasks.group_id, family_tasks.group_id, 031: users.tour_seen_at, users.allday_reminder_time, …, 036: note_folders, notebook_notes.folder_id / tags / color / archived / trashed_at, collections, collection_items, users.groups_imported_at, 037: board_notes, 038: arcade_scores, 039: reminders + push_subscriptions.alarms, 040: family_tasks.kind / reminders / push_sent_for / done_by / completed_at, shared_session_tasks.done_by / completed_at, push_subscriptions.groups, notification kind entries_added, 041: study goals — subjects, goals, goal_parts, study_windows, tasks.goal_part_id / plan_pinned, users.study_*, push_subscriptions.study, 042: own colours "#rrggbb" in the color CHECKs of tasks, groups, event_types, shared_session_tasks, family_tasks, subjects + goals.shape, 043: task notes moved into notebook_notes (task_id); `notes` stays empty, `/api/notes` and `/api/tasks/:id/notes` read / write my notebook notes about tasks in the old shape { id, task_id, content }). Tables: users, tasks, groups, task_groups, notes,
+  reminder mails, 018: group colour, 019: testers + broadcast audience, 020: optional task fields on shared session tasks, 021: profile fields, 022: families — families, family_members, family_tasks, family_messages, 023: events — tasks.kind / event_type_id, event_types, 024: tasks.repeat_left / repeat_skip, event_types.keywords, shared_session_tasks.kind, 025: users.level / avatar_frame / profile_title / showcase_badges / share_activity, shared_time_days, challenge_completions, feed_events, feed_cheers, 026: users.show_online, families.note / note_updated_at / note_updated_by / emoji / color, family_tasks.assignee_id, 027: tester_feedback — per tester and topic rating 1–5 / comment, 028: push_subscriptions, tasks.push_sent_for, users.push_digest_on, 029: tasks.reminders (replaces reminder_minutes), 030: sub-groups — shared_session_groups, family_groups, shared_session_tasks.group_id, family_tasks.group_id, 031: users.tour_seen_at, users.allday_reminder_time, …, 036: note_folders, notebook_notes.folder_id / tags / color / archived / trashed_at, collections, collection_items, users.groups_imported_at, 037: board_notes, 038: arcade_scores, 039: reminders + push_subscriptions.alarms, 040: family_tasks.kind / reminders / push_sent_for / done_by / completed_at, shared_session_tasks.done_by / completed_at, push_subscriptions.groups, notification kind entries_added, 041: study goals — subjects, goals, goal_parts, study_windows, tasks.goal_part_id / plan_pinned, users.study_*, push_subscriptions.study, 042: own colours "#rrggbb" in the color CHECKs of tasks, groups, event_types, shared_session_tasks, family_tasks, subjects + goals.shape, 043: task notes moved into notebook_notes (task_id); `notes` stays empty, `/api/notes` and `/api/tasks/:id/notes` read / write my notebook notes about tasks in the old shape { id, task_id, content }, 044: usage statistics, 045: admin export action, 046: users.saved_colors (my colours for the pickers), 047: users.tips_seen / tips_off (feature tips; the basics marked seen for everybody who had seen the tour)). Tables: users, tasks, groups, task_groups, notes,
   sessions, session_tasks, session_shared_tasks, friendships, task_shares, shared_sessions,
   shared_session_members / _tasks / _events / _time, messages, notifications, broadcasts,
   beta_access_requests, admin_actions, email_verification_tokens.

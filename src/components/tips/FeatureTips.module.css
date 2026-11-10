@@ -1,0 +1,148 @@
+/* A feature tip: an inverted little card (ink as ground), beside the control it explains, with an
+   arrow at it; a quiet ring around the control. Placed by FeatureTips.jsx (fixed, top/left). */
+.tip{
+    position: fixed;
+    z-index: 900;
+    box-sizing: border-box;
+    width: min(19rem, calc(100vw - 20px));
+    padding: 0.8rem 0.9rem 0.7rem;
+    color: var(--surface);
+    background-color: var(--text-h);
+    border-radius: var(--radius-lg, 18px);
+    box-shadow: var(--shadow-float, 0 8px 28px rgb(0 0 0 / 0.25));
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+}
+
+.tip[data-side="above"]{
+    transform: translateY(-4px) scale(0.98);
+}
+
+.tip[data-placed]{
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    /* only the arrival is animated: the position follows the control frame by frame, never lags */
+    transition: opacity 0.22s var(--ease-out, ease-out), transform 0.3s var(--spring-curve, ease-out);
+}
+
+/* a control taller than the window: the tip sits inside its top, no arrow */
+.tip[data-side="inside"] .arrow{
+    display: none;
+}
+
+.arrow{
+    position: absolute;
+    left: calc(var(--arrow, 50%) - 7px);
+    width: 14px;
+    height: 14px;
+    background-color: var(--text-h);
+    border-radius: 3px;
+    transform: rotate(45deg);
+}
+
+.tip[data-side="below"] .arrow{
+    top: -5px;
+}
+
+.tip[data-side="above"] .arrow{
+    bottom: -5px;
+}
+
+.title{
+    position: relative;
+    margin: 0 0 0.2rem;
+    font: var(--type-headline);
+}
+
+.text{
+    position: relative;
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    opacity: 0.86;
+}
+
+.actions{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.35rem;
+    margin-top: 0.65rem;
+}
+
+.off,
+.next{
+    min-height: 2.25rem;
+    padding: 0 0.8rem;
+    font: inherit;
+    font-size: 0.85rem;
+    border-radius: var(--radius-pill, 999px);
+    cursor: pointer;
+}
+
+.off{
+    margin-right: auto;
+    padding-left: 0;
+    color: inherit;
+    opacity: 0.75;
+    background: none;
+    border: 0;
+}
+
+.off:hover{
+    opacity: 1;
+}
+
+.next{
+    font-weight: 600;
+    color: var(--text-h);
+    background-color: var(--surface);
+    border: 0;
+}
+
+.off:active,
+.next:active{
+    transform: scale(var(--press, 0.96));
+}
+
+.off:focus-visible,
+.next:focus-visible{
+    outline: 2px solid var(--surface);
+    outline-offset: 2px;
+}
+
+/* around the control that is explained: exactly its box (and its corners), the line inside it */
+.ring{
+    position: fixed;
+    z-index: 899;
+    box-sizing: border-box;
+    border: 2px solid var(--text-h);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--text-h) 14%, transparent);
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.ring[data-placed]{
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.22s var(--ease-out, ease-out);
+}
+
+@media (prefers-reduced-motion: reduce){
+    .tip,
+    .tip[data-placed],
+    .ring[data-placed]{
+        transition: opacity 0.15s linear;
+        transform: none;
+    }
+}
+
+:root[data-motion="minimal"] .tip[data-placed],
+:root[data-motion="minimal"] .ring[data-placed]{
+    transition: opacity 0.15s linear;
+    transform: none;
+}

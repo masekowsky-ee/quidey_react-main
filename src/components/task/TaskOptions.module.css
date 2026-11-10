@@ -169,27 +169,92 @@
     outline-offset: 4px;
 }
 
-/* the last swatch: the colour wheel (a ring of every hue), or the own colour once there is one */
-.ownSwatch{
+/* the small plus at the end: a new colour of my own; the same round dot as the swatches */
+.addSwatch{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 1.75rem;
     height: 1.75rem;
     padding: 0;
+    color: var(--text-muted);
     background: none;
     border: none;
+    border-radius: 50%;
+    cursor: pointer;
 }
 
-.ownDot{
-    background:
-        radial-gradient(closest-side, var(--surface) 38%, transparent 40%),
-        conic-gradient(#f87171, #facc15, #4ade80, #2dd4bf, #60a5fa, #a78bfa, #f472b6, #f87171);
+.addDot{
+    display: grid;
+    place-items: center;
+    background-color: transparent;
+    border: 1.5px dashed var(--border-strong);
+    border-radius: 50%;
 }
 
-.ownSwatch:hover .swatchDot{
+.addDot svg{
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    fill: none;
+}
+
+.addSwatch:hover .addDot{
     transform: scale(1.12);
 }
 
-.ownSwatch[aria-pressed="true"] .swatchDot{
-    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--task-color, var(--text-muted));
+.addSwatch:hover,
+.addSwatch[aria-expanded="true"]{
+    color: var(--text-h);
+}
+
+.addSwatch[aria-expanded="true"] .addDot{
+    border-color: var(--text-muted);
+}
+
+.addSwatch:focus-visible{
+    outline: none;
+}
+
+.addSwatch:focus-visible .addDot{
+    outline: 2px solid var(--border-strong);
+    outline-offset: 4px;
+}
+
+.addPanel{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.6rem;
+}
+
+.addRow{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.addConfirm{
+    composes: btnPrimary from '../ui.module.css';
+}
+
+.addRemove{
+    padding: 0.2rem 0;
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+.colorError{
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+    color: var(--danger);
 }
 
 /* the dot in the task list that opens the swatches */
