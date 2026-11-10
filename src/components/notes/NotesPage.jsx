@@ -12,6 +12,8 @@ import { showToast } from '../../features/toast/toast';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import NoteEditor from './NoteEditor.jsx';
+import ScanSheet from '../scan/ScanSheet.jsx';
+import { useAiQuota } from '../../features/ai/ai';
 import NotePreview from './NotePreview.jsx';
 import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
 import Icon from '../icons.jsx';
@@ -66,6 +68,8 @@ export default function NotesPage() {
     const openId = Number(params.get('note')) || null;
 
     const [notes, setNotes] = useState(null);
+    const aiQuota = useAiQuota();
+    const [scanning, setScanning] = useState(false);
     const [trash, setTrash] = useState(null);
     const [folders, setFolders] = useState([]);
     const [query, setQuery] = useState('');
@@ -209,6 +213,8 @@ export default function NotesPage() {
 
     return (
         <div className={styles.page} data-part="notes">
+            {scanning && <ScanSheet onClose={() => setScanning(false)}
+                onDone={(made) => { if (made.notes) fetchNotes().then(setNotes).catch(() => {}); }} />}
             <header className={styles.head}>
                 <div>
                     <h1 className={styles.title}>{t('notesTitle')}</h1>
@@ -216,6 +222,11 @@ export default function NotesPage() {
                 </div>
                 <div className={styles.headActions}>
                     <Link to="/collections" className={styles.ghostLink}><Icon name="collection" size={16} /> {t('collections')}</Link>
+                    {/* study material read by the AI into notes, entries and a study plan */}
+                    {aiQuota?.available &&
+                        <button type="button" className={styles.ghostLink} onClick={() => setScanning(true)}>
+                            <Icon name="brain" size={16} /> {t('scanTitle')}
+                        </button>}
                     <select className={styles.templateSelect} value="" onChange={e => e.target.value && newNote(e.target.value)} aria-label={t('noteFromTemplate')}>
                         <option value="">{t('noteFromTemplate')}</option>
                         {NOTE_TEMPLATES.map(key => <option key={key} value={key}>{t(`noteTpl_${key}_name`)}</option>)}

@@ -50,7 +50,7 @@ export default function TaskForm(props){
     // sheet: QuickAdd's FormSheet (slides in, swiped down on phones)
     // onReminder(name): testers' "Erinnerung" choice, QuickAdd swaps in the reminder form;
     // initialKind / initialName: coming back from there
-    const {setCreateTask, sheet, onReminder, initialKind = 'task', initialName = '', initialDue = '', initialTime = '', target = null, group} = props;
+    const {setCreateTask, sheet, onReminder, onScan, initialKind = 'task', initialName = '', initialDue = '', initialTime = '', target = null, group} = props;
     const nameRef = useRef(null);
     useFocusOnArrival(nameRef);
 
@@ -296,6 +296,11 @@ export default function TaskForm(props){
                         if (next === 'reminder') { onReminder(name); return; }
                         setKind(next); setKindByHand(true); followName(name, next);
                     }} />}
+                {/* the plus button's form: study material read by the AI instead (QuickAdd swaps in the scan sheet) */}
+                {onScan && !elsewhere && aiQuota?.available &&
+                    <button type="button" className={styles.scanLink} onClick={onScan}>
+                        <Icon name="brain" size={14} /> {t('scanFromForm')}
+                    </button>}
                 {/* the form opens to be typed into: the name has the focus (on a touch screen once the sheet is up) */}
                 <div className={styles.nameRow}>
                     <input ref={nameRef} className={styles.input} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}

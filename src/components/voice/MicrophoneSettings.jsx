@@ -32,7 +32,7 @@ export default function MicrophoneSettings() {
                 <Icon name={state === 'granted' ? 'check' : 'mic'} size={16} />
                 <span>{t(text)}</span>
             </p>
-            {state !== 'granted' && (native
+            {state === 'denied' && (native
                 ? <p className={styles.muted}>{t('micHowApp')}</p>
                 : <ul className={styles.how}>
                     <li>{t('micHowChrome')}</li>
@@ -41,8 +41,8 @@ export default function MicrophoneSettings() {
                 </ul>)}
             <div className={styles.actions}>
                 {state !== 'granted' &&
-                    <button type="button" className={styles.button} onClick={ask}>{t('micAskAgain')}</button>}
-                {native && state !== 'granted' &&
+                    <button type="button" className={styles.button} onClick={ask}>{t(state === 'denied' ? 'micAskAgain' : 'micAllowNow')}</button>}
+                {native && state === 'denied' &&
                     <button type="button" className={styles.button} onClick={openVoiceSettings}>{t('micOpenSettings')}</button>}
             </div>
         </div>

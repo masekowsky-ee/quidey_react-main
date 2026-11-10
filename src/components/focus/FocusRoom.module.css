@@ -404,6 +404,12 @@
 }
 
 /* ---------- step three: the session's note ---------- */
+.notesHeadActions {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+
 .notesHead {
     display: flex;
     align-items: center;

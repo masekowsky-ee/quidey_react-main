@@ -5,6 +5,7 @@ import { showForms } from '../features/settings/settingsAction';
 import { useSheet } from '../features/layout/dragDismiss';
 import TaskForm from './TaskForm.jsx';
 import ReminderForm from './reminders/ReminderForm.jsx';
+import ScanSheet from './scan/ScanSheet.jsx';
 
 // The new-task form over whatever page is open: the header's "New" and Home's "Create task"
 // both open it (settings.showForms). Testers can switch it to a reminder ("Erinnerung" in the
@@ -13,6 +14,8 @@ export default function QuickAdd() {
     const dispatch = useDispatch();
     const open = useSelector(state => state.settings.showForms);
     if (!open) return null;
+    // "Material scannen" in the form: the scan sheet in its place
+    if (open === 'scan') return <ScanSheet onClose={() => dispatch(showForms(false))} />;
     return (
         <FormSheet onClose={() => dispatch(showForms(false))}>
             {(sheet, close) => <QuickAddForm sheet={sheet} close={close} reminder={open === 'reminder'} />}
@@ -21,6 +24,7 @@ export default function QuickAdd() {
 }
 
 function QuickAddForm({ sheet, close, reminder }) {
+    const dispatch = useDispatch();
     // what was typed goes along when switching between the two forms
     const [form, setForm] = useState(() => ({ kind: reminder ? 'reminder' : 'task', text: '' }));
     if (form.kind === 'reminder') {
@@ -29,6 +33,7 @@ function QuickAddForm({ sheet, close, reminder }) {
     }
     return <TaskForm key={form.kind} sheet={sheet} initialKind={form.kind} initialName={form.text}
         onReminder={(text) => setForm({ kind: 'reminder', text })}
+        onScan={() => dispatch(showForms('scan'))}
         setCreateTask={(value) => { if (!value) close(); }} />;
 }
 

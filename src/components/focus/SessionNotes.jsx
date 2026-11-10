@@ -6,6 +6,8 @@ import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import NoteEditor from '../notes/NoteEditor.jsx';
 import Notebook from './Notebook.jsx';
+import ScanSheet from '../scan/ScanSheet.jsx';
+import { useAiQuota } from '../../features/ai/ai';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
 import styles from './FocusRoom.module.css';
@@ -34,6 +36,8 @@ export default function SessionNotes({ goal, focusTask }) {
     const [showAll, setShowAll] = useState(false);
     const [stored, setStored] = useState(readSessionNote);
     const [creating, setCreating] = useState(false);
+    const aiQuota = useAiQuota();
+    const [scanning, setScanning] = useState(false);
     // a note made from the click: the cursor goes straight into it
     const [justMade, setJustMade] = useState(null);
 
@@ -83,10 +87,17 @@ export default function SessionNotes({ goal, focusTask }) {
         <aside className={styles.notesCol} aria-labelledby="session-notes-title" data-tip="focus-notes">
             <div className={styles.notesHead}>
                 <h2 id="session-notes-title" className={styles.cardLabel}><Icon name="note" size={16} /> {t('sessionNotesTitle')}</h2>
-                <button type="button" className={styles.textBtn} onClick={() => setShowAll(all => !all)} aria-pressed={showAll}>
-                    {showAll ? t('sessionNotesBack') : t('sessionNotesAll')}
-                </button>
+                <div className={styles.notesHeadActions}>
+                    {/* study material read by the AI (the whole notebook has its own button) */}
+                    {!showAll && aiQuota?.available &&
+                        <button type="button" className={styles.textBtn} onClick={() => setScanning(true)}>{t('scanTitle')}</button>}
+                    <button type="button" className={styles.textBtn} onClick={() => setShowAll(all => !all)} aria-pressed={showAll}>
+                        {showAll ? t('sessionNotesBack') : t('sessionNotesAll')}
+                    </button>
+                </div>
             </div>
+            {scanning && <ScanSheet onClose={() => setScanning(false)}
+                onDone={(made) => { if (made.notes) fetchNotes().then(setNotes).catch(() => {}); }} />}
             {showAll
                 ? <Notebook focusTask={focusTask} />
                 : notes === null

@@ -832,8 +832,9 @@ false without `ANTHROPIC_API_KEY`: the app hides the buttons). Frontend `feature
   each — both checked by their first bytes, pictures shrunk in the browser first —, one of my notes, or text ≤ 60 000
   chars) → `{ result: { plan, notes, entries }, quota }`: a study goal (name, kind, due, subject, parts with minutes
   15–600), notes in the editor's line format, dated tasks/events; only what was asked for. Nothing of the material is
-  stored. `components/scan/ScanSheet.jsx` (from the notebook's "Scannen" and the Lernen page): source tabs (Datei /
-  Notiz / Text einfügen), what to make (Lernplan only for testers), then a preview where each part is kept or left
+  stored. `components/scan/ScanSheet.jsx` (from the notebook's "Scannen", the session's notes in the Fokusraum, the notes
+  page, the Lernen page, and the plus button's form: "Material scannen" → `showForms('scan')`, QuickAdd shows the sheet): source tabs (Datei /
+  Notiz / Text einfügen), what to make (Lernplan, Notizen, Termine & Aufgaben), then a preview where each part is kept or left
   out; "Übernehmen" makes them through the usual routes (`createNote`, `addTask`, Lernen's `saveSubject` + `createGoal`
   with `estimateSource: 'ai'`). `features/ai/scan.js` (`filesToSource`, `scanMaterial`). Privacy: "Lernmaterial
   scannen" in § 5.
@@ -855,7 +856,10 @@ false without `ANTHROPIC_API_KEY`: the app hides the buttons). Frontend `feature
   new-entry name (what is said becomes the line, read like typing) and `DictateButton.jsx` in the notes editor's tools
   (continuous, each finished sentence inserted once at the cursor via the editor's `insertText`). Browser: Web Speech
   API; Android app: plugin `QuideyVoice` (`VoicePlugin.java` in quidey_android: SpeechRecognizer, RECORD_AUDIO asked on
-  first start, events partial / final / error / end). Privacy: "Spracheingabe" in § 5.
+  first start, events partial / final / error / end; `permission` / `requestPermission` / `openSettings`). A blocked
+  microphone's warning has "Erlauben": in the app Android's page for Quidey, in the browser Settings → App → Mikrofon
+  (`voice/MicrophoneSettings.jsx`: the state via `navigator.permissions`, how to allow it per browser when blocked,
+  "Nochmal fragen" / "Jetzt erlauben" via getUserMedia). Privacy: "Spracheingabe" in § 5.
 
 ## API access
 

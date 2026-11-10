@@ -237,6 +237,27 @@
     color: var(--text-h);
 }
 
+/* "Material scannen" under the kind switch: a quiet way to the scan sheet */
+.scanLink{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    align-self: flex-start;
+    padding: 0;
+    font: inherit;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.scanLink:hover{
+    color: var(--text-h);
+}
+
 /* the name with the microphone beside it */
 .nameRow{
     display: flex;
