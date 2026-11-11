@@ -471,7 +471,7 @@ function Privacy() {
                 Untis-Passwort, das Passwort nur verschlüsselt (AES-256) und nur, um den Stundenplan abzurufen; mit dem
                 iCal-Link speichert Quidey stattdessen diesen Link verschlüsselt. Gespeichert werden außerdem die Stunden
                 der letzten Woche und der nächsten drei Wochen: Tag, Uhrzeit, Fach, Raum, Klasse, ob sie entfällt oder
-                geändert ist, und der Hinweistext dazu; Namen von Lehrkräften speichert Quidey nicht. Abgerufen wird,
+                geändert ist, und der Hinweistext dazu; Namen von Lehrkräften speichert Quidey nicht. Mit dem Untis-Login ruft Quidey auch die Hausaufgaben ab und legt daraus Aufgaben an (Tag, Uhrzeit der Stunde, Text); das kannst du in den Einstellungen ausschalten, und gemerkt wird nur, welche Hausaufgabe schon eine Aufgabe wurde. Abgerufen wird,
                 wenn du den Kalender öffnest und der letzte Abruf älter als 15 Minuten ist. Die Daten siehst nur du.
                 „Trennen“ löscht Zugangsdaten und alle gespeicherten Stunden sofort, ebenso das Löschen deines Kontos.
                 Rechtsgrundlage ist deine Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO, die du mit dem Verbinden erteilst

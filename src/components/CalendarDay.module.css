@@ -1029,6 +1029,61 @@
     outline-offset: -1px;
 }
 
+/* the details of an entry (meta, labels): in a short block (under an hour) they stay hidden until the
+   block is hovered or focused, then it grows to show everything instead of cutting it off */
+.blockDetails{
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.block[data-short]{
+    transition: box-shadow 0.14s ease-out;
+}
+
+.block[data-short] .entryText{
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.4rem;
+}
+
+.block[data-short] .blockDetails{
+    display: none;
+}
+
+.block[data-short]:hover,
+.block[data-short]:focus-within{
+    height: auto;
+    min-height: calc(var(--length) * var(--hour) / 60 - 2px);
+    overflow: visible;
+    z-index: 6;
+    background: color-mix(in srgb, var(--task-color, var(--chip-color)) 22%, var(--surface));
+    box-shadow: 0 6px 18px -8px rgb(0 0 0 / 0.35);
+}
+
+.block[data-short]:hover .blockDetails,
+.block[data-short]:focus-within .blockDetails{
+    display: flex;
+    flex-basis: 100%;
+}
+
+/* the opened Untis day: a quiet way back to the one box */
+.lessonsClose{
+    align-self: flex-start;
+    margin: 0 0 0.4rem;
+    padding: 0;
+    font: inherit;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
 /* a lesson of my Untis timetable: a flat grey block, only to read */
 .block.entryLesson,
 .block.entryLesson:hover,

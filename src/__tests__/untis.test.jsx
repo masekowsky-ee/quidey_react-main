@@ -5,7 +5,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
 import { apiFetch } from '../features/helperFunction'
 import { setLanguage } from '../features/settings/settingsAction'
-import { lessonsToEntries, rememberUntisStatus } from '../features/untis/untis'
+import { lessonsToEntries, lessonBoxes, rememberUntisStatus } from '../features/untis/untis'
 import UntisSettings from '../components/untis/UntisSettings'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
@@ -24,6 +24,25 @@ describe('lessons as calendar entries', () => {
                 location: 'R12', done: false, lesson: { status: 'cancelled', info: 'Entfall', subjectLong: 'Mathematik', className: '10b' },
             }),
         ])
+    })
+})
+
+describe('a day of lessons as one box', () => {
+    const lesson = (id, day, start, end, status = 'normal') => ({ id, day, start, end, subject: 'M', subjectLong: 'Mathe', room: '', className: '', status, info: '' })
+
+    it('one entry per day from the first start to the last end, holding the lessons', () => {
+        const boxes = lessonBoxes(lessonsToEntries([
+            lesson(1, '2026-11-19', '07:55', '08:40'), lesson(2, '2026-11-19', '10:00', '12:55'), lesson(3, '2026-11-20', '08:00', '09:00'),
+        ]), 'Stundenplan')
+        expect(boxes.map(b => [b.due, b.due_time, b.duration_minutes, b.name, b.lesson.box, b.lesson.items.length])).toEqual([
+            ['2026-11-19', '07:55', 300, 'Stundenplan', true, 2],
+            ['2026-11-20', '08:00', 60, 'Stundenplan', true, 1],
+        ])
+    })
+
+    it('the box says so when every lesson of the day is cancelled', () => {
+        const [box] = lessonBoxes(lessonsToEntries([lesson(1, '2026-11-19', '08:00', '08:45', 'cancelled')]), 'Stundenplan')
+        expect(box.lesson.status).toBe('cancelled')
     })
 })
 
@@ -70,6 +89,17 @@ describe('connecting the timetable in the settings', () => {
         expect(screen.getByRole('button', { name: 'Jetzt aktualisieren' })).toBeInTheDocument()
         // the password isn't kept in the page afterwards
         expect(screen.queryByLabelText('Untis-Passwort')).toBeNull()
+    })
+
+    it('homework to tasks is on by default and can be switched off', async () => {
+        answers.status = { ...CONNECTED, homeworkToTasks: true }
+        await open()
+        const box = screen.getByRole('checkbox', { name: 'Hausaufgaben als Aufgaben anlegen' })
+        expect(box).toBeChecked()
+        apiFetch.mockImplementation(async (url, options = {}) => (url === '/api/untis/settings' ? { ...CONNECTED, homeworkToTasks: JSON.parse(options.body).homeworkToTasks } : {}))
+        await act(async () => { fireEvent.click(box) })
+        expect(JSON.parse(call('/api/untis/settings', 'PUT')[1].body)).toEqual({ homeworkToTasks: false })
+        expect(screen.getByRole('checkbox', { name: 'Hausaufgaben als Aufgaben anlegen' })).not.toBeChecked()
     })
 
     it('a wrong password says so', async () => {

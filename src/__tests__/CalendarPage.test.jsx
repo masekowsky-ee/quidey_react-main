@@ -642,13 +642,21 @@ describe('the Untis timetable in my calendar', () => {
         })
     })
 
-    it('shows the lessons beside my entries, read-only, a cancelled one marked', async () => {
+    it('shows a day of lessons as one box that opens to the lessons, read-only, a cancelled one marked', async () => {
         await act(async () => { setup('/calendar?date=2026-10-19&day=2026-10-19') })
         await act(async () => {})
+        const box = await screen.findByRole('button', { name: /Timetable: 08:00–10:40/ })
+        expect(box).toHaveAttribute('aria-expanded', 'false')
+        expect(screen.queryByLabelText('Timetable: Mathematik')).toBeNull()
+        fireEvent.click(box)
         const lesson = await screen.findByLabelText('Timetable: Mathematik')
         // no button to open an editor, no way to drag it
         expect(lesson.tagName).toBe('SPAN')
         expect(screen.getByLabelText('Timetable: Englisch')).toHaveTextContent('Cancelled')
+        const close = screen.getByRole('button', { name: 'Collapse timetable' })
+        expect(close).toHaveAttribute('aria-expanded', 'true')
+        fireEvent.click(close)
+        expect(screen.getByRole('button', { name: /Timetable: 08:00–10:40/ })).toHaveAttribute('aria-expanded', 'false')
         expect(apiFetch.mock.calls.some(([url]) => /^\/api\/untis\/lessons\?from=2026-09-18&to=2026-11-19$/.test(url))).toBe(true)
     })
 

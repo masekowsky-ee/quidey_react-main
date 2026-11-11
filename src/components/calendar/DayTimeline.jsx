@@ -17,7 +17,8 @@ const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styl
 const coarsePointer = () => Boolean(window.matchMedia?.('(pointer: coarse)')?.matches);
 const minLength = () => (coarsePointer() ? 45 : 30);
 // a block shorter than this puts time and name on one line and leaves the details out
-const SHORT_MINUTES = 45;
+// a block shorter than this shows its time and name on one line; the rest opens under the pointer / focus
+const SHORT_MINUTES = 60;
 
 const nowMinutes = () => {
     const now = new Date();
@@ -65,8 +66,13 @@ export default function DayTimeline({
         return () => clearInterval(id);
     }, [isToday]);
 
+    // the Untis timetable of the day is one box until it is opened here
+    const [lessonsOpen, setLessonsOpen] = useState(false);
     // a change being saved already shows where it goes
-    const shown = useMemo(() => tasks.map(task => (pending?.id === task.id ? { ...task, ...pending.changes } : task)), [tasks, pending]);
+    const shown = useMemo(() => tasks
+        .flatMap(task => (task.lesson?.box && lessonsOpen ? task.lesson.items : [task]))
+        .map(task => (pending?.id === task.id ? { ...task, ...pending.changes } : task)), [tasks, pending, lessonsOpen]);
+    const hasLessons = tasks.some(task => task.lesson?.box);
     const allDay = shown.filter(task => minutesOfDay(task.due_time) === null);
     const blocks = useMemo(() => {
         const shortest = minLength();
@@ -140,7 +146,15 @@ export default function DayTimeline({
                             {task.projected && <Icon name="repeat" size={12} />}
                             {taskTimeText(task)}
                         </span>}
-                    {task.lesson
+                    {task.lesson?.box
+                        // the timetable's day: one box, opened to the lessons by a tap
+                        ? <button type="button" className={styles.entryOpen} aria-expanded="false" data-entry-open=""
+                            aria-label={fill(t('untisBoxLabel'), { from: timeText(minutesOfDay(task.due_time)), to: timeText(minutesOfDay(task.due_time) + task.duration_minutes), n: task.lesson.items.length })}
+                            onClick={() => setLessonsOpen(true)}>
+                            <span className={styles.entryName}>{task.name}</span>
+                            <span className={styles.lessonState}>{t('untisBoxOpen')}</span>
+                        </button>
+                        : task.lesson
                         // a lesson of my timetable: only to read (Untis is where it changes)
                         ? <span className={styles.entryOpen} aria-label={fill(t('untisLessonLabel'), { name: task.name })}>
                             <span className={styles.entryName}>{task.name}</span>
@@ -154,9 +168,13 @@ export default function DayTimeline({
                             {!timed && task.projected && <Icon name="repeat" size={12} />}
                             <span className={styles.entryName}>{task.name}</span>
                         </button>}
-                    {!short && <TaskMeta task={task} showTime={false} />}
-                    {!short && personal && !task.lesson && <TaskLabels task={task} onOpenGroup={onOpenGroup} />}
-                    {!short && task.lesson?.info && <span className={styles.entryMeta}>{task.lesson.info}</span>}
+                    {/* the details: shown with a long block, under the pointer / focus with a short one (nothing is cut off) */}
+                    {!task.lesson?.box &&
+                        <div className={styles.blockDetails}>
+                            <TaskMeta task={task} showTime={false} />
+                            {personal && !task.lesson && <TaskLabels task={task} onOpenGroup={onOpenGroup} />}
+                            {task.lesson?.info && <span className={styles.entryMeta}>{task.lesson.info}</span>}
+                        </div>}
                     {/* in a shared calendar who added it matters, on a short block too */}
                     {byWhom && <span className={styles.entryMeta}>{byWhom}</span>}
                 </div>
@@ -178,6 +196,11 @@ export default function DayTimeline({
                     ? <ul className={styles.allDayList}>{allDay.map(task => entry(task, { timed: false }))}</ul>
                     : <span className={styles.allDayEmpty}>{tasks.length === 0 ? t('noTasks') : ''}</span>}
             </div>
+
+            {hasLessons && lessonsOpen &&
+                <button type="button" className={styles.lessonsClose} aria-expanded="true" onClick={() => setLessonsOpen(false)}>
+                    {t('untisBoxClose')}
+                </button>}
 
             <div className={styles.timeline} ref={scrollerRef} aria-label={t('timelineLabel')} role="region" tabIndex={-1}>
                 <div className={styles.hours} ref={gridRef} onClick={onGridClick}

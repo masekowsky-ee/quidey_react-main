@@ -13,7 +13,7 @@ export function KindSwitch({ value, onChange, kinds = ['task', 'event'] }) {
     const { t } = useTranslation();
     const name = useId();
     return (
-        <fieldset className={kinds.length > 2 ? styles.kindThree : styles.kind}>
+        <fieldset className={kinds.length > 3 ? styles.kindFour : kinds.length > 2 ? styles.kindThree : styles.kind}>
             <legend className={styles.srOnly}>{t('kindLegend')}</legend>
             {kinds.map(kind => (
                 <label key={kind} className={value === kind ? styles.kindOn : styles.kindOption} data-tip={kind === 'reminder' ? 'kind-reminder' : undefined}>

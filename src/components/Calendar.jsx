@@ -26,7 +26,7 @@ import TaskForm from './TaskForm.jsx';
 import { FormSheet } from './QuickAdd.jsx';
 import Icon from './calendar/icons.jsx';
 import { useMediaQuery } from '../features/layout/breakpoints';
-import { useUntisLessons, useShowLessons, setShowLessons, useUntisStatus } from '../features/untis/untis';
+import { useUntisLessons, lessonBoxes, useShowLessons, setShowLessons, useUntisStatus } from '../features/untis/untis';
 
 const VIEW_LABELS = { month: 'calendarViewMonth', week: 'calendarViewWeek', agenda: 'calendarViewAgenda' };
 const VIEW_KEYS = { m: 'month', w: 'week', a: 'agenda' };
@@ -90,7 +90,9 @@ export default function Calendar() {
     const untisConnected = useUntisStatus()?.connected;
     const showLessons = useShowLessons();
     const lessons = useUntisLessons(!isShared && showLessons, dateKey(addDays(focusedDate, -31)), dateKey(addDays(focusedDate, 31)));
-    const tasks = useMemo(() => (lessons.length ? [...baseTasks, ...lessons] : baseTasks), [baseTasks, lessons]);
+    // a day of lessons is one box (opened in the day panel)
+    const lessonDays = useMemo(() => lessonBoxes(lessons, t('untisBoxName')), [lessons, t]);
+    const tasks = useMemo(() => (lessonDays.length ? [...baseTasks, ...lessonDays] : baseTasks), [baseTasks, lessonDays]);
     const openDay = fromKey(params.get('day'));
     // the task to open in the day panel; a link can name one
     // with ?task=<id>, e.g. "open in calendar" from the task list

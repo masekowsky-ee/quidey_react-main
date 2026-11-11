@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react';
 import {
     useUntisStatus, rememberUntisStatus, searchUntisSchools, connectUntis, disconnectUntis, syncUntis,
-    useShowLessons, setShowLessons,
+    useShowLessons, setShowLessons, setHomeworkToTasks,
 } from '../../features/untis/untis';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -108,6 +108,14 @@ export default function UntisSettings() {
                     <input type="checkbox" checked={show} onChange={e => setShowLessons(e.target.checked)} />
                     <span>{t('untisShowInCalendar')}</span>
                 </label>
+                {/* homework put in Untis becomes a task (day, the lesson's time, the text); only with a login */}
+                {status.mode === 'login' &&
+                    <label className={styles.switch}>
+                        <input type="checkbox" checked={status.homeworkToTasks !== false} disabled={busy}
+                            onChange={e => run(async () => rememberUntisStatus(await setHomeworkToTasks(e.target.checked)))} />
+                        <span>{t('untisHomeworkToTasks')}</span>
+                    </label>}
+                {status.mode === 'login' && <p className={styles.muted}>{t('untisHomeworkHint')}</p>}
                 {error && <p className={styles.error} role="alert">{error}</p>}
                 <div className={styles.actions}>
                     <button type="button" className={styles.button} disabled={busy} onClick={() => run(async () => rememberUntisStatus(await syncUntis()))}>

@@ -136,9 +136,9 @@
 }
 
 .primary {
-    color: var(--on-primary, #fff);
-    background: var(--text-h);
-    border: none;
+    color: var(--contrast-text);
+    background: var(--contrast-top);
+    border: 1px solid transparent;
 }
 
 .primary:disabled {
@@ -147,7 +147,7 @@
 }
 
 .secondary {
-    color: var(--text);
+    color: var(--text-h);
     background: none;
     border: 1px solid var(--control-border);
 }

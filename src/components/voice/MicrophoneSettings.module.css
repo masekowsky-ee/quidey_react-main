@@ -45,7 +45,7 @@
     font: inherit;
     font-size: 0.88rem;
     font-weight: 600;
-    color: var(--text);
+    color: var(--text-h);
     background: none;
     border: 1px solid var(--control-border);
     border-radius: var(--radius-pill);

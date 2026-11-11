@@ -26,6 +26,17 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+/* the plus button's four (task, event, reminder, note): two by two */
+.kindFour{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    border: none;
+    min-width: 0;
+}
+
 .kindOption,
 .kindOn{
     position: relative;

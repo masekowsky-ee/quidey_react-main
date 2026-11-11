@@ -50,7 +50,7 @@ export default function TaskForm(props){
     // sheet: QuickAdd's FormSheet (slides in, swiped down on phones)
     // onReminder(name): testers' "Erinnerung" choice, QuickAdd swaps in the reminder form;
     // initialKind / initialName: coming back from there
-    const {setCreateTask, sheet, onReminder, onScan, initialKind = 'task', initialName = '', initialDue = '', initialTime = '', target = null, group} = props;
+    const {setCreateTask, sheet, onReminder, onNote, onScan, initialKind = 'task', initialName = '', initialDue = '', initialTime = '', target = null, group} = props;
     const nameRef = useRef(null);
     useFocusOnArrival(nameRef);
 
@@ -291,9 +291,10 @@ export default function TaskForm(props){
                 <p className={styles.shareHint}>{fill(t('createInCollection'), { name: collection.name })}</p>}
             <form className={`${styles.form}`} onSubmit={handleSubmit} noValidate>
                 {(!target || target.events) &&
-                <KindSwitch value={effectiveKind} kinds={onReminder && !elsewhere ? ['task', 'event', 'reminder'] : undefined}
+                <KindSwitch value={effectiveKind} kinds={onReminder && !elsewhere ? ['task', 'event', 'reminder', ...(onNote ? ['note'] : [])] : undefined}
                     onChange={(next) => {
                         if (next === 'reminder') { onReminder(name); return; }
+                        if (next === 'note') { onNote(name); return; }
                         setKind(next); setKindByHand(true); followName(name, next);
                     }} />}
                 {/* the plus button's form: study material read by the AI instead (QuickAdd swaps in the scan sheet) */}
@@ -303,11 +304,11 @@ export default function TaskForm(props){
                     </button>}
                 {/* the form opens to be typed into: the name has the focus (on a touch screen once the sheet is up) */}
                 <div className={styles.nameRow}>
-                    <input ref={nameRef} className={styles.input} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}
+                    <input ref={nameRef} className={`${styles.input} ${styles.grow}`} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}
                         aria-describedby={quickParts.length > 0 ? 'quick-add-hint' : undefined}
                         value={name} maxLength={200} onChange={(e) => { setName(e.target.value); followName(e.target.value, kind); }} />
                     {/* speaking the line instead of typing it: read the same way (features/voice/voice.js) */}
-                    <MicButton onText={(text) => { const line = text.slice(0, 200); setName(line); setIgnoreQuick(false); followName(line, kind); }} />
+                    <MicButton className={styles.nameMic} onText={(text) => { const line = text.slice(0, 200); setName(line); setIgnoreQuick(false); followName(line, kind); }} />
                 </div>
                 {quickParts.length > 0 &&
                     <p id="quick-add-hint" className={styles.quickHint} aria-live="polite">
@@ -336,17 +337,27 @@ export default function TaskForm(props){
                         <span className={styles.typeHintDot} aria-hidden="true" />
                         {fill(t('keywordSuggestEvent'), { type: match.type.name })}
                     </button>}
-                <div className={event ? styles.eventWhen : styles.rowDiv}>
-                    <input className={`${styles.input} ${styles.grow}`} type="date" aria-label={t(event ? 'eventDay' : 'dueDate')}
-                        required={event} value={due} onChange={(e) => setDue(e.target.value)} />
-                    <input className={styles.input} type="time" aria-label={`${t(event ? 'eventStart' : 'taskTime')} (${t('allDay')}: –)`} title={t(event ? 'eventStart' : 'taskTime')}
-                        value={time} onPointerDown={dayForTime} onChange={(e) => { dayForTime(); setTime(e.target.value); }} />
+                {/* day and time, each with its name above it */}
+                <div className={event ? styles.whenEvent : styles.whenTask}>
+                    <label className={`${styles.whenField} ${styles.whenDay}`}>
+                        <span className={styles.fieldLabel}>{t(event ? 'eventDay' : 'dueDate')}</span>
+                        <input className={styles.input} type="date" aria-label={t(event ? 'eventDay' : 'dueDate')}
+                            required={event} value={due} onChange={(e) => setDue(e.target.value)} />
+                    </label>
+                    <label className={styles.whenField}>
+                        <span className={styles.fieldLabel}>{t(event ? 'eventStart' : 'taskTime')}</span>
+                        <input className={styles.input} type="time" aria-label={`${t(event ? 'eventStart' : 'taskTime')} (${t('allDay')}: –)`}
+                            value={time} onPointerDown={dayForTime} onChange={(e) => { dayForTime(); setTime(e.target.value); }} />
+                    </label>
                     {/* an event's end: follows start and length, setting it changes the length */}
                     {event && <span className={styles.timeDash} aria-hidden="true">–</span>}
                     {event &&
-                        <input className={styles.input} type="time" aria-label={t('eventEnd')} title={t('eventEnd')}
-                            value={endOf(time, duration)} onPointerDown={dayForTime}
-                            onChange={(e) => { const next = fromEnd(e.target.value, time, duration); if (next.time !== time) { dayForTime(); setTime(next.time); } setDuration(next.duration); }} />}
+                        <label className={styles.whenField}>
+                            <span className={styles.fieldLabel}>{t('eventEnd')}</span>
+                            <input className={styles.input} type="time" aria-label={t('eventEnd')}
+                                value={endOf(time, duration)} onPointerDown={dayForTime}
+                                onChange={(e) => { const next = fromEnd(e.target.value, time, duration); if (next.time !== time) { dayForTime(); setTime(next.time); } setDuration(next.duration); }} />
+                        </label>}
                 </div>
                 <DurationField label={t(event ? 'eventDuration' : 'plannedTime')} value={duration} onChange={setDuration}
                     maxHours={event ? 168 : 99}
@@ -355,18 +366,6 @@ export default function TaskForm(props){
                     autoNote={!typeByHand && match && eventTypeId === match.type.id ? fill(t('keywordAutoNote'), { keyword: match.keyword }) : null} />}
                 <input className={styles.input} type="text" placeholder={t('description')} aria-label={t('description')}
                     value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)} />
-                {!event && <>
-                    <div className={styles.prioHead}>
-                        <label htmlFor="prioritise">{t('prioritise')} <output htmlFor="prioritise">{prio ?? '–'}</output></label>
-                        {prio !== null &&
-                            <button type="button" className={styles.prioClear} onClick={() => setPrio(null)}>{t('noPrio')}</button>}
-                    </div>
-                    <div className={`${styles.rowDiv} ${prio === null ? styles.prioUnset : ''}`}>
-                        <p>{t('low')}</p>
-                        <input type="range" id="prioritise" min="0" max="100" step="1" value={prio ?? 50} onChange={(e) => setPrio(Number(e.target.value))} />
-                        <p>{t('high')}</p>
-                    </div>
-                </>}
                 <TaskColorPicker value={color} onChange={setColor} />
 
                 <button type="button" className={styles.moreToggle} aria-expanded={showMore} onClick={() => setShowMore(!showMore)}>
@@ -374,6 +373,20 @@ export default function TaskForm(props){
                 </button>
                 {showMore &&
                     <div className={styles.more}>
+                        {/* a task's priority: optional, "–" until the slider is touched ("!hoch" in the name sets it too) */}
+                        {!event &&
+                            <div className={styles.prioBlock}>
+                                <div className={styles.prioHead}>
+                                    <label htmlFor="prioritise">{t('prioritise')} <output htmlFor="prioritise">{saved.prio ?? '–'}</output></label>
+                                    {prio !== null &&
+                                        <button type="button" className={styles.prioClear} onClick={() => setPrio(null)}>{t('noPrio')}</button>}
+                                </div>
+                                <div className={`${styles.rowDiv} ${saved.prio === null ? styles.prioUnset : ''}`}>
+                                    <p>{t('low')}</p>
+                                    <input type="range" id="prioritise" min="0" max="100" step="1" value={saved.prio ?? 50} onChange={(e) => setPrio(Number(e.target.value))} />
+                                    <p>{t('high')}</p>
+                                </div>
+                            </div>}
                         <TaskOptionsFields value={extras} hasTime={Boolean(saved.due && saved.time)} hasDate={Boolean(saved.due)} personal={!elsewhere} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
                         {!elsewhere && <div className={styles.shareBlock}>
                             <span className={styles.shareLabel}>{t('shareWithFriends')}</span>

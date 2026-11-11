@@ -12,6 +12,7 @@ export const searchUntisSchools = (q) => apiFetch(`/api/untis/schools?q=${encode
 export const connectUntis = (body) => apiFetch('/api/untis', { method: 'PUT', body: JSON.stringify(body) });
 export const disconnectUntis = () => apiFetch('/api/untis', { method: 'DELETE' });
 export const syncUntis = () => apiFetch('/api/untis/sync', { method: 'POST' });
+export const setHomeworkToTasks = (on) => apiFetch('/api/untis/settings', { method: 'PUT', body: JSON.stringify({ homeworkToTasks: on }) });
 export const fetchUntisLessons = (from, to) => apiFetch(`/api/untis/lessons?from=${from}&to=${to}`);
 
 // lessons as calendar entries (events with a time, read-only)
@@ -31,6 +32,30 @@ export function lessonsToEntries(lessons) {
         color: null,
         group_ids: [],
     }));
+}
+
+const toMin = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
+const toHhmm = (min) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+
+// a day's lessons as ONE entry from the first start to the last end (the calendar shows that; the
+// day panel opens it to the lessons): { lesson: { box: true, items: [lesson entries], status } }
+export function lessonBoxes(entries, name) {
+    const days = new Map();
+    for (const entry of entries) days.set(entry.due, [...(days.get(entry.due) ?? []), entry]);
+    return [...days.entries()].map(([day, items]) => {
+        const start = Math.min(...items.map(item => toMin(item.due_time)));
+        const end = Math.max(...items.map(item => toMin(item.due_time) + item.duration_minutes));
+        return {
+            ...items[0],
+            id: `lessonbox-${day}`,
+            name,
+            due: day,
+            due_time: toHhmm(start),
+            duration_minutes: end - start,
+            location: '',
+            lesson: { box: true, items, status: items.every(item => item.lesson.status === 'cancelled') ? 'cancelled' : 'normal', info: '', subjectLong: name, className: '' },
+        };
+    });
 }
 
 // showing them in the calendar (on unless switched off)

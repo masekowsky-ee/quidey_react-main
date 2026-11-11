@@ -96,7 +96,7 @@ export default function ReminderForm({ reminder = null, initialText = '', sheet,
             </button>
             <h2 id={titleId} data-sheet-drag>{t(reminder ? 'reminderEditTitle' : 'reminderNew')}</h2>
             <form className={styles.form} onSubmit={submit} noValidate>
-                {onKind && <KindSwitch value="reminder" kinds={['task', 'event', 'reminder']}
+                {onKind && <KindSwitch value="reminder" kinds={['task', 'event', 'reminder', 'note']}
                     onChange={(kind) => { if (kind !== 'reminder') onKind(kind, fields.text); }} />}
                 <input ref={textRef} className={styles.input} type="text" value={fields.text} maxLength={REMINDER_TEXT_MAX}
                     placeholder={t('reminderTextPlaceholder')} aria-label={t('reminderText')}

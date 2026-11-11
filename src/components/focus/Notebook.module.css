@@ -51,8 +51,8 @@
     height: 2.25rem;
     padding: 0 0.8rem;
     font-size: 0.85rem;
-    color: var(--text);
-    border: 1px solid var(--border);
+    color: var(--text-h);
+    border: 1px solid var(--control-border);
     border-radius: var(--radius-pill);
 }
 
