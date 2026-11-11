@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
 import { fetchStudySettings, saveStudySettings, fetchPlanPreview } from '../../features/study/study';
 import PlanPreview from './PlanPreview.jsx';
+import ui from '../ui.module.css';
 import styles from './Study.module.css';
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
@@ -22,6 +23,7 @@ function Form({ settings }) {
     const [sessionMinutes, setSessionMinutes] = useState(String(settings.sessionMinutes));
     const [dailyMaxMinutes, setDailyMaxMinutes] = useState(String(settings.dailyMaxMinutes));
     const [aiAuto, setAiAuto] = useState(settings.aiAuto);
+    const [gradeScale, setGradeScale] = useState(settings.gradeScale ?? 'points');
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState(null);
     const [saved, setSaved] = useState(false);
@@ -48,6 +50,7 @@ function Form({ settings }) {
                 sessionMinutes: Number(sessionMinutes),
                 dailyMaxMinutes: Number(dailyMaxMinutes),
                 aiAuto,
+                gradeScale,
             }));
             setSaved(true);
             // the setup changed (spec §3): with a goal being planned, the preview opens (ruling 30)
@@ -102,6 +105,17 @@ function Form({ settings }) {
             <Row title={t('studyDailyMax')} hint={t('studyDailyMaxHint')}>
                 <NumberField label={t('studyDailyMax')} value={dailyMaxMinutes} range={DAILY_RANGE}
                     onChange={(v) => touch(() => setDailyMaxMinutes(v))} />
+            </Row>
+            <Row title={t('studyGradeScale')} hint={t('studyGradeScaleHint')}>
+                <div className={ui.segmented} role="radiogroup" aria-label={t('studyGradeScale')}>
+                    {['points', 'marks'].map(scale => (
+                        <button key={scale} type="button" role="radio" aria-checked={gradeScale === scale}
+                            className={gradeScale === scale ? ui.segmentActive : undefined}
+                            onClick={() => touch(() => setGradeScale(scale))}>
+                            {t(`studyScale_${scale}`)}
+                        </button>
+                    ))}
+                </div>
             </Row>
             {settings.aiAvailable && (
                 <Row title={t('studyAiAuto')} hint={t('studyAiAutoHint')}>

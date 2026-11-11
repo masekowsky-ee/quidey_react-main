@@ -7,6 +7,7 @@ import { groupColorAttr } from '../../features/tasks/taskColors';
 import TaskColorButton from '../task/TaskColorButton.jsx';
 import GoalShape from './GoalShape.jsx';
 import { fill } from '../../features/helperFunction';
+import { formatGrade } from '../../features/study/grades';
 import { useTranslation } from '../../i18n/useTranslation';
 import Icon from '../icons.jsx';
 import { Bone, Skeleton } from '../skeleton/Skeleton.jsx';
@@ -19,7 +20,7 @@ import { useAiQuota } from '../../features/ai/ai';
 const NAME_MAX = 60;
 
 function SubjectRow({ subject, onArchive, onColor }) {
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
     const goal = subject.nextGoal;
     return (
         <li className={styles.item} data-task-color={groupColorAttr(subject)}>
@@ -38,6 +39,11 @@ function SubjectRow({ subject, onArchive, onColor }) {
                 ) : (
                     <span className={styles.meta}>{t('studyNoGoal')}</span>
                 )}
+                {/* the two averages: all exams, and everything else that was graded */}
+                <span className={styles.meta}>
+                    <span>{fill(t('studyAvgExam'), { value: formatGrade(subject.exam?.avg, language) })}</span>
+                    <span>{fill(t('studyAvgOther'), { value: formatGrade(subject.other?.avg, language) })}</span>
+                </span>
             </Link>
             <TaskColorButton task={subject} label={t('studySubjectColor')} onChange={(color) => onColor(subject, color)} />
             <button type="button" className={styles.iconButton} onClick={() => onArchive(subject)}

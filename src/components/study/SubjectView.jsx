@@ -10,6 +10,8 @@ import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
 import Icon from '../icons.jsx';
 import { Bone, Skeleton } from '../skeleton/Skeleton.jsx';
 import GoalProgress from './GoalProgress.jsx';
+import GradeSheet from './GradeSheet.jsx';
+import { formatGrade } from '../../features/study/grades';
 import SubjectEditSheet from './SubjectEditSheet.jsx';
 import { countdownText, goalStateKey, useStudyError } from './studyUi';
 import styles from './Study.module.css';
@@ -18,7 +20,7 @@ const sum = (parts, key) => parts.reduce((total, p) => total + (p[key] ?? 0), 0)
 
 // One subject: its goals by date. "+ Ziel" sets ?new=goal, where the create sheet (Task 13) opens.
 export default function SubjectView({ subjectId }) {
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const errorText = useStudyError();
@@ -26,6 +28,7 @@ export default function SubjectView({ subjectId }) {
     const allGoals = useSelector(state => state.study.goals);
     const [loaded, setLoaded] = useState(false);
     const [editing, setEditing] = useState(false);
+    const [grading, setGrading] = useState(null);
     const subject = subjects.find(s => s.id === subjectId);
 
     useEffect(() => {
@@ -42,6 +45,35 @@ export default function SubjectView({ subjectId }) {
     const remove = () => dispatch(deleteSubject(subjectId))
         .then(() => navigate('/study'))
         .catch((err) => dispatch(showToast(errorText(err), 'error')));
+
+    const openGoals = goals.filter(g => g.status === 'active');
+    const finishedGoals = goals.filter(g => g.status !== 'active');
+
+    const goalRow = (goal, finished) => {
+        const state = goalStateKey(goal);
+        return (
+            <li key={goal.id} className={styles.item}>
+                <Link to={`/study/goals/${goal.id}`} className={styles.itemLink}>
+                    <span className={styles.itemName}>
+                        <GoalShape shape={goal.shape} color={subject?.color} /> {goal.name}
+                    </span>
+                    <span className={styles.meta}>
+                        <span>{t(`studyKind_${goal.kind}`)}</span>
+                        <span>{countdownText(goal.due, t)}</span>
+                        {state && !finished && <span className={styles.badgeQuiet}>{t(state)}</span>}
+                        {finished && goal.grade != null && <span className={styles.badge}>{fill(t('studyGradeShown'), { value: formatGrade(goal.grade, language) })}</span>}
+                    </span>
+                    {!finished && <GoalProgress credit={sum(goal.parts, 'credit')} estimate={sum(goal.parts, 'estimateMinutes')} />}
+                </Link>
+                {finished && goal.status === 'done' && (
+                    <button type="button" className={styles.btn} onClick={() => setGrading(goal)}
+                        aria-label={fill(t(goal.grade == null ? 'studyGradeEnter' : 'studyGradeChange'), { name: goal.name })}>
+                        <Icon name="edit" size={14} /> {t('studyGradeTitle')}
+                    </button>
+                )}
+            </li>
+        );
+    };
 
     if (loaded && !subject) {
         return (
@@ -79,27 +111,18 @@ export default function SubjectView({ subjectId }) {
             ) : goals.length === 0 ? (
                 <p className={styles.empty}>{t('studyGoalsEmpty')}</p>
             ) : (
-                <ul className={styles.list}>
-                    {goals.map(goal => {
-                        const state = goalStateKey(goal);
-                        return (
-                            <li key={goal.id} className={styles.item}>
-                                <Link to={`/study/goals/${goal.id}`} className={styles.itemLink}>
-                                    <span className={styles.itemName}>
-                                        <GoalShape shape={goal.shape} color={subject?.color} /> {goal.name}
-                                    </span>
-                                    <span className={styles.meta}>
-                                        <span>{t(`studyKind_${goal.kind}`)}</span>
-                                        <span>{countdownText(goal.due, t)}</span>
-                                        {state && <span className={styles.badgeQuiet}>{t(state)}</span>}
-                                    </span>
-                                    <GoalProgress credit={sum(goal.parts, 'credit')} estimate={sum(goal.parts, 'estimateMinutes')} />
-                                </Link>
-                            </li>
-                        );
-                    })}
-                </ul>
+                <>
+                    {/* school life: what is still to do, then what is finished (with its grade) */}
+                    {openGoals.length > 0 && <ul className={styles.list} aria-label={t('studyOpenWork')}>{openGoals.map(goal => goalRow(goal, false))}</ul>}
+                    {finishedGoals.length > 0 && (
+                        <>
+                            <h2 className={styles.sectionTitle}>{t('studyFinishedWork')}</h2>
+                            <ul className={styles.list} aria-label={t('studyFinishedWork')}>{finishedGoals.map(goal => goalRow(goal, true))}</ul>
+                        </>
+                    )}
+                </>
             )}
+            {grading && <GradeSheet goal={grading} onClose={() => setGrading(null)} />}
         </div>
     );
 }

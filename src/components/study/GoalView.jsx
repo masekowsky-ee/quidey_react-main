@@ -15,6 +15,7 @@ import Icon from '../icons.jsx';
 import { Bone, Skeleton } from '../skeleton/Skeleton.jsx';
 import GoalProgress from './GoalProgress.jsx';
 import GoalSettingsSheet from './GoalSettingsSheet.jsx';
+import GradeSheet from './GradeSheet.jsx';
 import PlanPreview from './PlanPreview.jsx';
 import { changesPlan, countdownText, goalStateKey, isPastGoal, useStudyError } from './studyUi';
 import styles from './Study.module.css';
@@ -104,6 +105,8 @@ export default function GoalView({ goalId }) {
     const [asking, setAsking] = useState(false);
     const [partName, setPartName] = useState('');
     const [editing, setEditing] = useState(false);
+    // finished: the grade is offered (skippable)
+    const [grading, setGrading] = useState(false);
     const [preview, setPreview] = useState(false);
     const [prompt, setPrompt] = useState(false);
 
@@ -171,11 +174,13 @@ export default function GoalView({ goalId }) {
         }
     };
 
-    const setStatus = (status) => run(() => updateGoal(goalId, { status }));
+    const setStatus = (status) => run(() => updateGoal(goalId, { status }))
+        .then(() => { if (status === 'done') setGrading(true); });
 
     // the settings sheet put away: a new date, time or mode of a planned goal opens the preview
     const settingsClosed = (change) => {
         setEditing(false);
+        if (change?.status === 'done') setGrading(true);
         if (!changesPlan(change)) return;
         const next = { ...goal, ...change };
         if (next.status === 'active' && !isPastGoal(next)) {
@@ -295,6 +300,7 @@ export default function GoalView({ goalId }) {
             )}
 
             {editing && <GoalSettingsSheet goal={goal} onClose={settingsClosed} />}
+            {grading && goal.status === 'done' && <GradeSheet goal={goal} onClose={() => setGrading(false)} />}
             {preview && <PlanPreview onDone={() => { setPreview(false); setPrompt(false); }} />}
         </div>
     );

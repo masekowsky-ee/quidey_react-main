@@ -211,7 +211,7 @@ describe('Settings → Lernen', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
         await waitFor(() => expect(calls('/api/tester/study/settings', 'PUT')).toHaveLength(1))
         expect(JSON.parse(calls('/api/tester/study/settings', 'PUT')[0][1].body)).toEqual({
-            windows: [{ weekday: 1, start: '15:00', end: '19:00' }], sessionMinutes: 45, dailyMaxMinutes: 180, aiAuto: false,
+            windows: [{ weekday: 1, start: '15:00', end: '19:00' }], sessionMinutes: 45, dailyMaxMinutes: 180, aiAuto: false, gradeScale: 'points',
         })
     })
 
