@@ -16,8 +16,7 @@ work. With Untis linked, subjects, exams and homework arrive by themselves.
 - Grades never go to the AI.
 
 ## Data (backend migration 051)
-- `goals.grade numeric(4,2) NULL` (stored as points 0-15; marks converted: points = round(17 - 3*mark, 2)
-  is NOT used - see conversion below), `goals.graded_at timestamptz NULL`.
+- `goals.grade numeric(4,2) NULL` (always stored as **points** 0-15, so an average is one mean), `goals.graded_at timestamptz NULL`.
 - `users.grade_scale text NOT NULL DEFAULT 'points' CHECK IN ('points','marks')`.
 - `subjects.untis_name text NULL` (the Untis subject long name; unique per user with the subject; a subject
   made by Untis is `untis_name` set, matched later by lower(name) = lower(untis_name) before creating one).
@@ -26,9 +25,8 @@ work. With Untis linked, subjects, exams and homework arrive by themselves.
 - `untis_homework_suggestions` (id, user_id, untis_homework_id unique per user, subject_id, text, remark,
   due date, due_time, estimate_minutes NULL, estimate_source NULL, state `open|taken|dismissed`).
   Replaces the automatic `untis_homework_tasks` behaviour (the table stays for rows already made).
-- Conversion: the grade is stored in **points** so averages are one mean. marks -> points with the German
-  table (1 = 15..13 ... use mark m -> points = 15 - (m-1)*3 clamped, 1+ not modelled); shown back by the
-  inverse, rounded to 0.1 (marks) / 0.1 (points).
+- Conversion (the German rule): mark = (17 - points) / 3, so points = 17 - 3 * mark, clamped to 0-15 (mark 1 = 14 points, 6 = 0).
+  Entered marks are converted on save; averages are converted back for display, rounded to 0.1.
 
 ## API (behind requirePro, `/api/tester/study`)
 - `PATCH /goals/:id { grade }` (null clears; only for a goal with status `done`; 0-15 points or 1-6 marks as
