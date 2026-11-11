@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../i18n/useTranslation';
 import { logout } from '../features/auth/authAction';
-import { addAnotherAccount, MAX_ACCOUNTS, otherAccounts, switchAccount, listAccounts } from '../features/auth/accounts';
+import { addAnotherAccount, MAX_ACCOUNTS, otherAccounts, switchAccount, listAccounts, rememberAccount, currentToken } from '../features/auth/accounts';
 import Icon from './icons';
 import { useAvatarUrl } from '../features/profile/avatars';
 
@@ -46,8 +46,23 @@ export default function AccountSwitcher({ onNavigate, compact = false }) {
         };
     }, [open]);
 
-    // my profile picture (testers, see avatars.js)
+    // my profile picture (see avatars.js)
     const picture = myPicture;
+    // kept on this device with the account, so the other accounts' switcher shows it too
+    useEffect(() => {
+        if (!picture || !username) return undefined;
+        let live = true;
+        fetch(picture).then(res => res.blob()).then(blob => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        })).then((data) => {
+            const token = currentToken();
+            if (live && token && typeof data === 'string') rememberAccount({ username, token, avatar: data });
+        }).catch(() => {});
+        return () => { live = false; };
+    }, [picture, username]);
     if (!username) return null;
 
     return (
@@ -70,7 +85,7 @@ export default function AccountSwitcher({ onNavigate, compact = false }) {
                     {others.map(account => (
                         <button key={account.username} type="button" role="menuitem" className={styles.item}
                             onClick={() => switchAccount(account.username)}>
-                            <span className={styles.avatarSmall} aria-hidden="true">{initialOf(account.displayName || account.username)}</span>
+                            <span className={styles.avatarSmall} aria-hidden="true">{account.avatar ? <img className={styles.avatarPicture} src={account.avatar} alt="" /> : initialOf(account.displayName || account.username)}</span>
                             <span className={styles.names}>
                                 <span className={styles.name}>{account.displayName || account.username}</span>
                                 <span className={styles.handle}>@{account.username}</span>

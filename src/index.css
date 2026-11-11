@@ -840,6 +840,11 @@ code {
   animation: crossFade 0.2s ease-out backwards;
 }
 
+/* a form swapped for another inside a sheet that is already up (QuickAdd's kind switch) */
+:root [data-sheet][data-swapped] {
+  animation: none !important;
+}
+
 @keyframes sheetRise {
   from {
     opacity: 0;

@@ -64,7 +64,7 @@ export function sortNotes(notes, sort = 'updated', pinnedFirst = true) {
     const by = {
         updated: (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
         created: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-        title: (a, b) => (a.title || firstLine(a.body)).localeCompare(b.title || firstLine(b.body), undefined, { sensitivity: 'base' }),
+        title: (a, b) => titleOf(a).localeCompare(titleOf(b), undefined, { sensitivity: 'base' }),
     }[sort] ?? (() => 0);
     return [...notes].sort((a, b) => (pinnedFirst ? Number(b.pinned) - Number(a.pinned) : 0) || by(a, b));
 }
@@ -96,12 +96,30 @@ const plainLine = (line) => line.replace(/^\s*(- \[( |x|X)\] |#{1,2} |[-*] |\d{1
 
 export const firstLine = (body) => (body ?? '').split('\n').map(plainLine).find(Boolean) ?? '';
 
+// the first heading written in the text ("# Analysis", "## Proofs"), as it reads, or ''
+const HEADING = /^\s*#{1,2} +(.+)$/;
+export const headingOf = (body) => {
+    for (const line of (body ?? '').split('\n')) {
+        const found = HEADING.exec(line);
+        const text = found ? plainLine(found[1]) : '';
+        if (text) return text;
+    }
+    return '';
+};
+
+// What a note is called in lists: the title the user gave it; without one the first heading in
+// its text, else the text's first line ('' when there is nothing)
+export const titleOf = (note) => (note?.title ?? '').trim() || headingOf(note?.body) || firstLine(note?.body);
+
 // What a note's row shows under its title, always: the lines that read (after the one standing in
 // as the title when it has none), joined, at most max characters. Without any text: how much is
 // attached ({ attachments: n }), or { empty: true }.
 export function notePreview(note, max = 160) {
     const lines = (note.body ?? '').split('\n').map(plainLine).filter(Boolean);
-    const text = (note.title ? lines : lines.slice(1)).join(' ').slice(0, max);
+    // without a title the line standing in for it (the first heading, else the first line) isn't repeated
+    const heading = note.title ? '' : headingOf(note.body);
+    const stand = note.title ? -1 : heading ? lines.indexOf(heading) : 0;
+    const text = lines.filter((_, index) => index !== stand).join(' ').slice(0, max);
     if (text) return { text };
     const attachments = note.attachments?.length ?? 0;
     return attachments ? { attachments } : { empty: true };
@@ -129,7 +147,7 @@ export function templateNote(key, language, date = new Date()) {
 
 // ---------- a copy, and the note as a file ----------
 export const duplicateOf = (note, copyWord) => ({
-    title: `${note.title || firstLine(note.body) || ''} (${copyWord})`.trim().slice(0, 120),
+    title: `${titleOf(note) || ''} (${copyWord})`.trim().slice(0, 120),
     body: note.body,
     folderId: note.folderId ?? null,
     tags: note.tags ?? [],

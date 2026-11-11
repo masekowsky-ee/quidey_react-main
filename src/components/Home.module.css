@@ -259,10 +259,9 @@ a.overdue:focus-visible {
     padding: 1.25rem 1.25rem 1.1rem;
   }
 
-  /* phones: the list takes the whole width, as before; its rows carry their own lines */
+  /* phones: the same tonal panel, a little tighter. (It used to be padding 0 with the panel's
+     background and border still winning the cascade, so the rows touched the panel's edges.) */
   .listBlock {
-    padding: 0;
-    background-color: transparent;
-    border-radius: 0;
+    padding: 1rem 1rem 0.5rem;
   }
 }

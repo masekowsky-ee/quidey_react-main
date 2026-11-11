@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { fetchNotes, createNote, updateNote, removeNote, checklistCount } from '../../features/focus/notebook';
 import {
     fetchFolders, createFolder, updateFolder, removeFolder, fetchTrash, emptyTrash,
-    parseView, notesInView, sortNotes, tagCounts, firstLine, templateNote, duplicateOf, daysLeftInTrash,
+    parseView, notesInView, sortNotes, tagCounts, titleOf, templateNote, duplicateOf, daysLeftInTrash,
     SORTS, NOTE_TEMPLATES, FOLDER_EMOJIS, FOLDER_NAME_MAX, TRASH_DAYS,
 } from '../../features/notes/notes';
 import { useCollections } from '../../features/collections/collections';
@@ -22,6 +22,54 @@ import styles from './Notes.module.css';
 
 const LAYOUT_KEY = 'notesLayout';
 const SORT_KEY = 'notesSort';
+// the colours of the folder tiles, one per folder (by its id)
+const FOLDER_TONES = 5;
+
+// A day group's heading in the list: today, yesterday, else the month (and the year when it isn't this one)
+function dayLabel(date, now, t, language) {
+    const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    if (sameDay(date, now)) return t('today');
+    const before = new Date(now); before.setDate(before.getDate() - 1);
+    if (sameDay(date, before)) return t('yesterday');
+    return new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', date.getFullYear() === now.getFullYear()
+        ? { month: 'long' } : { month: 'long', year: 'numeric' }).format(date);
+}
+
+// The notes in the order shown, in groups: the pinned ones first, then by day (today, yesterday,
+// each month). Sorted by title they are one group without a heading.
+function groupNotes(notes, { sort, view, t, language }) {
+    if (sort === 'title' || view.kind === 'trash') return [{ key: 'all', label: null, notes }];
+    const now = new Date();
+    const groups = [];
+    for (const note of notes) {
+        const date = new Date(sort === 'created' ? note.createdAt : note.updatedAt);
+        const pinned = note.pinned && view.kind !== 'pinned';
+        const key = pinned ? 'pinned' : `${date.getFullYear()}-${date.getMonth()}-${date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear() ? date.getDate() : 0}`;
+        let group = groups.find(item => item.key === key);
+        if (!group) {
+            group = { key, label: pinned ? t('notesPinned') : dayLabel(date, now, t, language), notes: [] };
+            groups.push(group);
+        }
+        group.notes.push(note);
+    }
+    return groups;
+}
+
+// The folders as coloured tiles above the notes (phones; beside the list a side menu does it)
+function FolderTiles({ folders, count, onPick }) {
+    return (
+        <ul className={styles.folderTiles}>
+            {folders.map(item =>
+                <li key={item.id}>
+                    <button type="button" className={styles.folderTile} data-tone={item.id % FOLDER_TONES} onClick={() => onPick(item)}>
+                        <span className={styles.folderCount}>{count(item)}</span>
+                        <span className={styles.folderName}>{item.emoji ? `${item.emoji} ` : ''}{item.name}</span>
+                    </button>
+                </li>)}
+        </ul>
+    );
+}
+
 const stored = (key, allowed, fallback) => {
     try { const value = localStorage.getItem(key); return allowed.includes(value) ? value : fallback; } catch { return fallback; }
 };
@@ -74,7 +122,7 @@ export default function NotesPage() {
     const [folders, setFolders] = useState([]);
     const [query, setQuery] = useState('');
     const [sort, setSort] = useState(() => stored(SORT_KEY, SORTS, 'updated'));
-    const [layout, setLayout] = useState(() => stored(LAYOUT_KEY, ['list', 'grid'], 'list'));
+    const [layout, setLayout] = useState(() => stored(LAYOUT_KEY, ['list', 'grid'], 'grid'));
     const [addingFolder, setAddingFolder] = useState(false);
     const [renaming, setRenaming] = useState(null);
     useCollections();
@@ -106,10 +154,8 @@ export default function NotesPage() {
     const folderCount = (id) => (notes ?? []).filter(note => note.folderId === id && !note.archived).length;
 
     const newNote = async (template = null, copy = null) => {
-        const base = copy ?? (template ? templateNote(template, language) : {
-            title: fill(t('noteNewTitle'), { date: new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short' }).format(new Date()) }),
-            body: '',
-        });
+        // no title of its own: until one is typed the list names it after its first heading (titleOf)
+        const base = copy ?? (template ? templateNote(template, language) : { title: '', body: '' });
         try {
             const note = await createNote({
                 ...base,
@@ -200,6 +246,7 @@ export default function NotesPage() {
     const folderName = (id) => folders.find(item => item.id === id);
     const dateFmt = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short' });
     const activeCount = (notes ?? []).filter(note => !note.archived).length;
+    const groups = useMemo(() => groupNotes(shown, { sort, view, t, language }), [shown, sort, view, t, language]);
 
     const viewTitle = {
         all: t('notesAll'), pinned: t('notesPinned'), archive: t('notesArchive'), trash: t('notesTrash'),
@@ -329,6 +376,10 @@ export default function NotesPage() {
                             <ConfirmDeleteButton onConfirm={clearTrash} label={t('noteTrashEmpty')} title={t('noteTrashEmpty')} confirmText={t('noteTrashEmptyConfirm')} />
                         </div>}
 
+                    {/* phones: the folders as tiles, the way a notes app shows them; wider the side menu has them */}
+                    {view.kind === 'all' && !query.trim() && folders.length > 0 &&
+                        <FolderTiles folders={folders} count={folderCount} onPick={item => pickView(`folder:${item.id}`)} />}
+
                     {(view.kind === 'trash' ? trash === null : notes === null)
                         ? <div className={styles.rows}>{[0, 1, 2, 3].map(i => <Bone key={i} h="3.6rem" />)}</div>
                         : shown.length === 0
@@ -341,17 +392,18 @@ export default function NotesPage() {
                                     {shown.map(note =>
                                         <li key={note.id} className={styles.trashRow}>
                                             <span className={styles.trashText}>
-                                                <span className={styles.rowTitle}>{note.title || firstLine(note.body) || t('noteUntitled')}</span>
+                                                <span className={styles.rowTitle}>{titleOf(note) || t('noteUntitled')}</span>
                                                 <span className={styles.rowMeta}>{fill(t('noteTrashDaysLeft'), { days: daysLeftInTrash(note) })}</span>
                                             </span>
                                             <button type="button" className={styles.textBtn} onClick={() => restoreNote(note)}>{t('noteRestore')}</button>
                                             <ConfirmDeleteButton onConfirm={() => deleteForGood(note)} label={`${t('noteDeleteForGood')}: ${note.title || t('noteUntitled')}`} title={t('noteDeleteForGood')} />
                                         </li>)}
                                 </ul>
-                                : <ul className={styles.rows} data-layout={layout}>
-                                    {shown.map(note => {
+                                : groups.map(group => <div key={group.key} className={styles.group}>
+                                    {group.label && <h3 className={styles.groupTitle}>{group.label}</h3>}
+                                    <ul className={styles.rows} data-layout={layout}>
+                                    {group.notes.map(note => {
                                         const checks = checklistCount(note.body);
-                                        const line = firstLine(note.body);
                                         const inFolder = view.kind !== 'folder' && note.folderId ? folderName(note.folderId) : null;
                                         return (
                                             <li key={note.id}>
@@ -359,7 +411,7 @@ export default function NotesPage() {
                                                     aria-current={note.id === openId ? 'true' : undefined} data-task-color={note.color ?? undefined}>
                                                     <span className={styles.rowTitle}>
                                                         {note.pinned && <Icon name="pin" size={13} />}
-                                                        {note.title || line || t('noteUntitled')}
+                                                        {titleOf(note) || t('noteUntitled')}
                                                     </span>
                                                     <NotePreview note={note} className={styles.rowPreview} max={layout === 'grid' ? 320 : 160} />
                                                     <span className={styles.rowMeta}>
@@ -373,7 +425,8 @@ export default function NotesPage() {
                                             </li>
                                         );
                                     })}
-                                </ul>}
+                                    </ul>
+                                </div>)}
                 </section>
 
                 <section className={styles.editorCol} aria-label={t('noteOpen')}>
@@ -389,6 +442,12 @@ export default function NotesPage() {
                         </div>}
                 </section>
             </div>
+
+            {/* phones: the round new-note button at the thumb, as in a notes app */}
+            {!open &&
+                <button type="button" className={styles.noteFab} onClick={() => newNote()} aria-hidden="true" tabIndex={-1} title={t('noteNewLong')}>
+                    <Icon name="edit" size={22} />
+                </button>}
         </div>
     );
 }

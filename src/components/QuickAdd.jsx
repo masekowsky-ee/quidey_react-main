@@ -28,17 +28,19 @@ function QuickAddForm({ sheet, close, reminder }) {
     const dispatch = useDispatch();
     // what was typed goes along when switching between the two forms
     const [form, setForm] = useState(() => ({ kind: reminder ? 'reminder' : 'task', text: '' }));
+    // the sheet is already up when the kind is switched: the new form takes its place without
+    // sliding in from the bottom edge again (data-swapped, index.css)
+    const swap = (kind, text) => setForm({ kind, text, swapped: true });
+    const here = form.swapped ? { ...sheet, panel: { ...sheet.panel, 'data-swapped': '' } } : sheet;
     if (form.kind === 'note') {
-        return <NoteQuickForm sheet={sheet} initialTitle={form.text} onDone={close}
-            onKind={(kind, text) => setForm({ kind, text })} />;
+        return <NoteQuickForm sheet={here} initialTitle={form.text} onDone={close} onKind={swap} />;
     }
     if (form.kind === 'reminder') {
-        return <ReminderForm sheet={sheet} initialText={form.text} onDone={close}
-            onKind={(kind, text) => setForm({ kind, text })} />;
+        return <ReminderForm sheet={here} initialText={form.text} onDone={close} onKind={swap} />;
     }
-    return <TaskForm key={form.kind} sheet={sheet} initialKind={form.kind} initialName={form.text}
-        onReminder={(text) => setForm({ kind: 'reminder', text })}
-        onNote={(text) => setForm({ kind: 'note', text })}
+    return <TaskForm key={form.kind} sheet={here} initialKind={form.kind} initialName={form.text}
+        onReminder={(text) => swap('reminder', text)}
+        onNote={(text) => swap('note', text)}
         onScan={() => dispatch(showForms('scan'))}
         setCreateTask={(value) => { if (!value) close(); }} />;
 }

@@ -48,3 +48,10 @@
 .screen > footer{
     margin-top: auto;
 }
+
+/* the page column starts at --page-start (beside the desktop sidebar); signed out there is no
+   sidebar, so the sign-in card sits in the middle, under the wordmark */
+.screen > div{
+    margin-left: auto;
+    margin-right: auto;
+}

@@ -102,6 +102,8 @@ export default function SubjectList() {
                     <p className={styles.subtitle}>{t('studySubtitle')}</p>
                 </div>
                 <div className={styles.actions}>
+                    <Link to="/settings#study" className={styles.btn}>{t('studyOpenSettings')}</Link>
+                    <Link to="/settings#untis" className={styles.btn}>{t('studyOpenUntis')}</Link>
                     {/* a syllabus or exam plan read by the AI into a study goal (ScanSheet) */}
                     {aiQuota?.available &&
                         <button type="button" className={styles.btn} onClick={() => setScanning(true)}>

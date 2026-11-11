@@ -6,7 +6,7 @@ import {
     addToCollection, removeFromCollection, hasItem, COLLECTION_EMOJIS, COLLECTION_NAME_MAX, COLLECTION_DESCRIPTION_MAX,
 } from '../../features/collections/collections';
 import { fetchNotes, createNote } from '../../features/focus/notebook';
-import { firstLine, matchesQuery } from '../../features/notes/notes';
+import { firstLine, titleOf, matchesQuery } from '../../features/notes/notes';
 import { addTask, updateTaskProps } from '../../features/tasks/taskAction';
 import { groupColorAttr, taskColorAttr } from '../../features/tasks/taskColors';
 import { showToast } from '../../features/toast/toast';
@@ -143,7 +143,7 @@ function AddBar({ collection, tasks, notes, onNoteMade }) {
             .sort((a, b) => Number(a.done) - Number(b.done))
             .map(task => ({ kind: 'task', id: task.id, label: task.name, icon: task.kind === 'event' ? 'calendar' : 'check', task }));
         const noteHits = (notes ?? []).filter(note => !hasItem(collection, { kind: 'note', id: note.id }) && matchesQuery(note, q))
-            .map(note => ({ kind: 'note', id: note.id, label: note.title || firstLine(note.body) || t('noteUntitled'), icon: 'note' }));
+            .map(note => ({ kind: 'note', id: note.id, label: titleOf(note) || t('noteUntitled'), icon: 'note' }));
         return [...taskHits, ...noteHits].slice(0, 8);
     }, [query, tasks, notes, collection, t]);
 
@@ -350,7 +350,7 @@ function CollectionDetail({ id }) {
                                 <Row key={note.id} color={note.color ?? undefined} onRemove={() => takeOut({ kind: 'note', id: note.id })}
                                     removeLabel={fill(t('collectionTakeOutItem'), { name: note.title || t('noteUntitled') })}>
                                     <Link to={`/notes?note=${note.id}`} className={styles.rowMain}>
-                                        <span className={styles.rowName}>{note.title || firstLine(note.body) || t('noteUntitled')}</span>
+                                        <span className={styles.rowName}>{titleOf(note) || t('noteUntitled')}</span>
                                         {note.title && firstLine(note.body) && <span className={styles.rowMeta}>{firstLine(note.body)}</span>}
                                     </Link>
                                 </Row>)}

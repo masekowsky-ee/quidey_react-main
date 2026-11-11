@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useBoard, fetchBoardNote, pinToBoard, unpinFromBoard, boardErrorText, BOARD_NOTES_MAX } from '../../features/board/board';
 import { fetchNotes } from '../../features/focus/notebook';
-import { firstLine, matchesQuery, sortNotes } from '../../features/notes/notes';
+import { titleOf, matchesQuery, sortNotes } from '../../features/notes/notes';
 import { useSheet, useFocusOnArrival } from '../../features/layout/dragDismiss';
 import { useNow } from '../../features/together/work';
 import { showToast } from '../../features/toast/toast';
@@ -63,7 +63,7 @@ function PinnedNote({ kind, boardId, pin, onClose, onRemove }) {
     const images = note.attachments.filter(item => item.kind === 'image');
 
     return (
-        <BoardSheet title={note.title || firstLine(note.body) || t('noteUntitled')} onClose={onClose} wide>
+        <BoardSheet title={titleOf(note) || t('noteUntitled')} onClose={onClose} wide>
             {(dismiss) => <>
                 <p className={styles.byline}>
                     <Avatar user={note.owner} small />
@@ -144,7 +144,7 @@ function PinPicker({ pinnedIds, onPick, onClose }) {
                                     <li key={note.id}>
                                         <button type="button" className={styles.pickRow} disabled={here} data-task-color={note.color ?? undefined}
                                             onClick={() => dismiss(() => onPick(note))}>
-                                            <span className={styles.pickTitle}>{note.title || firstLine(note.body) || t('noteUntitled')}</span>
+                                            <span className={styles.pickTitle}>{titleOf(note) || t('noteUntitled')}</span>
                                             <NotePreview note={note} className={styles.preview} />
                                             {here && <span className={styles.pickHere}><Icon name="pin" size={12} /> {t('noteBoardAlreadyPinned')}</span>}
                                         </button>
@@ -204,7 +204,7 @@ export default function NoteBoard({ kind, id, canPin = true }) {
                         {pins.map(item =>
                             <li key={item.id}>
                                 <button type="button" className={styles.card} data-task-color={item.color ?? undefined} onClick={() => setOpen(item)}>
-                                    <span className={styles.cardTitle}>{item.title || firstLine(item.body) || t('noteUntitled')}</span>
+                                    <span className={styles.cardTitle}>{titleOf(item) || t('noteUntitled')}</span>
                                     <NotePreview note={item} className={styles.preview} max={220} />
                                     <span className={styles.cardMeta}>
                                         <Avatar user={item.owner} small />

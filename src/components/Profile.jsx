@@ -221,7 +221,7 @@ export default function Profile({ initialSignState = 0, initialEmail = '', googl
                             <p className={styles.savedTitle}>{t('accountsOnDevice')}</p>
                             {savedAccounts.map(account => (
                                 <button key={account.username} type="button" className={styles.savedAccount} onClick={() => switchAccount(account.username)}>
-                                    <span className={styles.savedAvatar} aria-hidden="true">{(account.displayName || account.username)[0].toUpperCase()}</span>
+                                    <span className={styles.savedAvatar} aria-hidden="true">{account.avatar ? <img className={styles.savedPicture} src={account.avatar} alt="" /> : (account.displayName || account.username)[0].toUpperCase()}</span>
                                     <span className={styles.savedNames}>
                                         <span>{account.displayName || account.username}</span>
                                         <small>@{account.username}</small>

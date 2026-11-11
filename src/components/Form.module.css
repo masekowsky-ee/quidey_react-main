@@ -427,6 +427,9 @@
     .div{
         min-height: 0;
         overflow-y: auto;
+        /* centred, the part of a card taller than its room (the keyboard is up) would hang out
+           above the top edge, out of reach of the scroll */
+        justify-content: flex-start;
     }
 }
 

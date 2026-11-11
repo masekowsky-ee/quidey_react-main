@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { animate } from 'motion';
 import { spring } from '../settings/motion';
 import { PHONE_QUERY } from './breakpoints';
@@ -43,11 +43,18 @@ export function shouldDismiss(offset, velocity, size) {
 // closed, so the gestures attach once the panel is there.
 export function useSheet(onClose, ref, open = true) {
     const ownRef = useRef(null);
+    // a form that swaps for another inside the same sheet (the add form's task / note / reminder)
+    // mounts a new panel element: the gestures follow it (`element` is in the effect's deps)
+    const [element, setElement] = useState(null);
+    const attach = useCallback((node) => {
+        ownRef.current = node;
+        if (node) setElement(node);
+    }, []);
     const panelRef = ref ?? ownRef;
-    const { dismiss } = useDragDismiss(panelRef, { onDismiss: onClose, enabled: open, from: SHEET_HANDLES });
+    const { dismiss } = useDragDismiss(panelRef, { onDismiss: onClose, enabled: open, from: SHEET_HANDLES, element });
     return {
         backdrop: { 'data-sheet-backdrop': '' },
-        panel: { ref: panelRef, 'data-sheet': '' },
+        panel: { ref: ref ?? attach, 'data-sheet': '' },
         dismiss,
     };
 }
@@ -97,7 +104,7 @@ const reducedMotion = () => document.documentElement.dataset.motion === 'minimal
 // media: only while this query matches (sheets are sheets on phones only).
 // Returns { dismiss(then?) }: animates it away as if it had been flicked, then calls `then` or
 // onDismiss; at once without motion or before the panel is laid out (tests).
-export function useDragDismiss(ref, { onDismiss, enabled = true, axis = 'y', direction = 1, from, media = PHONE_QUERY }) {
+export function useDragDismiss(ref, { onDismiss, enabled = true, axis = 'y', direction = 1, from, media = PHONE_QUERY, element }) {
     const dismissRef = useRef(onDismiss);
     useEffect(() => { dismissRef.current = onDismiss; });
     const leaveRef = useRef(null);
@@ -248,7 +255,7 @@ export function useDragDismiss(ref, { onDismiss, enabled = true, axis = 'y', dir
             panel.removeEventListener('click', onClick, true);
             reset();
         };
-    }, [ref, enabled, axis, direction, from, media]);
+    }, [ref, enabled, axis, direction, from, media, element]);
 
     return { dismiss };
 }

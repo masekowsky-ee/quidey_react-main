@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchNotes, createNote, updateNote, removeNote, checklistCount } from '../../features/focus/notebook';
-import { fetchFolders, duplicateOf, firstLine } from '../../features/notes/notes';
+import { fetchFolders, duplicateOf, titleOf } from '../../features/notes/notes';
 import { showToast } from '../../features/toast/toast';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -49,7 +49,7 @@ export default function Notebook({ focusTask }) {
     };
     // an empty note isn't allowed by the server: a new one is called after its day, to write over
     const startNote = () => newNote({
-        title: fill(t('noteNewTitle'), { date: new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short' }).format(new Date()) }),
+        title: '',
         taskId: onlyTask && focusTask ? focusTask.id : null,
     });
 
@@ -110,13 +110,12 @@ export default function Notebook({ focusTask }) {
                     : <ul className={styles.rows}>
                         {shown.map(note => {
                             const checks = checklistCount(note.body);
-                            const line = firstLine(note.body);
                             return (
                                 <li key={note.id}>
                                     <button type="button" className={styles.row} onClick={() => setOpenId(note.id)}>
                                         <span className={styles.rowTitle}>
                                             {note.pinned && <Icon name="pin" size={13} />}
-                                            {note.title || line || t('noteUntitled')}
+                                            {titleOf(note) || t('noteUntitled')}
                                         </span>
                                         <NotePreview note={note} className={styles.rowPreview} />
                                         <span className={styles.rowMeta}>

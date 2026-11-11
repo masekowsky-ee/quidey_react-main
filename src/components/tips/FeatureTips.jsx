@@ -152,6 +152,18 @@ export default function FeatureTips() {
         return () => document.removeEventListener('keydown', onKey, true);
     }, [current, dispatch]);
 
+    // using the control the tip points at answers it: the tip goes (a click, a tap, typing or focus in it)
+    useEffect(() => {
+        if (!current) return undefined;
+        const used = (e) => {
+            const target = targetRef.current;
+            if (target && e.target instanceof Node && target.contains(e.target) && !tipRef.current?.contains(e.target)) dispatch(markTipSeen(current));
+        };
+        const events = ['click', 'input', 'focusin'];
+        for (const name of events) document.addEventListener(name, used, true);
+        return () => { for (const name of events) document.removeEventListener(name, used, true); };
+    }, [current, dispatch]);
+
     if (!current) return null;
     const next = () => dispatch(markTipSeen(current));
 
