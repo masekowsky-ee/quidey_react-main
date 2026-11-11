@@ -846,7 +846,14 @@ false without `ANTHROPIC_API_KEY`: the app hides the buttons). Frontend `feature
   encrypted). Only `*.webuntis.com` over https is ever fetched. Lessons of the last week and the next three (double
   lessons merged; status normal / cancelled / irregular; no teacher names) are fetched again when the calendar asks
   (`GET /api/untis/lessons?from&to`, ≤ 62 days) and the last fetch is older than 15 min; "Trennen" deletes login and
-  lessons. Without `UNTIS_SECRET` `available` is false. Frontend `features/untis/untis.js` (`useUntisStatus`,
+  lessons. **Homework** (login mode only): REST `homeworks/lessons` is read with every sync and becomes a task
+  "<Fach>: Hausaufgabe" on its due day, at the time of that subject's lesson, description = text + remark; once per
+  homework (`untis_homework_tasks`, migration 050, also not again after deleting the task), not finished / past ones;
+  switch `untis_accounts.homework_to_tasks` (default on, `PUT /api/untis/settings`, checkbox in the settings).
+  **The calendar shows a day of lessons as ONE box** (`lessonBoxes`, first start to last end) that the day panel opens
+  to the lessons ("Stundenplan einklappen" closes it). **Day-view blocks under an hour** show time + name on one line;
+  their details (meta, labels) show when the block is hovered or focused, it grows instead of cutting them off.
+  Without `UNTIS_SECRET` `available` is false. Frontend `features/untis/untis.js` (`useUntisStatus`,
   `useUntisLessons`, `lessonsToEntries` → entries with a `lesson` field, `useShowLessons`, localStorage `untisShow`):
   my own calendar shows them read-only (no drag, no editor; MonthView / WeekView / DayTimeline / useTimelineDrag check
   `task.lesson`), a filter toggle "Stundenplan zeigen", not in the agenda or the .ics export. Tests: a local fake
