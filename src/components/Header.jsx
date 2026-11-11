@@ -107,7 +107,7 @@ export default function Header(){
                         <TeamQuickPanel />
                         {/* messages and notifications, from every page (new tasks: Home's add button,
                             N, the command bar) */}
-                        <Link to="/inbox" className={`${styles.btn} ${styles.inboxBtn}`}
+                        <Link to="/inbox" className={`${styles.btn} ${styles.inboxBtn}`} data-tip="nav-inbox"
                             aria-current={pathname.startsWith('/inbox') ? 'page' : undefined}
                             aria-label={inboxCount > 0 ? `${t('inbox')}, ${inboxCount} ${t('inboxUnread')}` : t('inbox')} title={t('inbox')}>
                             <Icon name="inbox" size={20} />

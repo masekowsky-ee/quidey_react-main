@@ -10,7 +10,6 @@ import { COMMUNITY_PATHS, isCommunityPath } from '../../features/community/paths
 import { selectIncomingCount } from '../../features/friends/friendsAction';
 import { selectInviteCount } from '../../features/together/togetherAction';
 import { selectTaskInviteCount } from '../../features/tasks/taskAction';
-import { selectInboxCount } from '../../features/inbox/inbox';
 import { selectFamilyInviteCount } from '../../features/family/family';
 
 function Tab({ to, end, match, icon, label, count = 0, countLabel, news = false, newsLabel, tip }) {
@@ -38,7 +37,6 @@ export default function TopNav({ inline = false }) {
     const menuBadge = useSelector(selectMenuBadgeCount);
     const hasNews = useSelector(selectHasNews);
     const news = useSelector(state => state.news);
-    const inboxCount = useSelector(selectInboxCount);
     const inviteCount = useSelector(selectInviteCount);
     const taskInviteCount = useSelector(selectTaskInviteCount);
     const friendRequests = useSelector(selectIncomingCount);
@@ -55,7 +53,8 @@ export default function TopNav({ inline = false }) {
                 <Tab to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} tip="nav-community"
                     count={inviteCount + friendRequests + familyInvites} countLabel={t('communityCount')}
                     news={news.together || news.social || news.feed} newsLabel={t('menuNews')} />
-                <Tab to="/inbox" icon="inbox" label={t('inbox')} tip="nav-inbox" count={inboxCount} countLabel={t('inboxUnread')} />
+                {/* Notizen takes the inbox's place here: the inbox is the header's icon (and the drawer's / tab bar's entry) */}
+                <Tab to="/notes" icon="note" label={t('notesTitle')} tip="nav-notes" />
                 <Tab to="/stats" icon="history" label={t('history')} tip="nav-stats" />
             </div>
             {inline
