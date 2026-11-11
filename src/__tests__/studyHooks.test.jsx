@@ -97,11 +97,11 @@ describe('task rows of study sessions', () => {
 })
 
 describe('calendar chip', () => {
-    it('a study session gets a book icon', () => {
+    it('a study session gets the symbol of its goal', () => {
         const { container, rerender } = render(<Provider store={makeStore()}><TaskChip task={sessionTask()} onOpen={() => {}} today={new Date()} /></Provider>)
-        expect(container.querySelector('[data-study-mark]')).not.toBeNull()
+        expect(container.querySelector('[data-study-shape]')).not.toBeNull()
         rerender(<Provider store={makeStore()}><TaskChip task={plainTask} onOpen={() => {}} today={new Date()} /></Provider>)
-        expect(container.querySelector('[data-study-mark]')).toBeNull()
+        expect(container.querySelector('[data-study-shape]')).toBeNull()
     })
 })
 

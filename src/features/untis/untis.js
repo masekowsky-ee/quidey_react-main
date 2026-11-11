@@ -40,6 +40,19 @@ export function lessonsToEntries(lessons) {
 const toMin = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
 const toHhmm = (min) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
 
+// A lesson takes the colour of its subject in Lernen (the subject's name, or the Untis name it was made from)
+export function colorLessons(entries, subjects) {
+    if (!Array.isArray(subjects) || subjects.length === 0) return entries;
+    const byName = new Map();
+    for (const subject of subjects) {
+        for (const name of [subject.untisName, subject.name]) if (name && subject.color) byName.set(name.toLowerCase(), subject.color);
+    }
+    return entries.map(entry => {
+        const color = byName.get(String(entry.name ?? '').toLowerCase());
+        return color ? { ...entry, color } : entry;
+    });
+}
+
 // a day's lessons as ONE entry from the first start to the last end (the calendar shows that; the
 // day panel opens it to the lessons): { lesson: { box: true, items: [lesson entries], status } }
 export function lessonBoxes(entries, name) {
@@ -56,6 +69,8 @@ export function lessonBoxes(entries, name) {
             due_time: toHhmm(start),
             duration_minutes: end - start,
             location: '',
+            // the box is neutral; its lessons keep their subject's colour
+            color: null,
             lesson: { box: true, items, status: items.every(item => item.lesson.status === 'cancelled') ? 'cancelled' : 'normal', info: '', subjectLong: name, className: '' },
         };
     });

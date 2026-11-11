@@ -1085,13 +1085,18 @@
 }
 
 /* a lesson of my Untis timetable: a flat grey block, only to read */
-.block.entryLesson,
-.block.entryLesson:hover,
-.allDayItem.entryLesson{
+.block.entryLesson:not([data-task-color]),
+.block.entryLesson:not([data-task-color]):hover,
+.allDayItem.entryLesson:not([data-task-color]){
     --task-color: var(--text-muted);
     --chip-color: var(--text-muted);
     background: color-mix(in oklab, var(--text-muted) 12%, var(--surface));
     border-color: transparent;
+}
+
+.block.entryLesson,
+.block.entryLesson:hover,
+.allDayItem.entryLesson{
     cursor: default;
 }
 

@@ -743,6 +743,10 @@ the theme before React loads.
   (`untis_homework_suggestions.task_id`). A full limit → 403 `LIMIT_REACHED` → `LimitDialog` → the beta card (`/beta`, reachable
   on the trial; the Pro page once Pro is on sale); the profile has a "Testversion" card (`id="trial"`) with the same way. Beta access
   / Pro / admin ends the limits by itself; `POST /api/beta-requests` still works on the trial (`hasFullAccess`).
+- **Calendar ↔ Lernen**: Untis lessons take their Lernen subject's colour (`colorLessons` in `features/untis/untis.js`: by the subject's name or
+  `untisName`; the day box stays neutral, its lessons are coloured); a planned study session shows its goal's symbol (`GoalShape`, `task.study.goalShape`)
+  where the dot is (`TaskChip` `.chipShape`, `DayTimeline` before the time). A subject made by Untis (`subjects.fromUntis`) can be archived ("einklappen"),
+  not deleted (400 `subject_from_untis`, no delete button).
 - **Quidey Pro is switched off** (built and tested, not shown; planned for after the beta). Two
   switches, turned on together by hand: `VITE_PRO=on` at build time (`features/pro/flag.js`:
   `proBuilt()` for the legal texts, `useProOn()` = built and `/api/me` `proSales`) and

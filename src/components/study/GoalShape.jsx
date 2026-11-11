@@ -23,7 +23,7 @@ export default function GoalShape({ shape, size = 14, color, label = false, clas
     const drawn = GOAL_SHAPES.includes(shape) ? shape : 'circle';
     return (
         <svg className={`${styles.shape} ${className}`} width={size} height={size} viewBox="0 0 20 20"
-            data-task-color={color || undefined}
+            data-task-color={color || undefined} data-shape={drawn}
             role={label ? 'img' : undefined} aria-label={label ? t(`goalShape_${drawn}`) : undefined}
             aria-hidden={label ? undefined : 'true'}>
             {PATHS[drawn]}

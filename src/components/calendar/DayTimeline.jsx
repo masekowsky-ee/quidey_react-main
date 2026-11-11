@@ -9,6 +9,7 @@ import { isEvent } from '../../features/tasks/kinds';
 import TaskMeta from '../task/TaskMeta.jsx';
 import TaskLabels from '../TaskLabels.jsx';
 import Icon from './icons.jsx';
+import GoalShape from '../study/GoalShape.jsx';
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
 const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
@@ -144,6 +145,8 @@ export default function DayTimeline({
                     {timed &&
                         <span className={styles.blockTime}>
                             {task.projected && <Icon name="repeat" size={12} />}
+                            {/* a planned study session: its goal's symbol */}
+                            {task.study && <GoalShape shape={task.study.goalShape} size={11} color={task.study.subjectColor} />}
                             {taskTimeText(task)}
                         </span>}
                     {task.lesson?.box

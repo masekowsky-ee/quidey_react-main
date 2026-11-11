@@ -101,9 +101,11 @@ export default function SubjectView({ subjectId }) {
                             <Icon name="edit" size={14} /> {t('studyEditSubject')}
                         </button>
                     )}
-                    {subject && <ConfirmDeleteButton onConfirm={remove} label={fill(t('studyDeleteSubject'), { name: subject.name })} />}
+                    {/* a subject the Untis timetable made can be folded away (archived), not deleted */}
+                    {subject && !subject.fromUntis && <ConfirmDeleteButton onConfirm={remove} label={fill(t('studyDeleteSubject'), { name: subject.name })} />}
                 </div>
             </header>
+            {subject?.fromUntis && <p className={styles.subtitle}>{t('studyFromUntis')}</p>}
             {editing && subject && <SubjectEditSheet subject={subject} onClose={() => setEditing(false)} />}
 
             <HomeworkSuggestions subjectId={subjectId} />

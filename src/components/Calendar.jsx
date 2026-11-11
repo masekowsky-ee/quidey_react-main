@@ -26,7 +26,8 @@ import TaskForm from './TaskForm.jsx';
 import { FormSheet } from './QuickAdd.jsx';
 import Icon from './calendar/icons.jsx';
 import { useMediaQuery } from '../features/layout/breakpoints';
-import { useUntisLessons, lessonBoxes, useShowLessons, setShowLessons, useUntisStatus } from '../features/untis/untis';
+import { fetchSubjects, selectSubjects } from '../features/study/study';
+import { useUntisLessons, lessonBoxes, colorLessons, useShowLessons, setShowLessons, useUntisStatus } from '../features/untis/untis';
 
 const VIEW_LABELS = { month: 'calendarViewMonth', week: 'calendarViewWeek', agenda: 'calendarViewAgenda' };
 const VIEW_KEYS = { m: 'month', w: 'week', a: 'agenda' };
@@ -91,7 +92,13 @@ export default function Calendar() {
     const showLessons = useShowLessons();
     const lessons = useUntisLessons(!isShared && showLessons, dateKey(addDays(focusedDate, -31)), dateKey(addDays(focusedDate, 31)));
     // a day of lessons is one box (opened in the day panel)
-    const lessonDays = useMemo(() => lessonBoxes(lessons, t('untisBoxName')), [lessons, t]);
+    // the lessons carry their Lernen subject's colour
+    const subjects = useSelector(selectSubjects);
+    const lessonDays = useMemo(() => lessonBoxes(colorLessons(lessons, subjects), t('untisBoxName')), [lessons, subjects, t]);
+    useEffect(() => {
+        if (untisConnected && !isShared) dispatch(fetchSubjects()).catch(() => {});
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [untisConnected, isShared]);
     const tasks = useMemo(() => (lessonDays.length ? [...baseTasks, ...lessonDays] : baseTasks), [baseTasks, lessonDays]);
     const openDay = fromKey(params.get('day'));
     // the task to open in the day panel; a link can name one

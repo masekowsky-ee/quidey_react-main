@@ -239,6 +239,19 @@
     white-space: nowrap;
 }
 
+.chipShape{
+    position: absolute;
+    left: 0.15rem;
+    top: calc(0.0625rem + 0.7em - 0.3125rem);
+    display: inline-flex;
+    pointer-events: none;
+}
+
+/* the goal's symbol stands where the dot would */
+:global(:root:not([data-ui])) .chip.chipHasShape::before{
+    display: none;
+}
+
 .chipStudy{
     display: inline-flex;
     vertical-align: -0.1em;
@@ -1236,13 +1249,18 @@ button.agendaName:hover{
 }
 
 /* a lesson of my Untis timetable: quiet and flat (it can't be moved), a cancelled one struck through */
-.chip.chipLesson,
-.chip.chipLesson:hover{
+.chip.chipLesson:not([data-task-color]),
+.chip.chipLesson:not([data-task-color]):hover{
     --chip-color: var(--text-muted);
     --task-color: var(--text-muted);
     background: color-mix(in oklab, var(--text-muted) 12%, var(--surface-inset));
     border-left-color: var(--text-muted);
     color: var(--text);
+}
+
+/* (a lesson with its subject's colour keeps the chip's own colouring) */
+.chip.chipLesson,
+.chip.chipLesson:hover{
     cursor: default;
 }
 
