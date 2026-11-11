@@ -459,3 +459,36 @@
     font-size: 0.9rem;
     color: var(--text-h);
 }
+
+/* homework from Untis offered as tasks (HomeworkSuggestions) */
+.suggestions{
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.suggestion{
+    composes: panel from '../ui.module.css';
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+}
+
+.suggestionText{
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: min(100%, 12rem);
+    flex: 1 1 14rem;
+    color: var(--text-h);
+}
+
+.suggestionActions{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}

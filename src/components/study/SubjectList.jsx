@@ -15,11 +15,12 @@ import { ProgressBar } from './GoalProgress.jsx';
 import { countdownText, useStudyError } from './studyUi';
 import styles from './Study.module.css';
 import ScanSheet from '../scan/ScanSheet.jsx';
+import HomeworkSuggestions from './HomeworkSuggestions.jsx';
 import { useAiQuota } from '../../features/ai/ai';
 
 const NAME_MAX = 60;
 
-function SubjectRow({ subject, onArchive, onColor }) {
+function SubjectRow({ subject, onArchive, onColor, tip }) {
     const { t, language } = useTranslation();
     const goal = subject.nextGoal;
     return (
@@ -40,7 +41,7 @@ function SubjectRow({ subject, onArchive, onColor }) {
                     <span className={styles.meta}>{t('studyNoGoal')}</span>
                 )}
                 {/* the two averages: all exams, and everything else that was graded */}
-                <span className={styles.meta}>
+                <span className={styles.meta} data-tip={tip}>
                     <span>{fill(t('studyAvgExam'), { value: formatGrade(subject.exam?.avg, language) })}</span>
                     <span>{fill(t('studyAvgOther'), { value: formatGrade(subject.other?.avg, language) })}</span>
                 </span>
@@ -120,6 +121,8 @@ export default function SubjectList() {
                 </button>
             </form>
 
+            <HomeworkSuggestions />
+
             {!loaded ? (
                 <Skeleton className={styles.list}>
                     {[0, 1, 2].map(i => <Bone key={i} h="4.2rem" />)}
@@ -128,7 +131,7 @@ export default function SubjectList() {
                 <>
                     {active.length === 0
                         ? <p className={styles.empty}>{t('studySubjectsEmpty')}</p>
-                        : <ul className={styles.list}>{active.map(s => <SubjectRow key={s.id} subject={s} onArchive={archive} onColor={recolor} />)}</ul>}
+                        : <ul className={styles.list}>{active.map((s, i) => <SubjectRow key={s.id} subject={s} onArchive={archive} onColor={recolor} tip={i === 0 ? 'study-grades' : undefined} />)}</ul>}
                     {archived.length > 0 && (
                         <div className={styles.group}>
                             <button type="button" className={styles.groupToggle} aria-expanded={showArchived}

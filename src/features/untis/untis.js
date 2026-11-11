@@ -13,6 +13,9 @@ export const connectUntis = (body) => apiFetch('/api/untis', { method: 'PUT', bo
 export const disconnectUntis = () => apiFetch('/api/untis', { method: 'DELETE' });
 export const syncUntis = () => apiFetch('/api/untis/sync', { method: 'POST' });
 export const setHomeworkToTasks = (on) => apiFetch('/api/untis/settings', { method: 'PUT', body: JSON.stringify({ homeworkToTasks: on }) });
+export const fetchHomeworkSuggestions = () => apiFetch('/api/untis/suggestions');
+export const takeHomeworkSuggestion = (id, minutes) => apiFetch(`/api/untis/suggestions/${id}/take`, { method: 'POST', body: JSON.stringify(minutes == null ? {} : { minutes }) });
+export const dismissHomeworkSuggestion = (id) => apiFetch(`/api/untis/suggestions/${id}/dismiss`, { method: 'POST' });
 export const fetchUntisLessons = (from, to) => apiFetch(`/api/untis/lessons?from=${from}&to=${to}`);
 
 // lessons as calendar entries (events with a time, read-only)

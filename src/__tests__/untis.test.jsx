@@ -94,12 +94,12 @@ describe('connecting the timetable in the settings', () => {
     it('homework to tasks is on by default and can be switched off', async () => {
         answers.status = { ...CONNECTED, homeworkToTasks: true }
         await open()
-        const box = screen.getByRole('checkbox', { name: 'Hausaufgaben als Aufgaben anlegen' })
+        const box = screen.getByRole('checkbox', { name: 'Hausaufgaben vorschlagen' })
         expect(box).toBeChecked()
         apiFetch.mockImplementation(async (url, options = {}) => (url === '/api/untis/settings' ? { ...CONNECTED, homeworkToTasks: JSON.parse(options.body).homeworkToTasks } : {}))
         await act(async () => { fireEvent.click(box) })
         expect(JSON.parse(call('/api/untis/settings', 'PUT')[1].body)).toEqual({ homeworkToTasks: false })
-        expect(screen.getByRole('checkbox', { name: 'Hausaufgaben als Aufgaben anlegen' })).not.toBeChecked()
+        expect(screen.getByRole('checkbox', { name: 'Hausaufgaben vorschlagen' })).not.toBeChecked()
     })
 
     it('a wrong password says so', async () => {

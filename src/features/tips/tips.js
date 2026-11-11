@@ -44,6 +44,8 @@ export const TIPS = [
     { id: 'focusSettings', page: isPath('/focus'), target: '[data-tip="focus-settings"]' },
     { id: 'studyGoal', page: (p) => p === '/study', target: '[data-tip="study-new-goal"]' },
     { id: 'studySubject', page: (p) => p === '/study', target: '[data-tip="study-new-subject"]' },
+    { id: 'studyGrades', page: (p) => p === '/study', target: '[data-tip="study-grades"]' },
+    { id: 'homeworkSuggestions', page: (p) => p === '/study', target: '[data-tip="homework-suggestions"]' },
     { id: 'notesNew', page: isPath('/notes'), target: '[data-tip="notes-new"]' },
     { id: 'notesFolder', page: isPath('/notes'), target: '[data-tip="notes-folder"]' },
     { id: 'notesSearch', page: isPath('/notes'), target: '[data-tip="notes-search"]' },

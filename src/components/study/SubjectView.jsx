@@ -11,6 +11,7 @@ import Icon from '../icons.jsx';
 import { Bone, Skeleton } from '../skeleton/Skeleton.jsx';
 import GoalProgress from './GoalProgress.jsx';
 import GradeSheet from './GradeSheet.jsx';
+import HomeworkSuggestions from './HomeworkSuggestions.jsx';
 import { formatGrade } from '../../features/study/grades';
 import SubjectEditSheet from './SubjectEditSheet.jsx';
 import { countdownText, goalStateKey, useStudyError } from './studyUi';
@@ -104,6 +105,8 @@ export default function SubjectView({ subjectId }) {
                 </div>
             </header>
             {editing && subject && <SubjectEditSheet subject={subject} onClose={() => setEditing(false)} />}
+
+            <HomeworkSuggestions subjectId={subjectId} />
 
             <h2 className={styles.sectionTitle}>{t('studyGoals')}</h2>
             {!loaded && goals.length === 0 ? (
