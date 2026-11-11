@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { readGoalDraft } from '../../features/study/goalDraft';
 import { useDispatch } from 'react-redux';
 import { fetchStudyStatus } from '../../features/study/study';
 import { matchPath, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -21,6 +22,12 @@ export default function StudyPage() {
     const goal = matchPath('/study/goals/:id', pathname);
     const subject = goal ? null : matchPath('/study/:subjectId', pathname);
     const close = () => navigate({ search: '' }, { replace: true });
+    // back from the settings (where the sheet was left for the study times): the sheet opens again with its draft
+    useEffect(() => {
+        const draft = readGoalDraft();
+        if (draft?.away && draft.path === pathname && !params.get('new')) navigate({ search: '?new=goal' }, { replace: true });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const page = goal
         ? <GoalView key={goal.params.id} goalId={Number(goal.params.id)} />

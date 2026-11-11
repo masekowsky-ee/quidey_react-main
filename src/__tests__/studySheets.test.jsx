@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, cleanup, screen, fireEvent, waitFor, within } from '@testing-library/react'
-import { MemoryRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
@@ -53,6 +53,7 @@ const previewOf = (extra = {}) => ({
 })
 
 beforeEach(() => {
+    sessionStorage.clear()
     apiFetch.mockReset()
     settings = { windows: [{ weekday: 1, start: '16:00', end: '18:00' }], sessionMinutes: 45, dailyMaxMinutes: 180, aiAuto: false, aiAvailable: true }
     subjects = [
@@ -114,6 +115,7 @@ function open(path) {
                 <Where />
                 <Routes>
                     <Route path="/" element={<p>HOME</p>} />
+                    <Route path="/settings" element={<Link to="/study/1">ZURÜCK</Link>} />
                     <Route path="/study" element={page} />
                     <Route path="/study/goals/:id" element={page} />
                     <Route path="/study/:subjectId" element={page} />
@@ -335,6 +337,40 @@ describe('create sheet', () => {
         fireEvent.click(await screen.findByRole('button', { name: 'Übernehmen' }))
         await waitFor(() => expect(screen.getByTestId('where').textContent).toBe('/study/goals/20'))
         expect(bodyOf(calls(`${BASE}/replan`, 'POST')[0])).toEqual({ inputHash: 'a'.repeat(64) })
+    })
+})
+
+describe('a goal sheet left for the study times', () => {
+    it('comes back with everything typed when you return from the settings', async () => {
+        settings.windows = []
+        open('/study/1?new=goal')
+        const dialog = await screen.findByRole('dialog')
+        fireEvent.click(within(dialog).getByRole('radio', { name: 'In deinen Lernzeiten' }))
+        fireEvent.change(within(dialog).getByLabelText('Name des Ziels'), { target: { value: 'Klausur Analysis' } })
+        fireEvent.change(within(dialog).getByLabelText('Datum'), { target: { value: inDays(10) } })
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Weiter' }))
+        fireEvent.change(await screen.findByLabelText('Themen, eins pro Zeile'), { target: { value: 'Grenzwerte\nAbleitungen' } })
+        await defaults(dialog, 2)
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Plan ansehen' }))
+        fireEvent.click(await screen.findByRole('link', { name: 'Lernzeiten festlegen' }))
+        // in the settings: the study times are set, then back to Lernen (by the menu, not the sheet's address)
+        settings.windows = [{ weekday: 1, start: '16:00', end: '18:00' }]
+        fireEvent.click(await screen.findByText('ZURÜCK'))
+        const back = await screen.findByRole('dialog')
+        // the sheet is open again on the topics, with what was typed
+        expect(await screen.findByLabelText('Themen, eins pro Zeile')).toHaveValue('Grenzwerte\nAbleitungen')
+        fireEvent.click(within(back).getByRole('button', { name: 'Zurück' }))
+        expect(within(back).getByLabelText('Name des Ziels')).toHaveValue('Klausur Analysis')
+        expect(within(back).getByLabelText('Datum')).toHaveValue(inDays(10))
+    })
+
+    it('a sheet closed by hand leaves nothing behind', async () => {
+        open('/study/1?new=goal')
+        const dialog = await screen.findByRole('dialog')
+        fireEvent.change(within(dialog).getByLabelText('Name des Ziels'), { target: { value: 'Verworfen' } })
+        fireEvent.click(within(dialog).getByRole('button', { name: /Schließen|Abbrechen/ }))
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+        expect(sessionStorage.getItem('studyGoalDraft')).toBeNull()
     })
 })
 

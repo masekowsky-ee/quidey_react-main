@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { goalDraftFor, writeGoalDraft, clearGoalDraft, readGoalDraft } from '../../features/study/goalDraft';
 import {
     fetchSubjects, fetchStudySettings, saveSubject, createGoal, deletePart, estimateParts,
     selectSubjects, selectStudySettings,
@@ -42,6 +43,8 @@ export default function GoalSheet({ subjectId = null, onClose }) {
     const createdRef = useRef(null);
     const setCreated = (goal) => { createdRef.current = goal; setCreatedState(goal); };
     const finish = () => {
+        // closed (by hand or done): nothing of the draft is kept
+        clearGoalDraft();
         if (createdRef.current) navigate(`/study/goals/${createdRef.current.id}`);
         else onClose();
     };
@@ -63,22 +66,26 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
     const nameRef = useRef(null);
     useFocusOnArrival(nameRef);
 
-    const [step, setStep] = useState(1);
+    // a draft of this sheet (left for the study times and back): what was typed comes back, on the topics
+    const { pathname } = useLocation();
+    const [draft] = useState(() => goalDraftFor(subjectId));
+    const [step, setStep] = useState(draft ? Math.min(draft.step ?? 1, 2) : 1);
     const [fields, setFields] = useState(() => ({
         // planMode null: not picked yet, see `planMode` below
         kind: 'exam', name: '', subject: subjectId == null ? '' : String(subjectId), newSubject: '', due: '', dueTime: '', planMode: null, shape: null,
+        ...(draft?.fields ?? {}),
     }));
     const set = (changes) => { setFields(prev => ({ ...prev, ...changes })); setError(null); };
     const [error, setError] = useState(null);
     const [busy, setBusy] = useState(false);
     const [noWindows, setNoWindows] = useState(false);
 
-    const [text, setText] = useState('');
+    const [text, setText] = useState(draft?.text ?? '');
     // estimate per part name: { minutes, source }; a manual one is never overwritten
-    const [known, setKnown] = useState({});
+    const [known, setKnown] = useState(draft?.known ?? {});
     const [estimating, setEstimating] = useState(false);
     const [aiFailed, setAiFailed] = useState(false);
-    const [reviewOn, setReviewOn] = useState(true);
+    const [reviewOn, setReviewOn] = useState(draft?.reviewOn ?? true);
     const requestId = useRef(0);
     // AI answers per part name for the sheet's lifetime (null: asked, no AI answer): a name is sent to the AI once
     const aiCache = useRef({});
@@ -89,6 +96,12 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
         if (!settings) dispatch(fetchStudySettings()).catch(() => {});
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch]);
+
+    // every change is kept while the sheet is open (not once the goal is made)
+    useEffect(() => {
+        if (created) { clearGoalDraft(); return; }
+        writeGoalDraft({ path: pathname, subjectId, step: Math.min(step, 2), fields, text, known, reviewOn, away: false });
+    }, [created, pathname, subjectId, step, fields, text, known, reviewOn]);
 
     const exam = fields.kind === 'exam';
     const names = useMemo(() => parseParts(text).slice(0, exam && reviewOn ? MAX_PARTS - 1 : MAX_PARTS), [text, exam, reviewOn]);
@@ -365,7 +378,8 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
                     <p className={own.hint}>{t('studyNoWindowsHint')}</p>
                     <div className={own.footer}>
                         <button type="button" className={styles.btn} onClick={() => { setNoWindows(false); setStep(2); }}>{t('studyBackStep')}</button>
-                        <Link to="/settings#study" className={styles.btn}>{t('studyOpenSettings')}</Link>
+                        {/* the draft stays: Lernen opens the sheet again when you come back */}
+                        <Link to="/settings#study" className={styles.btn} onClick={() => writeGoalDraft({ ...readGoalDraft(), away: true })}>{t('studyOpenSettings')}</Link>
                     </div>
                 </div>
             )}
