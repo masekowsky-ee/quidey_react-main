@@ -21,7 +21,7 @@ const initialState = {
     // see features/pro/pro.js; proSales: whether Pro is on sale (features/pro/flag.js). hasPassword: false for an account made with Google without one.
     access: {
         checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null, allDayReminderTime: '12:00', tourSeen: true, userId: null, savedColors: [], tipsSeen: [], tipsOff: false,
-        pro: { active: false, gift: false, until: null }, proSales: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false,
+        pro: { active: false, gift: false, until: null }, proSales: false, trial: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false,
         // anonymous usage statistics: my answer (choice 'granted' | 'denied' | null = not asked), when, which version of the question
         usageConsent: { choice: null, at: null, version: null },
     },
@@ -64,6 +64,8 @@ const authReducer = (state = initialState, action) => {
                     tipsOff: Boolean(action.payload.tipsOff),
                     pro: action.payload.pro ?? initialState.access.pro,
                     proSales: Boolean(action.payload.proSales),
+                    // chose "continue with the trial version": all features with the free plan's limits
+                    trial: Boolean(action.payload.trial),
                     accessMode: action.payload.accessMode === 'open' ? 'open' : 'beta',
                     limits: action.payload.limits ?? null,
                     usage: action.payload.usage ?? null,

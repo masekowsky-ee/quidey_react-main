@@ -89,6 +89,15 @@ export const requestBetaAccess = (reason) => {
     };
 };
 
+// "Continue with the trial version" on the beta screen: all features with the free plan's limits.
+// The access is asked again, so the app opens.
+export const startTrial = () => {
+    return async (dispatch) => {
+        await apiFetch('/api/trial', { method: 'POST', body: JSON.stringify({}) });
+        await dispatch(fetchAccess());
+    };
+};
+
 // Signs this account out on this device. Another account still signed in here takes over
 // (the app loads again as that one); otherwise it's the sign-in.
 export const logout = () => {

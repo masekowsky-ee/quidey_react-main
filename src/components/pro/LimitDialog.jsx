@@ -3,6 +3,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { useProOn } from '../../features/pro/flag';
 import { useTranslation } from '../../i18n/useTranslation';
 import { fill } from '../../features/helperFunction';
 import { fetchAccess } from '../../features/auth/authAction';
@@ -31,6 +32,8 @@ export default function LimitDialog() {
 function Question({ limit, onClose }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    // Pro on sale: the Pro page; else (trial version, beta) the beta card
+    const proOn = useProOn();
     const titleId = useId();
     const textId = useId();
     const yesRef = useRef(null);
@@ -51,17 +54,17 @@ function Question({ limit, onClose }) {
         };
     }, [onClose]);
 
-    const what = ['tasks', 'events', 'groups', 'sessions', 'friends', 'stats'].includes(limit.limit) ? limit.limit : 'tasks';
+    const what = ['tasks', 'events', 'groups', 'sessions', 'friends', 'stats', 'subjects', 'goals'].includes(limit.limit) ? limit.limit : 'tasks';
     return createPortal(
         <div className={styles.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
             <div className={styles.dialog} role="alertdialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={textId}>
                 <span className={styles.badge} aria-hidden="true"><Icon name="heart" size={20} /></span>
                 <h2 id={titleId} className={styles.title}>{t('limitTitle')}</h2>
                 <p id={textId} className={styles.text}>
-                    {fill(t(`limitText_${what}`), { max: limit.max })} {t('limitPro')}
+                    {fill(t(`limitText_${what}`), { max: limit.max })} {t(proOn ? 'limitPro' : 'limitTrial')}
                 </p>
-                <button ref={yesRef} type="button" className={styles.yes} onClick={() => { onClose(); navigate('/pro'); }}>
-                    <Icon name="heart" size={18} />{t('limitSeePro')}
+                <button ref={yesRef} type="button" className={styles.yes} onClick={() => { onClose(); navigate(proOn ? '/pro' : '/beta'); }}>
+                    <Icon name="heart" size={18} />{t(proOn ? 'limitSeePro' : 'limitSeeBeta')}
                 </button>
                 <button type="button" className={styles.later} onClick={onClose}>{t('limitLater')}</button>
             </div>

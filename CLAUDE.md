@@ -735,6 +735,14 @@ the theme before React loads.
   (= beta access back then) into a tester. `/api/me`: `isPro` still means "may use the app" (old
   app versions read it), plus `pro { active, gift, until }`, `accessMode`, `limits`/`usage`
   (null without limits), `hasPassword`, `googleLinked` (→ `state.auth.access`).
+- **Trial version** (branch `trial-version`, backend migration 052 `users.trial_at`, `POST /api/trial`, `/api/me` → `trial`): on the beta
+  screen "Mit der Testversion weitermachen" (`startTrial`) lets an account without beta access in with the free plan's limits
+  (`utils/limits.js`: 10 open tasks, 5 events ahead, 3 groups, 1 shared session, 3 friends, statistics of the last 7 days,
+  **3 own subjects, 1 active goal per subject**), whatever `ACCESS_MODE` / `PRO_BILLING` say; AI stays Pro / admin only. Not counted:
+  the study planner's sessions (`tasks.goal_part_id`), Untis subjects / exam goals / tasks made from Untis homework
+  (`untis_homework_suggestions.task_id`). A full limit → 403 `LIMIT_REACHED` → `LimitDialog` → the beta card (`/beta`, reachable
+  on the trial; the Pro page once Pro is on sale); the profile has a "Testversion" card (`id="trial"`) with the same way. Beta access
+  / Pro / admin ends the limits by itself; `POST /api/beta-requests` still works on the trial (`hasFullAccess`).
 - **Quidey Pro is switched off** (built and tested, not shown; planned for after the beta). Two
   switches, turned on together by hand: `VITE_PRO=on` at build time (`features/pro/flag.js`:
   `proBuilt()` for the legal texts, `useProOn()` = built and `/api/me` `proSales`) and

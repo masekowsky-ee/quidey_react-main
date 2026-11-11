@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import Icon from './icons';
 import { useTranslation } from '../i18n/useTranslation';
 import { formatDate } from '../features/helperFunction';
-import { fetchAccess, logout, requestBetaAccess } from '../features/auth/authAction';
+import { fetchAccess, logout, requestBetaAccess, startTrial } from '../features/auth/authAction';
 import { useProOn } from '../features/pro/flag';
 import { LANDING_URL } from '../features/site';
 
@@ -22,6 +22,9 @@ export default function BetaGate() {
     const dispatch = useDispatch();
     const username = useSelector(state => state.auth.user?.username);
     const betaRequest = useSelector(state => state.auth.access.betaRequest);
+    // already on the trial version: this screen is the way to apply, and back to the app
+    const trial = useSelector(state => state.auth.access.trial);
+    const [starting, setStarting] = useState(false);
 
     const [reason, setReason] = useState('');
     const [sending, setSending] = useState(false);
@@ -45,6 +48,17 @@ export default function BetaGate() {
             dispatch(fetchAccess()).catch(() => {});
         } finally {
             setSending(false);
+        }
+    };
+
+    const continueWithTrial = async () => {
+        setStarting(true);
+        setError(null);
+        try {
+            await dispatch(startTrial());
+        } catch {
+            setError(t('trialError'));
+            setStarting(false);
         }
     };
 
@@ -102,6 +116,19 @@ export default function BetaGate() {
                         {betaRequest.reason && <blockquote className={styles.reason}>{betaRequest.reason}</blockquote>}
                     </div>
                 )}
+
+                {/* the trial version: all features, with limits */}
+                {!trial && (
+                    <div className={styles.proCard}>
+                        <Icon name="check" className={styles.proHeart} />
+                        <span>
+                            <strong>{t('trialTitle')}</strong>
+                            <span>{t('trialContinueHint')}</span>
+                            <button type="button" className={styles.secondaryBtn} onClick={continueWithTrial} disabled={starting}>{t('trialContinue')}</button>
+                        </span>
+                    </div>
+                )}
+                {trial && <Link to="/" className={styles.secondaryBtn}>{t('trialBack')}</Link>}
 
                 {/* the waiting room */}
                 <Link to="/arcade" className={styles.proCard}>

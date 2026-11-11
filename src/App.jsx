@@ -384,7 +384,8 @@ function App(){
           <Route path="/arcade" element={<ArcadePage/>} />
           {/* Quidey Pro: supporting the development */}
           <Route path="/pro" element={proOn ? <ProPage/> : <Navigate to="/" replace />} />
-          <Route path="/beta" element={<Navigate to="/" replace />} />
+          {/* the beta screen stays reachable on the trial version: the way to apply */}
+          <Route path="/beta" element={access.trial ? <BetaGate /> : <Navigate to="/" replace />} />
           {/* where the landing page sends people to sign in or up */}
           <Route path="/signin" element={<Navigate to="/" replace />} />
           <Route path="/signup" element={<Navigate to="/" replace />} />

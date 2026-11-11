@@ -35,6 +35,8 @@ export default function ProfileView({ onSignOut }) {
     const hasPassword = useSelector(state => state.auth.access.hasPassword) !== false;
     const proActive = useSelector(state => Boolean(state.auth.access.pro?.active));
     const proOn = useProOn();
+    // on the trial version: the way to apply for beta (later: to subscribe)
+    const trial = useSelector(state => state.auth.access.trial);
 
     // the friends list is otherwise only loaded on the Social page
     useEffect(() => { dispatch(fetchFriends()).catch(() => {}); }, [dispatch]);
@@ -262,6 +264,14 @@ export default function ProfileView({ onSignOut }) {
                     <Link to="/pro" className={styles.quietBtn}>{t(proActive ? 'proProfileManage' : 'proProfileSupport')} →</Link>
                 </div>
                 <p className={styles.hint}>{t(proActive ? 'proProfileActive' : 'proProfileInactive')}</p>
+            </section>}
+
+            {trial && <section className={styles.card} id="trial">
+                <div className={styles.cardHead}>
+                    <h2 className={styles.cardTitle}>{t('trialProfileTitle')}</h2>
+                    <Link to="/beta" className={styles.quietBtn}>{t('trialProfileLink')} →</Link>
+                </div>
+                <p className={styles.hint}>{t('trialProfileText')}</p>
             </section>}
 
             <section className={styles.card} id="account">

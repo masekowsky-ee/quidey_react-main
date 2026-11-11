@@ -93,7 +93,7 @@ describe('Quidey Pro: the page', () => {
 })
 
 describe('the free plan is full', () => {
-    it('apiFetch announces LIMIT_REACHED; the dialog says it kindly and leads to Pro', async () => {
+    it('apiFetch announces LIMIT_REACHED; the dialog says it kindly and leads to the beta card while Pro is off', async () => {
         const { apiFetch: realFetch } = await vi.importActual('../features/helperFunction')
         globalThis.fetch = vi.fn(async () => new Response(JSON.stringify({ error: 'x', code: 'LIMIT_REACHED', limit: 'tasks', max: 10 }), { status: 403 }))
         apiFetch.mockImplementation(async () => ({}))
@@ -101,8 +101,8 @@ describe('the free plan is full', () => {
         await act(async () => { await realFetch('/api/tasks', { method: 'POST', body: '{}' }).catch((err) => expect(err.limit).toBe('tasks')) })
         expect(screen.getByRole('alertdialog')).toBeInTheDocument()
         expect(screen.getByText(/Platz für 10 offene Aufgaben/)).toBeInTheDocument()
-        fireEvent.click(screen.getByRole('button', { name: /Quidey Pro ansehen/ }))
-        expect(screen.getByTestId('where')).toHaveTextContent('/pro')
+        fireEvent.click(screen.getByRole('button', { name: /Beta-Zugang beantragen/ }))
+        expect(screen.getByTestId('where')).toHaveTextContent('/beta')
         expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     })
 
