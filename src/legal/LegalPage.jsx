@@ -471,12 +471,20 @@ function Privacy() {
                 Untis-Passwort, das Passwort nur verschlüsselt (AES-256) und nur, um den Stundenplan abzurufen; mit dem
                 iCal-Link speichert Quidey stattdessen diesen Link verschlüsselt. Gespeichert werden außerdem die Stunden
                 der letzten Woche und der nächsten drei Wochen: Tag, Uhrzeit, Fach, Raum, Klasse, ob sie entfällt oder
-                geändert ist, und der Hinweistext dazu; Namen von Lehrkräften speichert Quidey nicht. Mit dem Untis-Login ruft Quidey auch die Hausaufgaben ab und legt daraus Aufgaben an (Tag, Uhrzeit der Stunde, Text); das kannst du in den Einstellungen ausschalten, und gemerkt wird nur, welche Hausaufgabe schon eine Aufgabe wurde. Abgerufen wird,
+                geändert ist, und der Hinweistext dazu; Namen von Lehrkräften speichert Quidey nicht. Mit dem Untis-Login ruft Quidey auch die Fächer, die Klausurtermine und die Hausaufgaben ab: Aus den Fächern werden Fächer unter „Lernen“ (jeweils mit einer Farbe), aus noch nicht eingetragenen Klausuren Klausuren dort, und die Hausaufgaben (Tag, Uhrzeit der Stunde, Text, Bemerkung) erscheinen als Vorschläge, die du mit „Als Aufgabe übernehmen“ bestätigst; das Vorschlagen kannst du in den Einstellungen ausschalten. Gemerkt wird, welche Klausur und welche Hausaufgabe schon angelegt, übernommen oder verworfen wurde, damit sie nicht wiederkommen. Mit KI-Zugang schätzt die KI die Bearbeitungszeit einer Hausaufgabe: Dazu gehen nur der Hausaufgabentext, das Fach und die Tage bis zur Abgabe an Anthropic, wie bei den KI-Schätzungen oben. Abgerufen wird,
                 wenn du den Kalender öffnest und der letzte Abruf älter als 15 Minuten ist. Die Daten siehst nur du.
                 „Trennen“ löscht Zugangsdaten und alle gespeicherten Stunden sofort, ebenso das Löschen deines Kontos.
                 Rechtsgrundlage ist deine Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO, die du mit dem Verbinden erteilst
                 und mit „Trennen“ jederzeit widerrufen kannst. Bitte verbinde nur dein eigenes Untis-Konto und nur, wenn
                 deine Schule das erlaubt.
+            </p>
+            <p>
+                <strong>Noten:</strong> Unter „Lernen“ kannst du für erledigte Arbeiten eine Note eintragen (Notenpunkte 0–15 oder
+                Noten 1–6, das stellst du in den Einstellungen ein). Quidey speichert die Note bei deinem Lernziel und rechnet
+                pro Fach den Durchschnitt der Klausuren und den der übrigen Arbeiten aus. Die Noten siehst nur du; sie
+                werden nicht an Anthropic oder andere weitergegeben, auch nicht an die KI-Funktionen. Mit dem Löschen des Ziels,
+                des Fachs oder deines Kontos sind sie gelöscht. Rechtsgrundlage ist dein Vertrag mit uns über die Nutzung von
+                Quidey (Art. 6 Abs. 1 lit. b DSGVO); die Eingabe ist freiwillig.
             </p>
             <p>
                 <strong>Spracheingabe:</strong> Tippst du auf das Mikrofon (bei neuen Aufgaben, Terminen und Erinnerungen

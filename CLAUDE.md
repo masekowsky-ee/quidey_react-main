@@ -818,7 +818,7 @@ the theme before React loads.
 
 ## AI features (branch `pro-features`, later Quidey Pro)
 
-Claude Haiku 5.5 (`AI_MODEL`, default `claude-haiku-5-5`) through the backend only (`ai.js` router at `/api/ai`,
+**Pro and admins only, not testers** (`hasAiAccess`). Claude Haiku 5.5 (`AI_MODEL`, default `claude-haiku-5-5`) through the backend only (`ai.js` router at `/api/ai`,
 `utils/ai.js`: `messages.parse` with a JSON schema, low effort; every answer checked like input). For now with daily
 allowances per account and day of its time zone (`utils/quota.js`, table `daily_quota`, migration 048): `scan` 1,
 `aiLine` 5 (`QUOTA_SCAN`, `QUOTA_AI_LINE`), booked in one statement, given back when the AI fails, 429
@@ -846,7 +846,7 @@ false without `ANTHROPIC_API_KEY`: the app hides the buttons). Frontend `feature
   encrypted). Only `*.webuntis.com` over https is ever fetched. Lessons of the last week and the next three (double
   lessons merged; status normal / cancelled / irregular; no teacher names) are fetched again when the calendar asks
   (`GET /api/untis/lessons?from&to`, ≤ 62 days) and the last fetch is older than 15 min; "Trennen" deletes login and
-  lessons. **Homework** (login mode only): REST `homeworks/lessons` is read with every sync and becomes a task
+  lessons. **Homework** (login mode only; since migration 051 a *suggestion*, see "School life in Lernen"): REST `homeworks/lessons` is read with every sync and became a task
   "<Fach>: Hausaufgabe" on its due day, at the time of that subject's lesson, description = text + remark; once per
   homework (`untis_homework_tasks`, migration 050, also not again after deleting the task), not finished / past ones;
   switch `untis_accounts.homework_to_tasks` (default on, `PUT /api/untis/settings`, checkbox in the settings).
@@ -858,6 +858,21 @@ false without `ANTHROPIC_API_KEY`: the app hides the buttons). Frontend `feature
   my own calendar shows them read-only (no drag, no editor; MonthView / WeekView / DayTimeline / useTimelineDrag check
   `task.lesson`), a filter toggle "Stundenplan zeigen", not in the agenda or the .ics export. Tests: a local fake
   WebUntis (`scripts/test/fakeUntis.mjs`, `UNTIS_TEST_BASE`). Privacy: "Stundenplan aus WebUntis" in § 5.
+- **School life in Lernen** (migration 051, backend `study.js`, `utils/grades.js`, `untis.js`; web `features/study/grades.js`,
+  `GradeSheet.jsx`, `HomeworkSuggestions.jsx`): a finished goal (`status` done) can get a grade (`PATCH /goals/:id { grade }`,
+  null clears; 400 `goal_not_done` / `invalid_input`). The account's scale is `users.grade_scale` (`points` 0-15 or `marks` 1-6,
+  Settings → Lernen, `PUT /settings { gradeScale }`); stored as points (marks → points = 17 - 3 × mark), answers in the scale.
+  `GET /subjects` adds `exam { avg, n }` (kind exam) and `other { avg, n }` (all else), plain means, `avg` null without
+  grades; the subject list shows "Klausuren Ø" / "Sonstige Ø", a subject page lists open work, then finished work with its grade
+  and "Note eintragen"; marking a goal done offers the sheet (skippable). Untis sync (login mode) also makes every subject
+  (`subjects.untis_name`, colours: first of the eight not in use, then cycling), exam goals for exams still to come
+  (`untis_exams`, one default part; one entered by hand for the same subject and day is linked, not doubled; a deleted goal
+  doesn't come back) and homework **suggestions** (`untis_homework_suggestions`, `GET /api/untis/suggestions`,
+  `POST …/:id/take { minutes? }` makes the task "<Fach>: Hausaufgabe", `POST …/:id/dismiss`); the switch (column / field still
+  `homework_to_tasks` / `homeworkToTasks`) now means "suggest". `utils/ai.js` `estimateHomeworkMinutes` (5-240 min; homework text,
+  subject, days until due only) at sync for accounts with AI access. **AI is for Pro and admins, not testers**
+  (`utils/access.js` `hasAiAccess`: `/api/ai/*` 403 `PRO_REQUIRED`, `/api/ai/quota` `available` false, study `aiAvailable` false).
+  Grades never go to the AI. Privacy § 5 "Noten", the Untis paragraph. Run migration 051 on the real server (`sudo quidey-migrate`).
 - Voice input (no allowance needed, not AI): `features/voice/voice.js` (`voiceSupport()` 'web' | 'native' | null,
   `startDictation`, `speechLang`), `components/voice/MicButton.jsx` (hidden where unsupported, e.g. Firefox) beside the
   new-entry name (what is said becomes the line, read like typing) and `DictateButton.jsx` in the notes editor's tools
