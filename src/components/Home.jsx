@@ -20,6 +20,7 @@ import { Bone } from './skeleton/Skeleton.jsx'
 import Today from './home/Today.jsx'
 import HomeExtras from './home/HomeExtras.jsx'
 import { useHomeKinds } from '../features/home/kinds.js'
+import { pinCardNote } from '../features/home/cardNote.js'
 import DayPlan from './home/DayPlan.jsx'
 import FocusSheet, { FocusSheetSkeleton } from './home/FocusSheet.jsx'
 import ReplanCard from './study/ReplanCard.jsx'
@@ -266,7 +267,11 @@ export default function Home(){
                 currentPos.x <= dropRect.right &&
                 currentPos.y >= dropRect.top &&
                 currentPos.y <= dropRect.bottom;
-            if (isOverDropZone) dispatch(setFocusTask(currentTask));
+            // a note dropped there goes into the card (no focus), a task into focus
+            if (isOverDropZone) {
+                if (currentTask.noteId) pinCardNote(currentTask.noteId);
+                else dispatch(setFocusTask(currentTask));
+            }
         }
 
         draggedTaskRef.current = null;
@@ -349,7 +354,7 @@ export default function Home(){
                         dragPosition={dragPosition}
                         dragOffset={dragOffset}
                     />
-                    <HomeExtras kinds={kinds} />
+                    <HomeExtras kinds={kinds} onDragNote={handlePointerDown} />
                 </section>
                 <aside className={styles.sideArea} aria-label={t('momentumTitle')} data-part="home-momentum">
                     <Momentum stacked />

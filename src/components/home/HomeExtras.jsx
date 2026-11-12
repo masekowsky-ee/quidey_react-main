@@ -10,6 +10,7 @@ import { dateKey, taskTimeText } from '../../features/calendar/calendar';
 import { dueText } from '../../features/helperFunction';
 import { useWhenText } from '../reminders/whenText';
 import Icon from '../icons.jsx';
+import { pinCardNote } from '../../features/home/cardNote';
 import styles from './HomeExtras.module.css';
 
 // how many of each kind Home's list shows
@@ -18,7 +19,8 @@ const SHOWN = 6;
 // Events, reminders and notes in Home's list, under the tasks, as far as the list head's labels
 // have them switched on. Events and reminders are the app's own data; the notes are read when
 // the notes are asked for.
-export default function HomeExtras({ kinds }) {
+// onDragNote(event, { id, noteId, name }): grabbed by its handle, a note can be dropped on the card
+export default function HomeExtras({ kinds, onDragNote }) {
     const { t } = useTranslation();
     const when = useWhenText();
     const tasks = useSelector(state => state.task.tasks);
@@ -91,7 +93,7 @@ export default function HomeExtras({ kinds }) {
                     {shownNotes.map(note => {
                         const preview = notePreview(note, 90);
                         return (
-                            <li key={note.id}>
+                            <li key={note.id} className={styles.withActions}>
                                 <Link className={styles.row} to={`/notes?note=${note.id}`}>
                                     <Icon name="note" size={18} className={styles.icon} />
                                     <span className={styles.text}>
@@ -99,6 +101,15 @@ export default function HomeExtras({ kinds }) {
                                         {preview.text && <span className={styles.meta}>{preview.text}</span>}
                                     </span>
                                 </Link>
+                                <button type="button" className={styles.action} onClick={() => pinCardNote(note.id)}
+                                    title={t('homeCardNoteShow')} aria-label={`${t('homeCardNoteShow')}: ${titleOf(note) || t('homeNoteUntitled')}`}>
+                                    <Icon name="pin" size={18} />
+                                </button>
+                                {onDragNote &&
+                                    <span className={styles.grip} style={{ touchAction: 'none' }} aria-hidden="true" title={t('homeCardNoteDrag')}
+                                        onPointerDown={(e) => onDragNote(e, { id: `note-${note.id}`, noteId: note.id, name: titleOf(note) || t('homeNoteUntitled') })}>
+                                        <Icon name="drag" size={18} />
+                                    </span>}
                             </li>
                         );
                     })}

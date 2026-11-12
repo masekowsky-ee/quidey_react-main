@@ -9,6 +9,8 @@ import { dueText, fill, formatClock } from '../../features/helperFunction';
 import { durationText } from '../../features/calendar/calendar';
 import { createNote, refreshTaskNotes, updateTaskProps } from '../../features/tasks/taskAction';
 import TaskNoteRow from '../task/TaskNoteRow.jsx';
+import CardNote from './CardNote.jsx';
+import { useCardNote } from '../../features/home/cardNote';
 import { setSharedTaskDone, togetherErrorText } from '../../features/together/togetherAction';
 import { showToast } from '../../features/toast/toast';
 import {
@@ -45,6 +47,8 @@ export default function FocusSheet({ dropZoneRef, activeTask, setActiveTask, onR
     const focusByTask = useSelector(selectFocusByTask);
     const notes = useSelector(state => state.task.notes);
     const { groupsOf } = useTaskGroups();
+    // a note put in the card takes the task's place on show (the task and the timer stay as they are)
+    const cardNote = useCardNote();
 
     const stopwatch = timerMode === 'stopwatch';
     const isPomodoro = timerMode === 'pomodoro';
@@ -105,6 +109,15 @@ export default function FocusSheet({ dropZoneRef, activeTask, setActiveTask, onR
         : !stopwatch && timer.time < 1000 ? t('focusAgain')
         : onBreak ? t('pomodoroStartBreak') : t('focusStart');
     const canEditLength = timerMode === 'timer' && !inProgress;
+
+    if (cardNote) {
+        return (
+            <section ref={dropZoneRef} className={styles.sheet} aria-label={t('homeCardNoteLabel')} data-part="home-focus"
+                data-note="" data-dragging={dragging || undefined}>
+                <CardNote id={cardNote} />
+            </section>
+        );
+    }
 
     return (
         <section ref={dropZoneRef} className={styles.sheet} aria-label={t('focusTitle')} data-part="home-focus"
