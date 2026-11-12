@@ -139,7 +139,6 @@ describe('Google Analytics for Firebase (Android app, with consent only)', () =>
     it('can be changed in Settings → App → Nutzungsdaten', async () => {
         await inTheApp('granted')
         renderWithStore(<Settings />)
-        fireEvent.click(screen.getByRole('tab', { name: 'App' }))
         expect(screen.getByRole('heading', { name: 'Nutzungsdaten' })).toBeInTheDocument()
         const group = screen.getByRole('group', { name: 'Nutzung mitzählen' })
         await act(async () => { fireEvent.click(within(group).getByRole('button', { name: 'Aus' })) })
@@ -149,7 +148,6 @@ describe('Google Analytics for Firebase (Android app, with consent only)', () =>
 
     it('has no settings row in the browser', () => {
         renderWithStore(<Settings />)
-        fireEvent.click(screen.getByRole('tab', { name: 'App' }))
         expect(screen.queryByRole('heading', { name: 'Nutzungsdaten' })).not.toBeInTheDocument()
     })
 })

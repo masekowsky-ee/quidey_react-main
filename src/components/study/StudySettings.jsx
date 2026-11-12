@@ -11,7 +11,7 @@ const SESSION_RANGE = [15, 180];
 const DAILY_RANGE = [15, 720];
 
 let nextKey = 0;
-const withKeys = (windows) => windows.map(w => ({ ...w, key: ++nextKey }));
+const withKeys = (windows = []) => windows.map(w => ({ ...w, key: ++nextKey }));
 const inRange = (text, [min, max]) => /^\d+$/.test(text) && Number(text) >= min && Number(text) <= max;
 // what the planner reads from the settings (the AI switch doesn't move the plan)
 const planningOf = ({ windows, sessionMinutes, dailyMaxMinutes }) => JSON.stringify({ windows, sessionMinutes, dailyMaxMinutes });

@@ -263,18 +263,12 @@ function ProfileSkeleton({ own }) {
 
 // ---------- settings: title and areas, then a label column beside a panel per section ----------
 
-const AREAS = ['look', 'plan', 'app'];
-
 function SettingsSkeleton() {
     const { t } = useTranslation();
-    const { hash } = useLocation();
-    const name = hash.slice(1);
-    const area = name === 'event-types' ? 'plan' : AREAS.includes(name) ? name : 'look';
     return (
         <div className={styles.medium}>
             <header className={styles.settingsHead}>
                 <h1 className={styles.title}>{t('settings')}</h1>
-                <Tabs active={area} labels={AREAS.map(key => [key, t(`settingsArea_${key}`)])} />
             </header>
             <div>
                 {[2, 4, 3].map((rows, i) => (

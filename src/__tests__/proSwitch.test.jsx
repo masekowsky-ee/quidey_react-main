@@ -94,7 +94,6 @@ describe('the Android app to download (settings)', () => {
         android()
         window.matchMedia = vi.fn(() => ({ matches: false, addEventListener() {}, removeEventListener() {} }))
         render(<Provider store={storeWith({})}><MemoryRouter><Settings /></MemoryRouter></Provider>)
-        fireEvent.click(screen.getByRole('tab', { name: 'App' }))
         const link = screen.getByRole('link', { name: 'Herunterladen' })
         expect(link).toHaveAttribute('href', '/download/quidey.apk')
         expect(link).toHaveAttribute('download', 'Quidey.apk')

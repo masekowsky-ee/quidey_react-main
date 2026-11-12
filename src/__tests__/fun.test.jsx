@@ -265,7 +265,6 @@ describe('tutorial', () => {
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
         // the tour lives in the settings, area "App"
-        fireEvent.click(screen.getByRole('tab', { name: 'App' }))
         fireEvent.click(screen.getByRole('button', { name: 'Einführung starten' }))
         expect(screen.getByRole('dialog')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Zurück' })).toBeDisabled()

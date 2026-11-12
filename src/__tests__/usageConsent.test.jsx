@@ -92,7 +92,6 @@ describe('usage consent card', () => {
 describe('Settings → Datenschutz', () => {
     const open = () => {
         renderApp(<Settings />)
-        fireEvent.click(screen.getByRole('tab', { name: 'App' }))
     }
 
     it('shows "Noch nicht gefragt", then the date after switching on', async () => {

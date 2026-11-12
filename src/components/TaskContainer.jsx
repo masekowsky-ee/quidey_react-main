@@ -24,6 +24,7 @@ import { setShowSharedTasks } from '../features/settings/settingsAction'
 import { isEvent } from '../features/tasks/kinds'
 import { dateKey, minutesOfDay } from '../features/calendar/calendar'
 import TodayEvents from './task/TodayEvents.jsx'
+import KindChips from './home/KindChips.jsx'
 import { selectCollections, taskIdsIn, updateCollection, deleteCollection, removeFromCollection } from '../features/collections/collections'
 
 // seconds between two rows when the list cascades in
@@ -65,6 +66,9 @@ export default function TaskContainer(props){
     // plain: the app's own Home (today's events are in "Dein Tag" beside it, the list doesn't fold,
     // "5 erledigt" and "Neue Aufgabe" are quiet text buttons; the add button in the corner is the loud one)
     const plain = Boolean(props.plain);
+    // Home's labels (Aufgaben, Events, Erinnerungen, Notizen) in the head of "All": the kinds shown; tasks hidden when off
+    const { kinds, onToggleKind } = props;
+    const tasksOff = Boolean(kinds) && !kinds.includes('tasks');
     // Home's own look shows the first few open tasks, the rest one tap away, so the list stays
     // about as long as the column beside it
     const [expanded, setExpanded] = useState(false);
@@ -251,7 +255,8 @@ export default function TaskContainer(props){
                     title={t(collapsed ? 'expandTasks' : 'collapseTasks')} aria-label={t(collapsed ? 'expandTasks' : 'collapseTasks')}>
                     <Icon name="chevronDown" className={collapsed ? styles.chevronClosed : styles.chevron} />
                 </button>}
-                <h2 id="tasks-title" className={styles.sectionTitle}>
+                {plain && showingAll && !shownCollection && kinds && onToggleKind && <KindChips active={kinds} onToggle={onToggleKind} />}
+                <h2 id="tasks-title" className={styles.sectionTitle} hidden={Boolean(plain && showingAll && !shownCollection && kinds && onToggleKind)}>
                     {shownCollection
                         ? `${shownCollection.emoji ? `${shownCollection.emoji} ` : ''}${shownCollection.name}`
                         : shownGroup?.name && !showingAll ? shownGroup.name : t('taskContainer')}
@@ -329,7 +334,7 @@ export default function TaskContainer(props){
                     {groupDescription}
                 </p>)}
 
-            {!collapsed && <>
+            {!collapsed && !tasksOff && <>
                 {todayEvents.length > 0 && !plain && <TodayEvents events={todayEvents} onOpen={(task) => setEditTaskId(task.id)} />}
                 {!loaded ? <SkeletonPanel /> : <div className={plain ? styles.plainList : styles.panel}>
                     {listedOpen.length === 0 && plannedStudy.length === 0

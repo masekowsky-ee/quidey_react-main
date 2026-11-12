@@ -1,5 +1,5 @@
 import styles from './Settings.module.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {useTranslation} from '../i18n/useTranslation'
 import {useSelector, useDispatch} from 'react-redux';
 import {setLanguage, setTheme, setAccent, setPalette, setDefaultSessionMinutes, setMotion, setSound, setShowSharedTasks, setShowTutorial} from '../features/settings/settingsAction';
@@ -16,9 +16,8 @@ import { selectUsageConsent, setUsageConsent } from '../features/auth/authAction
 import { showToast } from '../features/toast/toast';
 import { saveAllDayTime, selectAllDayTime } from '../features/tasks/reminders';
 import EventTypeSettings from './EventTypeSettings.jsx';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useHashTarget } from '../features/layout/hashTarget';
-import { SECTION_AREAS } from '../features/search/places';
 import UntisSettings from './untis/UntisSettings.jsx';
 import MicrophoneSettings from './voice/MicrophoneSettings.jsx';
 import { isNativeApp } from '../features/native/native';
@@ -27,6 +26,7 @@ import { setAnalyticsConsent, useAnalytics } from '../features/native/analytics'
 import AlarmSettings from './reminders/AlarmSettings.jsx';
 import StudySettings from './study/StudySettings.jsx';
 import { resetTips } from '../features/tips/tips';
+import { useMotionLevel } from '../features/settings/motion';
 
 const LANGUAGES = [
     { code: 'de', label: 'german' },
@@ -39,15 +39,45 @@ const THEME_OPTIONS = [
     { value: 'system', label: 'themeSystem' },
 ];
 
-// The settings come in three areas, one view each, so only a few choices are in sight at a
-// time. The area is in the address's hash (#plan, #app); a section's id opens its area and
-// scrolls to it (#event-types from the editor, #appearance … from the command bar).
-// "App": notifications on this device, the intro tour and, where the browser can, installing Quidey.
-const AREAS = ['look', 'plan', 'app'];
-const areaFromHash = (hash) => {
-    const name = hash.slice(1);
-    return AREAS.includes(name) ? name : SECTION_AREAS[name] ?? 'look';
-};
+// The settings are one long page: every section under the other, with a list of them always in
+// sight (a column beside the page; on a phone a row of chips under the header) that jumps to a
+// section and shows the one being read. A section's id in the address (#event-types from the
+// editor, #appearance from the command bar) scrolls to it. The old areas' names (#plan, #app)
+// lead to the first section of what they held.
+const GROUPS = [
+    { key: 'look', sections: [['language', 'settingsLanguageTitle'], ['appearance', 'appearance']] },
+    { key: 'plan', sections: [['start', 'settingsStartTitle'], ['timer', 'sessionSettings'], ['event-types', 'eventTypes'], ['untis', 'untisSettingsTitle'], ['study', 'studySettingsTitle']] },
+    { key: 'app', sections: [['notifications', 'pushTitle'], ['microphone', 'micTitle'], ['tour', 'tutorial'], ['alarms', 'reminderAlarmSetting'], ['privacy', 'privacySetting'], ['analytics', 'analyticsSetting'], ['android', 'androidApp'], ['install', 'installApp']] },
+];
+const LEGACY_AREAS = { look: 'language', plan: 'start', app: 'notifications' };
+
+// The list of sections: grouped under the old areas' names on a wide screen, one row on a phone.
+function SettingsNav({ groups, current, onPick }) {
+    const { t } = useTranslation();
+    const nav = useRef(null);
+    // on a phone the row follows the section being read
+    useEffect(() => {
+        const row = nav.current;
+        const button = row?.querySelector(`[data-section="${current}"]`);
+        if (!row || !button || row.scrollWidth <= row.clientWidth) return;
+        row.scrollTo?.({ left: button.offsetLeft - 16, behavior: 'smooth' });
+    }, [current]);
+    return (
+        <nav ref={nav} className={styles.nav} aria-label={t('settings')}>
+            {groups.map(group => (
+                <div key={group.key} className={styles.navGroup}>
+                    <span className={styles.navGroupName}>{t(`settingsArea_${group.key}`)}</span>
+                    {group.sections.map(([id, label]) => (
+                        <button key={id} type="button" data-section={id} className={styles.navLink}
+                            aria-current={current === id ? 'location' : undefined} onClick={() => onPick(id)}>
+                            {t(label)}
+                        </button>
+                    ))}
+                </div>
+            ))}
+        </nav>
+    );
+}
 
 // A segmented control of options: [{ value, label }], the current value, and what a click does
 function Choice({ label, options, value, onChange, disabled = false }) {
@@ -293,21 +323,40 @@ export default function Settings(){
     // the Android app with Firebase: may it count how it is used
     const analytics = useAnalytics();
     const dispatch = useDispatch();
-    const { hash, key } = useLocation();
-    const [chosenArea, setArea] = useState(() => areaFromHash(hash));
-    // a new address while the page is open (the command bar) opens its area
-    const [shownKey, setShownKey] = useState(key);
-    if (shownKey !== key) {
-        setShownKey(key);
-        setArea(areaFromHash(hash));
-    }
+    const { hash } = useLocation();
+    const navigate = useNavigate();
+    const smooth = useMotionLevel() !== 'minimal';
+    // the old area names lead to the first section of what they held
+    const legacy = LEGACY_AREAS[hash.slice(1)];
+    useEffect(() => {
+        if (legacy) navigate({ hash: `#${legacy}` }, { replace: true });
+    }, [legacy, navigate]);
     useHashTarget();
-    const areas = AREAS;
-    const area = areas.includes(chosenArea) ? chosenArea : 'look';
 
-    const openArea = (next) => {
-        setArea(next);
-        try { window.history.replaceState(window.history.state, '', next === 'look' ? window.location.pathname : `#${next}`); } catch { /* only the address stays */ }
+    // the sections there are on this device (some only where they apply)
+    const there = { alarms: isNativeApp(), analytics: analytics.available, android: Boolean(apk), install: installState !== 'unavailable' };
+    const groups = GROUPS.map(group => ({ ...group, sections: group.sections.filter(([id]) => there[id] ?? true) }));
+    const ids = groups.flatMap(group => group.sections.map(([id]) => id));
+    const idsKey = ids.join();
+
+    // the section being read: the one at the upper part of the screen
+    const [current, setCurrent] = useState(() => LEGACY_AREAS[hash.slice(1)] ?? (ids.includes(hash.slice(1)) ? hash.slice(1) : ids[0]));
+    useEffect(() => {
+        if (typeof IntersectionObserver === 'undefined') return undefined;
+        const inView = new Set();
+        const watcher = new IntersectionObserver((entries) => {
+            entries.forEach(entry => (entry.isIntersecting ? inView.add(entry.target.id) : inView.delete(entry.target.id)));
+            const first = idsKey.split(',').find(id => inView.has(id));
+            if (first) setCurrent(first);
+        }, { rootMargin: '-15% 0px -70% 0px' });
+        idsKey.split(',').forEach(id => { const el = document.getElementById(id); if (el) watcher.observe(el); });
+        return () => watcher.disconnect();
+    }, [idsKey]);
+
+    const pick = (id) => {
+        setCurrent(id);
+        document.getElementById(id)?.scrollIntoView?.({ block: 'start', behavior: smooth ? 'smooth' : 'auto' });
+        try { window.history.replaceState(window.history.state, '', `#${id}`); } catch { /* only the address stays */ }
     };
 
     // New default length; also applied to the timer right away if it is idle and untouched.
@@ -325,19 +374,12 @@ export default function Settings(){
         <div className={styles.page}>
             <header className={styles.head}>
                 <h1 className={styles.title}>{t('settings')}</h1>
-                <div className={styles.areas} role="tablist" aria-label={t('settings')}>
-                    {areas.map(name => (
-                        <button key={name} type="button" role="tab" id={`settings-tab-${name}`} aria-selected={area === name}
-                            aria-controls={`settings-${name}`} className={area === name ? styles.areaActive : undefined}
-                            onClick={() => openArea(name)}>
-                            {t(`settingsArea_${name}`)}
-                        </button>
-                    ))}
-                </div>
             </header>
 
-            <div className={styles.view} role="tabpanel" id={`settings-${area}`} aria-labelledby={`settings-tab-${area}`}>
-                {area === 'look' && <>
+            <div className={styles.layout}>
+            <SettingsNav groups={groups} current={current} onPick={pick} />
+            <div className={styles.view}>
+                <>
                     <SettingSection id="language" title={t('settingsLanguageTitle')} description={t('settingsLanguageHint')}>
                         <SettingRow title={t('language')}>
                             <Choice label={t('language')} value={language} onChange={(code) => dispatch(setLanguage(code))}
@@ -433,9 +475,9 @@ export default function Settings(){
                             </div>
                         </div>}
                     </SettingSection>
-                </>}
+                </>
 
-                {area === 'plan' && <>
+                <>
                     <SettingSection id="start" title={t('settingsStartTitle')} description={t('settingsStartHint')}>
                         <SettingRow title={t('settingsLayoutRow')} hint={t(homeLayout === 'team' ? 'homeTeamHint' : 'homeSoloHint')}>
                             <HomeLayoutSwitch />
@@ -464,9 +506,9 @@ export default function Settings(){
                     <SettingSection id="study" title={t('studySettingsTitle')} description={t('studySettingsHint')}>
                         <StudySettings />
                     </SettingSection>
-                </>}
+                </>
 
-                {area === 'app' && <>
+                <>
                     <SettingSection id="notifications" title={t('pushTitle')} description={t('pushHint')}>
                         <PushSettings />
                         <AllDayTimeSetting />
@@ -513,7 +555,8 @@ export default function Settings(){
                                 )}
                             </SettingRow>
                         </SettingSection>}
-                </>}
+                </>
+            </div>
             </div>
         </div>
     );

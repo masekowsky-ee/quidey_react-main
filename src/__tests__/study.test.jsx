@@ -292,7 +292,8 @@ describe('Settings → Lernen', () => {
 
     it('the push list in Settings has the study kind', async () => {
         renderSettings({ hash: '#app' })
-        expect(await screen.findByText('Lernen')).toBeInTheDocument()
+        // "Lernen" is also a section of the page: the push kind is one of several
+        expect((await screen.findAllByText('Lernen')).length).toBeGreaterThan(0)
         expect(screen.getByText('Wenn ein Ziel hinter seinem Plan liegt, höchstens einmal am Tag.')).toBeInTheDocument()
     })
 })

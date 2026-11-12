@@ -1,0 +1,39 @@
+/* Home's list head: the kinds of entries as small toggles (one row, sideways when it is narrow) */
+.chips {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  flex: none;
+  height: 2rem;
+  padding: 0 0.625rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.chip[aria-pressed="true"] {
+  color: var(--text-h);
+  font-weight: 600;
+  background: var(--hover-wash);
+}
+
+@media (hover: hover) {
+  .chip:hover {
+    color: var(--text-h);
+    box-shadow: none;
+  }
+}

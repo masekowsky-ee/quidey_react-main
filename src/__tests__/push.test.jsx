@@ -114,7 +114,7 @@ const makeStore = () => configureStore({ reducer: rootReducer })
 function renderApp() {
     return render(<Provider store={makeStore()}><MemoryRouter><Settings /></MemoryRouter><PushOffer /></Provider>)
 }
-const openAppArea = () => fireEvent.click(screen.getByRole('tab', { name: 'App' }))
+const openAppArea = () => {} // every section is on the page
 
 describe('notifications on this device', () => {
     beforeEach(() => {

@@ -18,6 +18,8 @@ import { fetchMySharedTasks, selectSharedSoloTasks } from '../features/together/
 import { selectTasksLoaded } from '../features/tasks/taskAction.js'
 import { Bone } from './skeleton/Skeleton.jsx'
 import Today from './home/Today.jsx'
+import HomeExtras from './home/HomeExtras.jsx'
+import { useHomeKinds } from '../features/home/kinds.js'
 import DayPlan from './home/DayPlan.jsx'
 import FocusSheet, { FocusSheetSkeleton } from './home/FocusSheet.jsx'
 import ReplanCard from './study/ReplanCard.jsx'
@@ -181,6 +183,8 @@ export default function Home(){
     // testers' interface variants arrange Home their own way (src/ui-variants) and add a part:
     // the departure board (Abfahrtstafel), the reading room's seats (Lesesaal)
     const uiVariant = useUiVariant();
+    // which kinds of entries the list shows: tasks, events, reminders, notes
+    const [kinds, toggleKind] = useHomeKinds();
 
     // the new-task form opens over any page (QuickAdd in the shell); Home's button opens it too
     const setCreateTask = useCallback((open) => dispatch(showForms(Boolean(open))), [dispatch]);
@@ -334,6 +338,8 @@ export default function Home(){
                     <GroupBtnContainer setCreateGroup={setCreateGroup} />
                     <TaskContainer
                         plain
+                        kinds={kinds}
+                        onToggleKind={toggleKind}
                         activeTask={activeTask}
                         releasedIds={releasedIds}
                         onActivate={activateTask}
@@ -343,6 +349,7 @@ export default function Home(){
                         dragPosition={dragPosition}
                         dragOffset={dragOffset}
                     />
+                    <HomeExtras kinds={kinds} />
                 </section>
                 <aside className={styles.sideArea} aria-label={t('momentumTitle')} data-part="home-momentum">
                     <Momentum stacked />

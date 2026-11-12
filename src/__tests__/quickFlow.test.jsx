@@ -230,11 +230,10 @@ describe('the command bar for everybody and the keyboard shortcuts', () => {
                 </MemoryRouter>
             </Provider>
         )
-        expect(screen.getByRole('tab', { name: 'Appearance' })).toHaveAttribute('aria-selected', 'true')
+        expect(screen.getByRole('navigation', { name: 'Settings' })).toBeInTheDocument()
         await act(async () => { fireEvent.keyDown(window, { key: 'k', ctrlKey: true }) })
         fireEvent.change(screen.getByRole('combobox'), { target: { value: 'notifications' } })
         await act(async () => { fireEvent.keyDown(screen.getByRole('combobox'), { key: 'Enter' }) })
-        expect(screen.getByRole('tab', { name: 'App' })).toHaveAttribute('aria-selected', 'true')
         expect(screen.getByRole('heading', { name: 'Notifications' })).toBeInTheDocument()
     })
 

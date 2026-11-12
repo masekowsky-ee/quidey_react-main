@@ -424,6 +424,14 @@
 /* on a phone the card is a sheet from the bottom edge (index.css): taller than the room left
    beside the keyboard, it scrolls inside */
 @media (max-width: 720px) {
+    /* the form takes the sheet's width, whatever its content (the note editor's toolbar is a
+       row of buttons that scrolls sideways) */
+    .form{
+        align-self: stretch;
+        min-width: 0;
+        max-width: none;
+    }
+
     .div{
         min-height: 0;
         overflow-y: auto;
