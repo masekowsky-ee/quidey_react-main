@@ -32,3 +32,6 @@ public/download/
 
 # Firebase config (per machine, not in the repo)
 android/app/google-services.json
+
+# graphify output
+graphify-out/
