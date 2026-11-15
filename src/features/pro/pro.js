@@ -3,7 +3,7 @@
 // Google Play Billing through the app's plugin "QuideyBilling" (android/…/BillingPlugin.java):
 // Google Play only allows its own billing for that, and the app never points to another way.
 //
-// What Pro means, from the server (/api/me → state.auth.access): pro { active, gift, until };
+// What Pro means, from the server (/api/me → state.auth.access): pro { active, gift, until } and max { active, gift, until } (Max includes Pro);
 // accessMode 'beta' (testers, Pro and admins get in) or 'open' (everybody, with the free plan's
 // limits: access.limits / access.usage; null for Pro, testers and admins).
 import { registerPlugin } from '@capacitor/core';
@@ -18,6 +18,13 @@ export const YEARLY_SAVES = Math.round((PRICES.monthly * 12 - PRICES.yearly) * 1
 export const YEARLY_SAVES_PERCENT = Math.round((YEARLY_SAVES / (PRICES.monthly * 12)) * 100);
 export const YEARLY_PER_MONTH = Math.floor((PRICES.yearly / 12) * 100) / 100;
 
+// Quidey Max (5,99 € a month or 49 € a year) is Pro plus the AI assistant; Max includes Pro
+export const MAX_PRICES = { monthly: 5.99, yearly: 49 };
+export const PRICES_BY_TIER = { pro: PRICES, max: MAX_PRICES };
+export const yearlySaves = (tier) => Math.round((PRICES_BY_TIER[tier].monthly * 12 - PRICES_BY_TIER[tier].yearly) * 100) / 100;
+export const yearlySavesPercent = (tier) => Math.round((yearlySaves(tier) / (PRICES_BY_TIER[tier].monthly * 12)) * 100);
+export const yearlyPerMonth = (tier) => Math.floor((PRICES_BY_TIER[tier].yearly / 12) * 100) / 100;
+
 export const formatEuro = (value, language) => new Intl.NumberFormat(language === 'en' ? 'en-IE' : 'de-DE', { style: 'currency', currency: 'EUR' }).format(value);
 
 const PLAY_PRODUCT = 'quidey_pro';
@@ -29,10 +36,13 @@ export const sellsThroughPlay = () => isNativeApp();
 // GET /api/billing: { active, gift, until, subscription, canManageStripe, stripe, play, prices, playAccountId }
 export const fetchBilling = () => apiFetch('/api/billing');
 
-// Web: on to Stripe's checkout page for 'monthly' | 'yearly' (leaves the page)
-export async function startCheckout(plan, language) {
-    const { url } = await apiFetch('/api/billing/checkout', { method: 'POST', body: JSON.stringify({ plan, language }) });
-    window.location.assign(url);
+// Web: on to Stripe's checkout page for a tier ('pro' | 'max') and 'monthly' | 'yearly' (leaves the
+// page). A running Stripe Pro bought up to Max is changed in place: the server answers
+// { upgraded: true } and there is no page to go to; that answer is returned.
+export async function startCheckout(plan, language, tier = 'pro') {
+    const result = await apiFetch('/api/billing/checkout', { method: 'POST', body: JSON.stringify({ tier, plan, language }) });
+    if (result?.url) window.location.assign(result.url);
+    return result;
 }
 
 // Web: Stripe's customer portal (plan, payment method, invoices, cancel)
@@ -83,11 +93,15 @@ export function managePlaySubscription() {
 // Fired by apiFetch when the free plan is full: { limit, max } (App shows LimitDialog)
 export { LIMIT_EVENT };
 
-// My plan in short: { pro, limited, limits, usage, accessMode }
+// Do I have Max (paid, gifted, or as an admin)?
+export const selectHasMax = (state) => Boolean(state.auth.access.max?.active);
+
+// My plan in short: { pro, max, limited, limits, usage, accessMode }
 export function usePlan() {
     const access = useSelector((state) => state.auth.access);
     return {
         pro: Boolean(access.pro?.active),
+        max: Boolean(access.max?.active),
         limited: Boolean(access.limits),
         limits: access.limits,
         usage: access.usage,

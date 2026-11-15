@@ -34,6 +34,8 @@ export default function AdminUserDetail({ user, onClose }) {
 
     const paid = user.proUntil && new Date(user.proUntil) > new Date();
     const pro = [user.isPro && t('adminProGiftValue'), paid && fill(t('adminProPaidValue'), { date: date(user.proUntil) })].filter(Boolean).join(' · ');
+    const maxPaid = user.maxUntil && new Date(user.maxUntil) > new Date();
+    const max = [user.isMax && t('adminProGiftValue'), maxPaid && fill(t('adminProPaidValue'), { date: date(user.maxUntil) })].filter(Boolean).join(' · ');
     const roles = [user.isAdmin && t('adminRoleAdmin'), user.isTester && t('adminRoleTester'), user.isOwner && t('adminRoleOwner')].filter(Boolean).join(', ');
     const request = user.request && [
         t(`requestStatus_${user.request.status}`),
@@ -58,6 +60,7 @@ export default function AdminUserDetail({ user, onClose }) {
         ['birth', date(user.birthDate)],
         ['level', user.level],
         ['pro', pro],
+        ['max', max],
         ['roles', roles],
         ['request', request],
         ['usage', usage],

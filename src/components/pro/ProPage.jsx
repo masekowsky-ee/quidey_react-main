@@ -7,8 +7,8 @@ import { fill, formatDate } from '../../features/helperFunction';
 import { fetchAccess } from '../../features/auth/authAction';
 import Icon from '../icons.jsx';
 import {
-    PRICES, YEARLY_PER_MONTH, YEARLY_SAVES, YEARLY_SAVES_PERCENT, buyInPlay, fetchBilling, formatEuro, managePlaySubscription,
-    openPortal, playPlans, restorePlayPurchases, sellsThroughPlay, startCheckout,
+    PRICES_BY_TIER, buyInPlay, fetchBilling, formatEuro, managePlaySubscription,
+    openPortal, playPlans, restorePlayPurchases, sellsThroughPlay, startCheckout, yearlyPerMonth, yearlySaves, yearlySavesPercent,
 } from '../../features/pro/pro';
 import { CANCEL_PATH } from '../../legal/paths';
 
@@ -26,6 +26,7 @@ export default function ProPage() {
     const inApp = sellsThroughPlay();
 
     const [billing, setBilling] = useState(null);
+    const [tier, setTier] = useState('pro');
     const [plan, setPlan] = useState('yearly');
     const [play, setPlay] = useState(null);
     const [busy, setBusy] = useState(false);
@@ -62,9 +63,17 @@ export default function ProPage() {
 
     const active = Boolean(billing?.active ?? access.pro?.active);
     const subscription = billing?.subscription;
-    const canBuy = inApp ? Boolean(billing?.play && play?.[plan]) : Boolean(billing?.stripe);
+    // Max (Pro plus the AI assistant) is sold on the web (Stripe) only, where its prices are set up
+    const maxOffered = !inApp && !(billing && !billing.stripeMax);
+    const tiers = maxOffered ? ['pro', 'max'] : ['pro'];
+    const buyTier = maxOffered ? tier : 'pro';
+    const canBuy = inApp ? Boolean(billing?.play && play?.[plan]) : Boolean(billing?.stripe && (buyTier === 'pro' || billing.stripeMax));
+    const hasMax = billing ? billing.tier === 'max' : Boolean(access.max?.active);
+    // a Pro subscriber (Stripe or gift) can go up to Max here, in place
+    const canUpgrade = !inApp && active && !hasMax && Boolean(billing?.stripeMax) && (!subscription || subscription.provider === 'stripe');
+    const upgradePlan = subscription?.plan === 'monthly' ? 'monthly' : 'yearly';
 
-    const price = (which) => (inApp ? play?.[which]?.price ?? '…' : formatEuro(PRICES[which], language));
+    const price = (which, forTier = 'pro') => (inApp ? play?.[which]?.price ?? '…' : formatEuro(PRICES_BY_TIER[forTier][which], language));
 
     const buy = async () => {
         setBusy(true);
@@ -78,7 +87,24 @@ export default function ProPage() {
                     await dispatch(fetchAccess()).catch(() => {});
                 }
             } else {
-                await startCheckout(plan, language);
+                await startCheckout(plan, language, buyTier);
+            }
+        } catch {
+            setNotice({ ok: false, text: t('proError') });
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    const upgrade = async () => {
+        setBusy(true);
+        setNotice(null);
+        try {
+            const result = await startCheckout(upgradePlan, language, 'max');
+            if (result?.upgraded) {
+                await load();
+                await dispatch(fetchAccess()).catch(() => {});
+                setNotice({ ok: true, text: t('proUpgradedMax') });
             }
         } catch {
             setNotice({ ok: false, text: t('proError') });
@@ -116,11 +142,11 @@ export default function ProPage() {
             {active ? (
                 <section className={styles.thanks} aria-labelledby="proThanks">
                     <Icon name="heart" className={styles.thanksHeart} />
-                    <h2 id="proThanks" className={styles.thanksTitle}>{t('proThanksTitle')}</h2>
+                    <h2 id="proThanks" className={styles.thanksTitle}>{t(hasMax ? 'proThanksMaxTitle' : 'proThanksTitle')}</h2>
                     <p className={styles.thanksText}>{t('proThanksText')}</p>
                     {subscription && (
                         <dl className={styles.facts}>
-                            <div><dt>{t('proPlan')}</dt><dd>{t(subscription.plan === 'yearly' ? 'proYearly' : 'proMonthly')}</dd></div>
+                            <div><dt>{t('proPlan')}</dt><dd>{`${subscription.tier === 'max' ? 'Max' : 'Pro'} · ${t(subscription.plan === 'yearly' ? 'proYearly' : 'proMonthly')}`}</dd></div>
                             <div>
                                 <dt>{t(subscription.cancelAtPeriodEnd ? 'proEndsOn' : 'proRenewsOn')}</dt>
                                 <dd>{formatDate(subscription.periodEnd)}</dd>
@@ -131,30 +157,54 @@ export default function ProPage() {
                     {subscription && (subscription.provider === 'play' ? inApp : !inApp) && (
                         <button type="button" className={styles.secondary} onClick={manage} disabled={busy}>{t('proManage')}</button>
                     )}
+                    {canUpgrade && (
+                        <>
+                            <p className={styles.small}>{t('proUpgradeMaxHint')}</p>
+                            <button type="button" className={styles.cta} onClick={upgrade} disabled={busy} aria-busy={busy}>
+                                {t('proUpgradeMax')} ({formatEuro(PRICES_BY_TIER.max[upgradePlan], language)}{t(upgradePlan === 'yearly' ? 'proPerYear' : 'proPerMonth')})
+                            </button>
+                        </>
+                    )}
                     {subscription && subscription.provider === 'play' && !inApp && <p className={styles.small}>{t('proManageInPlay')}</p>}
                     {subscription && subscription.provider === 'stripe' && inApp && <p className={styles.small}>{t('proManageOnWeb')}</p>}
                 </section>
             ) : (
                 <section className={styles.plans} aria-label={t('proChoose')}>
-                    <div className={styles.planGrid} role="radiogroup" aria-label={t('proChoose')}>
-                        <button type="button" role="radio" aria-checked={plan === 'yearly'}
-                            className={`${styles.plan} ${styles.planYearly}`} data-selected={plan === 'yearly'} onClick={() => setPlan('yearly')}>
-                            <span className={styles.saveBadge}>{fill(t('proSaveBadge'), { percent: YEARLY_SAVES_PERCENT })}</span>
-                            <span className={styles.planName}>{t('proYearly')}</span>
-                            <span className={styles.price}>{price('yearly')}<small>{t('proPerYear')}</small></span>
-                            {!inApp && <span className={styles.perMonth}>{fill(t('proYearlyPerMonth'), { price: formatEuro(YEARLY_PER_MONTH, language) })}</span>}
-                            <span className={styles.saveLine}>
-                                {inApp ? fill(t('proSaveLineApp'), { percent: YEARLY_SAVES_PERCENT })
-                                    : fill(t('proSaveLine'), { amount: formatEuro(YEARLY_SAVES, language), percent: YEARLY_SAVES_PERCENT })}
-                            </span>
-                        </button>
-                        <button type="button" role="radio" aria-checked={plan === 'monthly'}
-                            className={styles.plan} data-selected={plan === 'monthly'} onClick={() => setPlan('monthly')}>
-                            <span className={styles.planName}>{t('proMonthly')}</span>
-                            <span className={styles.price}>{price('monthly')}<small>{t('proPerMonth')}</small></span>
-                            <span className={styles.perMonth}>{t('proMonthlyNote')}</span>
-                        </button>
-                    </div>
+                    {tiers.map((tierKey) => {
+                        const selected = (which) => buyTier === tierKey && plan === which;
+                        const choose = (which) => { setTier(tierKey); setPlan(which); };
+                        const percent = yearlySavesPercent(tierKey);
+                        const name = tierKey === 'max' ? 'Max' : 'Pro';
+                        return (
+                            <div key={tierKey} className={styles.tier}>
+                                {maxOffered && (
+                                    <div className={styles.tierHead}>
+                                        <h2 className={styles.tierName}>{name}</h2>
+                                        <p className={styles.tierNote}>{t(tierKey === 'max' ? 'proTierMaxNote' : 'proTierProNote')}</p>
+                                    </div>
+                                )}
+                                <div className={styles.planGrid} role="radiogroup" aria-label={name}>
+                                    <button type="button" role="radio" aria-checked={selected('yearly')}
+                                        className={`${styles.plan} ${styles.planYearly}`} data-selected={selected('yearly')} onClick={() => choose('yearly')}>
+                                        <span className={styles.saveBadge}>{fill(t('proSaveBadge'), { percent })}</span>
+                                        <span className={styles.planName}>{t('proYearly')}</span>
+                                        <span className={styles.price}>{price('yearly', tierKey)}<small>{t('proPerYear')}</small></span>
+                                        {!inApp && <span className={styles.perMonth}>{fill(t('proYearlyPerMonth'), { price: formatEuro(yearlyPerMonth(tierKey), language) })}</span>}
+                                        <span className={styles.saveLine}>
+                                            {inApp ? fill(t('proSaveLineApp'), { percent })
+                                                : fill(t('proSaveLine'), { amount: formatEuro(yearlySaves(tierKey), language), percent })}
+                                        </span>
+                                    </button>
+                                    <button type="button" role="radio" aria-checked={selected('monthly')}
+                                        className={styles.plan} data-selected={selected('monthly')} onClick={() => choose('monthly')}>
+                                        <span className={styles.planName}>{t('proMonthly')}</span>
+                                        <span className={styles.price}>{price('monthly', tierKey)}<small>{t('proPerMonth')}</small></span>
+                                        <span className={styles.perMonth}>{t('proMonthlyNote')}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    })}
 
                     <ul className={styles.terms}>
                         <li>{t(plan === 'yearly' ? 'proTermRenewYear' : 'proTermRenewMonth')}</li>
