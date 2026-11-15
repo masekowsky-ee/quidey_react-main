@@ -114,6 +114,7 @@ export default function AssistantSheet({ onClose, onReply }) {
     // the new entries of one answer: made at once, one toast to undo them all
     async function makeEntries(messageId, cards) {
         const undos = [];
+        const names = [];
         for (const card of cards) {
             try {
                 const { undo } = await applyAction(card.action, deps);
@@ -125,13 +126,14 @@ export default function AssistantSheet({ onClose, onReply }) {
                     patchCard(messageId, card.key, { status: 'undone', undo: null });
                 };
                 undos.push(once);
+                names.push(card.action.entry.name);
                 patchCard(messageId, card.key, { status: 'done', undo: once });
             } catch (err) {
                 patchCard(messageId, card.key, { status: 'failed', error: err.message });
             }
         }
         if (undos.length === 0) return;
-        const text = undos.length === 1 ? fill(t('assistantCreated'), { name: cards.find(c => c.action.entry)?.action.entry.name ?? '' }) : fill(t('assistantCreatedMany'), { n: undos.length });
+        const text = undos.length === 1 ? fill(t('assistantCreated'), { name: names[0] }) : fill(t('assistantCreatedMany'), { n: undos.length });
         dispatch(showToast(text, 'success', {
             action: { label: t('toastUndo'), run: () => Promise.all(undos.map(undo => undo().catch(() => {}))) },
         }));
@@ -395,7 +397,7 @@ function ActionCard({ card, deps, onChange, onLeave }) {
             {statusLine && <p className={styles.cardStatus} data-status={status}>{statusLine}</p>}
             {(status === 'pending' || status === 'busy') && (
                 <div className={styles.cardActions}>
-                    <button type="button" className={type === 'delete_entry' ? styles.confirmDanger : styles.confirm} onClick={confirm} disabled={status === 'busy'}>{t('assistantConfirm')}</button>
+                    <button type="button" className={styles.confirm} onClick={confirm} disabled={status === 'busy'}>{t('assistantConfirm')}</button>
                     <button type="button" className={styles.cancel} onClick={() => onChange({ status: 'cancelled' })} disabled={status === 'busy'}>{t('assistantCancel')}</button>
                 </div>
             )}

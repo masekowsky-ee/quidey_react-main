@@ -107,7 +107,6 @@
 .send:focus-visible,
 .stop:focus-visible,
 .confirm:focus-visible,
-.confirmDanger:focus-visible,
 .cancel:focus-visible {
     outline: 2px solid var(--primary-fg);
     outline-offset: 2px;
@@ -321,17 +320,6 @@
 .confirm {
     composes: btnPrimary from '../ui.module.css';
     min-width: 0;
-}
-
-.confirmDanger {
-    composes: btnPrimary from '../ui.module.css';
-    min-width: 0;
-    color: #fff;
-    background: var(--danger);
-}
-
-.confirmDanger:hover {
-    background: color-mix(in srgb, var(--danger) 86%, var(--bg));
 }
 
 .cancel {
