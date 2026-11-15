@@ -10,7 +10,7 @@ import { playPlans, buyInPlay, restorePlayPurchases, managePlaySubscription, upg
 import ProPage from '../components/pro/ProPage'
 
 const { billing } = vi.hoisted(() => ({
-    billing: { getPlans: vi.fn(), purchase: vi.fn(), restore: vi.fn(), manage: vi.fn() },
+    billing: { getPlans: vi.fn(), purchase: vi.fn(), restore: vi.fn(), manage: vi.fn(), getCapabilities: vi.fn() },
 }))
 
 vi.mock('@capacitor/core', async (importOriginal) => ({
@@ -40,9 +40,11 @@ beforeEach(() => {
     billing.getPlans.mockImplementation(async ({ productId }) => ({ plans: PLANS[productId] ?? [] }))
     billing.restore.mockResolvedValue({ purchases: [] })
     billing.manage.mockResolvedValue({})
+    billing.getCapabilities.mockResolvedValue({ replace: true })
     localStorage.clear()
 })
 
+const proPhone = (purchases) => billing.restore.mockImplementation(async ({ productId }) => ({ purchases: productId === 'quidey_pro' ? purchases : [] }))
 const postedTokens = () => apiFetch.mock.calls.filter(([url]) => url === '/api/billing/play').map(([, options]) => JSON.parse(options.body))
 
 describe('Google Play: the client knows both products', () => {
@@ -88,19 +90,62 @@ describe('Google Play: the client knows both products', () => {
         expect(postedTokens()).toEqual([{ purchaseToken: MAX_TOKEN }])
     })
 
-    it('upgradeInPlay looks up the Pro token on the phone and replaces it', async () => {
-        billing.restore.mockImplementation(async ({ productId }) => ({ purchases: productId === 'quidey_pro' ? [{ purchaseToken: PRO_TOKEN }] : [] }))
+    it('upgradeInPlay for Play Pro looks up the single Pro token and replaces it', async () => {
+        proPhone([{ purchaseToken: PRO_TOKEN }])
         billing.purchase.mockResolvedValue({ purchaseToken: MAX_TOKEN })
         apiFetch.mockResolvedValue({ active: true, tier: 'max' })
-        await upgradeInPlay('monthly', 'o-max-m', 'acct')
-        expect(billing.restore).toHaveBeenCalledWith({ productId: 'quidey_pro' })
+        await upgradeInPlay('monthly', 'o-max-m', 'acct', { hasPlayPro: true })
         expect(billing.purchase).toHaveBeenCalledWith({ productId: 'quidey_max', offerToken: 'o-max-m', accountId: 'acct', oldPurchaseToken: PRO_TOKEN })
+    })
+
+    it('Play Pro upgrade aborts when the phone has no Pro token (nothing is bought)', async () => {
+        proPhone([])
+        await expect(upgradeInPlay('monthly', 'o', 'acct', { hasPlayPro: true })).rejects.toMatchObject({ code: 'NO_PRO_TOKEN' })
+        expect(billing.purchase).not.toHaveBeenCalled()
+    })
+
+    it('Play Pro upgrade aborts when the lookup throws (nothing is bought)', async () => {
+        billing.restore.mockRejectedValue(new Error('boom'))
+        await expect(upgradeInPlay('monthly', 'o', 'acct', { hasPlayPro: true })).rejects.toMatchObject({ code: 'NO_PRO_TOKEN' })
+        expect(billing.purchase).not.toHaveBeenCalled()
+    })
+
+    it('with several Pro tokens the latest by purchaseTime is replaced', async () => {
+        proPhone([{ purchaseToken: 'old-token-aaaaaaaa', purchaseTime: 100 }, { purchaseToken: PRO_TOKEN, purchaseTime: 300 }, { purchaseToken: 'mid-token-aaaaaaaa', purchaseTime: 200 }])
+        billing.purchase.mockResolvedValue({ purchaseToken: MAX_TOKEN })
+        apiFetch.mockResolvedValue({})
+        await upgradeInPlay('monthly', 'o', 'acct', { hasPlayPro: true })
+        expect(billing.purchase.mock.calls[0][0].oldPurchaseToken).toBe(PRO_TOKEN)
+    })
+
+    it('with several Pro tokens and no purchase times it aborts', async () => {
+        proPhone([{ purchaseToken: 'a-token-aaaaaaaaa' }, { purchaseToken: 'b-token-bbbbbbbbb' }])
+        await expect(upgradeInPlay('monthly', 'o', 'acct', { hasPlayPro: true })).rejects.toMatchObject({ code: 'NO_PRO_TOKEN' })
+        expect(billing.purchase).not.toHaveBeenCalled()
+    })
+
+    it('Play Pro upgrade aborts when the plugin cannot replace (absent or false)', async () => {
+        proPhone([{ purchaseToken: PRO_TOKEN }])
+        billing.getCapabilities.mockRejectedValue(new Error('not implemented'))
+        await expect(upgradeInPlay('monthly', 'o', 'acct', { hasPlayPro: true })).rejects.toMatchObject({ code: 'UPGRADE_UNAVAILABLE' })
+        billing.getCapabilities.mockResolvedValue({ replace: false })
+        await expect(upgradeInPlay('monthly', 'o', 'acct', { hasPlayPro: true })).rejects.toMatchObject({ code: 'UPGRADE_UNAVAILABLE' })
+        expect(billing.purchase).not.toHaveBeenCalled()
+    })
+
+    it('a gifted Pro (no Play subscription) buys Max plainly, without any token', async () => {
+        proPhone([{ purchaseToken: PRO_TOKEN }])
+        billing.purchase.mockResolvedValue({ purchaseToken: MAX_TOKEN })
+        apiFetch.mockResolvedValue({})
+        await upgradeInPlay('monthly', 'o-max-m', 'acct')
+        expect(billing.purchase).toHaveBeenCalledWith({ productId: 'quidey_max', offerToken: 'o-max-m', accountId: 'acct' })
+        expect(billing.restore).not.toHaveBeenCalled()
     })
 
     it('restore covers both products and hands every token over once', async () => {
         billing.restore.mockImplementation(async ({ productId }) => ({ purchases: [{ purchaseToken: productId === 'quidey_pro' ? PRO_TOKEN : MAX_TOKEN }] }))
         apiFetch.mockResolvedValue({})
-        expect(await restorePlayPurchases()).toBe(true)
+        expect(await restorePlayPurchases()).toEqual({ found: 2, accepted: 2 })
         expect(billing.restore).toHaveBeenCalledWith({ productId: 'quidey_pro' })
         expect(billing.restore).toHaveBeenCalledWith({ productId: 'quidey_max' })
         expect(postedTokens()).toEqual([{ purchaseToken: PRO_TOKEN }, { purchaseToken: MAX_TOKEN }])
@@ -112,8 +157,17 @@ describe('Google Play: the client knows both products', () => {
             return { purchases: [{ purchaseToken: PRO_TOKEN }] }
         })
         apiFetch.mockResolvedValue({})
-        expect(await restorePlayPurchases()).toBe(true)
+        expect(await restorePlayPurchases()).toEqual({ found: 1, accepted: 1 })
         expect(postedTokens()).toEqual([{ purchaseToken: PRO_TOKEN }])
+    })
+
+    it('restore counts only the tokens the server accepted (every post fails: 0)', async () => {
+        billing.restore.mockImplementation(async ({ productId }) => ({ purchases: [{ purchaseToken: productId === 'quidey_pro' ? PRO_TOKEN : MAX_TOKEN }] }))
+        apiFetch.mockRejectedValue(new Error('server down'))
+        expect(await restorePlayPurchases()).toEqual({ found: 2, accepted: 0 })
+        apiFetch.mockReset()
+        apiFetch.mockImplementation(async (url, options) => { if (JSON.parse(options.body).purchaseToken === PRO_TOKEN) throw new Error('refused'); return {} })
+        expect(await restorePlayPurchases()).toEqual({ found: 2, accepted: 1 })
     })
 
     it('manage opens the page of the account\'s tier', async () => {
@@ -159,12 +213,49 @@ describe('Google Play: the Pro page in the app', () => {
     it('a Pro subscriber from Play can upgrade, passing the old token', async () => {
         const active = { ...BILLING, active: true, tier: 'pro', subscription: { provider: 'play', tier: 'pro', plan: 'monthly', status: 'active', periodEnd: '2027-11-01T10:00:00Z', cancelAtPeriodEnd: false } }
         apiFetch.mockImplementation(async (url) => (url === '/api/billing' ? active : { ...active, tier: 'max' }))
-        billing.restore.mockImplementation(async ({ productId }) => ({ purchases: productId === 'quidey_pro' ? [{ purchaseToken: PRO_TOKEN }] : [] }))
+        proPhone([{ purchaseToken: PRO_TOKEN }])
         billing.purchase.mockResolvedValue({ purchaseToken: MAX_TOKEN })
         await act(async () => { renderPage({ pro: { active: true } }) })
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Auf Max upgraden/ })) })
         expect(billing.purchase).toHaveBeenCalledWith({ productId: 'quidey_max', offerToken: 'o-max-m', accountId: 'a'.repeat(64), oldPurchaseToken: PRO_TOKEN })
         expect(postedTokens()).toEqual([{ purchaseToken: MAX_TOKEN }])
+    })
+
+    it('without a plugin that can replace the upgrade button is hidden for Play Pro', async () => {
+        billing.getCapabilities.mockRejectedValue(new Error('not implemented'))
+        const active = { ...BILLING, active: true, tier: 'pro', subscription: { provider: 'play', tier: 'pro', plan: 'monthly', status: 'active', periodEnd: '2027-11-01T10:00:00Z', cancelAtPeriodEnd: false } }
+        apiFetch.mockImplementation(async (url) => (url === '/api/billing' ? active : {}))
+        await act(async () => { renderPage({ pro: { active: true } }) })
+        expect(screen.queryByRole('button', { name: /Auf Max upgraden/ })).not.toBeInTheDocument()
+    })
+
+    it('a Play Pro whose token is missing sees an error and nothing is bought', async () => {
+        const active = { ...BILLING, active: true, tier: 'pro', subscription: { provider: 'play', tier: 'pro', plan: 'monthly', status: 'active', periodEnd: '2027-11-01T10:00:00Z', cancelAtPeriodEnd: false } }
+        apiFetch.mockImplementation(async (url) => (url === '/api/billing' ? active : {}))
+        proPhone([])
+        await act(async () => { renderPage({ pro: { active: true } }) })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Auf Max upgraden/ })) })
+        expect(screen.getByRole('status')).toHaveTextContent(/nicht gefunden/)
+        expect(billing.purchase).not.toHaveBeenCalled()
+    })
+
+    it('a gifted Pro is offered a plain Max purchase in the app', async () => {
+        const gifted = { ...BILLING, active: true, gift: true, tier: 'pro', subscription: null }
+        apiFetch.mockImplementation(async (url) => (url === '/api/billing' ? gifted : {}))
+        billing.purchase.mockResolvedValue({ purchaseToken: MAX_TOKEN })
+        billing.getCapabilities.mockRejectedValue(new Error('not implemented'))
+        await act(async () => { renderPage({ pro: { active: true } }) })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Auf Max upgraden/ })) })
+        expect(billing.purchase).toHaveBeenCalledWith({ productId: 'quidey_max', offerToken: 'o-max-y', accountId: 'a'.repeat(64) })
+    })
+
+    it('restore tells the truth: found but not accepted is an error, not "restored"', async () => {
+        apiFetch.mockImplementation(async (url) => { if (url === '/api/billing') return BILLING; throw new Error('down') })
+        billing.restore.mockImplementation(async ({ productId }) => ({ purchases: productId === 'quidey_pro' ? [{ purchaseToken: PRO_TOKEN }] : [] }))
+        await act(async () => { renderPage() })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Käufe wiederherstellen' })) })
+        expect(screen.getByRole('status')).toHaveTextContent(/nicht geklappt/)
+        expect(screen.queryByText('Deine Käufe sind wiederhergestellt.')).not.toBeInTheDocument()
     })
 
     it('a Pro subscriber from Stripe is not offered an in-app upgrade', async () => {

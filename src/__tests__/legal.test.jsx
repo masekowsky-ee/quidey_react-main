@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
@@ -73,6 +73,8 @@ describe('privacy page: study goals', () => {
 })
 
 describe('privacy page: the assistant (Max)', () => {
+    beforeEach(() => vi.stubEnv('VITE_PRO', 'on'))
+    afterEach(() => vi.unstubAllEnvs())
     const paragraph = () => {
         const { container } = renderAt('/datenschutz')
         return [...container.querySelectorAll('p')].find((p) => p.textContent.startsWith('KI-Assistent (Anthropic)'))
@@ -90,6 +92,21 @@ describe('privacy page: the assistant (Max)', () => {
         expect(text).toContain('Zahl der Anfragen')
         expect(text).toContain('Art. 6 Abs. 1 lit. a DSGVO')
         expect(text).toContain('nichts übermittelt')
+    })
+
+    it('says that entries others shared with me are sent too, with done status and repetition', () => {
+        const text = paragraph()?.textContent
+        expect(text).toContain('die andere mit dir geteilt haben')
+        expect(text).toContain('ob sie erledigt sind und ob sie sich wiederholen')
+    })
+
+    it('is absent while Pro is not built in', () => {
+        vi.stubEnv('VITE_PRO', 'off')
+        const { container } = renderAt('/datenschutz')
+        expect(container.textContent).not.toContain('KI-Assistent')
+        expect(container.textContent).not.toContain('Quidey Max')
+        expect(container.textContent).not.toContain('bei KI-Funktionen Anthropic')
+        expect(container.textContent).toContain('bei KI-Schätzungen Anthropic')
     })
 
     it('says voice recognition and reading aloud run at the device or browser vendor', () => {

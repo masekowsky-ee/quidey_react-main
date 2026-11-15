@@ -202,7 +202,7 @@ function App(){
   // Android app: purchases Google Play knows on this phone are handed to the server again (a new
   // install, another phone, an answer that got lost), then access is looked at again
   useEffect(() => {
-    if (signedIn && proOn) restorePlayPurchases().then((found) => { if (found) dispatch(fetchAccess()).catch(() => {}); });
+    if (signedIn && proOn) restorePlayPurchases().then(({ accepted }) => { if (accepted) dispatch(fetchAccess()).catch(() => {}); });
   }, [signedIn, proOn, token, dispatch]);
   useSafetyPoll(checkAccess, { everyMs: REQUEST_REFRESH_MS, enabled: signedIn });
 

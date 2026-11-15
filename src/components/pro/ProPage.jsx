@@ -8,7 +8,7 @@ import { fetchAccess } from '../../features/auth/authAction';
 import Icon from '../icons.jsx';
 import {
     PRICES_BY_TIER, buyInPlay, fetchBilling, formatEuro, managePlaySubscription,
-    openPortal, playPlans, restorePlayPurchases, sellsThroughPlay, startCheckout, upgradeInPlay, yearlyPerMonth, yearlySaves, yearlySavesPercent,
+    openPortal, playPlans, playCanReplace, restorePlayPurchases, sellsThroughPlay, startCheckout, upgradeInPlay, yearlyPerMonth, yearlySaves, yearlySavesPercent,
 } from '../../features/pro/pro';
 import { CANCEL_PATH } from '../../legal/paths';
 
@@ -29,6 +29,7 @@ export default function ProPage() {
     const [tier, setTier] = useState('pro');
     const [plan, setPlan] = useState('yearly');
     const [play, setPlay] = useState(null);
+    const [canReplace, setCanReplace] = useState(false);
     const [busy, setBusy] = useState(false);
     // back from Stripe: ?checkout=done | cancelled
     const [checkout] = useState(() => params.get('checkout'));
@@ -38,6 +39,7 @@ export default function ProPage() {
     const load = () => fetchBilling().then(setBilling).catch(() => {});
     useEffect(() => { load(); }, []);
     useEffect(() => {
+        if (inApp) playCanReplace().then(setCanReplace);
         if (inApp) Promise.all([playPlans('pro'), playPlans('max')]).then(([pro, max]) => setPlay({ pro, max }));
     }, [inApp]);
 
@@ -74,7 +76,7 @@ export default function ProPage() {
     // in the app as a replace purchase in Google Play (a gift: a plain Max purchase)
     const upgradePlan = subscription?.plan === 'monthly' ? 'monthly' : 'yearly';
     const canUpgrade = active && !hasMax && (inApp
-        ? Boolean(billing?.play && play?.max?.[upgradePlan]) && (!subscription || subscription.provider === 'play')
+        ? Boolean(billing?.play && play?.max?.[upgradePlan]) && (subscription ? subscription.provider === 'play' && canReplace : true)
         : Boolean(billing?.stripeMax) && (!subscription || subscription.provider === 'stripe'));
 
     const price = (which, forTier = 'pro') => (inApp ? play?.[forTier]?.[which]?.price ?? '…' : formatEuro(PRICES_BY_TIER[forTier][which], language));
@@ -108,7 +110,8 @@ export default function ProPage() {
             await dispatch(fetchAccess()).catch(() => {});
             return;
         }
-        setNotice({ ok: false, text: t(err?.code === 'BILLING_DISABLED' ? 'proNotYet' : 'proError') });
+        const key = err?.code === 'BILLING_DISABLED' ? 'proNotYet' : err?.code === 'NO_PRO_TOKEN' ? 'proUpgradeNoToken' : 'proError';
+        setNotice({ ok: false, text: t(key) });
     };
 
     const upgrade = async () => {
@@ -116,7 +119,7 @@ export default function ProPage() {
         setNotice(null);
         try {
             if (inApp) {
-                const status = await upgradeInPlay(upgradePlan, play.max[upgradePlan].offerToken, billing.playAccountId);
+                const status = await upgradeInPlay(upgradePlan, play.max[upgradePlan].offerToken, billing.playAccountId, { hasPlayPro: subscription?.provider === 'play' });
                 if (status) {
                     setBilling(status);
                     await dispatch(fetchAccess()).catch(() => {});
@@ -145,10 +148,11 @@ export default function ProPage() {
 
     const restore = async () => {
         setBusy(true);
-        const found = await restorePlayPurchases();
+        const { found, accepted } = await restorePlayPurchases();
         await load();
         await dispatch(fetchAccess()).catch(() => {});
-        setNotice(found ? { ok: true, text: t('proRestored') } : { ok: false, text: t('proNothingToRestore') });
+        setNotice(accepted ? { ok: true, text: t('proRestored') }
+            : { ok: false, text: t(found ? 'proError' : 'proNothingToRestore') });
         setBusy(false);
     };
 

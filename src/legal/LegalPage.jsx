@@ -173,7 +173,7 @@ function Privacy() {
                     In der Android-App nutze ich zusätzlich Google Analytics für Firebase, nur wenn du einwilligst (Abschnitt 3).</li>
                 <li>Schriften und alle Dateien der App werden von Quidey selbst ausgeliefert, nicht von Dritten.</li>
                 <li>Externe Dienste kommen nur zum Einsatz, wenn du sie auslöst oder einschaltest: Die optionalen
-                    KI-Schätzungen im Bereich „Lernen“ und der optionale KI-Assistent von Quidey Max gehen an Anthropic
+                    KI-Schätzungen im Bereich „Lernen“{proBuilt() && ' und der optionale KI-Assistent von Quidey Max'} gehen an Anthropic
                     (Abschnitt {privacyNo(5)}), und nur mit den Angaben, die dafür nötig sind.</li>
                 <li>Du kannst dein Konto jederzeit im Profil selbst löschen. Dabei werden deine Daten gelöscht.</li>
                 {proBuilt() && <li>Bezahlst du für Quidey Pro, läuft das über Stripe bzw. Google Play; deine Karten- oder Kontodaten
@@ -497,14 +497,16 @@ function Privacy() {
                 ohne Tippen wird nichts aufgenommen. Rechtsgrundlage ist deine Einwilligung nach Art. 6 Abs. 1 lit. a
                 DSGVO durch das Tippen auf das Mikrofon.
             </p>
-            <p>
+            {proBuilt() && <p>
                 <strong>KI-Assistent (Anthropic):</strong> Mit Quidey Max kannst du dem Assistenten schreiben oder mit ihm
                 sprechen, damit er Fragen zu deinem Kalender beantwortet oder Einträge für dich vorbereitet. Nur wenn du
                 eine Nachricht abschickst, übermittelt der Quidey-Server an <V>{PROCESSORS.aiProvider}</V> („Anthropic“):
                 den getippten oder gesprochenen Text (die Spracherkennung, die das Gesprochene in Text umwandelt, läuft vorher
                 auf deinem Gerät bzw. beim Anbieter deines Browsers, siehe Spracheingabe), die letzten Nachrichten des Gesprächs, das heutige Datum
                 und deine Zeitzone sowie die Einträge, die der Assistent nachschlägt, um zu antworten: Titel, Tage,
-                Uhrzeiten und die Namen deiner Event-Typen. Nicht übermittelt werden dein Name, Benutzername, deine
+                Uhrzeiten und die Namen deiner Event-Typen. Dazu gehören auch Aufgaben und Termine, die andere mit dir
+                geteilt haben, mit ihrem Namen, ihrem Tag und ihrer Uhrzeit, ob sie erledigt sind und ob sie sich
+                wiederholen. Nicht übermittelt werden dein Name, Benutzername, deine
                 E-Mail-Adresse, Nutzer-ID, Notizen, Noten, Zugangsdaten oder andere Daten deines Kontos. Bitte schreib
                 deshalb möglichst keine Angaben über andere Personen in deine Nachrichten. Quidey speichert weder deine
                 Nachrichten noch die Antworten auf dem Server; gespeichert wird nur, was du aus einem Vorschlag selbst
@@ -517,7 +519,7 @@ function Privacy() {
                 du kannst sie jederzeit widerrufen, indem du keine Nachrichten mehr schickst (die Rechtmäßigkeit der
                 bisherigen Verarbeitung bleibt davon unberührt). Für die Verarbeitung durch Anthropic gilt dasselbe wie
                 bei den KI-Schätzungen oben (Auftragsverarbeitung, EU-Standardvertragsklauseln).
-            </p>
+            </p>}
 
             <h2>{privacyNo(6)}. Freunde und gemeinsame Funktionen</h2>
             <p>
@@ -821,7 +823,7 @@ function Privacy() {
             <h2>{privacyNo(11)}. Empfänger</h2>
             <p>
                 Daten erhalten nur die oben genannten Auftragsverarbeiter (Hosting, E-Mail-Versand, in der Android-App
-                Firebase Cloud Messaging, bei KI-Funktionen Anthropic, Abschnitt {privacyNo(5)}) sowie – soweit du es veranlasst – deine Freunde (auch als Empfänger deiner
+                Firebase Cloud Messaging, bei {proBuilt() ? 'KI-Funktionen' : 'KI-Schätzungen'} Anthropic, Abschnitt {privacyNo(5)}) sowie – soweit du es veranlasst – deine Freunde (auch als Empfänger deiner
                 Nachrichten), Mitglieder gemeinsamer Sitzungen und Families, wenn du Benachrichtigungen eingeschaltet
                 hast der Push-Dienst deines Browsers (nur verschlüsselt, siehe Abschnitt {privacyNo(6)}), wenn du dich mit Google
                 anmeldest Google (Abschnitt {privacyNo(4)}), wenn du in der Android-App in die Analyse einwilligst Google

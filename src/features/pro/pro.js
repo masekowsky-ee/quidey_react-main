@@ -80,31 +80,69 @@ export async function buyInPlay(plan, offerToken, accountId, tier = 'pro', { rep
     return sendPlayToken(result.purchaseToken);
 }
 
-// The purchase tokens Google Play knows on this phone for a tier's product
-async function playTokens(tier) {
+// The purchases Google Play knows on this phone for a tier's product: [{ purchaseToken, purchaseTime? }]
+async function playPurchases(tier) {
     const { purchases } = await QuideyBilling.restore({ productId: productOf(tier) });
-    return (purchases ?? []).map((purchase) => purchase.purchaseToken).filter(Boolean);
+    return (purchases ?? []).filter((purchase) => purchase?.purchaseToken);
 }
 
-// App: a Pro subscriber from Google Play goes up to Max: the phone's Pro token is replaced by the
-// Max purchase (no second subscription side by side). Without a Pro token on this phone it is a plain purchase.
-export async function upgradeInPlay(plan, offerToken, accountId) {
-    const [replaceToken] = await playTokens('pro').catch(() => []);
+// App: can the native plugin replace one subscription by another (Pro -> Max)? Contract for the
+// Android plugin: `getCapabilities()` -> { replace: true } once `purchase` honours `oldPurchaseToken`.
+// A plugin without the method (or with replace false) counts as "cannot", so the in-app upgrade stays hidden.
+export async function playCanReplace() {
+    try {
+        const result = await QuideyBilling.getCapabilities();
+        return result?.replace === true;
+    } catch {
+        return false;
+    }
+}
+
+// The one Pro purchase token to replace: exactly one on the phone, or of several the latest by
+// `purchaseTime` (only when every one has it); else no safe choice (undefined)
+export function pickProToken(purchases) {
+    if (purchases.length === 1) return purchases[0].purchaseToken;
+    if (purchases.length > 1 && purchases.every((purchase) => Number.isFinite(Number(purchase.purchaseTime)))) {
+        return purchases.reduce((latest, purchase) => (Number(purchase.purchaseTime) > Number(latest.purchaseTime) ? purchase : latest)).purchaseToken;
+    }
+    return undefined;
+}
+
+// App: goes up to Max. { hasPlayPro: true }: Pro runs in Google Play, so the phone's Pro purchase is
+// REPLACED by the Max one; it never falls back to a plain purchase (that would charge Max beside the
+// paid Pro): without a plugin that can replace, a readable lookup and one safe token it throws
+// (err.code UPGRADE_UNAVAILABLE | NO_PRO_TOKEN). Without a Play Pro (a gift) it is a plain, token-less purchase.
+export async function upgradeInPlay(plan, offerToken, accountId, { hasPlayPro = false } = {}) {
+    if (!hasPlayPro) return buyInPlay(plan, offerToken, accountId, 'max');
+    if (!(await playCanReplace())) throw Object.assign(new Error('The app cannot replace a subscription'), { code: 'UPGRADE_UNAVAILABLE' });
+    let replaceToken;
+    try {
+        replaceToken = pickProToken(await playPurchases('pro'));
+    } catch { /* unreadable: no safe token */ }
+    if (!replaceToken) throw Object.assign(new Error('No usable Pro purchase on this phone'), { code: 'NO_PRO_TOKEN' });
     return buyInPlay(plan, offerToken, accountId, 'max', { replaceToken });
 }
 
 // App: purchases Google Play knows on this phone are handed over again (another device, a new
-// install, a purchase whose answer got lost), for Pro and for Max. Quietly does nothing outside the app.
+// install, a purchase whose answer got lost), for Pro and for Max. Resolves { found, accepted }:
+// how many tokens Play knows and how many the server accepted. Quietly { 0, 0 } outside the app.
 export async function restorePlayPurchases() {
-    if (!isNativeApp()) return false;
-    const found = new Set();
+    const none = { found: 0, accepted: 0 };
+    if (!isNativeApp()) return none;
+    const tokens = new Set();
     for (const tier of Object.keys(PLAY_PRODUCTS)) {
         try {
-            for (const token of await playTokens(tier)) found.add(token);
+            for (const purchase of await playPurchases(tier)) tokens.add(purchase.purchaseToken);
         } catch { /* this product can't be read: the other one still can */ }
     }
-    for (const token of found) await sendPlayToken(token).catch(() => {});
-    return found.size > 0;
+    let accepted = 0;
+    for (const token of tokens) {
+        try {
+            await sendPlayToken(token);
+            accepted += 1;
+        } catch { /* counted as not accepted */ }
+    }
+    return { found: tokens.size, accepted };
 }
 
 // App: Google Play's page of my subscriptions for a tier (change, cancel)
