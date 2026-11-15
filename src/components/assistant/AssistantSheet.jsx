@@ -121,15 +121,33 @@ export default function AssistantSheet({ onClose, onReply }) {
         for (const card of cards) {
             try {
                 const { undo } = await applyAction(card.action, deps);
-                let used = false;
-                const once = async () => {
-                    if (used) return;
-                    used = true;
-                    await undo?.();
-                    patchCard(messageId, card.key, { status: 'undone', undo: null });
+                const name = card.action.entry.name;
+                // undone once, whether from the toast or the card (also both at the same time); a
+                // failed undo says so (on the card and as a toast) and can be tried again
+                let undone = false;
+                let running = null;
+                const once = () => {
+                    if (undone) return Promise.resolve();
+                    if (running) return running;
+                    patchCard(messageId, card.key, { undoing: true, undoError: null });
+                    running = (async () => {
+                        try {
+                            await undo?.();
+                            undone = true;
+                            patchCard(messageId, card.key, { status: 'undone', undo: null, undoing: false });
+                        } catch (err) {
+                            const message = fill(t('assistantUndoFailed'), { name });
+                            patchCard(messageId, card.key, { undoing: false, undoError: message });
+                            dispatch(showToast(message, 'error'));
+                            throw err;
+                        } finally {
+                            running = null;
+                        }
+                    })();
+                    return running;
                 };
                 undos.push(once);
-                names.push(card.action.entry.name);
+                names.push(name);
                 patchCard(messageId, card.key, { status: 'done', undo: once });
             } catch (err) {
                 patchCard(messageId, card.key, { status: 'failed', error: err.message });
@@ -138,7 +156,7 @@ export default function AssistantSheet({ onClose, onReply }) {
         if (undos.length === 0) return;
         const text = undos.length === 1 ? fill(t('assistantCreated'), { name: names[0] }) : fill(t('assistantCreatedMany'), { n: undos.length });
         dispatch(showToast(text, 'success', {
-            action: { label: t('toastUndo'), run: () => Promise.all(undos.map(undo => undo().catch(() => {}))) },
+            action: { label: t('toastUndo'), run: () => Promise.allSettled(undos.map(undo => undo())) },
         }));
     }
 
@@ -362,9 +380,11 @@ function ActionCard({ card, deps, onChange, onLeave }) {
                 <p id={id} className={styles.cardTitle}>{entry.name}</p>
                 {when && <p className={styles.cardMeta}>{when}</p>}
                 {statusLine && <p className={styles.cardStatus} data-status={status}>{statusLine}</p>}
+                {card.undoError && <p className={styles.cardStatus} data-status="failed" role="alert">{card.undoError}</p>}
                 {status === 'done' && card.undo && (
                     <div className={styles.cardActions}>
-                        <button type="button" className={styles.cancel} onClick={() => card.undo()}>{t('assistantUndo')}</button>
+                        <button type="button" className={styles.cancel} disabled={card.undoing}
+                            onClick={() => card.undo().catch(() => { /* said on the card and in a toast */ })}>{t('assistantUndo')}</button>
                     </div>
                 )}
             </div>

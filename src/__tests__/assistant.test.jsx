@@ -198,6 +198,67 @@ describe('what the assistant proposes', () => {
         expect(calls('/api/tasks/80', 'DELETE')).toHaveLength(1)
     })
 
+    describe('undoing a new entry', () => {
+        const SPORT = { type: 'create_entry', entry: { kind: 'task', name: 'Sport', due: '2026-11-16', time: null, durationMinutes: null, color: null, eventTypeId: null, reminders: [], prio: null } }
+        let deleteFails
+        beforeEach(() => {
+            deleteFails = false
+            reply = async () => ({ message: 'Eingetragen.', actions: [SPORT], quota: QUOTA })
+            const base = apiFetch.getMockImplementation()
+            apiFetch.mockImplementation(async (url, options = {}) => {
+                if (url === '/api/tasks/80' && options.method === 'DELETE' && deleteFails) throw Object.assign(new Error('Server nicht erreichbar'), { status: 503 })
+                return base(url, options)
+            })
+        })
+        const deletes = () => calls('/api/tasks/80', 'DELETE').length
+        const undoToast = (store) => store.getState().toast.find(item => item.actionLabel === 'Rückgängig')
+
+        it('happy path: the toast and the card together delete it once', async () => {
+            const store = open()
+            openSheet()
+            await say('Sport morgen')
+            const card = screen.getByRole('group', { name: /Sport/ })
+            await act(async () => {
+                store.dispatch(runToastAction(undoToast(store).id))
+                fireEvent.click(within(card).getByRole('button', { name: 'Rückgängig' }))
+            })
+            expect(deletes()).toBe(1)
+            expect(within(card).getByText('Rückgängig gemacht')).toBeInTheDocument()
+            expect(within(card).queryByRole('button', { name: 'Rückgängig' })).toBeNull()
+        })
+
+        it('a failed undo from the card says so and can be tried again; then it deletes once', async () => {
+            const store = open()
+            openSheet()
+            await say('Sport morgen')
+            const card = screen.getByRole('group', { name: /Sport/ })
+            deleteFails = true
+            await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Rückgängig' })) })
+            expect(within(card).getByText(/konnte nicht rückgängig gemacht werden/)).toBeInTheDocument()
+            expect(store.getState().toast.some(item => item.tone === 'error' && /konnte nicht rückgängig gemacht werden/.test(item.text))).toBe(true)
+            deleteFails = false
+            await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Rückgängig' })) })
+            expect(deletes()).toBe(2)
+            expect(within(card).getByText('Rückgängig gemacht')).toBeInTheDocument()
+            expect(within(card).queryByRole('button', { name: 'Rückgängig' })).toBeNull()
+        })
+
+        it('a failed undo from the toast says so; the card still offers it', async () => {
+            const store = open()
+            openSheet()
+            await say('Sport morgen')
+            deleteFails = true
+            await act(async () => { await store.dispatch(runToastAction(undoToast(store).id)) })
+            expect(store.getState().toast.some(item => item.tone === 'error' && /konnte nicht rückgängig gemacht werden/.test(item.text))).toBe(true)
+            const card = screen.getByRole('group', { name: /Sport/ })
+            expect(within(card).getByText(/konnte nicht rückgängig gemacht werden/)).toBeInTheDocument()
+            deleteFails = false
+            await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Rückgängig' })) })
+            expect(deletes()).toBe(2)
+            expect(within(card).getByText('Rückgängig gemacht')).toBeInTheDocument()
+        })
+    })
+
     it('a move shows what changes from my own copy of the task and waits for the confirmation', async () => {
         reply = async () => ({
             message: 'Soll ich das verschieben?',
