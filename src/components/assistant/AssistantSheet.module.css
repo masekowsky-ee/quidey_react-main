@@ -1,0 +1,452 @@
+/* The AI assistant (AssistantFab.jsx, AssistantSheet.jsx).
+   The button: the add button's shape (ui.module.css .fab) mirrored to the bottom left, in the
+   folded timer's quiet colours (the add button stays the one filled control on the page).
+   The sheet: rises from the button's corner on wider screens; on phones the shared bottom sheet
+   (index.css, [data-sheet]). The assistant answers in the serif, what I typed in the sans. */
+
+.fab {
+    composes: fab from '../ui.module.css';
+    left: calc(1rem + var(--sidebar-w, 0px) + env(safe-area-inset-left, 0px));
+    color: var(--text-h);
+    background-color: var(--surface-hover);
+    border-color: var(--control-border);
+}
+
+.fab:hover {
+    color: var(--text-h);
+    background-color: color-mix(in srgb, var(--surface-hover) 85%, var(--text-h));
+}
+
+.fab:focus-visible {
+    outline: 2px solid var(--primary-fg);
+    outline-offset: 3px;
+}
+
+.fabIcon {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: none;
+}
+
+/* ---------- the sheet ---------- */
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: var(--header-h, 1rem) 1rem calc(1rem + var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px))
+        calc(1rem + var(--sidebar-w, 0px) + env(safe-area-inset-left, 0px));
+    box-sizing: border-box;
+}
+
+/* darker than other sheets' dimming: the chat is the one thing in front */
+:root .backdrop[data-sheet-backdrop]::before {
+    background: color-mix(in srgb, var(--overlay), rgb(0 0 0) 35%);
+}
+
+.sheet {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: min(27rem, 100%);
+    height: min(38rem, 100%);
+    box-sizing: border-box;
+    padding: 0.75rem 0 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+    overflow: hidden;
+}
+
+.head {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.25rem 0.75rem 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.headIcon {
+    flex: none;
+    color: var(--text-h);
+}
+
+.headText {
+    flex: 1;
+    min-width: 0;
+}
+
+.title {
+    margin: 0;
+    font: var(--type-headline);
+    color: var(--text-h);
+}
+
+.left {
+    margin: 0.125rem 0 0;
+    font: var(--type-caption);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.iconBtn {
+    composes: iconBtn from '../ui.module.css';
+    flex: none;
+}
+
+.iconBtn[aria-pressed="true"] {
+    color: var(--text-h);
+    background: var(--surface-strong);
+}
+
+.iconBtn:focus-visible,
+.send:focus-visible,
+.stop:focus-visible,
+.confirm:focus-visible,
+.confirmDanger:focus-visible,
+.cancel:focus-visible {
+    outline: 2px solid var(--primary-fg);
+    outline-offset: 2px;
+}
+
+.scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 1rem 1.25rem 0.5rem;
+}
+
+.intro {
+    margin: 0 0 1rem;
+    max-width: 34ch;
+    font: 400 1.0625rem/1.45 var(--serif);
+    color: var(--text-muted);
+    text-wrap: pretty;
+}
+
+.log {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+/* what I wrote: the sans, a quiet well on the right */
+.user {
+    align-self: flex-end;
+    max-width: 85%;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--text-h);
+    background: var(--surface-strong);
+    border-radius: var(--radius) var(--radius) 0.25rem var(--radius);
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.user[data-unanswered] {
+    color: var(--text-muted);
+}
+
+/* the assistant's answer: the serif on the page itself, no bubble */
+.reply {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    max-width: 92%;
+}
+
+.replyText {
+    margin: 0;
+    font: 400 1.0625rem/1.5 var(--serif);
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    text-wrap: pretty;
+}
+
+.note {
+    margin: 0;
+    font: var(--type-footnote);
+    color: var(--text-muted);
+    text-wrap: pretty;
+}
+
+.thinking {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-top: 0.875rem;
+    font: var(--type-footnote);
+    color: var(--text-muted);
+}
+
+.dots {
+    display: inline-flex;
+    gap: 0.25rem;
+}
+
+.dots i {
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 50%;
+    background: var(--text-muted);
+    animation: breathe 1.2s ease-in-out infinite;
+}
+
+.dots i:nth-child(2) { animation-delay: 0.15s; }
+.dots i:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes breathe {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}
+
+.stop {
+    composes: ghostBtn from '../ui.module.css';
+    margin-left: auto;
+    min-height: 2rem;
+    padding: 0 0.75rem;
+    font: inherit;
+    color: var(--text);
+    border-radius: var(--radius-pill);
+}
+
+/* ---------- what is proposed ---------- */
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.875rem 1rem;
+    background: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.cardKind {
+    margin: 0;
+    font: var(--type-caption);
+    color: var(--text-muted);
+}
+
+.card[data-kind="delete_entry"] .cardKind {
+    color: var(--danger);
+}
+
+.cardTitle {
+    margin: 0;
+    font: var(--type-headline);
+    color: var(--text-h);
+    overflow-wrap: anywhere;
+}
+
+.cardMeta {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.topics {
+    margin: 0.25rem 0 0;
+    padding-left: 1.125rem;
+    font-size: 0.875rem;
+    color: var(--text);
+}
+
+.changes {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 1rem;
+    margin: 0.375rem 0 0;
+}
+
+.change {
+    display: contents;
+}
+
+.change dt {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.change dd {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    margin: 0;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.from {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    text-decoration-color: color-mix(in srgb, var(--text-muted) 60%, transparent);
+}
+
+.arrow {
+    flex: none;
+    color: var(--text-muted);
+}
+
+.to {
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.cardStatus {
+    margin: 0.25rem 0 0;
+    font: var(--type-footnote);
+    color: var(--text-muted);
+}
+
+.cardStatus[data-status="failed"] {
+    color: var(--danger);
+}
+
+.cardActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.625rem;
+}
+
+.confirm {
+    composes: btnPrimary from '../ui.module.css';
+    min-width: 0;
+}
+
+.confirmDanger {
+    composes: btnPrimary from '../ui.module.css';
+    min-width: 0;
+    color: #fff;
+    background: var(--danger);
+}
+
+.confirmDanger:hover {
+    background: color-mix(in srgb, var(--danger) 86%, var(--bg));
+}
+
+.cancel {
+    composes: ghostBtn from '../ui.module.css';
+    height: 2.25rem;
+    padding: 0 1rem;
+    font: inherit;
+    font-weight: 550;
+    color: var(--text);
+    border-radius: var(--radius-pill);
+}
+
+/* ---------- writing ---------- */
+
+.compose {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.field {
+    flex: 1;
+    min-width: 0;
+    min-height: 2.25rem;
+    max-height: 8rem;
+    box-sizing: border-box;
+    padding: 0.45rem 0.875rem;
+    font: inherit;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    resize: none;
+    field-sizing: content;
+    border-radius: 1.125rem;
+}
+
+.mic {
+    flex: none;
+}
+
+.send {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    color: var(--contrast-text);
+    background: var(--contrast-top);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform var(--ease), opacity var(--ease);
+}
+
+.send:active {
+    transform: scale(0.94);
+    transition-duration: var(--press);
+}
+
+.send:disabled {
+    opacity: 0.35;
+    cursor: default;
+    transform: none;
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+@media (pointer: coarse) {
+    .send {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+
+    .field {
+        min-height: 2.75rem;
+        padding-top: 0.7rem;
+        padding-bottom: 0.7rem;
+        font-size: 1rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dots i {
+        animation: none;
+        opacity: 0.7;
+    }
+}
+
+:root[data-motion="minimal"] .dots i {
+    animation: none;
+    opacity: 0.7;
+}
+
+@media (max-width: 640px) {
+    .fab {
+        left: calc(0.75rem + env(safe-area-inset-left, 0px));
+    }
+}
+
+/* phones: the shared bottom sheet takes the full width; the chat takes most of the height */
+@media (max-width: 720px) {
+    /* over the shared sheet's padding: the writing row holds the bottom edge itself */
+    :root .sheet[data-sheet] {
+        height: calc(85dvh - var(--keyboard-inset, 0px));
+        padding-top: 1.25rem;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+}

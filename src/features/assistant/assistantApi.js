@@ -1,0 +1,73 @@
+// The AI assistant (Quidey Max, backend ai.js POST /api/ai/assistant): the request, and the chat
+// kept for this run of the app.
+//
+// sendAssistant(messages, language, { signal }) → { message, actions, quota }. The server reads
+// only the last 10 turns, so only those are sent. Throws the API's error (status, code, data):
+// 403 MAX_REQUIRED, 429 QUOTA_REACHED { resetsAt, max }, 502 AI_FAILED | AI_TIMEOUT,
+// 503 AI_UNAVAILABLE, 422 AI_REFUSED; an abort (closed sheet, Stop, the time limit) throws too.
+//
+// The chat lives here, in memory, until the app is closed (never stored): it belongs to the
+// account that wrote it, so another account signed in on this device starts empty.
+//   messages: [{ id, role: 'user' | 'assistant' | 'note', content, unanswered?, cards? }]
+//   readAloud: the sheet's "read answers aloud" toggle (speaking it is Task 7's)
+
+import { useSyncExternalStore } from 'react';
+import { apiFetch } from '../helperFunction';
+
+export const HISTORY_TURNS = 10;
+// a request can take up to about 4 minutes on the server (6 model calls, each with a retry)
+export const ASSISTANT_TIMEOUT_MS = 5 * 60 * 1000;
+export const MESSAGE_MAX = 2000;
+
+// what goes to the server: the conversation's own turns, not notes, errors or unanswered messages
+export function historyOf(messages) {
+    return messages
+        .filter(m => (m.role === 'user' || m.role === 'assistant') && !m.unanswered && m.content.trim())
+        .map(m => ({ role: m.role, content: m.content.slice(0, MESSAGE_MAX) }))
+        .slice(-HISTORY_TURNS);
+}
+
+export async function sendAssistant(messages, language, { signal } = {}) {
+    const answer = await apiFetch('/api/ai/assistant', {
+        method: 'POST',
+        body: JSON.stringify({ messages: historyOf(messages), language: language === 'en' ? 'en' : 'de' }),
+        signal,
+    });
+    return { message: String(answer?.message ?? ''), actions: Array.isArray(answer?.actions) ? answer.actions : [], quota: answer?.quota ?? null };
+}
+
+// ---------- the chat of this app run ----------
+
+const EMPTY = { owner: null, messages: [], readAloud: false };
+let chat = EMPTY;
+let nextId = 1;
+const listeners = new Set();
+const emit = () => listeners.forEach(listener => listener());
+const subscribe = (listener) => { listeners.add(listener); return () => listeners.delete(listener); };
+
+const forOwner = (owner) => (chat.owner === owner ? chat : { ...EMPTY, owner, readAloud: chat.readAloud });
+
+export const newMessageId = () => nextId++;
+
+// fn(messages) → the new messages, for this account
+export function updateChat(owner, fn) {
+    const current = forOwner(owner);
+    chat = { ...current, messages: fn(current.messages) };
+    emit();
+}
+
+export function setReadAloud(on) {
+    chat = { ...chat, readAloud: Boolean(on) };
+    emit();
+}
+
+export function resetAssistantChat() {
+    chat = EMPTY;
+    emit();
+}
+
+// { messages, readAloud } of this account
+export function useAssistantChat(owner) {
+    const snapshot = useSyncExternalStore(subscribe, () => chat, () => chat);
+    return snapshot.owner === owner ? snapshot : { ...EMPTY, owner, readAloud: snapshot.readAloud };
+}

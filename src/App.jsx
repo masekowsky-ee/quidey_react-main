@@ -42,6 +42,7 @@ import PushOffer from './components/PushOffer.jsx';
 import OnboardingPrompts from './components/onboarding/OnboardingPrompts.jsx';
 import QuickAdd from './components/QuickAdd.jsx';
 import AddFab from './components/home/AddFab.jsx';
+import AssistantFab from './components/assistant/AssistantFab.jsx';
 import { showsAddFab } from './features/layout/addFab.js';
 import { useTabSwipe } from './features/layout/tabSwipe.js';
 import { useKeyboardInset } from './features/layout/keyboardInset.js';
@@ -331,6 +332,8 @@ function App(){
         <ReminderAlert/>
         {/* the round add button, bottom right, on the planning pages */}
         <AddFab/>
+        {/* Quidey Max: the AI assistant, round at the bottom left, on the same pages */}
+        <AssistantFab/>
         {/* Ctrl/⌘ K or "/": search tasks, jump, do; "?": the keyboard shortcuts */}
         <CommandPalette/>
         <ShortcutsDialog/>
