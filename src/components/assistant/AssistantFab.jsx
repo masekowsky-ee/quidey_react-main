@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { selectHasMax } from '../../features/pro/pro';
+import { stopSpeaking } from '../../features/voice/speak';
 import { showsAddFab } from '../../features/layout/addFab';
 import { useTranslation } from '../../i18n/useTranslation';
 import Icon from '../icons';
@@ -17,6 +18,8 @@ export default function AssistantFab() {
     const { pathname } = useLocation();
     const hasMax = useSelector(selectHasMax);
     const [open, setOpen] = useState(false);
+    // another page: nothing is read on over it
+    useEffect(() => () => stopSpeaking(), [pathname]);
     return (
         <>
             {hasMax && showsAddFab(pathname) && (

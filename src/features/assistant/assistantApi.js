@@ -9,7 +9,8 @@
 // The chat lives here, in memory, until the app is closed (never stored): it belongs to the
 // account that wrote it, so another account signed in on this device starts empty.
 //   messages: [{ id, role: 'user' | 'assistant' | 'note', content, unanswered?, cards? }]
-//   readAloud: the sheet's "read answers aloud" toggle (speaking it is Task 7's)
+//   readAloud: the sheet's "read answers aloud" toggle (getReadAloud() = its value right now: an
+//   answer is spoken by the toggle as it is when it arrives, not as it was when the message was sent)
 
 import { useSyncExternalStore } from 'react';
 import { apiFetch } from '../helperFunction';
@@ -60,6 +61,8 @@ export function setReadAloud(on) {
     chat = { ...chat, readAloud: Boolean(on) };
     emit();
 }
+
+export const getReadAloud = () => chat.readAloud;
 
 export function resetAssistantChat() {
     chat = EMPTY;

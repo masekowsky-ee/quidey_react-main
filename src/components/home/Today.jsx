@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectTimerInProgress } from '../../features/session/sessionAction';
@@ -9,6 +9,10 @@ import { showToast } from '../../features/toast/toast';
 import { fill, formatClock, parseDate, sameDay, dueText, isOverdue } from '../../features/helperFunction';
 import { isEvent } from '../../features/tasks/kinds';
 import { selectTasksLoaded } from '../../features/tasks/taskAction';
+import { selectHasMax } from '../../features/pro/pro';
+import { speak, speechOutputSupport } from '../../features/voice/speak';
+import { speechLang } from '../../features/voice/voice';
+import { buildDayReadout } from '../../features/assistant/dayReadout';
 import { Bone } from '../skeleton/Skeleton.jsx';
 import { useTranslation } from '../../i18n/useTranslation';
 import Icon from '../icons.jsx';
@@ -85,9 +89,36 @@ function RoutinesToday() {
     );
 }
 
+// Quidey Max: today's schedule read aloud; a second tap (or leaving the page) stops it
+function ReadoutButton({ tasks }) {
+    const { t, language } = useTranslation();
+    const [speaking, setSpeaking] = useState(false);
+    const stopRef = useRef(null);
+    useEffect(() => () => stopRef.current?.(), []);
+    const toggle = () => {
+        if (speaking) {
+            stopRef.current?.();
+            return;
+        }
+        let ended = false;
+        const stop = speak(buildDayReadout(tasks, new Date(), t, language), {
+            lang: speechLang(language),
+            onEnd: () => { ended = true; stopRef.current = null; setSpeaking(false); },
+        });
+        if (!ended) { stopRef.current = stop; setSpeaking(true); }
+    };
+    const label = t(speaking ? 'readoutStop' : 'readoutRead');
+    return (
+        <button type="button" className={styles.readBtn} aria-pressed={speaking} onClick={toggle} aria-label={label} title={label}>
+            <Icon name={speaking ? 'soundOff' : 'sound'} size={16} />
+        </button>
+    );
+}
+
 // What comes next: today's coming events and the tasks due soonest
 function UpNext({ tasks }) {
     const { t } = useTranslation();
+    const hasMax = useSelector(selectHasMax);
     const loaded = useSelector(selectTasksLoaded);
     const now = new Date();
     const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -108,7 +139,10 @@ function UpNext({ tasks }) {
 
     return (
         <section className={styles.card} aria-labelledby="today-next">
-            <h2 id="today-next" className={styles.cardTitle}><Icon name="calendar" size={16} /> {t('dashNextTitle')}</h2>
+            <div className={styles.cardHead}>
+                <h2 id="today-next" className={styles.cardTitle}><Icon name="calendar" size={16} /> {t('dashNextTitle')}</h2>
+                {hasMax && speechOutputSupport() && <ReadoutButton tasks={tasks} />}
+            </div>
             {!loaded ? <Bone h="4.5rem" />
                 : items.length === 0
                 ? <p className={styles.muted}>{t('dashNextNone')}</p>

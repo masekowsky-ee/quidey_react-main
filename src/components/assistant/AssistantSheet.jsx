@@ -8,19 +8,23 @@
 //   "Bestätigen"; a study plan opens the new-goal sheet on Lernen, where it is previewed.
 // - A request can take minutes: "denkt nach" with a Stop. Stopping or closing drops the request:
 //   an answer that comes later is not applied.
-// - Task 7 hook: `readAloud` (the toggle, kept in assistantApi.js) and `onReply(message,
-//   { readAloud })`, called once per answer that arrives while the sheet is open. Closing stops
-//   any speech (speechSynthesis.cancel).
+// - Reading aloud: `readAloud` (the toggle, kept in assistantApi.js; hidden where the device can't
+//   speak) is read when the answer arrives (getReadAloud), so a switch during the wait counts.
+//   Each answer is spoken (features/voice/speak.js); `onReply(message, { readAloud })` is called
+//   once per answer that arrives while the sheet is open. Closing (or leaving the page) stops
+//   any speech.
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useSheet, useFocusOnArrival } from '../../features/layout/dragDismiss';
 import {
-    sendAssistant, useAssistantChat, updateChat, setReadAloud, newMessageId,
+    sendAssistant, useAssistantChat, updateChat, setReadAloud, getReadAloud, newMessageId,
     ASSISTANT_TIMEOUT_MS, MESSAGE_MAX,
 } from '../../features/assistant/assistantApi';
 import { applyAction, prepareActions, changeRows } from '../../features/assistant/applyAction';
+import { speak, speechOutputSupport, stopSpeaking } from '../../features/voice/speak';
+import { speechLang } from '../../features/voice/voice';
 import { useAiQuota, refreshAiQuota, left as leftOf } from '../../features/ai/ai';
 import { selectHasMax } from '../../features/pro/pro';
 import { fetchAccess } from '../../features/auth/authAction';
@@ -32,10 +36,6 @@ import SheetGrabber from '../SheetGrabber.jsx';
 import MicButton from '../voice/MicButton.jsx';
 import Icon from '../icons.jsx';
 import styles from './AssistantSheet.module.css';
-
-const stopSpeaking = () => {
-    try { window.speechSynthesis?.cancel(); } catch { /* nothing speaking */ }
-};
 
 export default function AssistantSheet({ onClose, onReply }) {
     const { t, language } = useTranslation();
@@ -167,7 +167,10 @@ export default function AssistantSheet({ onClose, onReply }) {
         const shown = cards.map((card, i) => ({ ...card, key: `${id}-${i}`, status: card.type === 'create_entry' ? 'busy' : 'pending' }));
         updateChat(owner, list => [...list, { id, role: 'assistant', content: message, cards: shown }]);
         if (missing > 0) addNote(missing === 1 ? t('assistantMissing_one') : fill(t('assistantMissing'), { n: missing }));
-        onReply?.(message, { readAloud });
+        // the toggle as it is now: it may have been switched during the wait
+        const aloud = getReadAloud();
+        if (aloud && speechOutputSupport() && message.trim()) speak(message, { lang: speechLang(language) });
+        onReply?.(message, { readAloud: aloud });
         const creates = shown.filter(card => card.type === 'create_entry');
         if (creates.length > 0) makeEntries(id, creates);
     }
@@ -246,10 +249,12 @@ export default function AssistantSheet({ onClose, onReply }) {
                         <h2 id={titleId} className={styles.title}>{t('assistant')}</h2>
                         {leftToday !== null && <p className={styles.left}>{fill(t('assistantLeft'), { n: leftToday, max: maxToday })}</p>}
                     </div>
-                    <button type="button" className={styles.iconBtn} aria-pressed={readAloud} onClick={() => setReadAloud(!readAloud)}
-                        aria-label={t('assistantReadAloud')} title={t('assistantReadAloud')}>
-                        <Icon name={readAloud ? 'sound' : 'soundOff'} size={18} />
-                    </button>
+                    {speechOutputSupport() && (
+                        <button type="button" className={styles.iconBtn} aria-pressed={readAloud} onClick={() => setReadAloud(!readAloud)}
+                            aria-label={t('assistantReadAloud')} title={t('assistantReadAloud')}>
+                            <Icon name={readAloud ? 'sound' : 'soundOff'} size={18} />
+                        </button>
+                    )}
                     <button type="button" className={styles.iconBtn} onClick={close} aria-label={t('close')} title={t('close')}>
                         <Icon name="close" size={18} />
                     </button>

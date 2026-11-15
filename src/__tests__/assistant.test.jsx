@@ -95,11 +95,16 @@ describe('the assistant button', () => {
     })
 
     it('opens the chat over the page', () => {
+        // the toggle is there where the device can speak
+        window.speechSynthesis = { speak() {}, cancel() {}, getVoices: () => [], addEventListener() {}, removeEventListener() {} }
+        window.SpeechSynthesisUtterance = function Utterance() {}
         open()
         const dialog = openSheet()
         expect(within(dialog).getByRole('textbox', { name: 'Nachricht an den Assistenten' })).toBeInTheDocument()
         expect(within(dialog).getByRole('button', { name: 'Antworten vorlesen' })).toHaveAttribute('aria-pressed', 'false')
         expect(within(dialog).getByRole('log')).toBeInTheDocument()
+        delete window.speechSynthesis
+        delete window.SpeechSynthesisUtterance
     })
 })
 
