@@ -189,7 +189,8 @@ export default function AssistantSheet({ onClose, onReply }) {
             addNote(fill(t('assistantNoneLeft'), { max: err.data?.max ?? 20, time: back ? timeText(back.getHours() * 60 + back.getMinutes()) : '00:00' }));
             return;
         }
-        addNote(t(timedOut || err.code === 'AI_TIMEOUT' ? 'assistantTimeout'
+        // too long: the server's time or step / token limit for one message (AI_TOO_LONG): ask narrower
+        addNote(t(timedOut || err.code === 'AI_TIMEOUT' || err.code === 'AI_TOO_LONG' ? 'assistantTimeout'
             : err.code === 'AI_UNAVAILABLE' ? 'assistantUnavailable'
                 : err.code === 'AI_REFUSED' ? 'assistantRefused'
                     : 'assistantFailed'));

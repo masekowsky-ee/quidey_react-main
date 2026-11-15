@@ -140,6 +140,24 @@ describe('speak', () => {
         expect(spoken[0].voice.name).toBe('D')
     })
 
+    it('prefers a voice on the device over a network voice of the language', () => {
+        synth.voices = [
+            { lang: 'de-DE', name: 'Google Deutsch', localService: false },
+            { lang: 'de-AT', name: 'Lokal AT', localService: true },
+            { lang: 'de-DE', name: 'Lokal DE', localService: true },
+        ]
+        speak('Hallo', { lang: 'de-DE' })
+        expect(spoken[0].voice.name).toBe('Lokal DE')
+        // a local voice of the language in another region beats a network voice of the exact one
+        synth.voices = [{ lang: 'de-DE', name: 'Google Deutsch', localService: false }, { lang: 'de-AT', name: 'Lokal AT', localService: true }]
+        speak('Hallo', { lang: 'de-DE' })
+        expect(spoken[1].voice.name).toBe('Lokal AT')
+        // only a network voice: it may be used
+        synth.voices = [{ lang: 'en-US', name: 'Local EN', localService: true }, { lang: 'de-DE', name: 'Google Deutsch', localService: false }]
+        speak('Hallo', { lang: 'de-DE' })
+        expect(spoken[2].voice.name).toBe('Google Deutsch')
+    })
+
     it('waits for the voices when none are loaded yet', () => {
         vi.useFakeTimers()
         try {

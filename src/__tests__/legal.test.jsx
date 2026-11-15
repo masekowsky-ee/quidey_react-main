@@ -86,7 +86,6 @@ describe('privacy page: the assistant (Max)', () => {
         expect(text).toContain('Anthropic Ireland')
         expect(text).toContain('Quidey Max')
         expect(text).toContain('getippten oder gesprochenen Text')
-        expect(text).toContain('Titel, Tage, Uhrzeiten')
         expect(text).toContain('Zeitzone')
         expect(text).toContain('Nicht übermittelt werden')
         expect(text).toContain('Zahl der Anfragen')
@@ -94,10 +93,29 @@ describe('privacy page: the assistant (Max)', () => {
         expect(text).toContain('nichts übermittelt')
     })
 
-    it('says that entries others shared with me are sent too, with done status and repetition', () => {
+    it('lists every field of an entry that goes to the model, and the time of day', () => {
+        const text = paragraph()?.textContent
+        // utils/assistant.js entryForModel: id, name, kind, date, time, endTime, done, repeat, eventType, own
+        for (const field of ['Titel', 'Art (Aufgabe oder Event)', 'Tag, Uhrzeit und Ende', 'ob er erledigt ist',
+            'ob und wie er sich wiederholt', 'sein Event-Typ', 'interne Nummer (ID)', 'ob es dein eigener ist']) {
+            expect(text).toContain(field)
+        }
+        // systemPrompt: date with weekday, time of day, time zone, the names of my event types
+        expect(text).toContain('das heutige Datum mit Wochentag, die aktuelle Uhrzeit und deine Zeitzone')
+        expect(text).toContain('die Namen deiner Event-Typen')
+    })
+
+    it('says that entries others shared with me are sent too, with the same fields', () => {
         const text = paragraph()?.textContent
         expect(text).toContain('die andere mit dir geteilt haben')
-        expect(text).toContain('ob sie erledigt sind und ob sie sich wiederholen')
+        expect(text).toContain('mit denselben Angaben')
+    })
+
+    it('says that reading aloud may use an online voice of the browser or system vendor on some devices', () => {
+        const text = paragraph()?.textContent
+        expect(text).toContain('Stimme, die auf dem Gerät selbst läuft')
+        expect(text).toContain('auf manchen Geräten bzw. in manchen Browsern')
+        expect(text).not.toContain('dabei geht nichts an Quidey. Der Assistent')
     })
 
     it('is absent while Pro is not built in', () => {
@@ -112,6 +130,12 @@ describe('privacy page: the assistant (Max)', () => {
     it('says voice recognition and reading aloud run at the device or browser vendor', () => {
         expect(paragraph()?.textContent).toContain('Vorlesen')
         expect(paragraph()?.textContent).toContain('Spracherkennung')
+    })
+
+    it('§ 7 lists the tier (Pro or Max) among the stored subscription fields', () => {
+        const { container } = renderAt('/datenschutz')
+        const p = [...container.querySelectorAll('p')].find((el) => el.textContent.includes('Dafür speichere ich zu deinem Konto'))
+        expect(p?.textContent).toContain('Stufe (Pro oder Max)')
     })
 
     it('the summary and the recipients name the assistant too', () => {

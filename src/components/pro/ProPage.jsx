@@ -75,7 +75,10 @@ export default function ProPage() {
     // a Pro subscriber can go up to Max where the subscription runs: on the web in place at Stripe (or a gift),
     // in the app as a replace purchase in Google Play (a gift: a plain Max purchase)
     const upgradePlan = subscription?.plan === 'monthly' ? 'monthly' : 'yearly';
-    const canUpgrade = active && !hasMax && (inApp
+    // a Stripe Pro waiting for its payment can't go up to Max (the server refuses: PAYMENT_PAST_DUE); the
+    // web says to settle it in the portal first (never in the app: no word of Stripe there)
+    const pastDue = !inApp && Boolean(billing?.stripeMax && billing?.paymentPastDue);
+    const canUpgrade = active && !hasMax && !pastDue && (inApp
         ? Boolean(billing?.play && play?.max?.[upgradePlan]) && (subscription ? subscription.provider === 'play' && canReplace : true)
         : Boolean(billing?.stripeMax) && (!subscription || subscription.provider === 'stripe'));
 
@@ -108,6 +111,12 @@ export default function ProPage() {
         if (err?.code === 'ALREADY_SUBSCRIBED') {
             await load();
             await dispatch(fetchAccess()).catch(() => {});
+            return;
+        }
+        // a Stripe Pro waiting for its payment: settle it first (the page is read again, so the button goes)
+        if (err?.code === 'PAYMENT_PAST_DUE') {
+            setNotice({ ok: false, text: t('proUpgradePastDue') });
+            await load();
             return;
         }
         const key = err?.code === 'BILLING_DISABLED' ? 'proNotYet' : err?.code === 'NO_PRO_TOKEN' ? 'proUpgradeNoToken' : 'proError';
@@ -193,6 +202,7 @@ export default function ProPage() {
                             </button>
                         </>
                     )}
+                    {pastDue && !hasMax && <p className={styles.small}>{t('proUpgradePastDue')}</p>}
                     {subscription && subscription.provider === 'play' && !inApp && <p className={styles.small}>{t('proManageInPlay')}</p>}
                     {subscription && subscription.provider === 'stripe' && inApp && <p className={styles.small}>{t('proManageOnWeb')}</p>}
                 </section>

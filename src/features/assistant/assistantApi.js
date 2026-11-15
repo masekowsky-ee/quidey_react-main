@@ -3,7 +3,7 @@
 //
 // sendAssistant(messages, language, { signal }) → { message, actions, quota }. The server reads
 // only the last 10 turns, so only those are sent. Throws the API's error (status, code, data):
-// 403 MAX_REQUIRED, 429 QUOTA_REACHED { resetsAt, max }, 502 AI_FAILED | AI_TIMEOUT,
+// 403 MAX_REQUIRED, 429 QUOTA_REACHED { resetsAt, max }, 502 AI_FAILED | AI_TIMEOUT | AI_TOO_LONG,
 // 503 AI_UNAVAILABLE, 422 AI_REFUSED; an abort (closed sheet, Stop, the time limit) throws too.
 //
 // The chat lives here, in memory, until the app is closed (never stored): it belongs to the

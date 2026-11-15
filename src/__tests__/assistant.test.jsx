@@ -372,4 +372,13 @@ describe('when it cannot answer', () => {
         expect(screen.getByText(/konnte gerade nicht antworten/)).toBeInTheDocument()
         expect(calls('/api/ai/quota', 'GET').length).toBe(before + 1)
     })
+
+    it('a request too broad for one message (AI_TOO_LONG): asks for a narrower one', async () => {
+        reply = async () => { throw Object.assign(new Error('too long'), { status: 502, code: 'AI_TOO_LONG', data: { code: 'AI_TOO_LONG' } }) }
+        open()
+        openSheet()
+        await say('Alles im ganzen Jahr')
+        expect(screen.getByText(/kürzeren Frage/)).toBeInTheDocument()
+        expect(screen.queryByText(/konnte gerade nicht antworten/)).toBeNull()
+    })
 })

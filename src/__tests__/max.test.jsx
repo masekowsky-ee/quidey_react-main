@@ -198,3 +198,32 @@ describe('Max: checkout refused as already subscribed', () => {
         expect(screen.queryByRole('button', { name: /Auf Max upgraden/ })).not.toBeInTheDocument()
     })
 })
+
+describe('Max: a Stripe Pro waiting for its payment', () => {
+    const proSub = { ...BILLING, active: true, tier: 'pro', subscription: { provider: 'stripe', tier: 'pro', plan: 'monthly', status: 'past_due', periodEnd: '2027-11-01T10:00:00Z', cancelAtPeriodEnd: false } }
+
+    it('shows the portal hint instead of the upgrade button', async () => {
+        apiFetch.mockImplementation(async (url) => (url === '/api/billing' ? { ...proSub, paymentPastDue: true } : {}))
+        await act(async () => { renderPro(makeStore({ pro: { active: true } })) })
+        expect(screen.queryByRole('button', { name: /Auf Max upgraden/ })).not.toBeInTheDocument()
+        expect(screen.getByText(/Bitte zuerst die Zahlung im Kundenportal klären/)).toBeInTheDocument()
+        // the way to settle it stays
+        expect(screen.getByRole('button', { name: /verwalten/i })).toBeInTheDocument()
+    })
+
+    it('a 409 PAYMENT_PAST_DUE on upgrading shows the same hint, no generic error', async () => {
+        let billingCalls = 0
+        apiFetch.mockImplementation(async (url) => {
+            if (url === '/api/billing') { billingCalls += 1; return billingCalls > 1 ? { ...proSub, paymentPastDue: true } : { ...proSub, subscription: { ...proSub.subscription, status: 'active' }, paymentPastDue: false } }
+            if (url === '/api/billing/checkout') throw Object.assign(new Error('x'), { status: 409, code: 'PAYMENT_PAST_DUE' })
+            return {}
+        })
+        await act(async () => { renderPro(makeStore({ pro: { active: true } })) })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Auf Max upgraden/ })) })
+        expect(screen.getAllByText(/Bitte zuerst die Zahlung im Kundenportal klären/).length).toBeGreaterThan(0)
+        expect(screen.queryByText(/nicht geklappt/)).not.toBeInTheDocument()
+        // the page is read again, so the stale button goes
+        expect(billingCalls).toBe(2)
+        expect(screen.queryByRole('button', { name: /Auf Max upgraden/ })).not.toBeInTheDocument()
+    })
+})

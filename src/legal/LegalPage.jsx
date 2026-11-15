@@ -502,18 +502,25 @@ function Privacy() {
                 sprechen, damit er Fragen zu deinem Kalender beantwortet oder Einträge für dich vorbereitet. Nur wenn du
                 eine Nachricht abschickst, übermittelt der Quidey-Server an <V>{PROCESSORS.aiProvider}</V> („Anthropic“):
                 den getippten oder gesprochenen Text (die Spracherkennung, die das Gesprochene in Text umwandelt, läuft vorher
-                auf deinem Gerät bzw. beim Anbieter deines Browsers, siehe Spracheingabe), die letzten Nachrichten des Gesprächs, das heutige Datum
-                und deine Zeitzone sowie die Einträge, die der Assistent nachschlägt, um zu antworten: Titel, Tage,
-                Uhrzeiten und die Namen deiner Event-Typen. Dazu gehören auch Aufgaben und Termine, die andere mit dir
-                geteilt haben, mit ihrem Namen, ihrem Tag und ihrer Uhrzeit, ob sie erledigt sind und ob sie sich
-                wiederholen. Nicht übermittelt werden dein Name, Benutzername, deine
+                auf deinem Gerät bzw. beim Anbieter deines Browsers, siehe Spracheingabe), die letzten Nachrichten des Gesprächs,
+                das heutige Datum mit Wochentag, die aktuelle Uhrzeit und deine Zeitzone, die Namen deiner Event-Typen sowie
+                die Einträge, die der Assistent nachschlägt, um zu antworten. Übermittelt werden zu jedem dieser Einträge: Titel,
+                Art (Aufgabe oder Event), Tag, Uhrzeit und Ende, ob er erledigt ist, ob und wie er sich wiederholt, sein
+                Event-Typ, seine interne Nummer (ID) bei Quidey und ob es dein eigener ist. Dazu gehören auch Aufgaben und
+                Termine, die andere mit dir geteilt haben, mit denselben Angaben (der Event-Typ ist dann der Name, den die
+                Person, die den Eintrag geteilt hat, ihrem Event-Typ gegeben hat). Nicht übermittelt werden dein Name, Benutzername, deine
                 E-Mail-Adresse, Nutzer-ID, Notizen, Noten, Zugangsdaten oder andere Daten deines Kontos. Bitte schreib
                 deshalb möglichst keine Angaben über andere Personen in deine Nachrichten. Quidey speichert weder deine
                 Nachrichten noch die Antworten auf dem Server; gespeichert wird nur, was du aus einem Vorschlag selbst
                 anlegst (dann wie jede Aufgabe oder jeder Termin). Damit die tägliche Nutzung begrenzt bleibt und die
                 Kosten im Blick bleiben, zählt der Server pro Konto und Tag die Zahl der Anfragen und der verbrauchten
                 Wortbausteine (Tokens), nur Zahlen ohne Inhalt, nach acht Tagen gelöscht. Das Vorlesen der Antworten
-                übernimmt die Sprachausgabe deines Geräts bzw. Browsers; dabei geht nichts an Quidey. Der Assistent ist
+                übernimmt die Sprachausgabe deines Geräts bzw. Browsers; an Quidey geht dabei nichts. Quidey wählt dafür,
+                wenn es eine gibt, eine Stimme, die auf dem Gerät selbst läuft. Gibt es für die Sprache nur eine
+                Online-Stimme oder wählt der Browser die Stimme selbst, kann der vorzulesende Text auf manchen Geräten bzw.
+                in manchen Browsern an den Anbieter des Browsers bzw. des Betriebssystems gehen (z. B. Google, Microsoft
+                oder Apple), der daraus die Sprache erzeugt, nach dessen Datenschutzbestimmungen, wie bei der
+                Spracheingabe. Der Assistent ist
                 freiwillig: Solange du ihm keine Nachricht schickst, wird nichts übermittelt. Rechtsgrundlage ist
                 deine Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO, die du durch das Abschicken einer Nachricht erteilst;
                 du kannst sie jederzeit widerrufen, indem du keine Nachrichten mehr schickst (die Rechtmäßigkeit der
@@ -682,7 +689,7 @@ function Privacy() {
             <h2>{privacyNo(7)}. Quidey Pro (Bezahlung)</h2>
             <p>
                 Quidey ist kostenlos nutzbar. Wer die Entwicklung unterstützen möchte, kann Quidey Pro oder Quidey Max (Pro und der KI-Assistent) abonnieren
-                (Nutzungsbedingungen, Abschnitt 8). Dafür speichere ich zu deinem Konto: Plan (monatlich oder jährlich),
+                (Nutzungsbedingungen, Abschnitt 8). Dafür speichere ich zu deinem Konto: Stufe (Pro oder Max), Plan (monatlich oder jährlich),
                 Zahlungsweg, Status, bis wann bezahlt ist, ob das Abo zum Ende gekündigt ist, wann es angelegt und
                 geändert wurde, und die Kennungen beim Zahlungsdienst (Kunden- und Abo-Nummer bei Stripe bzw. das
                 Kauf-Token von Google Play). Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, für die Aufbewahrung

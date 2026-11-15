@@ -6,7 +6,7 @@
 //   onEnd fires once: at the end, on an error, on stop(), and when a newer speak() takes over.
 // stopSpeaking() stops whatever this module is saying. Speech also stops when the app is hidden.
 //
-// A voice of the language is picked when there is one. Voices can load late (Chrome): when none
+// A voice of the language is picked when there is one, one on the device first. Voices can load late (Chrome): when none
 // are listed yet, speaking waits for `voiceschanged` (at most VOICES_WAIT_MS), else the engine chooses.
 
 export const VOICES_WAIT_MS = 500;
@@ -17,11 +17,17 @@ export function speechOutputSupport() {
 
 const normal = (lang) => String(lang ?? '').replace('_', '-').toLowerCase();
 
+// A voice on the device (localService) before a network voice, which some browsers send the text to
+// (privacy § 5 says so): the language and region, then the language, first among the local voices,
+// then among all.
 function voiceFor(synth, lang) {
     const voices = synth.getVoices?.() ?? [];
     const want = normal(lang);
     const base = want.split('-')[0];
-    return voices.find(voice => normal(voice.lang) === want) ?? voices.find(voice => normal(voice.lang).split('-')[0] === base) ?? null;
+    const exact = (voice) => normal(voice.lang) === want;
+    const sameLanguage = (voice) => normal(voice.lang).split('-')[0] === base;
+    const local = voices.filter(voice => voice.localService === true);
+    return local.find(exact) ?? local.find(sameLanguage) ?? voices.find(exact) ?? voices.find(sameLanguage) ?? null;
 }
 
 // the stop function of the speech going on, if any
