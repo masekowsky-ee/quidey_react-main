@@ -8,7 +8,7 @@ import { fetchAccess } from '../../features/auth/authAction';
 import Icon from '../icons.jsx';
 import {
     PRICES_BY_TIER, buyInPlay, fetchBilling, formatEuro, managePlaySubscription,
-    openPortal, playPlans, restorePlayPurchases, sellsThroughPlay, startCheckout, yearlyPerMonth, yearlySaves, yearlySavesPercent,
+    openPortal, playPlans, restorePlayPurchases, sellsThroughPlay, startCheckout, upgradeInPlay, yearlyPerMonth, yearlySaves, yearlySavesPercent,
 } from '../../features/pro/pro';
 import { CANCEL_PATH } from '../../legal/paths';
 
@@ -38,7 +38,7 @@ export default function ProPage() {
     const load = () => fetchBilling().then(setBilling).catch(() => {});
     useEffect(() => { load(); }, []);
     useEffect(() => {
-        if (inApp) playPlans().then(setPlay);
+        if (inApp) Promise.all([playPlans('pro'), playPlans('max')]).then(([pro, max]) => setPlay({ pro, max }));
     }, [inApp]);
 
     // back from Stripe: the webhook may be a moment behind, so it looks a few times
@@ -63,24 +63,28 @@ export default function ProPage() {
 
     const active = Boolean(billing?.active ?? access.pro?.active);
     const subscription = billing?.subscription;
-    // Max (Pro plus the AI assistant) is sold on the web (Stripe) only, where its prices are set up
-    const maxOffered = !inApp && !(billing && !billing.stripeMax);
+    // Max (Pro plus the AI assistant): on the web where Stripe has its prices, in the app where Google Play has its product
+    const playMax = Boolean(play?.max && Object.keys(play.max).length > 0);
+    const maxOffered = inApp ? playMax : !(billing && !billing.stripeMax);
     const tiers = maxOffered ? ['pro', 'max'] : ['pro'];
     const buyTier = maxOffered ? tier : 'pro';
-    const canBuy = inApp ? Boolean(billing?.play && play?.[plan]) : Boolean(billing?.stripe && (buyTier === 'pro' || billing.stripeMax));
+    const canBuy = inApp ? Boolean(billing?.play && play?.[buyTier]?.[plan]) : Boolean(billing?.stripe && (buyTier === 'pro' || billing.stripeMax));
     const hasMax = billing ? billing.tier === 'max' : Boolean(access.max?.active);
-    // a Pro subscriber (Stripe or gift) can go up to Max here, in place
-    const canUpgrade = !inApp && active && !hasMax && Boolean(billing?.stripeMax) && (!subscription || subscription.provider === 'stripe');
+    // a Pro subscriber can go up to Max where the subscription runs: on the web in place at Stripe (or a gift),
+    // in the app as a replace purchase in Google Play (a gift: a plain Max purchase)
     const upgradePlan = subscription?.plan === 'monthly' ? 'monthly' : 'yearly';
+    const canUpgrade = active && !hasMax && (inApp
+        ? Boolean(billing?.play && play?.max?.[upgradePlan]) && (!subscription || subscription.provider === 'play')
+        : Boolean(billing?.stripeMax) && (!subscription || subscription.provider === 'stripe'));
 
-    const price = (which, forTier = 'pro') => (inApp ? play?.[which]?.price ?? '…' : formatEuro(PRICES_BY_TIER[forTier][which], language));
+    const price = (which, forTier = 'pro') => (inApp ? play?.[forTier]?.[which]?.price ?? '…' : formatEuro(PRICES_BY_TIER[forTier][which], language));
 
     const buy = async () => {
         setBusy(true);
         setNotice(null);
         try {
             if (inApp) {
-                const status = await buyInPlay(plan, play[plan].offerToken, billing.playAccountId);
+                const status = await buyInPlay(plan, play[buyTier][plan].offerToken, billing.playAccountId, buyTier);
                 if (status) {
                     setBilling(status);
                     setNotice({ ok: true, text: t('proThanksTitle') });
@@ -111,6 +115,15 @@ export default function ProPage() {
         setBusy(true);
         setNotice(null);
         try {
+            if (inApp) {
+                const status = await upgradeInPlay(upgradePlan, play.max[upgradePlan].offerToken, billing.playAccountId);
+                if (status) {
+                    setBilling(status);
+                    await dispatch(fetchAccess()).catch(() => {});
+                    setNotice({ ok: true, text: t('proUpgradedMax') });
+                }
+                return;
+            }
             const result = await startCheckout(upgradePlan, language, 'max');
             if (result?.upgraded) {
                 await load();
@@ -125,7 +138,7 @@ export default function ProPage() {
     };
 
     const manage = async () => {
-        if (subscription?.provider === 'play') return managePlaySubscription();
+        if (subscription?.provider === 'play') return managePlaySubscription(subscription.tier);
         setBusy(true);
         try { await openPortal(); } catch { setNotice({ ok: false, text: t('proError') }); setBusy(false); }
     };
@@ -172,7 +185,7 @@ export default function ProPage() {
                         <>
                             <p className={styles.small}>{t('proUpgradeMaxHint')}</p>
                             <button type="button" className={styles.cta} onClick={upgrade} disabled={busy} aria-busy={busy}>
-                                {t('proUpgradeMax')} ({formatEuro(PRICES_BY_TIER.max[upgradePlan], language)}{t(upgradePlan === 'yearly' ? 'proPerYear' : 'proPerMonth')})
+                                {t('proUpgradeMax')} ({inApp ? play.max[upgradePlan].price : formatEuro(PRICES_BY_TIER.max[upgradePlan], language)}{t(upgradePlan === 'yearly' ? 'proPerYear' : 'proPerMonth')})
                             </button>
                         </>
                     )}

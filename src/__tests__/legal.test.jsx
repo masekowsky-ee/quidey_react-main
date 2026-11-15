@@ -72,6 +72,38 @@ describe('privacy page: study goals', () => {
     })
 })
 
+describe('privacy page: the assistant (Max)', () => {
+    const paragraph = () => {
+        const { container } = renderAt('/datenschutz')
+        return [...container.querySelectorAll('p')].find((p) => p.textContent.startsWith('KI-Assistent (Anthropic)'))
+    }
+
+    it('says what goes to Anthropic, what stays, and that it is optional', () => {
+        const text = paragraph()?.textContent
+        expect(text).toBeDefined()
+        expect(text).toContain('Anthropic Ireland')
+        expect(text).toContain('Quidey Max')
+        expect(text).toContain('getippten oder gesprochenen Text')
+        expect(text).toContain('Titel, Tage, Uhrzeiten')
+        expect(text).toContain('Zeitzone')
+        expect(text).toContain('Nicht übermittelt werden')
+        expect(text).toContain('Zahl der Anfragen')
+        expect(text).toContain('Art. 6 Abs. 1 lit. a DSGVO')
+        expect(text).toContain('nichts übermittelt')
+    })
+
+    it('says voice recognition and reading aloud run at the device or browser vendor', () => {
+        expect(paragraph()?.textContent).toContain('Vorlesen')
+        expect(paragraph()?.textContent).toContain('Spracherkennung')
+    })
+
+    it('the summary and the recipients name the assistant too', () => {
+        const { container } = renderAt('/datenschutz')
+        expect(container.textContent).toContain('der optionale KI-Assistent von Quidey Max')
+        expect(container.textContent).toContain('bei KI-Funktionen Anthropic')
+    })
+})
+
 describe('contact form', () => {
     beforeEach(() => apiFetch.mockReset())
 

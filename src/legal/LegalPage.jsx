@@ -173,8 +173,8 @@ function Privacy() {
                     In der Android-App nutze ich zusätzlich Google Analytics für Firebase, nur wenn du einwilligst (Abschnitt 3).</li>
                 <li>Schriften und alle Dateien der App werden von Quidey selbst ausgeliefert, nicht von Dritten.</li>
                 <li>Externe Dienste kommen nur zum Einsatz, wenn du sie auslöst oder einschaltest: Die optionalen
-                    KI-Schätzungen im Bereich „Lernen“ gehen an Anthropic (Abschnitt {privacyNo(5)}), und nur mit den Angaben, die dafür
-                    nötig sind.</li>
+                    KI-Schätzungen im Bereich „Lernen“ und der optionale KI-Assistent von Quidey Max gehen an Anthropic
+                    (Abschnitt {privacyNo(5)}), und nur mit den Angaben, die dafür nötig sind.</li>
                 <li>Du kannst dein Konto jederzeit im Profil selbst löschen. Dabei werden deine Daten gelöscht.</li>
                 {proBuilt() && <li>Bezahlst du für Quidey Pro, läuft das über Stripe bzw. Google Play; deine Karten- oder Kontodaten
                     sehe ich nicht (Abschnitt {privacyNo(7)}).</li>}
@@ -497,6 +497,27 @@ function Privacy() {
                 ohne Tippen wird nichts aufgenommen. Rechtsgrundlage ist deine Einwilligung nach Art. 6 Abs. 1 lit. a
                 DSGVO durch das Tippen auf das Mikrofon.
             </p>
+            <p>
+                <strong>KI-Assistent (Anthropic):</strong> Mit Quidey Max kannst du dem Assistenten schreiben oder mit ihm
+                sprechen, damit er Fragen zu deinem Kalender beantwortet oder Einträge für dich vorbereitet. Nur wenn du
+                eine Nachricht abschickst, übermittelt der Quidey-Server an <V>{PROCESSORS.aiProvider}</V> („Anthropic“):
+                den getippten oder gesprochenen Text (die Spracherkennung, die das Gesprochene in Text umwandelt, läuft vorher
+                auf deinem Gerät bzw. beim Anbieter deines Browsers, siehe Spracheingabe), die letzten Nachrichten des Gesprächs, das heutige Datum
+                und deine Zeitzone sowie die Einträge, die der Assistent nachschlägt, um zu antworten: Titel, Tage,
+                Uhrzeiten und die Namen deiner Event-Typen. Nicht übermittelt werden dein Name, Benutzername, deine
+                E-Mail-Adresse, Nutzer-ID, Notizen, Noten, Zugangsdaten oder andere Daten deines Kontos. Bitte schreib
+                deshalb möglichst keine Angaben über andere Personen in deine Nachrichten. Quidey speichert weder deine
+                Nachrichten noch die Antworten auf dem Server; gespeichert wird nur, was du aus einem Vorschlag selbst
+                anlegst (dann wie jede Aufgabe oder jeder Termin). Damit die tägliche Nutzung begrenzt bleibt und die
+                Kosten im Blick bleiben, zählt der Server pro Konto und Tag die Zahl der Anfragen und der verbrauchten
+                Wortbausteine (Tokens), nur Zahlen ohne Inhalt, nach acht Tagen gelöscht. Das Vorlesen der Antworten
+                übernimmt die Sprachausgabe deines Geräts bzw. Browsers; dabei geht nichts an Quidey. Der Assistent ist
+                freiwillig: Solange du ihm keine Nachricht schickst, wird nichts übermittelt. Rechtsgrundlage ist
+                deine Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO, die du durch das Abschicken einer Nachricht erteilst;
+                du kannst sie jederzeit widerrufen, indem du keine Nachrichten mehr schickst (die Rechtmäßigkeit der
+                bisherigen Verarbeitung bleibt davon unberührt). Für die Verarbeitung durch Anthropic gilt dasselbe wie
+                bei den KI-Schätzungen oben (Auftragsverarbeitung, EU-Standardvertragsklauseln).
+            </p>
 
             <h2>{privacyNo(6)}. Freunde und gemeinsame Funktionen</h2>
             <p>
@@ -658,7 +679,7 @@ function Privacy() {
             {proBuilt() && <>
             <h2>{privacyNo(7)}. Quidey Pro (Bezahlung)</h2>
             <p>
-                Quidey ist kostenlos nutzbar. Wer die Entwicklung unterstützen möchte, kann Quidey Pro abonnieren
+                Quidey ist kostenlos nutzbar. Wer die Entwicklung unterstützen möchte, kann Quidey Pro oder Quidey Max (Pro und der KI-Assistent) abonnieren
                 (Nutzungsbedingungen, Abschnitt 8). Dafür speichere ich zu deinem Konto: Plan (monatlich oder jährlich),
                 Zahlungsweg, Status, bis wann bezahlt ist, ob das Abo zum Ende gekündigt ist, wann es angelegt und
                 geändert wurde, und die Kennungen beim Zahlungsdienst (Kunden- und Abo-Nummer bei Stripe bzw. das
@@ -800,7 +821,7 @@ function Privacy() {
             <h2>{privacyNo(11)}. Empfänger</h2>
             <p>
                 Daten erhalten nur die oben genannten Auftragsverarbeiter (Hosting, E-Mail-Versand, in der Android-App
-                Firebase Cloud Messaging, bei KI-Schätzungen Anthropic, Abschnitt {privacyNo(5)}) sowie – soweit du es veranlasst – deine Freunde (auch als Empfänger deiner
+                Firebase Cloud Messaging, bei KI-Funktionen Anthropic, Abschnitt {privacyNo(5)}) sowie – soweit du es veranlasst – deine Freunde (auch als Empfänger deiner
                 Nachrichten), Mitglieder gemeinsamer Sitzungen und Families, wenn du Benachrichtigungen eingeschaltet
                 hast der Push-Dienst deines Browsers (nur verschlüsselt, siehe Abschnitt {privacyNo(6)}), wenn du dich mit Google
                 anmeldest Google (Abschnitt {privacyNo(4)}), wenn du in der Android-App in die Analyse einwilligst Google
@@ -934,12 +955,13 @@ function Terms() {
             <h2 id="pro">8. Quidey Pro</h2>
             <p>
                 <strong>Wozu:</strong> Quidey Pro ist ein freiwilliges Abo, mit dem du die Entwicklung von Quidey
-                unterstützt. Es hebt die Grenzen des kostenlosen Plans auf (Abschnitt 2) und gibt während der Beta Zugang
+                unterstützt. Quidey Max enthält alles aus Pro und zusätzlich den KI-Assistenten; ein laufendes Pro kannst
+                du zu Max erweitern, für Max gelten dieselben Bedingungen wie für Pro (Abschnitte 8 und 9). Pro hebt die Grenzen des kostenlosen Plans auf (Abschnitt 2) und gibt während der Beta Zugang
                 zur App. Funktionen im Test bleiben Testerinnen und Testern vorbehalten. Ein Anspruch auf bestimmte
                 künftige Funktionen besteht nicht.
             </p>
             <p>
-                <strong>Preise:</strong> 2,99 € im Monat oder 25,00 € im Jahr. Das sind Endpreise; gemäß § 19 UStG wird
+                <strong>Preise:</strong> Quidey Pro kostet 2,99 € im Monat oder 25,00 € im Jahr, Quidey Max 5,99 € im Monat oder 49,00 € im Jahr. Das sind Endpreise; gemäß § 19 UStG wird
                 keine Umsatzsteuer berechnet. Im Voraus fällig für den jeweiligen Zeitraum.
             </p>
             <p>
@@ -997,7 +1019,7 @@ function Terms() {
                 (Wenn du den Vertrag widerrufen willst, fülle bitte dieses Formular aus und sende es zurück.)<br />
                 – An <V>{OWNER.name}</V>, <V>{OWNER.street}</V>, <V>{OWNER.city}</V>, E-Mail: <V>{OWNER.email}</V>:<br />
                 – Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag über die Erbringung der
-                folgenden Dienstleistung: Quidey Pro (monatlich / jährlich)<br />
+                folgenden Dienstleistung: Quidey Pro / Quidey Max (monatlich / jährlich)<br />
                 – Bestellt am (*)<br />
                 – Name des/der Verbraucher(s)<br />
                 – Anschrift des/der Verbraucher(s)<br />
