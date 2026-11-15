@@ -27,6 +27,7 @@ import ReplanCard from './study/ReplanCard.jsx'
 import { DESKTOP_QUERY, useMediaQuery } from '../features/layout/breakpoints.js'
 import { fill, isOverdue, sameDay, parseDate } from '../features/helperFunction.js'
 import { isEvent } from '../features/tasks/kinds.js'
+import { selectHasMax } from '../features/pro/pro.js'
 import { useTranslation } from '../i18n/useTranslation.js'
 import { DEFAULT_UI_VARIANT, useUiVariant } from '../features/tester/variants.js'
 import DepartureBoard from './variants/DepartureBoard.jsx'
@@ -179,6 +180,7 @@ export default function Home(){
     const desktop = useMediaQuery(DESKTOP_QUERY);
 
     const tasks = useSelector(state => state.task.tasks);
+    const hasMax = useSelector(selectHasMax);
     const sharedTasks = useSelector(selectSharedSoloTasks);
     const showSharedTasks = useSelector(state => state.settings.showSharedTasks);
     // testers' interface variants arrange Home their own way (src/ui-variants) and add a part:
@@ -395,8 +397,9 @@ export default function Home(){
                     {uiVariant === 'lesesaal' && <Seats />}
                 </aside>
             </div>
-            {/* folded in the bottom left (the add button, from App, is in the bottom right) */}
-            {!desktop && timerPanel}
+            {/* folded in the bottom left (the add button, from App, is in the bottom right); Max accounts have
+                the assistant's button there instead, and the Fokusraum and the focus sheet for the timer */}
+            {!desktop && !hasMax && timerPanel}
         </div>
     );
 }

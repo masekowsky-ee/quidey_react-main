@@ -301,6 +301,18 @@ function UsersTab() {
                                                 )}
                                                 <button
                                                     role="switch"
+                                                    aria-checked={Boolean(user.isMax)}
+                                                    className={user.isMax ? styles.toggleOn : styles.toggle}
+                                                    disabled={busy}
+                                                    onClick={() => change(user, { isMax: !user.isMax }, user.isMax ? 'adminToastMaxRevoked' : 'adminToastMaxGranted')}
+                                                >
+                                                    <span className={styles.toggleKnob} aria-hidden="true" /> {t('adminMaxGift')}
+                                                </button>
+                                                {user.maxUntil && new Date(user.maxUntil) > new Date() && (
+                                                    <span className={styles.meta}>{fill(t('adminMaxPaidUntil'), { date: formatDate(user.maxUntil) })}</span>
+                                                )}
+                                                <button
+                                                    role="switch"
                                                     aria-checked={user.isTester}
                                                     className={user.isTester ? styles.toggleOn : styles.toggle}
                                                     disabled={busy}

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
@@ -69,6 +69,79 @@ describe('privacy page: study goals', () => {
         const note = container.querySelector('p[lang="en"]')
         if (englishNote) expect(note?.textContent).toBe('This legal information is provided in German, as required by German law.')
         else expect(note).toBeNull()
+    })
+})
+
+describe('privacy page: the assistant (Max)', () => {
+    beforeEach(() => vi.stubEnv('VITE_PRO', 'on'))
+    afterEach(() => vi.unstubAllEnvs())
+    const paragraph = () => {
+        const { container } = renderAt('/datenschutz')
+        return [...container.querySelectorAll('p')].find((p) => p.textContent.startsWith('KI-Assistent (Anthropic)'))
+    }
+
+    it('says what goes to Anthropic, what stays, and that it is optional', () => {
+        const text = paragraph()?.textContent
+        expect(text).toBeDefined()
+        expect(text).toContain('Anthropic Ireland')
+        expect(text).toContain('Quidey Max')
+        expect(text).toContain('getippten oder gesprochenen Text')
+        expect(text).toContain('Zeitzone')
+        expect(text).toContain('Nicht übermittelt werden')
+        expect(text).toContain('Zahl der Anfragen')
+        expect(text).toContain('Art. 6 Abs. 1 lit. a DSGVO')
+        expect(text).toContain('nichts übermittelt')
+    })
+
+    it('lists every field of an entry that goes to the model, and the time of day', () => {
+        const text = paragraph()?.textContent
+        // utils/assistant.js entryForModel: id, name, kind, date, time, endTime, done, repeat, eventType, own
+        for (const field of ['Titel', 'Art (Aufgabe oder Event)', 'Tag, Uhrzeit und Ende', 'ob er erledigt ist',
+            'ob und wie er sich wiederholt', 'sein Event-Typ', 'interne Nummer (ID)', 'ob es dein eigener ist']) {
+            expect(text).toContain(field)
+        }
+        // systemPrompt: date with weekday, time of day, time zone, the names of my event types
+        expect(text).toContain('das heutige Datum mit Wochentag, die aktuelle Uhrzeit und deine Zeitzone')
+        expect(text).toContain('die Namen deiner Event-Typen')
+    })
+
+    it('says that entries others shared with me are sent too, with the same fields', () => {
+        const text = paragraph()?.textContent
+        expect(text).toContain('die andere mit dir geteilt haben')
+        expect(text).toContain('mit denselben Angaben')
+    })
+
+    it('says that reading aloud may use an online voice of the browser or system vendor on some devices', () => {
+        const text = paragraph()?.textContent
+        expect(text).toContain('Stimme, die auf dem Gerät selbst läuft')
+        expect(text).toContain('auf manchen Geräten bzw. in manchen Browsern')
+        expect(text).not.toContain('dabei geht nichts an Quidey. Der Assistent')
+    })
+
+    it('is absent while Pro is not built in', () => {
+        vi.stubEnv('VITE_PRO', 'off')
+        const { container } = renderAt('/datenschutz')
+        expect(container.textContent).not.toContain('KI-Assistent')
+        expect(container.textContent).not.toContain('Quidey Max')
+        expect(container.textContent).not.toContain('bei KI-Funktionen Anthropic')
+        expect(container.textContent).toContain('bei KI-Schätzungen Anthropic')
+    })
+
+    it('says voice recognition and reading aloud run at the device or browser vendor', () => {
+        expect(paragraph()?.textContent).toContain('Vorlesen')
+        expect(paragraph()?.textContent).toContain('Spracherkennung')
+    })
+
+    it('§ 7 lists the tier (Pro or Max) among the stored subscription fields', () => {
+        const { container } = renderAt('/datenschutz')
+        const p = [...container.querySelectorAll('p')].find((el) => el.textContent.includes('Dafür speichere ich zu deinem Konto'))
+        expect(p?.textContent).toContain('Stufe (Pro oder Max)')
+    })
+
+    it('the summary and the recipients name the assistant too', () => {
+        const { container } = renderAt('/datenschutz')
+        expect(container.textContent).toContain('der optionale KI-Assistent von Quidey Max')
+        expect(container.textContent).toContain('bei KI-Funktionen Anthropic')
     })
 })
 

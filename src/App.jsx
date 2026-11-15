@@ -42,6 +42,7 @@ import PushOffer from './components/PushOffer.jsx';
 import OnboardingPrompts from './components/onboarding/OnboardingPrompts.jsx';
 import QuickAdd from './components/QuickAdd.jsx';
 import AddFab from './components/home/AddFab.jsx';
+import AssistantFab from './components/assistant/AssistantFab.jsx';
 import { showsAddFab } from './features/layout/addFab.js';
 import { useTabSwipe } from './features/layout/tabSwipe.js';
 import { useKeyboardInset } from './features/layout/keyboardInset.js';
@@ -201,7 +202,7 @@ function App(){
   // Android app: purchases Google Play knows on this phone are handed to the server again (a new
   // install, another phone, an answer that got lost), then access is looked at again
   useEffect(() => {
-    if (signedIn && proOn) restorePlayPurchases().then((found) => { if (found) dispatch(fetchAccess()).catch(() => {}); });
+    if (signedIn && proOn) restorePlayPurchases().then(({ accepted }) => { if (accepted) dispatch(fetchAccess()).catch(() => {}); });
   }, [signedIn, proOn, token, dispatch]);
   useSafetyPoll(checkAccess, { everyMs: REQUEST_REFRESH_MS, enabled: signedIn });
 
@@ -331,6 +332,8 @@ function App(){
         <ReminderAlert/>
         {/* the round add button, bottom right, on the planning pages */}
         <AddFab/>
+        {/* Quidey Max: the AI assistant, round at the bottom left, on the same pages */}
+        <AssistantFab/>
         {/* Ctrl/⌘ K or "/": search tasks, jump, do; "?": the keyboard shortcuts */}
         <CommandPalette/>
         <ShortcutsDialog/>

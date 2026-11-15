@@ -112,6 +112,29 @@ main.page {
     gap: 1.25rem;
 }
 
+.tier {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.tierHead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+}
+
+.tierName {
+    margin: 0;
+    font-size: 1.35rem;
+    color: var(--text-h);
+}
+
+.tierNote {
+    margin: 0;
+}
+
 .planGrid {
     display: grid;
     grid-template-columns: 1.15fr 1fr;

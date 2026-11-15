@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
 import { useProOn } from '../features/pro/flag';
+import { selectIsSupporter } from '../features/pro/pro';
 import { formatDate, formatDuration } from '../features/helperFunction';
 import { updateProfile, changePassword, logoutEverywhere, resendVerificationMail, deleteAccount } from '../features/auth/authAction';
 import { fetchFriends } from '../features/friends/friendsAction';
@@ -33,7 +34,7 @@ export default function ProfileView({ onSignOut }) {
     const friendCount = useSelector(state => state.friends.friends.length);
     // false: an account made with Google that has no password (set one, delete with the username)
     const hasPassword = useSelector(state => state.auth.access.hasPassword) !== false;
-    const proActive = useSelector(state => Boolean(state.auth.access.pro?.active));
+    const proActive = useSelector(selectIsSupporter);
     const proOn = useProOn();
     // on the trial version: the way to apply for beta (later: to subscribe)
     const trial = useSelector(state => state.auth.access.trial);

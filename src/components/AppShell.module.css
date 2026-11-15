@@ -17,16 +17,18 @@
 }
 
 /* calm mode (features/focus/calm.js): while a focus round runs in the Fokusraum the navigation,
-   the tab bar and the add button step back; the Fokusraum offers "Zurück zur App" instead */
+   the tab bar, the add button and the assistant step back; the Fokusraum offers "Zurück zur App" instead */
 .shell [data-part="header"],
 .shell [data-part="tabbar"],
-.shell [data-part="add-fab"] {
+.shell [data-part="add-fab"],
+.shell [data-part="assistant-fab"] {
   transition: opacity 0.45s ease, visibility 0.45s;
 }
 
 .shell[data-calm] [data-part="header"],
 .shell[data-calm] [data-part="tabbar"],
-.shell[data-calm] [data-part="add-fab"] {
+.shell[data-calm] [data-part="add-fab"],
+.shell[data-calm] [data-part="assistant-fab"] {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;

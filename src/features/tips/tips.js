@@ -33,6 +33,8 @@ export const TIPS = [
     { id: 'tabbar', page: anyPage, target: '[data-tip="tabbar"]' },
     // pages
     { id: 'add', page: (p) => p === '/', target: '[data-part="add-fab"]' },
+    // Quidey Max only: without Max there is no button, so the tip waits
+    { id: 'assistant', page: (p) => p === '/', target: '[data-part="assistant-fab"]' },
     { id: 'focus', page: (p) => p === '/', target: '[data-part="home-focus"], [data-part="focus"]' },
     { id: 'list', page: (p) => p === '/', target: '[data-part="home-list"], [data-part="task-list"]' },
     { id: 'search', page: (p) => p === '/', target: '[data-tip="search"]' },

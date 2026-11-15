@@ -77,7 +77,7 @@ describe('Quidey Pro: the page', () => {
         fireEvent.click(screen.getByRole('radio', { name: /Monatlich/ }))
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Weiter zur Bezahlung/ })) })
         const [, options] = apiFetch.mock.calls.find(([url]) => url === '/api/billing/checkout')
-        expect(JSON.parse(options.body)).toEqual({ plan: 'monthly', language: 'de' })
+        expect(JSON.parse(options.body)).toEqual({ tier: 'pro', plan: 'monthly', language: 'de' })
         expect(assign).toHaveBeenCalledWith('https://checkout.stripe.com/c/pay/x')
     })
 
