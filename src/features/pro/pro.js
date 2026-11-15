@@ -96,6 +96,16 @@ export { LIMIT_EVENT };
 // Do I have Max (paid, gifted, or as an admin)?
 export const selectHasMax = (state) => Boolean(state.auth.access.max?.active);
 
+// Do I really support Quidey (a gift, or a running paid subscription)? pro.active is also true for
+// admins, who count as Max without a gift or a subscription: they are not shown "thank you" texts.
+export const selectIsSupporter = (state) => {
+    const { pro, max, isAdmin } = state.auth.access;
+    if (!pro?.active) return false;
+    if (!isAdmin) return true;
+    const running = (until) => Boolean(until) && new Date(until) > new Date();
+    return Boolean(pro.gift || max?.gift || running(pro.until) || running(max?.until));
+};
+
 // My plan in short: { pro, max, limited, limits, usage, accessMode }
 export function usePlan() {
     const access = useSelector((state) => state.auth.access);

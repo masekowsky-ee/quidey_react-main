@@ -89,11 +89,22 @@ export default function ProPage() {
             } else {
                 await startCheckout(plan, language, buyTier);
             }
-        } catch {
-            setNotice({ ok: false, text: t('proError') });
+        } catch (err) {
+            await checkoutFailed(err);
         } finally {
             setBusy(false);
         }
+    };
+
+    // A checkout the server refuses: already subscribed (stale page, second tab) → the page is
+    // brought up to date and flips to the thanks view; payments not set up → say so
+    const checkoutFailed = async (err) => {
+        if (err?.code === 'ALREADY_SUBSCRIBED') {
+            await load();
+            await dispatch(fetchAccess()).catch(() => {});
+            return;
+        }
+        setNotice({ ok: false, text: t(err?.code === 'BILLING_DISABLED' ? 'proNotYet' : 'proError') });
     };
 
     const upgrade = async () => {
@@ -106,8 +117,8 @@ export default function ProPage() {
                 await dispatch(fetchAccess()).catch(() => {});
                 setNotice({ ok: true, text: t('proUpgradedMax') });
             }
-        } catch {
-            setNotice({ ok: false, text: t('proError') });
+        } catch (err) {
+            await checkoutFailed(err);
         } finally {
             setBusy(false);
         }

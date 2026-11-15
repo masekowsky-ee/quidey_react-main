@@ -10,6 +10,7 @@ import { MAX_PRICES } from '../features/pro/pro'
 import { selectHasMax } from '../features/pro/pro'
 import ProPage from '../components/pro/ProPage'
 import Admin from '../components/Admin'
+import ProfileView from '../components/ProfileView'
 
 vi.mock('../features/helperFunction', async (importOriginal) => ({
     ...(await importOriginal()),
@@ -135,5 +136,65 @@ describe('Max: admin toggle', () => {
         await act(async () => { fireEvent.click(toggle) })
         expect(calls.find((c) => c.method === 'PATCH')).toMatchObject({ url: '/api/admin/users/3', body: { isMax: true } })
         expect(within(row).getByRole('switch', { name: /Max/ })).toHaveAttribute('aria-checked', 'true')
+    })
+})
+
+describe('Max: admins are not shown supporter texts', () => {
+    const renderProfile = async (access) => {
+        vi.stubEnv('VITE_PRO', 'on')
+        apiFetch.mockImplementation(async (url) => (url === '/api/friends' ? [] : {}))
+        const store = makeStore({ proSales: true, ...access })
+        await act(async () => {
+            render(<Provider store={store}><MemoryRouter initialEntries={['/profile']}><ProfileView onSignOut={() => {}} /></MemoryRouter></Provider>)
+        })
+    }
+
+    it('an admin without gift or subscription sees the neutral text and no "subscription ends" hint', async () => {
+        await renderProfile({ isAdmin: true, pro: { active: true, gift: false, until: null }, max: { active: true, gift: false, until: null } })
+        expect(screen.getByText(/Ein-Personen-Projekt/)).toBeInTheDocument()
+        expect(screen.queryByText(/Du unterstützt Quidey mit Pro/)).not.toBeInTheDocument()
+        expect(screen.queryByText(/Pro-Abo endet dabei sofort/)).not.toBeInTheDocument()
+    })
+
+    it('a gifted Pro user keeps the supporter wording', async () => {
+        await renderProfile({ pro: { active: true, gift: true, until: null } })
+        expect(screen.getByText(/Du unterstützt Quidey mit Pro/)).toBeInTheDocument()
+        expect(screen.getByText(/Pro-Abo endet dabei sofort/)).toBeInTheDocument()
+    })
+})
+
+describe('Max: checkout refused as already subscribed', () => {
+    const alreadySubscribed = Object.assign(new Error('x'), { status: 409, code: 'ALREADY_SUBSCRIBED' })
+
+    it('buying reloads billing and access and shows no generic error', async () => {
+        let billingCalls = 0
+        apiFetch.mockImplementation(async (url) => {
+            if (url === '/api/billing') { billingCalls += 1; return billingCalls > 1 ? { ...BILLING, active: true, tier: 'pro' } : BILLING }
+            if (url === '/api/billing/checkout') throw alreadySubscribed
+            if (url === '/api/me') return { isPro: true, pro: { active: true } }
+            return {}
+        })
+        await act(async () => { renderPro(makeStore()) })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Weiter zur Bezahlung/ })) })
+        expect(billingCalls).toBe(2)
+        expect(apiFetch.mock.calls.some(([url]) => url === '/api/me')).toBe(true)
+        expect(screen.queryByText(/nicht geklappt|Fehler/i)).not.toBeInTheDocument()
+        expect(screen.getByText('Danke, dass du Quidey unterstützt!')).toBeInTheDocument()
+    })
+
+    it('upgrading reloads billing and access too', async () => {
+        const proSub = { ...BILLING, active: true, tier: 'pro', subscription: { provider: 'stripe', tier: 'pro', plan: 'yearly', status: 'active', periodEnd: '2027-11-01T10:00:00Z', cancelAtPeriodEnd: false } }
+        let billingCalls = 0
+        apiFetch.mockImplementation(async (url) => {
+            if (url === '/api/billing') { billingCalls += 1; return billingCalls > 1 ? { ...proSub, tier: 'max' } : proSub }
+            if (url === '/api/billing/checkout') throw alreadySubscribed
+            if (url === '/api/me') return { isPro: true, pro: { active: true }, max: { active: true } }
+            return {}
+        })
+        await act(async () => { renderPro(makeStore({ pro: { active: true } })) })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Auf Max upgraden/ })) })
+        expect(billingCalls).toBe(2)
+        expect(apiFetch.mock.calls.some(([url]) => url === '/api/me')).toBe(true)
+        expect(screen.queryByRole('button', { name: /Auf Max upgraden/ })).not.toBeInTheDocument()
     })
 })
