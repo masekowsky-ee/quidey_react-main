@@ -13,7 +13,6 @@
 //   any speech (speechSynthesis.cancel).
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useSheet, useFocusOnArrival } from '../../features/layout/dragDismiss';
@@ -76,6 +75,8 @@ export default function AssistantSheet({ onClose, onReply }) {
         request.current = null;
         running.controller.abort();
         setPending(false);
+        // the server may have counted it all the same
+        refreshAiQuota();
         patchMessage(running.messageId, { unanswered: true });
         addNote(t('assistantStopped'));
     };
@@ -93,6 +94,8 @@ export default function AssistantSheet({ onClose, onReply }) {
     // Escape closes; gone (closed, pulled down, the page changed): nothing late is applied, the
     // focus goes back where it was
     useEffect(() => {
+        // what is left today, fresh: the app's copy is from before this chat's last answers
+        refreshAiQuota();
         const previous = document.activeElement;
         const onKey = (e) => { if (e.key === 'Escape' && !e.defaultPrevented) closeRef.current(); };
         window.addEventListener('keydown', onKey);
@@ -214,7 +217,8 @@ export default function AssistantSheet({ onClose, onReply }) {
     const leftToday = answerLeft ?? (quota?.assistant ? leftOf(quota.assistant) : null);
     const maxToday = quota?.assistant?.max ?? 20;
 
-    return createPortal(
+    // in place (as FormSheet), not in a portal: the shell's --sidebar-w and --tabbar-h place it
+    return (
         <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) close(); }}>
             <section className={styles.sheet} role="dialog" aria-modal="true" aria-labelledby={titleId} {...sheet.panel}>
                 <SheetGrabber />
@@ -260,8 +264,7 @@ export default function AssistantSheet({ onClose, onReply }) {
                     </button>
                 </form>
             </section>
-        </div>,
-        document.body,
+        </div>
     );
 }
 

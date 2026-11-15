@@ -146,6 +146,24 @@ describe('talking to the assistant', () => {
         expect(screen.getByText('Erledigt.')).toBeInTheDocument()
     })
 
+    it('what is left today stays right after closing and opening again', async () => {
+        let used = 3
+        apiFetch.mockImplementation(async (url, options = {}) => {
+            if (url === '/api/ai/quota') return { ...QUOTA, assistant: { used, max: 20 } }
+            if (url === '/api/ai/assistant') { used = 4; return { message: 'Ok.', actions: [], quota: { ...QUOTA, assistant: { used: 4, max: 20 } } } }
+            return options.method ? {} : []
+        })
+        open()
+        openSheet()
+        expect(await screen.findByText('Heute noch 17 von 20')).toBeInTheDocument()
+        await say('Hallo')
+        expect(screen.getByText('Heute noch 16 von 20')).toBeInTheDocument()
+        fireEvent.click(screen.getByRole('button', { name: 'Schließen' }))
+        openSheet()
+        expect(await screen.findByText('Heute noch 16 von 20')).toBeInTheDocument()
+        expect(screen.queryByText('Heute noch 17 von 20')).toBeNull()
+    })
+
     it('a sheet closed while it thinks applies nothing that comes late', async () => {
         let answer
         reply = () => new Promise(resolve => { answer = resolve })
@@ -282,8 +300,10 @@ describe('when it cannot answer', () => {
         reply = async () => { throw Object.assign(new Error('failed'), { status: 502, code: 'AI_FAILED', data: { code: 'AI_FAILED' } }) }
         open()
         openSheet()
+        await act(async () => {})
+        const before = calls('/api/ai/quota', 'GET').length
         await say('Hallo')
         expect(screen.getByText(/konnte gerade nicht antworten/)).toBeInTheDocument()
-        expect(calls('/api/ai/quota', 'GET').length).toBeGreaterThanOrEqual(2)
+        expect(calls('/api/ai/quota', 'GET').length).toBe(before + 1)
     })
 })
