@@ -130,10 +130,21 @@ Order of checks on every render:
 1. `/verify-email` → `VerifyEmail` (works signed in or out).
 2. Legal paths (`/impressum`, `/datenschutz`, `/nutzungsbedingungen`, `/kontakt`, see
    `src/legal/paths.js`) → `LegalPage`, always public.
-3. Not signed in → `SignIn` (wordmark, link back to the landing page, the `Profile` sign-in /
-   sign-up card, legal footer). `/signup` opens on sign-up; the landing page's email line hands
-   the address over as `#email=…` (read once, then removed from the URL). Signed in, `/signin`
-   and `/signup` redirect to `/`. `LANDING_URL` in `src/features/site.js`.
+3. Not signed in → **the app as a guest** (no sign-in page): the same frame (`Header`, `Menu`, `TabBar`, `Toaster`, `QuickAdd`, `AddFab`),
+   empty (`App` marks tasks, collections and progress as loaded-and-empty; no tour, tips, push question, assistant, reminders), looking only:
+   Start, Kalender and Fokusraum (`GUEST_PATHS` in `features/auth/gate.js`); every other address renders `GuestLocked` and asks for an
+   account. The header's "Anmelden" (and the menu's foot) and everything that would save something call `openAuth(mode?, detail?)`
+   (`features/auth/gate.js`, a window event), which opens `components/auth/AuthDialog.jsx`: a sheet with the `Profile` sign-in / sign-up
+   card, closed by itself once signed in (the page stays). Gates: `useRequireAccount()` (Home's group "+", the calendar's plus, the
+   Fokusraum's goal field), `QuickAdd` (every way to the new-task form: N, the add button, the command bar), `startFocus` (the timer). Safety
+   net in `apiFetch`: without a token a read (GET, except `/api/auth/…`) fails at once with `code: 'NO_ACCOUNT'` without a request, and a
+   write the server refuses with "No existing token" (401) opens the window. `/signin`, `/signup` (and the landing page's `#email=…`, read
+   once by `takeEmailFromHash`) and `/auth/google` (Google's return, `googleReturn`) are `GuestEntry`: they open the window, `/signin` and
+   `/signup` then go to `/`. The token is read when a store is made (`authReducer`), tests get one by default (`setupTests.js`); guest tests clear it.
+   **Short tour for guests**: `Tutorial` has a guest mode (`GUEST_STEPS`: welcome, plan, focus, calendar, `join`; no way out into pages, the last button
+   "Konto erstellen" ends at `openAuth('signup')`); on `/` a quiet card "Neu hier?" (`components/guest/GuestTourInvite.jsx`) offers it, "Nicht jetzt" or opening
+   the tour (card, the guest menu's "Kurz erklärt", the command bar) puts the card away for good (`features/guest/tourInvite.js`, localStorage `guestTourInvite`).
+   `public/theme-init.js` picks the Home / page boot skeleton for guests too. `LANDING_URL` in `src/features/site.js`.
 4. Signed in, access not checked yet → `AppSkeleton` (the real `Header`/`Menu`/`TabBar`, inert,
    and the address's `RouteSkeleton`; after 5 s a bar "Verbindung…" + retry / sign out); not pro → `/beta` (`BetaGate`, user can
    request beta access; three ways on: the form, "Zur Startseite" (`LANDING_URL`) and "Ab in den Warteraum" →

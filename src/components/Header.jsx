@@ -12,6 +12,7 @@ import { selectMenuBadgeCount, selectInboxCount } from '../features/inbox/inbox'
 import { selectHasNews } from '../features/realtime/news'
 import { useTranslation } from '../i18n/useTranslation'
 import { fill } from '../features/helperFunction'
+import { openAuth } from '../features/auth/gate'
 import TopNav from './variants/TopNav'
 import { openCommands } from '../features/tester/commands'
 import { UI_VARIANTS, useNavModel, useUiVariant } from '../features/tester/variants'
@@ -60,7 +61,7 @@ export default function Header(){
     const commandBar = UI_VARIANTS[useUiVariant()].nav === 'command';
     return (
         <div className={`${styles.header} ${nav === 'top' ? styles.undocked : ''} ${nav === 'bar' ? styles.bar : ''}`} data-part="header">
-            {token && <>
+            <>
                 <div className={styles.div} data-part="header-row">
                     {/* tablets only: desktop has the sidebar, phones the tab bar's "More" */}
                     <button onClick={()=>showMenu()} className={`${styles.btn} ${styles.menuBtn}`}
@@ -102,21 +103,25 @@ export default function Header(){
                                 aria-keyshortcuts="Control+K Meta+K /">
                                 <Icon name="search" size={20} />
                             </button>}
+                        {token && <>
                         <StreakPill />
                         <DailyTicker />
                         <TeamQuickPanel />
+                        </>}
                         {/* messages and notifications, from every page (new tasks: Home's add button,
                             N, the command bar) */}
-                        <Link to="/inbox" className={`${styles.btn} ${styles.inboxBtn}`} data-tip="nav-inbox"
+                        {token ? <Link to="/inbox" className={`${styles.btn} ${styles.inboxBtn}`} data-tip="nav-inbox"
                             aria-current={pathname.startsWith('/inbox') ? 'page' : undefined}
                             aria-label={inboxCount > 0 ? `${t('inbox')}, ${inboxCount} ${t('inboxUnread')}` : t('inbox')} title={t('inbox')}>
                             <Icon name="inbox" size={20} />
                             {inboxCount > 0 && <span className={styles.menuBadge} aria-hidden="true">{inboxCount > 9 ? '9+' : inboxCount}</span>}
                         </Link>
+                        // without an account: the way in, the one filled button of the screen
+                        : <button type="button" className={styles.signIn} onClick={() => openAuth()}>{t('signIn')}</button>}
                     </div>
                 </div>
                 {nav === 'top' && <TopNav />}
-            </>}
+            </>
         </div>
     );
 }

@@ -221,7 +221,7 @@ function Ready({ nav }) {
     );
 }
 
-const SCENES = { welcome: Welcome, plan: Plan, focus: Focus, calendar: Calendar, grow: Grow, together: Together, stats: Stats, yours: Yours, ready: Ready };
+const SCENES = { welcome: Welcome, join: Welcome, plan: Plan, focus: Focus, calendar: Calendar, grow: Grow, together: Together, stats: Stats, yours: Yours, ready: Ready };
 
 export default function TourPreview({ id, nav }) {
     const Scene = SCENES[id];

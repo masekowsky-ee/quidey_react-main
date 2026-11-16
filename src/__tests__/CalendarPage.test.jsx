@@ -62,6 +62,7 @@ beforeEach(() => {
     apiFetch.mockReset()
     apiFetch.mockResolvedValue([])
     localStorage.clear()
+    localStorage.setItem('token', 'test-token')
 })
 
 afterEach(() => {

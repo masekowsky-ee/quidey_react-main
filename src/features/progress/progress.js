@@ -102,7 +102,7 @@ export const nextUnlocks = (level, count = 3) => UNLOCKS.filter(step => step.lev
 // ---------- the store ----------
 const PROGRESS_LOADED = 'PROGRESS_LOADED';
 const RANKING_LOADED = 'RANKING_LOADED';
-const PROGRESS_FAILED = 'PROGRESS_FAILED';
+export const PROGRESS_FAILED = 'PROGRESS_FAILED';
 
 // failed: the last look went wrong (what is on screen stays)
 const initialState = { data: null, ranking: null, failed: false };

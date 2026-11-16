@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { showForms } from '../features/settings/settingsAction';
 import { useSheet } from '../features/layout/dragDismiss';
+import { openAuth } from '../features/auth/gate';
 import TaskForm from './TaskForm.jsx';
 import ReminderForm from './reminders/ReminderForm.jsx';
 import ScanSheet from './scan/ScanSheet.jsx';
@@ -14,7 +15,12 @@ import NoteQuickForm from './notes/NoteQuickForm.jsx';
 export default function QuickAdd() {
     const dispatch = useDispatch();
     const open = useSelector(state => state.settings.showForms);
-    if (!open) return null;
+    const guest = useSelector(state => !state.auth.token);
+    // a visitor without an account can't add anything: the sign-in window instead of the form
+    useEffect(() => {
+        if (guest && open) { openAuth(); dispatch(showForms(false)); }
+    }, [guest, open, dispatch]);
+    if (!open || guest) return null;
     // "Material scannen" in the form: the scan sheet in its place
     if (open === 'scan') return <ScanSheet onClose={() => dispatch(showForms(false))} />;
     return (

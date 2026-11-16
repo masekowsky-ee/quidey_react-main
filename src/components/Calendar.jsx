@@ -28,6 +28,7 @@ import Icon from './calendar/icons.jsx';
 import { useMediaQuery } from '../features/layout/breakpoints';
 import { fetchSubjects, selectSubjects } from '../features/study/study';
 import { useUntisLessons, lessonBoxes, colorLessons, useShowLessons, setShowLessons, useUntisStatus } from '../features/untis/untis';
+import { useRequireAccount } from '../features/auth/gate.js';
 
 const VIEW_LABELS = { month: 'calendarViewMonth', week: 'calendarViewWeek', agenda: 'calendarViewAgenda' };
 const VIEW_KEYS = { m: 'month', w: 'week', a: 'agenda' };
@@ -242,7 +243,9 @@ export default function Calendar() {
     // the new-task form, opened on a day (a day's plus, the day's timeline: also at a time).
     // In a shared calendar the entry goes there (target); in mine into the filtered group.
     const [createAt, setCreateAt] = useState(null);
-    const openCreate = (date, time = null) => setCreateAt({ due: dateKey(date), time });
+    // a visitor without an account can't add: the sign-in window instead of the form
+    const requireAccount = useRequireAccount();
+    const openCreate = (date, time = null) => requireAccount(() => setCreateAt({ due: dateKey(date), time }));
     const createTarget = isShared ? {
         kind: source.kind,
         name: shared.data?.name ?? '',

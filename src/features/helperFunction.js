@@ -1,4 +1,5 @@
 import { platform } from './usage/platform';
+import { openAuth } from './auth/gate';
 
 // Full URL for an API path. VITE_API_URL is the backend's address in production builds
 // (e.g. https://api.quidey.example.com); locally it's empty and Vite's proxy forwards /api.
@@ -21,8 +22,20 @@ const SIGNED_OUT_CODES = ['TOKEN_REVOKED', 'TOKEN_INVALID'];
 // App shows the friendly "this needs Quidey Pro" dialog (components/pro/LimitDialog.jsx).
 export const LIMIT_EVENT = 'quidey:limit-reached';
 
+// What may be read without an account (everything else a visitor's page asks for stays off the network)
+const PUBLIC_READS = ['/api/auth/'];
+
 export async function apiFetch(url, options = {}) {
     const token = localStorage.getItem("token");
+
+    // a visitor without an account: reading what is only for accounts fails at once, without a request
+    // (the page shows itself empty); saving it goes to the server, which refuses and so asks them to sign in
+    if (!token && (options.method ?? 'GET') === 'GET' && !PUBLIC_READS.some(prefix => url.startsWith(prefix))) {
+        const error = new Error('Not signed in');
+        error.status = 401;
+        error.code = 'NO_ACCOUNT';
+        throw error;
+    }
 
     const response = await fetch(apiUrl(url), {
         ...options,
@@ -48,6 +61,9 @@ export async function apiFetch(url, options = {}) {
         // pro / tester was taken away while the app is open: App checks access again
         // (and shows the beta screen, or hides what only testers see)
         if (ACCESS_CODES.includes(errorData.code)) window.dispatchEvent(new Event(PRO_REQUIRED_EVENT));
+        // a visitor without an account tried to save something: ask them to sign in (reads fail
+        // quietly). The text is the backend's own, see authenticateToken in the api's index.js.
+        if (!token && response.status === 401 && (options.method ?? 'GET') !== 'GET' && errorData.error === 'No existing token') openAuth();
         if (token && SIGNED_OUT_CODES.includes(errorData.code)) window.dispatchEvent(new Event(SIGNED_OUT_EVENT));
         if (errorData.code === 'LIMIT_REACHED') {
             error.limit = errorData.limit;

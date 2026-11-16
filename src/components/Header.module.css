@@ -893,3 +893,10 @@ a.timerChip {
         display: none;
     }
 }
+
+/* "Anmelden": a visitor without an account, top right; the one filled button of the screen */
+.signIn{
+composes: btnPrimary from './ui.module.css';
+margin-left: 0.5rem;
+white-space: nowrap;
+}

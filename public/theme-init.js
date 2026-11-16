@@ -23,12 +23,12 @@ try {
     language = String((navigator.languages && navigator.languages[0]) || navigator.language || '').toLowerCase().indexOf('de') === 0 ? 'de' : 'en';
   }
   document.documentElement.lang = language;
-  // which skeleton the first paint shows (public/boot.css): Home, another page, or the sign-in
-  document.documentElement.dataset.boot = !localStorage.getItem('token') ? 'gate'
-    : window.location.pathname === '/' ? 'home' : 'page';
+  // which skeleton the first paint shows (public/boot.css): Home or another page (a visitor
+  // without an account gets the app too)
+  document.documentElement.dataset.boot = window.location.pathname === '/' ? 'home' : 'page';
 } catch {
   // storage blocked (private mode): the device's light or dark, otherwise the CSS default
   // (Abendrot on the warm ground) stays; no account to show
   document.documentElement.dataset.theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-  document.documentElement.dataset.boot = 'gate';
+  document.documentElement.dataset.boot = 'home';
 }

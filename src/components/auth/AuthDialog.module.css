@@ -1,0 +1,50 @@
+/* The sign-in / sign-up window over the page (a sheet on phones, a card beside the header's end otherwise) */
+.panel{
+    width: min(34rem, 100%);
+    max-height: calc(100dvh - var(--header-h) - 2rem);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.25rem 1.25rem 1rem;
+    background: var(--sheet);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+}
+
+.title{
+    margin: 0;
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--text-h);
+}
+
+.text{
+    margin: 0 0 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.about{
+    align-self: center;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.about:hover{
+    color: var(--text-h);
+    text-decoration: underline;
+}
+
+/* the sign-in card (Profile's page column) sits in the window as it is: no page margins around it */
+.panel > div{
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+}

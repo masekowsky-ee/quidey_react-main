@@ -9,7 +9,7 @@ import Icon from './icons';
 import Logo from './Logo';
 import {useSelector, useDispatch} from 'react-redux'
 import {useTranslation} from '../i18n/useTranslation'
-import {setShowMenu, setMenuSide} from '../features/settings/settingsAction';
+import {setShowMenu, setMenuSide, setShowTutorial} from '../features/settings/settingsAction';
 import { selectIncomingCount } from '../features/friends/friendsAction';
 import { selectInviteCount } from '../features/together/togetherAction';
 import { selectTaskInviteCount } from '../features/tasks/taskAction';
@@ -23,6 +23,7 @@ import { useProOn } from '../features/pro/flag';
 import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, useMotionLevel } from '../features/settings/motion';
 import { useDragDismiss } from '../features/layout/dragDismiss';
+import { openAuth } from '../features/auth/gate';
 
 // One entry: icon, label and an optional count badge (or a dot: something changed there);
 // the current page is highlighted (`match`: also on other addresses that belong to it)
@@ -95,6 +96,7 @@ export default function Menu(){
     // phones: swiped past the last tab, the drawer comes in from the right (features/layout/tabSwipe.js)
     const fromRight = useSelector((state) => state.settings.menuSide) === 'right' && !docked;
     const isTester = useSelector(selectIsTester);
+    const token = useSelector((state) => state.auth.token);
     const incomingCount = useSelector(selectIncomingCount);
     const inviteCount = useSelector(selectInviteCount);
     const taskInviteCount = useSelector(selectTaskInviteCount);
@@ -215,7 +217,12 @@ export default function Menu(){
                     <MenuLink to="/feedback" icon="feedback" label={t('feedback')} onClick={onClose} />
                     {/* who is signed in: profile, switch accounts, add one, sign out */}
                     <div className={styles.account}>
-                        <AccountSwitcher onNavigate={onClose} compact={nav === 'rail'} />
+                        {token ? <AccountSwitcher onNavigate={onClose} compact={nav === 'rail'} />
+                            : <>
+                                {/* the short tour, for visitors without an account */}
+                                <button type="button" className={styles.tourLink} onClick={() => { onClose(); dispatch(setShowTutorial(true)); }}>{t('guestInviteOpen')}</button>
+                                <button type="button" className={styles.signIn} onClick={() => { onClose(); openAuth(); }}>{t('signIn')}</button>
+                            </>}
                     </div>
                 </div>
             </div>

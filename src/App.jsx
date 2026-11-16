@@ -15,6 +15,9 @@ import BetaGate from "./components/BetaGate.jsx";
 import AppSkeleton from "./components/skeleton/AppSkeleton.jsx";
 import { GateSkeleton, RouteSkeleton } from "./components/skeleton/PageSkeletons.jsx";
 import { fetchTaskState, fetchTaskInvites, refreshTasks } from "./features/tasks/taskAction.js"
+import { SET_TASK_STATE } from './features/tasks/taskActionTypes.js'
+import { SET_COLLECTIONS } from './features/collections/collections.js'
+import { PROGRESS_FAILED } from './features/progress/progress.js'
 import { useTaskReminders } from "./features/tasks/reminders.js"
 import { useEventEnds } from "./features/tasks/kinds.js"
 import { useAccountLocale } from "./features/settings/accountLocale.js"
@@ -56,6 +59,10 @@ import { useProgressWatcher } from './features/progress/progress.js';
 import { useFeedRealtime } from './features/feed/feed.js';
 import { COMMUNITY_PATHS } from './features/community/paths.js';
 import { LegalFooter } from './legal/LegalFooter.jsx';
+import AuthDialog from './components/auth/AuthDialog.jsx';
+import GuestEntry from './components/guest/GuestEntry.jsx';
+import GuestLocked from './components/guest/GuestLocked.jsx';
+import GuestTourInvite from './components/guest/GuestTourInvite.jsx';
 import { LEGAL_PATHS } from './legal/paths.js';
 import { useApplyTheme } from './features/settings/theme.js';
 import { MOTION, pageSwipeMotion, useApplyMotion, useMotionLevel } from './features/settings/motion.js';
@@ -76,7 +83,6 @@ const REQUEST_REFRESH_MS = 60 * 1000;
 // doesn't carry the whole app. Once the app is idle the rest is fetched in the background
 // (preloadPages), so switching pages stays instant.
 const PAGES = {
-  SignIn: () => import('./components/SignIn.jsx'),
   LegalPage: () => import('./legal/LegalPage.jsx'),
   VerifyEmail: () => import('./components/VerifyEmail.jsx'),
   TeamHome: () => import('./components/TeamHome.jsx'),
@@ -100,7 +106,6 @@ const PAGES = {
   StudyPage: () => import('./components/study/StudyPage.jsx'),
   ProPage: () => import('./components/pro/ProPage.jsx'),
 };
-const SignIn = lazy(PAGES.SignIn);
 const LegalPage = lazy(PAGES.LegalPage);
 const VerifyEmail = lazy(PAGES.VerifyEmail);
 const TeamHome = lazy(PAGES.TeamHome);
@@ -128,14 +133,14 @@ const ProPage = lazy(PAGES.ProPage);
 function preloadPages() {
   const load = () => {
     for (const [name, page] of Object.entries(PAGES)) {
-      if (!['SignIn', 'LegalPage', 'VerifyEmail'].includes(name)) page().catch(() => {});
+      if (!['LegalPage', 'VerifyEmail'].includes(name)) page().catch(() => {});
     }
   };
   const id = window.requestIdleCallback ? window.requestIdleCallback(load, { timeout: 5000 }) : setTimeout(load, 2000);
   return () => (window.cancelIdleCallback ? window.cancelIdleCallback(id) : clearTimeout(id));
 }
 
-// while the sign-in's code is on its way: its shape
+// while the mail link's page is on its way: its shape
 const gateLoading = <GateSkeleton />;
 
 function App(){
@@ -163,6 +168,17 @@ function App(){
 
   const token = useSelector((state) => state.auth.token);
   const signedIn = Boolean(token);
+  // nobody signed in: the app opens anyway, empty, and asks for an account when one is needed
+  // (features/auth/gate.js, components/auth/AuthDialog.jsx)
+  const guest = !signedIn;
+  // a guest has nothing to load: the lists count as loaded (empty) and there is no progress to show,
+  // so Home draws no skeletons that would never fill
+  useEffect(() => {
+    if (!guest) return;
+    dispatch({ type: SET_TASK_STATE, payload: { tasks: [], groups: [], notes: [] } });
+    dispatch({ type: SET_COLLECTIONS, payload: [] });
+    dispatch({ type: PROGRESS_FAILED });
+  }, [guest, dispatch]);
   // closed beta: only pro users get into the app, the others see the beta screen
   const access = useSelector((state) => state.auth.access);
   const allowed = signedIn && access.checked && access.isPro;
@@ -291,8 +307,7 @@ function App(){
   if (location.pathname === '/verify-email') return <Suspense fallback={gateLoading}><VerifyEmail /></Suspense>;
   // Impressum, Datenschutz and terms must open for everybody, signed in or not
   if (LEGAL_PATHS.includes(location.pathname)) return <Suspense fallback={pageLoading}><LegalPage /></Suspense>;
-  // signed out: the way in (sign in / sign up). The landing page is its own site on quidey.com
-  if (!signedIn) return <Suspense fallback={gateLoading}><SignIn /></Suspense>;
+  // signed out: the app itself, as a guest (below); the landing page is its own site on quidey.com
   // the app's frame until the server says whether I may use it
   if (signedIn && !access.checked) return <AppSkeleton />;
   if (signedIn && !access.isPro) {
@@ -323,23 +338,28 @@ function App(){
         <TabBar/>
         <CustomError/>
         <Toaster/>
+        {/* a guest gets no tour, tips, push question or account dialogs: the sign-in window instead */}
+        {guest ? <><AuthDialog/><Tutorial/></> : <>
         <Tutorial/>
         <FeatureTips/>
         <DeleteScopeDialog/>
         <PushOffer/>
         <OnboardingPrompts/>
+        </>}
         <QuickAdd/>
-        <ReminderAlert/>
+        {!guest && <ReminderAlert/>}
         {/* the round add button, bottom right, on the planning pages */}
         <AddFab/>
         {/* Quidey Max: the AI assistant, round at the bottom left, on the same pages */}
-        <AssistantFab/>
+        {!guest && <AssistantFab/>}
         {/* Ctrl/⌘ K or "/": search tasks, jump, do; "?": the keyboard shortcuts */}
         <CommandPalette/>
         <ShortcutsDialog/>
         {/* the free plan is full (after the beta): the way to Quidey Pro */}
-        {proOn && <LimitDialog/>}
+        {proOn && !guest && <LimitDialog/>}
         <main className={shell.main} data-part="main" data-fab={showsAddFab(location.pathname) || undefined}>
+        {/* a visitor without an account: the quiet offer of the short tour, on the start page */}
+        {guest && location.pathname === '/' && <GuestTourInvite/>}
         {/* each page comes in as the motion setting says */}
         {/* ...the tabs of the Gemeinschaft page are one page: switching them doesn't */}
         {/* ...a tab reached by a sideways swipe (phones) slides in from that side */}
@@ -347,6 +367,18 @@ function App(){
             {...(location.state?.tabSwipe ? pageSwipeMotion(location.state.tabSwipe, motionLevel) : MOTION.page[motionLevel])}>
         <Suspense fallback={pageLoading}>
         <Routes location={location}>
+          {guest && <>
+          {/* without an account: the start page, calendar and Fokusraum to look at, the rest asks for one */}
+          <Route path="/" element={<Home/>} />
+          <Route path="/calendar" element={<Calendar/>} />
+          <Route path="/focus" element={<FocusRoom/>} />
+          {/* where the landing page sends people to sign in or up, and where Google's sign-in page sends the browser back */}
+          <Route path="/signin" element={<GuestEntry mode="signin" />} />
+          <Route path="/signup" element={<GuestEntry mode="signup" />} />
+          <Route path="/auth/google" element={<GuestEntry mode="signin" googleReturn><Home/></GuestEntry>} />
+          <Route path="*" element={<GuestLocked/>} />
+          </>}
+          {!guest && <>
           <Route path="/" element={homeLayout === 'team' ? <TeamHome/> : <Home/>} />
           <Route path="/calendar" element={<Calendar/>} />
           {/* Fokusraum: the big timer, Pomodoro, notes and study tools */}
@@ -394,6 +426,7 @@ function App(){
           <Route path="/signup" element={<Navigate to="/" replace />} />
           {/* back from Google's sign-in page (features/auth/google.js), already signed in */}
           <Route path="/auth/google" element={<Navigate to="/" replace />} />
+          </>}
         </Routes>
         </Suspense>
         </motion.div>

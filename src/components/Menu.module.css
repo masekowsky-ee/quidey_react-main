@@ -539,3 +539,28 @@
     justify-content: center;
   }
 }
+
+/* "Anmelden" at the foot of the menu, for a visitor without an account */
+.signIn{
+composes: btnPrimary from './ui.module.css';
+width: 100%;
+}
+
+/* "Kurz erklärt" above the sign-in button, for a visitor without an account */
+.tourLink{
+width: 100%;
+margin-bottom: 0.5rem;
+padding: 0.5rem 0.75rem;
+font: inherit;
+font-size: 0.9rem;
+color: var(--text-muted);
+background: none;
+border: 0;
+border-radius: var(--radius-sm);
+cursor: pointer;
+text-align: left;
+}
+.tourLink:hover{
+color: var(--text-h);
+background: var(--surface-hover);
+}

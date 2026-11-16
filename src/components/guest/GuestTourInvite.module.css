@@ -1,0 +1,61 @@
+/* "Neu hier?": a quiet offer of the short tour above the start page, in the page's own column */
+.card{
+    width: min(var(--content-w, 70rem), calc(100% - 2 * var(--page-gutter, 1rem)));
+    /* main has no top padding of its own: the pages clear the fixed header themselves */
+    margin: calc(var(--header-h, 4rem) + 0.5rem) auto calc(-1 * var(--header-h, 4rem) + 0.5rem);
+    padding: 0.85rem 1.1rem;
+    /* above the page that is pulled up beside it, so its buttons take the clicks */
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.copy{
+    min-width: 0;
+    text-align: left;
+}
+
+.title{
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 650;
+    color: var(--text-h);
+}
+
+.text{
+    margin: 0.1rem 0 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.actions{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.open{
+    composes: btnPrimary from '../ui.module.css';
+}
+
+.later{
+    padding: 0.45rem 0.7rem;
+    font: inherit;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    background: none;
+    border: 0;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.later:hover{
+    color: var(--text-h);
+}

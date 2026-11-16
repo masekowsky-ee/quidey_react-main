@@ -1,7 +1,7 @@
 import { LOGIN_SUCCESS, LOGOUT, SET_USER, SET_ACCESS, TOUR_SEEN, SAVED_COLORS_SET, TIPS_SET } from "./authActionTypes";
 
 const initialState = {
-    token: localStorage.getItem('token') || null,
+    token: null,
     user: {
         username: null,
         display_name: null,
@@ -28,7 +28,8 @@ const initialState = {
     },
 };
 
-const authReducer = (state = initialState, action) => {
+// the token is read when the store is made (not when this file loads): signed in or not is what is on the device then
+const authReducer = (state = { ...initialState, token: localStorage.getItem('token') || null }, action) => {
     switch (action.type) {
         case LOGIN_SUCCESS:
             return {
