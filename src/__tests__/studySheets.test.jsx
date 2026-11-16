@@ -340,6 +340,55 @@ describe('create sheet', () => {
     })
 })
 
+describe('a goal as a date only', () => {
+    const fillStepOne = async () => {
+        open('/study/1?new=goal')
+        const dialog = await screen.findByRole('dialog')
+        fireEvent.click(within(dialog).getByRole('radio', { name: 'Klausur' }))
+        fireEvent.change(within(dialog).getByLabelText('Name des Ziels'), { target: { value: 'Klausur Analysis' } })
+        fireEvent.change(within(dialog).getByLabelText('Datum'), { target: { value: inDays(10) } })
+        return dialog
+    }
+
+    it('"Nur Termin" creates the goal at once, without parts, and opens it', async () => {
+        const dialog = await fillStepOne()
+        fireEvent.click(within(dialog).getByRole('radio', { name: 'Nur Termin' }))
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Termin anlegen' }))
+        await waitFor(() => expect(screen.getByTestId('where').textContent).toBe('/study/goals/20'))
+        const body = bodyOf(calls(`${BASE}/goals`, 'POST')[0])
+        expect(body).toMatchObject({ subjectId: 1, kind: 'exam', name: 'Klausur Analysis', due: inDays(10), planMode: 'none', parts: [] })
+        expect(calls(`${BASE}/estimate`, 'POST')).toHaveLength(0)
+    })
+
+    it('the study window is sent with the goal, and not for "Nur Termin"', async () => {
+        const dialog = await fillStepOne()
+        fireEvent.change(within(dialog).getByLabelText('Lernen von'), { target: { value: inDays(2) } })
+        fireEvent.change(within(dialog).getByLabelText('Lernen bis'), { target: { value: inDays(6) } })
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Weiter' }))
+        fireEvent.change(await screen.findByLabelText('Themen, eins pro Zeile'), { target: { value: 'Grenzwerte' } })
+        await defaults(dialog, 1)
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Plan ansehen' }))
+        await screen.findByRole('button', { name: 'Übernehmen' })
+        expect(bodyOf(calls(`${BASE}/goals`, 'POST')[0])).toMatchObject({ studyFrom: inDays(2), studyTo: inDays(6) })
+    })
+
+    it('a window that ends before it starts is refused on the first step', async () => {
+        const dialog = await fillStepOne()
+        fireEvent.change(within(dialog).getByLabelText('Lernen von'), { target: { value: inDays(6) } })
+        fireEvent.change(within(dialog).getByLabelText('Lernen bis'), { target: { value: inDays(2) } })
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Weiter' }))
+        expect(await within(dialog).findByRole('alert')).toHaveTextContent('Das Lernfenster')
+        expect(screen.queryByLabelText('Themen, eins pro Zeile')).toBeNull()
+    })
+
+    it('"Nur Termin" hides the study window', async () => {
+        const dialog = await fillStepOne()
+        expect(within(dialog).getByLabelText('Lernen von')).toBeTruthy()
+        fireEvent.click(within(dialog).getByRole('radio', { name: 'Nur Termin' }))
+        expect(within(dialog).queryByLabelText('Lernen von')).toBeNull()
+    })
+})
+
 describe('a goal sheet left for the study times', () => {
     it('comes back with everything typed when you return from the settings', async () => {
         settings.windows = []

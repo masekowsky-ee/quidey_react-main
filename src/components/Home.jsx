@@ -20,7 +20,7 @@ import { Bone } from './skeleton/Skeleton.jsx'
 import Today from './home/Today.jsx'
 import HomeExtras from './home/HomeExtras.jsx'
 import { useHomeKinds } from '../features/home/kinds.js'
-import { pinCardNote } from '../features/home/cardNote.js'
+import { pinCardNote, clearCardNote } from '../features/home/cardNote.js'
 import DayPlan from './home/DayPlan.jsx'
 import FocusSheet, { FocusSheetSkeleton } from './home/FocusSheet.jsx'
 import ReplanCard from './study/ReplanCard.jsx'
@@ -225,6 +225,7 @@ export default function Home(){
     // the button on a task row: the same as dropping it into the work area, which then comes
     // into view (on a phone it is far above the list)
     const activateTask = useCallback((task) => {
+        clearCardNote(); // a task picked by hand takes the card back from a note
         dispatch(setFocusTask(task));
         requestAnimationFrame(() => dropZoneRef.current?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }));
     }, [dispatch]);
@@ -272,7 +273,7 @@ export default function Home(){
             // a note dropped there goes into the card (no focus), a task into focus
             if (isOverDropZone) {
                 if (currentTask.noteId) pinCardNote(currentTask.noteId);
-                else dispatch(setFocusTask(currentTask));
+                else { clearCardNote(); dispatch(setFocusTask(currentTask)); }
             }
         }
 

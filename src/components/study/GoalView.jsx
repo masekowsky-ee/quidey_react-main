@@ -6,6 +6,7 @@ import {
     selectGoal, selectSubjects, selectStudyStatus, formatHours, hoursNumber,
 } from '../../features/study/study';
 import { setFocusTask, startFocus } from '../../features/session/sessionAction';
+import { clearCardNote } from '../../features/home/cardNote';
 import { showToast } from '../../features/toast/toast';
 import { fill, formatDate } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -127,7 +128,8 @@ export default function GoalView({ goalId }) {
         .sort((a, b) => a.due.localeCompare(b.due) || (a.dueTime ?? '').localeCompare(b.dueTime ?? '')), [goal]);
 
     // the planner plans this goal: active and its day not over
-    const planned = goal?.status === 'active' && !isPastGoal(goal);
+    const dateOnly = goal?.planMode === 'none';
+    const planned = goal?.status === 'active' && !isPastGoal(goal) && !dateOnly;
 
     // runs a change and shows what went wrong as a toast; { replan: true } offers the preview after it
     const run = async (action, { replan = false } = {}) => {
@@ -146,6 +148,7 @@ export default function GoalView({ goalId }) {
         setBusy(true);
         try {
             const { task } = await dispatch(studyNow(part.id));
+            clearCardNote();
             dispatch(setFocusTask(task));
             dispatch(startFocus());
         } catch (err) {
@@ -183,7 +186,7 @@ export default function GoalView({ goalId }) {
         if (change?.status === 'done') setGrading(true);
         if (!changesPlan(change)) return;
         const next = { ...goal, ...change };
-        if (next.status === 'active' && !isPastGoal(next)) {
+        if (next.status === 'active' && next.planMode !== 'none' && !isPastGoal(next)) {
             setPrompt(false);
             setPreview(true);
         }
@@ -224,7 +227,7 @@ export default function GoalView({ goalId }) {
                     </p>
                 </div>
                 <div className={styles.actions}>
-                    <button type="button" className={styles.btn} onClick={() => navigate({ search: '?replan=1' })}>{t('studyReplan')}</button>
+                    {!dateOnly && <button type="button" className={styles.btn} onClick={() => navigate({ search: '?replan=1' })}>{t('studyReplan')}</button>}
                     <button type="button" className={styles.btn} onClick={() => setEditing(true)}>
                         <Icon name="edit" size={14} /> {t('studyEditGoal')}
                     </button>
@@ -262,10 +265,10 @@ export default function GoalView({ goalId }) {
                 </div>
             )}
 
-            <GoalProgress credit={sum(parts, 'credit')} estimate={sum(parts, 'estimateMinutes')} />
+            {!dateOnly && <GoalProgress credit={sum(parts, 'credit')} estimate={sum(parts, 'estimateMinutes')} />}
 
             <h2 className={styles.sectionTitle}>{t('studyParts')}</h2>
-            {parts.length === 0 ? <p className={styles.empty}>{t('studyPartsEmpty')}</p> : (
+            {parts.length === 0 ? <p className={styles.empty}>{t(dateOnly ? 'studyDateOnlyHint' : 'studyPartsEmpty')}</p> : (
                 <ul className={styles.list}>
                     {parts.map((part, index) => (
                         <PartRow key={part.id} part={part} index={index} parts={parts} goal={goal} busy={busy} run={run}

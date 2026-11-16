@@ -404,6 +404,12 @@ time is counted on locally (`othersRunningMs`). Runs task reminders
   sessions). Every subject has a colour (a new one without takes the first of the eight not in use; the list has a
   colour dot per row) and every goal a **shape** (`goals.shape`, migration 042: circle, square, triangle, diamond,
   star, hexagon, heart; `components/study/GoalShape.jsx` + `ShapePicker`, list in `features/study/shapes.js`; a new
+  **Nur Termin** (`goals.plan_mode = 'none'`, migration 055): no topics, nothing planned; `POST /goals` with `planMode: 'none', parts: []`
+  makes a calendar event (`goals.event_task_id`, kept in step by `PATCH` name / date / time, deleted with the goal; the link goes null
+  when the event is deleted by hand). `loadActiveGoals` leaves these goals out, so planner, status and push skip them; a plan can be
+  switched on only once the goal has topics (400 `no_parts`), "Nur Termin" only while it has none (400 `has_parts`).
+  **Lernfenster** (`goals.study_from` / `study_to`, both days included, optional): `planningDays` stays inside it (`studyFrom` /
+  `studyTo` on the planner's goals); "Lernen von / bis" in the new-goal sheet and in "Ziel bearbeiten".
   goal without one gets the first its subject has no active goal in). The shape is drawn in the subject's colour on
   the goal page, the subject's goal list, the subjects list and every planned session (`SessionMarker`,
   `task.study.goalShape`). A goal whose date is over has ended ("Vorbei"): not planned, not in status / push.

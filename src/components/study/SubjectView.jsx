@@ -64,7 +64,7 @@ export default function SubjectView({ subjectId }) {
                         {state && !finished && <span className={styles.badgeQuiet}>{t(state)}</span>}
                         {finished && goal.grade != null && <span className={styles.badge}>{fill(t('studyGradeShown'), { value: formatGrade(goal.grade, language) })}</span>}
                     </span>
-                    {!finished && <GoalProgress credit={sum(goal.parts, 'credit')} estimate={sum(goal.parts, 'estimateMinutes')} />}
+                    {!finished && goal.planMode !== 'none' && <GoalProgress credit={sum(goal.parts, 'credit')} estimate={sum(goal.parts, 'estimateMinutes')} />}
                 </Link>
                 {finished && goal.status === 'done' && (
                     <button type="button" className={styles.btn} onClick={() => setGrading(goal)}

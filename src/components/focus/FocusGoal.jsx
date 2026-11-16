@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setFocusTask, selectTaskTime } from '../../features/session/sessionAction';
+import { clearCardNote } from '../../features/home/cardNote';
 import { selectSharedSoloTasks } from '../../features/together/togetherAction';
 import { updateTaskProps } from '../../features/tasks/taskAction';
 import { isEvent } from '../../features/tasks/kinds';
@@ -26,7 +27,7 @@ export default function FocusGoal({ goal, onGoal, task }) {
     const pick = (value) => {
         if (!value) { dispatch(setFocusTask(null)); return; }
         const next = [...open, ...openShared].find(item => String(item.id) === value);
-        if (next) dispatch(setFocusTask(next));
+        if (next) { clearCardNote(); dispatch(setFocusTask(next)); }
     };
     const finish = (e) => {
         if (!task || task.shared) return;

@@ -29,7 +29,7 @@ export function goalStateKey(goal, now = new Date()) {
 }
 
 // Whether a saved goal change moves the plan (date, time, mode): then the preview opens (ruling 30)
-export const changesPlan = (change) => Boolean(change) && ['due', 'dueTime', 'planMode'].some(key => key in change);
+export const changesPlan = (change) => Boolean(change) && ['due', 'dueTime', 'planMode', 'studyFrom', 'studyTo'].some(key => key in change);
 
 // A server error as a sentence: its code's text, else the general one
 export function useStudyError() {

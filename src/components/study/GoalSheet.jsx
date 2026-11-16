@@ -72,7 +72,7 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
     const [step, setStep] = useState(draft ? Math.min(draft.step ?? 1, 2) : 1);
     const [fields, setFields] = useState(() => ({
         // planMode null: not picked yet, see `planMode` below
-        kind: 'exam', name: '', subject: subjectId == null ? '' : String(subjectId), newSubject: '', due: '', dueTime: '', planMode: null, shape: null,
+        kind: 'exam', name: '', subject: subjectId == null ? '' : String(subjectId), newSubject: '', due: '', dueTime: '', studyFrom: '', studyTo: '', planMode: null, shape: null,
         ...(draft?.fields ?? {}),
     }));
     const set = (changes) => { setFields(prev => ({ ...prev, ...changes })); setError(null); };
@@ -202,12 +202,60 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
 
     const step1Valid = fields.name.trim() && fields.due >= today && (inline ? fields.newSubject.trim() : subject);
 
+    const dateOnly = planMode === 'none';
+    const windowBackwards = !dateOnly && fields.studyFrom && fields.studyTo && fields.studyFrom > fields.studyTo;
+    const windowFields = () => (dateOnly ? {} : {
+        ...(fields.studyFrom ? { studyFrom: fields.studyFrom } : {}),
+        ...(fields.studyTo ? { studyTo: fields.studyTo } : {}),
+    });
+
     const goNext = () => {
         if (!step1Valid) {
             setError(t(fields.due && fields.due < today ? 'studyError_due_in_past' : 'studyGoalIncomplete'));
             return;
         }
-        setStep(2);
+        if (windowBackwards) {
+            setError(t('studyError_window'));
+            return;
+        }
+        if (dateOnly) createDateOnly();
+        else setStep(2);
+    };
+
+    // the subject of the goal: the picked one, or the new one made now (and kept for a retry)
+    const resolveSubject = async () => {
+        if (!inline) return subject?.id;
+        try {
+            const id = (await dispatch(saveSubject(null, { name: fields.newSubject.trim() }))).id;
+            // the subject exists now: a retry after a failed createGoal must pick it, not create it again
+            setFields(prev => ({ ...prev, subject: String(id), newSubject: '' }));
+            return id;
+        } catch (err) {
+            setStep(1);
+            setError(err.code === 'subject_exists' ? t('studySubjectExists') : errorText(err));
+            return undefined;
+        }
+    };
+
+    // "Nur Termin": no topics, no plan; the goal is made now and opened
+    const createDateOnly = async () => {
+        setBusy(true);
+        setError(null);
+        try {
+            const id = await resolveSubject();
+            if (id === undefined) return;
+            const goal = await dispatch(createGoal({
+                subjectId: id, kind: fields.kind, name: fields.name.trim(), due: fields.due,
+                ...(fields.dueTime ? { dueTime: fields.dueTime } : {}), planMode: 'none',
+                ...(fields.shape ? { shape: fields.shape } : {}), parts: [],
+            }));
+            setCreated(goal);
+            done();
+        } catch (err) {
+            setError(errorText(err));
+        } finally {
+            setBusy(false);
+        }
     };
 
     const submit = async () => {
@@ -221,21 +269,11 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
                 setStep(3);
                 return;
             }
-            let id = subject?.id;
-            if (inline) {
-                try {
-                    id = (await dispatch(saveSubject(null, { name: fields.newSubject.trim() }))).id;
-                    // the subject exists now: a retry after a failed createGoal must pick it, not create it again
-                    setFields(prev => ({ ...prev, subject: String(id), newSubject: '' }));
-                } catch (err) {
-                    setStep(1);
-                    setError(err.code === 'subject_exists' ? t('studySubjectExists') : errorText(err));
-                    return;
-                }
-            }
+            const id = await resolveSubject();
+            if (id === undefined) return;
             const goal = await dispatch(createGoal({
                 subjectId: id, kind: fields.kind, name: fields.name.trim(), due: fields.due,
-                ...(fields.dueTime ? { dueTime: fields.dueTime } : {}), planMode,
+                ...(fields.dueTime ? { dueTime: fields.dueTime } : {}), planMode, ...windowFields(),
                 ...(fields.shape ? { shape: fields.shape } : {}),
                 parts: rows.map(r => ({ name: r.name, estimateMinutes: r.minutes, estimateSource: r.source })),
             }));
@@ -309,7 +347,7 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
                     <div className={own.field}>
                         <span className={own.label} id="goalModeLabel">{t('studyPlanMode')}</span>
                         <div className={ui.segmented} role="radiogroup" aria-labelledby="goalModeLabel">
-                            {['days', 'slots'].map(mode => (
+                            {['days', 'slots', 'none'].map(mode => (
                                 <button key={mode} type="button" role="radio" aria-checked={planMode === mode}
                                     className={planMode === mode ? ui.segmentActive : undefined} onClick={() => set({ planMode: mode })}>
                                     {t(`studyPlanMode_${mode}`)}
@@ -317,13 +355,30 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
                             ))}
                         </div>
                     </div>
+                    {dateOnly
+                        ? <p className={own.hint}>{t('studyDateOnlyHint')}</p>
+                        : (
+                            <>
+                                <div className={own.two}>
+                                    <label className={own.field}>
+                                        <span className={own.label}>{t('studyWindowFrom')}</span>
+                                        <input type="date" value={fields.studyFrom} min={today} onChange={(e) => set({ studyFrom: e.target.value })} />
+                                    </label>
+                                    <label className={own.field}>
+                                        <span className={own.label}>{t('studyWindowTo')}</span>
+                                        <input type="date" value={fields.studyTo} min={fields.studyFrom || today} onChange={(e) => set({ studyTo: e.target.value })} />
+                                    </label>
+                                </div>
+                                <p className={own.hint}>{t('studyWindowHint')}</p>
+                            </>
+                        )}
                     <div className={own.field}>
                         <ShapePicker value={fields.shape} onChange={(shape) => set({ shape })} color={subject?.color} />
                         {!fields.shape && <p className={own.hint}>{t('goalShapeAuto')}</p>}
                     </div>
                     {error && <p className={own.error} role="alert">{error}</p>}
                     <div className={own.footer}>
-                        <button type="submit" className={styles.btnPrimary}>{t('studyNext')}</button>
+                        <button type="submit" className={styles.btnPrimary} disabled={busy}>{t(dateOnly ? 'studyDateOnly' : 'studyNext')}</button>
                     </div>
                 </form>
             )}

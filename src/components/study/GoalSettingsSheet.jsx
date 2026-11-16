@@ -36,6 +36,7 @@ function GoalSettingsForm({ goal, sheet, close, onClose }) {
     useFocusOnArrival(nameRef);
     const [fields, setFields] = useState(() => ({
         name: goal.name, kind: goal.kind, due: goal.due, dueTime: goal.dueTime ?? '', planMode: goal.planMode,
+        studyFrom: goal.studyFrom ?? '', studyTo: goal.studyTo ?? '',
         shape: goal.shape ?? 'circle',
     }));
     const subjectColor = useSelector(selectSubjects).find(s => s.id === goal.subjectId)?.color;
@@ -43,6 +44,8 @@ function GoalSettingsForm({ goal, sheet, close, onClose }) {
     const [error, setError] = useState(null);
     const set = (changes) => { setFields(prev => ({ ...prev, ...changes })); setError(null); };
     const today = toInputDate(new Date());
+    // a plan needs topics; "only a date" is for a goal that has none
+    const hasParts = (goal.parts?.length ?? 0) > 0;
 
     const save = async (change) => {
         setBusy(true);
@@ -69,6 +72,13 @@ function GoalSettingsForm({ goal, sheet, close, onClose }) {
         if (fields.due !== goal.due) change.due = fields.due;
         if ((fields.dueTime || null) !== (goal.dueTime ?? null)) change.dueTime = fields.dueTime || null;
         if (fields.planMode !== goal.planMode) change.planMode = fields.planMode;
+        if (fields.studyFrom && fields.studyTo && fields.studyFrom > fields.studyTo) {
+            setError(t('studyError_window'));
+            return;
+        }
+        // the window of a date-only goal isn't used (and its fields are hidden)
+        if (fields.studyFrom !== (goal.studyFrom ?? '')) change.studyFrom = fields.studyFrom || null;
+        if (fields.studyTo !== (goal.studyTo ?? '')) change.studyTo = fields.studyTo || null;
         if (fields.shape !== (goal.shape ?? 'circle')) change.shape = fields.shape;
         save(change);
     };
@@ -110,14 +120,28 @@ function GoalSettingsForm({ goal, sheet, close, onClose }) {
                 <div className={own.field}>
                     <span className={own.label} id="goalSettingsMode">{t('studyPlanMode')}</span>
                     <div className={ui.segmented} role="radiogroup" aria-labelledby="goalSettingsMode">
-                        {['days', 'slots'].map(mode => (
+                        {['days', 'slots', 'none'].map(mode => (
                             <button key={mode} type="button" role="radio" aria-checked={fields.planMode === mode}
+                                disabled={mode === 'none' ? hasParts : !hasParts}
                                 className={fields.planMode === mode ? ui.segmentActive : undefined} onClick={() => set({ planMode: mode })}>
                                 {t(`studyPlanMode_${mode}`)}
                             </button>
                         ))}
                     </div>
+                    {!hasParts && <p className={own.hint}>{t('studyDateOnlyNeedsParts')}</p>}
                 </div>
+                {fields.planMode !== 'none' && (
+                    <div className={own.two}>
+                        <label className={own.field}>
+                            <span className={own.label}>{t('studyWindowFrom')}</span>
+                            <input type="date" value={fields.studyFrom} min={today} onChange={(e) => set({ studyFrom: e.target.value })} />
+                        </label>
+                        <label className={own.field}>
+                            <span className={own.label}>{t('studyWindowTo')}</span>
+                            <input type="date" value={fields.studyTo} min={fields.studyFrom || today} onChange={(e) => set({ studyTo: e.target.value })} />
+                        </label>
+                    </div>
+                )}
                 <ShapePicker value={fields.shape} onChange={(shape) => set({ shape })} color={subjectColor} />
                 <div className={styles.actions}>
                     {goal.status === 'active' ? (

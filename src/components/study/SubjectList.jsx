@@ -35,7 +35,7 @@ function SubjectRow({ subject, onArchive, onColor, tip }) {
                         <span><GoalShape shape={goal.shape} /> {goal.name}</span>
                         <span>{countdownText(goal.due, t)}</span>
                         {goal.behindMinutes > 0 && <span className={styles.badge}>{t('studyBehind')}</span>}
-                        <ProgressBar value={goal.progress} label={goal.name} />
+                        {goal.planMode !== 'none' && <ProgressBar value={goal.progress} label={goal.name} />}
                     </span>
                 ) : (
                     <span className={styles.meta}>{t('studyNoGoal')}</span>

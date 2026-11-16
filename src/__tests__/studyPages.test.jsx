@@ -163,6 +163,14 @@ describe('subject list', () => {
         expect(within(physik).getByText('Noch kein Ziel')).toBeInTheDocument()
     })
 
+    it('a goal that is only a date shows no progress bar', async () => {
+        subjects[0].nextGoal = { ...subjects[0].nextGoal, planMode: 'none', progress: 0, behindMinutes: 0 }
+        open('/study')
+        const row = (await screen.findByText('Mathe')).closest('li')
+        expect(within(row).getByText('Klausur Analysis')).toBeInTheDocument()
+        expect(within(row).queryByRole('progressbar')).toBeNull()
+    })
+
     it('keeps archived subjects in a collapsed group', async () => {
         open('/study')
         await screen.findByText('Mathe')
@@ -210,6 +218,15 @@ describe('subject page', () => {
         open('/study/1')
         const row = (await screen.findByText('Abgabe Übung')).closest('li')
         expect(within(row).getByText('Vorbei')).toBeInTheDocument()
+    })
+
+    it('a goal that is only a date shows no progress in the list of its subject', async () => {
+        goals[11] = { ...goals[11], planMode: 'none', parts: [] }
+        open('/study/1')
+        const row = (await screen.findByText('Abgabe Übung')).closest('li')
+        expect(within(row).queryByRole('progressbar')).toBeNull()
+        const other = screen.getByText('Klausur Analysis').closest('li')
+        expect(within(other).getByRole('progressbar')).toBeInTheDocument()
     })
 
     it('lists the goals by date and leads to + Ziel', async () => {
@@ -322,6 +339,72 @@ describe('goal page', () => {
         })
         expect(await screen.findByRole('heading', { name: 'Neuer Plan' })).toBeInTheDocument()
         expect(screen.getByRole('heading', { name: 'Klausur Analysis 2' })).toBeInTheDocument()
+    })
+
+    it('a study window saved in the goal settings is sent, cleared with null, and opens the preview', async () => {
+        goals[10].studyFrom = null
+        goals[10].studyTo = null
+        open('/study/goals/10')
+        fireEvent.click(await screen.findByRole('button', { name: 'Ziel bearbeiten' }))
+        const dialog = await screen.findByRole('dialog')
+        fireEvent.change(within(dialog).getByLabelText('Lernen von'), { target: { value: inDays(2) } })
+        fireEvent.change(within(dialog).getByLabelText('Lernen bis'), { target: { value: inDays(6) } })
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Speichern' }))
+        await waitFor(() => expect(calls(`${BASE}/goals/10`, 'PATCH')).toHaveLength(1))
+        expect(bodyOf(calls(`${BASE}/goals/10`, 'PATCH')[0])).toEqual({ studyFrom: inDays(2), studyTo: inDays(6) })
+        expect(await screen.findByRole('heading', { name: 'Neuer Plan' })).toBeInTheDocument()
+    })
+
+    it('the study window of the goal settings can be emptied', async () => {
+        goals[10].studyFrom = inDays(2)
+        goals[10].studyTo = inDays(6)
+        open('/study/goals/10')
+        fireEvent.click(await screen.findByRole('button', { name: 'Ziel bearbeiten' }))
+        const dialog = await screen.findByRole('dialog')
+        fireEvent.change(within(dialog).getByLabelText('Lernen von'), { target: { value: '' } })
+        fireEvent.change(within(dialog).getByLabelText('Lernen bis'), { target: { value: '' } })
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Speichern' }))
+        await waitFor(() => expect(calls(`${BASE}/goals/10`, 'PATCH')).toHaveLength(1))
+        expect(bodyOf(calls(`${BASE}/goals/10`, 'PATCH')[0])).toEqual({ studyFrom: null, studyTo: null })
+    })
+
+    describe('a goal that is only a date', () => {
+        beforeEach(() => {
+            goals[10] = { ...goals[10], planMode: 'none', parts: [], sessions: [], studyFrom: null, studyTo: null }
+        })
+
+        it('has no replan button and no progress, and says what it is', async () => {
+            open('/study/goals/10')
+            expect(await screen.findByRole('heading', { name: 'Klausur Analysis' })).toBeInTheDocument()
+            expect(screen.queryByRole('button', { name: 'Neu planen' })).toBeNull()
+            expect(screen.queryByText(/ von \d/)).toBeNull()
+            expect(screen.getByText(/Nur der Termin: ohne Themen und ohne Plan/)).toBeInTheDocument()
+        })
+
+        it('a new date opens no preview, and the plan modes wait for a topic', async () => {
+            open('/study/goals/10')
+            fireEvent.click(await screen.findByRole('button', { name: 'Ziel bearbeiten' }))
+            const dialog = await screen.findByRole('dialog')
+            expect(within(dialog).getByRole('radio', { name: 'Nur Termin' })).toBeChecked()
+            expect(within(dialog).getByRole('radio', { name: 'Nur an Tagen' })).toBeDisabled()
+            expect(within(dialog).getByRole('radio', { name: 'In deinen Lernzeiten' })).toBeDisabled()
+            expect(within(dialog).queryByLabelText('Lernen von')).toBeNull()
+            fireEvent.change(within(dialog).getByLabelText('Datum'), { target: { value: inDays(14) } })
+            fireEvent.click(within(dialog).getByRole('button', { name: 'Speichern' }))
+            await waitFor(() => expect(calls(`${BASE}/goals/10`, 'PATCH')).toHaveLength(1))
+            expect(bodyOf(calls(`${BASE}/goals/10`, 'PATCH')[0])).toEqual({ due: inDays(14) })
+            await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+            expect(calls(`${BASE}/plan`)).toHaveLength(0)
+        })
+
+        it('"Nur Termin" is not offered once the goal has topics', async () => {
+            goals[10].planMode = 'days'
+            goals[10].parts = [part(100, 'Thema 3')]
+            open('/study/goals/10')
+            fireEvent.click(await screen.findByRole('button', { name: 'Ziel bearbeiten' }))
+            const dialog = await screen.findByRole('dialog')
+            expect(within(dialog).getByRole('radio', { name: 'Nur Termin' })).toBeDisabled()
+        })
     })
 
     it('renaming in the goal settings opens no preview', async () => {
