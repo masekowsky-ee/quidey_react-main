@@ -19,6 +19,8 @@ import TourPreview from './tour/TourPreview';
 import SheetGrabber from './SheetGrabber.jsx';
 import { useSheet } from '../features/layout/dragDismiss';
 import { markTipSeen } from '../features/tips/tips';
+import { openAuth } from '../features/auth/gate';
+import { markInviteDone } from '../features/guest/tourInvite';
 
 // The chapters of the tour, in the order a student meets them: plan, focus, see the week, grow,
 // do it with friends, look back, make it yours. Texts per step (tourTexts.js): tut_<id>_short,
@@ -34,6 +36,16 @@ const STEPS = [
     { id: 'stats', go: { to: '/stats', page: 'history' } },
     { id: 'yours', go: { to: '/settings', page: 'settings' } },
     { id: 'ready' },
+];
+
+// The short tour for visitors without an account: what Quidey is for, then the way to an account.
+// No way out into a page (they can't open it), the last card's button asks them to sign up.
+const GUEST_STEPS = [
+    { id: 'welcome' },
+    { id: 'plan' },
+    { id: 'focus' },
+    { id: 'calendar' },
+    { id: 'join' },
 ];
 
 // the last step's first things to do
@@ -85,7 +97,8 @@ export default function Tutorial() {
     // this one opened by itself for a new account
     const firstTour = useRef(false);
 
-    const steps = STEPS;
+    const guest = useSelector((state) => !state.auth.token);
+    const steps = guest ? GUEST_STEPS : STEPS;
     const current = Math.min(index, steps.length - 1);
     const step = steps[current];
     const last = current === steps.length - 1;
@@ -99,6 +112,9 @@ export default function Tutorial() {
         // "Sozial ist jetzt unter Mehr" is news only to who knew it in the tab bar
         dispatch(markTipSeen('navMoreSocial'));
     }, [username, tourSeen, dispatch]);
+
+    // a visitor who opened the tour doesn't need the invitation to it any more
+    useEffect(() => { if (open && guest) markInviteDone(); }, [open, guest]);
 
     // focus goes to the main button, so Enter walks through the tour
     useEffect(() => {
@@ -127,7 +143,8 @@ export default function Tutorial() {
 
     const finish = () => {
         celebrate();
-        dismiss();
+        // a visitor: the tour ends at the sign-up window
+        dismiss(guest ? () => openAuth('signup') : undefined);
     };
 
     // out of the tour, to a page or into the new-task form; the tour is done then
@@ -289,7 +306,7 @@ export default function Tutorial() {
                         {t('tutBack')}
                     </button>
                     <button ref={nextRef} type="button" className={styles.next} onClick={() => (last ? finish() : go(current + 1))}>
-                        {last ? t('tutDone') : t('tutNext')}
+                        {last ? t(guest ? 'tutGuestSignUp' : 'tutDone') : t('tutNext')}
                     </button>
                 </div>
                 <p className={styles.keys} aria-hidden="true">{t('tutKeys')}</p>

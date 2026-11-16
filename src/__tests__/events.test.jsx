@@ -53,6 +53,7 @@ beforeEach(() => {
     // friends, profile and the like load on their own: an empty answer
     apiFetch.mockImplementation(async () => [])
     localStorage.clear()
+    localStorage.setItem('token', 'test-token')
 })
 
 describe('events: helpers', () => {

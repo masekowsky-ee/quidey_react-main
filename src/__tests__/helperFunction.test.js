@@ -153,6 +153,7 @@ describe('apiUrl', () => {
 describe('apiFetch', () => {
     beforeEach(() => {
         localStorage.clear()
+        localStorage.setItem('token', 'abc')
         vi.stubGlobal('fetch', vi.fn())
     })
 
@@ -185,8 +186,9 @@ describe('apiFetch', () => {
     })
 
     it('sends no Authorization header when signed out', async () => {
+        localStorage.removeItem('token')
         respond(true, {})
-        await apiFetch('/api/tasks')
+        await apiFetch('/api/auth/google/nonce')
         expect(fetch.mock.calls[0][1].headers).not.toHaveProperty('Authorization')
     })
 

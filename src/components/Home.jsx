@@ -34,6 +34,7 @@ import DepartureBoard from './variants/DepartureBoard.jsx'
 import Seats from './variants/Seats.jsx'
 
 import {useSelector, useDispatch} from 'react-redux';
+import { useRequireAccount } from '../features/auth/gate.js'
 
 // "Thursday, 22 October": known before anything is loaded (also for the start screen's skeleton)
 function useTodayTitle() {
@@ -191,7 +192,10 @@ export default function Home(){
 
     // the new-task form opens over any page (QuickAdd in the shell); Home's button opens it too
     const setCreateTask = useCallback((open) => dispatch(showForms(Boolean(open))), [dispatch]);
-    const [createGroup, setCreateGroup] = useState(false);
+    const [createGroup, setCreateGroupOpen] = useState(false);
+    // a visitor without an account can't make a group: the sign-in window instead
+    const requireAccount = useRequireAccount();
+    const setCreateGroup = (open) => (open ? requireAccount(() => setCreateGroupOpen(true)) : setCreateGroupOpen(false));
 
     // --- task in focus, drag & drop ---
     // The task in focus lives in the store (the Fokusraum and the timer on every page use it):
@@ -297,7 +301,7 @@ export default function Home(){
     const timerPanel = <TimerContainer inline={desktop} />;
 
     const listedTasks = showSharedTasks ? [...tasks, ...sharedTasks] : tasks;
-    const groupForm = createGroup && <FormSheet onClose={() => setCreateGroup(false)}>
+    const groupForm = createGroup && <FormSheet onClose={() => setCreateGroupOpen(false)}>
         {(sheet, close) => <GroupForm sheet={sheet} setCreateGroup={(value) => { if (!value) close(); }} />}
     </FormSheet>;
     const taskList = (

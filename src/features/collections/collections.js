@@ -9,7 +9,7 @@ import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiFetch } from '../helperFunction';
 
-const SET_COLLECTIONS = 'SET_COLLECTIONS';
+export const SET_COLLECTIONS = 'SET_COLLECTIONS';
 const COLLECTION_SAVED = 'COLLECTION_SAVED';
 const COLLECTION_REMOVED = 'COLLECTION_REMOVED';
 

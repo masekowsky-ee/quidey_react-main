@@ -1,7 +1,7 @@
 // Adds DOM matchers like toBeInTheDocument() to Vitest's expect.
 // The /vitest entry registers them without needing global test functions.
 import '@testing-library/jest-dom/vitest'
-import { afterEach } from 'vitest'
+import { afterEach, beforeEach } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import { MotionGlobalConfig } from 'motion/react'
 
@@ -25,3 +25,7 @@ if (typeof globalThis.IntersectionObserver === 'undefined') {
 
 // Unmount rendered components between tests so they don't leak into each other
 afterEach(() => cleanup())
+
+// Quidey opens for visitors without an account too (src/features/auth/gate.js): a store made in a
+// test counts as signed in unless the test clears the token itself (guest tests do)
+beforeEach(() => localStorage.setItem('token', 'test-token'))

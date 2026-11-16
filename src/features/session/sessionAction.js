@@ -1,4 +1,5 @@
 import { SET_SESSION_PARAMS, SAVE_SESSION_DATA, UPDATE_CURRENT_SESSION_DATA, SET_TIMER, ADD_WORKED_TASK, ADD_TASK_TIME, SET_WORKED_SESSIONS, SET_TIMER_MODE, CLOCK_TICK, SET_FOCUS_TASK, SET_POMODORO, RESET_FOCUS } from "./sessionActionTypes";
+import { openAuth } from '../auth/gate';
 import { apiFetch } from '../helperFunction';
 import { isSharedTaskId, sharedTaskIdOf, selectSharedSoloTasks } from '../together/togetherAction';
 import { storeTimerMode, storePomodoro } from '../settings/preferences';
@@ -168,6 +169,8 @@ export const catchUpClock = () => (dispatch, getState) => {
 export const startFocus = () => (dispatch, getState) => {
     const { timer, timerMode, pomodoro, sessionParams } = getState().session;
     if (timer.active) return;
+    // a visitor without an account looks, they don't focus: the sign-in window instead
+    if (!getState().auth.token) { openAuth(); return; }
     // a countdown that is over (or was stopped) starts again with the last length
     const from = timerMode !== 'stopwatch' && timer.time < 1000
         ? (timerMode === 'pomodoro' ? phaseMs(pomodoro) : sessionParams.time)

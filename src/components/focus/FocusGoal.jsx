@@ -9,6 +9,7 @@ import { fill, formatClock } from '../../features/helperFunction';
 import { burstFrom, useMotionLevel } from '../../features/settings/motion';
 import { playSound } from '../../features/settings/sound';
 import { useTranslation } from '../../i18n/useTranslation';
+import { useRequireAccount } from '../../features/auth/gate';
 import Icon from '../icons.jsx';
 import styles from './FocusRoom.module.css';
 
@@ -16,6 +17,8 @@ import styles from './FocusRoom.module.css';
 // one) the task it's booked on: own open tasks, then shared ones. goal / onGoal: the sentence.
 export default function FocusGoal({ goal, onGoal, task }) {
     const { t } = useTranslation();
+    // a visitor without an account looks: the field asks them to sign in
+    const requireAccount = useRequireAccount();
     const dispatch = useDispatch();
     const motion = useMotionLevel();
     const tasks = useSelector(state => state.task.tasks);
@@ -40,7 +43,8 @@ export default function FocusGoal({ goal, onGoal, task }) {
         <section className={styles.goal} aria-label={t('focusGoalQuestion')} data-tip="focus-goal">
             <label className={styles.goalLabel} htmlFor="focus-goal">{t('focusGoalQuestion')}</label>
             <input id="focus-goal" className={styles.goalInput} value={goal} maxLength={140}
-                onChange={e => onGoal(e.target.value)} placeholder={t('focusGoalPlaceholder')} autoComplete="off" />
+                onChange={e => onGoal(e.target.value)} placeholder={t('focusGoalPlaceholder')} autoComplete="off"
+                onFocus={() => requireAccount()} />
             <div className={styles.goalTask}>
                 <label className={styles.taskChip}>
                     <span>{t('focusTaskChip')}</span>

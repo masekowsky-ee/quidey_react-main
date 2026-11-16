@@ -99,6 +99,19 @@ const tourTexts = {
             'Psst: Klick doch mal auf die Glühbirne und das Fenster dahinter.',
         ],
         tut_ready_tester: 'Als Tester findest du im Menü den Testbereich mit neuen Oberflächen zum Ausprobieren.',
+        // the short tour for visitors without an account (Tutorial.jsx, GUEST_STEPS)
+        tut_join_short: 'Konto',
+        tut_join_title: 'Bereit zum Loslegen?',
+        tut_join_text: 'Mit einem Konto speichert Quidey deine Aufgaben, Termine und Fokuszeiten, und du findest alles auf jedem Gerät wieder.',
+        tut_join_tips: [
+            'Anmelden oder registrieren geht in einem Fenster, auch mit Google.',
+            'Die Kurzfassung findest du jederzeit im Menü unter „Kurz erklärt“.',
+        ],
+        tutGuestSignUp: 'Konto erstellen',
+        guestInviteTitle: 'Neu hier?',
+        guestInviteText: 'In einer Minute siehst du, was Quidey kann.',
+        guestInviteOpen: 'Kurz erklärt',
+        guestInviteLater: 'Nicht jetzt',
 
         // the made-up examples in the previews
         tutDemo_task: 'Kapitel 3 zusammenfassen',
@@ -208,6 +221,19 @@ const tourTexts = {
             'Psst: try clicking the light bulb and the window behind it.',
         ],
         tut_ready_tester: 'As a tester you find the test area in the menu, with new interfaces to try.',
+        // the short tour for visitors without an account (Tutorial.jsx, GUEST_STEPS)
+        tut_join_short: 'Account',
+        tut_join_title: 'Ready to start?',
+        tut_join_text: 'With an account Quidey keeps your tasks, events and focus time, and you find it all again on every device.',
+        tut_join_tips: [
+            'Signing in or up takes one window, Google included.',
+            'You can find this short tour any time in the menu under “Quick tour”.',
+        ],
+        tutGuestSignUp: 'Create account',
+        guestInviteTitle: 'New here?',
+        guestInviteText: 'In a minute you see what Quidey can do.',
+        guestInviteOpen: 'Quick tour',
+        guestInviteLater: 'Not now',
 
         tutDemo_task: 'Summarise chapter 3',
         tutDemo_taskMeta: 'Today · High',

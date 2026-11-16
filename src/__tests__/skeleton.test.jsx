@@ -65,7 +65,7 @@ describe('the first paint (index.html, public/boot.css)', () => {
         expect(PUBLIC_FILES).toContain('/boot.css')
     })
 
-    it('theme-init.js picks the skeleton: sign-in, Home or another page', () => {
+    it('theme-init.js picks the skeleton: Home or another page (a visitor without an account gets the app too)', () => {
         const source = readFileSync('public/theme-init.js', 'utf8')
         const matchMedia = window.matchMedia
         window.matchMedia = () => ({ matches: false })
@@ -75,7 +75,8 @@ describe('the first paint (index.html, public/boot.css)', () => {
             new Function(source)()
             return document.documentElement.dataset.boot
         }
-        expect(run('/', null)).toBe('gate')
+        expect(run('/', null)).toBe('home')
+        expect(run('/calendar', null)).toBe('page')
         expect(run('/', 'jwt')).toBe('home')
         expect(run('/calendar', 'jwt')).toBe('page')
         window.history.replaceState(null, '', '/')

@@ -50,6 +50,7 @@ beforeEach(() => {
     apiFetch.mockReset()
     apiFetch.mockResolvedValue([])
     localStorage.clear()
+    localStorage.setItem('token', 'test-token')
 })
 
 describe('time of day', () => {
