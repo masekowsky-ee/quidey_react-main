@@ -50,6 +50,30 @@ describe('scanning from more places', () => {
         expect(store.getState().settings.showForms).toBe('scan')
     })
 
+    it('the plus button\'s note form has "Material scannen" too, and it opens the scan sheet', async () => {
+        const store = mount(<QuickAdd />)
+        await act(async () => { store.dispatch(showForms(true)) })
+        await act(async () => { fireEvent.click(await screen.findByRole('radio', { name: /^Notiz/ })) })
+        await act(async () => { fireEvent.click(await screen.findByRole('button', { name: 'Material scannen' })) })
+        expect(scanSheet()).toBeInTheDocument()
+        expect(store.getState().settings.showForms).toBe('scan')
+    })
+
+    it('the plus button\'s reminder form has "Material scannen" too', async () => {
+        const store = mount(<QuickAdd />)
+        await act(async () => { store.dispatch(showForms('reminder')) })
+        await act(async () => { fireEvent.click(await screen.findByRole('button', { name: 'Material scannen' })) })
+        expect(scanSheet()).toBeInTheDocument()
+    })
+
+    it('the reminder form has none where the AI isn\'t set up', async () => {
+        available = false
+        const store = mount(<QuickAdd />)
+        await act(async () => { store.dispatch(showForms('reminder')) })
+        await act(async () => {})
+        expect(screen.queryByRole('button', { name: 'Material scannen' })).toBeNull()
+    })
+
     it('the session\'s notes have a scan button', async () => {
         await act(async () => { mount(<SessionNotes goal="Kapitel 4" focusTask={null} />) })
         await act(async () => { fireEvent.click(await screen.findByRole('button', { name: 'Scannen' })) })

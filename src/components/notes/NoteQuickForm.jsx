@@ -10,12 +10,13 @@ import { useFocusOnArrival } from '../../features/layout/dragDismiss';
 import { useTranslation } from '../../i18n/useTranslation';
 import SheetGrabber from '../SheetGrabber.jsx';
 import { KindSwitch } from '../task/KindFields.jsx';
+import ScanLink from '../scan/ScanLink.jsx';
 import NoteText from './NoteText.jsx';
 import DictateButton from '../voice/DictateButton.jsx';
 import MicButton from '../voice/MicButton.jsx';
 import styles from '../Form.module.css';
 
-export default function NoteQuickForm({ initialTitle = '', sheet, onKind, onDone }) {
+export default function NoteQuickForm({ initialTitle = '', sheet, onKind, onScan, onDone }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const [title, setTitle] = useState(initialTitle);
@@ -51,6 +52,7 @@ export default function NoteQuickForm({ initialTitle = '', sheet, onKind, onDone
             <form className={styles.form} onSubmit={save} noValidate>
                 <KindSwitch value="note" kinds={['task', 'event', 'reminder', 'note']}
                     onChange={(kind) => { if (kind !== 'note') onKind(kind, title); }} />
+                <ScanLink onScan={onScan} />
                 <div className={styles.nameRow}>
                     <input ref={titleRef} className={`${styles.input} ${styles.grow}`} type="text" value={title} maxLength={120}
                         placeholder={t('noteTitlePlaceholder')} aria-label={t('noteQuickTitle')} onChange={e => setTitle(e.target.value)} />

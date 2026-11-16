@@ -11,6 +11,7 @@ import { dateKey } from '../../features/calendar/calendar';
 import { dueText, fill } from '../../features/helperFunction';
 import { showToast } from '../../features/toast/toast';
 import { KindSwitch } from '../task/KindFields.jsx';
+import ScanLink from '../scan/ScanLink.jsx';
 import SheetGrabber from '../SheetGrabber.jsx';
 import { useWhenText } from './whenText';
 
@@ -36,7 +37,7 @@ function initialFields(reminder, text) {
 // A new reminder (in QuickAdd's sheet) or one to change (reminder). A day or time written into the
 // text ("Mama anrufen morgen 18 Uhr") fills the empty fields, as in the new-task form.
 // onKind(kind, text): back to the task form (QuickAdd); onDone(): saved or closed.
-export default function ReminderForm({ reminder = null, initialText = '', sheet, onKind, onDone }) {
+export default function ReminderForm({ reminder = null, initialText = '', sheet, onKind, onScan, onDone }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const when = useWhenText();
@@ -98,6 +99,7 @@ export default function ReminderForm({ reminder = null, initialText = '', sheet,
             <form className={styles.form} onSubmit={submit} noValidate>
                 {onKind && <KindSwitch value="reminder" kinds={['task', 'event', 'reminder', 'note']}
                     onChange={(kind) => { if (kind !== 'reminder') onKind(kind, fields.text); }} />}
+                {onKind && <ScanLink onScan={onScan} />}
                 <input ref={textRef} className={styles.input} type="text" value={fields.text} maxLength={REMINDER_TEXT_MAX}
                     placeholder={t('reminderTextPlaceholder')} aria-label={t('reminderText')}
                     aria-describedby={quickKinds.length > 0 ? 'reminder-quick-hint' : undefined}

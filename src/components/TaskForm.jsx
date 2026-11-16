@@ -27,6 +27,7 @@ import { shownSubGroup } from '../features/tasks/subGroups';
 import { addToShownCollection } from '../features/collections/collections';
 
 import Icon from './icons';
+import ScanLink from './scan/ScanLink.jsx';
 import MicButton from './voice/MicButton.jsx';
 import SheetGrabber from './SheetGrabber.jsx';
 import { useFocusOnArrival } from '../features/layout/dragDismiss';
@@ -298,10 +299,7 @@ export default function TaskForm(props){
                         setKind(next); setKindByHand(true); followName(name, next);
                     }} />}
                 {/* the plus button's form: study material read by the AI instead (QuickAdd swaps in the scan sheet) */}
-                {onScan && !elsewhere && aiQuota?.available &&
-                    <button type="button" className={styles.scanLink} onClick={onScan}>
-                        <Icon name="brain" size={14} /> {t('scanFromForm')}
-                    </button>}
+                {!elsewhere && <ScanLink onScan={onScan} />}
                 {/* the form opens to be typed into: the name has the focus (on a touch screen once the sheet is up) */}
                 <div className={styles.nameRow}>
                     <input ref={nameRef} className={`${styles.input} ${styles.grow}`} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}

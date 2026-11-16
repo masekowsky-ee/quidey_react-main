@@ -31,17 +31,18 @@ function QuickAddForm({ sheet, close, reminder }) {
     // the sheet is already up when the kind is switched: the new form takes its place without
     // sliding in from the bottom edge again (data-swapped, index.css)
     const swap = (kind, text) => setForm({ kind, text, swapped: true });
+    const scan = () => dispatch(showForms('scan'));
     const here = form.swapped ? { ...sheet, panel: { ...sheet.panel, 'data-swapped': '' } } : sheet;
     if (form.kind === 'note') {
-        return <NoteQuickForm sheet={here} initialTitle={form.text} onDone={close} onKind={swap} />;
+        return <NoteQuickForm sheet={here} initialTitle={form.text} onDone={close} onKind={swap} onScan={scan} />;
     }
     if (form.kind === 'reminder') {
-        return <ReminderForm sheet={here} initialText={form.text} onDone={close} onKind={swap} />;
+        return <ReminderForm sheet={here} initialText={form.text} onDone={close} onKind={swap} onScan={scan} />;
     }
     return <TaskForm key={form.kind} sheet={here} initialKind={form.kind} initialName={form.text}
         onReminder={(text) => swap('reminder', text)}
         onNote={(text) => swap('note', text)}
-        onScan={() => dispatch(showForms('scan'))}
+        onScan={scan}
         setCreateTask={(value) => { if (!value) close(); }} />;
 }
 
