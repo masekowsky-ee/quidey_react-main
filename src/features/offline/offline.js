@@ -204,6 +204,8 @@ export function flushOutbox() {
                 if (op.tempId && answer?.id !== undefined) map[op.tempId] = answer.id;
                 sent += 1;
             } catch (error) {
+                // the server is busy with this very request (an earlier try got through slowly): later
+                if (error.code === 'IDEMPOTENCY_IN_PROGRESS') break;
                 if (isUnreachable(error)) { setStatus({ offline: true }); break; }
                 // gone already (deleted elsewhere) or refused: nothing more to do with it
                 if (!(op.method === 'DELETE' && error.status === 404)) failed += 1;

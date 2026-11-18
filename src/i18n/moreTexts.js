@@ -3,6 +3,19 @@
 // checked by translate.test.js).
 const moreTexts = {
     de: {
+        // ---------- app updates (Android) ----------
+        updateTitle: 'Neue Version von Quidey',
+        updateText: 'Es gibt Verbesserungen und Fehlerbehebungen. Das Update läuft im Hintergrund.',
+        updateNow: 'Jetzt aktualisieren',
+        updateLater: 'Später',
+        updateDownloading: 'Das Update wird geladen. Quidey kannst du weiter benutzen.',
+        updateReadyTitle: 'Update bereit',
+        updateReadyText: 'Starte Quidey neu, um die neue Version zu nutzen. Ein laufender Fokus-Timer läuft danach weiter.',
+        updateRestart: 'Neu starten',
+        updateRequiredTitle: 'Bitte aktualisiere Quidey',
+        updateRequiredText: 'Diese Version wird nicht mehr unterstützt, damit alles zuverlässig funktioniert. Deine Daten bleiben erhalten.',
+        updateFailed: 'Das Update konnte nicht gestartet werden. Versuche es später noch einmal oder öffne Quidey im Play Store.',
+
         // ---------- offline ----------
         offlineSaved: 'Keine Verbindung. Du siehst, was auf diesem Gerät gespeichert ist.',
         offlinePending: 'Keine Verbindung. {count} Änderung(en) warten und gehen raus, sobald du wieder online bist.',
@@ -231,6 +244,19 @@ const moreTexts = {
         markUndone: 'Wieder öffnen',
     },
     en: {
+        // ---------- app updates (Android) ----------
+        updateTitle: 'A new version of Quidey',
+        updateText: 'It has improvements and fixes. The update runs in the background.',
+        updateNow: 'Update now',
+        updateLater: 'Later',
+        updateDownloading: 'The update is downloading. You can keep using Quidey.',
+        updateReadyTitle: 'Update ready',
+        updateReadyText: 'Restart Quidey to use the new version. A running focus timer carries on afterwards.',
+        updateRestart: 'Restart',
+        updateRequiredTitle: 'Please update Quidey',
+        updateRequiredText: 'This version is no longer supported so that everything keeps working reliably. Your data is kept.',
+        updateFailed: 'The update could not be started. Try again later or open Quidey in the Play Store.',
+
         // ---------- offline ----------
         offlineSaved: 'No connection. You see what is saved on this device.',
         offlinePending: 'No connection. {count} change(s) are waiting and go out once you are online again.',

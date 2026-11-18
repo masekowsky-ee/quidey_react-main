@@ -54,4 +54,7 @@ export async function setupNativeApp(store) {
     // Google Analytics for Firebase: whether it's there, and the remembered answer handed over
     const { setupAnalytics } = await import('./analytics');
     setupAnalytics();
+    // is there a newer version of the app? (on start and whenever it comes back to the front)
+    const { startUpdateChecks } = await import('./appUpdate');
+    startUpdateChecks(App);
 }
