@@ -39,6 +39,27 @@ let status = { offline: false, pending: 0, failed: 0 };
 let send = null; // the real request function, handed over by apiFetch
 let flushing = null;
 
+// While the server is known to be unreachable, requests do not go out: every one would hang for a
+// while and keep one of the few connections a host gets (the browser holds on to half-open ones
+// for about two minutes), so the request that matters, the outbox's, would wait behind them. Reads
+// are answered from the saved copy, changes go to the outbox, and one request in PROBE_MS goes out
+// to find out whether the server is back. The `online` event and the app coming to the front probe
+// at once.
+export const PROBE_MS = 15000;
+let nextTry = 0;
+function mayTry() {
+    if (!status.offline) return true;
+    if (Date.now() < nextTry) return false;
+    nextTry = Date.now() + PROBE_MS;
+    return true;
+}
+const reachable = () => { nextTry = 0; setStatus({ offline: false }); };
+const unreachable = () => {
+    if (!status.offline) nextTry = Date.now() + PROBE_MS;
+    setStatus({ offline: true });
+};
+export const probeNow = () => { nextTry = 0; };
+
 export const connectionState = () => status;
 
 function setStatus(change) {
@@ -229,10 +250,11 @@ export function flushOutbox() {
                 const answer = await timed(url, { method: op.method, body: body ?? undefined, headers: { 'Idempotency-Key': op.key } }, WRITE_TIMEOUT_MS);
                 if (op.tempId && answer?.id !== undefined) map[op.tempId] = answer.id;
                 sent += 1;
+                reachable();
             } catch (error) {
                 // the server is busy with this very request (an earlier try got through slowly): later
                 if (error.code === 'IDEMPOTENCY_IN_PROGRESS') break;
-                if (isUnreachable(error)) { setStatus({ offline: true }); break; }
+                if (isUnreachable(error)) { unreachable(); break; }
                 // gone already (deleted elsewhere) or refused: nothing more to do with it
                 if (!(op.method === 'DELETE' && error.status === 404)) failed += 1;
             }
@@ -268,19 +290,27 @@ export async function withOffline(url, options, request) {
 
     if (method === 'GET') {
         if (!isCacheable(url)) {
+            if (!mayTry()) throw offlineError();
             try {
-                return await request(url, options);
+                const data = await request(url, options);
+                reachable();
+                return data;
             } catch (error) {
                 if (!isUnreachable(error)) throw error;
-                setStatus({ offline: true });
+                unreachable();
                 throw offlineError();
             }
         }
         const entry = await savedRead(url);
+        // known to be unreachable: the saved copy, without trying the network
+        if (!mayTry()) {
+            if (entry) return entry.data;
+            throw offlineError();
+        }
         // a read that takes too long is cancelled (sooner when there is a saved copy to show)
         const controller = options.signal ? null : new AbortController();
         const live = request(url, controller ? { ...options, signal: controller.signal } : options).then((data) => {
-            setStatus({ offline: false });
+            reachable();
             saveRead(url, data).catch(() => {});
             if (status.pending > 0) flushOutbox().catch(() => {});
             return data;
@@ -292,10 +322,10 @@ export async function withOffline(url, options, request) {
         try {
             // a bad connection (it answers, but slowly) shows the saved copy after a while instead
             // of a page that waits; the answer, when it comes, refreshes the copy
-            return await (entry ? Promise.race([live, new Promise((resolve) => { timer = setTimeout(() => resolve(entry.data), SLOW_MS); })]) : live);
+            return await (entry ? Promise.race([live, new Promise((resolve) => { timer = setTimeout(() => { unreachable(); resolve(entry.data); }, SLOW_MS); })]) : live);
         } catch (error) {
             if (!isUnreachable(error)) throw error;
-            setStatus({ offline: true });
+            unreachable();
             if (entry) return entry.data;
             throw offlineError();
         } finally {
@@ -307,6 +337,11 @@ export async function withOffline(url, options, request) {
     // a new thing carries its key from the first try on: if that try reached the server but its
     // answer got lost, sending it again from the outbox can't make a second one
     const key = write?.creates ? newKey() : null;
+    // known to be unreachable: straight to the outbox (and no waiting for a timeout per change)
+    if (!mayTry()) {
+        if (!write) throw offlineError();
+        return enqueue(write, url, { ...options, method }, key);
+    }
     // a change made while earlier ones still wait goes behind them (the order matters): try to
     // send those first, and queue this one if they are still there
     if (write && (await readOutbox()).length > 0) {
@@ -317,11 +352,11 @@ export async function withOffline(url, options, request) {
         const data = write
             ? await timed(url, { ...options, headers: { ...options.headers, ...(key ? { 'Idempotency-Key': key } : {}) } }, WRITE_TIMEOUT_MS)
             : await request(url, options);
-        setStatus({ offline: false });
+        reachable();
         return data;
     } catch (error) {
         if (!isUnreachable(error)) throw error;
-        setStatus({ offline: true });
+        unreachable();
         if (!write) throw offlineError();
         return enqueue(write, url, { ...options, method }, key);
     }
@@ -332,6 +367,7 @@ export async function withOffline(url, options, request) {
 // everything of this device's offline copy (sign-out)
 export async function clearOffline() {
     await kvClear();
+    nextTry = 0;
     status = { offline: false, pending: 0, failed: 0 };
     window.dispatchEvent(new CustomEvent(CONNECTION_EVENT, { detail: status }));
 }
@@ -349,15 +385,20 @@ export async function loadPending() {
 
 // when the connection is back, or the app is opened again, the outbox goes out
 export function startOfflineSync() {
-    const run = () => { flushOutbox().catch(() => {}); };
-    window.addEventListener('online', run);
-    window.addEventListener('focus', run);
-    window.addEventListener('offline', () => setStatus({ offline: true }));
-    const timer = setInterval(() => { if (status.pending > 0) run(); }, 30_000);
+    // the outbox goes out when it may (one attempt per PROBE_MS while the server is unreachable)
+    const run = () => { if (mayTry()) flushOutbox().catch(() => {}); };
+    // the connection is back, or the app is in front again: look right away
+    const now = () => { probeNow(); run(); };
+    const goesOffline = () => unreachable();
+    window.addEventListener('online', now);
+    window.addEventListener('focus', now);
+    window.addEventListener('offline', goesOffline);
+    const timer = setInterval(() => { if (status.pending > 0) run(); }, PROBE_MS);
     loadPending().then(() => { if (status.pending > 0) run(); });
     return () => {
-        window.removeEventListener('online', run);
-        window.removeEventListener('focus', run);
+        window.removeEventListener('online', now);
+        window.removeEventListener('focus', now);
+        window.removeEventListener('offline', goesOffline);
         clearInterval(timer);
     };
 }

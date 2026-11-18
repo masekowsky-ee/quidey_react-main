@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { apiFetch } from '../features/helperFunction'
-import { clearOffline, flushOutbox, forgetReads, connectionState, tokenOwner, SLOW_MS, HARD_MS, WRITE_TIMEOUT_MS } from '../features/offline/offline'
+import { clearOffline, flushOutbox, forgetReads, connectionState, tokenOwner, probeNow, SLOW_MS, HARD_MS, WRITE_TIMEOUT_MS } from '../features/offline/offline'
 import { checkAuth } from '../features/auth/authAction'
 
 // a JWT whose payload says who it is (the signature isn't looked at on the device)
@@ -91,6 +91,44 @@ describe('reads while offline', () => {
         await settle()
         fetchMock.mockImplementation(down)
         await expect(apiFetch('/api/billing')).rejects.toMatchObject({ code: 'OFFLINE' })
+    })
+})
+
+describe('a server that is known to be unreachable', () => {
+    it('is not asked again for every request, only now and then, and at once when told to look', async () => {
+        fetchMock.mockImplementationOnce(() => json([{ id: 1 }]))
+        await apiFetch('/api/tasks')
+        await settle()
+        fetchMock.mockImplementation(down)
+        await apiFetch('/api/tasks') // finds out: offline
+        const callsWhenFound = fetchMock.mock.calls.length
+        await apiFetch('/api/tasks')
+        await apiFetch('/api/tasks')
+        await apiFetch('/api/groups').catch(() => {})
+        expect(fetchMock.mock.calls.length).toBe(callsWhenFound) // the saved copy, no network
+        probeNow()
+        await apiFetch('/api/tasks')
+        expect(fetchMock.mock.calls.length).toBe(callsWhenFound + 1)
+    })
+
+    it('puts a change straight into the outbox, without waiting for a timeout', async () => {
+        fetchMock.mockImplementation(down)
+        await apiFetch('/api/tasks', { method: 'POST', body: JSON.stringify({ name: 'First' }) }) // finds out
+        const calls = fetchMock.mock.calls.length
+        const second = await apiFetch('/api/tasks', { method: 'POST', body: JSON.stringify({ name: 'Second' }) })
+        expect(second).toMatchObject({ name: 'Second', pending: true })
+        expect(fetchMock.mock.calls.length).toBe(calls)
+        expect(connectionState().pending).toBe(2)
+    })
+
+    it('is back as soon as a request gets through', async () => {
+        fetchMock.mockImplementation(down)
+        await apiFetch('/api/stats').catch(() => {})
+        expect(connectionState().offline).toBe(true)
+        probeNow()
+        fetchMock.mockImplementation(() => json({ ok: true }))
+        await apiFetch('/api/stats')
+        expect(connectionState().offline).toBe(false)
     })
 })
 
