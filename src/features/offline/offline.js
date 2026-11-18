@@ -25,6 +25,12 @@ const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 200;
 // a read that takes longer than this is answered from the saved copy, when there is one
 export const SLOW_MS = 8000;
+// ... and a read that still has no answer after this long is cancelled: a connection that leads
+// nowhere would otherwise keep one of the few connections per host busy (a phone allows six),
+// and the outbox's request would wait in line behind such reads for minutes
+export const HARD_MS = 20000;
+// without a saved copy the person has nothing to look at meanwhile, so it waits longer
+export const NO_COPY_MS = 60000;
 // a change that gets no answer for this long is kept in the outbox instead (a connection that
 // is there but leads nowhere never says no)
 export const WRITE_TIMEOUT_MS = 10000;
@@ -271,13 +277,17 @@ export async function withOffline(url, options, request) {
             }
         }
         const entry = await savedRead(url);
-        const live = request(url, options).then((data) => {
+        // a read that takes too long is cancelled (sooner when there is a saved copy to show)
+        const controller = options.signal ? null : new AbortController();
+        const live = request(url, controller ? { ...options, signal: controller.signal } : options).then((data) => {
             setStatus({ offline: false });
             saveRead(url, data).catch(() => {});
             if (status.pending > 0) flushOutbox().catch(() => {});
             return data;
         });
-        live.catch(() => {}); // an answer nobody waits for any more must not end as an unhandled rejection
+        const hard = controller ? setTimeout(() => controller.abort(), entry ? HARD_MS : NO_COPY_MS) : null;
+        // an answer nobody waits for any more must not end as an unhandled rejection
+        live.finally(() => clearTimeout(hard)).catch(() => {});
         let timer;
         try {
             // a bad connection (it answers, but slowly) shows the saved copy after a while instead

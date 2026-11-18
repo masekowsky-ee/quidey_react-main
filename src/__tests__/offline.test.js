@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { apiFetch } from '../features/helperFunction'
-import { clearOffline, flushOutbox, forgetReads, connectionState, tokenOwner, SLOW_MS, WRITE_TIMEOUT_MS } from '../features/offline/offline'
+import { clearOffline, flushOutbox, forgetReads, connectionState, tokenOwner, SLOW_MS, HARD_MS, WRITE_TIMEOUT_MS } from '../features/offline/offline'
 import { checkAuth } from '../features/auth/authAction'
 
 // a JWT whose payload says who it is (the signature isn't looked at on the device)
@@ -41,10 +41,15 @@ describe('reads while offline', () => {
         await settle()
         vi.useFakeTimers()
         try {
-            fetchMock.mockImplementation(() => new Promise(() => {})) // never answers
+            fetchMock.mockImplementation(hang) // never answers, gives up when cancelled
             const read = apiFetch('/api/tasks')
             await vi.advanceTimersByTimeAsync(SLOW_MS + 100)
             expect(await read).toEqual([{ id: 1 }])
+            // the read that nobody waits for is cancelled later, so it doesn't hold a connection
+            const signal = fetchMock.mock.calls.at(-1)[1].signal
+            expect(signal.aborted).toBe(false)
+            await vi.advanceTimersByTimeAsync(HARD_MS)
+            expect(signal.aborted).toBe(true)
         } finally {
             vi.useRealTimers()
         }
