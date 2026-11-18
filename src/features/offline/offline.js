@@ -25,6 +25,9 @@ const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 200;
 // a read that takes longer than this is answered from the saved copy, when there is one
 export const SLOW_MS = 8000;
+// a change that gets no answer for this long is kept in the outbox instead (a connection that
+// is there but leads nowhere never says no)
+export const WRITE_TIMEOUT_MS = 10000;
 
 let status = { offline: false, pending: 0, failed: 0 };
 let send = null; // the real request function, handed over by apiFetch
@@ -60,6 +63,7 @@ const idMapKey = () => `${ID_MAP_KEY}:${owner()}`;
 // The server couldn't be reached: no connection (fetch throws a TypeError) or a gateway that
 // has nobody behind it (502-504, e.g. while the API restarts).
 export const isUnreachable = (error) => (error instanceof TypeError && error.status === undefined)
+    || error?.name === 'AbortError'
     || [502, 503, 504].includes(error?.status);
 
 function offlineError() {
@@ -172,10 +176,17 @@ async function writeOutbox(list) {
     setStatus({ pending: list.length });
 }
 
-async function enqueue(write, url, options) {
+// the real request, given up after `ms` (the result counts as "server unreachable")
+function timed(url, options, ms) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ms);
+    return send(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
+async function enqueue(write, url, options, key) {
     const id = write.creates ? tempId() : null;
     const answer = localAnswer(write, url, options, id);
-    const op = { key: newKey(), name: write.name, method: options.method.toUpperCase(), url, body: options.body ?? null, tempId: id, at: Date.now() };
+    const op = { key: key ?? newKey(), name: write.name, method: options.method.toUpperCase(), url, body: options.body ?? null, tempId: id, at: Date.now() };
     await writeOutbox([...(await readOutbox()), op]);
     await applyToSavedLists(write, url, answer);
     return answer;
@@ -209,7 +220,7 @@ export function flushOutbox() {
             const url = swapIds(op.url, map);
             const body = swapIds(op.body, map);
             try {
-                const answer = await send(url, { method: op.method, body: body ?? undefined, headers: { 'Idempotency-Key': op.key } });
+                const answer = await timed(url, { method: op.method, body: body ?? undefined, headers: { 'Idempotency-Key': op.key } }, WRITE_TIMEOUT_MS);
                 if (op.tempId && answer?.id !== undefined) map[op.tempId] = answer.id;
                 sent += 1;
             } catch (error) {
@@ -283,21 +294,26 @@ export async function withOffline(url, options, request) {
     }
 
     const write = matchWrite(url, method);
+    // a new thing carries its key from the first try on: if that try reached the server but its
+    // answer got lost, sending it again from the outbox can't make a second one
+    const key = write?.creates ? newKey() : null;
     // a change made while earlier ones still wait goes behind them (the order matters): try to
     // send those first, and queue this one if they are still there
     if (write && (await readOutbox()).length > 0) {
         await flushOutbox().catch(() => {});
-        if ((await readOutbox()).length > 0) return enqueue(write, url, { ...options, method });
+        if ((await readOutbox()).length > 0) return enqueue(write, url, { ...options, method }, key);
     }
     try {
-        const data = await request(url, options);
+        const data = write
+            ? await timed(url, { ...options, headers: { ...options.headers, ...(key ? { 'Idempotency-Key': key } : {}) } }, WRITE_TIMEOUT_MS)
+            : await request(url, options);
         setStatus({ offline: false });
         return data;
     } catch (error) {
         if (!isUnreachable(error)) throw error;
         setStatus({ offline: true });
         if (!write) throw offlineError();
-        return enqueue(write, url, { ...options, method });
+        return enqueue(write, url, { ...options, method }, key);
     }
 }
 

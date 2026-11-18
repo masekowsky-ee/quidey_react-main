@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { apiFetch } from '../features/helperFunction'
-import { clearOffline, flushOutbox, forgetReads, connectionState, tokenOwner, SLOW_MS } from '../features/offline/offline'
+import { clearOffline, flushOutbox, forgetReads, connectionState, tokenOwner, SLOW_MS, WRITE_TIMEOUT_MS } from '../features/offline/offline'
 import { checkAuth } from '../features/auth/authAction'
 
 // a JWT whose payload says who it is (the signature isn't looked at on the device)
@@ -10,6 +10,11 @@ const json = (data, status = 200) => Promise.resolve(new Response(JSON.stringify
 const down = () => Promise.reject(new TypeError('Failed to fetch'))
 // the copy of a read is written right after the answer
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0))
+
+// a connection that is there but leads nowhere: never answers, gives up when told to
+const hang = (url, options) => new Promise((resolve, reject) => {
+    options?.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
+})
 
 let fetchMock
 beforeEach(async () => {
@@ -173,6 +178,46 @@ describe('writes while offline', () => {
         expect((await apiFetch('/api/tasks')).map((t) => t.id)).toEqual([2])
     })
 
+    it('keeps a change in the outbox when the server never answers, and sends it with the same key', async () => {
+        await withSavedTasks([])
+        vi.useFakeTimers()
+        try {
+            fetchMock.mockImplementation(hang)
+            const pending = apiFetch('/api/tasks', post({ name: 'Slow' }))
+            await vi.advanceTimersByTimeAsync(WRITE_TIMEOUT_MS + 100)
+            const created = await pending
+            expect(created).toMatchObject({ name: 'Slow', pending: true })
+            expect(connectionState().pending).toBe(1)
+            const firstKey = fetchMock.mock.calls.at(-1)[1].headers['Idempotency-Key']
+            expect(firstKey).toBeTruthy()
+
+            fetchMock.mockReset()
+            fetchMock.mockImplementation(() => json({ id: 11 }, 201))
+            expect(await flushOutbox()).toBe(1)
+            // the same key as the try that got no answer: if it had reached the server, nothing is made twice
+            expect(fetchMock.mock.calls[0][1].headers['Idempotency-Key']).toBe(firstKey)
+        } finally {
+            vi.useRealTimers()
+        }
+    })
+
+    it('does not drop an outbox entry whose send got no answer', async () => {
+        await withSavedTasks([])
+        fetchMock.mockImplementation(down)
+        await apiFetch('/api/tasks', post({ name: 'Keep' }))
+        vi.useFakeTimers()
+        try {
+            fetchMock.mockReset()
+            fetchMock.mockImplementation(hang)
+            const flush = flushOutbox()
+            await vi.advanceTimersByTimeAsync(WRITE_TIMEOUT_MS + 100)
+            expect(await flush).toBe(0)
+            expect(connectionState()).toMatchObject({ pending: 1, failed: 0 })
+        } finally {
+            vi.useRealTimers()
+        }
+    })
+
     it('queues a finished focus session', async () => {
         fetchMock.mockImplementation(down)
         const saved = await apiFetch('/api/sessions', post({ totalTime: 1500, workedTasks: [] }))
@@ -226,6 +271,21 @@ describe('opening the app without a connection', () => {
         const actions = await run()
         expect(actions.find((a) => a.type === 'SET_ACCESS').payload).toMatchObject({ username: 'ann', isPro: true })
         expect(actions.find((a) => a.type === 'LOGIN_SUCCESS').payload.username).toBe('ann')
+    })
+
+    it('gives up on a server that never answers and uses the saved answer', async () => {
+        fetchMock.mockImplementationOnce(() => json({ username: 'ann', isPro: true }))
+        await run()
+        await settle()
+        vi.useFakeTimers()
+        try {
+            fetchMock.mockImplementation(hang)
+            const pending = run()
+            await vi.advanceTimersByTimeAsync(5100)
+            expect((await pending).map((a) => a.type)).toEqual(['LOGIN_SUCCESS', 'SET_ACCESS'])
+        } finally {
+            vi.useRealTimers()
+        }
     })
 
     it('does nothing when there is no saved answer yet', async () => {

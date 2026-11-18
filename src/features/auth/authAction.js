@@ -127,6 +127,9 @@ export const logout = () => {
     };
 };
 
+// how long the check at start waits for the server when the device has a saved answer
+const START_CHECK_MS = 5000;
+
 export const checkAuth = () => {
     return async (dispatch) => {
         const token = localStorage.getItem("token");
@@ -144,15 +147,23 @@ export const checkAuth = () => {
             dispatch({ type: SET_ACCESS, payload: saved });
         };
 
+        // with a saved answer to fall back on, a server that doesn't answer (a connection that
+        // leads nowhere never says no) is given up on after a few seconds
+        const hasSaved = Boolean(await savedAnswer('/api/me'));
+        const controller = new AbortController();
+        const timer = hasSaved ? setTimeout(() => controller.abort(), START_CHECK_MS) : null;
         let response;
         try {
             response = await fetch(apiUrl("/api/me"), {
                 headers: { Authorization: `Bearer ${token}` },
+                signal: controller.signal,
             });
         } catch {
             // backend not reachable (not started yet, offline): keep the token, try again on the next load
             await fromSaved();
             return;
+        } finally {
+            clearTimeout(timer);
         }
         // a gateway with nobody behind it (the API restarts): the same as no connection
         if ([502, 503, 504].includes(response.status)) {
