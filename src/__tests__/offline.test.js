@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { apiFetch } from '../features/helperFunction'
-import { clearOffline, flushOutbox, forgetReads, connectionState, tokenOwner } from '../features/offline/offline'
+import { clearOffline, flushOutbox, forgetReads, connectionState, tokenOwner, SLOW_MS } from '../features/offline/offline'
+import { checkAuth } from '../features/auth/authAction'
 
 // a JWT whose payload says who it is (the signature isn't looked at on the device)
 const jwt = (userId) => `x.${btoa(JSON.stringify({ userId }))}.y`
@@ -27,6 +28,21 @@ describe('reads while offline', () => {
         fetchMock.mockImplementation(down)
         expect(await apiFetch('/api/tasks')).toEqual([{ id: 1, name: 'Essay' }])
         expect(connectionState().offline).toBe(true)
+    })
+
+    it('shows the saved copy when the connection is only slow', async () => {
+        fetchMock.mockImplementationOnce(() => json([{ id: 1 }]))
+        await apiFetch('/api/tasks')
+        await settle()
+        vi.useFakeTimers()
+        try {
+            fetchMock.mockImplementation(() => new Promise(() => {})) // never answers
+            const read = apiFetch('/api/tasks')
+            await vi.advanceTimersByTimeAsync(SLOW_MS + 100)
+            expect(await read).toEqual([{ id: 1 }])
+        } finally {
+            vi.useRealTimers()
+        }
     })
 
     it('fails with OFFLINE when nothing was saved for it', async () => {
@@ -192,5 +208,33 @@ describe('housekeeping', () => {
         await forgetReads()
         await expect(apiFetch('/api/stats')).rejects.toMatchObject({ code: 'OFFLINE' })
         expect(connectionState().pending).toBe(1)
+    })
+})
+
+describe('opening the app without a connection', () => {
+    const run = async () => {
+        const actions = []
+        await checkAuth()((action) => actions.push(action))
+        return actions
+    }
+
+    it('signs in from the last saved answer about the account', async () => {
+        fetchMock.mockImplementationOnce(() => json({ username: 'ann', isPro: true }))
+        expect((await run()).map((a) => a.type)).toContain('SET_ACCESS')
+        await settle()
+        fetchMock.mockImplementation(down)
+        const actions = await run()
+        expect(actions.find((a) => a.type === 'SET_ACCESS').payload).toMatchObject({ username: 'ann', isPro: true })
+        expect(actions.find((a) => a.type === 'LOGIN_SUCCESS').payload.username).toBe('ann')
+    })
+
+    it('does nothing when there is no saved answer yet', async () => {
+        fetchMock.mockImplementation(down)
+        expect(await run()).toEqual([])
+    })
+
+    it('still signs out when the server says the login is no good', async () => {
+        fetchMock.mockImplementation(() => json({ error: 'x' }, 401))
+        expect((await run()).map((a) => a.type)).toEqual(['LOGOUT'])
     })
 })

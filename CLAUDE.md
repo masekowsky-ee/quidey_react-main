@@ -728,8 +728,9 @@ the inbox's reminder tab and the .ics export all use the same rule; of several d
 the latest goes out (`push_sent_for` / `reminder_mailed_at` = the reminder time sent for; a later
 one follows, a task moved before that time reminds again).
 
-Client-side storage: only `localStorage` (no cookies), plus the service worker's Cache Storage
-for the app's own files: `token` (JWT), `accounts` (several accounts on one device:
+Client-side storage: `localStorage` (no cookies), the service worker's Cache Storage
+for the app's own files, and IndexedDB `quidey-offline` (the offline copy of the account's data and the
+queue of changes made offline, see "Offline-first"). In localStorage: `token` (JWT), `accounts` (several accounts on one device:
 `[{ username, displayName, token }]`, max 5, `src/features/auth/accounts.js`; switching reloads
 the app as the other one, signing out takes over the next remembered account), `language`, `accent`,
 `theme`, `palette`, `motion`, `sound`, `analytics` (Android app: the answer to the usage data question), `homeLayout`, `showSharedTasks`, `calendarView`, `timerMode`,
@@ -818,6 +819,39 @@ the theme before React loads.
   Backend `utils/fcm.js` (FCM HTTP v1, `FIREBASE_SERVICE_ACCOUNT_FILE`); `push_subscriptions` rows
   with `fcm:` endpoints have no keys (migration 034). Besides Google Play, the APK can be downloaded
   in Settings → App on Android phones (see PWA above).
+- **Offline-first** (every platform; `src/features/offline/`, `components/offline/OfflineStatus.jsx`, backend migration 056
+  + `utils/idempotency.js`; privacy § 9 "Offline-Kopie"): `apiFetch` wraps the real request (`request` in helperFunction.js) in
+  `withOffline`. **Reads** (`GET /api/…` except `NEVER_CACHED`: auth, billing, admin, ai, assistant, push, usage) are saved per
+  account in IndexedDB (`storage.js`, memory fallback in tests; ≤ 200 entries, ≤ 30 days) and answered from there when the
+  server can't be reached (a `TypeError` from fetch, or 502-504) or takes longer than `SLOW_MS` (8 s); nothing saved → error
+  `code: 'OFFLINE'`. **Writes** listed in `WRITES` (tasks add/edit/delete, a task's groups, finished focus sessions) go to an
+  outbox when the server can't be reached: the caller gets an answer made on the device (new things get a temporary id
+  `local-…` and `pending: true`; the saved `/api/tasks` list is changed too, so a restart offline still shows them), the
+  outbox is sent in order with an `Idempotency-Key` header (the server answers a repeated key with the first answer) when
+  the browser is `online`, on focus, every 30 s, and before the next write; temporary ids in later entries and in later
+  calls are swapped for the real ones (`idmap`). A 4xx on replay drops the entry and counts it in `failed` (the line under
+  the header says so; a delete of something already gone isn't a failure); a 409 `IDEMPOTENCY_IN_PROGRESS` waits. After a
+  send `quidey:synced` makes `OfflineStatus` reload tasks and sessions. Everything else written offline fails with
+  `OFFLINE`. **Not offline yet**: notes (notebook), routines, reminders, event types, collections, Lernen, friends, sessions
+  with others. The start check (`checkAuth`) signs in from the saved `/api/me` when the server can't be reached, so the app
+  opens offline. Sign-out removes the account's saved reads (`forgetReads`), pending changes stay for that account. Conflict
+  rule: the last write wins. Adding an offline-capable write: an entry in `WRITES`, a `localAnswer` case, and a test in
+  `offline.test.js`; the route must be idempotent (POST routes get the middleware by being under `/api/tasks` or
+  `/api/sessions` in the backend's `app.use`).
+- **Updating the Android app** (`features/native/appUpdate.js`, `components/update/UpdatePrompt.jsx`, plugin `QuideyUpdate` /
+  `UpdatePlugin.java`, backend `GET /api/app-version?platform=&version=` from `utils/appVersion.js`, env
+  `ANDROID_LATEST_VERSION_CODE|NAME`, `ANDROID_MIN_VERSION_CODE`, `ANDROID_STORE_URL`, same for `IOS_`): the web layer is bundled
+  in the app, so every change of the web app reaches phones only as a new build in Google Play. On start and when the app
+  comes back (≥ 6 h apart) the app asks our server and Google Play's in-app update API: newer build → a card ("Später" rests
+  it 3 days; Play downloads in the background, then "Neu starten"); build below `…_MIN_VERSION_CODE` or an update with Play
+  priority 5 → a window that stays until updated (immediate update). A sideloaded APK has no Play: the store/download page
+  opens. Releasing: raise `versionCode` in `android/app/build.gradle`, `npm run bundle`, upload, roll out, then set
+  `ANDROID_LATEST_VERSION_CODE` on the server (and `…_MIN_…` only to force). No tip: it is a system prompt, not a feature.
+- **Ways into the Android app** (`features/native/deepLinks.js`, `sharedText.js`, plugin `QuideyShare` / `ShareTargetPlugin.java`,
+  `public/.well-known/assetlinks.json`): links to `https://app.quidey.com/…` open the app (App Links, verified by the
+  assetlinks file: **add Play App Signing's SHA-256 from Play Console → App integrity** to it, else only the upload/debug
+  keys verify), the launcher's long-press shortcuts (new task `/?new=task`, focus, calendar; `res/xml/shortcuts.xml`), and
+  "Share → Quidey" (text/plain) opens the new-task form with the text as its first line.
 - **Google Analytics for Firebase** (Android app only, only with consent; privacy § 3):
   `features/native/analytics.js` + the app's plugin `QuideyAnalytics` (`AnalyticsPlugin.java`,
   `firebase-analytics` 23.2.0). The manifest keeps collection off by default (no advertising id,

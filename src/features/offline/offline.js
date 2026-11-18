@@ -23,6 +23,8 @@ const ID_MAP_KEY = 'idmap';
 // an offline copy older than this is not shown any more (a very old list is worse than none)
 const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 200;
+// a read that takes longer than this is answered from the saved copy, when there is one
+export const SLOW_MS = 8000;
 
 let status = { offline: false, pending: 0, failed: 0 };
 let send = null; // the real request function, handed over by apiFetch
@@ -85,6 +87,13 @@ async function savedRead(url) {
     const entry = await kvGet(cacheKey(url));
     if (!entry || Date.now() - entry.at > MAX_AGE_MS) return undefined;
     return entry;
+}
+
+// For the few requests that don't go through apiFetch (the check at start): keep an answer for
+// this account, and read it back when the server can't be reached.
+export const saveAnswer = (url, data) => saveRead(url, data).catch(() => {});
+export async function savedAnswer(url) {
+    return (await savedRead(url))?.data;
 }
 
 // ---------- the writes that work offline ----------
@@ -250,18 +259,26 @@ export async function withOffline(url, options, request) {
                 throw offlineError();
             }
         }
-        try {
-            const data = await request(url, options);
+        const entry = await savedRead(url);
+        const live = request(url, options).then((data) => {
             setStatus({ offline: false });
             saveRead(url, data).catch(() => {});
             if (status.pending > 0) flushOutbox().catch(() => {});
             return data;
+        });
+        live.catch(() => {}); // an answer nobody waits for any more must not end as an unhandled rejection
+        let timer;
+        try {
+            // a bad connection (it answers, but slowly) shows the saved copy after a while instead
+            // of a page that waits; the answer, when it comes, refreshes the copy
+            return await (entry ? Promise.race([live, new Promise((resolve) => { timer = setTimeout(() => resolve(entry.data), SLOW_MS); })]) : live);
         } catch (error) {
             if (!isUnreachable(error)) throw error;
             setStatus({ offline: true });
-            const entry = await savedRead(url);
             if (entry) return entry.data;
             throw offlineError();
+        } finally {
+            clearTimeout(timer);
         }
     }
 

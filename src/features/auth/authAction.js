@@ -6,7 +6,7 @@ import { resetFocus } from '../session/sessionAction';
 import { clearFocusRun } from '../session/focusRun';
 import { cancelAlarms } from '../native/alarms';
 import { setUsageEnabled } from '../usage/usage';
-import { forgetReads } from '../offline/offline';
+import { forgetReads, saveAnswer, savedAnswer } from '../offline/offline';
 
 // Signed in (password, Google): { token, username } from the server
 const finishSignIn = (data) => {
@@ -135,6 +135,15 @@ export const checkAuth = () => {
             return;
         }
 
+        // signed in from what the device saved of the last answer (offline-first: the app opens
+        // without a connection); the live answer replaces it as soon as there is one
+        const fromSaved = async () => {
+            const saved = await savedAnswer('/api/me');
+            if (!saved?.username) return;
+            dispatch({ type: LOGIN_SUCCESS, payload: { token, username: saved.username } });
+            dispatch({ type: SET_ACCESS, payload: saved });
+        };
+
         let response;
         try {
             response = await fetch(apiUrl("/api/me"), {
@@ -142,6 +151,12 @@ export const checkAuth = () => {
             });
         } catch {
             // backend not reachable (not started yet, offline): keep the token, try again on the next load
+            await fromSaved();
+            return;
+        }
+        // a gateway with nobody behind it (the API restarts): the same as no connection
+        if ([502, 503, 504].includes(response.status)) {
+            await fromSaved();
             return;
         }
 
@@ -155,6 +170,7 @@ export const checkAuth = () => {
         if (!response.ok) return;
 
         const data = await response.json();
+        saveAnswer('/api/me', data);
         rememberAccount({ username: data.username, token });
         dispatch({
             type: LOGIN_SUCCESS,

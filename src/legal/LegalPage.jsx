@@ -789,10 +789,22 @@ function Privacy() {
                 in der App selbst enthalten.
             </p>
             <p>
+                <strong>Offline-Kopie deiner Daten:</strong> Damit Quidey auch ohne Verbindung funktioniert, legt die
+                App im Datenspeicher des Geräts (IndexedDB) eine Kopie dessen ab, was sie vom Server geladen hat:
+                deine Aufgaben, Termine, Notizen, Sitzungen, Listen und Kontoangaben, die du gerade ansiehst oder
+                zuletzt angesehen hast (höchstens die letzten 200 Abfragen, nicht älter als 30 Tage). Nicht
+                gespeichert werden Anmeldungen, Zahlungsangaben, Admin-Bereiche und Antworten der KI-Funktionen.
+                Änderungen, die du ohne Verbindung an Aufgaben, Terminen oder Fokus-Sitzungen machst, warten dort in
+                einer Warteschlange, bis die Verbindung wieder da ist, und werden dann an den Server gesendet. Die
+                Kopie gehört zu deinem Konto: Beim Abmelden wird sie gelöscht (noch nicht gesendete Änderungen
+                bleiben für dieses Konto erhalten, bis du dich wieder anmeldest und sie gesendet sind). Sie verlässt
+                dein Gerät nicht und wird in der Android-App nicht in Datensicherungen deines Handys übernommen.
+            </p>
+            <p>
                 Damit Quidey sich als App installieren lässt, schnell startet und auch ohne Verbindung öffnet, legt ein
                 Service Worker die Programmdateien der App (Seite, Skripte, Stylesheets, Schrift, Icons) im Cache-Speicher
                 deines Browsers ab. Darin liegen keine personenbezogenen Daten: Deine Aufgaben, Nachrichten und
-                Kontodaten werden immer direkt vom Server geladen und nicht zwischengespeichert. Bei jeder neuen
+                Kontodaten stehen nicht im Cache-Speicher, sondern, wenn überhaupt, in der Offline-Kopie weiter oben. Bei jeder neuen
                 Version werden die alten Dateien ersetzt. Derselbe Service Worker zeigt die Benachrichtigungen an, wenn
                 du sie eingeschaltet hast; er speichert sie nicht.
             </p>
