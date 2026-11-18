@@ -31,6 +31,8 @@ export const TIPS = [
     // phones with Lernen in the tab bar: Sozial moved behind "Mehr"
     { id: 'navMoreSocial', page: anyPage, target: '[data-tip="nav-more"][data-holds-social]' },
     { id: 'tabbar', page: anyPage, target: '[data-tip="tabbar"]' },
+    // shows itself the first time the app goes offline (the line it points at is only there then)
+    { id: 'offline', page: anyPage, target: '[data-tip="offline"]' },
     // pages
     { id: 'add', page: (p) => p === '/', target: '[data-part="add-fab"]' },
     // Quidey Max only: without Max there is no button, so the tip waits

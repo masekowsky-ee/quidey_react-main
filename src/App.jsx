@@ -38,6 +38,7 @@ import { useReminders } from './features/reminders/reminders.js'
 import ReminderAlert from './components/reminders/ReminderAlert.jsx'
 import { useAvatarRealtime } from './features/profile/avatars.js'
 import Toaster from './components/Toaster.jsx';
+import OfflineStatus from './components/offline/OfflineStatus.jsx';
 import Tutorial from './components/Tutorial.jsx';
 import FeatureTips from './components/tips/FeatureTips.jsx';
 import DeleteScopeDialog from './components/task/DeleteScopeDialog.jsx';
@@ -340,6 +341,7 @@ function App(){
         <Toaster/>
         {/* a guest gets no tour, tips, push question or account dialogs: the sign-in window instead */}
         {guest ? <><AuthDialog/><Tutorial/></> : <>
+        <OfflineStatus/>
         <Tutorial/>
         <FeatureTips/>
         <DeleteScopeDialog/>

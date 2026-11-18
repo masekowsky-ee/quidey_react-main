@@ -6,6 +6,7 @@ import { resetFocus } from '../session/sessionAction';
 import { clearFocusRun } from '../session/focusRun';
 import { cancelAlarms } from '../native/alarms';
 import { setUsageEnabled } from '../usage/usage';
+import { forgetReads } from '../offline/offline';
 
 // Signed in (password, Google): { token, username } from the server
 const finishSignIn = (data) => {
@@ -105,6 +106,8 @@ export const logout = () => {
         // this account's queued usage events are gone with it
         setUsageEnabled(false);
         const token = localStorage.getItem('token');
+        // the offline copy of this account's data goes with it (before the token, which names the owner)
+        forgetReads().catch(() => {});
         forgetToken(token);
         forgetAccount(getState().auth.user?.username);
         const next = listAccounts()[0];

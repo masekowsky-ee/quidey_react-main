@@ -14,11 +14,13 @@ import store from "./features/store";
 import { registerServiceWorker } from './features/pwa/registerServiceWorker'
 import { listenForInstallPrompt } from './features/pwa/install'
 import { setupNativeApp } from './features/native/native'
+import { startOfflineSync } from './features/offline/offline'
 import { startOwnColors } from './features/tasks/ownColors'
 
 registerServiceWorker()
 listenForInstallPrompt()
 setupNativeApp(store)
+startOfflineSync()
 startOwnColors()
 
 createRoot(document.getElementById('root')).render(

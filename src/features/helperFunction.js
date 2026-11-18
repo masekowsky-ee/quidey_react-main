@@ -1,5 +1,6 @@
 import { platform } from './usage/platform';
 import { openAuth } from './auth/gate';
+import { withOffline } from './offline/offline';
 
 // Full URL for an API path. VITE_API_URL is the backend's address in production builds
 // (e.g. https://api.quidey.example.com); locally it's empty and Vite's proxy forwards /api.
@@ -25,7 +26,13 @@ export const LIMIT_EVENT = 'quidey:limit-reached';
 // What may be read without an account (everything else a visitor's page asks for stays off the network)
 const PUBLIC_READS = ['/api/auth/'];
 
-export async function apiFetch(url, options = {}) {
+// Every request to the API. Reads are kept on the device and answered from there when the server
+// can't be reached; some writes wait in a queue meanwhile (features/offline/offline.js).
+export function apiFetch(url, options = {}) {
+    return withOffline(url, options, request);
+}
+
+async function request(url, options = {}) {
     const token = localStorage.getItem("token");
 
     // a visitor without an account: reading what is only for accounts fails at once, without a request

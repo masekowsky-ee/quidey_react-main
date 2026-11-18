@@ -1,0 +1,45 @@
+/* A quiet line under the header while the server can't be reached or changes are waiting */
+
+.bar{
+    position: fixed;
+    top: calc(var(--header-h, 3.5rem) + 0.5rem + env(safe-area-inset-top, 0px));
+    left: calc(50% + var(--sidebar-w, 0px) / 2);
+    transform: translateX(-50%);
+    z-index: var(--z-header);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: min(30rem, calc(100% - 2rem));
+    padding: 0.4rem 0.4rem 0.4rem 0.9rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-h);
+    background-color: var(--surface-strong);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-float);
+}
+
+.warn{
+    border-color: color-mix(in srgb, var(--danger, #c0392b) 55%, var(--border));
+}
+
+.text{
+    min-width: 0;
+}
+
+.ok{
+    flex: none;
+    min-height: 2rem;
+    padding: 0 0.75rem;
+    font: inherit;
+    color: var(--text-h);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+}
+
+@media (pointer: coarse){
+    .ok{ min-height: 2.75rem; }
+}
