@@ -57,4 +57,7 @@ export async function setupNativeApp(store) {
     // is there a newer version of the app? (on start and whenever it comes back to the front)
     const { startUpdateChecks } = await import('./appUpdate');
     startUpdateChecks(App);
+    // links, launcher shortcuts and "Share → Quidey"
+    const { setupDeepLinks } = await import('./deepLinks');
+    setupDeepLinks(store, App);
 }

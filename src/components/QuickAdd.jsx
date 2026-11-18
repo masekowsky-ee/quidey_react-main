@@ -8,6 +8,7 @@ import TaskForm from './TaskForm.jsx';
 import ReminderForm from './reminders/ReminderForm.jsx';
 import ScanSheet from './scan/ScanSheet.jsx';
 import NoteQuickForm from './notes/NoteQuickForm.jsx';
+import { takePendingText } from '../features/native/sharedText';
 
 // The new-task form over whatever page is open: the header's "New" and Home's "Create task"
 // both open it (settings.showForms). Testers can switch it to a reminder ("Erinnerung" in the
@@ -33,7 +34,7 @@ export default function QuickAdd() {
 function QuickAddForm({ sheet, close, reminder }) {
     const dispatch = useDispatch();
     // what was typed goes along when switching between the two forms
-    const [form, setForm] = useState(() => ({ kind: reminder ? 'reminder' : 'task', text: '' }));
+    const [form, setForm] = useState(() => ({ kind: reminder ? 'reminder' : 'task', text: takePendingText() }));
     // the sheet is already up when the kind is switched: the new form takes its place without
     // sliding in from the bottom edge again (data-swapped, index.css)
     const swap = (kind, text) => setForm({ kind, text, swapped: true });

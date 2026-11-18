@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.quidey.app",
+      "sha256_cert_fingerprints": [
+        "76:30:8B:5A:D5:92:28:13:B2:62:D9:5D:2A:8E:22:24:46:98:BC:1C:58:8A:7F:FD:D2:1A:3B:E0:D5:9D:81:3A",
+        "75:10:86:5A:47:48:28:D3:7F:C2:E5:44:97:44:73:98:F1:1A:DC:2D:04:AF:A9:D0:6F:69:09:60:D0:B2:CB:9C"
+      ]
+    }
+  }
+]
