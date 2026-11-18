@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { apiFetch } from '../features/helperFunction'
-import { clearOffline, flushOutbox, forgetReads, connectionState, tokenOwner, probeNow, SLOW_MS, HARD_MS, WRITE_TIMEOUT_MS } from '../features/offline/offline'
+import { clearOffline, flushOutbox, forgetReads, connectionState, tokenOwner, probeNow, startOfflineSync, SLOW_MS, HARD_MS, WRITE_TIMEOUT_MS, START_PROBE_MS } from '../features/offline/offline'
 import { checkAuth } from '../features/auth/authAction'
 
 // a JWT whose payload says who it is (the signature isn't looked at on the device)
@@ -129,6 +129,39 @@ describe('a server that is known to be unreachable', () => {
         fetchMock.mockImplementation(() => json({ ok: true }))
         await apiFetch('/api/stats')
         expect(connectionState().offline).toBe(false)
+    })
+})
+
+describe('the start of the app', () => {
+    it('finds out whether the server answers before the first reads go out', async () => {
+        const stop = startOfflineSync()
+        vi.useFakeTimers()
+        try {
+            fetchMock.mockImplementation(hang) // a connection that leads nowhere
+            const read = apiFetch('/api/tasks')
+            const outcome = expect(read).rejects.toMatchObject({ code: 'OFFLINE' })
+            await vi.advanceTimersByTimeAsync(START_PROBE_MS + 100)
+            await outcome
+            // only the probe went out: the read never touched the dead connection
+            expect(fetchMock.mock.calls.length).toBe(1)
+            expect(fetchMock.mock.calls[0][0]).toMatch(/app-version/)
+        } finally {
+            stop()
+            vi.useRealTimers()
+        }
+    })
+
+    it('does nothing special when the server answers, a refusal included', async () => {
+        const stop = startOfflineSync()
+        try {
+            fetchMock.mockImplementation(() => json({ error: 'x' }, 404))
+            fetchMock.mockImplementationOnce(() => json({ error: 'not there' }, 404)) // the probe: an old server without the route
+            fetchMock.mockImplementationOnce(() => json([{ id: 1 }]))
+            expect(await apiFetch('/api/tasks')).toEqual([{ id: 1 }])
+            expect(connectionState().offline).toBe(false)
+        } finally {
+            stop()
+        }
     })
 })
 

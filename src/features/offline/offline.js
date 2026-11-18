@@ -46,19 +46,45 @@ let flushing = null;
 // to find out whether the server is back. The `online` event and the app coming to the front probe
 // at once.
 export const PROBE_MS = 15000;
+// the gap grows while the server stays away, so the probes themselves do not pile up
+const MAX_PROBE_MS = 60000;
 let nextTry = 0;
+let gap = PROBE_MS;
 function mayTry() {
     if (!status.offline) return true;
     if (Date.now() < nextTry) return false;
-    nextTry = Date.now() + PROBE_MS;
+    nextTry = Date.now() + gap;
+    gap = Math.min(gap * 2, MAX_PROBE_MS);
     return true;
 }
-const reachable = () => { nextTry = 0; setStatus({ offline: false }); };
+const reachable = () => { nextTry = 0; gap = PROBE_MS; setStatus({ offline: false }); };
 const unreachable = () => {
-    if (!status.offline) nextTry = Date.now() + PROBE_MS;
+    if (!status.offline) nextTry = Date.now() + gap;
     setStatus({ offline: true });
 };
 export const probeNow = () => { nextTry = 0; };
+
+// At the start, before the first reads go out, one small request finds out whether the server
+// answers at all. Without it the app's first dozen reads would all hang on a dead connection
+// before anything knew. Only once the app has started the sync (startOfflineSync), and only
+// signed in: a guest has no saved copy to fall back on.
+export const START_PROBE_MS = 3000;
+let syncStarted = false;
+let startProbe = null;
+function probeAtStart() {
+    if (!syncStarted || !localStorage.getItem('token')) return Promise.resolve();
+    startProbe ??= (async () => {
+        try {
+            await timed('/api/app-version?platform=android', {}, START_PROBE_MS);
+            reachable();
+        } catch (error) {
+            // any answer, even a refusal, shows the server is there
+            if (isUnreachable(error)) unreachable();
+            else reachable();
+        }
+    })();
+    return startProbe;
+}
 
 export const connectionState = () => status;
 
@@ -279,6 +305,7 @@ export const acknowledgeFailures = () => setStatus({ failed: 0 });
 
 export async function withOffline(url, options, request) {
     send = request;
+    await probeAtStart();
     const method = (options.method ?? 'GET').toUpperCase();
 
     // something made offline is still called by its temporary id here: use the real one if it has one
@@ -368,6 +395,8 @@ export async function withOffline(url, options, request) {
 export async function clearOffline() {
     await kvClear();
     nextTry = 0;
+    gap = PROBE_MS;
+    startProbe = null;
     status = { offline: false, pending: 0, failed: 0 };
     window.dispatchEvent(new CustomEvent(CONNECTION_EVENT, { detail: status }));
 }
@@ -385,6 +414,7 @@ export async function loadPending() {
 
 // when the connection is back, or the app is opened again, the outbox goes out
 export function startOfflineSync() {
+    syncStarted = true;
     // the outbox goes out when it may (one attempt per PROBE_MS while the server is unreachable)
     const run = () => { if (mayTry()) flushOutbox().catch(() => {}); };
     // the connection is back, or the app is in front again: look right away
@@ -400,5 +430,6 @@ export function startOfflineSync() {
         window.removeEventListener('focus', now);
         window.removeEventListener('offline', goesOffline);
         clearInterval(timer);
+        syncStarted = false;
     };
 }
