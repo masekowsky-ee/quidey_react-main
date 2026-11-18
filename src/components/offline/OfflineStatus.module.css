@@ -1,18 +1,17 @@
-/* A quiet line under the header while the server can't be reached or changes are waiting */
+/* A quiet line while the server can't be reached or changes are waiting */
 
 .bar{
+    /* above the tab bar and left of the add button: the top of the page (the greeting) stays readable */
     position: fixed;
-    top: calc(var(--header-h, 3.5rem) + 0.5rem + env(safe-area-inset-top, 0px));
-    /* centred, as wide as its text up to the limit (left: 50% would cap it at half the screen) */
+    bottom: calc(5.25rem + var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px));
     left: calc(var(--sidebar-w, 0px) + 1rem);
-    right: 1rem;
-    margin-inline: auto;
+    right: 5.75rem;
     width: fit-content;
+    max-width: 26rem;
     z-index: var(--z-header);
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    max-width: 30rem;
     padding: 0.4rem 0.4rem 0.4rem 0.9rem;
     font-size: 0.78rem;
     font-weight: 500;
