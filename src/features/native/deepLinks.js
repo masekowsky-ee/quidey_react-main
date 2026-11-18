@@ -42,9 +42,10 @@ function go(store, link) {
 function share(store, text) {
     if (!text) return;
     setPendingText(text);
-    // a form that is open already keeps what was typed: close and open it again with the text
+    // a form that is open already keeps what it holds: close it, and open it again a moment later
+    // (in the same tick React would keep the old form), so it starts with the text
     store.dispatch(showForms(false));
-    store.dispatch(showForms(true));
+    setTimeout(() => store.dispatch(showForms(true)), 80);
 }
 
 export async function setupDeepLinks(store, App) {

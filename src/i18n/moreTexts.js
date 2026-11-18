@@ -18,9 +18,9 @@ const moreTexts = {
 
         // ---------- offline ----------
         offlineSaved: 'Keine Verbindung. Du siehst, was auf diesem Gerät gespeichert ist.',
-        offlinePending: 'Keine Verbindung. {count} Änderung(en) warten und gehen raus, sobald du wieder online bist.',
+        offlinePending: 'Keine Verbindung. Wartende Änderungen: {count}. Sie gehen raus, sobald du wieder online bist.',
         offlineSyncing: 'Änderungen werden gesendet … ({count})',
-        offlineFailed: '{count} Änderung(en) konnte(n) nicht übernommen werden, zum Beispiel weil es das Element nicht mehr gibt.',
+        offlineFailed: 'Änderungen, die nicht übernommen werden konnten: {count}. Zum Beispiel, weil es das Element nicht mehr gibt.',
         offlineOk: 'Okay',
         tip_offline_title: 'Auch ohne Netz',
         tip_offline_text: 'Quidey zeigt, was auf deinem Gerät gespeichert ist. Aufgaben, Termine und Fokus-Sitzungen kannst du weiter anlegen und ändern; sie gehen raus, sobald du wieder online bist.',
@@ -259,9 +259,9 @@ const moreTexts = {
 
         // ---------- offline ----------
         offlineSaved: 'No connection. You see what is saved on this device.',
-        offlinePending: 'No connection. {count} change(s) are waiting and go out once you are online again.',
+        offlinePending: 'No connection. Changes waiting: {count}. They go out once you are online again.',
         offlineSyncing: 'Sending changes … ({count})',
-        offlineFailed: '{count} change(s) could not be applied, for example because the item no longer exists.',
+        offlineFailed: 'Changes that could not be applied: {count}. For example, the item no longer exists.',
         offlineOk: 'OK',
         tip_offline_title: 'Works without a network',
         tip_offline_text: 'Quidey shows what is saved on your device. You can keep adding and changing tasks, events and focus sessions; they go out as soon as you are online again.',
