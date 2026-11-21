@@ -131,6 +131,8 @@
 }
 
 .menuList {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -138,6 +140,8 @@
 
 /* Settings, tutorial and admin: pushed to the bottom of the panel */
 .menuBottom {
+  position: relative;
+  isolation: isolate;
   margin-top: auto;
   padding-top: 12px;
   border-top: 1px solid var(--border);
@@ -184,6 +188,48 @@
 .active {
   color: var(--text-h);
   font-weight: 600;
+  /* clearly the page you are on (before the sliding mark is there) */
+  background: color-mix(in srgb, var(--text-h) 11%, transparent);
+}
+
+/* the mark that slides to the current entry (features/layout/slidingActive.js) */
+.menuList::before,
+.menuBottom::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  top: 0;
+  width: var(--seg-w, 0px);
+  height: var(--seg-h, 0px);
+  border-radius: var(--seg-r, 8px);
+  background: color-mix(in srgb, var(--text-h) 11%, transparent);
+  transform: translate(var(--seg-x, 0px), var(--seg-y, 0px));
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.42s var(--spring-curve), width 0.42s var(--spring-curve), height 0.42s var(--spring-curve);
+}
+
+.menuList[data-slide]::before,
+.menuBottom[data-slide]::before {
+  opacity: 1;
+}
+
+.menuList[data-slide="init"]::before,
+.menuBottom[data-slide="init"]::before {
+  transition: none;
+}
+
+:global(:root[data-motion="minimal"]) .menuList::before,
+:global(:root[data-motion="minimal"]) .menuBottom::before {
+  transition: none;
+}
+
+.menuList[data-slide] > .active,
+.menuBottom[data-slide] > .active,
+.menuList[data-slide] > .active:hover,
+.menuBottom[data-slide] > .active:hover {
+  background: transparent;
 }
 
 .active .menuIcon {
@@ -566,15 +612,60 @@ color: var(--text-h);
 background: var(--surface-hover);
 }
 
-/* iOS: a row is at least 44 pt tall (phones: the drawer comes in from the side) */
+/* Phones: the drawer comes in from the side and fits the screen without scrolling. Rows are 44 pt
+   (iOS) where there is room and share the height evenly down to 32 px on a short screen; the
+   padding is trimmed so the list, the settings block and the account all stay in view. */
 @media (max-width: 720px) {
+  .menuDiv,
+  .menuDiv.fromRight {
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+  }
+
+  .menuHead {
+    min-height: 2.25rem;
+    margin-bottom: 6px;
+  }
+
+  .menuNav {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .menuList {
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 0;
+  }
+
+  .menuItem {
+    flex: 1 1 0;
+    min-height: 2rem;
+    max-height: 2.75rem;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .menuBottom {
+    padding-top: 6px;
+    gap: 0;
+  }
+
+  .menuBottom .menuItem {
+    flex: none;
+    min-height: 2.5rem;
+    max-height: none;
+  }
+
+  .account {
+    margin-top: 4px;
+    padding-top: 4px;
+  }
+
   /* what the tab bar already holds (Start, Kalender, Fokus, Lernen) isn't repeated here: the drawer
      is "More". Not while the tab bar is folded away (TabBar.jsx): then it is all there is. */
   :global(body:not(:has([data-part="tabbar"][data-collapsed]))) .menuItem[data-in-tabbar] {
     display: none;
-  }
-
-  .menuItem {
-    min-height: 2.75rem;
   }
 }

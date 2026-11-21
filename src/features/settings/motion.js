@@ -245,8 +245,8 @@ export function useCelebrate(delay = 0) {
 export function pageSwipeMotion(from, level) {
     if (level === 'minimal') return MOTION.page.minimal;
     return {
-        initial: { opacity: 0, x: `${from * 30}%` },
+        initial: { opacity: 0, x: `${from * 22}%` },
         animate: { opacity: 1, x: '0%' },
-        transition: { ...(level === 'extreme' ? BOUNCE : SETTLE), opacity: { duration: 0.2, ease: 'easeOut' } },
+        transition: { ...(level === 'extreme' ? BOUNCE : spring(0.3, 1)), opacity: { duration: 0.16, ease: 'easeOut' } },
     };
 }

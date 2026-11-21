@@ -30,8 +30,10 @@ import { openAuth } from '../features/auth/gate';
 // inTabBar: the phone's tab bar has this place too, so the drawer leaves it out there (data-in-tabbar)
 function MenuLink({ to, end, match, icon, label, onClick, count = 0, countLabel, news = false, newsLabel, tip, inTabBar = false }) {
     const { pathname } = useLocation();
+    // the current entry (the menu's highlight slides to it, features/layout/slidingActive.js)
+    const current = match ? match(pathname) : (end ? pathname === to : pathname === to || pathname.startsWith(`${to}/`));
     return (
-        <NavLink to={to} end={end} onClick={onClick} data-part="menu-item" data-active={match?.(pathname) || undefined} data-tip={tip} data-in-tabbar={inTabBar || undefined}
+        <NavLink to={to} end={end} onClick={onClick} data-part="menu-item" data-active={current || undefined} data-tip={tip} data-in-tabbar={inTabBar || undefined}
             className={({ isActive }) => `${styles.menuItem} ${isActive || match?.(pathname) ? styles.active : ''}`}>
             <Icon name={icon} className={styles.menuIcon} />
             <span className={styles.menuLabel}>{label}</span>
@@ -179,7 +181,7 @@ export default function Menu(){
                     statistics; the profile lives in the account menu at the foot, the tour in
                     the settings */}
                 <nav className={styles.menuNav} aria-label={t('menu')}>
-                    <div className={styles.menuList}>
+                    <div className={styles.menuList} data-slide-container>
                         <MenuLink to="/" end icon="home" label={t('home')} onClick={onClose} inTabBar />
                         <MenuLink to="/calendar" icon="calendar" label={t('calendar')} onClick={onClose} inTabBar
                             count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
@@ -205,7 +207,7 @@ export default function Menu(){
                 </nav>
 
                 {/* settings, feedback and admin sit at the bottom, the account last */}
-                <div className={styles.menuBottom}>
+                <div className={styles.menuBottom} data-slide-container>
                     {/* testers: switch the interface variant, rate what is being tested */}
                     {isTester && <MenuLink to="/tester" icon="flask" label={t('testerNav')} onClick={onClose} />}
                     {isAdmin && (

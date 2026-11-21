@@ -41,6 +41,8 @@
 
 /* Pill-shaped group of options where exactly one is active */
 .segmented {
+    position: relative;
+    isolation: isolate;
     display: inline-flex;
     max-width: 100%; /* never wider than the screen (narrow phones) */
     box-sizing: border-box;
@@ -80,13 +82,48 @@
     }
 }
 
-/* Two classes so it beats the plain option above. The chosen option is marked by its
-   background alone, no shadow. */
+/* Two classes so it beats the plain option above. The chosen option is marked by the app's
+   "selected" look (light on dark, dark on light): you see at a glance which one it is. */
 .segmented > .segmentActive,
 .segmented > .segmentActive:hover {
-    background: var(--sheet);
-    color: var(--text-h);
+    background: var(--contrast-top);
+    color: var(--contrast-text);
     box-shadow: none;
+}
+
+/* The mark slides (features/layout/slidingActive.js puts it behind the chosen option): once it is
+   there, the option itself keeps no fill of its own */
+.segmented::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 0;
+    top: 0;
+    width: var(--seg-w, 0px);
+    height: var(--seg-h, 0px);
+    border-radius: var(--seg-r, 999px);
+    background: var(--contrast-top);
+    transform: translate(var(--seg-x, 0px), var(--seg-y, 0px));
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.42s var(--spring-curve), width 0.42s var(--spring-curve), height 0.42s var(--spring-curve);
+}
+
+.segmented[data-slide]::before {
+    opacity: 1;
+}
+
+.segmented[data-slide="init"]::before {
+    transition: none;
+}
+
+:global(:root[data-motion="minimal"]) .segmented::before {
+    transition: none;
+}
+
+.segmented[data-slide] > .segmentActive,
+.segmented[data-slide] > .segmentActive:hover {
+    background: transparent;
 }
 
 /* Page-level tabs (inbox, friends, admin, ...): a segmented bar as wide as its options (a

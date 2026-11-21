@@ -50,6 +50,7 @@ import AddFab from './components/home/AddFab.jsx';
 import AssistantFab from './components/assistant/AssistantFab.jsx';
 import { showsAddFab } from './features/layout/addFab.js';
 import { useTabSwipe } from './features/layout/tabSwipe.js';
+import { useSlidingActive } from './features/layout/slidingActive.js';
 import { useKeyboardInset } from './features/layout/keyboardInset.js';
 import { fetchInboxUnread } from './features/inbox/inbox.js';
 import { useInboxRealtime } from './features/inbox/useInboxRealtime.js';
@@ -285,6 +286,8 @@ function App(){
   useFocusAway(allowed);
   // phones: a sideways swipe goes to the tab beside it (and past the ends, the menu)
   useTabSwipe({ enabled: allowed });
+  // the chosen option of every group of options slides from one to the next
+  useSlidingActive();
   // phones: the on-screen keyboard's height, so sheets (the add form) stand above it
   useKeyboardInset();
 

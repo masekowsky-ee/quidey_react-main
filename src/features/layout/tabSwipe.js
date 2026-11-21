@@ -63,11 +63,13 @@ const overlayOpen = () => Boolean(document.querySelector('[aria-modal="true"], [
 const pageOf = () => document.querySelector('[data-part="main"] > *');
 const moves = () => document.documentElement.getAttribute('data-motion') !== 'minimal';
 
-// the page at dx px from its place; it fades a little as it leaves
-function paint(page, dx) {
+// the page at dx px from its place; it fades as it leaves: a little while the finger holds it, and
+// completely by the end of the way out (fadeEnd), so nothing is cut off when the next page comes
+function paint(page, dx, fadeEnd = window.innerWidth * 2.5) {
     page.style.transition = 'none';
-    page.style.transform = dx === 0 ? '' : `translateX(${dx}px)`;
-    page.style.opacity = dx === 0 ? '' : String(1 - Math.min(1, Math.abs(dx) / window.innerWidth) * 0.5);
+    page.style.willChange = dx === 0 ? '' : 'transform, opacity';
+    page.style.transform = dx === 0 ? '' : `translate3d(${dx}px, 0, 0)`;
+    page.style.opacity = dx === 0 ? '' : String(Math.max(0, 1 - Math.min(1, Math.abs(dx) / fadeEnd)));
 }
 
 export function useTabSwipe({ enabled = true } = {}) {
@@ -91,14 +93,28 @@ export function useTabSwipe({ enabled = true } = {}) {
         let spring$ = null;
         let shown = null;
 
-        const show = (page, value) => { offset = value; paint(page, value); };
+        const show = (page, value, fadeEnd) => { offset = value; paint(page, value, fadeEnd); };
+        // to the target with the finger's speed; going out (target != 0) the next page is called as
+        // soon as this one is all but gone, not after the spring's long tail
         const settle = (page, target, velocity, done) => {
             spring$?.stop();
+            const leaving = target !== 0;
+            let called = false;
+            const finish = () => {
+                if (called) return;
+                called = true;
+                spring$?.stop();
+                spring$ = null;
+                done?.();
+            };
             spring$ = animate(offset, target, {
-                ...spring(target === 0 ? 0.35 : 0.28, 1),
+                ...spring(leaving ? 0.2 : 0.35, 1),
                 velocity,
-                onUpdate: value => show(page, value),
-                onComplete: () => { spring$ = null; done?.(); },
+                onUpdate: (value) => {
+                    show(page, value, leaving ? Math.abs(target) : undefined);
+                    if (leaving && Math.abs(value) >= Math.abs(target) * 0.96) finish();
+                },
+                onComplete: finish,
             });
         };
 
@@ -171,7 +187,7 @@ export function useTabSwipe({ enabled = true } = {}) {
             const go = () => { offset = 0; shown = null; navigate(paths[next], { state: { tabSwipe: step } }); };
             if (!page) { go(); return; }
             // the old page goes on the way the finger threw it, then the new one comes in
-            settle(page, -step * window.innerWidth * 0.6, velocity, go);
+            settle(page, -step * window.innerWidth * 0.4, velocity, go);
         };
 
         // the system took the touch away: the page goes back
