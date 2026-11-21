@@ -51,6 +51,7 @@ export const storeAccent = (accent) => store('accent', accent);
 // the accent. The values live in index.css under [data-palette]; these are the swatches the
 // settings show ({ dark, light }: page, card, text), keep them in step.
 export const PALETTES = {
+    system: { dark: ['#000000', '#1c1c1e', '#ffffff'], light: ['#f2f2f7', '#ffffff', '#000000'] },
     warm: { dark: ['#0e0d0c', '#181716', '#f4f3f1'], light: ['#f4f3ef', '#ffffff', '#151413'] },
     papier: { dark: ['#111311', '#1a1c1a', '#f1f3ef'], light: ['#f3f3f0', '#ffffff', '#1b1b19'] },
     graphite: { dark: ['#0d0e10', '#16181b', '#f3f4f6'], light: ['#f4f5f7', '#ffffff', '#121418'] },
@@ -60,14 +61,15 @@ export const PALETTES = {
     mono: { dark: ['#000000', '#0f0f0f', '#ffffff'], light: ['#ffffff', '#f3f3f3', '#0a0a0a'] },
 };
 export const PALETTE_NAMES = Object.keys(PALETTES);
-export const DEFAULT_PALETTE = 'warm';
+export const DEFAULT_PALETTE = 'system';
 export const readStoredPalette = () => readStored('palette', PALETTE_NAMES, DEFAULT_PALETTE);
 export const storePalette = (palette) => store('palette', palette);
 
 // Colour schemes: a palette and the accent made for it, picked in one go (Settings → Farbschema).
 // Both can still be changed one by one below; a scheme counts as chosen while both match.
 export const COLOR_SCHEMES = [
-    { id: 'abendrot', label: 'schemeAbendrot', palette: 'warm', accent: 'sunset' }, // the default
+    { id: 'system', label: 'schemeSystem', palette: 'system', accent: 'sunset' }, // the default
+    { id: 'abendrot', label: 'schemeAbendrot', palette: 'warm', accent: 'sunset' },
     { id: 'papier', label: 'schemePapier', palette: 'papier', accent: 'pine' },
 ];
 

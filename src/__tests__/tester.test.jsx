@@ -149,7 +149,7 @@ describe('colours of the variants', () => {
         expect(screen.getByText(/Gilt nur für die Variante Abfahrtstafel/)).toBeInTheDocument()
         fireEvent.click(within(palettes).getByRole('button', { name: /Nord/ }))
         expect(store.getState().settings.uiColors.tafel).toEqual({ palette: 'nord' })
-        expect(store.getState().settings.palette).toBe('warm')
+        expect(store.getState().settings.palette).toBe('system')
         const accents = screen.getByRole('group', { name: 'Akzentfarbe' })
         expect(within(accents).getAllByRole('button')[0]).toHaveTextContent('Abfahrtstafel')
     })

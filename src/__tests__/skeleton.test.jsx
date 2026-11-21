@@ -49,8 +49,8 @@ describe('the first paint (index.html, public/boot.css)', () => {
         const names = ['bg', 'surface', 'surface-strong', 'border']
         const bootColors = variables(boot, names)
         const appColors = variables(app, names)
-        // dark and light, the default ground and six palettes
-        expect(Object.keys(bootColors)).toHaveLength(14)
+        // dark and light, the default ground and seven palettes
+        expect(Object.keys(bootColors)).toHaveLength(16)
         for (const [selector, values] of Object.entries(bootColors)) {
             expect({ selector, ...values }).toEqual({ selector, ...appColors[selector] })
         }

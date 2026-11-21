@@ -109,7 +109,7 @@ describe('colour palettes', () => {
     it('a palette is applied to the page and remembered', () => {
         window.matchMedia = vi.fn(() => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() }))
         renderWith(makeStore(), <Themed />)
-        expect(document.documentElement.dataset.palette).toBe('warm')
+        expect(document.documentElement.dataset.palette).toBe('system')
         fireEvent.click(screen.getByRole('button', { name: 'Nord' }))
         expect(screen.getByRole('button', { name: 'Nord' })).toHaveAttribute('aria-pressed', 'true')
         expect(document.documentElement.dataset.palette).toBe('nord')
@@ -119,7 +119,7 @@ describe('colour palettes', () => {
 
     it('an unknown saved palette falls back to the default', () => {
         localStorage.setItem('palette', 'neon')
-        expect(readStoredPalette()).toBe('warm')
+        expect(readStoredPalette()).toBe('system')
     })
 })
 

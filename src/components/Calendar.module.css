@@ -320,7 +320,7 @@
 
 .weekNumHead{
     padding-top: 0.3rem;
-    font-size: 0.62rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     text-align: center;
@@ -1132,7 +1132,7 @@ button.agendaName:hover{
     .weekdayHead{
         padding-left: 0;
         text-align: center;
-        font-size: 0.65rem;
+        font-size: 0.6875rem;
         letter-spacing: 0.04em;
     }
 
@@ -1146,7 +1146,7 @@ button.agendaName:hover{
 
     .weekNum{
         min-width: 1.1rem;
-        font-size: 0.58rem;
+        font-size: 0.6875rem;
     }
 
     /* a day is a little taller: its tasks and events by name, one under the other */
@@ -1178,7 +1178,7 @@ button.agendaName:hover{
     /* one small line per entry, cut off with an ellipsis; time and marks wait in the day's timeline */
     .chips .chip{
         padding: 0.0625rem 0.125rem;
-        font-size: 0.625rem;
+        font-size: 0.6875rem;
         line-height: 1.25;
         border-radius: 3px;
     }
@@ -1204,7 +1204,7 @@ button.agendaName:hover{
 
     .chips .chipMore{
         padding-left: 0.1875rem;
-        font-size: 0.625rem;
+        font-size: 0.6875rem;
         line-height: 1.3;
     }
 
@@ -1647,7 +1647,7 @@ button.agendaName:hover{
 
     :global(:root:not([data-ui])) .chips .chip{
         padding: 0.0625rem 0.125rem;
-        font-size: 0.625rem;
+        font-size: 0.6875rem;
         line-height: 1.25;
         background: color-mix(in srgb, var(--task-color, var(--chip-color)) 14%, transparent);
     }
@@ -1766,7 +1766,7 @@ button.agendaName:hover{
     height: 1rem;
     padding: 0 0.25rem;
     box-sizing: border-box;
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     line-height: 1rem;
     text-align: center;

@@ -45,6 +45,7 @@ const moreTexts = {
         // ---------- colour palettes ----------
         paletteSetting: 'Farbpalette',
         paletteSettingHint: 'Der Grundton der App, in hell und dunkel. Die Akzentfarbe wählst du darunter.',
+        palette_system: 'Systemgrau',
         palette_warm: 'Glut',
         palette_graphite: 'Graphit',
         palette_nord: 'Nord',
@@ -55,6 +56,7 @@ const moreTexts = {
         // a palette with its accent in one go
         schemeSetting: 'Farbschema',
         schemeSettingHint: 'Grundton und Akzent zusammen. Darunter kannst du beides einzeln ändern.',
+        schemeSystem: 'Systemgrau mit Abendrot',
         schemeAbendrot: 'Glut mit Abendrot',
         schemePapier: 'Papier mit Tanne',
         accentPine: 'Tanne',
@@ -286,6 +288,7 @@ const moreTexts = {
         // ---------- colour palettes ----------
         paletteSetting: 'Colour palette',
         paletteSettingHint: 'The ground tone of the app, light and dark. The accent colour is below.',
+        palette_system: 'System gray',
         palette_warm: 'Ember',
         palette_graphite: 'Graphite',
         palette_nord: 'Nord',
@@ -296,6 +299,7 @@ const moreTexts = {
         // a palette with its accent in one go
         schemeSetting: 'Colour scheme',
         schemeSettingHint: 'Ground tone and accent together. You can change each of them below.',
+        schemeSystem: 'System gray with Sunset',
         schemeAbendrot: 'Ember with Sunset',
         schemePapier: 'Paper with Pine',
         accentPine: 'Pine',

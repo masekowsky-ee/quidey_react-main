@@ -184,11 +184,11 @@
     .weekdayHead{
         padding-left: 0;
         text-align: center;
-        font-size: 0.65rem;
+        font-size: 0.6875rem;
     }
 
     .weekNum{
-        font-size: 0.58rem;
+        font-size: 0.6875rem;
         padding-top: 0.35rem;
     }
 

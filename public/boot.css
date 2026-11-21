@@ -19,6 +19,8 @@
     --boot-border: #e2dfd8;
 }
 
+:root[data-palette="system"]{ --boot-bg: #000000; --boot-surface: #1c1c1e; --boot-surface-strong: #2c2c2e; --boot-border: #272729; }
+:root[data-theme="light"][data-palette="system"]{ --boot-bg: #f2f2f7; --boot-surface: #ffffff; --boot-surface-strong: #e5e5ea; --boot-border: #e5e5ea; }
 :root[data-palette="graphite"]{ --boot-bg: #0d0e10; --boot-surface: #16181b; --boot-surface-strong: #2a2d32; --boot-border: #24262a; }
 :root[data-theme="light"][data-palette="graphite"]{ --boot-bg: #f4f5f7; --boot-surface: #ffffff; --boot-surface-strong: #e3e6ea; --boot-border: #e6e8eb; }
 :root[data-palette="nord"]{ --boot-bg: #0b1018; --boot-surface: #131a25; --boot-surface-strong: #242e3e; --boot-border: #1f2836; }
