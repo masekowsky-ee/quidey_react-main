@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
 import { displayName, fill, toInputDate } from '../../features/helperFunction';
-import { dateKey, durationText, minutesOfDay, remindersOf, timeText } from '../../features/calendar/calendar';
+import { durationText, remindersOf } from '../../features/calendar/calendar';
 import TaskOptionsFields from '../task/TaskOptionsFields.jsx';
 import { reminderLabel } from '../../features/tasks/reminders';
 import { linkIsValid } from '../../features/tasks/taskFields';
@@ -11,9 +11,8 @@ import { selectFocusByTask } from '../../features/tasks/plannedTime';
 import TaskSharing from '../task/TaskSharing.jsx';
 import TaskColorPicker from '../task/TaskColorPicker.jsx';
 import DurationField from '../task/DurationWheel.jsx';
-import { endOf, endDayOffset, fromEnd } from '../../features/tasks/eventTimes';
-import { EventTypePicker, KindSwitch } from '../task/KindFields.jsx';
-import { matchEventType } from '../../features/tasks/kinds';
+import { EventTypePicker, KindSwitch, TypeHint } from '../task/KindFields.jsx';
+import { buildTaskPayload, useTaskDraft } from '../../features/tasks/taskDraft';
 import { createdText } from '../../features/tasks/created';
 import CollectionPicker from '../collections/CollectionPicker.jsx';
 import Icon from '../icons.jsx';
@@ -63,46 +62,25 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
     // (in a shared session everybody can, without types)
     const canPickType = personal && isOwner;
     const canChangeKind = canPickType || allowEvents;
-    const [kind, setKind] = useState((personal || allowEvents) && task.kind === 'event' ? 'event' : 'task');
+    const draft = useTaskDraft({
+        kind: (personal || allowEvents) && task.kind === 'event' ? 'event' : 'task',
+        name: task.name, eventTypeId: task.event_type_id, due: toInputDate(task.due), time: task.due_time,
+        // kept as it is (also empty, or above 100 from older tasks) until the slider is moved
+        prio: task.prio, description: task.description, color: task.color, duration: task.duration_minutes,
+        extras: {
+            reminders: remindersOf(task),
+            reminder_email: Boolean(task.reminder_email),
+            location: task.location ?? '',
+            link: task.link ?? '',
+            details: task.details ?? '',
+            repeat: task.repeat ?? null,
+            repeat_left: Number.isInteger(task.repeat_left) ? task.repeat_left : null,
+        },
+    }, { pickTypes: canPickType });
+    const { kind, name, due, time, duration, prio, description, color, extras, eventTypeId, match } = draft;
     const event = kind === 'event';
-    const [eventTypeId, setEventTypeId] = useState(task.event_type_id ?? null);
-    // 'hand' once a type was picked (an existing event's type counts as picked), 'auto' while
-    // it came from a keyword of the name
-    const [typeSource, setTypeSource] = useState(task.event_type_id ? 'hand' : null);
-    const types = useSelector(state => state.task.eventTypes);
-    const [name, setName] = useState(task.name ?? '');
-    const match = canPickType ? matchEventType(name, types) : null;
-    // follows the name (and the switch to an event) until a type is picked by hand
-    const followName = (nextName, nextKind) => {
-        if (!canPickType || typeSource === 'hand' || nextKind !== 'event') return;
-        const found = matchEventType(nextName, types);
-        setEventTypeId(found?.type.id ?? null);
-        setTypeSource(found ? 'auto' : null);
-    };
-    const pickType = (id) => {
-        setEventTypeId(id);
-        setTypeSource('hand');
-    };
-    const [due, setDue] = useState(toInputDate(task.due));
-    const [time, setTime] = useState(task.due_time ?? '');
-    // a time of day needs a day: picking one first takes today
-    const dayForTime = () => { if (!due) setDue(dateKey(new Date())); };
-    // kept as it is (also empty, or above 100 from older tasks) until the slider is moved
-    const [prio, setPrio] = useState(task.prio ?? null);
     const sliderValue = Math.min(100, Math.max(0, Number(prio ?? 50)));
-    const [description, setDescription] = useState(task.description ?? '');
-    const [color, setColor] = useState(task.color ?? null);
-    // a task's planned time, an event's length
-    const [duration, setDuration] = useState(task.duration_minutes ?? null);
-    const [extras, setExtras] = useState({
-        reminders: remindersOf(task),
-        reminder_email: Boolean(task.reminder_email),
-        location: task.location ?? '',
-        link: task.link ?? '',
-        details: task.details ?? '',
-        repeat: task.repeat ?? null,
-        repeat_left: Number.isInteger(task.repeat_left) ? task.repeat_left : null,
-    });
+
     // closed at first (the editor stays short); the toggle says what is set in it
     const [showMore, setShowMore] = useState(false);
     const [error, setError] = useState('');
@@ -126,45 +104,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
         if (event && !due) { setError(t('eventNeedsDay')); return; }
         if (!linkIsValid(extras.link)) { setShowMore(true); return; }
         setBusy(true);
-        const saved = await onSave(!personal ? {
-            ...(allowEvents ? { kind } : {}),
-            name: name.trim(),
-            due: due || null,
-            prio,
-            description: description.trim(),
-            // a time of day needs a day
-            due_time: due ? time || null : null,
-            duration_minutes: duration,
-            color,
-            location: extras.location.trim(),
-            link: extras.link.trim(),
-            details: extras.details.trim(),
-            ...(subGroups ? { group_id: groupId } : {}),
-            ...(remindsAll ? { reminders: due ? extras.reminders : [] } : {}),
-        } : {
-            name: name.trim(),
-            // the day is optional; a time of day, a reminder and repeating need one
-            due: due || null,
-            prio,
-            description: description.trim(),
-            due_time: due ? time || null : null,
-            duration_minutes: duration,
-            // reminders count from the start, or from my all-day time on the day
-            reminders: due ? extras.reminders : [],
-            // only the owner's (the server ignores them from others)
-            ...(isOwner ? {
-                reminder_email: Boolean(due && extras.reminders.length > 0 && extras.reminder_email),
-                kind,
-                event_type_id: event ? eventTypeId : null,
-            } : {}),
-            color,
-            location: extras.location.trim(),
-            link: extras.link.trim(),
-            details: extras.details.trim(),
-            repeat: due ? extras.repeat ?? null : null,
-            // an end only for something that repeats
-            repeat_left: due && extras.repeat ? extras.repeat_left : null,
-        });
+        const saved = await onSave(buildTaskPayload(draft.values, { personal, owner: isOwner, withKind: allowEvents, groupId: subGroups ? groupId : undefined, remindsAll }));
         // still open when saving failed; otherwise the editor is gone already
         if (!saved) setBusy(false);
     };
@@ -177,45 +117,35 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && e.target.tagName === 'TEXTAREA') submit(e);
     };
 
-    // an event's end: worked out from start and length, setting it changes the length
-    const endDays = endDayOffset(time, duration);
-    const setEnd = (value) => {
-        const next = fromEnd(value, time, duration);
-        if (next.time !== time) { dayForTime(); setTime(next.time); }
-        setDuration(next.duration);
-    };
-    const start = minutesOfDay(time);
     const durationHint = event
-        ? (duration && start !== null ? fill(t('eventUntil'), { time: timeText(start + duration) }) : t('eventDurationHint'))
+        ? (draft.untilTime ? fill(t('eventUntil'), { time: draft.untilTime }) : t('eventDurationHint'))
         : (focusedSeconds >= 60 ? fill(t('plannedFocused'), { time: durationText(Math.round(focusedSeconds / 60)) }) : t('plannedTimeHint'));
 
     return (
         <form className={styles.editor} onSubmit={submit} onKeyDown={onKeyDown} noValidate>
-            {canChangeKind && <KindSwitch value={kind} onChange={(next) => { setKind(next); setError(''); followName(name, next); }} />}
+            {canChangeKind && <KindSwitch value={kind} onChange={(next) => { draft.changeKind(next); setError(''); }} />}
             <label className={styles.field}>
                 <span>{t(event ? 'eventName' : 'taskName')}</span>
                 <input ref={nameRef} value={name} maxLength={200}
-                    onChange={(e) => { setName(e.target.value); setError(''); followName(e.target.value, kind); }} aria-invalid={Boolean(error) && !name.trim()} />
+                    onChange={(e) => { draft.changeName(e.target.value); setError(''); }} aria-invalid={Boolean(error) && !name.trim()} />
             </label>
             {/* a task whose name fits a type: one tap makes it such an event */}
             {!event && canChangeKind && match &&
-                <button type="button" className={styles.typeHint} data-task-color={match.type.color ?? undefined}
-                    onClick={() => { setKind('event'); setEventTypeId(match.type.id); setTypeSource('auto'); }}>
-                    <span className={styles.typeHintDot} aria-hidden="true" />
+                <TypeHint className={styles.typeHintTight} color={match.type.color} onClick={draft.suggestEvent}>
                     {fill(t('keywordSuggestEvent'), { type: match.type.name })}
-                </button>}
+                </TypeHint>}
             <div className={styles.fieldRow}>
                 <label className={styles.field}>
                     <span>{t(event ? 'eventDay' : 'dueDate')}</span>
                     <input type="date" value={due} required={event} aria-invalid={event && Boolean(error) && !due}
-                        onChange={(e) => { setDue(e.target.value); setError(''); }} />
+                        onChange={(e) => { draft.setDue(e.target.value); setError(''); }} />
                 </label>
                 <label className={`${styles.field} ${styles.timeField}`}>
                     <span>{t(event ? 'eventStart' : 'taskTime')}</span>
                     <span className={styles.timeInput}>
-                        <input type="time" value={time} onPointerDown={dayForTime} onChange={(e) => { dayForTime(); setTime(e.target.value); }} />
+                        <input type="time" value={time} onPointerDown={draft.dayForTime} onChange={(e) => draft.changeTime(e.target.value)} />
                         {time &&
-                            <button type="button" className={styles.clearTime} onClick={() => setTime('')} title={t('allDay')} aria-label={t('allDay')}>
+                            <button type="button" className={styles.clearTime} onClick={() => draft.setTime('')} title={t('allDay')} aria-label={t('allDay')}>
                                 <Icon name="mClose" size={16} />
                             </button>}
                     </span>
@@ -224,29 +154,29 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
                 {event &&
                     <label className={`${styles.field} ${styles.timeField}`}>
                         <span>{t('eventEnd')}</span>
-                        <input type="time" value={endOf(time, duration)} onPointerDown={dayForTime} onChange={(e) => setEnd(e.target.value)} />
-                        {endDays > 0 && <small className={styles.allDayNote}>{fill(t(endDays === 1 ? 'eventEndNextDay' : 'eventEndDaysLater'), { days: endDays })}</small>}
+                        <input type="time" value={draft.endTime} onPointerDown={draft.dayForTime} onChange={(e) => draft.setEnd(e.target.value)} />
+                        {draft.endDays > 0 && <small className={styles.allDayNote}>{fill(t(draft.endDays === 1 ? 'eventEndNextDay' : 'eventEndDaysLater'), { days: draft.endDays })}</small>}
                     </label>}
                 {!event &&
                     <label className={`${styles.field} ${styles.prioField}`} htmlFor={`${id}-prio`}>
                         <span>{t('prioritise')} <output className={styles.prioValue} htmlFor={`${id}-prio`}>{prio ?? '–'}</output></span>
                         <input id={`${id}-prio`} type="range" min="0" max="100" step="1" value={sliderValue}
-                            onChange={(e) => setPrio(Number(e.target.value))} />
+                            onChange={(e) => draft.setPrio(Number(e.target.value))} />
                     </label>}
             </div>
             <div className={styles.fieldRow}>
-                <DurationField label={t(event ? 'eventDuration' : 'plannedTime')} value={duration} onChange={setDuration}
+                <DurationField label={t(event ? 'eventDuration' : 'plannedTime')} value={duration} onChange={draft.setDuration}
                     maxHours={event ? 168 : 99} hint={durationHint} />
             </div>
-            {event && canPickType && <EventTypePicker value={eventTypeId} onChange={pickType}
-                autoNote={typeSource === 'auto' && match ? fill(t('keywordAutoNote'), { keyword: match.keyword }) : null} />}
+            {event && canPickType && <EventTypePicker value={eventTypeId} onChange={draft.pickType}
+                autoNote={draft.autoNote ? fill(t('keywordAutoNote'), { keyword: draft.autoNote }) : null} />}
             {event && !canPickType && personal && task.event_type &&
                 <p className={styles.sharedNote}>{t('eventType')}: {task.event_type.name}</p>}
             <label className={styles.field}>
                 <span>{t('description')}</span>
-                <textarea rows={2} value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)} />
+                <textarea rows={2} value={description} maxLength={2000} onChange={(e) => draft.setDescription(e.target.value)} />
             </label>
-            <TaskColorPicker value={color} onChange={setColor} />
+            <TaskColorPicker value={color} onChange={draft.setColor} />
             {showCollections && <CollectionPicker item={{ kind: 'task', id: task.id }} name={name.trim() || task.name} />}
             {subGroups && !personal &&
                 <label className={styles.field}>
@@ -266,7 +196,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             </button>
             {showMore &&
                 <div className={styles.more}>
-                    <TaskOptionsFields value={extras} hasTime={Boolean(time)} hasDate={Boolean(due)} canMail={isOwner} personal={personal} remindsAll={remindsAll} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
+                    <TaskOptionsFields value={extras} hasTime={Boolean(time)} hasDate={Boolean(due)} canMail={isOwner} personal={personal} remindsAll={remindsAll} onChange={draft.changeExtras} />
                     {personal && <TaskSharing task={task} />}
                 </div>}
 

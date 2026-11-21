@@ -164,18 +164,10 @@ export default function Home(){
     const groupForm = createGroup && <FormSheet onClose={() => setCreateGroupOpen(false)}>
         {(sheet, close) => <GroupForm sheet={sheet} setCreateGroup={(value) => { if (!value) close(); }} />}
     </FormSheet>;
-    const taskList = (
-        <TaskContainer
-            activeTask={activeTask}
-            releasedIds={releasedIds}
-            onActivate={activateTask}
-            setCreateTask={setCreateTask}
-            handlePointerDown={handlePointerDown}
-            draggedTask={draggedTask}
-            dragPosition={dragPosition}
-            dragOffset={dragOffset}
-        />
-    );
+    // the list's props, the same in both layouts (the app's own look adds plain + the kind filter)
+    const listProps = {
+        activeTask, releasedIds, onActivate: activateTask, setCreateTask, handlePointerDown, draggedTask, dragPosition, dragOffset,
+    };
     const working = (
         <WorkingContainer
             dropZoneRef={dropZoneRef}
@@ -208,19 +200,7 @@ export default function Home(){
                 </div>
                 <section className={`${styles.listArea} ${styles.listBlock}`} aria-label={t('taskContainer')} data-part="home-list">
                     <GroupBtnContainer setCreateGroup={setCreateGroup} />
-                    <TaskContainer
-                        plain
-                        kinds={kinds}
-                        onToggleKind={toggleKind}
-                        activeTask={activeTask}
-                        releasedIds={releasedIds}
-                        onActivate={activateTask}
-                        setCreateTask={setCreateTask}
-                        handlePointerDown={handlePointerDown}
-                        draggedTask={draggedTask}
-                        dragPosition={dragPosition}
-                        dragOffset={dragOffset}
-                    />
+                    <TaskContainer {...listProps} plain kinds={kinds} onToggleKind={toggleKind} />
                     <HomeExtras kinds={kinds} onDragNote={handlePointerDown} />
                 </section>
                 <aside className={styles.sideArea} aria-label={t('momentumTitle')} data-part="home-momentum">
@@ -254,7 +234,7 @@ export default function Home(){
             <div className={styles.columns} data-part="home-columns">
                 <div className={styles.mainCol} data-part="home-list" data-label={t('taskContainer')}>
                     <GroupBtnContainer setCreateGroup={setCreateGroup} />
-                    {taskList}
+                    <TaskContainer {...listProps} />
                 </div>
                 <aside className={styles.focusCol} aria-label={t('focusTitle')} data-part="home-focus" data-label={t('focusTitle')}>
                     {working}

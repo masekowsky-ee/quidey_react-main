@@ -34,7 +34,7 @@ const nowMinutes = () => {
 // (onCreateAt(minutes)); with a mouse the spot shows where it would go.
 export default function DayTimeline({
     date, dayKey, today, tasks, personal, drag, startDrag, gridRef, scrollerRef, pending,
-    onOpen, onToggleDone, onShiftTime, onOpenGroup, onCreateAt, children,
+    onOpen, onToggleDone, onShiftTime, onCreateAt, children,
 }) {
     const { t } = useTranslation();
     const isToday = sameDay(date, today);
@@ -175,7 +175,7 @@ export default function DayTimeline({
                     {!task.lesson?.box &&
                         <div className={styles.blockDetails}>
                             <TaskMeta task={task} showTime={false} />
-                            {personal && !task.lesson && <TaskLabels task={task} onOpenGroup={onOpenGroup} />}
+                            {personal && !task.lesson && <TaskLabels task={task} />}
                             {task.lesson?.info && <span className={styles.entryMeta}>{task.lesson.info}</span>}
                         </div>}
                     {/* in a shared calendar who added it matters, on a short block too */}

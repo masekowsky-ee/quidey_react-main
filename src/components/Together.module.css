@@ -85,11 +85,7 @@
 /* ---------- lists and rows ---------- */
 
 .list{
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
+    composes: listColumn from './ui.module.css';
 }
 
 /* a list in a card that can get long (tasks, people): grows up to a limit, then scrolls inside,
@@ -131,8 +127,6 @@
     color: var(--primary-fg);
 }
 
-.avatar,
-.avatarSmall,
 .chipAvatar{
     flex-shrink: 0;
     display: inline-flex;
@@ -145,18 +139,6 @@
     border-radius: 50%;
     corner-shape: round;
     user-select: none;
-}
-
-.avatar{
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 0.95rem;
-}
-
-.avatarSmall{
-    width: 1.6rem;
-    height: 1.6rem;
-    font-size: 0.6875rem;
 }
 
 .chipAvatar{
@@ -854,10 +836,6 @@ a.primaryBtn{
 
 /* ---------- team ---------- */
 
-.avatarLive{
-    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary);
-}
-
 .liveText{
     font-size: 0.8rem;
     color: var(--primary-fg);
@@ -891,144 +869,6 @@ a.primaryBtn{
 .addPersonBtn:hover{
     color: var(--text-h);
     border-color: var(--btn-border-hover);
-}
-
-/* ---------- activity & chat ---------- */
-
-.feedCard{
-    display: flex;
-    flex-direction: column;
-}
-
-.feed{
-    list-style: none;
-    margin: 0;
-    /* the top padding matches the fade below, so nothing is hidden when scrolled to the top */
-    padding: 1.25rem 0.25rem 0.25rem 0;
-    max-height: 22rem;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.55rem;
-    overscroll-behavior: contain;
-    /* older entries fade out at the top edge instead of being cut off hard */
-    mask-image: linear-gradient(to bottom, transparent 0, #000 1.25rem);
-}
-
-/* entries keep their height and the list scrolls; otherwise the column squeezes and clips them */
-.feed > li{
-    flex-shrink: 0;
-}
-
-/* in the team sidebar the feed fills whatever height is left */
-.feedTall{
-    flex: 1;
-    min-height: 0;
-}
-
-.feedTall .feed{
-    flex: 1;
-    max-height: none;
-    min-height: 8rem;
-}
-
-.feedEvent{
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: baseline;
-    gap: 0.5rem;
-    font-size: 0.82rem;
-    color: var(--text-muted);
-}
-
-.feedDot{
-    width: 0.4rem;
-    height: 0.4rem;
-    border-radius: 50%;
-    background-color: var(--btn-border);
-    transform: translateY(-0.1rem);
-}
-
-.feedDot[data-type='task_done']{ background-color: var(--primary); }
-.feedDot[data-type='started']{ background-color: var(--primary-fg); }
-.feedDot[data-type='joined'],
-.feedDot[data-type='created']{ background-color: var(--text-h); }
-.feedDot[data-type='left'],
-.feedDot[data-type='removed'],
-.feedDot[data-type='ended']{ background-color: var(--danger); }
-
-.feedText{
-    min-width: 0;
-    overflow-wrap: anywhere;
-}
-
-.feedTime{
-    flex-shrink: 0;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    white-space: nowrap;
-}
-
-.message,
-.messageMine{
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    gap: 0.4rem;
-}
-
-.messageMine{
-    justify-content: flex-end;
-}
-
-.bubble{
-    max-width: 85%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-    padding: 0.4rem 0.7rem;
-    background-color: var(--surface-inset);
-    border: 1px solid var(--btn-border);
-    border-radius: var(--radius) var(--radius) var(--radius) var(--radius-sm);
-}
-
-.messageMine .bubble{
-    background-color: color-mix(in srgb, var(--primary) 16%, var(--surface));
-    border-color: color-mix(in srgb, var(--primary) 30%, transparent);
-    border-radius: var(--radius) var(--radius) var(--radius-sm) var(--radius);
-}
-
-.bubbleName{
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--text-h);
-}
-
-.bubbleText{
-    font-size: 0.9rem;
-    color: var(--text-h);
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-}
-
-.bubble .feedTime{
-    align-self: flex-end;
-}
-
-.chatForm{
-    display: flex;
-    flex-direction: row;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-}
-
-.chatForm input{
-    flex: 1;
-    min-width: 0;
-}
-
-.chatForm .primaryBtn{
-    min-width: 0;
 }
 
 /* ---------- summary ---------- */
@@ -1346,10 +1186,6 @@ a.primaryBtn{
         max-height: none;
     }
 
-    .feedTall .feed{
-        max-height: 24rem;
-    }
-
     .roomSide{
         position: static;
     }
@@ -1480,15 +1316,4 @@ a.primaryBtn{
 .lead{
     margin: 0;
     color: var(--text-muted);
-}
-
-/* a profile picture fills the circle (the frame of a large avatar stays around it) */
-.avatarPicture{
-    display: block;
-    flex: none;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: inherit;
-    corner-shape: round;
 }

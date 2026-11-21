@@ -3,12 +3,13 @@ import own from './Family.module.css';
 import { useId, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
-import { fill, formatDate } from '../../features/helperFunction';
+import { fill } from '../../features/helperFunction';
 import { movableTasks, moveToFamily } from '../../features/family/family';
 import { refreshTasks } from '../../features/tasks/taskAction';
 import { useFamilyRun } from './useFamilyRun';
 import Dialog from '../Dialog.jsx';
 import Icon from '../icons';
+import OpenTaskList from '../together/OpenTaskList';
 
 // "From my tasks": my own tasks and events, each moved into the family after a question (it
 // leaves my list). subGroup: the shown sub-group, which it goes into. onChanged(family).
@@ -27,29 +28,16 @@ export default function MoveMyTasks({ family, subGroup = null, onChanged }) {
     };
 
     return (
-        <section className={styles.card}>
-            <h2 className={styles.cardTitle}>{t('familyMoveTitle')}</h2>
-            {tasks.length === 0 ? <p className={styles.emptyLine}>{t('familyMoveEmpty')}</p> : (
-                <ul className={styles.scrollList}>
-                    {tasks.map(task => (
-                        <li key={task.id} className={styles.row}>
-                            <div className={styles.who}>
-                                <span className={styles.name}>{task.name}</span>
-                                <span className={styles.meta}>
-                                    {[task.kind === 'event' && t('kind_event'), task.due && formatDate(task.due)].filter(Boolean).join(' · ')}
-                                </span>
-                            </div>
-                            <button type="button" className={styles.secondaryBtn} onClick={() => setAsking(task)}
-                                aria-label={`${t('familyMoveBtn')}: ${task.name}`}>
-                                {t('familyMoveBtn')}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            )}
+        <OpenTaskList title={t('familyMoveTitle')} emptyText={t('familyMoveEmpty')} tasks={tasks}
+            renderAction={(task) => (
+                <button type="button" className={styles.secondaryBtn} onClick={() => setAsking(task)}
+                    aria-label={`${t('familyMoveBtn')}: ${task.name}`}>
+                    {t('familyMoveBtn')}
+                </button>
+            )}>
             {asking && <MoveQuestion key={asking.id} task={asking}
                 onAnswer={(yes) => { const task = asking; setAsking(null); if (yes) move(task); }} />}
-        </section>
+        </OpenTaskList>
     );
 }
 

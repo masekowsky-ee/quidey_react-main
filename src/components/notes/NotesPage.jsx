@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useSearchParams } from 'react-router-dom';
-import { fetchNotes, createNote, updateNote, removeNote, checklistCount } from '../../features/focus/notebook';
+import { checklistCount } from '../../features/focus/notebook';
+import { useNotes, useNoteFolders, useShortDate } from '../../features/notes/useNotes';
 import {
-    fetchFolders, createFolder, updateFolder, removeFolder, fetchTrash, emptyTrash,
+    createFolder, updateFolder, removeFolder, fetchTrash, emptyTrash,
     parseView, notesInView, sortNotes, tagCounts, titleOf, templateNote, duplicateOf, daysLeftInTrash,
     SORTS, NOTE_TEMPLATES, FOLDER_EMOJIS, FOLDER_NAME_MAX, TRASH_DAYS,
 } from '../../features/notes/notes';
@@ -116,11 +117,11 @@ export default function NotesPage() {
     const view = parseView(viewKey);
     const openId = Number(params.get('note')) || null;
 
-    const [notes, setNotes] = useState(null);
+    const { notes, setNotes, merge: onChange, create, trash: trashInList, restore: restoreInList, remove, onScanDone } = useNotes();
     const aiQuota = useAiQuota();
     const [scanning, setScanning] = useState(false);
     const [trash, setTrash] = useState(null);
-    const [folders, setFolders] = useState([]);
+    const [folders, setFolders] = useNoteFolders();
     const [query, setQuery] = useState('');
     const [sort, setSort] = useState(() => stored(SORT_KEY, SORTS, 'updated'));
     const [layout, setLayout] = useState(() => stored(LAYOUT_KEY, ['list', 'grid'], 'grid'));
@@ -131,9 +132,7 @@ export default function NotesPage() {
     const failed = useCallback(() => dispatch(showToast(t('noteSaveFailed'), 'error')), [dispatch, t]);
 
     useEffect(() => {
-        fetchNotes().then(setNotes).catch(() => setNotes([]));
         fetchTrash().then(setTrash).catch(() => setTrash([]));
-        fetchFolders().then(setFolders).catch(() => {});
     }, []);
 
     const go = (changes, replace = false) => {
@@ -147,53 +146,38 @@ export default function NotesPage() {
     const closeNote = () => go({ note: null });
     const pickView = (key) => { setQuery(''); go({ view: key, note: null }); };
 
-    const onChange = useCallback((saved) => {
-        setNotes(prev => prev?.map(note => note.id === saved.id ? saved : note) ?? prev);
-    }, []);
-
     // counts of folders follow the list (the server's are only the first ones)
     const folderCount = (id) => (notes ?? []).filter(note => note.folderId === id && !note.archived).length;
 
     const newNote = async (template = null, copy = null) => {
         // no title of its own: until one is typed the list names it after its first heading (titleOf)
         const base = copy ?? (template ? templateNote(template, language) : { title: '', body: '' });
-        try {
-            const note = await createNote({
-                ...base,
-                // made where I am looking: in this folder, with this tag
-                ...(view.kind === 'folder' && !copy ? { folderId: view.folderId } : {}),
-                ...(view.kind === 'tag' && !copy ? { tags: [view.tag] } : {}),
-                ...(view.kind === 'pinned' && !copy ? { pinned: true } : {}),
-            });
-            setNotes(prev => [note, ...(prev ?? [])]);
-            go({ note: note.id, ...(['archive', 'trash'].includes(view.kind) ? { view: 'all' } : {}) });
-        } catch (err) {
-            dispatch(showToast(err.code === 'NOTEBOOK_LIMIT' ? t('noteLimit') : err.code === 'NOTEBOOK_STORAGE_FULL' ? t('noteStorageFull') : t('noteSaveFailed'), 'error'));
-        }
+        const note = await create({
+            ...base,
+            // made where I am looking: in this folder, with this tag
+            ...(view.kind === 'folder' && !copy ? { folderId: view.folderId } : {}),
+            ...(view.kind === 'tag' && !copy ? { tags: [view.tag] } : {}),
+            ...(view.kind === 'pinned' && !copy ? { pinned: true } : {}),
+        });
+        if (note) go({ note: note.id, ...(['archive', 'trash'].includes(view.kind) ? { view: 'all' } : {}) });
     };
 
     const trashNote = async (note) => {
-        try {
-            const saved = await updateNote(note.id, { trashed: true });
-            setNotes(prev => prev.filter(item => item.id !== note.id));
-            setTrash(prev => [saved, ...(prev ?? [])]);
-            closeNote();
-            dispatch(showToast(t('noteTrashed'), 'info', {
-                action: { label: t('toastUndo'), run: () => restoreNote(saved) },
-            }));
-        } catch { failed(); }
+        const saved = await trashInList(note.id);
+        if (!saved) return;
+        setTrash(prev => [saved, ...(prev ?? [])]);
+        closeNote();
+        dispatch(showToast(t('noteTrashed'), 'info', {
+            action: { label: t('toastUndo'), run: () => restoreNote(saved) },
+        }));
     };
 
     const restoreNote = async (note) => {
-        try {
-            const saved = await updateNote(note.id, { trashed: false });
-            setTrash(prev => (prev ?? []).filter(item => item.id !== note.id));
-            setNotes(prev => [saved, ...(prev ?? []).filter(item => item.id !== note.id)]);
-        } catch { failed(); }
+        if (await restoreInList(note.id)) setTrash(prev => (prev ?? []).filter(item => item.id !== note.id));
     };
 
     const deleteForGood = async (note) => {
-        await removeNote(note.id).catch(() => {});
+        await remove(note.id);
         setTrash(prev => prev.filter(item => item.id !== note.id));
     };
 
@@ -245,7 +229,7 @@ export default function NotesPage() {
     const folder = view.kind === 'folder' ? folders.find(item => item.id === view.folderId) : null;
     const open = openId ? notes?.find(note => note.id === openId) : null;
     const folderName = (id) => folders.find(item => item.id === id);
-    const dateFmt = new Intl.DateTimeFormat(localeOf(language), { day: 'numeric', month: 'short' });
+    const dateFmt = useShortDate();
     const activeCount = (notes ?? []).filter(note => !note.archived).length;
     const groups = useMemo(() => groupNotes(shown, { sort, view, t, language }), [shown, sort, view, t, language]);
 
@@ -261,8 +245,7 @@ export default function NotesPage() {
 
     return (
         <div className={styles.page} data-part="notes">
-            {scanning && <ScanSheet onClose={() => setScanning(false)}
-                onDone={(made) => { if (made.notes) fetchNotes().then(setNotes).catch(() => {}); }} />}
+            {scanning && <ScanSheet onClose={() => setScanning(false)} onDone={onScanDone} />}
             <header className={styles.head}>
                 <div>
                     <h1 className={styles.title}>{t('notesTitle')}</h1>

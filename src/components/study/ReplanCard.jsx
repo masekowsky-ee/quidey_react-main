@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     fetchStudyStatus, fetchStudySettings, fetchGoals, dismissBehind, formatHours,
@@ -7,6 +7,7 @@ import {
 import { fill, toInputDate } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import PlanPreview from './PlanPreview.jsx';
+import { useStudyLoad } from './useStudyLoad.js';
 import styles from './Study.module.css';
 
 const LATER_KEY = 'studyLater';
@@ -29,12 +30,7 @@ function ReplanCardContent() {
     const [hidden, setHidden] = useState(laterToday);
     const [preview, setPreview] = useState(false);
 
-    useEffect(() => {
-        dispatch(fetchStudyStatus()).catch(() => {});
-        if (!settings) dispatch(fetchStudySettings()).catch(() => {});
-        // once on arrival
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dispatch]);
+    useStudyLoad((d) => [d(fetchStudyStatus()), !settings && d(fetchStudySettings())]);
 
     const goals = status?.goals ?? [];
     const sessionMinutes = settings?.sessionMinutes;

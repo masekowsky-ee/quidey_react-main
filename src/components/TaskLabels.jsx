@@ -1,16 +1,20 @@
 import styles from './TaskLabels.module.css';
+import { useContext } from 'react';
 import Icon from './icons';
 import { useTranslation } from '../i18n/useTranslation';
 import { displayName, fill } from '../features/helperFunction';
 import { groupColorAttr } from '../features/tasks/taskColors';
 import { useTaskGroups } from '../features/collections/collections';
+import { OpenGroupContext } from '../features/collections/openGroup';
 
 // Small labels under a task's name: the groups it is in, or for a task from a shared
 // session that session (and who it's assigned to). A click on a label opens that group.
 // A group with a colour shows a dot in it. For testers the collections it is in take the
 // place of groups (with their emoji).
-export default function TaskLabels({ task, onOpenGroup }) {
+export default function TaskLabels({ task, onOpenGroup: openFromProp }) {
     const { t } = useTranslation();
+    const openFromPage = useContext(OpenGroupContext);
+    const onOpenGroup = openFromProp ?? openFromPage;
     const { groupsOf } = useTaskGroups();
 
     if (task.shared) {

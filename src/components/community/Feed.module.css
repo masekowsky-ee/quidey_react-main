@@ -275,17 +275,7 @@
 }
 
 .textBtn{
-    padding: 0;
-    min-width: 0;
-    height: auto;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-h);
-    background: none;
-    border: none;
-    box-shadow: none;
-    text-decoration: underline;
-    text-underline-offset: 2px;
+    composes: textLink from '../ui.module.css';
 }
 
 .textBtn:hover{

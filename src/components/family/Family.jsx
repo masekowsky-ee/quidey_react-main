@@ -9,7 +9,7 @@ import { fetchFriends } from '../../features/friends/friendsAction';
 import { createFamily, fetchFamilies, joinFamily, removeFamilyMember } from '../../features/family/family';
 import { useFamilyRun } from './useFamilyRun';
 import { calendarLink } from '../../features/calendar/sources';
-import Avatar from '../together/Avatar';
+import ProfileAvatar from '../profile/ProfileAvatar';
 import FriendPicker from '../together/FriendPicker';
 import { friendsPath } from '../../features/community/paths';
 
@@ -83,7 +83,7 @@ export default function Family() {
                     <ul className={styles.list}>
                         {invites.map(invite => (
                             <li key={invite.id} className={styles.row}>
-                                <Avatar user={invite.invitedBy ?? invite.owner} />
+                                <ProfileAvatar plain user={invite.invitedBy ?? invite.owner} />
                                 <div className={styles.who}>
                                     <span className={styles.name}>{invite.name}</span>
                                     <span className={styles.meta}>

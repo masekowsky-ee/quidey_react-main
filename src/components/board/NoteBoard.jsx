@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useBoard, fetchBoardNote, pinToBoard, unpinFromBoard, boardErrorText, BOARD_NOTES_MAX } from '../../features/board/board';
-import { fetchNotes } from '../../features/focus/notebook';
+import { useNotes } from '../../features/notes/useNotes';
 import { titleOf, matchesQuery, sortNotes } from '../../features/notes/notes';
 import { useFocusOnArrival } from '../../features/layout/dragDismiss';
 import { useNow } from '../../features/together/work';
@@ -13,7 +13,8 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { localeOf } from '../../i18n/locale';
 import { NoteView } from '../notes/NoteView.jsx';
 import NotePreview from '../notes/NotePreview.jsx';
-import Avatar from '../together/Avatar';
+import Lightbox, { ImageThumb } from '../notes/Lightbox.jsx';
+import ProfileAvatar from '../profile/ProfileAvatar';
 import Dialog from '../Dialog.jsx';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
@@ -58,7 +59,7 @@ function PinnedNote({ kind, boardId, pin, onClose, onRemove }) {
         <BoardSheet title={titleOf(note) || t('noteUntitled')} onClose={onClose} wide>
             {(dismiss) => <>
                 <p className={styles.byline}>
-                    <Avatar user={note.owner} small />
+                    <ProfileAvatar plain user={note.owner} size="small" />
                     <span>{fill(t('noteBoardBy'), { name: displayName(note.owner) })} · {fill(t('noteBoardChanged'), { when: formatRelative(note.updatedAt, now, locale) })}</span>
                 </p>
                 <div className={styles.readBody} data-task-color={note.color ?? undefined}>
@@ -79,9 +80,7 @@ function PinnedNote({ kind, boardId, pin, onClose, onRemove }) {
                         {images.map((item, i) =>
                             <li key={i}>
                                 {item.data
-                                    ? <button type="button" className={styles.thumb} onClick={() => setBigImage(item)} aria-label={item.name || t('noteImage')}>
-                                        <img src={item.data} alt={item.name || t('noteImage')} />
-                                    </button>
+                                    ? <ImageThumb item={item} size="large" onOpen={setBigImage} />
                                     : <Bone w="5rem" h="5rem" />}
                             </li>)}
                     </ul>}
@@ -97,9 +96,7 @@ function PinnedNote({ kind, boardId, pin, onClose, onRemove }) {
                 </div>
                 {/* on the body: the sheet moves (a transform), which would hold a fixed layer inside it */}
                 {bigImage && createPortal(
-                    <div className={styles.lightbox} role="dialog" aria-label={bigImage.name || t('noteImage')} onClick={() => setBigImage(null)}>
-                        <img src={bigImage.data} alt={bigImage.name || t('noteImage')} />
-                    </div>,
+                    <Lightbox item={bigImage} layer="alert" onClose={() => setBigImage(null)} />,
                     document.body
                 )}
             </>}
@@ -110,11 +107,10 @@ function PinnedNote({ kind, boardId, pin, onClose, onRemove }) {
 // Picking one of my notes to pin here (the ones already here are marked)
 function PinPicker({ pinnedIds, onPick, onClose }) {
     const { t } = useTranslation();
-    const [notes, setNotes] = useState(null);
+    const { notes } = useNotes();
     const [query, setQuery] = useState('');
     const field = useRef(null);
     useFocusOnArrival(field);
-    useEffect(() => { fetchNotes().then(setNotes).catch(() => setNotes([])); }, []);
     const shown = useMemo(() => sortNotes((notes ?? []).filter(note => !note.archived && matchesQuery(note, query)), 'updated'), [notes, query]);
 
     return (
@@ -199,7 +195,7 @@ export default function NoteBoard({ kind, id, canPin = true }) {
                                     <span className={styles.cardTitle}>{titleOf(item) || t('noteUntitled')}</span>
                                     <NotePreview note={item} className={styles.preview} max={220} />
                                     <span className={styles.cardMeta}>
-                                        <Avatar user={item.owner} small />
+                                        <ProfileAvatar plain user={item.owner} size="small" />
                                         <span>{displayName(item.owner)}</span>
                                         <span aria-hidden="true">·</span>
                                         <time dateTime={item.updatedAt}>{formatRelative(item.updatedAt, now, locale)}</time>

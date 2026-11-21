@@ -97,12 +97,7 @@
 }
 
 .exportBtn{
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.85rem;
-    padding: 0.3rem 0.8rem;
-    white-space: nowrap;
+    composes: exportBtn from '../Admin.module.css';
 }
 
 .exportBtn svg{

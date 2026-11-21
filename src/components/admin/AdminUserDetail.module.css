@@ -26,9 +26,7 @@
 }
 
 .who{
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
+    composes: who from '../Admin.module.css';
 }
 
 .title{

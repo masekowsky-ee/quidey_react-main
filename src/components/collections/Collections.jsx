@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
     useCollections, selectCollectionsLoaded, collectionContents, createCollection, updateCollection, deleteCollection,
     addToCollection, removeFromCollection, hasItem, COLLECTION_EMOJIS, COLLECTION_NAME_MAX, COLLECTION_DESCRIPTION_MAX,
 } from '../../features/collections/collections';
-import { fetchNotes, createNote } from '../../features/focus/notebook';
+import { useNotes as useNoteList } from '../../features/notes/useNotes';
 import { firstLine, titleOf, matchesQuery } from '../../features/notes/notes';
 import { addTask, updateTaskProps } from '../../features/tasks/taskAction';
 import { groupColorAttr, taskColorAttr } from '../../features/tasks/taskColors';
@@ -19,13 +19,6 @@ import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
 import styles from './Collections.module.css';
-
-// my notes, loaded once per page (they are not in the store)
-function useNotes() {
-    const [notes, setNotes] = useState(null);
-    useEffect(() => { fetchNotes().then(setNotes).catch(() => setNotes([])); }, []);
-    return [notes, setNotes];
-}
 
 const dayFormat = (language) => new Intl.DateTimeFormat(localeOf(language), { weekday: 'short', day: 'numeric', month: 'short' });
 
@@ -52,7 +45,7 @@ function CollectionList() {
     const collections = useCollections();
     const loaded = useSelector(selectCollectionsLoaded);
     const tasks = useSelector(state => state.task.tasks);
-    const [notes] = useNotes();
+    const { notes } = useNoteList();
     const [name, setName] = useState('');
     const [emoji, setEmoji] = useState(COLLECTION_EMOJIS[0]);
     const days = dayFormat(language);
@@ -126,7 +119,7 @@ function CollectionList() {
 const KINDS = [['task', 'collectionKindTask'], ['event', 'collectionKindEvent'], ['note', 'collectionKindNote']];
 
 // Search what I have (tasks, events, notes not in it yet) or make something new right in it
-function AddBar({ collection, tasks, notes, onNoteMade }) {
+function AddBar({ collection, tasks, notes, create }) {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
     const [query, setQuery] = useState('');
@@ -162,8 +155,8 @@ function AddBar({ collection, tasks, notes, onNoteMade }) {
         setBusy(true);
         try {
             if (making === 'note') {
-                const note = await createNote({ title: name.trim(), body: '' });
-                onNoteMade(note);
+                const note = await create({ title: name.trim(), body: '' });
+                if (!note) return;
                 await dispatch(addToCollection(collection.id, { kind: 'note', id: note.id }));
             } else {
                 const task = await dispatch(addTask(name.trim(), day || null, '', null, null, undefined, making === 'event' ? { kind: 'event' } : {}));
@@ -232,7 +225,7 @@ function CollectionDetail({ id }) {
     const collections = useCollections();
     const loaded = useSelector(selectCollectionsLoaded);
     const tasks = useSelector(state => state.task.tasks);
-    const [notes, setNotes] = useNotes();
+    const { notes, create } = useNoteList();
     const [editing, setEditing] = useState(null);
     const collection = collections.find(item => item.id === id);
     const [name, setName] = useState(collection?.name ?? '');
@@ -304,7 +297,7 @@ function CollectionDetail({ id }) {
                     </span>}
             </div>
 
-            <AddBar collection={collection} tasks={tasks} notes={notes} onNoteMade={note => setNotes(prev => [note, ...(prev ?? [])])} />
+            <AddBar collection={collection} tasks={tasks} notes={notes} create={create} />
 
             {nothing && notes !== null &&
                 <div className={styles.empty}><Icon name="collection" size={28} /><p>{t('collectionEmptyHint')}</p></div>}

@@ -7,6 +7,17 @@ import { addEventType } from '../../features/tasks/taskAction';
 import { EVENT_TYPE_SUGGESTIONS, eventTypeErrorText } from '../../features/tasks/kinds';
 import { showToast } from '../../features/toast/toast';
 
+// A quiet dashed suggestion under the name ("make it an event of type X", "make it a reminder"):
+// a dot in the colour (data-task-color) or an icon, then the text. extra: more classes.
+export function TypeHint({ color, icon, onClick, className = '', children }) {
+    return (
+        <button type="button" className={`${styles.typeHint} ${className}`} data-task-color={color ?? undefined} onClick={onClick}>
+            {icon ?? <span className={styles.typeHintDot} aria-hidden="true" />}
+            {children}
+        </button>
+    );
+}
+
 // Task or event, as two buttons side by side (a radio group). value: 'task' | 'event'.
 // kinds: the choices (testers also get 'reminder': a reminder without a task, QuickAdd swaps the form)
 export function KindSwitch({ value, onChange, kinds = ['task', 'event'] }) {

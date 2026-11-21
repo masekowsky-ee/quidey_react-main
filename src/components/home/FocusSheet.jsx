@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './FocusSheet.module.css';
@@ -7,12 +7,9 @@ import DurationInput from '../focus/DurationInput.jsx';
 import { useTranslation } from '../../i18n/useTranslation';
 import { dueText, fill, formatClock } from '../../features/helperFunction';
 import { durationText } from '../../features/calendar/calendar';
-import { createNote, refreshTaskNotes, updateTaskProps } from '../../features/tasks/taskAction';
 import TaskNoteRow from '../task/TaskNoteRow.jsx';
 import CardNote from './CardNote.jsx';
 import { useCardNote } from '../../features/home/cardNote';
-import { setSharedTaskDone, togetherErrorText } from '../../features/together/togetherAction';
-import { showToast } from '../../features/toast/toast';
 import {
     PHASE_LABEL, pauseFocus, selectTaskTime, selectTimerInProgress, selectTimerProgress,
     setSessionParams, setTimerMode, skipPhase, startFocus, stopFocus,
@@ -20,8 +17,7 @@ import {
 import { useFocusClock } from '../../features/session/useFocusClock';
 import { plannedProgress, selectFocusByTask } from '../../features/tasks/plannedTime';
 import { useTaskGroups } from '../../features/collections/collections';
-import { useMotionLevel, burstFrom } from '../../features/settings/motion';
-import { playSound } from '../../features/settings/sound';
+import { useActiveTaskActions } from '../../features/home/useActiveTaskActions';
 
 // "30:00", "1:05:00": hours only when there are any
 const clockText = (ms) => formatClock(ms).replace(/^00:/, '');
@@ -37,8 +33,8 @@ const LENGTHS = [15, 25, 30, 45, 60, 90];
 export default function FocusSheet({ dropZoneRef, activeTask, setActiveTask, onRelease, dragging = false }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const motionLevel = useMotionLevel();
     useFocusClock();
+    const { markDone, saveDescription, addNote, addingNote, setAddingNote, noteInputRef } = useActiveTaskActions(activeTask, setActiveTask);
 
     const { timer, timerMode, pomodoro, sessionParams } = useSelector(state => state.session);
     const percent = useSelector(selectTimerProgress);
@@ -55,19 +51,12 @@ export default function FocusSheet({ dropZoneRef, activeTask, setActiveTask, onR
     const onBreak = isPomodoro && pomodoro.phase !== 'focus';
     const own = activeTask && !activeTask.shared;
     const taskNotes = own ? (notes ?? []).filter(note => note.task_id === activeTask.id) : [];
-    // notes about the task written in the notebook (Fokusraum, Notizen) since the list was loaded
-    useEffect(() => { dispatch(refreshTaskNotes()).catch(() => {}); }, [dispatch]);
 
     // description and notes, opened for one task (another task starts folded)
     const [openFor, setOpenFor] = useState(null);
     const open = openFor !== null && openFor === activeTask?.id;
     const setOpen = (value) => setOpenFor(value ? activeTask.id : null);
-    const [addingFor, setAddingFor] = useState(null);
-    const addingNote = addingFor !== null && addingFor === activeTask?.id;
-    const setAddingNote = (value) => setAddingFor(value ? activeTask.id : null);
     const [editLength, setEditLength] = useState(false);
-    const noteInputRef = useRef(null);
-    useEffect(() => { if (addingNote) noteInputRef.current?.focus(); }, [addingNote]);
 
     // what is known about the task, on one line
     const progress = own ? plannedProgress(activeTask, focusByTask) : null;
@@ -80,30 +69,6 @@ export default function FocusSheet({ dropZoneRef, activeTask, setActiveTask, onR
         else meta.push(...groupsOf(activeTask).map(group => group.name));
         if (activeTask.due && !activeTask.shared) meta.push(dueText(activeTask.due, t));
     }
-
-    const done = (e) => {
-        playSound('done');
-        if (motionLevel !== 'minimal' && e?.currentTarget) burstFrom(e.currentTarget, motionLevel === 'extreme' ? 60 : 30);
-        if (activeTask.shared) {
-            dispatch(setSharedTaskDone(activeTask.shared.sessionId, activeTask.shared.taskId, true))
-                .catch(err => dispatch(showToast(togetherErrorText(t, err), 'error')));
-        } else {
-            dispatch(updateTaskProps({ done: true }, activeTask));
-        }
-        setActiveTask(null);
-    };
-
-    const saveDescription = (e) => {
-        const description = e.target.value.trim();
-        if (description === (activeTask.description ?? '')) return;
-        setActiveTask(prev => ({ ...prev, description }));
-        dispatch(updateTaskProps({ description }, activeTask));
-    };
-    const addNote = (e) => {
-        const text = e.target.value.trim();
-        setAddingNote(false);
-        if (text) dispatch(createNote(activeTask.id, text));
-    };
 
     const startLabel = inProgress ? t('focusResume')
         : !stopwatch && timer.time < 1000 ? t('focusAgain')
@@ -195,7 +160,7 @@ export default function FocusSheet({ dropZoneRef, activeTask, setActiveTask, onR
                         <button type="button" className={styles.icon} onClick={onRelease} title={t('releaseTask')} aria-label={t('releaseTask')}>
                             <Icon name="release" size={18} />
                         </button>
-                        <button type="button" className={styles.check} onClick={done} title={t('markDone')} aria-label={t('markDone')}>
+                        <button type="button" className={styles.check} onClick={markDone} title={t('markDone')} aria-label={t('markDone')}>
                             <Icon name="check" size={18} strokeWidth={2.2} />
                         </button>
                     </>}
@@ -213,7 +178,7 @@ export default function FocusSheet({ dropZoneRef, activeTask, setActiveTask, onR
                         placeholder={t('description')} aria-label={t('description')} onBlur={saveDescription} />
                     <ul className={styles.notes}>
                         {taskNotes.map(note =>
-                            <TaskNoteRow key={note.id} taskId={activeTask.id} note={note} buttonClassName={styles.icon} />)}
+                            <TaskNoteRow key={note.id} taskId={activeTask.id} note={note} />)}
                         {addingNote &&
                             <li><input ref={noteInputRef} type="text" aria-label={t('addNote')} onBlur={addNote}
                                 onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); if (e.key === 'Escape') setAddingNote(false); }} /></li>}

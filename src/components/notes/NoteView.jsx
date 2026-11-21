@@ -1,5 +1,5 @@
 import { noteLines, richParts } from '../../features/focus/notebook';
-import styles from '../focus/Notebook.module.css';
+import styles from './NoteBody.module.css';
 import own from './Notes.module.css';
 
 // A line's text with its links, **bold** and `code` as React parts, never HTML

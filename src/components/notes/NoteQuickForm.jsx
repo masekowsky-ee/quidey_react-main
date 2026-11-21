@@ -4,7 +4,8 @@
 
 import { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { createNote, NOTE_BODY_MAX } from '../../features/focus/notebook';
+import { NOTE_BODY_MAX } from '../../features/focus/notebook';
+import { useCreateNote } from '../../features/notes/useNotes';
 import { showToast } from '../../features/toast/toast';
 import { useFocusOnArrival } from '../../features/layout/dragDismiss';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -20,6 +21,7 @@ import styles from '../Form.module.css';
 export default function NoteQuickForm({ initialTitle = '', sheet, onKind, onScan, onDone }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
+    const createNote = useCreateNote();
     const [title, setTitle] = useState(initialTitle);
     const [busy, setBusy] = useState(false);
     // the editor hands over a way to read its text (worked out only when saving)
@@ -33,14 +35,10 @@ export default function NoteQuickForm({ initialTitle = '', sheet, onKind, onScan
         if (!title.trim() && !body.trim()) { onDone(); return; }
         if (body.length > NOTE_BODY_MAX) { dispatch(showToast(t('noteTooLong'), 'error')); return; }
         setBusy(true);
-        try {
-            const note = await createNote({ title: title.trim(), body });
-            dispatch(showToast(t('noteQuickSaved'), 'success', { to: `/notes?note=${note.id}` }));
-            onDone();
-        } catch (err) {
-            dispatch(showToast(err.code === 'NOTEBOOK_LIMIT' ? t('noteLimit') : t('noteSaveFailed'), 'error'));
-            setBusy(false);
-        }
+        const note = await createNote({ title: title.trim(), body });
+        if (!note) { setBusy(false); return; }
+        dispatch(showToast(t('noteQuickSaved'), 'success', { to: `/notes?note=${note.id}` }));
+        onDone();
     }
 
     return (

@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import { GUEST_PATHS } from '../app/routeTable.js';
 
 // Quidey opens for everybody; what needs an account asks for one. Anything that does asks
 // openAuth() for the sign-in / sign-up window (components/auth/AuthDialog.jsx listens).
@@ -11,8 +12,8 @@ export function openAuth(mode = 'signin', detail = {}) {
     window.dispatchEvent(new CustomEvent(OPEN_AUTH_EVENT, { detail: { mode, ...detail } }));
 }
 
-// The pages a visitor without an account may look at; every other address asks them to sign in
-const GUEST_PATHS = ['/', '/calendar', '/focus'];
+// The pages a visitor without an account may look at (features/app/routeTable.js, guest: true);
+// every other address asks them to sign in
 export const isGuestPath = (pathname) => GUEST_PATHS.includes(pathname);
 
 // requireAccount(action?): with an account it runs action and answers true; without one it

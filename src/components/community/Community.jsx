@@ -10,11 +10,28 @@ import { fetchFriends, selectIncomingCount } from '../../features/friends/friend
 import { selectInviteCount } from '../../features/together/togetherAction';
 import { selectFamilyInviteCount } from '../../features/family/family';
 import Feed from './Feed';
-import Progress from './Progress';
+import LevelCard from './LevelCard';
+import Challenges from './Challenges';
+import Ranking from './Ranking';
 import OnlineNow from './OnlineNow';
 import Together from '../Together';
 import Social from '../Social';
 import Family from '../family/Family';
+
+// The progress tab: my level (with what it unlocks), today's and this week's challenges and the
+// week among friends. Wide: the level on the left, the rest beside it; narrow: one column.
+const Progress = () => (
+    <div className={styles.progress}>
+        <div className={styles.progressColumn}>
+            <LevelCard />
+        </div>
+        <div className={styles.progressColumn}>
+            <Challenges period="day" />
+            <Challenges period="week" />
+            <Ranking />
+        </div>
+    </div>
+);
 
 const TAB_CONTENT = { feed: Feed, progress: Progress, sessions: Together, friends: Social, family: Family };
 

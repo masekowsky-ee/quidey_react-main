@@ -8,7 +8,7 @@ import {
     fetchSharedSessions, joinSharedSession, removeSharedMember,
 } from '../features/together/togetherAction';
 import { useTogetherRun } from '../features/together/hooks';
-import Avatar from './together/Avatar';
+import ProfileAvatar from './profile/ProfileAvatar';
 import QuickStart from './together/QuickStart';
 
 // The shared sessions: invites, the open ones, a form to start one and the ended ones
@@ -85,7 +85,7 @@ export default function Together() {
                     <ul className={styles.list}>
                         {invites.map(invite => (
                             <li key={invite.id} className={styles.row}>
-                                <Avatar user={invite.invitedBy ?? invite.owner} />
+                                <ProfileAvatar plain user={invite.invitedBy ?? invite.owner} />
                                 <div className={styles.who}>
                                     <span className={styles.name}>{invite.name}</span>
                                     <span className={styles.meta}>

@@ -16,7 +16,7 @@ import { workOnSharedTask, dropSharedFocus } from '../../features/together/linke
 import { pauseFocus } from '../../features/session/sessionAction';
 import { useTogetherRun } from '../../features/together/hooks';
 import { taskColorAttr } from '../../features/tasks/taskColors';
-import Avatar from './Avatar';
+import ProfileAvatar from '../profile/ProfileAvatar';
 import TaskMeta from '../task/TaskMeta.jsx';
 import TaskEditDialog from '../task/TaskEditDialog.jsx';
 import Icon from '../icons.jsx';
@@ -165,7 +165,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                 {workers.length > 0 && (
                     <span className={styles.workers} title={workers.map(p => displayName(p.user)).join(', ')}>
                         <span className={styles.liveDot} />
-                        {workers.map(p => <Avatar key={p.user.id} user={p.user} small />)}
+                        {workers.map(p => <ProfileAvatar plain key={p.user.id} user={p.user} size="small" />)}
                     </span>
                 )}
                 {isOpen && !task.done && (

@@ -8,7 +8,6 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { localeOf } from '../../i18n/locale';
 import { displayName, fill, formatDuration, formatRelative, parseDate, sameDay, toDateOnly } from '../../features/helperFunction';
 import { dateKey, taskTimeText } from '../../features/calendar/calendar';
-import { fetchFriends } from '../../features/friends/friendsAction';
 import {
     addFamilyTask, removeFamilyTask, updateFamilyTask, deleteFamily, fetchFamily, fetchFamilyMessages, inviteToFamily, removeFamilyMember,
     renameFamily, sendFamilyMessage, updateFamily, FAMILY_EMOJIS, addFamilySubGroup, removeFamilySubGroup,
@@ -23,7 +22,7 @@ import { calendarLink } from '../../features/calendar/sources';
 import { useRealtime, useRealtimeRefresh, useSafetyPoll } from '../../features/realtime/socket';
 import { useNow } from '../../features/together/work';
 import { useFamilyRun } from './useFamilyRun';
-import Avatar from '../together/Avatar';
+import ProfileAvatar from '../profile/ProfileAvatar';
 import TaskEditDialog from '../task/TaskEditDialog';
 import { KindSwitch } from '../task/KindFields';
 import MoveMyTasks from './MoveMyTasks.jsx';
@@ -31,6 +30,7 @@ import Icon from '../icons.jsx';
 // the app's outline set, for what the calendar's icons don't have (flame, chevron)
 import AppIcon from '../icons';
 import FriendPicker from '../together/FriendPicker';
+import ChatPanel from '../together/ChatPanel';
 import NoteBoard from '../board/NoteBoard.jsx';
 
 const UPCOMING_MAX = 8;
@@ -431,7 +431,6 @@ function Upcoming({ family, onChanged, subGroup, subGroups }) {
 // Who's in it; the owner removes people, everybody invites their own friends
 function Members({ family, onChanged }) {
     const { t } = useTranslation();
-    const dispatch = useDispatch();
     const run = useFamilyRun();
     const friends = useSelector(state => state.friends.friends);
     const [inviting, setInviting] = useState(false);
@@ -439,8 +438,6 @@ function Members({ family, onChanged }) {
     const [busy, setBusy] = useState(false);
     // removing somebody takes a second click on the same button
     const [confirmId, setConfirmId] = useState(null);
-
-    useEffect(() => { if (inviting) dispatch(fetchFriends()).catch(() => {}); }, [inviting, dispatch]);
 
     const inFamily = new Set(family.people.map(person => person.user.id));
     const candidates = friends.filter(friend => !inFamily.has(friend.id));
@@ -483,7 +480,7 @@ function Members({ family, onChanged }) {
                     const mine = week.get(person.user.id);
                     return (
                     <li key={person.user.id} className={styles.row}>
-                        <Avatar user={{ ...person.user, online: person.online }} presence={person.user.id !== family.me} />
+                        <ProfileAvatar plain user={{ ...person.user, online: person.online }} presence={person.user.id !== family.me} />
                         <div className={styles.who}>
                             <span className={styles.name}>
                                 <Link to={`/u/${person.user.username}`}>{displayName(person.user)}</Link>
@@ -526,67 +523,18 @@ function Members({ family, onChanged }) {
 
 // The family's chat, newest at the bottom
 function FamilyChat({ family }) {
-    const { t, language } = useTranslation();
-    const locale = localeOf(language);
+    const { t } = useTranslation();
     const run = useFamilyRun();
-    const now = useNow(true, 30 * 1000);
     const { messages, hasMore, addMessages, loadOlder } = useFamilyChat(family.id);
-    const [text, setText] = useState('');
-    const [sending, setSending] = useState(false);
-
-    // follow new messages, unless the reader scrolled up to read older ones
-    const listRef = useRef(null);
-    const stickToBottom = useRef(true);
-    const lastId = messages.at(-1)?.id;
-    useEffect(() => {
-        const list = listRef.current;
-        if (list && stickToBottom.current) list.scrollTop = list.scrollHeight;
-    }, [lastId]);
-    const onScroll = () => {
-        const list = listRef.current;
-        stickToBottom.current = list.scrollHeight - list.scrollTop - list.clientHeight < 40;
-    };
-
-    const send = async (e) => {
-        e.preventDefault();
-        const message = text.trim();
-        if (!message) return;
-        setSending(true);
-        stickToBottom.current = true;
+    const items = messages.map(message => ({ ...message, type: 'message', mine: message.user?.id === family.me }));
+    const send = async (message) => {
         const sent = await run(sendFamilyMessage(family.id, message));
-        setSending(false);
-        if (sent) {
-            addMessages([sent]);
-            setText('');
-        }
+        if (sent) addMessages([sent]);
+        return Boolean(sent);
     };
-
     return (
-        <section className={`${styles.card} ${styles.feedCard} ${styles.feedTall}`}>
-            <h2 className={styles.cardTitle}>{t('familyChat')}</h2>
-            <ol className={styles.feed} ref={listRef} onScroll={onScroll} aria-live="polite" aria-label={t('familyChat')}>
-                {hasMore && <li className={own.loadOlder}><button type="button" className={styles.quietBtn} onClick={loadOlder}>{t('loadOlder')}</button></li>}
-                {messages.length === 0 && <li className={styles.emptyLine}>{t('familyChatEmpty')}</li>}
-                {messages.map(message => {
-                    const mine = message.user?.id === family.me;
-                    return (
-                        <li key={message.id} className={mine ? styles.messageMine : styles.message}>
-                            {!mine && <Avatar user={message.user} small />}
-                            <div className={styles.bubble}>
-                                {!mine && <span className={styles.bubbleName}>{displayName(message.user)}</span>}
-                                <span className={styles.bubbleText}>{message.text}</span>
-                                <time className={styles.feedTime} dateTime={message.createdAt}>{formatRelative(message.createdAt, now, locale)}</time>
-                            </div>
-                        </li>
-                    );
-                })}
-            </ol>
-            <form className={styles.chatForm} onSubmit={send}>
-                <input value={text} maxLength={MESSAGE_MAX} onChange={(e) => setText(e.target.value)}
-                    placeholder={t('familyMessagePlaceholder')} aria-label={t('familyMessagePlaceholder')} />
-                <button type="submit" className={styles.primaryBtn} disabled={sending || !text.trim()}>{t('send')}</button>
-            </form>
-        </section>
+        <ChatPanel items={items} tall onSend={send} hasMore={hasMore} onLoadOlder={loadOlder}
+            title={t('familyChat')} emptyText={t('familyChatEmpty')} placeholder={t('familyMessagePlaceholder')} maxLength={MESSAGE_MAX} />
     );
 }
 

@@ -6,7 +6,8 @@
 import { Component, Suspense, lazy, useId } from 'react';
 import { NoteView } from './NoteView.jsx';
 import { NOTE_BODY_MAX } from '../../features/focus/notebook';
-import styles from '../focus/Notebook.module.css';
+import styles from './NoteBody.module.css';
+import chrome from '../focus/Notebook.module.css';
 
 const RichNoteEditor = lazy(() => import('./RichNoteEditor.jsx'));
 
@@ -38,7 +39,7 @@ function PlainNoteText({ body, onChange, label, placeholder, autoFocus, tools, o
     };
     return (
         <>
-            {tools && <div className={styles.toolbar}>{tools({ currentLine, insertText })}</div>}
+            {tools && <div className={chrome.toolbar}>{tools({ currentLine, insertText })}</div>}
             <textarea id={id} className={styles.area} defaultValue={body} maxLength={NOTE_BODY_MAX} aria-label={label}
                 placeholder={placeholder} autoFocus={autoFocus} onPaste={onPaste} onChange={e => { const value = e.target.value; onChange(() => value); }} />
         </>

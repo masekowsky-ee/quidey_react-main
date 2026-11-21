@@ -1,20 +1,18 @@
 import styles from '../Together.module.css';
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
 import { displayName, formatDuration } from '../../features/helperFunction';
-import { fetchFriends } from '../../features/friends/friendsAction';
 import { inviteToSharedSession, removeSharedMember } from '../../features/together/togetherAction';
 import { selectWork, localMs, othersRunningMs, othersWorking, useNow } from '../../features/together/work';
 import { useTogetherRun } from '../../features/together/hooks';
-import Avatar from './Avatar';
+import ProfileAvatar from '../profile/ProfileAvatar';
 import FriendPicker from './FriendPicker';
 
 import Icon from '../icons';
 // Members with what they are doing right now, their time, and inviting more friends
 export default function TeamPresence({ session }) {
     const { t } = useTranslation();
-    const dispatch = useDispatch();
     const run = useTogetherRun();
     const friends = useSelector(state => state.friends.friends);
     const presence = useSelector(state => state.presence);
@@ -25,9 +23,6 @@ export default function TeamPresence({ session }) {
     const [showInvite, setShowInvite] = useState(false);
     const [invitees, setInvitees] = useState([]);
 
-    useEffect(() => {
-        dispatch(fetchFriends()).catch(() => {});
-    }, [dispatch]);
 
     const me = session.me;
     const isOpen = !session.endedAt;
@@ -65,7 +60,7 @@ export default function TeamPresence({ session }) {
             <ul className={styles.scrollList}>
                 {people.map(person => (
                     <li key={person.user.id} className={styles.row}>
-                        <Avatar user={{ ...person.user, online: person.online }} live={Boolean(person.task)}
+                        <ProfileAvatar plain user={{ ...person.user, online: person.online }} live={Boolean(person.task)}
                             presence={person.status === 'joined' && person.user.id !== me} />
                         <div className={styles.who}>
                             <span className={styles.name}>

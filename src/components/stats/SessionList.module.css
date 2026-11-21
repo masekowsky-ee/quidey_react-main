@@ -3,11 +3,11 @@
 }
 
 .title{
-    composes: pageTitle from '../ui.module.css';
+    composes: title from './Stats.module.css';
 }
 
 .card{
-    composes: card from '../ui.module.css';
+    composes: card from './Stats.module.css';
 }
 
 /* Summary numbers above the list: one panel split into equal columns */

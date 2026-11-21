@@ -350,11 +350,7 @@ button.emojiBadge:hover{
 /* ---------- the list (entries without a day) ---------- */
 
 .list{
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
+    composes: listColumn from '../ui.module.css';
 }
 
 .listItem{
@@ -481,12 +477,6 @@ button.emojiBadge:hover{
     margin-top: 0.85rem;
     padding-top: 0.85rem;
     border-top: 1px solid var(--btn-border);
-}
-
-.loadOlder{
-    align-self: center;
-    margin-bottom: 0.5rem;
-    font-size: 0.8rem;
 }
 
 @media (max-width: 600px){

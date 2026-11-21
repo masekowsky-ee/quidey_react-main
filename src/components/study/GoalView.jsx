@@ -18,6 +18,7 @@ import GoalProgress from './GoalProgress.jsx';
 import GoalSettingsSheet from './GoalSettingsSheet.jsx';
 import GradeSheet from './GradeSheet.jsx';
 import PlanPreview from './PlanPreview.jsx';
+import { useStudyLoad } from './useStudyLoad.js';
 import { changesPlan, countdownText, goalStateKey, isPastGoal, useStudyError } from './studyUi';
 import styles from './Study.module.css';
 
@@ -111,12 +112,12 @@ export default function GoalView({ goalId }) {
     const [preview, setPreview] = useState(false);
     const [prompt, setPrompt] = useState(false);
 
+    useStudyLoad((d) => [d(fetchSubjects())]);
     useEffect(() => {
         dispatch(fetchGoal(goalId)).catch((err) => {
             if (err.status === 404) setMissing(true);
             else dispatch(showToast(t('studyError_default'), 'error'));
         });
-        dispatch(fetchSubjects()).catch(() => {});
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch, goalId]);
 

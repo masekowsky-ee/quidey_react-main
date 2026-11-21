@@ -1,42 +1,21 @@
-import { useEffect, lazy, Suspense } from 'react'
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, Suspense } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { MotionConfig, motion } from 'motion/react'
 import Header from './components/Header.jsx';
-import Home from './components/Home.jsx'
+import { LegalPage, VerifyEmail, GuestRoutes, AppRoutes, WaitingRoutes } from './features/app/routes.jsx';
 import Menu from './components/Menu.jsx'
 import TabBar from './components/TabBar.jsx'
 import shell from './components/AppShell.module.css'
 import CustomError from './components/CustomError.jsx';
 import { useDispatch, useSelector } from "react-redux";
-import { checkAuth, setUser, fetchAccess } from "./features/auth/authAction";
-import { PRO_REQUIRED_EVENT, SIGNED_OUT_EVENT } from './features/api/api';
-import { logout } from "./features/auth/authAction";
-import BetaGate from "./components/BetaGate.jsx";
+import { checkAuth } from "./features/auth/authAction";
 import AppSkeleton from "./components/skeleton/AppSkeleton.jsx";
 import { GateSkeleton, RouteSkeleton } from "./components/skeleton/PageSkeletons.jsx";
-import { fetchTaskState, fetchTaskInvites, refreshTasks } from "./features/tasks/taskAction.js"
-import { SET_TASK_STATE } from './features/tasks/taskActionTypes.js'
-import { SET_COLLECTIONS } from './features/collections/collections.js'
-import { PROGRESS_FAILED } from './features/progress/progress.js'
-import { useTaskReminders } from "./features/tasks/reminders.js"
-import { useEventEnds } from "./features/tasks/kinds.js"
-import { useAccountLocale } from "./features/settings/accountLocale.js"
-import { usePushSync } from "./features/pwa/push.js"
-import { fetchSessions } from "./features/session/sessionAction.js"
-import { fetchFriendRequests, fetchFriends } from "./features/friends/friendsAction.js"
-import { usePresenceRealtime } from "./features/presence/presence.js"
-import { fetchSharedSessions, fetchMySharedTasks } from './features/together/togetherAction.js'
+import { useFocusClock } from './features/session/useFocusClock.js'
 import { useWorkReporter } from './features/together/work.js'
 import { useLinkedWork } from './features/together/linkedWork.js'
-import { useFocusClock } from './features/session/useFocusClock.js'
-import { useFocusNotification } from './features/session/focusNotification';
-import { useFocusTitle } from './features/session/focusTitle'
-import { useFocusAway } from './features/focus/useFocusAway';
 import { useCalm } from './features/focus/calm';
-import { useRoutineReminders } from './features/routines/routines.js'
-import { useReminders } from './features/reminders/reminders.js'
 import ReminderAlert from './components/reminders/ReminderAlert.jsx'
-import { useAvatarRealtime } from './features/profile/avatars.js'
 import Toaster from './components/Toaster.jsx';
 import OfflineStatus from './components/offline/OfflineStatus.jsx';
 import UpdatePrompt from './components/update/UpdatePrompt.jsx';
@@ -49,99 +28,21 @@ import QuickAdd from './components/QuickAdd.jsx';
 import AddFab from './components/home/AddFab.jsx';
 import AssistantFab from './components/assistant/AssistantFab.jsx';
 import { showsAddFab } from './features/layout/addFab.js';
-import { useTabSwipe } from './features/layout/tabSwipe.js';
-import { useSlidingActive } from './features/layout/slidingActive.js';
-import { useKeyboardInset } from './features/layout/keyboardInset.js';
-import { fetchInboxUnread } from './features/inbox/inbox.js';
-import { useInboxRealtime } from './features/inbox/useInboxRealtime.js';
-import { connectRealtime, disconnectRealtime, useRealtime, useSafetyPoll, REALTIME_REJECTED } from './features/realtime/socket.js';
-import { useLiveLists } from './features/realtime/useLiveLists.js';
-import { useClearNews } from './features/realtime/useClearNews.js';
-import { useFamilyList } from './features/family/family.js';
-import { useProgressWatcher } from './features/progress/progress.js';
-import { useFeedRealtime } from './features/feed/feed.js';
 import { COMMUNITY_PATHS } from './features/community/paths.js';
 import { LegalFooter } from './legal/LegalFooter.jsx';
 import AuthDialog from './components/auth/AuthDialog.jsx';
-import GuestEntry from './components/guest/GuestEntry.jsx';
-import GuestLocked from './components/guest/GuestLocked.jsx';
 import GuestTourInvite from './components/guest/GuestTourInvite.jsx';
 import { LEGAL_PATHS } from './legal/paths.js';
 import { useApplyTheme } from './features/settings/theme.js';
 import { MOTION, pageSwipeMotion, useApplyMotion, useMotionLevel } from './features/settings/motion.js';
 import { useApplyUiVariant, useNavModel } from './features/tester/variants.js';
-import TesterOnly from './components/TesterOnly.jsx';
 import CommandPalette from './components/variants/CommandPalette.jsx';
 import ShortcutsDialog from './components/ShortcutsDialog.jsx';
 import LimitDialog from './components/pro/LimitDialog.jsx';
-import { restorePlayPurchases } from './features/pro/pro.js';
 import { useProOn } from './features/pro/flag.js';
-import { trackView } from './features/usage/track.js';
-import { setUsageEnabled } from './features/usage/usage.js';
-import { useActiveMinutes, useAppOpen } from './features/usage/useActiveMinutes.js';
-
-const REQUEST_REFRESH_MS = 60 * 1000;
-
-// The pages load when first opened, so the first screen (and the sign-in for visitors)
-// doesn't carry the whole app. Once the app is idle the rest is fetched in the background
-// (preloadPages), so switching pages stays instant.
-const PAGES = {
-  LegalPage: () => import('./legal/LegalPage.jsx'),
-  VerifyEmail: () => import('./components/VerifyEmail.jsx'),
-  TeamHome: () => import('./components/TeamHome.jsx'),
-  Calendar: () => import('./components/Calendar.jsx'),
-  Stats: () => import('./components/Stats.jsx'),
-  Profile: () => import('./components/Profile.jsx'),
-  Settings: () => import('./components/Settings.jsx'),
-  UserProfile: () => import('./components/UserProfile.jsx'),
-  Inbox: () => import('./components/Inbox.jsx'),
-  Feedback: () => import('./components/Feedback.jsx'),
-  Community: () => import('./components/community/Community.jsx'),
-  SharedSession: () => import('./components/SharedSession.jsx'),
-  Admin: () => import('./components/Admin.jsx'),
-  FamilyPage: () => import('./components/family/FamilyPage.jsx'),
-  ArcadePage: () => import('./components/arcade/ArcadePage.jsx'),
-  Tester: () => import('./components/tester/Tester.jsx'),
-  FocusRoom: () => import('./components/focus/FocusRoom.jsx'),
-  Routines: () => import('./components/routines/Routines.jsx'),
-  NotesPage: () => import('./components/notes/NotesPage.jsx'),
-  Collections: () => import('./components/collections/Collections.jsx'),
-  StudyPage: () => import('./components/study/StudyPage.jsx'),
-  ProPage: () => import('./components/pro/ProPage.jsx'),
-};
-const LegalPage = lazy(PAGES.LegalPage);
-const VerifyEmail = lazy(PAGES.VerifyEmail);
-const TeamHome = lazy(PAGES.TeamHome);
-const Calendar = lazy(PAGES.Calendar);
-const Stats = lazy(PAGES.Stats);
-const Profile = lazy(PAGES.Profile);
-const Settings = lazy(PAGES.Settings);
-const UserProfile = lazy(PAGES.UserProfile);
-const Inbox = lazy(PAGES.Inbox);
-const Feedback = lazy(PAGES.Feedback);
-const Community = lazy(PAGES.Community);
-const SharedSession = lazy(PAGES.SharedSession);
-const Admin = lazy(PAGES.Admin);
-const FamilyPage = lazy(PAGES.FamilyPage);
-const ArcadePage = lazy(PAGES.ArcadePage);
-const Tester = lazy(PAGES.Tester);
-const FocusRoom = lazy(PAGES.FocusRoom);
-const Routines = lazy(PAGES.Routines);
-const NotesPage = lazy(PAGES.NotesPage);
-const Collections = lazy(PAGES.Collections);
-const StudyPage = lazy(PAGES.StudyPage);
-const ProPage = lazy(PAGES.ProPage);
-
-// the app's pages (not the sign-in or legal texts) in the background, when nothing else runs
-function preloadPages() {
-  const load = () => {
-    for (const [name, page] of Object.entries(PAGES)) {
-      if (!['LegalPage', 'VerifyEmail'].includes(name)) page().catch(() => {});
-    }
-  };
-  const id = window.requestIdleCallback ? window.requestIdleCallback(load, { timeout: 5000 }) : setTimeout(load, 2000);
-  return () => (window.cancelIdleCallback ? window.cancelIdleCallback(id) : clearTimeout(id));
-}
+import {
+  useGuestSeed, useSignedInStart, useAccessGuard, useSignedInData, useAppServices, useUsage,
+} from './features/app/startup.js';
 
 // while the mail link's page is on its way: its shape
 const gateLoading = <GateSkeleton />;
@@ -174,137 +75,23 @@ function App(){
   // nobody signed in: the app opens anyway, empty, and asks for an account when one is needed
   // (features/auth/gate.js, components/auth/AuthDialog.jsx)
   const guest = !signedIn;
-  // a guest has nothing to load: the lists count as loaded (empty) and there is no progress to show,
-  // so Home draws no skeletons that would never fill
-  useEffect(() => {
-    if (!guest) return;
-    dispatch({ type: SET_TASK_STATE, payload: { tasks: [], groups: [], notes: [] } });
-    dispatch({ type: SET_COLLECTIONS, payload: [] });
-    dispatch({ type: PROGRESS_FAILED });
-  }, [guest, dispatch]);
+  useGuestSeed(guest);
   // closed beta: only pro users get into the app, the others see the beta screen
   const access = useSelector((state) => state.auth.access);
   const allowed = signedIn && access.checked && access.isPro;
   // Quidey Pro is switched off until both switches are on (features/pro/flag.js)
   const proOn = useProOn();
 
-  useEffect(() => {
-    if (allowed) {
-      dispatch(setUser());
-      dispatch(fetchTaskState());
-      dispatch(fetchSessions());
-    }
-  }, [allowed, dispatch]);
-
-  // The server no longer accepts my login (expired, password changed on another device,
-  // "sign out everywhere"): sign out here too
-  useEffect(() => {
-    const signOut = () => dispatch(logout());
-    window.addEventListener(SIGNED_OUT_EVENT, signOut);
-    return () => window.removeEventListener(SIGNED_OUT_EVENT, signOut);
-  }, [dispatch]);
-
-  // Access can change while the app is open (pro granted or taken away): checked when the server
-  // refuses a request or the live connection for lack of it, and as a safety net once a minute
-  // (every few minutes while connected: taking pro away closes the connection right away).
-  // On the beta screen there is no connection, so a granted beta shows up within a minute.
-  const checkAccess = () => dispatch(fetchAccess()).catch(() => {});
-  useEffect(() => {
-    if (!signedIn) return;
-    const check = () => dispatch(fetchAccess()).catch(() => {});
-    window.addEventListener(PRO_REQUIRED_EVENT, check);
-    return () => window.removeEventListener(PRO_REQUIRED_EVENT, check);
-  }, [signedIn, dispatch]);
-  useRealtime(REALTIME_REJECTED, checkAccess);
-  // a payment went through or a subscription ended (the server says so live)
-  useRealtime('pro:changed', checkAccess);
-  // Android app: purchases Google Play knows on this phone are handed to the server again (a new
-  // install, another phone, an answer that got lost), then access is looked at again
-  useEffect(() => {
-    if (signedIn && proOn) restorePlayPurchases().then(({ accepted }) => { if (accepted) dispatch(fetchAccess()).catch(() => {}); });
-  }, [signedIn, proOn, token, dispatch]);
-  useSafetyPoll(checkAccess, { everyMs: REQUEST_REFRESH_MS, enabled: signedIn });
-
-  // The friend request and session invite badges: loaded on sign-in, then kept current by the
-  // live connection (useLiveLists); polled only as the safety net
-  useSafetyPoll(() => {
-    dispatch(fetchFriendRequests()).catch(() => {});
-    // friends (with who of them is online, for the menu and Home)
-    dispatch(fetchFriends()).catch(() => {});
-    dispatch(fetchSharedSessions()).catch(() => {});
-    // the shared sessions' tasks for the solo view
-    dispatch(fetchMySharedTasks()).catch(() => {});
-    // tasks friends sent me
-    dispatch(fetchTaskInvites()).catch(() => {});
-    // unread messages and notices for the inbox badge
-    dispatch(fetchInboxUnread()).catch(() => {});
-  }, { everyMs: REQUEST_REFRESH_MS, enabled: allowed, immediately: true });
-
-  // The live connection for chats and notices: open while signed in with access, opened
-  // again with a new token (password changed), closed on sign-out
-  useEffect(() => {
-    if (!allowed) return;
-    connectRealtime();
-    return () => disconnectRealtime();
-  }, [allowed, token]);
-  useInboxRealtime();
-  useLiveLists();
-  // friends coming online or going away
-  usePresenceRealtime(dispatch);
-  useClearNews();
-  // Quidey Family (testers): my families and invites
-  useFamilyList(allowed);
-  // XP, levels and challenges: looked at again after every session and ticked-off task;
-  // the feed reloads when a friend's entry comes
-  useProgressWatcher(allowed);
-  useFeedRealtime();
-  // profile pictures that changed are loaded again
-  useAvatarRealtime();
-
-  // tasks shared with friends change on their side (announced live, see useLiveLists), my own
-  // ones maybe on another device: read again as a safety net (not right at the start,
-  // fetchTaskState just loaded them)
-  useSafetyPoll(() => dispatch(refreshTasks()).catch(() => {}), { everyMs: REQUEST_REFRESH_MS, enabled: allowed });
-
-  // reminders of tasks with a time, while the app is open
-  useTaskReminders(allowed);
-  // ...and by mail when a task asks for it: the server needs my time zone and language
-  useAccountLocale(allowed);
-  // an event that ends while the app is open shows as done right then
-  useEventEnds(allowed);
-  // push notifications on this device: checked on every start, a click opens their page
+  useSignedInStart(allowed);
+  useAccessGuard({ signedIn, proOn, token });
+  useSignedInData(allowed);
   const navigate = useNavigate();
-  usePushSync(allowed, token, navigate);
-  // routines planned for a time of day: a toast while the app is open
-  useRoutineReminders(allowed);
-  // testers' reminders: loaded, live, handed to the Android app's alarm clock
-  useReminders(allowed);
-  // a lasting notification with the time while a focus session is on (features/session/focusNotification.js)
-  useFocusNotification(allowed);
-  useFocusTitle(allowed);
-  // leaving the app during focus: counted, nudged, welcomed back (only where a screen turned off can be told apart)
-  useFocusAway(allowed);
-  // phones: a sideways swipe goes to the tab beside it (and past the ends, the menu)
-  useTabSwipe({ enabled: allowed });
-  // the chosen option of every group of options slides from one to the next
-  useSlidingActive();
-  // phones: the on-screen keyboard's height, so sheets (the add form) stand above it
-  useKeyboardInset();
-
-  useEffect(() => { if (allowed) return preloadPages(); }, [allowed]);
+  useAppServices(allowed, token, navigate);
 
   const location = useLocation();
   // calm mode: while a focus round runs in the Fokusraum, the navigation steps back (features/focus/calm.js)
   const calm = useCalm(location.pathname);
-  // Quidey's own anonymous statistics: counting follows my answer (access.usageConsent). Declared before
-  // the page view below: effects run in order, so the first view finds counting already on. Nothing is
-  // decided before the server answered (a reload keeps its queue); sign-out and account switches switch it off themselves.
-  const usageOn = allowed && access.usageConsent.choice === 'granted';
-  useEffect(() => { if (access.checked) setUsageEnabled(usageOn, access.userId); }, [access.checked, usageOn, access.userId]);
-  // the pages by name: Android's Firebase analytics and Quidey's statistics, each with its own consent (usage/track.js)
-  useEffect(() => { if (allowed) trackView(location.pathname); }, [allowed, location.pathname]);
-  useAppOpen(usageOn);
-  useActiveMinutes(usageOn);
+  useUsage(allowed, access, location.pathname);
   // while a page's code is on its way (only the first time, and briefly): that page's shape
   const pageLoading = <RouteSkeleton pathname={location.pathname} fade />;
 
@@ -318,14 +105,7 @@ function App(){
   if (signedIn && !access.isPro) {
     return (
       <>
-        <Routes>
-          <Route path="/beta" element={<BetaGate />} />
-          {/* the waiting room: the arcade, while access is still to come */}
-          <Route path="/arcade" element={<Suspense fallback={pageLoading}><ArcadePage waiting /></Suspense>} />
-          {/* Pro gets into the app during the beta too */}
-          {proOn && <Route path="/pro" element={<Suspense fallback={pageLoading}><ProPage /></Suspense>} />}
-          <Route path="*" element={<Navigate to="/beta" replace />} />
-        </Routes>
+        <WaitingRoutes proOn={proOn} pageLoading={pageLoading} />
         <LegalFooter />
       </>
     );
@@ -373,68 +153,9 @@ function App(){
         <motion.div key={location.pathname.startsWith(COMMUNITY_PATHS.feed) ? COMMUNITY_PATHS.feed : location.pathname}
             {...(location.state?.tabSwipe ? pageSwipeMotion(location.state.tabSwipe, motionLevel) : MOTION.page[motionLevel])}>
         <Suspense fallback={pageLoading}>
-        <Routes location={location}>
-          {guest && <>
-          {/* without an account: the start page, calendar and Fokusraum to look at, the rest asks for one */}
-          <Route path="/" element={<Home/>} />
-          <Route path="/calendar" element={<Calendar/>} />
-          <Route path="/focus" element={<FocusRoom/>} />
-          {/* where the landing page sends people to sign in or up, and where Google's sign-in page sends the browser back */}
-          <Route path="/signin" element={<GuestEntry mode="signin" />} />
-          <Route path="/signup" element={<GuestEntry mode="signup" />} />
-          <Route path="/auth/google" element={<GuestEntry mode="signin" googleReturn><Home/></GuestEntry>} />
-          <Route path="*" element={<GuestLocked/>} />
-          </>}
-          {!guest && <>
-          <Route path="/" element={homeLayout === 'team' ? <TeamHome/> : <Home/>} />
-          <Route path="/calendar" element={<Calendar/>} />
-          {/* Fokusraum: the big timer, Pomodoro, notes and study tools */}
-          <Route path="/focus" element={<FocusRoom/>} />
-          <Route path="/routines" element={<Routines/>} />
-          <Route path="/routines/:id/run" element={<Routines/>} />
-          {/* testers: the notes area, and collections of tasks, events and notes */}
-          <Route path="/notes" element={<NotesPage/>} />
-          <Route path="/collections" element={<Collections/>} />
-          <Route path="/collections/:id" element={<Collections/>} />
-          <Route path="/study" element={<StudyPage/>} />
-          <Route path="/study/goals/:id" element={<StudyPage/>} />
-          <Route path="/study/:subjectId" element={<StudyPage/>} />
-          <Route path="/stats" element={<Stats />} />
-          {/* the old address of the statistics (bookmarks, ?tab=done links) */}
-          <Route path="/history" element={<Navigate to={{ pathname: '/stats', search: location.search }} replace />} />
-          <Route path="/profile" element={<Profile/>} />
-          <Route path="/settings" element={<Settings/>} />
-          {/* Gemeinschaft: the feed, then sessions, friends and families as tabs */}
-          <Route path="/community" element={<Community/>} />
-          <Route path="/community/:tab" element={<Community/>} />
-          {/* the old addresses of the lists (bookmarks, links in mails and toasts) */}
-          <Route path="/social" element={<Navigate to={{ pathname: COMMUNITY_PATHS.friends, search: location.search }} replace />} />
-          <Route path="/together" element={<Navigate to={{ pathname: COMMUNITY_PATHS.sessions, search: location.search }} replace />} />
-          <Route path="/family" element={<Navigate to={COMMUNITY_PATHS.family} replace />} />
-          <Route path="/u/:username" element={<UserProfile/>} />
-          <Route path="/inbox" element={<Inbox/>} />
-          <Route path="/feedback" element={<Feedback/>} />
-          <Route path="/together/:id" element={<SharedSession/>} />
-          <Route path="/family/:id" element={<FamilyPage/>} />
-          <Route path="/admin" element={access.isAdmin ? <Admin/> : <Navigate to="/" replace />} />
-          {/* testers: interface variants and the features in test, with their ratings */}
-          <Route path="/tester" element={<TesterOnly fallback={<Navigate to="/" replace />}><Tester/></TesterOnly>} />
-          {/* hidden: only reachable through the daily line in the header */}
-          {/* the old hidden playground: its games live in the Arcade now */}
-          <Route path="/fun" element={<Navigate to="/arcade" replace />} />
-          {/* small games and their leaderboard (the beta screen's waiting room, too) */}
-          <Route path="/arcade" element={<ArcadePage/>} />
-          {/* Quidey Pro: supporting the development */}
-          <Route path="/pro" element={proOn ? <ProPage/> : <Navigate to="/" replace />} />
-          {/* the beta screen stays reachable on the trial version: the way to apply */}
-          <Route path="/beta" element={access.trial ? <BetaGate /> : <Navigate to="/" replace />} />
-          {/* where the landing page sends people to sign in or up */}
-          <Route path="/signin" element={<Navigate to="/" replace />} />
-          <Route path="/signup" element={<Navigate to="/" replace />} />
-          {/* back from Google's sign-in page (features/auth/google.js), already signed in */}
-          <Route path="/auth/google" element={<Navigate to="/" replace />} />
-          </>}
-        </Routes>
+        {guest
+          ? <GuestRoutes location={location} />
+          : <AppRoutes location={location} access={access} proOn={proOn} homeLayout={homeLayout} />}
         </Suspense>
         </motion.div>
         <LegalFooter />

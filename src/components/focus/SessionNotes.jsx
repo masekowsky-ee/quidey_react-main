@@ -1,10 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { fetchNotes, createNote, removeNote } from '../../features/focus/notebook';
-import { showToast } from '../../features/toast/toast';
+import { useState } from 'react';
+import { useNotes, useShortDate } from '../../features/notes/useNotes';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
-import { localeOf } from '../../i18n/locale';
 import NoteEditor from '../notes/NoteEditor.jsx';
 import Notebook from './Notebook.jsx';
 import ScanSheet from '../scan/ScanSheet.jsx';
@@ -31,9 +28,9 @@ function storeSessionNote(value) {
 // you start writing (no empty notes); then the note takes the goal as its title and belongs to
 // the task in focus. "Alle Notizen" shows the whole notebook instead.
 export default function SessionNotes({ goal, focusTask }) {
-    const { t, language } = useTranslation();
-    const dispatch = useDispatch();
-    const [notes, setNotes] = useState(null);
+    const { t } = useTranslation();
+    const { notes, merge: onChange, create, remove, onScanDone } = useNotes();
+    const dateFmt = useShortDate();
     const [showAll, setShowAll] = useState(false);
     const [stored, setStored] = useState(readSessionNote);
     const [creating, setCreating] = useState(false);
@@ -42,45 +39,31 @@ export default function SessionNotes({ goal, focusTask }) {
     // a note made from the click: the cursor goes straight into it
     const [justMade, setJustMade] = useState(null);
 
-    useEffect(() => {
-        fetchNotes().then(setNotes).catch(() => setNotes([]));
-    }, []);
-
     const wanted = goal.trim();
     const note = stored && stored.day === today() && stored.goal === wanted
         ? notes?.find(item => item.id === stored.id && !item.trashed && !item.archived)
         : null;
 
-    const onChange = useCallback((saved) => {
-        setNotes(prev => prev?.map(item => item.id === saved.id ? saved : item) ?? prev);
-    }, []);
-
     const start = async () => {
         if (creating) return;
         setCreating(true);
-        const date = new Intl.DateTimeFormat(localeOf(language), { day: 'numeric', month: 'short' }).format(new Date());
-        try {
-            const made = await createNote({
-                title: wanted || fill(t('noteNewTitle'), { date }),
-                body: '',
-                taskId: focusTask && !focusTask.shared ? focusTask.id : null,
-            });
+        const made = await create({
+            title: wanted || fill(t('noteNewTitle'), { date: dateFmt.format(new Date()) }),
+            body: '',
+            taskId: focusTask && !focusTask.shared ? focusTask.id : null,
+        });
+        if (made) {
             const next = { id: made.id, goal: wanted, day: today() };
             storeSessionNote(next);
             setJustMade(made.id);
-            setNotes(prev => [made, ...(prev ?? [])]);
             setStored(next);
-        } catch (err) {
-            dispatch(showToast(err.code === 'NOTEBOOK_LIMIT' ? t('noteLimit') : err.code === 'NOTEBOOK_STORAGE_FULL' ? t('noteStorageFull') : t('noteSaveFailed'), 'error'));
-        } finally {
-            setCreating(false);
         }
+        setCreating(false);
     };
 
     const forget = () => { storeSessionNote(null); setStored(null); };
     const deleteNote = async (id) => {
-        await removeNote(id).catch(() => {});
-        setNotes(prev => prev.filter(item => item.id !== id));
+        await remove(id);
         forget();
     };
 
@@ -97,8 +80,7 @@ export default function SessionNotes({ goal, focusTask }) {
                     </button>
                 </div>
             </div>
-            {scanning && <ScanSheet onClose={() => setScanning(false)}
-                onDone={(made) => { if (made.notes) fetchNotes().then(setNotes).catch(() => {}); }} />}
+            {scanning && <ScanSheet onClose={() => setScanning(false)} onDone={onScanDone} />}
             {showAll
                 ? <Notebook focusTask={focusTask} />
                 : notes === null

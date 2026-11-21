@@ -22,7 +22,7 @@ export default function ProfileCard({ profile, limited = false, heading: Heading
             <div className={styles.body}>
                 <div className={styles.top}>
                     {/* a friend's profile: the green dot while they have the app open */}
-                    <ProfileAvatar user={limited ? { ...profile, emoji: null, color: null, frame: null } : profile} large
+                    <ProfileAvatar user={limited ? { ...profile, emoji: null, color: null, frame: null } : profile} size="large"
                         presence={profile.relation === 'friend'} />
                     {children && <div className={styles.actions}>{children}</div>}
                 </div>

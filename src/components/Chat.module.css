@@ -1,0 +1,166 @@
+/* The chat panel (ChatPanel.jsx): the session's activity and the family's chat */
+
+.card{
+    composes: card from './ui.module.css';
+}
+
+.cardTitle{
+    composes: cardTitle from './ui.module.css';
+}
+
+.emptyLine{
+    composes: emptyLine from './Together.module.css';
+}
+
+.older{
+    composes: quietBtn from './Together.module.css';
+}
+
+.loadOlder{
+    align-self: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.feedCard{
+    display: flex;
+    flex-direction: column;
+}
+
+.feed{
+    list-style: none;
+    margin: 0;
+    /* the top padding matches the fade below, so nothing is hidden when scrolled to the top */
+    padding: 1.25rem 0.25rem 0.25rem 0;
+    max-height: 22rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    overscroll-behavior: contain;
+    /* older entries fade out at the top edge instead of being cut off hard */
+    mask-image: linear-gradient(to bottom, transparent 0, #000 1.25rem);
+}
+
+/* entries keep their height and the list scrolls; otherwise the column squeezes and clips them */
+.feed > li{
+    flex-shrink: 0;
+}
+
+/* in the team sidebar the feed fills whatever height is left */
+.feedTall{
+    flex: 1;
+    min-height: 0;
+}
+
+.feedTall .feed{
+    flex: 1;
+    max-height: none;
+    min-height: 8rem;
+}
+
+.feedEvent{
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.feedDot{
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background-color: var(--btn-border);
+    transform: translateY(-0.1rem);
+}
+
+.feedDot[data-type='task_done']{ background-color: var(--primary); }
+.feedDot[data-type='started']{ background-color: var(--primary-fg); }
+.feedDot[data-type='joined'],
+.feedDot[data-type='created']{ background-color: var(--text-h); }
+.feedDot[data-type='left'],
+.feedDot[data-type='removed'],
+.feedDot[data-type='ended']{ background-color: var(--danger); }
+
+.feedText{
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.feedTime{
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.message,
+.messageMine{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 0.4rem;
+}
+
+.messageMine{
+    justify-content: flex-end;
+}
+
+.bubble{
+    max-width: 85%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.4rem 0.7rem;
+    background-color: var(--surface-inset);
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius) var(--radius) var(--radius) var(--radius-sm);
+}
+
+.messageMine .bubble{
+    background-color: color-mix(in srgb, var(--primary) 16%, var(--surface));
+    border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+    border-radius: var(--radius) var(--radius) var(--radius-sm) var(--radius);
+}
+
+.bubbleName{
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-h);
+}
+
+.bubbleText{
+    font-size: 0.9rem;
+    color: var(--text-h);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.bubble .feedTime{
+    align-self: flex-end;
+}
+
+.chatForm{
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.chatForm input{
+    flex: 1;
+    min-width: 0;
+}
+
+.send{
+    composes: btnPrimary from './ui.module.css';
+    min-width: 0;
+}
+
+@media (max-width: 860px) {
+    .feedTall .feed{
+        max-height: 24rem;
+    }
+}

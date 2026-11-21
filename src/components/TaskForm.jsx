@@ -13,14 +13,13 @@ import { useFriends } from '../features/friends/useFriends';
 import FriendPicker from './together/FriendPicker.jsx';
 import TaskColorPicker from './task/TaskColorPicker.jsx';
 import DurationField from './task/DurationWheel.jsx';
-import { endOf, fromEnd } from '../features/tasks/eventTimes';
-import { EventTypePicker, KindSwitch } from './task/KindFields.jsx';
-import { matchEventType } from '../features/tasks/kinds';
+import { EventTypePicker, KindSwitch, TypeHint } from './task/KindFields.jsx';
+import { buildTaskPayload, EMPTY_EXTRAS, useTaskDraft } from '../features/tasks/taskDraft';
 import { dueText, fill } from '../features/helperFunction';
 import { parseQuickEntry, stripFound, needsAiHelp } from '../features/tasks/quickParse';
 import { useAiQuota, readLineWithAi, left } from '../features/ai/ai';
 import { prioLevel, durationText } from '../features/calendar/calendar';
-import { dateKey, minutesOfDay, timeText } from '../features/calendar/calendar';
+import { timeText } from '../features/calendar/calendar';
 import { defaultReminders, reminderLabel } from '../features/tasks/reminders';
 import { addSharedTask, selectSharedGroups, togetherErrorText } from '../features/together/togetherAction';
 import { shownSubGroup } from '../features/tasks/subGroups';
@@ -31,7 +30,6 @@ import ScanLink from './scan/ScanLink.jsx';
 import MicButton from './voice/MicButton.jsx';
 import SheetGrabber from './SheetGrabber.jsx';
 import { useFocusOnArrival } from '../features/layout/dragDismiss';
-const EMPTY_EXTRAS = { reminders: [], reminder_email: false, location: '', link: '', details: '', repeat: null, repeat_left: null };
 
 // New task or event. A task needs only its name; optionally a day and time (no time: the whole
 // day, no day: whenever), the time planned for it, description and priority (none until the
@@ -73,31 +71,19 @@ export default function TaskForm(props){
     // for none), elsewhere it's the one shown on Home
     const intoGroup = group !== undefined ? group : groupToDisplay.group;
     const collection = intoGroup?.collection ? intoGroup : null;
+    // where the entry goes: events (it can be an event), personalFields (reminders, repeating,
+    // types, sharing with friends); what saving does is chosen in handleSubmit
+    const destination = { events: !target || target.events, personalFields: !elsewhere };
 
-    const [kind, setKind] = useState(initialKind);
+    const types = useSelector(state => state.task.eventTypes);
+    const draft = useTaskDraft({
+        kind: initialKind, name: initialName, due: initialDue, time: initialTime,
+        extras: { ...EMPTY_EXTRAS, reminders: defaultReminders() },
+    });
+    const { kind, name, due, time, duration, prio, description, color, extras, eventTypeId, typeByHand, match } = draft;
     // the switch used by hand: what the name says no longer decides
     const [kindByHand, setKindByHand] = useState(initialKind !== 'task');
-    const [eventTypeId, setEventTypeId] = useState(null);
-    // a task's planned time, an event's length (minutes)
-    const [duration, setDuration] = useState(null);
-    const [name, setName] = useState(initialName);
-    // the type follows the name's keywords until one is picked by hand (also "none")
-    const types = useSelector(state => state.task.eventTypes);
-    const [typeByHand, setTypeByHand] = useState(false);
-    const match = matchEventType(name, types);
-    const followName = (nextName, nextKind) => {
-        if (typeByHand || nextKind !== 'event') return;
-        setEventTypeId(matchEventType(nextName, types)?.type.id ?? null);
-    };
-    const [due, setDue] = useState(initialDue);
-    const [time, setTime] = useState(initialTime);
-    // a time of day needs a day: picking one first takes today
-    const dayForTime = () => { if (!due) setDue(dateKey(new Date())); };
-    const [description, setDescription] = useState('');
-    const [prio, setPrio] = useState(null);
-    const [color, setColor] = useState(null);
     const [showMore, setShowMore] = useState(false);
-    const [extras, setExtras] = useState(() => ({ ...EMPTY_EXTRAS, reminders: defaultReminders() }));
     const [shareWith, setShareWith] = useState([]);
     const [busy, setBusy] = useState(false);
     // a day, time or priority written into the name ("morgen 14 Uhr !hoch") is taken over on
@@ -105,7 +91,7 @@ export default function TaskForm(props){
     const [ignoreQuick, setIgnoreQuick] = useState(false);
     const parsed = useMemo(() => parseQuickEntry(name, undefined, { eventTypes: types }), [name, types]);
     // a time range or one of my types in the name makes it an event (where events can go)
-    const nameMakesEvent = !ignoreQuick && !kindByHand && kind === 'task' && parsed.kind === 'event' && (!target || target.events);
+    const nameMakesEvent = !ignoreQuick && !kindByHand && kind === 'task' && parsed.kind === 'event' && destination.events;
     const effectiveKind = nameMakesEvent ? 'event' : kind;
     const event = effectiveKind === 'event';
     const quick = ignoreQuick ? {} : {
@@ -155,15 +141,15 @@ export default function TaskForm(props){
             const entry = await readLineWithAi(text);
             setAiState(null);
             if (entry.kind === 'reminder' && onReminder) { onReminder(text); return; }
-            setName(entry.name);
-            if (entry.due) setDue(entry.due);
-            if (entry.time) setTime(entry.time);
-            if (entry.durationMinutes) setDuration(entry.durationMinutes);
-            if (entry.color) setColor(entry.color);
-            if (entry.prio != null) setPrio(entry.prio);
-            if (entry.kind === 'event' && (!target || target.events)) { setKind('event'); setKindByHand(true); }
-            if (entry.eventTypeId) { setEventTypeId(entry.eventTypeId); setTypeByHand(true); }
-            if (entry.reminders.length > 0) setExtras(prev => ({ ...prev, reminders: entry.reminders }));
+            draft.setName(entry.name);
+            if (entry.due) draft.setDue(entry.due);
+            if (entry.time) draft.setTime(entry.time);
+            if (entry.durationMinutes) draft.setDuration(entry.durationMinutes);
+            if (entry.color) draft.setColor(entry.color);
+            if (entry.prio != null) draft.setPrio(entry.prio);
+            if (entry.kind === 'event' && destination.events) { draft.setKind('event'); setKindByHand(true); }
+            if (entry.eventTypeId) draft.pickType(entry.eventTypeId);
+            if (entry.reminders.length > 0) draft.changeExtras({ reminders: entry.reminders });
         } catch (err) {
             const back = err.data?.resetsAt ? new Date(err.data.resetsAt) : null;
             setAiState({ message: err.code === 'QUOTA_REACHED'
@@ -176,13 +162,11 @@ export default function TaskForm(props){
 
     async function handleSubmit(e){
         e.preventDefault();
-        const { name, due, time, prio, kind, duration, color, eventTypeId } = saved;
-        const event = kind === 'event';
-        if (!name.trim()) {
+        if (!saved.name.trim()) {
             dispatch( setCustomError({bool: true, message: t('nameTaskError') }) );
             return;
         }
-        if (event && !due) {
+        if (event && !saved.due) {
             dispatch(setCustomError({ bool: true, message: t('eventNeedsDay') }));
             return;
         }
@@ -190,87 +174,40 @@ export default function TaskForm(props){
             setShowMore(true);
             return;
         }
-        if (target) {
-            setBusy(true);
-            try {
-                await target.save({
-                    name: name.trim(),
-                    ...(target.events ? { kind } : {}),
-                    due: due || null,
-                    due_time: due && time ? time : null,
-                    prio: event ? null : prio,
-                    description: description.trim(),
-                    duration_minutes: duration,
-                    color,
-                    location: extras.location.trim(),
-                    link: extras.link.trim(),
-                    details: extras.details.trim(),
-                });
-                setCreateTask(false);
-            } catch (err) {
-                dispatch(setCustomError({ bool: true, message: target.errorText?.(err) ?? (err.message || t('friendError_generic')) }));
-                setBusy(false);
-            }
-            return;
-        }
-        if (session) {
-            setBusy(true);
-            try {
-                await dispatch(addSharedTask(session.sessionId, {
-                    name: name.trim(),
-                    kind,
-                    due: due || null,
-                    // a time of day needs a day
-                    due_time: due && time ? time : null,
-                    prio: event ? null : prio,
-                    description: description.trim(),
-                    duration_minutes: duration,
-                    color,
-                    location: extras.location.trim(),
-                    link: extras.link.trim(),
-                    details: extras.details.trim(),
-                    ...(subGroupId ? { group_id: subGroupId } : {}),
-                }));
-                setCreateTask(false);
-            } catch (err) {
-                dispatch(setCustomError({ bool: true, message: togetherErrorText(t, err) }));
-                setBusy(false);
-            }
-            return;
-        }
-        // the shown group gets the new task (not a shared session's group: those aren't real groups)
-        const groupId = intoGroup?.id;
-        const activeGroupId = typeof groupId === 'number' && intoGroup.name !== 'all' ? groupId : null;
+        const { save, errorText } = target ? {
+            save: (payload) => target.save(payload),
+            errorText: (err) => target.errorText?.(err) ?? (err.message || t('friendError_generic')),
+        } : session ? {
+            save: (payload) => dispatch(addSharedTask(session.sessionId, payload)),
+            errorText: (err) => togetherErrorText(t, err),
+        } : {
+            save: async (payload) => {
+                // the shown group gets the new task (not a shared session's group: those aren't real groups)
+                const groupId = intoGroup?.id;
+                const activeGroupId = typeof groupId === 'number' && intoGroup.name !== 'all' ? groupId : null;
+                const { name, due, description, prio, ...more } = payload;
+                const task = await dispatch(addTask(name, due, description, prio, activeGroupId, undefined, more));
+                // made already: not getting into the collection is only told, the form still closes
+                await dispatch(addToShownCollection(collection, task))
+                    .catch(() => dispatch(showToast(t('collectionError'), 'error')));
+                if (shareWith.length > 0) {
+                    await dispatch(shareTask(task.id, shareWith));
+                    dispatch(showToast(t('shareInviteSent'), 'success'));
+                }
+            },
+            errorText: (err) => err.message || t('friendError_generic'),
+        };
+        const payload = buildTaskPayload({ ...saved, description, extras }, {
+            personal: destination.personalFields,
+            withKind: destination.events,
+            groupId: subGroupId || undefined,
+        });
         setBusy(true);
         try {
-            const task = await dispatch(addTask(name.trim(), due, description.trim(), event ? null : prio, activeGroupId, undefined, {
-                kind,
-                event_type_id: event ? eventTypeId : null,
-                // a time of day needs a day
-                due_time: due && time ? time : null,
-                duration_minutes: duration,
-                // reminders need a day (without a time they count from my all-day time)
-                reminders: due ? saved.reminders : [],
-                // only a reminder can come by mail
-                reminder_email: Boolean(due && saved.reminders.length > 0 && extras.reminder_email),
-                color,
-                location: extras.location.trim(),
-                link: extras.link.trim(),
-                details: extras.details.trim(),
-                // repeating needs a day
-                repeat: due ? extras.repeat : null,
-                repeat_left: due && extras.repeat ? extras.repeat_left : null,
-            }));
-            // made already: not getting into the collection is only told, the form still closes
-            await dispatch(addToShownCollection(collection, task))
-                .catch(() => dispatch(showToast(t('collectionError'), 'error')));
-            if (shareWith.length > 0) {
-                await dispatch(shareTask(task.id, shareWith));
-                dispatch(showToast(t('shareInviteSent'), 'success'));
-            }
+            await save(payload);
             setCreateTask(false);
         } catch (err) {
-            dispatch(setCustomError({ bool: true, message: err.message || t('friendError_generic') }));
+            dispatch(setCustomError({ bool: true, message: errorText(err) }));
             setBusy(false);
         }
     }
@@ -291,12 +228,12 @@ export default function TaskForm(props){
             {collection && !target &&
                 <p className={styles.shareHint}>{fill(t('createInCollection'), { name: collection.name })}</p>}
             <form className={`${styles.form}`} onSubmit={handleSubmit} noValidate>
-                {(!target || target.events) &&
+                {destination.events &&
                 <KindSwitch value={effectiveKind} kinds={onReminder && !elsewhere ? ['task', 'event', 'reminder', ...(onNote ? ['note'] : [])] : undefined}
                     onChange={(next) => {
                         if (next === 'reminder') { onReminder(name); return; }
                         if (next === 'note') { onNote(name); return; }
-                        setKind(next); setKindByHand(true); followName(name, next);
+                        draft.changeKind(next); setKindByHand(true);
                     }} />}
                 {/* the plus button's form: study material read by the AI instead (QuickAdd swaps in the scan sheet) */}
                 {!elsewhere && <ScanLink onScan={onScan} />}
@@ -304,9 +241,9 @@ export default function TaskForm(props){
                 <div className={styles.nameRow}>
                     <input ref={nameRef} className={`${styles.input} ${styles.grow}`} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}
                         aria-describedby={quickParts.length > 0 ? 'quick-add-hint' : undefined}
-                        value={name} maxLength={200} onChange={(e) => { setName(e.target.value); followName(e.target.value, kind); }} />
+                        value={name} maxLength={200} onChange={(e) => draft.changeName(e.target.value)} />
                     {/* speaking the line instead of typing it: read the same way (features/voice/voice.js) */}
-                    <MicButton className={styles.nameMic} onText={(text) => { const line = text.slice(0, 200); setName(line); setIgnoreQuick(false); followName(line, kind); }} />
+                    <MicButton className={styles.nameMic} onText={(text) => { draft.changeName(text.slice(0, 200)); setIgnoreQuick(false); }} />
                 </div>
                 {quickParts.length > 0 &&
                     <p id="quick-add-hint" className={styles.quickHint} aria-live="polite">
@@ -318,9 +255,9 @@ export default function TaskForm(props){
                     </p>}
                 {/* "Erinnere mich …": testers make a reminder of it */}
                 {parsed.kind === 'reminder' && onReminder && !elsewhere && !ignoreQuick &&
-                    <button type="button" className={styles.typeHint} onClick={() => onReminder(stripFound(name, parsed.found, ['asReminder']))}>
-                        <Icon name="alarm" size={14} /> {t('quickAddAsReminder')}
-                    </button>}
+                    <TypeHint icon={<Icon name="alarm" size={14} />} onClick={() => onReminder(stripFound(name, parsed.found, ['asReminder']))}>
+                        {' '}{t('quickAddAsReminder')}
+                    </TypeHint>}
                 {offerAi &&
                     <button type="button" className={styles.aiHelp} onClick={readWithAi} disabled={aiLeft === 0 || aiState?.reading}>
                         <Icon name="brain" size={14} />
@@ -330,22 +267,20 @@ export default function TaskForm(props){
                 {aiState?.message && <p className={styles.aiStatus} role="status" aria-label={t('aiHelpStatus')}>{aiState.message}</p>}
                 {/* a task whose name fits a type: one tap makes it such an event */}
                 {!event && !elsewhere && match &&
-                    <button type="button" className={styles.typeHint} data-task-color={match.type.color ?? undefined}
-                        onClick={() => { setKind('event'); setEventTypeId(match.type.id); }}>
-                        <span className={styles.typeHintDot} aria-hidden="true" />
+                    <TypeHint color={match.type.color} onClick={draft.suggestEvent}>
                         {fill(t('keywordSuggestEvent'), { type: match.type.name })}
-                    </button>}
+                    </TypeHint>}
                 {/* day and time, each with its name above it */}
                 <div className={event ? styles.whenEvent : styles.whenTask}>
                     <label className={`${styles.whenField} ${styles.whenDay}`}>
                         <span className={styles.fieldLabel}>{t(event ? 'eventDay' : 'dueDate')}</span>
                         <input className={styles.input} type="date" aria-label={t(event ? 'eventDay' : 'dueDate')}
-                            required={event} value={due} onChange={(e) => setDue(e.target.value)} />
+                            required={event} value={due} onChange={(e) => draft.setDue(e.target.value)} />
                     </label>
                     <label className={styles.whenField}>
                         <span className={styles.fieldLabel}>{t(event ? 'eventStart' : 'taskTime')}</span>
                         <input className={styles.input} type="time" aria-label={`${t(event ? 'eventStart' : 'taskTime')} (${t('allDay')}: –)`}
-                            value={time} onPointerDown={dayForTime} onChange={(e) => { dayForTime(); setTime(e.target.value); }} />
+                            value={time} onPointerDown={draft.dayForTime} onChange={(e) => draft.changeTime(e.target.value)} />
                     </label>
                     {/* an event's end: follows start and length, setting it changes the length */}
                     {event && <span className={styles.timeDash} aria-hidden="true">–</span>}
@@ -353,18 +288,18 @@ export default function TaskForm(props){
                         <label className={styles.whenField}>
                             <span className={styles.fieldLabel}>{t('eventEnd')}</span>
                             <input className={styles.input} type="time" aria-label={t('eventEnd')}
-                                value={endOf(time, duration)} onPointerDown={dayForTime}
-                                onChange={(e) => { const next = fromEnd(e.target.value, time, duration); if (next.time !== time) { dayForTime(); setTime(next.time); } setDuration(next.duration); }} />
+                                value={draft.endTime} onPointerDown={draft.dayForTime}
+                                onChange={(e) => draft.setEnd(e.target.value)} />
                         </label>}
                 </div>
-                <DurationField label={t(event ? 'eventDuration' : 'plannedTime')} value={duration} onChange={setDuration}
+                <DurationField label={t(event ? 'eventDuration' : 'plannedTime')} value={duration} onChange={draft.setDuration}
                     maxHours={event ? 168 : 99}
-                    hint={event && duration && due && time ? fill(t('eventUntil'), { time: timeText(minutesOfDay(time) + duration) }) : t(event ? 'eventDurationHint' : 'plannedTimeHint')} />
-                {event && !elsewhere && <EventTypePicker value={eventTypeId} onChange={(id) => { setEventTypeId(id); setTypeByHand(true); }}
-                    autoNote={!typeByHand && match && eventTypeId === match.type.id ? fill(t('keywordAutoNote'), { keyword: match.keyword }) : null} />}
+                    hint={event && due && draft.untilTime ? fill(t('eventUntil'), { time: draft.untilTime }) : t(event ? 'eventDurationHint' : 'plannedTimeHint')} />
+                {event && destination.personalFields && <EventTypePicker value={eventTypeId} onChange={draft.pickType}
+                    autoNote={draft.autoNote ? fill(t('keywordAutoNote'), { keyword: draft.autoNote }) : null} />}
                 <input className={styles.input} type="text" placeholder={t('description')} aria-label={t('description')}
-                    value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)} />
-                <TaskColorPicker value={color} onChange={setColor} />
+                    value={description} maxLength={2000} onChange={(e) => draft.setDescription(e.target.value)} />
+                <TaskColorPicker value={color} onChange={draft.setColor} />
 
                 <button type="button" className={styles.moreToggle} aria-expanded={showMore} onClick={() => setShowMore(!showMore)}>
                     <Icon name="chevronDown" size={16} className={showMore ? styles.moreIconOpen : styles.moreIcon} /> {showMore ? t('fewerOptions') : t('moreOptions')}
@@ -377,16 +312,16 @@ export default function TaskForm(props){
                                 <div className={styles.prioHead}>
                                     <label htmlFor="prioritise">{t('prioritise')} <output htmlFor="prioritise">{saved.prio ?? '–'}</output></label>
                                     {prio !== null &&
-                                        <button type="button" className={styles.prioClear} onClick={() => setPrio(null)}>{t('noPrio')}</button>}
+                                        <button type="button" className={styles.prioClear} onClick={() => draft.setPrio(null)}>{t('noPrio')}</button>}
                                 </div>
                                 <div className={`${styles.rowDiv} ${saved.prio === null ? styles.prioUnset : ''}`}>
                                     <p>{t('low')}</p>
-                                    <input type="range" id="prioritise" min="0" max="100" step="1" value={saved.prio ?? 50} onChange={(e) => setPrio(Number(e.target.value))} />
+                                    <input type="range" id="prioritise" min="0" max="100" step="1" value={saved.prio ?? 50} onChange={(e) => draft.setPrio(Number(e.target.value))} />
                                     <p>{t('high')}</p>
                                 </div>
                             </div>}
-                        <TaskOptionsFields value={extras} hasTime={Boolean(saved.due && saved.time)} hasDate={Boolean(saved.due)} personal={!elsewhere} onChange={(change) => setExtras(prev => ({ ...prev, ...change }))} />
-                        {!elsewhere && <div className={styles.shareBlock}>
+                        <TaskOptionsFields value={extras} hasTime={Boolean(saved.due && saved.time)} hasDate={Boolean(saved.due)} personal={destination.personalFields} onChange={draft.changeExtras} />
+                        {destination.personalFields && <div className={styles.shareBlock}>
                             <span className={styles.shareLabel}>{t('shareWithFriends')}</span>
                             {friends.length > 0
                                 ? <>

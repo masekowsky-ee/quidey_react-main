@@ -20,7 +20,7 @@ const PRIO_TEXT = { high: 'prioHigh', medium: 'prioMedium', low: 'prioLow' };
 
 const isTyping = (el) => el?.closest?.('input, textarea, select, [contenteditable="true"]');
 
-function TaskRow({ task, today, personal, allowEvents, remindsAll, editing, onEdit, onCloseEdit, onToggleDone, onSave, onDelete, onLeave, onOpenGroup }) {
+function TaskRow({ task, today, personal, allowEvents, remindsAll, editing, onEdit, onCloseEdit, onToggleDone, onSave, onDelete, onLeave }) {
     const { t } = useTranslation();
     const event = isEvent(task);
     const level = event ? null : prioLevel(task.prio);
@@ -44,7 +44,7 @@ function TaskRow({ task, today, personal, allowEvents, remindsAll, editing, onEd
                     {!editing && <TaskMeta task={task} />}
                     {!editing && task.description && <p className={styles.rowDesc}>{task.description}</p>}
                     {personal
-                        ? <TaskLabels task={task} onOpenGroup={onOpenGroup} />
+                        ? <TaskLabels task={task} />
                         : task.addedBy && <span className={styles.addedBy}>{fill(t('addedByName'), { name: displayName(task.addedBy) })}</span>}
                 </div>
                 <div className={styles.rowMeta}>
@@ -118,7 +118,7 @@ export default function DayPanel(props) {
 
 function DayPanelBody({
     date, today, tasks, focus, sharedEntries, initialTaskId, locale, longDate, personal = true, allowEvents = false, remindsAll = false, paused = false,
-    onShiftDay, onCreate, onToggleDone, onSaveTask, onDeleteTask, onLeaveTask, onOpenGroup, onOpenSeries, dismiss, sheet,
+    onShiftDay, onCreate, onToggleDone, onSaveTask, onDeleteTask, onLeaveTask, onOpenSeries, dismiss, sheet,
 }) {
     const { t } = useTranslation();
     const key = dateKey(date);
@@ -233,7 +233,6 @@ function DayPanelBody({
                                 onSave={(changes) => save(editingTask, changes)}
                                 onDelete={remove}
                                 onLeave={leave}
-                                onOpenGroup={onOpenGroup}
                             />
                         )}
                     </ul>
@@ -251,7 +250,6 @@ function DayPanelBody({
                         onOpen={(task) => setEditing({ day: key, id: task.id })}
                         onToggleDone={onToggleDone}
                         onShiftTime={shiftTime}
-                        onOpenGroup={onOpenGroup}
                         onCreateAt={(minutes) => onCreate(timeText(minutes))}
                     >
                     {(sessions.length > 0 || sharedEntries.length > 0) &&

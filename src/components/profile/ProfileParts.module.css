@@ -1076,6 +1076,39 @@
     }
 }
 
+/* the plain look (chats, sessions, boards): initials on a neutral circle, no profile colour */
+.avatarPlain,
+.avatarPlainSmall{
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--text-h);
+    background: var(--surface-strong);
+    border: none;
+    border-radius: 50%;
+    corner-shape: round;
+    user-select: none;
+}
+
+.avatarPlain{
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.95rem;
+}
+
+.avatarPlainSmall{
+    width: 1.6rem;
+    height: 1.6rem;
+    font-size: 0.6875rem;
+}
+
+/* working right now */
+.avatarLive{
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary);
+}
+
 /* a profile picture fills the circle (the frame of a large avatar stays around it); round like
    the avatar, not the squircle every element gets (index.css), whose corners stuck out */
 .avatarPicture{

@@ -206,7 +206,8 @@ button.time:hover {
   margin-left: auto;
 }
 
-.icon {
+.icon,
+.notes button {
   width: 2.5rem;
   height: 2.5rem;
   display: inline-grid;
@@ -215,7 +216,8 @@ button.time:hover {
   border-radius: var(--radius-pill);
 }
 
-.icon:hover {
+.icon:hover,
+.notes button:hover {
   color: var(--text-h);
 }
 

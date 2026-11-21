@@ -15,6 +15,7 @@ import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
 import NoteText from './NoteText.jsx';
 import DictateButton from '../voice/DictateButton.jsx';
+import Lightbox, { ImageThumb } from './Lightbox.jsx';
 import styles from '../focus/Notebook.module.css';
 import own from './Notes.module.css';
 
@@ -267,9 +268,7 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
                         </li>
                         : <li key={i} className={styles.imageChip}>
                             {item.data
-                                ? <button type="button" className={styles.thumb} onClick={() => setBigImage(item)} aria-label={item.name || t('noteImage')}>
-                                    <img src={item.data} alt={item.name || t('noteImage')} />
-                                </button>
+                                ? <ImageThumb item={item} onOpen={setBigImage} />
                                 : <Bone w="4.5rem" h="4.5rem" />}
                             <button type="button" className={styles.removeImage} aria-label={t('noteRemoveAttachment')} onClick={() => setAttachments(attachments.filter((_, j) => j !== i))}><Icon name="close" size={12} /></button>
                         </li>)}
@@ -294,12 +293,7 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
                     </div>
                 </>}
 
-            {bigImage &&
-                <div className={styles.lightbox} role="dialog" aria-label={bigImage.name || t('noteImage')} onClick={() => setBigImage(null)}
-                    onKeyDown={e => e.key === 'Escape' && setBigImage(null)}>
-                    <img src={bigImage.data} alt={bigImage.name || t('noteImage')} />
-                    <button type="button" autoFocus className={styles.lightboxClose} aria-label={t('close')} title={t('close')}><Icon name="close" size={20} /></button>
-                </div>}
+            {bigImage && <Lightbox item={bigImage} onClose={() => setBigImage(null)} closeButton />}
         </article>
     );
 }

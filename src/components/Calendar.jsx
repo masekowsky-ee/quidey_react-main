@@ -7,6 +7,7 @@ import { useTranslation } from '../i18n/useTranslation';
 import { localeOf } from '../i18n/locale';
 import { deleteTaskAsking, leaveTask, updateTaskProps } from '../features/tasks/taskAction';
 import TaskInvites from './task/TaskInvites.jsx';
+import { OpenGroupContext } from '../features/collections/openGroup';
 import { fetchSharedHistory, togetherErrorText } from '../features/together/togetherAction';
 import { familyErrorText, selectFamilies } from '../features/family/family';
 import { calendarSourceKey, parseCalendarSource, useSharedCalendar } from '../features/calendar/sources';
@@ -406,6 +407,7 @@ export default function Calendar() {
     );
 
     return (
+        <OpenGroupContext.Provider value={openGroup}>
         <div className={styles.page}>
             {compact
                 ? <header className={`${styles.toolbar} ${styles.toolbarCompact}`}>
@@ -527,7 +529,7 @@ export default function Calendar() {
             {view === 'week' && <WeekView {...viewProps} tasksByDay={gridTasksByDay} drag={drag} startDrag={startDrag} />}
             {view === 'agenda' &&
                 <AgendaView {...viewProps} tasksByDay={agendaByDay} tasks={agendaTasks} onToggleDone={toggleDone} onSchedule={moveTask}
-                    onOpenGroup={openGroup} filtersActive={filtersActive} onClearFilters={clearFilters} />}
+                    filtersActive={filtersActive} onClearFilters={clearFilters} />}
 
             {view !== 'agenda' &&
                 <p className={styles.hint}>
@@ -557,7 +559,6 @@ export default function Calendar() {
                     onDeleteTask={removeTask}
                     onOpenSeries={(task) => openDate(parseDate(dateKey(task.due)), task.id)}
                     onLeaveTask={isShared ? undefined : leaveSharedTask}
-                    onOpenGroup={openGroup}
                 />}
 
             {createAt && createPortal(
@@ -576,5 +577,6 @@ export default function Calendar() {
                 document.body
             )}
         </div>
+        </OpenGroupContext.Provider>
     );
 }

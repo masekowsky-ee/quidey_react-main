@@ -49,6 +49,26 @@ function TaskEditBody({ task, shared, handlers, dismiss, titleId }) {
         }
     };
 
+    // where the task is kept: a shared session, somewhere else (handlers: a family's calendar) or mine
+    const where = handlers ? {
+        personal: false,
+        allowEvents: Boolean(handlers.allowEvents),
+        remindsAll: Boolean(handlers.remindsAll),
+        subGroups: handlers.subGroups,
+        onSave: (changes) => run(handlers.save(changes)),
+        onDelete: handlers.remove ? () => run(handlers.remove(), t('taskDeleted')) : undefined,
+    } : shared ? {
+        personal: false,
+        allowEvents: true,
+        subGroups: shared.subGroups,
+        onSave: (changes) => run(updateSharedTask(shared.sessionId, task.id, changes)),
+        onDelete: shared.canRemove ? () => run(removeSharedTask(shared.sessionId, task.id), t('taskDeleted')) : undefined,
+    } : {
+        onSave: (changes) => run(updateTaskProps(changes, task)),
+        onDelete: () => run(deleteTaskAsking(task), t('taskDeleted')),
+        onLeave: () => run(leaveTask(task), t('taskLeft')),
+    };
+
     return (
         <>
                 <div className={styles.head} data-sheet-drag>
@@ -59,34 +79,11 @@ function TaskEditBody({ task, shared, handlers, dismiss, titleId }) {
                         <Icon name="mClose" size={22} />
                     </button>
                 </div>
-                {handlers
-                    ? <TaskEditor
-                        task={task}
-                        personal={false}
-                        allowEvents={Boolean(handlers.allowEvents)}
-                        remindsAll={Boolean(handlers.remindsAll)}
-                        subGroups={handlers.subGroups}
-                        onSave={(changes) => run(handlers.save(changes))}
-                        onCancel={() => dismiss()}
-                        onDelete={handlers.remove ? () => run(handlers.remove(), t('taskDeleted')) : undefined}
-                    />
-                    : shared
-                    ? <TaskEditor
-                        task={task}
-                        personal={false}
-                        allowEvents
-                        subGroups={shared.subGroups}
-                        onSave={(changes) => run(updateSharedTask(shared.sessionId, task.id, changes))}
-                        onCancel={() => dismiss()}
-                        onDelete={shared.canRemove ? () => run(removeSharedTask(shared.sessionId, task.id), t('taskDeleted')) : undefined}
-                    />
-                    : <TaskEditor
-                        task={task}
-                        onSave={(changes) => run(updateTaskProps(changes, task))}
-                        onCancel={() => dismiss()}
-                        onDelete={() => run(deleteTaskAsking(task), t('taskDeleted'))}
-                        onLeave={() => run(leaveTask(task), t('taskLeft'))}
-                    />}
+                <TaskEditor
+                    task={task}
+                    onCancel={() => dismiss()}
+                    {...where}
+                />
         </>
     );
 }

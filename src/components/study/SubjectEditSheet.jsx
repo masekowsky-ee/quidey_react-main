@@ -4,14 +4,12 @@ import { saveSubject } from '../../features/study/study';
 import { useFocusOnArrival } from '../../features/layout/dragDismiss';
 import { useTranslation } from '../../i18n/useTranslation';
 import { FormSheet } from '../QuickAdd.jsx';
-import SheetGrabber from '../SheetGrabber.jsx';
-import Icon from '../icons.jsx';
+import SheetForm from './SheetForm.jsx';
+import { useSubmit } from './useSubmit.js';
 import TaskColorPicker from '../task/TaskColorPicker.jsx';
-import { useStudyError } from './studyUi';
-import styles from './Study.module.css';
 import own from './GoalSheet.module.css';
 
-const NAME_MAX = 60;
+const SUBJECT_NAME_MAX = 60;
 const EMOJI_MAX = 16;
 
 // Edit a subject (spec §5): name, emoji, colour (the task colours). Only what changed is sent;
@@ -27,16 +25,17 @@ export default function SubjectEditSheet({ subject, onClose }) {
 function SubjectForm({ subject, sheet, close }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const errorText = useStudyError();
     const nameRef = useRef(null);
     useFocusOnArrival(nameRef);
     const [name, setName] = useState(subject.name);
     const [emoji, setEmoji] = useState(subject.emoji ?? '');
     const [color, setColor] = useState(subject.color ?? null);
-    const [busy, setBusy] = useState(false);
-    const [error, setError] = useState(null);
+    const { run: save, busy, error, setError } = useSubmit(async (change) => {
+        await dispatch(saveSubject(subject.id, change));
+        close();
+    }, (err, errorText) => (err.code === 'subject_exists' ? t('studySubjectExists') : errorText(err)));
 
-    const submit = async (e) => {
+    const submit = (e) => {
         e.preventDefault();
         const trimmed = name.trim();
         if (!trimmed) {
@@ -51,43 +50,22 @@ function SubjectForm({ subject, sheet, close }) {
             close();
             return;
         }
-        setBusy(true);
-        setError(null);
-        try {
-            await dispatch(saveSubject(subject.id, change));
-            close();
-        } catch (err) {
-            setError(err.code === 'subject_exists' ? t('studySubjectExists') : errorText(err));
-            setBusy(false);
-        }
+        save(change);
     };
 
-    const titleId = 'subjectEditTitle';
     return (
-        <div className={own.panel} role="dialog" aria-modal="true" aria-labelledby={titleId} {...sheet.panel}>
-            <SheetGrabber />
-            <button type="button" className={own.close} onClick={() => close()} aria-label={t('close')}><Icon name="close" size={18} /></button>
-            <div className={own.head} data-sheet-drag>
-                <h2 id={titleId} className={own.title}>{t('studyEditSubject')}</h2>
+        <SheetForm sheet={sheet} close={close} title={t('studyEditSubject')} onSubmit={submit} error={error} busy={busy}>
+            <div className={own.two}>
+                <label className={own.field}>
+                    <span className={own.label}>{t('studySubjectName')}</span>
+                    <input ref={nameRef} type="text" value={name} maxLength={SUBJECT_NAME_MAX} onChange={(e) => { setName(e.target.value); setError(null); }} />
+                </label>
+                <label className={own.field}>
+                    <span className={own.label}>{t('studySubjectEmoji')}</span>
+                    <input type="text" value={emoji} maxLength={EMOJI_MAX} onChange={(e) => setEmoji(e.target.value)} />
+                </label>
             </div>
-            <form className={own.form} noValidate onSubmit={submit}>
-                <div className={own.two}>
-                    <label className={own.field}>
-                        <span className={own.label}>{t('studySubjectName')}</span>
-                        <input ref={nameRef} type="text" value={name} maxLength={NAME_MAX} onChange={(e) => { setName(e.target.value); setError(null); }} />
-                    </label>
-                    <label className={own.field}>
-                        <span className={own.label}>{t('studySubjectEmoji')}</span>
-                        <input type="text" value={emoji} maxLength={EMOJI_MAX} onChange={(e) => setEmoji(e.target.value)} />
-                    </label>
-                </div>
-                <TaskColorPicker value={color} onChange={setColor} />
-                {error && <p className={own.error} role="alert">{error}</p>}
-                <div className={own.footer}>
-                    <button type="button" className={styles.btn} disabled={busy} onClick={() => close()}>{t('studyCancel')}</button>
-                    <button type="submit" className={styles.btnPrimary} disabled={busy}>{t('studySave')}</button>
-                </div>
-            </form>
-        </div>
+            <TaskColorPicker value={color} onChange={setColor} />
+        </SheetForm>
     );
 }

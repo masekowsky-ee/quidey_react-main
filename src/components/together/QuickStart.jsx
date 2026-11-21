@@ -1,10 +1,9 @@
 import styles from '../Together.module.css';
 import { friendsPath } from '../../features/community/paths';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
-import { fetchFriends } from '../../features/friends/friendsAction';
 import { createSharedSession } from '../../features/together/togetherAction';
 import { useTogetherRun } from '../../features/together/hooks';
 import FriendPicker from './FriendPicker';
@@ -13,13 +12,8 @@ import FriendPicker from './FriendPicker';
 // onStarted(session) is called with the new session (e.g. to open it).
 export default function QuickStart({ onStarted, onCancel }) {
     const { t } = useTranslation();
-    const dispatch = useDispatch();
     const run = useTogetherRun();
     const friends = useSelector(state => state.friends.friends);
-
-    useEffect(() => {
-        dispatch(fetchFriends()).catch(() => {});
-    }, [dispatch]);
 
     const [name, setName] = useState('');
     const [invitees, setInvitees] = useState([]);

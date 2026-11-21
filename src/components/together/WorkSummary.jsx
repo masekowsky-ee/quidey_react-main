@@ -6,7 +6,7 @@ import { displayName, formatDuration, toCsv, downloadFile } from '../../features
 import { summaryRows } from '../../features/together/format';
 import { timeOf } from '../../features/together/togetherAction';
 import { selectWork, localMs, othersRunningMs, othersWorking, useNow } from '../../features/together/work';
-import Avatar from './Avatar';
+import ProfileAvatar from '../profile/ProfileAvatar';
 
 import Icon from '../icons';
 // Who worked on what and for how long, by person or by task, with a CSV download
@@ -71,7 +71,7 @@ export default function WorkSummary({ session }) {
                         return (
                             <li key={person.user.id} className={styles.summaryPerson}>
                                 <div className={styles.summaryHead}>
-                                    <Avatar user={person.user} />
+                                    <ProfileAvatar plain user={person.user} />
                                     <span className={styles.name}>
                                         {displayName(person.user)}{person.user.id === me && ` (${t('you')})`}
                                         {person.status === 'left' && <span className={styles.meta}> · {t('leftSession')}</span>}

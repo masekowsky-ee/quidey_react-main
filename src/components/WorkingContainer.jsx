@@ -1,20 +1,16 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import styles from './WorkingPage.module.css'
-import { useSelector, useDispatch } from "react-redux";
-import { createNote, refreshTaskNotes, updateTaskProps } from "../features/tasks/taskAction.js";
+import { useSelector } from "react-redux";
 import TaskNoteRow from "./task/TaskNoteRow.jsx";
 import {useTranslation} from '../i18n/useTranslation'
 import { dueText, formatClock } from '../features/helperFunction'
 import { selectTaskTime } from '../features/session/sessionAction'
-import { setSharedTaskDone, togetherErrorText } from '../features/together/togetherAction'
-import { showToast } from '../features/toast/toast'
 import { Link } from 'react-router-dom'
 import TaskLabels from './TaskLabels.jsx'
 import Icon from './icons.jsx'
 
 import { motion, useDragControls } from 'motion/react'
-import { useMotionLevel, burstFrom } from '../features/settings/motion'
-import { playSound } from '../features/settings/sound'
+import { useActiveTaskActions } from '../features/home/useActiveTaskActions'
 
 // how far (px) or how fast (px/s) the card has to be swiped to put the task back
 const SWIPE_DISTANCE = 110;
@@ -26,9 +22,9 @@ const SWIPE_SPEED = 600;
 export default function WorkingContainer (props) {
     const {dropZoneRef, activeTask, setActiveTask, onRelease, dragging = false } = props;
 
-    const dispatch = useDispatch();
     const {t} = useTranslation();
-    const motionLevel = useMotionLevel();
+    // a second, smaller burst follows the first on "extreme"
+    const { markDone, saveDescription, addNote, addingNote, setAddingNote, noteInputRef } = useActiveTaskActions(activeTask, setActiveTask, { echo: true });
     // the card can be swiped sideways by its head (not by the fields inside it)
     const dragControls = useDragControls();
     const startSwipe = (e) => { if (!e.target.closest('button, input, textarea')) dragControls.start(e); };
@@ -37,53 +33,10 @@ export default function WorkingContainer (props) {
     };
 
     const notes = useSelector(state => state.task.notes);
-    // notes about the task written in the notebook (Fokusraum, Notizen) since the list was loaded
-    useEffect(() => { dispatch(refreshTaskNotes()).catch(() => {}); }, [dispatch]);
     const taskSeconds = useSelector(state => activeTask ? selectTaskTime(state, activeTask.id) : 0);
 
-    const [addingNote, setAddingNote] = useState(false);
-    const noteInputRef = useRef(null);
-    useEffect(() => {
-        if (addingNote) noteInputRef.current?.focus();
-    }, [addingNote]);
-
-    const handleCreateNote = (e) => {
-        const text = e.target.value.trim();
-        setAddingNote(false);
-        if (!text) return;
-        dispatch(createNote(activeTask.id, text));
-    }
-
     const [editActiveDescription, setEditActiveDescription] = useState(false);
-
-    // Saves on blur only (Enter just blurs), and only when the text really changed,
-    // so clicking in and out never sends a request or overwrites the description
-    const saveDescription = (e) => {
-        setEditActiveDescription(false);
-        const description = e.target.value.trim();
-        if (description === (activeTask.description ?? '')) return;
-        setActiveTask(prev => ({...prev, description}));
-        dispatch(updateTaskProps({description}, activeTask));
-    }
-
-    const setActiveDoneHandler = (e) => {
-        // finishing the task in focus is worth a burst on "normal", a big one on "extreme"
-        playSound('done');
-        if (motionLevel === 'extreme' && e?.currentTarget) {
-            burstFrom(e.currentTarget, 60);
-            const target = e.currentTarget;
-            setTimeout(() => burstFrom(target, 40), 180);
-        } else if (motionLevel === 'normal' && e?.currentTarget) {
-            burstFrom(e.currentTarget, 30);
-        }
-        if (activeTask.shared) {
-            dispatch(setSharedTaskDone(activeTask.shared.sessionId, activeTask.shared.taskId, true))
-                .catch(err => dispatch(showToast(togetherErrorText(t, err), 'error')));
-        } else {
-            dispatch(updateTaskProps({done: true}, activeTask));
-        }
-        setActiveTask(null);
-    }
+    const onDescriptionBlur = (e) => { setEditActiveDescription(false); saveDescription(e); };
 
     // name, then "put back" and "done"; the head is where the card is grabbed to swipe it away
     const head = (
@@ -92,7 +45,7 @@ export default function WorkingContainer (props) {
             <button className={styles.releaseBtn} onClick={onRelease} title={t('releaseTask')} aria-label={t('releaseTask')}>
                 <Icon name="release" className={styles.headIcon} />
             </button>
-            <button className={styles.doneBtn} onClick={setActiveDoneHandler} title={t('markDone')} aria-label={t('markDone')}>
+            <button className={styles.doneBtn} onClick={markDone} title={t('markDone')} aria-label={t('markDone')}>
                 <Icon name="check" className={styles.headIcon} strokeWidth={2.2} />
             </button>
         </div>
@@ -139,7 +92,7 @@ export default function WorkingContainer (props) {
                             defaultValue={activeTask.description ?? ''}
                             placeholder={t('description')}
                             autoFocus={editActiveDescription}
-                            onBlur={saveDescription}
+                            onBlur={onDescriptionBlur}
                             onKeyDown={(e)=>{ if(e.key === "Enter") e.currentTarget.blur(); }}
                         />}
                         <div className={styles.notesHead}>
@@ -149,12 +102,11 @@ export default function WorkingContainer (props) {
                             </button>
                         </div>
                         {addingNote && <input ref={noteInputRef} className={styles.newNoteInput} type="text" aria-label={t('addNote')}
-                            onBlur={handleCreateNote}
+                            onBlur={addNote}
                             onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); if (e.key === 'Escape') setAddingNote(false); }} />}
                         <ul className={styles.notesList}>
                             {notes?.filter(note => note.task_id === activeTask.id).map(note =>
-                                <TaskNoteRow key={note.id} taskId={activeTask.id} note={note} className={styles.noteRow} inputClassName={styles.noteInput}
-                                    buttonClassName={styles.noteDelete} iconClassName={styles.noteIcon} />)}
+                                <TaskNoteRow key={note.id} taskId={activeTask.id} note={note} className={styles.noteRow} />)}
                         </ul>
                         <p className={styles.swipeHint}>{t('releaseTaskHint')}</p>
                     </motion.div>}

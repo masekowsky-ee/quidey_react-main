@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { goalDraftFor, writeGoalDraft, clearGoalDraft, readGoalDraft } from '../../features/study/goalDraft';
@@ -13,8 +13,8 @@ import { showToast } from '../../features/toast/toast';
 import { useTranslation } from '../../i18n/useTranslation';
 import { ShapePicker } from './GoalShape.jsx';
 import { FormSheet } from '../QuickAdd.jsx';
-import SheetGrabber from '../SheetGrabber.jsx';
-import Icon from '../icons.jsx';
+import { SheetPanel } from './SheetForm.jsx';
+import { useStudyLoad } from './useStudyLoad.js';
 import ui from '../ui.module.css';
 import { PlanPreviewContent } from './PlanPreview.jsx';
 import { KINDS, useStudyError } from './studyUi';
@@ -24,7 +24,7 @@ import own from './GoalSheet.module.css';
 const STEP = 15;
 const MIN = 15;
 const MAX = 1200;
-const NAME_MAX = 200;
+const GOAL_NAME_MAX = 200;
 const SUBJECT_MAX = 60;
 const NEW_SUBJECT = 'new';
 const DEFAULT_MINUTES = { exam: 120, assignment: 180, presentation: 90, other: 120 };
@@ -91,11 +91,7 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
     const aiCache = useRef({});
     const [aiRunning, setAiRunning] = useState(false);
 
-    useEffect(() => {
-        dispatch(fetchSubjects()).catch(() => {});
-        if (!settings) dispatch(fetchStudySettings()).catch(() => {});
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dispatch]);
+    useStudyLoad((d) => [d(fetchSubjects()), !settings && d(fetchStudySettings())]);
 
     // every change is kept while the sheet is open (not once the goal is made)
     useEffect(() => {
@@ -291,158 +287,151 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
         }
     };
 
-    const titleId = 'goalSheetTitle';
+    const kindId = useId();
     return (
-        <div className={own.panel} role="dialog" aria-modal="true" aria-labelledby={titleId} {...sheet.panel}>
-            <SheetGrabber />
-            <button type="button" className={own.close} onClick={close} aria-label={t('close')} title={t('close')}><Icon name="close" size={18} /></button>
-            <div className={own.head} data-sheet-drag>
-                <h2 id={titleId} className={own.title}>{t('studyNewGoal')}</h2>
-                <span className={own.step}>{fill(t('studyStep'), { n: step })}</span>
-            </div>
-
-            {step === 1 && (
-                <form className={own.form} noValidate onSubmit={(e) => { e.preventDefault(); goNext(); }}>
-                    <div className={own.field}>
-                        <span className={own.label} id="goalKindLabel">{t('studyGoalKind')}</span>
-                        <div className={ui.segmented} role="radiogroup" aria-labelledby="goalKindLabel">
-                            {KINDS.map(kind => (
-                                <button key={kind} type="button" role="radio" aria-checked={fields.kind === kind}
-                                    className={fields.kind === kind ? ui.segmentActive : undefined} onClick={() => set({ kind })}>
-                                    {t(`studyKind_${kind}`)}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <label className={own.field}>
-                        <span className={own.label}>{t('studyGoalName')}</span>
-                        <input ref={nameRef} type="text" value={fields.name} maxLength={NAME_MAX}
-                            placeholder={t('studyGoalNamePlaceholder')} onChange={(e) => set({ name: e.target.value })} />
-                    </label>
-                    <label className={own.field}>
-                        <span className={own.label}>{t('studyGoalSubject')}</span>
-                        <select value={inline && subjects.length > 0 ? NEW_SUBJECT : fields.subject}
-                            onChange={(e) => set({ subject: e.target.value })}>
-                            <option value="" disabled>{t('studyGoalSubjectPick')}</option>
-                            {subjects.map(s => <option key={s.id} value={String(s.id)}>{s.name}</option>)}
-                            <option value={NEW_SUBJECT}>{t('studyNewSubjectOption')}</option>
-                        </select>
-                    </label>
-                    {inline && (
-                        <label className={own.field}>
-                            <span className={own.label}>{t('studyNewSubjectName')}</span>
-                            <input type="text" value={fields.newSubject} maxLength={SUBJECT_MAX} onChange={(e) => set({ newSubject: e.target.value })} />
-                        </label>
-                    )}
-                    <div className={own.two}>
-                        <label className={own.field}>
-                            <span className={own.label}>{t('studyGoalDue')}</span>
-                            <input type="date" value={fields.due} min={today} onChange={(e) => set({ due: e.target.value })} />
-                        </label>
-                        <label className={own.field}>
-                            <span className={own.label}>{t('studyGoalDueTime')}</span>
-                            <input type="time" value={fields.dueTime} onChange={(e) => set({ dueTime: e.target.value })} />
-                        </label>
-                    </div>
-                    <div className={own.field}>
-                        <span className={own.label} id="goalModeLabel">{t('studyPlanMode')}</span>
-                        <div className={ui.segmented} role="radiogroup" aria-labelledby="goalModeLabel">
-                            {['days', 'slots', 'none'].map(mode => (
-                                <button key={mode} type="button" role="radio" aria-checked={planMode === mode}
-                                    className={planMode === mode ? ui.segmentActive : undefined} onClick={() => set({ planMode: mode })}>
-                                    {t(`studyPlanMode_${mode}`)}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    {dateOnly
-                        ? <p className={own.hint}>{t('studyDateOnlyHint')}</p>
-                        : (
-                            <>
-                                <div className={own.two}>
-                                    <label className={own.field}>
-                                        <span className={own.label}>{t('studyWindowFrom')}</span>
-                                        <input type="date" value={fields.studyFrom} min={today} onChange={(e) => set({ studyFrom: e.target.value })} />
-                                    </label>
-                                    <label className={own.field}>
-                                        <span className={own.label}>{t('studyWindowTo')}</span>
-                                        <input type="date" value={fields.studyTo} min={fields.studyFrom || today} onChange={(e) => set({ studyTo: e.target.value })} />
-                                    </label>
-                                </div>
-                                <p className={own.hint}>{t('studyWindowHint')}</p>
-                            </>
-                        )}
-                    <div className={own.field}>
-                        <ShapePicker value={fields.shape} onChange={(shape) => set({ shape })} color={subject?.color} />
-                        {!fields.shape && <p className={own.hint}>{t('goalShapeAuto')}</p>}
-                    </div>
-                    {error && <p className={own.error} role="alert">{error}</p>}
-                    <div className={own.footer}>
-                        <button type="submit" className={styles.btnPrimary} disabled={busy}>{t(dateOnly ? 'studyDateOnly' : 'studyNext')}</button>
-                    </div>
-                </form>
-            )}
-
-            {step === 2 && (
-                <div className={own.form}>
-                    <label className={own.field}>
-                        <span className={own.label}>{t('studyPartsLabel')}</span>
-                        <textarea className={own.parts} value={text} onChange={(e) => { setText(e.target.value); setError(null); }}
-                            onBlur={estimateWithAi} placeholder={t('studyPartsPlaceholder')} />
-                    </label>
-                    <p className={own.hint}>{t('studyPartsHint')}</p>
-                    {aiAvailable && (
-                        <div>
-                            <button type="button" className={styles.btn} disabled={estimating || aiRunning || names.length === 0} onClick={() => estimate(true)}>
-                                {t('studyAiEstimate')}
+        <SheetPanel sheet={sheet} close={close} title={t('studyNewGoal')} aside={<span className={own.step}>{fill(t('studyStep'), { n: step })}</span>}>
+        {step === 1 && (
+            <form className={own.form} noValidate onSubmit={(e) => { e.preventDefault(); goNext(); }}>
+                <div className={own.field}>
+                    <span className={own.label} id={kindId}>{t('studyGoalKind')}</span>
+                    <div className={ui.segmented} role="radiogroup" aria-labelledby={kindId}>
+                        {KINDS.map(kind => (
+                            <button key={kind} type="button" role="radio" aria-checked={fields.kind === kind}
+                                className={fields.kind === kind ? ui.segmentActive : undefined} onClick={() => set({ kind })}>
+                                {t(`studyKind_${kind}`)}
                             </button>
-                        </div>
-                    )}
-                    {aiFailed && <p className={own.notice} role="status">{t('studyAiFailed')}</p>}
-                    {(names.length > 0 || reviewMin > 0) && (
-                        <ul className={own.rows}>
-                            {rows.map(row => <EstimateRow key={row.name} row={row} kind={fields.kind} onChange={change} />)}
-                            {reviewMin > 0 && (
-                                <li className={own.row}>
-                                    <span className={own.rowName}>
-                                        <span>{t('studyReviewName')}</span>
-                                        <span className={styles.source}>{t('studyReviewSource')}</span>
-                                    </span>
-                                    <span className={styles.stepValue}>{reviewMin} {t('studyMinutes')}</span>
-                                    <button type="button" className={styles.btn} onClick={() => setReviewOn(false)}>{t('studyRemoveReview')}</button>
-                                </li>
-                            )}
-                        </ul>
-                    )}
-                    {exam && !reviewOn && (
-                        <div>
-                            <button type="button" className={styles.btn} onClick={() => setReviewOn(true)}>{t('studyAddReview')}</button>
-                        </div>
-                    )}
-                    {error && <p className={own.error} role="alert">{error}</p>}
-                    <div className={own.footer}>
-                        <button type="button" className={styles.btn} disabled={busy} onClick={() => { setStep(1); setError(null); }}>{t('studyBackStep')}</button>
-                        <button type="button" className={styles.btnPrimary} disabled={!ready || busy} onClick={submit}>{t('studySeePlan')}</button>
+                        ))}
                     </div>
                 </div>
-            )}
-
-            {step === 3 && noWindows && (
-                <div className={own.form}>
-                    <p className={own.notice}>{t('studyNoWindows')}</p>
-                    <p className={own.hint}>{t('studyNoWindowsHint')}</p>
-                    <div className={own.footer}>
-                        <button type="button" className={styles.btn} onClick={() => { setNoWindows(false); setStep(2); }}>{t('studyBackStep')}</button>
-                        {/* the draft stays: Lernen opens the sheet again when you come back */}
-                        <Link to="/settings#study" className={styles.btn} onClick={() => writeGoalDraft({ ...readGoalDraft(), away: true })}>{t('studyOpenSettings')}</Link>
+                <label className={own.field}>
+                    <span className={own.label}>{t('studyGoalName')}</span>
+                    <input ref={nameRef} type="text" value={fields.name} maxLength={GOAL_NAME_MAX}
+                        placeholder={t('studyGoalNamePlaceholder')} onChange={(e) => set({ name: e.target.value })} />
+                </label>
+                <label className={own.field}>
+                    <span className={own.label}>{t('studyGoalSubject')}</span>
+                    <select value={inline && subjects.length > 0 ? NEW_SUBJECT : fields.subject}
+                        onChange={(e) => set({ subject: e.target.value })}>
+                        <option value="" disabled>{t('studyGoalSubjectPick')}</option>
+                        {subjects.map(s => <option key={s.id} value={String(s.id)}>{s.name}</option>)}
+                        <option value={NEW_SUBJECT}>{t('studyNewSubjectOption')}</option>
+                    </select>
+                </label>
+                {inline && (
+                    <label className={own.field}>
+                        <span className={own.label}>{t('studyNewSubjectName')}</span>
+                        <input type="text" value={fields.newSubject} maxLength={SUBJECT_MAX} onChange={(e) => set({ newSubject: e.target.value })} />
+                    </label>
+                )}
+                <div className={own.two}>
+                    <label className={own.field}>
+                        <span className={own.label}>{t('studyGoalDue')}</span>
+                        <input type="date" value={fields.due} min={today} onChange={(e) => set({ due: e.target.value })} />
+                    </label>
+                    <label className={own.field}>
+                        <span className={own.label}>{t('studyGoalDueTime')}</span>
+                        <input type="time" value={fields.dueTime} onChange={(e) => set({ dueTime: e.target.value })} />
+                    </label>
+                </div>
+                <div className={own.field}>
+                    <span className={own.label} id="goalModeLabel">{t('studyPlanMode')}</span>
+                    <div className={ui.segmented} role="radiogroup" aria-labelledby="goalModeLabel">
+                        {['days', 'slots', 'none'].map(mode => (
+                            <button key={mode} type="button" role="radio" aria-checked={planMode === mode}
+                                className={planMode === mode ? ui.segmentActive : undefined} onClick={() => set({ planMode: mode })}>
+                                {t(`studyPlanMode_${mode}`)}
+                            </button>
+                        ))}
                     </div>
                 </div>
-            )}
+                {dateOnly
+                    ? <p className={own.hint}>{t('studyDateOnlyHint')}</p>
+                    : (
+                        <>
+                            <div className={own.two}>
+                                <label className={own.field}>
+                                    <span className={own.label}>{t('studyWindowFrom')}</span>
+                                    <input type="date" value={fields.studyFrom} min={today} onChange={(e) => set({ studyFrom: e.target.value })} />
+                                </label>
+                                <label className={own.field}>
+                                    <span className={own.label}>{t('studyWindowTo')}</span>
+                                    <input type="date" value={fields.studyTo} min={fields.studyFrom || today} onChange={(e) => set({ studyTo: e.target.value })} />
+                                </label>
+                            </div>
+                            <p className={own.hint}>{t('studyWindowHint')}</p>
+                        </>
+                    )}
+                <div className={own.field}>
+                    <ShapePicker value={fields.shape} onChange={(shape) => set({ shape })} color={subject?.color} />
+                    {!fields.shape && <p className={own.hint}>{t('goalShapeAuto')}</p>}
+                </div>
+                {error && <p className={own.error} role="alert">{error}</p>}
+                <div className={own.footer}>
+                    <button type="submit" className={styles.btnPrimary} disabled={busy}>{t(dateOnly ? 'studyDateOnly' : 'studyNext')}</button>
+                </div>
+            </form>
+        )}
 
-            {step === 3 && !noWindows && created && (
-                <PlanPreviewContent onCancel={close} onApplied={done} />
-            )}
-        </div>
+        {step === 2 && (
+            <div className={own.form}>
+                <label className={own.field}>
+                    <span className={own.label}>{t('studyPartsLabel')}</span>
+                    <textarea className={own.parts} value={text} onChange={(e) => { setText(e.target.value); setError(null); }}
+                        onBlur={estimateWithAi} placeholder={t('studyPartsPlaceholder')} />
+                </label>
+                <p className={own.hint}>{t('studyPartsHint')}</p>
+                {aiAvailable && (
+                    <div>
+                        <button type="button" className={styles.btn} disabled={estimating || aiRunning || names.length === 0} onClick={() => estimate(true)}>
+                            {t('studyAiEstimate')}
+                        </button>
+                    </div>
+                )}
+                {aiFailed && <p className={own.notice} role="status">{t('studyAiFailed')}</p>}
+                {(names.length > 0 || reviewMin > 0) && (
+                    <ul className={own.rows}>
+                        {rows.map(row => <EstimateRow key={row.name} row={row} kind={fields.kind} onChange={change} />)}
+                        {reviewMin > 0 && (
+                            <li className={own.row}>
+                                <span className={own.rowName}>
+                                    <span>{t('studyReviewName')}</span>
+                                    <span className={styles.source}>{t('studyReviewSource')}</span>
+                                </span>
+                                <span className={styles.stepValue}>{reviewMin} {t('studyMinutes')}</span>
+                                <button type="button" className={styles.btn} onClick={() => setReviewOn(false)}>{t('studyRemoveReview')}</button>
+                            </li>
+                        )}
+                    </ul>
+                )}
+                {exam && !reviewOn && (
+                    <div>
+                        <button type="button" className={styles.btn} onClick={() => setReviewOn(true)}>{t('studyAddReview')}</button>
+                    </div>
+                )}
+                {error && <p className={own.error} role="alert">{error}</p>}
+                <div className={own.footer}>
+                    <button type="button" className={styles.btn} disabled={busy} onClick={() => { setStep(1); setError(null); }}>{t('studyBackStep')}</button>
+                    <button type="button" className={styles.btnPrimary} disabled={!ready || busy} onClick={submit}>{t('studySeePlan')}</button>
+                </div>
+            </div>
+        )}
+
+        {step === 3 && noWindows && (
+            <div className={own.form}>
+                <p className={own.notice}>{t('studyNoWindows')}</p>
+                <p className={own.hint}>{t('studyNoWindowsHint')}</p>
+                <div className={own.footer}>
+                    <button type="button" className={styles.btn} onClick={() => { setNoWindows(false); setStep(2); }}>{t('studyBackStep')}</button>
+                    {/* the draft stays: Lernen opens the sheet again when you come back */}
+                    <Link to="/settings#study" className={styles.btn} onClick={() => writeGoalDraft({ ...readGoalDraft(), away: true })}>{t('studyOpenSettings')}</Link>
+                </div>
+            </div>
+        )}
+
+        {step === 3 && !noWindows && created && (
+            <PlanPreviewContent onCancel={close} onApplied={done} />
+        )}
+        </SheetPanel>
     );
 }
 

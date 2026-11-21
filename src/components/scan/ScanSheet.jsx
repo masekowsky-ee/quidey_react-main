@@ -3,11 +3,12 @@
 // make → reading → what was found, each part kept or left out → made through the usual routes.
 // onDone({ notes, entries, plan }) says how much was made.
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useAiQuota, left } from '../../features/ai/ai';
 import { filesToSource, scanMaterial } from '../../features/ai/scan';
-import { createNote, fetchNotes } from '../../features/focus/notebook';
+import { createNote } from '../../features/focus/notebook';
+import { useNotes } from '../../features/notes/useNotes';
 import { addTask } from '../../features/tasks/taskAction';
 import { fetchSubjects, saveSubject, createGoal, fetchStudySettings } from '../../features/study/study';
 import { showToast } from '../../features/toast/toast';
@@ -40,7 +41,7 @@ function ScanForm({ dismiss, onDone, titleId, closeRef }) {
     const [sourceKind, setSourceKind] = useState('file');
     const [files, setFiles] = useState([]);
     const [text, setText] = useState('');
-    const [notes, setNotes] = useState(null);
+    const { notes } = useNotes({ enabled: sourceKind === 'note' });
     const [noteId, setNoteId] = useState('');
     const [wants, setWants] = useState(() => new Set(['plan', 'notes', 'entries']));
     const [step, setStep] = useState('pick');
@@ -50,10 +51,6 @@ function ScanForm({ dismiss, onDone, titleId, closeRef }) {
     const [subjectId, setSubjectId] = useState('');
     const [planDue, setPlanDue] = useState('');
     const subjects = useSelector(state => state.study.subjects);
-
-    useEffect(() => {
-        if (sourceKind === 'note' && notes === null) fetchNotes().then(setNotes).catch(() => setNotes([]));
-    }, [sourceKind, notes]);
 
     const toggleWant = (want) => setWants(prev => {
         const next = new Set(prev);

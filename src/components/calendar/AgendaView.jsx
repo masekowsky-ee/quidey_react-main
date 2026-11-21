@@ -23,7 +23,7 @@ function ScheduleField({ task, onSchedule }) {
     );
 }
 
-function AgendaRow({ task, today, showDate, onOpenTask, onToggleDone, onSchedule, onOpenGroup }) {
+function AgendaRow({ task, today, showDate, onOpenTask, onToggleDone, onSchedule }) {
     const { t } = useTranslation();
     const event = task.kind === 'event';
     const level = event ? null : prioLevel(task.prio);
@@ -43,7 +43,7 @@ function AgendaRow({ task, today, showDate, onOpenTask, onToggleDone, onSchedule
                     : <span className={styles.agendaName}>{task.name}</span>}
                 <TaskMeta task={task} />
                 {task.description && <p className={styles.agendaDesc}>{task.description}</p>}
-                <TaskLabels task={task} onOpenGroup={onOpenGroup} />
+                <TaskLabels task={task} />
             </div>
             <div className={styles.agendaMeta}>
                 {showDate && <span className={isOverdue(task, today) ? styles.agendaDueLate : styles.agendaDue}>{formatDate(task.due)}</span>}
@@ -56,7 +56,7 @@ function AgendaRow({ task, today, showDate, onOpenTask, onToggleDone, onSchedule
 
 // The focused month as a list: overdue tasks first (in the current month), then every
 // day that has tasks, today always included, and tasks without a date at the end.
-export default function AgendaView({ focusedDate, today, tasks, tasksByDay, onOpenDate, onToggleDone, onSchedule, onOpenGroup, longDate, filtersActive, onClearFilters }) {
+export default function AgendaView({ focusedDate, today, tasks, tasksByDay, onOpenDate, onToggleDone, onSchedule, longDate, filtersActive, onClearFilters }) {
     const { t } = useTranslation();
     const isCurrentMonth = focusedDate.getFullYear() === today.getFullYear() && focusedDate.getMonth() === today.getMonth();
 
@@ -70,7 +70,7 @@ export default function AgendaView({ focusedDate, today, tasks, tasksByDay, onOp
     const hasAny = overdue.length > 0 || undated.length > 0 || days.some(date => tasksOn(date).length > 0);
 
     const openTask = (task) => onOpenDate(parseDate(task.due), task.id);
-    const rowProps = { today, onOpenTask: openTask, onToggleDone, onSchedule, onOpenGroup };
+    const rowProps = { today, onOpenTask: openTask, onToggleDone, onSchedule };
 
     return (
         <div className={styles.agenda}>

@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { fetchNotes, createNote, updateNote, removeNote, checklistCount } from '../../features/focus/notebook';
-import { fetchFolders, duplicateOf, titleOf } from '../../features/notes/notes';
+import { checklistCount } from '../../features/focus/notebook';
+import { duplicateOf, titleOf } from '../../features/notes/notes';
+import { useNotes, useNoteFolders, useShortDate } from '../../features/notes/useNotes';
 import { showToast } from '../../features/toast/toast';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
-import { localeOf } from '../../i18n/locale';
 import NoteEditor from '../notes/NoteEditor.jsx';
 import ScanSheet from '../scan/ScanSheet.jsx';
 import { useAiQuota } from '../../features/ai/ai';
@@ -18,35 +18,20 @@ import styles from './Notebook.module.css';
 // Testers get the notes area's editor here too (folders, tags, archive, trash: see /notes);
 // archived notes stay out of this list then.
 export default function Notebook({ focusTask }) {
-    const { t, language } = useTranslation();
+    const { t } = useTranslation();
     const dispatch = useDispatch();
-    const [notes, setNotes] = useState(null);
+    const { notes, merge: onChange, create, trash, remove, onScanDone } = useNotes();
     const aiQuota = useAiQuota();
     const [scanning, setScanning] = useState(false);
-    const [folders, setFolders] = useState([]);
+    const [folders] = useNoteFolders();
     const [openId, setOpenId] = useState(null);
     const [query, setQuery] = useState('');
     const [onlyTask, setOnlyTask] = useState(false);
-
-    useEffect(() => {
-        fetchNotes().then(setNotes).catch(() => setNotes([]));
-    }, []);
-    useEffect(() => {
-        fetchFolders().then(setFolders).catch(() => {});
-    }, []);
-
-    const onChange = useCallback((saved) => {
-        setNotes(prev => prev?.map(note => note.id === saved.id ? saved : note) ?? prev);
-    }, []);
+    const dateFmt = useShortDate();
 
     const newNote = async (extra = {}) => {
-        try {
-            const note = await createNote({ title: '', body: extra.body ?? '', taskId: extra.taskId ?? null, ...(extra.title ? { title: extra.title } : {}), ...(extra.copy ?? {}) });
-            setNotes(prev => [note, ...(prev ?? [])]);
-            setOpenId(note.id);
-        } catch (err) {
-            dispatch(showToast(err.code === 'NOTEBOOK_LIMIT' ? t('noteLimit') : err.code === 'NOTEBOOK_STORAGE_FULL' ? t('noteStorageFull') : t('noteSaveFailed'), 'error'));
-        }
+        const note = await create({ title: '', body: extra.body ?? '', taskId: extra.taskId ?? null, ...(extra.title ? { title: extra.title } : {}), ...(extra.copy ?? {}) });
+        if (note) setOpenId(note.id);
     };
     // an empty note isn't allowed by the server: a new one is called after its day, to write over
     const startNote = () => newNote({
@@ -55,19 +40,13 @@ export default function Notebook({ focusTask }) {
     });
 
     const deleteNote = async (id) => {
-        await removeNote(id).catch(() => {});
-        setNotes(prev => prev.filter(note => note.id !== id));
+        await remove(id);
         setOpenId(null);
     };
     const trashNote = async (id) => {
-        try {
-            await updateNote(id, { trashed: true });
-            setNotes(prev => prev.filter(note => note.id !== id));
-            setOpenId(null);
-            dispatch(showToast(t('noteTrashed'), 'info'));
-        } catch {
-            dispatch(showToast(t('noteSaveFailed'), 'error'));
-        }
+        if (!await trash(id)) return;
+        setOpenId(null);
+        dispatch(showToast(t('noteTrashed'), 'info'));
     };
 
     const shown = useMemo(() => {
@@ -83,7 +62,6 @@ export default function Notebook({ focusTask }) {
     if (open) return <NoteEditor key={open.id} note={open} focusTask={focusTask} onChange={onChange} onDelete={() => deleteNote(open.id)} onClose={() => setOpenId(null)}
         full folders={folders} onTrash={() => trashNote(open.id)} onDuplicate={(note) => newNote({ copy: duplicateOf(note, t('noteCopyWord')) })} />;
 
-    const dateFmt = new Intl.DateTimeFormat(localeOf(language), { day: 'numeric', month: 'short' });
     return (
         <div className={styles.list}>
             <div className={styles.listHead}>
@@ -129,8 +107,7 @@ export default function Notebook({ focusTask }) {
                             );
                         })}
                     </ul>}
-            {scanning && <ScanSheet onClose={() => setScanning(false)}
-                onDone={(made) => { if (made.notes) fetchNotes().then(setNotes).catch(() => {}); }} />}
+            {scanning && <ScanSheet onClose={() => setScanning(false)} onDone={onScanDone} />}
         </div>
     );
 }
