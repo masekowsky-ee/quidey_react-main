@@ -8,7 +8,7 @@
 // API: POST /api/arcade/scores { game, level, score, ranked }, GET /api/arcade/me,
 // GET /api/arcade/leaderboard?game=&level=, DELETE /api/arcade/ranked (off every board).
 
-import { apiFetch } from '../helperFunction';
+import { apiFetch, CACHE_SHORT } from '../helperFunction';
 
 // max: the most the server takes (the same numbers as ARCADE_GAMES in the api)
 export const ARCADE_GAMES = [
@@ -31,9 +31,9 @@ export function storeMode(mode) {
 
 export const submitScore = (game, level, score, ranked) =>
     apiFetch('/api/arcade/scores', { method: 'POST', body: JSON.stringify({ game, level, score, ranked }) });
-export const fetchMyArcade = () => apiFetch('/api/arcade/me');
+export const fetchMyArcade = () => apiFetch('/api/arcade/me', { cacheMs: CACHE_SHORT });
 export const fetchLeaderboard = (game, level) =>
-    apiFetch(`/api/arcade/leaderboard?game=${encodeURIComponent(game)}&level=${encodeURIComponent(level)}`);
+    apiFetch(`/api/arcade/leaderboard?game=${encodeURIComponent(game)}&level=${encodeURIComponent(level)}`, { cacheMs: CACHE_SHORT });
 export const leaveLeaderboards = () => apiFetch('/api/arcade/ranked', { method: 'DELETE' });
 
 const bestKey = (game, level) => `${game}:${level}`;

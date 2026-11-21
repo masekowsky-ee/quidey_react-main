@@ -924,8 +924,10 @@ code {
     animation: crossFade 0.2s ease-out backwards;
   }
 
+  /* a sheet on the bottom edge never overshoots its place (that would lift it off the edge and
+     show a gap under it), so its spring here is the critically damped one */
   :root[data-motion="extreme"] [data-sheet] {
-    animation: sheetUp 0.6s var(--spring) backwards;
+    animation: sheetUp 0.6s var(--spring-curve) backwards;
   }
 
   /* while a finger holds it, it follows the finger and nothing else */

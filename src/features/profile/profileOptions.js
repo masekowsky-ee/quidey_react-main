@@ -1,4 +1,4 @@
-import { apiFetch } from '../helperFunction';
+import { apiFetch, CACHE_SHORT } from '../helperFunction';
 import { TASK_COLORS } from '../tasks/taskColors';
 
 // What a profile can be set up with. The api checks the same lists (index.js, "Profiles").
@@ -36,7 +36,7 @@ export function fetchOwnProfile() {
 // Somebody's profile by username. Friends get everything they may see; everybody else only
 // { id, username, displayName, relation }. Rejects with code USER_NOT_FOUND for unknown names.
 export function fetchProfile(username) {
-    return apiFetch(`/api/profiles/${encodeURIComponent(username)}`);
+    return apiFetch(`/api/profiles/${encodeURIComponent(username)}`, { cacheMs: CACHE_SHORT });
 }
 
 // Saves the given fields of my profile ({ bio, status, study, interests, color, banner, emoji,

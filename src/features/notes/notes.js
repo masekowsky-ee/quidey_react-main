@@ -3,7 +3,7 @@
 // the trash are under /api/tester/...; the server lets only testers set a note's folderId,
 // tags, color, archived or trashed. A note in the trash is deleted for good after TRASH_DAYS.
 
-import { apiFetch } from '../helperFunction';
+import { apiFetch, CACHE_MEDIUM } from '../helperFunction';
 import { translate } from '../../i18n/useTranslation';
 
 export const TRASH_DAYS = 30;
@@ -15,7 +15,7 @@ export const FOLDER_EMOJIS = ['📁', '📐', '🧪', '📖', '🧠', '💡', '�
 // ---------- the server ----------
 export const fetchTrash = () => apiFetch('/api/notebook?trash=1');
 export const emptyTrash = () => apiFetch('/api/tester/notebook/trash', { method: 'DELETE' });
-export const fetchFolders = () => apiFetch('/api/tester/note-folders');
+export const fetchFolders = () => apiFetch('/api/tester/note-folders', { cacheMs: CACHE_MEDIUM });
 export const createFolder = (folder) => apiFetch('/api/tester/note-folders', { method: 'POST', body: JSON.stringify(folder) });
 export const updateFolder = (id, change) => apiFetch(`/api/tester/note-folders/${id}`, { method: 'PUT', body: JSON.stringify(change) });
 export const removeFolder = (id) => apiFetch(`/api/tester/note-folders/${id}`, { method: 'DELETE' });

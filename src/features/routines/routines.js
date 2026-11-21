@@ -9,7 +9,7 @@
 import { useEffect } from 'react';
 import { track } from '../usage/usage';
 import { useDispatch, useSelector, useStore } from 'react-redux';
-import { apiFetch, fill } from '../helperFunction';
+import { apiFetch, fill, CACHE_MEDIUM } from '../helperFunction';
 import { showToast } from '../toast/toast';
 import { translate } from '../../i18n/useTranslation';
 import { playSound } from '../settings/sound';
@@ -61,7 +61,7 @@ export default function routinesReducer(state = { list: [], loaded: false }, act
 }
 
 export const fetchRoutines = () => async (dispatch) => {
-    const list = await apiFetch('/api/routines');
+    const list = await apiFetch('/api/routines', { cacheMs: CACHE_MEDIUM });
     dispatch({ type: SET_ROUTINES, payload: list });
     return list;
 };

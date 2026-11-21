@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
-import { apiFetch, fill, mondayIndex } from '../features/helperFunction';
+import { apiFetch, fill, mondayIndex, CACHE_SHORT } from '../features/helperFunction';
 import { fetchOwnProfile, profileColorAttr } from '../features/profile/profileOptions';
 import { RANGES, hoursText, periodOf, periodQuery, sumByBucket } from '../features/stats/period';
 import { isTaskColor, groupColorAttr } from '../features/tasks/taskColors';
@@ -191,7 +191,7 @@ export default function Stats() {
     // the period's numbers, again when a session was saved or the period changes
     useEffect(() => {
         let current = true;
-        apiFetch(`/api/stats${query}`)
+        apiFetch(`/api/stats${query}`, { cacheMs: CACHE_SHORT })
             .then(data => { if (current) setStats({ query, data, error: false }); })
             .catch(() => { if (current) setStats({ query, data: null, error: true }); });
         return () => { current = false; };

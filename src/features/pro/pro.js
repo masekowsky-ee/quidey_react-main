@@ -8,7 +8,7 @@
 // limits: access.limits / access.usage; null for Pro, testers and admins).
 import { registerPlugin } from '@capacitor/core';
 import { useSelector } from 'react-redux';
-import { apiFetch, LIMIT_EVENT } from '../helperFunction';
+import { apiFetch, CACHE_MEDIUM, LIMIT_EVENT } from '../helperFunction';
 import { isNativeApp } from '../native/native';
 
 // The prices as shown (the real ones live at Stripe / in the Play Console: keep them the same)
@@ -36,7 +36,7 @@ const QuideyBilling = registerPlugin('QuideyBilling');
 export const sellsThroughPlay = () => isNativeApp();
 
 // GET /api/billing: { active, gift, until, subscription, canManageStripe, stripe, play, prices, playAccountId }
-export const fetchBilling = () => apiFetch('/api/billing');
+export const fetchBilling = () => apiFetch('/api/billing', { cacheMs: CACHE_MEDIUM });
 
 // Web: on to Stripe's checkout page for a tier ('pro' | 'max') and 'monthly' | 'yearly' (leaves the
 // page). A running Stripe Pro bought up to Max is changed in place: the server answers

@@ -130,7 +130,11 @@ export function useDragDismiss(ref, { onDismiss, enabled = true, axis = 'y', dir
         const backdrop = () => panel.closest('[data-sheet-backdrop]') ?? panel.parentElement?.querySelector?.('[data-drawer-overlay]');
         // travel: how far "all the way away" is: the panel's size, or LIFT for a sheet that only
         // rose a little (it fades as it goes, the way it came)
-        const paint = (value, travel = size(), fade = false) => {
+        const paint = (rawValue, travel = size(), fade = false) => {
+            // never past its edge: a panel that is attached to the bottom or the side of the screen
+            // stays filling everything between itself and that edge (a rubber band or a bounce
+            // would lift it off and show the page / a gap behind it)
+            const value = Math.max(0, rawValue);
             offset = value;
             panel.style.transform = value === 0 ? '' : (horizontal ? `translateX(${value * direction}px)` : `translateY(${value * direction}px)`);
             const progress = Math.max(0, Math.min(1, value / travel));
@@ -203,8 +207,8 @@ export function useDragDismiss(ref, { onDismiss, enabled = true, axis = 'y', dir
             const raw = along(e) - gesture.start;
             gesture.samples.push({ at: raw, t: e.timeStamp });
             if (gesture.samples.length > 8) gesture.samples.shift();
-            // away: 1:1 with the finger; the other way: it resists, it has nowhere to go
-            paint(raw >= 0 ? raw : rubberband(raw, size()));
+            // away: 1:1 with the finger; the other way: it has nowhere to go and stays on its edge
+            paint(raw);
             e.preventDefault();
         };
 

@@ -244,7 +244,7 @@ describe('statistics page', () => {
         apiFetch.mockImplementation(async (url) => (url.startsWith('/api/stats') ? stats : url === '/api/profile' ? {} : []))
         await act(async () => { wrap(makeStore(), <Stats />, '/stats') })
         expect(screen.getByRole('heading', { name: 'Statistics' })).toBeInTheDocument()
-        expect(apiFetch).toHaveBeenCalledWith(`/api/stats${periodQuery(periodOf('week', 0))}`)
+        expect(apiFetch).toHaveBeenCalledWith(`/api/stats${periodQuery(periodOf('week', 0))}`, expect.anything())
         expect(screen.getByText('This week')).toBeInTheDocument()
         const byType = screen.getByRole('region', { name: 'Events by type' })
         expect(within(byType).getByText('Work')).toBeInTheDocument()
@@ -253,7 +253,7 @@ describe('statistics page', () => {
 
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Previous period' })) })
         expect(screen.getByText('Last week')).toBeInTheDocument()
-        expect(apiFetch).toHaveBeenCalledWith(`/api/stats${periodQuery(periodOf('week', -1))}`)
+        expect(apiFetch).toHaveBeenCalledWith(`/api/stats${periodQuery(periodOf('week', -1))}`, expect.anything())
 
         await act(async () => { fireEvent.click(screen.getByRole('radio', { name: 'Month' })) })
         expect(screen.getByText('This month')).toBeInTheDocument()

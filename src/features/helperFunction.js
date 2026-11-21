@@ -26,11 +26,56 @@ export const LIMIT_EVENT = 'quidey:limit-reached';
 // What may be read without an account (everything else a visitor's page asks for stays off the network)
 const PUBLIC_READS = ['/api/auth/'];
 
+// ---------- answer cache ----------
+// apiFetch(url, { cacheMs }) keeps the answer of a GET in memory for cacheMs (no personal data
+// leaves the page): the same data needed again within that time (reopening a page, several
+// components asking at once) costs no request. Asked at the same moment, one request is shared.
+// Anything that changes data (every non-GET), signing out and signing in empty the cache, so a
+// change of mine is never hidden behind an old answer. Only use it for data that doesn't change
+// behind my back (not for what the live connection delivers: tasks, messages, friends, sessions).
+// { fresh: true } skips the cache for one call (pull to refresh) and stores the new answer.
+export const CACHE_SHORT = 30 * 1000;
+export const CACHE_MEDIUM = 5 * 60 * 1000;
+export const CACHE_LONG = 60 * 60 * 1000;
+const answers = new Map();   // key -> { at, ttl, value } | { pending: Promise }
+let cacheOwner = null;
+
+export function clearApiCache() {
+    answers.clear();
+}
+if (typeof window !== 'undefined') window.addEventListener(SIGNED_OUT_EVENT, clearApiCache);
+
 // Every request to the API. Reads are kept on the device and answered from there when the server
 // can't be reached; some writes wait in a queue meanwhile (features/offline/offline.js).
-export function apiFetch(url, options = {}) {
-    return withOffline(url, options, request);
+// On top of that, { cacheMs } keeps an answer in memory for a while (see "answer cache" above).
+export async function apiFetch(url, options = {}) {
+    const { cacheMs, fresh, ...fetchOptions } = options;
+    const token = localStorage.getItem("token");
+    const isGet = !fetchOptions.method || fetchOptions.method.toUpperCase() === 'GET';
+    // another account (switching) never sees the answers of the previous one
+    if (token !== cacheOwner) { clearApiCache(); cacheOwner = token; }
+    if (!isGet) {
+        const done = await withOffline(url, fetchOptions, request);
+        clearApiCache();
+        return done;
+    }
+    if (!cacheMs) return withOffline(url, fetchOptions, request);
+    const hit = answers.get(url);
+    if (!fresh && hit) {
+        if (hit.pending) return hit.pending;
+        if (Date.now() - hit.at < hit.ttl) return hit.value;
+    }
+    const pending = withOffline(url, fetchOptions, request).then((value) => {
+        if (answers.get(url)?.pending === pending) answers.set(url, { at: Date.now(), ttl: cacheMs, value });
+        return value;
+    }, (err) => {
+        if (answers.get(url)?.pending === pending) answers.delete(url);
+        throw err;
+    });
+    answers.set(url, { pending });
+    return pending;
 }
+
 
 async function request(url, options = {}) {
     const token = localStorage.getItem("token");

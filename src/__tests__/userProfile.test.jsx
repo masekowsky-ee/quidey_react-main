@@ -89,7 +89,7 @@ describe('somebody else\'s profile', () => {
         apiFetch.mockResolvedValue(friend)
         await renderPage('tom')
 
-        expect(apiFetch).toHaveBeenCalledWith('/api/profiles/tom')
+        expect(apiFetch).toHaveBeenCalledWith('/api/profiles/tom', expect.anything())
         expect(screen.getByRole('heading', { level: 1, name: 'Tom' })).toBeInTheDocument()
         expect(screen.getByText('Mathe-Klausur am Freitag')).toBeInTheDocument()
         expect(screen.getByText('Ich lerne gern abends.')).toBeInTheDocument()

@@ -3,7 +3,7 @@
 // apiFetch's error (status, code, data). The planner's sessions are ordinary tasks, so whatever
 // changes them reloads the task list.
 
-import { apiFetch } from '../helperFunction';
+import { apiFetch, CACHE_MEDIUM } from '../helperFunction';
 import { track } from '../usage/usage';
 import { refreshTasks } from '../tasks/taskAction';
 
@@ -76,7 +76,7 @@ const reloadTasks = (dispatch) => dispatch(refreshTasks()).catch(() => {});
 
 // ---------- subjects ----------
 export const fetchSubjects = () => async (dispatch) => {
-    const list = await apiFetch(`${BASE}/subjects`);
+    const list = await apiFetch(`${BASE}/subjects`, { cacheMs: CACHE_MEDIUM });
     dispatch({ type: SET_SUBJECTS, payload: list });
     return list;
 };
@@ -170,7 +170,7 @@ export const reorderParts = (goalId, ids) => async (dispatch) => {
 
 // ---------- settings ----------
 export const fetchStudySettings = () => async (dispatch) => {
-    const settings = await apiFetch(`${BASE}/settings`);
+    const settings = await apiFetch(`${BASE}/settings`, { cacheMs: CACHE_MEDIUM });
     dispatch({ type: SETTINGS_SET, payload: settings });
     return settings;
 };
