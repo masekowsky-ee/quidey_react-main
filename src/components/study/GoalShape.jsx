@@ -4,8 +4,7 @@ import { GOAL_SHAPES } from '../../features/study/shapes';
 
 // A study goal's shape, in its subject's colour (--task-color from the nearest data-task-color):
 // the goals of one subject told apart at a glance, in the lists, on the goal's page and on every
-// planned session. Beside the goal's name it is decoration (the name says which goal it is);
-// label: said aloud where the shape stands alone (the picker).
+// planned session. Beside the goal's name it is decoration (the name says which goal it is).
 
 // drawn on a 20 × 20 grid, filled, so they read at 10px as well as at 24px
 const PATHS = {
@@ -18,14 +17,12 @@ const PATHS = {
     heart: <path d="M10 17.6s-7.6-4.6-7.6-9.9C2.4 5 4.4 3 6.8 3c1.4 0 2.6.7 3.2 1.8C10.6 3.7 11.8 3 13.2 3c2.4 0 4.4 2 4.4 4.7 0 5.3-7.6 9.9-7.6 9.9z" />,
 };
 
-export default function GoalShape({ shape, size = 14, color, label = false, className = '' }) {
-    const { t } = useTranslation();
+export default function GoalShape({ shape, size = 14, color, className = '' }) {
     const drawn = GOAL_SHAPES.includes(shape) ? shape : 'circle';
     return (
         <svg className={`${styles.shape} ${className}`} width={size} height={size} viewBox="0 0 20 20"
             data-task-color={color || undefined} data-shape={drawn}
-            role={label ? 'img' : undefined} aria-label={label ? t(`goalShape_${drawn}`) : undefined}
-            aria-hidden={label ? undefined : 'true'}>
+            aria-hidden="true">
             {PATHS[drawn]}
         </svg>
     );

@@ -6,6 +6,7 @@ import { playSound } from '../settings/sound';
 import { useTranslation } from '../../i18n/useTranslation';
 import { markNews } from '../realtime/news';
 import { useRealtime, useRealtimeRefresh } from '../realtime/socket';
+import { FEED_CHANGED, FEED_CHEERED } from '../realtime/events';
 import { fetchProgress } from '../progress/progress';
 
 // The feed on the Gemeinschaft page: what friends and I did (a day's focus, challenges, levels,
@@ -96,11 +97,11 @@ export function useFeedRealtime() {
     const store = useStore();
     const { t } = useTranslation();
 
-    useRealtimeRefresh(['feed:changed'], async () => {
+    useRealtimeRefresh([FEED_CHANGED], async () => {
         if (store.getState().feed.loaded) await dispatch(fetchFeed()).catch(() => {});
     });
-    useRealtime('feed:changed', () => dispatch(markNews('feed')));
-    useRealtime('feed:cheered', (payload) => {
+    useRealtime(FEED_CHANGED, () => dispatch(markNews('feed')));
+    useRealtime(FEED_CHEERED, (payload) => {
         if (!payload?.user) return;
         playSound('cheer');
         dispatch(showToast(fill(t('liveFeedCheer'), { name: displayName(payload.user) }), 'info', { to: '/community' }));

@@ -50,10 +50,8 @@ export default {
     feedCheersCount: '{count} cheering',
     feedCheerOne: '1 cheering',
     feedCheeredBy: 'Cheered on by {names}',
-    feedRemove: 'Remove',
     feedRemoveConfirm: 'Really remove',
     feedRemoveLabel: 'Take the entry out of the feed',
-    feedEntryMenu: 'Entry',
     liveFeedCheer: '{name} is cheering you on',
 
     levelTitle: 'Your level',

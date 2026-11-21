@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from '../../i18n/useTranslation';
 import { displayName, fill, isOverdue, sameDay } from '../../features/helperFunction';
-import { layoutDay, minutesOfDay, prioLevel, taskTimeText, timeText } from '../../features/calendar/calendar';
+import { layoutDay, minutesOfDay, prioLevel, taskTimeText, timeText, prioClasses } from '../../features/calendar/calendar';
 import { taskColorAttr } from '../../features/tasks/taskColors';
 import { isEvent } from '../../features/tasks/kinds';
 import TaskMeta from '../task/TaskMeta.jsx';
@@ -12,7 +12,7 @@ import Icon from '../icons.jsx';
 import GoalShape from '../study/GoalShape.jsx';
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
-const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
+const PRIO_CLASS = prioClasses(styles);
 
 // The shortest a block is drawn, in minutes: on a touch screen tall enough to hit with a finger
 const coarsePointer = () => Boolean(window.matchMedia?.('(pointer: coarse)')?.matches);

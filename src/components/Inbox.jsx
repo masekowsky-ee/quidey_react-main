@@ -12,6 +12,8 @@ import {
     deleteNotification, fetchInboxUnread, markConversationRead, noticeView,
 } from '../features/inbox/inbox';
 import { REALTIME_RECONNECT, useRealtime } from '../features/realtime/socket';
+import { INBOX_READ, MESSAGE_NEW, NOTIFICATION_NEW } from '../features/realtime/events';
+import { errorText } from '../features/api/transport';
 import { acceptFriendRequest, removeFriendRequest, fetchFriends } from '../features/friends/friendsAction';
 import { joinSharedSession, removeSharedMember } from '../features/together/togetherAction';
 import { reminderBase, reminderTimes, selectAllDayTime } from '../features/tasks/reminders';
@@ -25,11 +27,6 @@ import ReminderList from './reminders/ReminderList.jsx';
 const TABS = ['messages', 'requests', 'notices', 'reminders'];
 const SEEN_DELAY_MS = 1500;
 const REMINDER_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
-
-const errorText = (t, err) => {
-    const key = `inboxError_${err?.code}`;
-    return t(key) !== key ? t(key) : t('friendError_generic');
-};
 
 function Avatar({ user }) {
     return <span className={styles.avatar} aria-hidden="true">{getInitials(displayName(user))}</span>;
@@ -83,14 +80,14 @@ function Conversations({ onOpen, selected = null, newChat = true }) {
 
     const load = useCallback(() => fetchConversations().then(setConversations).catch(setError), []);
     useEffect(() => { load(); }, [load]);
-    useRealtime('message:new', load);
-    useRealtime('inbox:read', load);
+    useRealtime(MESSAGE_NEW, load);
+    useRealtime(INBOX_READ, load);
     useRealtime(REALTIME_RECONNECT, load);
 
     const talkedTo = new Set((conversations ?? []).map(c => c.user.id));
     const others = friends.filter(friend => !talkedTo.has(friend.id));
 
-    if (error) return <p className={styles.error}>{errorText(t, error)}</p>;
+    if (error) return <p className={styles.error}>{errorText(t, 'inboxError', error?.code)}</p>;
     if (!conversations) return <SkeletonRows count={4} />;
 
     return (
@@ -146,7 +143,7 @@ function Thread({ userId, onBack }) {
         !prev || prev.messages.some(m => m.id === message.id) ? prev : { ...prev, messages: [...prev.messages, message] }
     ));
 
-    useRealtime('message:new', ({ user, message } = {}) => {
+    useRealtime(MESSAGE_NEW, ({ user, message } = {}) => {
         if (user?.id !== userId || !message) return;
         addMessage(message);
         if (!message.fromMe) markConversationRead(userId).catch(() => {});
@@ -197,7 +194,7 @@ function Thread({ userId, onBack }) {
                     <li ref={endRef} aria-hidden="true" />
                 </ol>
             )}
-            {error && <p className={styles.error} role="alert">{errorText(t, error)}</p>}
+            {error && <p className={styles.error} role="alert">{errorText(t, 'inboxError', error?.code)}</p>}
             {thread && (thread.canWrite ? (
                 <form className={styles.compose} onSubmit={send}>
                     <textarea value={text} maxLength={2000} rows={2} placeholder={t('inboxWrite')} aria-label={t('inboxWrite')}
@@ -226,7 +223,7 @@ function Requests() {
             await dispatch(action);
             if (success) success();
         } catch (err) {
-            dispatch(showToast(errorText(t, err), 'error'));
+            dispatch(showToast(errorText(t, 'inboxError', err?.code), 'error'));
         } finally {
             setBusy(null);
         }
@@ -316,7 +313,7 @@ function Notices() {
         return () => clearTimeout(seenTimer.current);
     }, [load]);
 
-    useRealtime('notification:new', (notice) => {
+    useRealtime(NOTIFICATION_NEW, (notice) => {
         if (!notice?.id) return;
         setNotices(prev => (!prev ? prev : [notice, ...prev.filter(n => n.id !== notice.id)]));
         markSeenSoon();
@@ -329,11 +326,11 @@ function Notices() {
             setNotices(prev => prev.filter(n => n.id !== id));
             dispatch(fetchInboxUnread()).catch(() => {});
         } catch (err) {
-            dispatch(showToast(errorText(t, err), 'error'));
+            dispatch(showToast(errorText(t, 'inboxError', err?.code), 'error'));
         }
     };
 
-    if (error) return <p className={styles.error}>{errorText(t, error)}</p>;
+    if (error) return <p className={styles.error}>{errorText(t, 'inboxError', error?.code)}</p>;
     if (!notices) return <SkeletonRows count={4} avatar={false} />;
     if (notices.length === 0) return <p className={styles.empty}>{t('inboxNoNotices')}</p>;
 

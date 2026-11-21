@@ -130,7 +130,7 @@ export default function AdminTesterFeedback() {
 
     useEffect(() => {
         let cancelled = false;
-        dispatch(fetchAllTesterFeedback())
+        fetchAllTesterFeedback()
             .then(result => { if (!cancelled) setData(result); })
             .catch(() => { if (!cancelled) { setData({ testers: 0, topics: [] }); dispatch(showToast(t('friendError_generic'), 'error')); } });
         return () => { cancelled = true; };

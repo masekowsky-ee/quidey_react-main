@@ -39,12 +39,12 @@ export const RATING_MAX = 5;
 export const COMMENT_MAX = 2000;
 
 // [{ topic, rating, comment, updatedAt }] of mine
-export const fetchMyTesterFeedback = () => () => apiFetch('/api/tester/feedback');
+export const fetchMyTesterFeedback = () => apiFetch('/api/tester/feedback');
 
 // changes: { rating?: 1-5 | null, comment?: string | null }; answers with the saved entry
 // (rating and comment null once both are empty: nothing is kept then)
-export const saveTesterFeedback = (topic, changes) => () =>
+export const saveTesterFeedback = (topic, changes) =>
     apiFetch(`/api/tester/feedback/${encodeURIComponent(topic)}`, { method: 'PUT', body: JSON.stringify(changes) });
 
 // admins: { testers, topics: [{ topic, ratings, average, spread: [n1..n5], entries: [...] }] }
-export const fetchAllTesterFeedback = () => () => apiFetch('/api/admin/tester-feedback');
+export const fetchAllTesterFeedback = () => apiFetch('/api/admin/tester-feedback');

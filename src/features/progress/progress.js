@@ -5,6 +5,7 @@ import { apiFetch } from '../api/api';
 import { showToast } from '../toast/toast';
 import { COMMUNITY_PATHS } from '../community/paths';
 import { translate } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import { burst } from '../settings/motion';
 import { playSound } from '../settings/sound';
 import { PROFILE_COLORS, PROFILE_BANNERS, PROFILE_EMOJIS, AVATAR_FRAMES } from '../profile/profileOptions';
@@ -185,7 +186,7 @@ export const challengeTitle = (t, challenge) => fill(t(`challenge_${challenge.id
 
 // A number in the app's language: 1.944 / 1,944, 2,2 / 2.2
 export const formatNumber = (value, language, digits = 0) =>
-    new Intl.NumberFormat(language === 'de' ? 'de-DE' : 'en-GB', { maximumFractionDigits: digits }).format(value);
+    new Intl.NumberFormat(localeOf(language), { maximumFractionDigits: digits }).format(value);
 
 // How a challenge's numbers read: minutes as "18 / 45 Min.", long ones in hours, others as "2 / 3"
 export function challengeAmount(t, challenge, language) {

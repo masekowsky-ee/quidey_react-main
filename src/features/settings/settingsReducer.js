@@ -1,5 +1,5 @@
 import { SET_SHOW_MENU, SET_MENU_SIDE, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS, SET_PALETTE, SET_UI_VARIANT, SET_UI_COLORS, SET_SOUND } from "./settingsActionTypes";
-import { UI_VARIANT_IDS, readStoredUiVariant, readStoredUiColors } from "../tester/variants";
+import { UI_VARIANT_IDS, readStoredUiVariant, readStoredUiColors } from "./colors";
 import { THEMES, readStoredTheme } from "./theme";
 import { HOME_LAYOUTS, readStoredHomeLayout } from "./homeLayout";
 import { MOTION_LEVELS, readStoredMotion } from "./motion";

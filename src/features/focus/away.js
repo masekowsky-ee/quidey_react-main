@@ -10,7 +10,7 @@
 import { useSyncExternalStore } from 'react';
 import { selectTimerInProgress } from '../session/sessionAction';
 
-export const AWAY_MIN_MS = 10 * 1000;      // shorter looks elsewhere don't count
+const AWAY_MIN_MS = 10 * 1000;      // shorter looks elsewhere don't count
 export const NUDGE_AFTER_MS = 20 * 1000;   // one nudge after this long away (where it can be told)
 const BEAT_GAP_MS = 3000;                  // a longer gap between beats: the computer slept
 const STORE_KEY = 'focusAway';

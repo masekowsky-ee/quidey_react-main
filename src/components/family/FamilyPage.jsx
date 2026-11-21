@@ -4,6 +4,7 @@ import own from './Family.module.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectUsername } from '../../features/auth/tester';
 import { useTranslation } from '../../i18n/useTranslation';
 import { localeOf } from '../../i18n/locale';
 import { displayName, fill, formatDuration, formatRelative, parseDate, sameDay, toDateOnly } from '../../features/helperFunction';
@@ -20,6 +21,7 @@ import { rememberPresence } from '../../features/presence/presence';
 import { OnlineLabel } from '../presence/OnlineDot';
 import { calendarLink } from '../../features/calendar/sources';
 import { useRealtime, useRealtimeRefresh, useSafetyPoll } from '../../features/realtime/socket';
+import { FAMILY_CHANGED, FAMILY_MESSAGE } from '../../features/realtime/events';
 import { useNow } from '../../features/together/work';
 import { useFamilyRun } from './useFamilyRun';
 import ProfileAvatar from '../profile/ProfileAvatar';
@@ -70,7 +72,7 @@ function useFamily(id) {
     }, [id]);
     useEffect(() => { load(); }, [load]);
     useSafetyPoll(load, { everyMs: 60 * 1000 });
-    useRealtimeRefresh(['family:changed'], load, (event, payload) => Number(payload?.familyId) === id);
+    useRealtimeRefresh([FAMILY_CHANGED], load, (event, payload) => Number(payload?.familyId) === id);
     const show = useCallback((family) => {
         seq.current++;
         setState({ id, family, missing: false });
@@ -96,7 +98,7 @@ function useFamilyChat(id) {
     useEffect(() => { load(); }, [load]);
     // after a lost connection: whatever came in meanwhile
     useRealtimeRefresh([], load);
-    useRealtime('family:message', (payload) => {
+    useRealtime(FAMILY_MESSAGE, (payload) => {
         if (Number(payload?.familyId) === id && payload.message) addMessages([payload.message]);
     });
 
@@ -210,7 +212,7 @@ function FamilyBoard({ family, onChanged }) {
 function FamilyList({ family, onChanged, subGroup }) {
     const { t, language } = useTranslation();
     const run = useFamilyRun();
-    const myUsername = useSelector(state => state.auth.user?.username);
+    const myUsername = useSelector(selectUsername);
     const [name, setName] = useState('');
     const [assignee, setAssignee] = useState(null);
     const [busy, setBusy] = useState(false);
@@ -308,7 +310,7 @@ function Upcoming({ family, onChanged, subGroup, subGroups }) {
     const { t, language } = useTranslation();
     const locale = localeOf(language);
     const run = useFamilyRun();
-    const myUsername = useSelector(state => state.auth.user?.username);
+    const myUsername = useSelector(selectUsername);
     const today = toDateOnly(new Date());
     const todayKey = dateKey(today);
     const [name, setName] = useState('');

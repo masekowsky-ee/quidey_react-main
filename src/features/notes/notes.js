@@ -5,6 +5,8 @@
 
 import { apiFetch, CACHE_MEDIUM } from '../api/api';
 import { translate } from '../../i18n/useTranslation';
+import { downloadBlob } from '../helperFunction';
+import { localeOf } from '../../i18n/locale';
 
 export const TRASH_DAYS = 30;
 export const TAGS_MAX = 10;
@@ -133,7 +135,7 @@ export const readingMinutes = (words) => (words === 0 ? 0 : Math.max(1, Math.rou
 export const NOTE_TEMPLATES = ['lecture', 'summary', 'exam', 'group', 'week'];
 
 export function templateNote(key, language, date = new Date()) {
-    const day = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+    const day = new Intl.DateTimeFormat(localeOf(language), { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
     const fillDate = (text) => String(text).replaceAll('{date}', day);
     return {
         title: fillDate(translate(language, `noteTpl_${key}_title`)),
@@ -168,15 +170,7 @@ export const noteFileName = (note) => `${(note.title || firstLine(note.body) || 
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'notiz'}.md`;
 
 export function downloadNote(note) {
-    const blob = new Blob([noteMarkdown(note)], { type: 'text/markdown;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = noteFileName(note);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    downloadBlob(new Blob([noteMarkdown(note)], { type: 'text/markdown;charset=utf-8' }), noteFileName(note));
 }
 
 export const daysLeftInTrash = (note, now = Date.now()) => note.trashedAt

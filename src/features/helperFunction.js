@@ -44,7 +44,11 @@ export function toCsv(rows) {
 export function downloadFile(filename, text, type = 'text/csv') {
     // the BOM makes Excel read umlauts correctly; other formats (e.g. .ics) must not start with one
     const parts = type === 'text/csv' ? ['﻿', text] : [text];
-    const blob = new Blob(parts, { type: `${type};charset=utf-8` });
+    downloadBlob(new Blob(parts, { type: `${type};charset=utf-8` }), filename);
+}
+
+// Offers a blob as a file download; the object URL is released a moment later so the download is not cancelled
+export function downloadBlob(blob, filename) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -54,6 +58,9 @@ export function downloadFile(filename, text, type = 'text/csv') {
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+// 7 -> "07"
+export const pad = (n) => String(n).padStart(2, '0');
 
 // Name to show for a user from the api ({ username, displayName })
 export function displayName(user) {
@@ -88,6 +95,9 @@ export function formatClock(ms) {
     const s = totalSeconds % 60;
     return [h, m, s].map(n => String(n).padStart(2, '0')).join(':');
 }
+
+// The same for a running timer, without the empty hour: 125000 ms -> "02:05"
+export const shortClock = (ms) => formatClock(ms).replace(/^00:/, '');
 
 // Worked time for summaries: 45000 -> "45 s", 3900000 -> "1 h 5 min"
 export function formatDuration(ms) {

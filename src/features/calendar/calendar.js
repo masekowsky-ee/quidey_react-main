@@ -13,6 +13,9 @@ export function fromKey(key) {
     return date && dateKey(date) === key ? date : null;
 }
 
+// The class of each priority level out of a CSS module that defines prioHigh, prioMedium, prioLow
+export const prioClasses = (styles) => ({ high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow });
+
 export function addDays(date, days) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
 }

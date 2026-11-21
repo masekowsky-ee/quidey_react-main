@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { COMMUNITY_PATHS, isCommunityPath } from '../features/community/paths';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectIsAdmin } from '../features/auth/tester';
 import styles from './TabBar.module.css';
 import Icon from './icons';
 import { useTranslation } from '../i18n/useTranslation';
@@ -72,7 +73,7 @@ export default function TabBar() {
     const news = useSelector(state => state.news);
     const inviteCount = useSelector(selectInviteCount);
     const taskInviteCount = useSelector(selectTaskInviteCount);
-    const isAdmin = useSelector(state => state.auth.access.isAdmin);
+    const isAdmin = useSelector(selectIsAdmin);
     const friendRequests = useSelector(selectIncomingCount);
     const familyInvites = useSelector(selectFamilyInviteCount);
     const adminPending = useSelector(selectAdminPendingCount);

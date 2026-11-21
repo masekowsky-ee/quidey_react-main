@@ -5,8 +5,9 @@ import styles from './FocusSheet.module.css';
 import Icon from '../icons.jsx';
 import DurationInput from '../focus/DurationInput.jsx';
 import { useTranslation } from '../../i18n/useTranslation';
-import { dueText, fill, formatClock } from '../../features/helperFunction';
+import { dueText, fill, formatClock, shortClock } from '../../features/helperFunction';
 import { durationText } from '../../features/calendar/calendar';
+import { TIMER_MODE_LABEL } from '../../features/settings/preferences';
 import TaskNoteRow from '../task/TaskNoteRow.jsx';
 import CardNote from './CardNote.jsx';
 import { useCardNote } from '../../features/home/cardNote';
@@ -19,9 +20,8 @@ import { plannedProgress, selectFocusByTask } from '../../features/tasks/planned
 import { useTaskGroups } from '../../features/collections/collections';
 import { useActiveTaskActions } from '../../features/home/useActiveTaskActions';
 
-const clockText = (ms) => formatClock(ms).replace(/^00:/, '');
 
-const MODES = [['timer', 'timerModeTimer'], ['pomodoro', 'timerModePomodoro'], ['stopwatch', 'timerModeStopwatch']];
+const MODES = ['timer', 'pomodoro', 'stopwatch'].map((mode) => [mode, TIMER_MODE_LABEL[mode]]);
 const LENGTHS = [15, 25, 30, 45, 60, 90];
 
 // Home's one white sheet: the task in focus and the timer together. The name in the serif, one
@@ -99,9 +99,9 @@ export default function FocusSheet({ dropZoneRef, activeTask, setActiveTask, onR
                 {canEditLength
                     ? <button type="button" className={styles.time} onClick={() => setEditLength(!editLength)}
                         aria-expanded={editLength} title={t('focusLength')}>
-                        <span role="timer" aria-live="off">{clockText(timer.time)}</span>
+                        <span role="timer" aria-live="off">{shortClock(timer.time)}</span>
                     </button>
-                    : <span className={styles.time} role="timer" aria-live="off">{clockText(timer.time)}</span>}
+                    : <span className={styles.time} role="timer" aria-live="off">{shortClock(timer.time)}</span>}
             </div>
 
             <div className={styles.progress} aria-hidden="true">
@@ -196,7 +196,7 @@ export function FocusSheetSkeleton() {
                 <h2 className={`${styles.title} ${styles.titleEmpty}`}>{t('homeFocusEmpty')}</h2>
                 <p className={styles.meta}><span>{t('focusHint')}</span></p>
             </div>
-            <div className={styles.clock}><span className={styles.time}>{clockText(timer.time)}</span></div>
+            <div className={styles.clock}><span className={styles.time}>{shortClock(timer.time)}</span></div>
             <div className={styles.progress} />
             <div className={styles.controls}>
                 <span className={styles.go} aria-hidden="true"><Icon name="play" size={16} strokeWidth={2.4} />{t('focusStart')}</span>

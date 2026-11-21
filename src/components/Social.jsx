@@ -2,6 +2,7 @@ import styles from './Social.module.css';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectUser } from '../features/auth/tester';
 import { useTranslation } from '../i18n/useTranslation';
 import { formatDate, displayName, fill } from '../features/helperFunction';
 import ProfileAvatar from './profile/ProfileAvatar.jsx';
@@ -9,19 +10,13 @@ import { OnlineLabel } from './presence/OnlineDot.jsx';
 import { createSharedSession } from '../features/together/togetherAction';
 import { useTogetherRun } from '../features/together/hooks';
 import { setCustomError } from '../features/settings/settingsAction';
+import { errorText } from '../features/api/transport';
 import {
     fetchFriends, fetchFriendRequests, sendFriendRequest,
     acceptFriendRequest, removeFriendRequest, removeFriend,
 } from '../features/friends/friendsAction';
 
 const TABS = ['friends', 'add', 'requests'];
-
-// Translated message for an API error, using the error code the backend sends
-function errorText(t, err) {
-    const key = `friendError_${err?.code}`;
-    const text = t(key);
-    return text === key ? t('friendError_generic') : text;
-}
 
 // A person with a link to their profile (friends see all of it, others only the names);
 // `online`: they have the app open right now (friends only)
@@ -50,7 +45,7 @@ export default function Social() {
     const presence = useSelector(state => state.presence);
     const isOnline = (friend) => presence[friend.id] ?? friend.online ?? false;
     const friends = [...byName.filter(isOnline), ...byName.filter(friend => !isOnline(friend))];
-    const me = useSelector(state => state.auth.user);
+    const me = useSelector(selectUser);
     const homeLayout = useSelector(state => state.settings.homeLayout);
     const navigate = useNavigate();
     const runTogether = useTogetherRun();
@@ -89,7 +84,7 @@ export default function Social() {
         try {
             await dispatch(action);
         } catch (err) {
-            dispatch(setCustomError({ bool: true, message: errorText(t, err) }));
+            dispatch(setCustomError({ bool: true, message: errorText(t, 'friendError', err?.code) }));
         } finally {
             setBusyId(null);
         }
@@ -110,7 +105,7 @@ export default function Social() {
             setFeedback({ ok: true, text: `${t(status === 'accepted' ? 'nowFriendsWith' : 'requestSentTo')} @${name}` });
             setUsername('');
         } catch (err) {
-            setFeedback({ ok: false, text: errorText(t, err) });
+            setFeedback({ ok: false, text: errorText(t, 'friendError', err?.code) });
         } finally {
             setSending(false);
         }

@@ -20,17 +20,17 @@ export function Bone({ w, h, round = false, pill = false, className = '', style 
 // inert: nothing in it works yet (whole pages: their tabs and buttons are only shapes); the
 // "Loading…" then sits beside it, where it is still heard. One inside another says nothing more.
 const Nested = createContext(false);
-export function Skeleton({ as: Tag = 'div', className = '', fade = false, inert = false, children, ...rest }) {
+export function Skeleton({ className = '', fade = false, inert = false, children, ...rest }) {
     const { t } = useTranslation();
     const nested = useContext(Nested);
     const status = !nested && <span className={styles.srOnly} role="status">{t('loading')}</span>;
     return (
         <Nested.Provider value>
             {inert && status}
-            <Tag className={`${fade ? styles.fade : ''} ${className}`} aria-busy={nested ? undefined : 'true'} inert={inert || undefined} {...rest}>
+            <div className={`${fade ? styles.fade : ''} ${className}`} aria-busy={nested ? undefined : 'true'} inert={inert || undefined} {...rest}>
                 {!inert && status}
                 {children}
-            </Tag>
+            </div>
         </Nested.Provider>
     );
 }

@@ -40,7 +40,7 @@ export default function Notebook({ focusTask }) {
     });
 
     const deleteNote = async (id) => {
-        await remove(id);
+        if (!await remove(id)) return;
         setOpenId(null);
     };
     const trashNote = async (id) => {

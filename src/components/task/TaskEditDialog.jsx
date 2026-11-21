@@ -1,4 +1,4 @@
-import styles from '../CalendarDay.module.css';
+import styles from './TaskEditDialog.module.css';
 import { useId } from 'react';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';

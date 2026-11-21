@@ -70,6 +70,7 @@ export const readStoredSessionMinutes = () =>
 export const storeSessionMinutes = (minutes) => store('sessionMinutes', String(minutes));
 
 export const TIMER_MODES = ['timer', 'stopwatch', 'pomodoro'];
+export const TIMER_MODE_LABEL = { timer: 'timerModeTimer', pomodoro: 'timerModePomodoro', stopwatch: 'timerModeStopwatch' };
 export const readStoredTimerMode = () => readStored('timerMode', TIMER_MODES, 'timer');
 export const storeTimerMode = (mode) => store('timerMode', mode);
 

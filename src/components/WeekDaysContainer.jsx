@@ -3,7 +3,7 @@ import { Link } from  'react-router-dom';
 import { useSelector } from "react-redux"
 import {useTranslation} from '../i18n/useTranslation'
 import { toDateOnly } from '../features/helperFunction'
-import { addDays, dateKey, groupByDay, prioLevel, taskTimeText } from '../features/calendar/calendar'
+import { addDays, dateKey, groupByDay, prioLevel, taskTimeText, prioClasses } from '../features/calendar/calendar'
 import { taskColorAttr } from '../features/tasks/taskColors'
 import { isEvent } from '../features/tasks/kinds'
 import { selectTasksLoaded } from '../features/tasks/taskAction'
@@ -11,7 +11,7 @@ import { Bone } from './skeleton/Skeleton.jsx'
 
 const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const MAX_VISIBLE_TASKS = 3;
-const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
+const PRIO_CLASS = prioClasses(styles);
 
 // The next 8 days with their tasks and events; a day opens in the calendar. (The menu and the
 // tab bar lead to the calendar itself, the title row's overdue count to its agenda.)

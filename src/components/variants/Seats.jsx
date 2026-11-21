@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { selectUser } from '../../features/auth/tester';
 import styles from './Seats.module.css';
 import ProfileAvatar from '../profile/ProfileAvatar';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -20,7 +21,7 @@ const seatOf = (key) => {
 // friends who have Quidey open, each on their seat; a tap leads to them.
 export default function Seats() {
     const { t } = useTranslation();
-    const me = useSelector(state => state.auth.user);
+    const me = useSelector(selectUser);
     const online = useOnlineFriends();
     const shown = online.slice(0, SHOWN);
 

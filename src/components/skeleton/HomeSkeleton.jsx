@@ -4,6 +4,7 @@ import focusStyles from '../WorkingPage.module.css';
 import { useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
 import { formatClock } from '../../features/helperFunction';
+import { TIMER_MODE_LABEL } from '../../features/settings/preferences';
 import { DESKTOP_QUERY, useMediaQuery } from '../../features/layout/breakpoints';
 import { DEFAULT_UI_VARIANT, useUiVariant } from '../../features/tester/variants';
 import Icon from '../icons';
@@ -16,7 +17,6 @@ import { FocusSheetSkeleton } from '../home/FocusSheet.jsx';
 import { MomentumSkeleton } from '../home/Momentum.jsx';
 
 const MODES = ['timer', 'pomodoro', 'stopwatch'];
-const MODE_LABEL = { timer: 'timerModeTimer', pomodoro: 'timerModePomodoro', stopwatch: 'timerModeStopwatch' };
 
 // Home before the app knows it may load anything (the start screen, see AppSkeleton): the same
 // layout, the parts that need no data as they are, grey where tasks and progress will be
@@ -58,7 +58,7 @@ export function HomeSkeleton() {
     );
 }
 
-export function FocusSkeleton() {
+function FocusSkeleton() {
     const { t } = useTranslation();
     return (
         <section className={focusStyles.focus} data-part="focus">
@@ -75,7 +75,7 @@ export function FocusSkeleton() {
 }
 
 // from this device, so they are shown as they are; nothing in it works yet
-export function TimerSkeleton() {
+function TimerSkeleton() {
     const { t } = useTranslation();
     const { timer, timerMode } = useSelector(state => state.session);
     return (
@@ -84,7 +84,7 @@ export function TimerSkeleton() {
                 <div className={timerStyles.modeSwitch} aria-hidden="true">
                     {MODES.map(mode =>
                         <button key={mode} type="button" tabIndex={-1} className={timerMode === mode ? timerStyles.modeOn : timerStyles.mode}>
-                            {t(MODE_LABEL[mode])}
+                            {t(TIMER_MODE_LABEL[mode])}
                         </button>)}
                 </div>
             </div>

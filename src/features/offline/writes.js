@@ -14,7 +14,7 @@
 const ID = '([^/?]+)';
 const idOf = (task) => String(task.id);
 
-export const WRITES = [
+const WRITES = [
     {
         name: 'task:add', method: 'POST', pattern: /^\/api\/tasks$/, creates: true,
         localAnswer: ({ body, id, now }) => ({ done: false, completed_at: null, created_at: now, isOwner: true, group_ids: [], ...body, id, pending: true }),

@@ -8,6 +8,7 @@
 // limits: access.limits / access.usage; null for Pro, testers and admins).
 import { registerPlugin } from '@capacitor/core';
 import { useSelector } from 'react-redux';
+import { selectAccess } from '../auth/tester';
 import { apiFetch, CACHE_MEDIUM, LIMIT_EVENT } from '../api/api';
 import { isNativeApp } from '../native/native';
 
@@ -161,7 +162,7 @@ export const selectIsSupporter = (state) => {
 
 // My plan in short: { pro, max, limited, limits, usage, accessMode }
 export function usePlan() {
-    const access = useSelector((state) => state.auth.access);
+    const access = useSelector(selectAccess);
     return {
         pro: Boolean(access.pro?.active),
         max: Boolean(access.max?.active),

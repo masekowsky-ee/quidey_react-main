@@ -1,0 +1,113 @@
+/* The task editor as a dialog (a sheet from the bottom on phones) */
+
+.backdrop{
+    composes: overlay fadeIn from '../ui.module.css';
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+.panel{
+    composes: card from '../ui.module.css';
+    width: min(540px, 100%);
+    max-height: min(86vh, 780px);
+    overflow-y: auto;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    outline: none;
+    box-shadow: var(--shadow-modal);
+    animation: panelIn 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.panelWide{
+    width: min(720px, 100%);
+    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 2rem);
+}
+
+/* the editor's fields (CalendarDay.module.css) keep a short description box in here */
+.panelWide.panel textarea{
+    min-height: 3rem;
+}
+
+@keyframes panelIn {
+    from { opacity: 0; transform: translateY(0.75rem) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes sheetIn {
+    from { transform: translateY(100%); }
+    to { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .backdrop,
+    .panel{
+        animation: none;
+    }
+}
+
+.head{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.titles{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    text-align: center;
+}
+
+.title{
+    margin: 0;
+    font-size: 1.15rem;
+}
+
+.closeBtn{
+    composes: iconBtn from '../ui.module.css';
+}
+
+.head > .closeBtn{
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    margin-left: 0.25rem;
+    color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+    .backdrop{
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .panel{
+        width: 100%;
+        max-height: 90vh;
+        max-height: 90dvh;
+        padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+        border-bottom: none;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        animation: sheetIn 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+}
+
+/* iOS: a control is at least 44 pt on a touch screen (HIG) */
+@media (pointer: coarse) {
+  .head > .closeBtn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}

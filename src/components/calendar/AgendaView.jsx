@@ -2,13 +2,13 @@ import styles from '../Calendar.module.css';
 import { useState } from 'react';
 import { useTranslation } from '../../i18n/useTranslation';
 import { formatDate, isOverdue, parseDate, sameDay } from '../../features/helperFunction';
-import { compareTasks, dateKey, monthDates, prioLevel } from '../../features/calendar/calendar';
+import { compareTasks, dateKey, monthDates, prioLevel, prioClasses } from '../../features/calendar/calendar';
 import TaskLabels from '../TaskLabels.jsx';
 import TaskMeta from '../task/TaskMeta.jsx';
 import Icon from '../icons.jsx';
 import { taskColorAttr } from '../../features/tasks/taskColors';
 
-const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
+const PRIO_CLASS = prioClasses(styles);
 const PRIO_TEXT = { high: 'prioHigh', medium: 'prioMedium', low: 'prioLow' };
 
 function ScheduleField({ task, onSchedule }) {

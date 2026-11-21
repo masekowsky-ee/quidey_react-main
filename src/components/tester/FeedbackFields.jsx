@@ -1,5 +1,4 @@
 import { useId, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import styles from './Tester.module.css';
 import Stars from '../stars/Stars';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -10,7 +9,6 @@ import { COMMENT_MAX, RATING_MAX, saveTesterFeedback } from '../../features/test
 // the comment is saved with its button. onSaved(entry) gets what the server kept.
 export default function FeedbackFields({ topic, name, entry, onSaved }) {
     const { t } = useTranslation();
-    const dispatch = useDispatch();
     const commentId = useId();
     const statusId = useId();
     const rating = entry?.rating ?? null;
@@ -28,7 +26,7 @@ export default function FeedbackFields({ topic, name, entry, onSaved }) {
     const save = async (changes) => {
         setStatus('saving');
         try {
-            const saved = await dispatch(saveTesterFeedback(topic, changes));
+            const saved = await saveTesterFeedback(topic, changes);
             onSaved(saved);
             setStatus('saved');
         } catch {

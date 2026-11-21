@@ -1,6 +1,7 @@
 import styles from './BetaGate.module.css';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectUsername } from '../features/auth/tester';
 import { Link } from 'react-router-dom';
 import Icon from './icons';
 import { useTranslation } from '../i18n/useTranslation';
@@ -9,8 +10,8 @@ import { fetchAccess, logout, requestBetaAccess, startTrial } from '../features/
 import { useProOn } from '../features/pro/flag';
 import { LANDING_URL } from '../features/site';
 
-export const REASON_MIN = 10;
-export const REASON_MAX = 1000;
+const REASON_MIN = 10;
+const REASON_MAX = 1000;
 
 // Closed beta: everybody without pro lands here after logging in or registering.
 // They can ask for access once, with a reason; afterwards the screen shows how it stands.
@@ -20,7 +21,7 @@ export default function BetaGate() {
     const { t } = useTranslation();
     const proOn = useProOn();
     const dispatch = useDispatch();
-    const username = useSelector(state => state.auth.user?.username);
+    const username = useSelector(selectUsername);
     const betaRequest = useSelector(state => state.auth.access.betaRequest);
     // already on the trial version: this screen is the way to apply, and back to the app
     const trial = useSelector(state => state.auth.access.trial);

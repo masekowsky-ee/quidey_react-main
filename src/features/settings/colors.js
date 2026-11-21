@@ -1,5 +1,7 @@
 import { useSelector, shallowEqual } from 'react-redux';
 import { selectIsTester } from '../auth/tester';
+import { read } from '../storedSetting';
+import { ACCENTS, PALETTE_NAMES } from './preferences';
 
 // Which colours the interface shows: the settings' palette and accent, or (for testers) the ones
 // of the interface variant in use. Lives in settings so the theme doesn't depend on the tester's
@@ -18,6 +20,26 @@ export const VARIANT_COLORS = {
     uebersicht: { palette: { dark: ['#101114', '#16171b', '#f5f6f8'], light: ['#f2f3f5', '#ffffff', '#0e1014'] }, accent: '#d7000f' },
     tafel: { palette: { dark: ['#061430', '#0c2253', '#ffffff'], light: ['#eef1f6', '#ffffff', '#091735'] }, accent: '#ffd23f' },
 };
+
+export const UI_VARIANT_IDS = [DEFAULT_UI_VARIANT, ...Object.keys(VARIANT_COLORS)];
+
+export const readStoredUiVariant = () => read('uiVariant', { allowed: UI_VARIANT_IDS, fallback: DEFAULT_UI_VARIANT });
+
+export const validColors = (choice) => ({
+    ...(PALETTE_NAMES.includes(choice?.palette) || choice?.palette === OWN_COLORS ? { palette: choice.palette } : {}),
+    ...(ACCENTS.includes(choice?.accent) || choice?.accent === OWN_COLORS ? { accent: choice.accent } : {}),
+});
+
+// { [variant]: { palette?, accent? } }: what is not there is the variant's own
+export const readStoredUiColors = () => read('uiColors', {
+    parse: (text) => {
+        const stored = JSON.parse(text ?? '{}');
+        return Object.fromEntries(Object.keys(VARIANT_COLORS)
+            .filter(variant => stored?.[variant])
+            .map(variant => [variant, validColors(stored[variant])]));
+    },
+    fallback: {},
+});
 
 // The variant in use: the chosen one for testers, "current" for everybody else
 export const selectUiVariant = (state) =>

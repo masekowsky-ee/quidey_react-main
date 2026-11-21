@@ -87,10 +87,13 @@ describe('downloadCsv', () => {
   it('clicks a temporary download link and revokes the URL', () => {
     URL.createObjectURL = vi.fn(() => 'blob:x');
     URL.revokeObjectURL = vi.fn();
+    vi.useFakeTimers();
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () { expect(this.download).toBe('a.csv'); });
     downloadCsv(sheet([{ key: 'a', label: 'A', type: 'string' }], []), 'de', 'a.csv');
     expect(click).toHaveBeenCalled();
+    vi.advanceTimersByTime(1000);
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:x');
+    vi.useRealTimers();
     expect(document.querySelector('a[download]')).toBeNull();
   });
 });

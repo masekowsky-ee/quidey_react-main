@@ -164,22 +164,10 @@
 }
 
 .close {
+    composes: roundClose from '../ui.module.css';
     flex: none;
-    display: grid;
-    place-items: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    padding: 0;
-    color: var(--text-muted);
-    background: none;
-    border: none;
-    border-radius: var(--radius-pill);
 }
 
-.close:hover {
-    color: var(--text-h);
-    background: var(--hover-wash);
-}
 
 .byline {
     display: flex;

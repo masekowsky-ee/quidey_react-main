@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/api/api';
 import { connectRealtime, disconnectRealtime, useRealtimeRefresh, useSafetyPoll, REFRESH_DELAY_MS, REALTIME_RECONNECT } from '../features/realtime/socket'
-import { useLiveLists } from '../features/realtime/useLiveLists'
+import { useLiveLists } from '../features/app/useLiveLists'
 import { SET_FRIENDS, SET_FRIEND_REQUESTS } from '../features/friends/friendsActionTypes'
 import { SET_SHARED_SESSIONS } from '../features/together/togetherActionTypes'
 import { othersRunningMs, othersWorking, OTHERS_MAX_MS } from '../features/together/work'

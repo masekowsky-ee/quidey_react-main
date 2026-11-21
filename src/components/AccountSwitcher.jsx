@@ -1,6 +1,7 @@
 import styles from './AccountSwitcher.module.css';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectUser } from '../features/auth/tester';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../i18n/useTranslation';
 import { logout } from '../features/auth/authAction';
@@ -16,7 +17,7 @@ const initialOf = (name) => (String(name ?? '?').trim()[0] ?? '?').toUpperCase()
 export default function AccountSwitcher({ onNavigate, compact = false }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const user = useSelector(state => state.auth.user);
+    const user = useSelector(selectUser);
     const myPicture = useAvatarUrl(useSelector(state => state.auth.access.userId));
     const [open, setOpen] = useState(false);
     const wrapRef = useRef(null);

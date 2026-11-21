@@ -121,7 +121,7 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
         setEstimating(true);
         try {
             // ai: false says so even with "automatisch" on: the runs while typing never use the AI (ruling 32)
-            const result = await dispatch(estimateParts({ ...subjectFields(), parts: names, ai }));
+            const result = await estimateParts({ ...subjectFields(), parts: names, ai });
             if (ai) keepAi(names, result.estimates);
             if (id !== requestId.current) return;
             setKnown(prev => {
@@ -154,7 +154,7 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
         for (const name of open) aiCache.current[name] = null;
         setAiRunning(true);
         try {
-            const result = await dispatch(estimateParts({ ...subjectFields(), parts: open, ai: true }));
+            const result = await estimateParts({ ...subjectFields(), parts: open, ai: true });
             keepAi(open, result.estimates);
             setKnown(prev => {
                 const next = { ...prev };

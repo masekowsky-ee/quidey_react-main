@@ -4,7 +4,6 @@ export default {
 
     notesTitle: 'Notes',
     notesSubtitle: 'Lecture notes, study sheets and ideas, in folders and with tags.',
-    notesOpenAll: 'All notes',
     notesViews: 'Views of the notes',
     notesAll: 'All notes',
     notesPinned: 'Pinned',

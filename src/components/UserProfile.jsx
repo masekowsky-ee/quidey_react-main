@@ -11,14 +11,8 @@ import { setCustomError } from '../features/settings/settingsAction';
 import ProfileCard from './profile/ProfileCard.jsx';
 import ProfileStats from './profile/ProfileStats.jsx';
 import ProfileAvatar from './profile/ProfileAvatar.jsx';
+import { errorText } from '../features/api/transport';
 import { Bone, Skeleton } from './skeleton/Skeleton.jsx';
-
-// Translated message for a friends API error, using the error code the backend sends
-function errorText(t, err) {
-    const key = `friendError_${err?.code}`;
-    const text = t(key);
-    return text === key ? t('friendError_generic') : text;
-}
 
 // Somebody else's profile (/u/:username). Everybody sees name and username; friends see the
 // whole profile, mutual friends and (unless hidden) the statistics.
@@ -49,7 +43,7 @@ export default function UserProfile() {
             await dispatch(action);
             setVersion(v => v + 1);
         } catch (err) {
-            dispatch(setCustomError({ bool: true, message: errorText(t, err) }));
+            dispatch(setCustomError({ bool: true, message: errorText(t, 'friendError', err?.code) }));
         } finally {
             setBusy(false);
         }

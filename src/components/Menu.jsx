@@ -13,7 +13,8 @@ import {setShowMenu, setMenuSide, setShowTutorial} from '../features/settings/se
 import { selectIncomingCount } from '../features/friends/friendsAction';
 import { selectInviteCount } from '../features/together/togetherAction';
 import { selectTaskInviteCount } from '../features/tasks/taskAction';
-import { selectIsAdmin, selectAdminPendingCount } from '../features/admin/adminAction';
+import { selectAdminPendingCount } from '../features/admin/adminAction';
+import { selectIsAdmin } from '../features/auth/tester';
 import { selectInboxCount } from '../features/inbox/inbox';
 import { selectFamilies, selectFamilyInviteCount } from '../features/family/family';
 import { useMenuDocked, useNavModel } from '../features/tester/variants';

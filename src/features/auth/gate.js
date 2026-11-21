@@ -1,16 +1,13 @@
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { GUEST_PATHS } from '../app/routeTable.js';
+import { OPEN_AUTH_EVENT, openAuth } from '../api/events';
 
 // Quidey opens for everybody; what needs an account asks for one. Anything that does asks
 // openAuth() for the sign-in / sign-up window (components/auth/AuthDialog.jsx listens).
 // A plain window event, so the API layer can ask too without reaching the store.
-export const OPEN_AUTH_EVENT = 'quidey:open-auth';
-
-// mode: 'signin' | 'signup'; detail: { email?, googleReturn? }
-export function openAuth(mode = 'signin', detail = {}) {
-    window.dispatchEvent(new CustomEvent(OPEN_AUTH_EVENT, { detail: { mode, ...detail } }));
-}
+// (OPEN_AUTH_EVENT and openAuth live in features/api/events.js, re-exported here)
+export { OPEN_AUTH_EVENT, openAuth };
 
 // The pages a visitor without an account may look at (features/app/routeTable.js, guest: true);
 // every other address asks them to sign in

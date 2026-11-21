@@ -8,6 +8,7 @@ import TabBar from './components/TabBar.jsx'
 import shell from './components/AppShell.module.css'
 import CustomError from './components/CustomError.jsx';
 import { useDispatch, useSelector } from "react-redux";
+import { selectAccess } from './features/auth/tester';
 import { checkAuth } from "./features/auth/authAction";
 import AppSkeleton from "./components/skeleton/AppSkeleton.jsx";
 import { GateSkeleton, RouteSkeleton } from "./components/skeleton/PageSkeletons.jsx";
@@ -75,7 +76,7 @@ function App(){
   const guest = !signedIn;
   useGuestSeed(guest);
   // closed beta: only pro users get into the app, the others see the beta screen
-  const access = useSelector((state) => state.auth.access);
+  const access = useSelector(selectAccess);
   const allowed = signedIn && access.checked && access.isPro;
   // Quidey Pro is switched off until both switches are on (features/pro/flag.js)
   const proOn = useProOn();

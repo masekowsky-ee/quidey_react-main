@@ -2,9 +2,8 @@
 // an Error. No offline copy and no answer cache in here (that is api.js with offline/offline.js);
 // requests that must bypass them (the start check, the usage queue, a sign-out) use rawFetch.
 import { platform } from '../usage/platform';
-import { openAuth } from '../auth/gate';
 import { session } from './session';
-import { ACCESS_CODES, LIMIT_EVENT, PRO_REQUIRED_EVENT, SIGNED_OUT_CODES, SIGNED_OUT_EVENT } from './events';
+import { ACCESS_CODES, LIMIT_EVENT, openAuth, PRO_REQUIRED_EVENT, SIGNED_OUT_CODES, SIGNED_OUT_EVENT } from './events';
 
 // Full URL for an API path. VITE_API_URL is the backend's address in production builds
 // (e.g. https://api.quidey.example.com); locally it's empty and Vite's proxy forwards /api.

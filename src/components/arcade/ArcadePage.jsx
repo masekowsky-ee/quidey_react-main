@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectUsername } from '../../features/auth/tester';
 import { Link } from 'react-router-dom';
 import {
     ARCADE_GAMES, gameById, MODES, readMode, storeMode, submitScore, fetchMyArcade, fetchLeaderboard, leaveLeaderboards,
@@ -79,7 +80,7 @@ function Leaderboard({ game, level, version, onLeave }) {
 export default function ArcadePage({ waiting = false }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const username = useSelector(state => state.auth.user?.username);
+    const username = useSelector(selectUsername);
     const [gameId, setGameId] = useState('reflex');
     const [levels, setLevels] = useState(() => Object.fromEntries(ARCADE_GAMES.map(g => [g.id, g.levels.length > 1 ? readLevel(g.id) : 'normal'])));
     const [mode, setMode] = useState(readMode);

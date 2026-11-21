@@ -9,8 +9,8 @@ import Icon from '../icons';
 // chip per group, "+" names a new one. The shown group can be deleted; its entries stay.
 // value: the shown group's id, or null for all. counts: open entries per group id (and `all`).
 // onAdd(name) / onRemove(id) resolve to something truthy once it worked; without them the
-// groups can only be picked (e.g. an ended session). className: e.g. other spacing.
-export default function SubGroupBar({ groups, value, onChange, onAdd, onRemove, counts, className = '' }) {
+// groups can only be picked (e.g. an ended session).
+export default function SubGroupBar({ groups, value, onChange, onAdd, onRemove, counts }) {
     const { t } = useTranslation();
     const [adding, setAdding] = useState(false);
     const [name, setName] = useState('');
@@ -42,7 +42,7 @@ export default function SubGroupBar({ groups, value, onChange, onAdd, onRemove, 
     };
 
     return (
-        <div className={`${styles.wrap} ${className}`}>
+        <div className={styles.wrap}>
             <div className={styles.bar} role="group" aria-label={t('subGroups')} data-part="sub-groups">
                 <span className={styles.label}>
                     {t('subGroups')}

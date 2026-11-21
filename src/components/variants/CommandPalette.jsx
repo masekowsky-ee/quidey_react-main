@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectIsAdmin } from '../../features/auth/tester';
 import { AnimatePresence, motion } from 'motion/react';
 import styles from './CommandPalette.module.css';
 import Icon from '../icons';
@@ -41,7 +42,7 @@ export default function CommandPalette() {
     const navigate = useNavigate();
     const variant = useUiVariant();
     const isTester = useIsTester();
-    const isAdmin = useSelector(state => state.auth.access.isAdmin);
+    const isAdmin = useSelector(selectIsAdmin);
     const tasks = useSelector(state => state.task.tasks);
     const installable = useInstallState() !== 'unavailable';
     const analyticsAvailable = useAnalytics().available === true;

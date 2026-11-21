@@ -140,4 +140,3 @@ export async function startUpdateChecks(App) {
 }
 
 // for tests
-export const resetUpdateState = () => { state = initial; lastCheck = 0; listeners.clear(); };

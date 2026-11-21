@@ -221,7 +221,7 @@ export const dismissBehind = (goalId) => async (dispatch) => {
 };
 
 // { subjectName, kind, due, parts: [name], subjectId?, ai? } -> { estimates: [{ minutes, source }], aiUsed, aiFailed }
-export const estimateParts = (data) => () => apiFetch(`${BASE}/estimate`, send('POST', data));
+export const estimateParts = (data) => apiFetch(`${BASE}/estimate`, send('POST', data));
 
 // "Jetzt lernen": resolves with { task }
 export const studyNow = (partId) => async (dispatch) => {

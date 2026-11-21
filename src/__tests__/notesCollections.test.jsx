@@ -250,6 +250,26 @@ describe('the notes area', () => {
     })
 })
 
+describe('deleting a note for good', () => {
+    it('keeps the note and toasts when the request fails', async () => {
+        serve({
+            'GET /api/notebook': [],
+            'GET /api/notebook?trash=1': [note({ id: 7, title: 'Weg', trashedAt: new Date().toISOString() })],
+            'GET /api/tester/note-folders': [],
+            'GET /api/tester/collections': [],
+            'DELETE /api/notebook/7': () => { throw new Error('down') },
+        })
+        const store = makeStore()
+        wrap(<Routes><Route path="/notes" element={<NotesPage />} /></Routes>, store, '/notes?view=trash')
+        await act(async () => {})
+        const name = `${t('noteDeleteForGood')}: Weg`
+        fireEvent.click(screen.getByRole('button', { name }))
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: new RegExp(name) })) })
+        expect(screen.getByText('Weg')).toBeTruthy()
+        expect(store.getState().toast.some(x => x.text === t('noteSaveFailed'))).toBe(true)
+    })
+})
+
 describe('collections', () => {
     const tasks = [
         { id: 10, name: 'Klausur Mathe', kind: 'event', due: '2026-11-20', due_time: '09:00', done: false, isOwner: true },

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
 import { displayName, fill, isOverdue, mondayIndex, sameDay } from '../../features/helperFunction';
-import { addDays, dateKey, formatFocus, minutesOfDay, prioLevel, timeText } from '../../features/calendar/calendar';
+import { addDays, dateKey, formatFocus, minutesOfDay, prioLevel, timeText, prioClasses } from '../../features/calendar/calendar';
 import { snapMinutes, useTimelineDrag } from '../../features/calendar/useTimelineDrag';
 import TaskLabels from '../TaskLabels.jsx';
 import TaskEditor from './TaskEditor.jsx';
@@ -15,7 +15,7 @@ import Dialog from '../Dialog.jsx';
 import { taskColorAttr } from '../../features/tasks/taskColors';
 import { isEvent } from '../../features/tasks/kinds';
 
-const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
+const PRIO_CLASS = prioClasses(styles);
 const PRIO_TEXT = { high: 'prioHigh', medium: 'prioMedium', low: 'prioLow' };
 
 const isTyping = (el) => el?.closest?.('input, textarea, select, [contenteditable="true"]');

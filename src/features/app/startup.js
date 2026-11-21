@@ -26,7 +26,8 @@ import { useKeyboardInset } from '../layout/keyboardInset.js';
 import { fetchInboxUnread } from '../inbox/inbox.js';
 import { useInboxRealtime } from '../inbox/useInboxRealtime.js';
 import { connectRealtime, disconnectRealtime, useRealtime, useSafetyPoll, REALTIME_REJECTED } from '../realtime/socket.js';
-import { useLiveLists } from '../realtime/useLiveLists.js';
+import { PRO_CHANGED } from '../realtime/events.js';
+import { useLiveLists } from './useLiveLists.js';
 import { useClearNews } from '../realtime/useClearNews.js';
 import { useFamilyList } from '../family/family.js';
 import { useFeedRealtime } from '../feed/feed.js';
@@ -83,7 +84,7 @@ export function useAccessGuard({ signedIn, proOn, token }) {
   }, [signedIn, checkAccess]);
   useRealtime(REALTIME_REJECTED, checkAccess);
   // a payment went through or a subscription ended (the server says so live)
-  useRealtime('pro:changed', checkAccess);
+  useRealtime(PRO_CHANGED, checkAccess);
   // Android app: purchases Google Play knows on this phone are handed to the server again (a new
   // install, another phone, an answer that got lost), then access is looked at again
   useEffect(() => {

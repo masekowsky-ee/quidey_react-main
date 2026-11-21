@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { selectUser } from '../../features/auth/tester';
 import styles from '../Home.module.css';
 import { dateKey, hhmm } from '../../features/calendar/calendar.js';
 import { selectTasksLoaded } from '../../features/tasks/taskAction.js';
@@ -53,7 +54,7 @@ export default function TitleRow({ tasks, focusTask = null, sentence = false }) 
     const today = new Date();
     const date = useTodayTitle();
     const loaded = useSelector(selectTasksLoaded);
-    const user = useSelector(state => state.auth.user);
+    const user = useSelector(selectUser);
     const firstName = (user?.display_name || user?.username || '').trim().split(/\s+/)[0];
     const hello = t(greetingKey(today.getHours()));
     const isToday = (task) => { const due = parseDate(task.due); return due && sameDay(due, today); };

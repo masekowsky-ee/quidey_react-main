@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectIsAdmin } from '../../features/auth/tester';
 import styles from './Tester.module.css';
 import Icon from '../icons';
 import VariantPreview from './VariantPreview';
@@ -68,14 +69,14 @@ export default function Tester() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const active = useUiVariant();
-    const isAdmin = useSelector(state => state.auth.access.isAdmin);
+    const isAdmin = useSelector(selectIsAdmin);
     // topic -> { rating, comment }; null while loading
     const [feedback, setFeedback] = useState(null);
     const [loadFailed, setLoadFailed] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
-        dispatch(fetchMyTesterFeedback())
+        fetchMyTesterFeedback()
             .then(list => { if (!cancelled) setFeedback(Object.fromEntries(list.map(entry => [entry.topic, entry]))); })
             .catch(() => { if (!cancelled) { setFeedback({}); setLoadFailed(true); } });
         return () => { cancelled = true; };

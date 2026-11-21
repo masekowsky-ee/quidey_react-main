@@ -1,7 +1,7 @@
 // Export helpers for admin tables. Sheet model:
 // { name, columns: [{ key, label, type: 'string'|'number'|'date'|'datetime'|'boolean', width? }], rows }
 
-const pad = (n) => String(n).padStart(2, '0');
+import { pad, downloadBlob } from '../helperFunction';
 
 function toDate(value) {
   if (value == null || value === '') return null;
@@ -72,12 +72,5 @@ export async function downloadXlsx(sheets, fileName) {
 
 export function downloadCsv(sheet, language, fileName) {
   const blob = new Blob([toCsv(sheet, language)], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  downloadBlob(blob, fileName);
 }

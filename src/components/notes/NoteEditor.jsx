@@ -16,8 +16,7 @@ import { Bone } from '../skeleton/Skeleton.jsx';
 import NoteText from './NoteText.jsx';
 import DictateButton from '../voice/DictateButton.jsx';
 import Lightbox, { ImageThumb } from './Lightbox.jsx';
-import styles from '../focus/Notebook.module.css';
-import own from './Notes.module.css';
+import styles from './Notes.module.css';
 
 const SAVE_AFTER_MS = 700;
 
@@ -31,10 +30,10 @@ function TagField({ tags, onChange }) {
         onChange([...tags, tag]);
     };
     return (
-        <div className={own.tagField}>
+        <div className={styles.tagField}>
             <Icon name="tag" size={14} />
             {tags.map(tag =>
-                <span key={tag} className={own.tag}>
+                <span key={tag} className={styles.tag}>
                     #{tag}
                     <button type="button" aria-label={fill(t('noteTagRemove'), { tag })} onClick={() => onChange(tags.filter(other => other !== tag))}>
                         <Icon name="close" size={10} />
@@ -190,17 +189,17 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
     return (
         <article className={styles.editor} aria-label={draft.title || t('noteUntitled')} data-task-color={full && draft.color ? draft.color : undefined}>
             <div className={styles.editorHead}>
-                <button type="button" className={styles.iconBtn} onClick={onClose} aria-label={t('noteBack')} title={t('noteBack')}>
+                <button type="button" className={styles.noteIconBtn} onClick={onClose} aria-label={t('noteBack')} title={t('noteBack')}>
                     <Icon name="release" size={18} />
                 </button>
                 <input className={styles.titleInput} value={draft.title} maxLength={120} placeholder={t('noteTitlePlaceholder')}
                     aria-label={t('noteTitle')} onChange={e => edit({ title: e.target.value })} />
-                <button type="button" className={styles.iconBtn} aria-pressed={draft.pinned} onClick={() => edit({ pinned: !draft.pinned }, true)}
+                <button type="button" className={styles.noteIconBtn} aria-pressed={draft.pinned} onClick={() => edit({ pinned: !draft.pinned }, true)}
                     aria-label={draft.pinned ? t('noteUnpin') : t('notePin')} title={draft.pinned ? t('noteUnpin') : t('notePin')} data-on={draft.pinned || undefined}>
                     <Icon name="pin" size={18} />
                 </button>
                 {full
-                    ? <button type="button" className={styles.iconBtn} onClick={onTrash} aria-label={`${t('noteToTrash')}: ${draft.title || t('noteUntitled')}`} title={t('noteToTrash')}>
+                    ? <button type="button" className={styles.noteIconBtn} onClick={onTrash} aria-label={`${t('noteToTrash')}: ${draft.title || t('noteUntitled')}`} title={t('noteToTrash')}>
                         <Icon name="trash" size={18} />
                     </button>
                     : <ConfirmDeleteButton onConfirm={onDelete} label={`${t('noteDelete')}: ${draft.title || t('noteUntitled')}`} />}
@@ -209,7 +208,7 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
             <div className={styles.metaRow}>
                 {checks.total > 0 && <span className={styles.metaText}>{fill(t('noteChecks'), checks)}</span>}
                 {full && words > 0 && <span className={styles.metaText}>{fill(t(words === 1 ? 'noteWordsOne' : 'noteWords'), { n: words, min: readingMinutes(words) })}</span>}
-                {draft.archived && <span className={own.badge}><Icon name="archive" size={12} /> {t('noteArchived')}</span>}
+                {draft.archived && <span className={styles.badge}><Icon name="archive" size={12} /> {t('noteArchived')}</span>}
                 {focusTask && (draft.taskId === focusTask.id
                     ? <button type="button" className={styles.taskChip} onClick={() => edit({ taskId: null }, true)} title={t('noteUnlinkTask')}>
                         <Icon name="focus" size={14} /> {focusTask.name} <Icon name="close" size={12} />
@@ -221,17 +220,17 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
             </div>
 
             {full &&
-                <div className={own.details}>
-                    <label className={own.folderField}>
+                <div className={styles.details}>
+                    <label className={styles.folderField}>
                         <Icon name="folder" size={14} />
-                        <span className={own.srOnly}>{t('noteFolder')}</span>
+                        <span className={styles.srOnly}>{t('noteFolder')}</span>
                         <select value={draft.folderId ?? ''} onChange={e => edit({ folderId: e.target.value ? Number(e.target.value) : null }, true)}>
                             <option value="">{t('noteNoFolder')}</option>
                             {folders.map(folder => <option key={folder.id} value={folder.id}>{folder.emoji ? `${folder.emoji} ` : ''}{folder.name}</option>)}
                         </select>
                     </label>
                     <TagField tags={draft.tags ?? []} onChange={tags => edit({ tags }, true)} />
-                    <div className={own.colorRow}><TaskColorPicker value={draft.color ?? null} onChange={color => edit({ color }, true)} hideLabel /></div>
+                    <div className={styles.colorRow}><TaskColorPicker value={draft.color ?? null} onChange={color => edit({ color }, true)} hideLabel /></div>
                 </div>}
 
             <NoteText body={note.body} onChange={editBody} label={t('noteText')} placeholder={t('notePlaceholder')} autoFocus={autoFocus}
@@ -275,15 +274,15 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
             {full &&
                 <>
                     <CollectionPicker item={{ kind: 'note', id: note.id }} name={draft.title} />
-                    <div className={own.actions}>
-                        <button type="button" className={own.actionBtn} onClick={() => edit({ archived: !draft.archived }, true)}>
+                    <div className={styles.actions}>
+                        <button type="button" className={styles.actionBtn} onClick={() => edit({ archived: !draft.archived }, true)}>
                             <Icon name="archive" size={15} /> {draft.archived ? t('noteUnarchive') : t('noteArchive')}
                         </button>
                         {onDuplicate &&
-                            <button type="button" className={own.actionBtn} onClick={() => onDuplicate(latest.current)}>
+                            <button type="button" className={styles.actionBtn} onClick={() => onDuplicate(latest.current)}>
                                 <Icon name="copy" size={15} /> {t('noteDuplicate')}
                             </button>}
-                        <button type="button" className={own.actionBtn} onClick={() => downloadNote(latest.current)}>
+                        <button type="button" className={styles.actionBtn} onClick={() => downloadNote(latest.current)}>
                             <Icon name="download" size={15} /> {t('noteExport')}
                         </button>
                     </div>

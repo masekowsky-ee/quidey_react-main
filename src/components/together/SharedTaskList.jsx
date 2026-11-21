@@ -1,6 +1,7 @@
 import styles from '../Together.module.css';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectUsername } from '../../features/auth/tester';
 import { useTranslation } from '../../i18n/useTranslation';
 import { formatDuration, displayName, formatDate, toInputDate } from '../../features/helperFunction';
 import { isEvent } from '../../features/tasks/kinds';
@@ -34,7 +35,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
     const run = useTogetherRun();
     const work = useSelector(selectWork);
     const myTasks = useSelector(state => state.task.tasks);
-    const myUsername = useSelector(state => state.auth.user?.username);
+    const myUsername = useSelector(selectUsername);
     const now = useNow(Boolean(work.taskId) || othersWorking(session));
     const subGroups = session.groups ?? [];
     const [subGroupPick, setSubGroupPick] = useState(null);

@@ -2,6 +2,7 @@ import { forwardRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectUsername } from '../../features/auth/tester';
 import styles from './TaskRow.module.css';
 import Icon from '../icons';
 import TaskMeta from './TaskMeta.jsx';
@@ -72,7 +73,7 @@ const TaskRow = forwardRef(function TaskRow({
     onFocus, onDragStart, onRemoveFromGroup, removeLabel, onOpenGroup,
 }, ref) {
     const { t, language } = useTranslation();
-    const myUsername = useSelector(state => state.auth.user?.username);
+    const myUsername = useSelector(selectUsername);
     const dispatch = useDispatch();
     const [editing, setEditing] = useState(null); // 'name' | 'due' | null
     const shared = Boolean(task.shared);

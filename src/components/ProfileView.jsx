@@ -1,6 +1,7 @@
 import styles from './Profile.module.css';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectUser } from '../features/auth/tester';
 import { useTranslation } from '../i18n/useTranslation';
 import { useProOn } from '../features/pro/flag';
 import { selectIsSupporter } from '../features/pro/pro';
@@ -14,14 +15,8 @@ import ProfileCard from './profile/ProfileCard.jsx';
 import ProfileEditor from './profile/ProfileEditor.jsx';
 import PlantCard from './progress/PlantCard.jsx';
 import PasswordInput from './PasswordInput.jsx';
+import { errorText } from '../features/api/transport';
 import MailSpamHint from './auth/MailSpamHint.jsx';
-
-// Translated message for a profile API error, using the error code the backend sends
-function errorText(t, err) {
-    const key = `profileError_${err?.code}`;
-    const text = t(key);
-    return text === key ? t('profileError_generic') : text;
-}
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -29,7 +24,7 @@ const MIN_PASSWORD_LENGTH = 8;
 export default function ProfileView({ onSignOut }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const user = useSelector(state => state.auth.user);
+    const user = useSelector(selectUser);
     const sessions = useSelector(state => state.session.workedSessionData);
     const friendCount = useSelector(state => state.friends.friends.length);
     // false: an account made with Google that has no password (set one, delete with the username)
@@ -102,7 +97,7 @@ export default function ProfileView({ onSignOut }) {
             const newEmail = saved?.email?.toLowerCase() !== user?.email?.toLowerCase();
             setAccountMessage({ ok: true, text: t(newEmail && saved?.email_verified === false ? 'profileSavedVerify' : 'profileSaved') });
         } catch (err) {
-            setAccountMessage({ ok: false, text: errorText(t, err) });
+            setAccountMessage({ ok: false, text: errorText(t, 'profileError', err?.code, 'profileError_generic') });
         } finally {
             setSaving(false);
         }
@@ -149,7 +144,7 @@ export default function ProfileView({ onSignOut }) {
             setPasswords(emptyPasswords);
             setPasswordMessage({ ok: true, text: t('passwordChanged') });
         } catch (err) {
-            setPasswordMessage({ ok: false, text: errorText(t, err) });
+            setPasswordMessage({ ok: false, text: errorText(t, 'profileError', err?.code, 'profileError_generic') });
         } finally {
             setChanging(false);
         }
@@ -162,7 +157,7 @@ export default function ProfileView({ onSignOut }) {
         try {
             await dispatch(logoutEverywhere());
         } catch (err) {
-            setPasswordMessage({ ok: false, text: errorText(t, err) });
+            setPasswordMessage({ ok: false, text: errorText(t, 'profileError', err?.code, 'profileError_generic') });
             setSigningOutEverywhere(false);
             setConfirmEverywhere(false);
         }
@@ -188,7 +183,7 @@ export default function ProfileView({ onSignOut }) {
             // signs out on success; this view is gone then
             await dispatch(deleteAccount(hasPassword ? { password: deletePassword } : { confirmUsername: deletePassword }));
         } catch (err) {
-            setDeleteMessage({ ok: false, text: errorText(t, err) });
+            setDeleteMessage({ ok: false, text: errorText(t, 'profileError', err?.code, 'profileError_generic') });
             setDeletePassword('');
             setDeleting(false);
         }

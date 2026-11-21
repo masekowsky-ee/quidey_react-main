@@ -3,6 +3,7 @@
 // the Android repo's `npm run apk:web`): { version, versionCode, size (bytes), sha256 }. No APK in
 // the build, no row.
 import { isNativeApp } from './native';
+import { localeOf } from '../../i18n/locale';
 
 export const APK_URL = '/download/quidey.apk';
 
@@ -23,4 +24,4 @@ export const apkOffer = () => (onAndroidBrowser() ? androidApk() : null);
 
 // "6,2 MB"
 export const formatSize = (bytes, language) =>
-    `${new Intl.NumberFormat(language === 'en' ? 'en-GB' : 'de-DE', { maximumFractionDigits: 1 }).format(bytes / 1024 / 1024)} MB`;
+    `${new Intl.NumberFormat(localeOf(language), { maximumFractionDigits: 1 }).format(bytes / 1024 / 1024)} MB`;

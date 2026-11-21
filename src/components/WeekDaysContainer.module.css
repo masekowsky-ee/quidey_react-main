@@ -171,8 +171,8 @@
 }
 
 :global(:root[data-motion="extreme"]) .day{
-    animation: dayDrop 0.7s cubic-bezier(0.34, 1.7, 0.64, 1) both;
-    transition: translate 0.45s cubic-bezier(0.34, 1.7, 0.64, 1), rotate 0.45s cubic-bezier(0.34, 1.7, 0.64, 1),
+    animation: dayDrop 0.7s var(--spring) both;
+    transition: translate 0.45s var(--spring), rotate 0.45s var(--spring),
         box-shadow 0.3s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
@@ -204,8 +204,8 @@
 }
 
 :global(:root[data-motion="normal"]) .day{
-    animation: dayDropMid 0.55s cubic-bezier(0.34, 1.35, 0.64, 1) both;
-    transition: translate 0.4s cubic-bezier(0.34, 1.35, 0.64, 1), rotate 0.4s cubic-bezier(0.34, 1.35, 0.64, 1),
+    animation: dayDropMid 0.55s var(--spring-mid) both;
+    transition: translate 0.4s var(--spring-mid), rotate 0.4s var(--spring-mid),
         box-shadow 0.3s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 

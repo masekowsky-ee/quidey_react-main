@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
 import { localeOf } from '../../i18n/locale';
-import { fill } from '../../features/helperFunction';
+import { fill, pad } from '../../features/helperFunction';
 import { showToast } from '../../features/toast/toast';
 import { adminErrorText, fetchAdminUsage, fetchAdminUsageRaw, usageQuery } from '../../features/admin/adminAction';
 import { downloadCsv, downloadXlsx } from '../../features/admin/exportTable';
@@ -23,7 +23,6 @@ const FILTERS = {
     plan: ['free', 'tester', 'pro'],
 };
 
-const pad = (n) => String(n).padStart(2, '0');
 const isoDay = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const parseDay = (iso) => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); };
 const addDays = (iso, n) => { const d = parseDay(iso); d.setDate(d.getDate() + n); return isoDay(d); };
@@ -219,7 +218,7 @@ export default function AdminUsage() {
     useEffect(() => {
         if (!valid) return undefined;
         let cancelled = false;
-        dispatch(fetchAdminUsage(params))
+        fetchAdminUsage(params)
             .then(data => { if (!cancelled) setLoaded({ query, params, data, error: null }); })
             .catch(error => {
                 if (cancelled) return;
@@ -245,7 +244,7 @@ export default function AdminUsage() {
         setCsvOpen(false);
         setExporting(true);
         try {
-            const raw = id === 'xlsx' || id === 'raw' ? await dispatch(fetchAdminUsageRaw(loaded.params)) : null;
+            const raw = id === 'xlsx' || id === 'raw' ? await fetchAdminUsageRaw(loaded.params) : null;
             const sheets = usageSheets(report, raw, t);
             if (id === 'xlsx') {
                 await downloadXlsx(sheets, `quidey-nutzung_${fileRange}.xlsx`);

@@ -5,12 +5,12 @@ import Icon from './icons';
 
 // A password field with an eye at its end that shows what was typed (and hides it again).
 // Takes everything a plain <input> takes; the type is up to the eye.
-export default function PasswordInput({ className = '', ...props }) {
+export default function PasswordInput(props) {
     const { t } = useTranslation();
     const [visible, setVisible] = useState(false);
     const label = t(visible ? 'passwordHide' : 'passwordShow');
     return (
-        <span className={`${styles.wrap} ${className}`}>
+        <span className={styles.wrap}>
             <input {...props} type={visible ? 'text' : 'password'} className={styles.input}
                 autoCapitalize="none" autoCorrect="off" spellCheck={false} />
             <button type="button" className={styles.eye} onClick={() => setVisible(show => !show)}

@@ -52,10 +52,8 @@ export default {
     feedCheersCount: '{count} feuern an',
     feedCheerOne: '1 feuert an',
     feedCheeredBy: 'Angefeuert von {names}',
-    feedRemove: 'Entfernen',
     feedRemoveConfirm: 'Wirklich entfernen',
     feedRemoveLabel: 'Eintrag aus dem Feed nehmen',
-    feedEntryMenu: 'Eintrag',
     liveFeedCheer: '{name} feuert dich an',
 
     levelTitle: 'Dein Level',

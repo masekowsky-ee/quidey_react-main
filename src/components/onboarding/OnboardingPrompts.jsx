@@ -1,6 +1,7 @@
 import styles from './Onboarding.module.css';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectUsername } from '../../features/auth/tester';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
 import { closeOnboarding, sendRating, setOnboardingAccount, useOnboarding } from '../../features/onboarding/onboarding';
@@ -24,7 +25,7 @@ export const ANALYTICS_DELAY_MS = 1500;
 // Also, once per device in the Android app: may Quidey count how the app is used (consent for
 // Google Analytics for Firebase, features/native/analytics.js); its two answers weigh the same.
 export default function OnboardingPrompts() {
-    const username = useSelector((state) => state.auth.user?.username);
+    const username = useSelector(selectUsername);
     const tourOpen = useSelector((state) => state.settings.showTutorial);
     const { asking } = useOnboarding();
     const pushAsking = usePushState().asking;

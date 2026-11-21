@@ -1,6 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectUsername } from '../../features/auth/tester';
 import { useTranslation } from '../../i18n/useTranslation';
 import { tipsForPage, useTips, markTipSeen, turnTipsOff, syncTips } from '../../features/tips/tips';
 import styles from './FeatureTips.module.css';
@@ -76,7 +77,7 @@ export default function FeatureTips() {
     const current = pendingKey && !tourOpen && pending.some(tip => tip.id === found) ? found : null;
 
     // once the server has answered: join what this device saw meanwhile (before any tip is looked for)
-    const username = useSelector(state => state.auth.user?.username);
+    const username = useSelector(selectUsername);
     useEffect(() => {
         if (tips.ready && username) dispatch(syncTips());
     }, [tips.ready, username, dispatch]);

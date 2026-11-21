@@ -5,14 +5,14 @@ import { fetchAccess } from '../auth/authAction';
 // return what the API answers; anything that changes the open-request count refreshes
 // my access (the badge in the menu comes from there).
 
-export const fetchAdminOverview = () => () => apiFetch('/api/admin/overview');
+export const fetchAdminOverview = () => apiFetch('/api/admin/overview');
 
 // status: 'pending' | 'all'
-export const fetchBetaRequests = (status = 'pending') => () =>
+export const fetchBetaRequests = (status = 'pending') =>
     apiFetch(`/api/admin/requests${status === 'all' ? '?status=all' : ''}`);
 
 // One page of accounts: { users, total }. sort: 'newest' | 'oldest' | 'name'
-export const fetchAdminUsers = ({ q = '', sort = 'newest', page = 1, pageSize = 50 } = {}) => () => {
+export const fetchAdminUsers = ({ q = '', sort = 'newest', page = 1, pageSize = 50 } = {}) => {
     const params = new URLSearchParams();
     if (q.trim()) params.set('q', q.trim());
     params.set('sort', sort);
@@ -22,7 +22,7 @@ export const fetchAdminUsers = ({ q = '', sort = 'newest', page = 1, pageSize = 
 };
 
 // Every account for the export: { users } (the server logs it in the admin log)
-export const fetchAdminUsersExport = () => () => apiFetch('/api/admin/users/export');
+export const fetchAdminUsersExport = () => apiFetch('/api/admin/users/export');
 
 // A change that answers with the updated user; afterwards my access (and the badge) is refreshed
 const adminChange = (url, options) => async (dispatch) => {
@@ -53,12 +53,11 @@ export function usageQuery({ from, to, platform, language, plan } = {}) {
     return query.toString();
 }
 
-export const fetchAdminUsage = (params) => () => apiFetch(`/api/admin/usage?${usageQuery(params)}`);
+export const fetchAdminUsage = (params) => apiFetch(`/api/admin/usage?${usageQuery(params)}`);
 
-export const fetchAdminUsageRaw = (params) => () => apiFetch(`/api/admin/usage/raw?${usageQuery(params)}`);
+export const fetchAdminUsageRaw = (params) => apiFetch(`/api/admin/usage/raw?${usageQuery(params)}`);
 
 // Translated message for an admin API error (keys adminError_<code>)
 export const adminErrorText = (t, err) => errorText(t, 'adminError', err?.code);
 
-export const selectIsAdmin = (state) => state.auth.access.isAdmin;
 export const selectAdminPendingCount = (state) => state.auth.access.adminPendingCount;

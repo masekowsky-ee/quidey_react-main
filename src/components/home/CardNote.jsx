@@ -9,11 +9,9 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { fetchNote, updateNote, toggleCheck } from '../../features/focus/notebook';
 import { titleOf } from '../../features/notes/notes';
 import { clearCardNote } from '../../features/home/cardNote';
-import { formatClock, fill } from '../../features/helperFunction';
+import { shortClock, fill } from '../../features/helperFunction';
 import { selectTimerInProgress } from '../../features/session/sessionAction';
 import { showToast } from '../../features/toast/toast';
-
-const clockText = (ms) => formatClock(ms).replace(/^00:/, '');
 
 // A note in Home's white card: its title in the serif and its text as it reads (headings, lists,
 // checklists you can tick), "Öffnen" to write in it. No timer and no focus link here. While the
@@ -67,7 +65,7 @@ export default function CardNote({ id }) {
                 {timerOn &&
                     <button type="button" className={styles.text} onClick={clearCardNote}>
                         <Icon name="timer" size={16} />
-                        {fill(t('homeCardTimerRunning'), { time: clockText(timer.time) })} · {t('homeCardBackToTask')}
+                        {fill(t('homeCardTimerRunning'), { time: shortClock(timer.time) })} · {t('homeCardBackToTask')}
                     </button>}
                 <div className={styles.taskActions}>
                     {note &&

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { selectUser } from '../features/auth/tester';
 import { Link } from 'react-router-dom';
 import styles from './Legal.module.css';
 import { apiFetch } from '../features/api/api';
@@ -20,7 +21,7 @@ const empty = { name: null, email: null, message: '', website: '' };
 export default function ContactForm() {
     const [form, setForm] = useState(empty);
     const [state, setState] = useState({ sending: false, sent: false, error: null });
-    const user = useSelector(state => state.auth.user);
+    const user = useSelector(selectUser);
     const name = form.name ?? user?.display_name ?? '';
     const email = form.email ?? user?.email ?? '';
 

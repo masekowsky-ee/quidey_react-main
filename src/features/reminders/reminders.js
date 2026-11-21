@@ -15,6 +15,7 @@ import { track } from '../usage/usage';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiFetch } from '../api/api';
 import { useRealtime, useSafetyPoll } from '../realtime/socket';
+import { REMINDERS_CHANGED } from '../realtime/events';
 import { isoWeekday, weekdaysText as weekdaysListText } from '../calendar/calendar';
 import { listReducer } from '../listReducer';
 import { LOGOUT } from '../auth/authActionTypes';
@@ -154,7 +155,7 @@ export function useReminders(allowed) {
     const language = useSelector(state => state.settings.language);
 
     useSafetyPoll(() => dispatch(fetchReminders()).catch(() => {}), { everyMs: REFRESH_MS, enabled, immediately: true });
-    useRealtime('reminders:changed', () => { if (enabled) dispatch(fetchReminders()).catch(() => {}); });
+    useRealtime(REMINDERS_CHANGED, () => { if (enabled) dispatch(fetchReminders()).catch(() => {}); });
 
     // the Android app rings them itself: every change goes to its alarm clock
     const key = useMemo(() => JSON.stringify(list.map(r => [r.id, r.text, r.at, r.days, r.atTime, r.snoozedUntil, r.doneAt])), [list]);

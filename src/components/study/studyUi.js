@@ -3,7 +3,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 
 export const KINDS = ['exam', 'assignment', 'presentation', 'other'];
 
-export function daysUntil(due, now = new Date()) {
+function daysUntil(due, now = new Date()) {
     const day = parseDate(due);
     if (!day) return null;
     return Math.round((toDateOnly(day) - toDateOnly(now)) / 86400000);

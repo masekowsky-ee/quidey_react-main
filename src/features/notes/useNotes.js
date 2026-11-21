@@ -69,11 +69,12 @@ export function useNotes({ enabled = true } = {}) {
         } catch { failed(); return null; }
     }, [failed]);
 
-    // for good; a failure is not shown
+    // for good: true once gone; a failure keeps the note and is toasted
     const remove = useCallback(async (id) => {
-        await removeNote(id).catch(() => {});
+        try { await removeNote(id); } catch { failed(); return false; }
         setNotes(prev => prev?.filter(note => note.id !== id) ?? prev);
-    }, []);
+        return true;
+    }, [failed]);
 
     return { notes, setNotes, merge, create, trash, restore, remove, refetch, onScanDone };
 }

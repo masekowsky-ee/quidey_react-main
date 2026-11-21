@@ -172,7 +172,7 @@ export default function NotesPage() {
     };
 
     const deleteForGood = async (note) => {
-        await remove(note.id);
+        if (!await remove(note.id)) return;
         setTrash(prev => prev.filter(item => item.id !== note.id));
     };
 

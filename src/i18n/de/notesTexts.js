@@ -8,7 +8,6 @@ export default {
     // ---------- the notes area ----------
     notesTitle: 'Notizen',
     notesSubtitle: 'Mitschriften, Lernzettel und Ideen, in Ordnern und mit Schlagwörtern.',
-    notesOpenAll: 'Alle Notizen',
     notesViews: 'Ansichten der Notizen',
     notesAll: 'Alle Notizen',
     notesPinned: 'Angeheftet',

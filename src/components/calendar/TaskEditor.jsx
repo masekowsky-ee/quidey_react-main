@@ -1,6 +1,7 @@
 import styles from '../CalendarDay.module.css';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { selectUsername } from '../../features/auth/tester';
 import { useTranslation } from '../../i18n/useTranslation';
 import { displayName, fill, toInputDate } from '../../features/helperFunction';
 import { durationText, remindersOf } from '../../features/calendar/calendar';
@@ -55,7 +56,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
     const id = useId();
     const nameRef = useRef(null);
     const isOwner = task.isOwner !== false;
-    const myUsername = useSelector(state => state.auth.user?.username);
+    const myUsername = useSelector(selectUsername);
     const created = createdText(task, t, language, myUsername);
     const [groupId, setGroupId] = useState(task.groupId ?? null);
     // only the owner makes a task an event or back and picks its type, from their own list

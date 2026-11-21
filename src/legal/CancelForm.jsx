@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { selectUser } from '../features/auth/tester';
 import { Link } from 'react-router-dom';
 import styles from './Legal.module.css';
 import { apiFetch } from '../features/api/api';
@@ -17,7 +18,7 @@ const GENERIC_ERROR = 'Die Kündigung konnte nicht gesendet werden. Bitte versuc
 // law asks for (type of cancellation, who, which contract, where the confirmation goes, when) and
 // ends with "Jetzt kündigen"; the server confirms by mail right away (POST /api/billing/cancel).
 export default function CancelForm() {
-    const user = useSelector((state) => state.auth.user);
+    const user = useSelector(selectUser);
     const [form, setForm] = useState({ name: null, email: null, username: null, reason: 'ordinary', explanation: '' });
     const [state, setState] = useState({ sending: false, done: null, error: null });
     const name = form.name ?? user?.display_name ?? '';

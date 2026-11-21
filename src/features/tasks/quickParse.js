@@ -1,4 +1,5 @@
-import { toInputDate } from '../helperFunction';
+import { pad, toInputDate } from '../helperFunction';
+import { addDays } from '../calendar/calendar';
 
 // Quick entry: a day, a time and a priority written into a new task's name ("Übungsblatt
 // morgen 14 Uhr !hoch") are found here, so the form can take them over and keep only the name
@@ -26,13 +27,6 @@ const START = '(?<![\\p{L}\\p{N}])';
 const END = '(?![\\p{L}\\p{N}])';
 const word = (source) => new RegExp(`${START}${source}${END}`, 'iu');
 
-const addDays = (date, days) => {
-    const next = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    next.setDate(next.getDate() + days);
-    return next;
-};
-
-const pad = (n) => String(n).padStart(2, '0');
 
 // every rule: a pattern and what it means; the first match of each kind wins
 const DAY_RULES = [

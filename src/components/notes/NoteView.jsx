@@ -40,4 +40,3 @@ export function NoteView({ body, onToggle }) {
     );
 }
 
-export default NoteView;

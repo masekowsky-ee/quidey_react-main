@@ -3,6 +3,7 @@ import { LOGOUT } from '../auth/authActionTypes';
 import { SET_FRIENDS } from '../friends/friendsActionTypes';
 import { SET_SHARED_SESSION } from '../together/togetherActionTypes';
 import { useRealtime } from '../realtime/socket';
+import { PRESENCE_CHANGED } from '../realtime/events';
 
 // Who has the app open right now: my friends, and the people in my open shared sessions and
 // families (the server tells only them, and nobody who switched it off in their profile).
@@ -46,7 +47,7 @@ export const useOnlineFriends = () => useSelector(selectOnlineFriends, shallowEq
 
 // App-wide while signed in: a friend (or somebody in one of my sessions or families) came or went
 export function usePresenceRealtime(dispatch) {
-    useRealtime('presence:changed', (payload) => {
+    useRealtime(PRESENCE_CHANGED, (payload) => {
         if (!payload?.userId || typeof payload.online !== 'boolean') return;
         dispatch({ type: PRESENCE_SEEN, payload: { [payload.userId]: payload.online } });
     });

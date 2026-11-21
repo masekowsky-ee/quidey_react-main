@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectFocusTask, selectTimerProgress, selectTimerInProgress, setTimerMode, setSessionParams, startFocus, pauseFocus, stopFocus, skipPhase, setPomodoro, PHASE_LABEL } from '../../features/session/sessionAction';
 import { formatClock, fill } from '../../features/helperFunction';
-import { POMODORO_LIMITS, validPomodoroValue, SESSION_LENGTHS } from '../../features/settings/preferences';
+import { POMODORO_LIMITS, validPomodoroValue, SESSION_LENGTHS, TIMER_MODE_LABEL } from '../../features/settings/preferences';
 import { useTranslation } from '../../i18n/useTranslation';
 import Icon from '../icons.jsx';
 import DurationInput from './DurationInput.jsx';
 import styles from './FocusRoom.module.css';
 
-const MODES = [['pomodoro', 'timerModePomodoro'], ['timer', 'timerModeTimer'], ['stopwatch', 'timerModeStopwatch']];
+const MODES = ['pomodoro', 'timer', 'stopwatch'].map((mode) => [mode, TIMER_MODE_LABEL[mode]]);
 const RING = 2 * Math.PI * 54;
 
 // A Pomodoro length (or the rounds before the long break) typed freely within its limits

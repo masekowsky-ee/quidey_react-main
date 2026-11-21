@@ -18,6 +18,7 @@ import { useStore } from 'react-redux';
 import { registerPlugin } from '@capacitor/core';
 import { isNativeApp } from '../native/native';
 import { translate } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import { fill } from '../helperFunction';
 import { selectFocusTask, selectTimerInProgress, PHASE_LABEL } from './sessionAction';
 
@@ -63,7 +64,7 @@ async function webRegistration() {
     return navigator.serviceWorker.getRegistration().catch(() => null);
 }
 
-const timeOfDay = (ms, language) => new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { hour: '2-digit', minute: '2-digit' }).format(new Date(ms));
+const timeOfDay = (ms, language) => new Intl.DateTimeFormat(localeOf(language), { hour: '2-digit', minute: '2-digit' }).format(new Date(ms));
 
 async function showWeb(notice, language) {
     const registration = await webRegistration();

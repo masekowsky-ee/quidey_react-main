@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNotes, useShortDate } from '../../features/notes/useNotes';
 import { fill } from '../../features/helperFunction';
+import { today } from '../../features/focus/away';
 import { useTranslation } from '../../i18n/useTranslation';
 import NoteEditor from '../notes/NoteEditor.jsx';
 import Notebook from './Notebook.jsx';
@@ -13,7 +14,6 @@ import styles from './FocusRoom.module.css';
 // Which note belongs to the session: { id, goal, day } on this device. The same goal on the
 // same day writes on in the same note; a new goal (or a new day) gets a new one.
 const STORE_KEY = 'focusSessionNote';
-const today = () => new Date().toDateString();
 function readSessionNote() {
     try { return JSON.parse(localStorage.getItem(STORE_KEY) ?? 'null'); } catch { return null; }
 }
@@ -62,7 +62,7 @@ export default function SessionNotes({ goal, focusTask }) {
 
     const forget = () => { storeSessionNote(null); setStored(null); };
     const deleteNote = async (id) => {
-        await remove(id);
+        if (!await remove(id)) return;
         forget();
     };
 

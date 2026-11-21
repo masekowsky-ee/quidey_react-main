@@ -1,9 +1,8 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { SET_UI_COLORS, SET_UI_VARIANT } from '../settings/settingsActionTypes';
-import { ACCENTS, PALETTE_NAMES } from '../settings/preferences';
-import { DEFAULT_UI_VARIANT, OWN_COLORS, VARIANT_COLORS, applyBarColor, selectColorChoice, selectUiVariant, useColorChoice } from '../settings/colors';
-import { read, write } from '../storedSetting';
+import { DEFAULT_UI_VARIANT, OWN_COLORS, UI_VARIANT_IDS, VARIANT_COLORS, applyBarColor, readStoredUiColors, readStoredUiVariant, selectColorChoice, selectUiVariant, useColorChoice, validColors } from '../settings/colors';
+import { write } from '../storedSetting';
 import { DESKTOP_QUERY, useMediaQuery } from '../layout/breakpoints';
 
 // Interface variants for testers: whole looks of the app (colours, type, shapes, density), each
@@ -22,9 +21,8 @@ export const UI_VARIANTS = {
     uebersicht: { nav: 'command', swatches: ['#f4f5f7', '#ffffff', '#1d1f23', '#d7000f'] },
     tafel: { nav: 'top', swatches: ['#071635', '#0d2250', '#ffffff', '#ffd23f'] },
 };
-export const UI_VARIANT_IDS = Object.keys(UI_VARIANTS);
 // the colour choice lives in settings (the theme needs it); re-exported here for the variants' users
-export { DEFAULT_UI_VARIANT, OWN_COLORS, VARIANT_COLORS, selectColorChoice, selectUiVariant, useColorChoice };
+export { DEFAULT_UI_VARIANT, OWN_COLORS, UI_VARIANT_IDS, VARIANT_COLORS, readStoredUiColors, readStoredUiVariant, selectColorChoice, selectUiVariant, useColorChoice };
 
 // each variant's stylesheet, fetched the first time it is shown
 const VARIANT_STYLES = {
@@ -36,29 +34,12 @@ const VARIANT_STYLES = {
 
 const STORAGE_KEY = 'uiVariant';
 
-export const readStoredUiVariant = () => read(STORAGE_KEY, { allowed: UI_VARIANT_IDS, fallback: DEFAULT_UI_VARIANT });
-
 export const setUiVariant = (variant) => {
     if (UI_VARIANT_IDS.includes(variant)) write(STORAGE_KEY, variant);
     return { type: SET_UI_VARIANT, payload: variant };
 };
 
 const COLORS_KEY = 'uiColors';
-const validColors = (choice) => ({
-    ...(PALETTE_NAMES.includes(choice?.palette) || choice?.palette === OWN_COLORS ? { palette: choice.palette } : {}),
-    ...(ACCENTS.includes(choice?.accent) || choice?.accent === OWN_COLORS ? { accent: choice.accent } : {}),
-});
-
-// { [variant]: { palette?, accent? } }: what is not there is the variant's own
-export const readStoredUiColors = () => read(COLORS_KEY, {
-    parse: (text) => {
-        const stored = JSON.parse(text ?? '{}');
-        return Object.fromEntries(Object.keys(VARIANT_COLORS)
-            .filter(variant => stored?.[variant])
-            .map(variant => [variant, validColors(stored[variant])]));
-    },
-    fallback: {},
-});
 
 // changes: { palette?, accent? } for one variant ('own' or a name from preferences.js)
 export const setUiColors = (variant, changes) => (dispatch, getState) => {

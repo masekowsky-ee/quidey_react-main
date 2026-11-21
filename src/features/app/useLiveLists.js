@@ -6,9 +6,9 @@ import { refreshTasks, fetchTaskInvites } from '../tasks/taskAction';
 import { showToast } from '../toast/toast';
 import { displayName, fill } from '../helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
-import { markNews } from './news';
-import { useRealtime, useRealtimeRefresh } from './socket';
-import { FRIENDS_CHANGED, INVITES_CHANGED, SESSION_CHANGED, TASKS_CHANGED } from './events';
+import { markNews } from '../realtime/news';
+import { useRealtime, useRealtimeRefresh } from '../realtime/socket';
+import { FRIENDS_CHANGED, INVITES_CHANGED, SESSION_CHANGED, TASKS_CHANGED } from '../realtime/events';
 
 // what's in `after` but wasn't in `before` (by id). Nothing when `before` was never loaded:
 // after a reconnect (e.g. the server restarted) the first load would otherwise announce every

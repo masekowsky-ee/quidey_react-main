@@ -1,4 +1,4 @@
-import styles from '../PushOffer.module.css';
+import styles from './LimitDialog.module.css';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';

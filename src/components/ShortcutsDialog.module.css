@@ -29,22 +29,10 @@
 }
 
 .close{
-    display: grid;
-    place-items: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    padding: 0;
-    color: var(--text-muted);
-    background: none;
-    border: none;
-    border-radius: var(--radius-pill);
+    composes: roundClose from './ui.module.css';
     corner-shape: round;
 }
 
-.close:hover{
-    color: var(--text-h);
-    background: var(--hover-wash);
-}
 
 .intro{
     margin: 0 0 0.25rem;

@@ -3,6 +3,7 @@ import { fetchBroadcasts, sendBroadcast } from '../features/inbox/inbox';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectUsername } from '../features/auth/tester';
 import { useTranslation } from '../i18n/useTranslation';
 import { localeOf } from '../i18n/locale';
 import { displayName, fill, formatDate, formatRelative, getInitials } from '../features/helperFunction';
@@ -72,7 +73,7 @@ function RequestsTab() {
 
     useEffect(() => {
         let cancelled = false;
-        dispatch(fetchBetaRequests(scope))
+        fetchBetaRequests(scope)
             .then(list => { if (!cancelled) { setRequests(list); setNow(Date.now()); } })
             .catch(err => { if (!cancelled) { setRequests([]); dispatch(showToast(adminErrorText(t, err), 'error')); } });
         return () => { cancelled = true; };
@@ -152,7 +153,7 @@ function UsersTab() {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
     const run = useAdminRun();
-    const myName = useSelector(state => state.auth.user?.username);
+    const myName = useSelector(selectUsername);
     const [query, setQuery] = useState('');
     const [sort, setSort] = useState('newest');
     const [users, setUsers] = useState(null);
@@ -170,7 +171,7 @@ function UsersTab() {
         let cancelled = false;
         generation.current += 1;
         const timeout = setTimeout(() => {
-            dispatch(fetchAdminUsers({ q: query, sort, page: 1, pageSize: PAGE_SIZE }))
+            fetchAdminUsers({ q: query, sort, page: 1, pageSize: PAGE_SIZE })
                 .then(result => { if (!cancelled) { setUsers(result.users); setTotal(result.total); setPage(1); setLoaded({ query, sort }); setLoadingMore(false); } })
                 .catch(err => { if (!cancelled) { setUsers([]); setTotal(0); setLoaded({ query, sort }); setLoadingMore(false); dispatch(showToast(adminErrorText(t, err), 'error')); } });
         }, query ? SEARCH_DELAY_MS : 0);
@@ -186,7 +187,7 @@ function UsersTab() {
         const mine = generation.current;
         setLoadingMore(true);
         try {
-            const result = await dispatch(fetchAdminUsers({ q: query, sort, page: page + 1, pageSize: PAGE_SIZE }));
+            const result = await fetchAdminUsers({ q: query, sort, page: page + 1, pageSize: PAGE_SIZE });
             if (mine !== generation.current) return;
             setUsers(list => [...list, ...result.users.filter(u => !list.some(x => x.id === u.id))]);
             setTotal(result.total);
@@ -202,7 +203,7 @@ function UsersTab() {
     const exportUsers = async (kind) => {
         setExporting(true);
         try {
-            const { users: all } = await dispatch(fetchAdminUsersExport());
+            const { users: all } = await fetchAdminUsersExport();
             const sheet = userSheet(all, t);
             const base = usersFileBase();
             if (kind === 'xlsx') await downloadXlsx([sheet], `${base}.xlsx`);
@@ -361,7 +362,7 @@ function OverviewTab() {
 
     useEffect(() => {
         let cancelled = false;
-        dispatch(fetchAdminOverview())
+        fetchAdminOverview()
             .then(overview => { if (!cancelled) { setData(overview); setNow(Date.now()); } })
             .catch(err => { if (!cancelled) dispatch(showToast(adminErrorText(t, err), 'error')); });
         return () => { cancelled = true; };

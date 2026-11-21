@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { COMMUNITY_PATHS, friendsPath } from '../features/community/paths';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectUser } from '../features/auth/tester';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import styles from './Tutorial.module.css';
@@ -78,7 +79,7 @@ export default function Tutorial() {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const open = useSelector((state) => state.settings.showTutorial);
-    const user = useSelector((state) => state.auth.user);
+    const user = useSelector(selectUser);
     const username = user?.username;
     const tourSeen = useSelector((state) => state.auth.access.tourSeen);
     const isTester = useIsTester();

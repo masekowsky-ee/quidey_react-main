@@ -1,12 +1,12 @@
 import styles from '../Calendar.module.css';
-import { prioLevel, taskTimeText } from '../../features/calendar/calendar';
+import { prioLevel, taskTimeText, prioClasses } from '../../features/calendar/calendar';
 import { isOverdue } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import Icon from '../icons.jsx';
 import { taskColorAttr } from '../../features/tasks/taskColors';
 import GoalShape from '../study/GoalShape.jsx';
 
-const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
+const PRIO_CLASS = prioClasses(styles);
 
 // Shared with friends (mine, somebody joined) or from a friend
 const isShared = (task) => Boolean(task.owner) || (task.sharedWith ?? []).some(share => share.status === 'accepted');
@@ -15,7 +15,7 @@ const isShared = (task) => Boolean(task.owner) || (task.sharedWith ?? []).some(s
 // end and the location), name and a mark when it's shared. Clicking opens it, dragging moves it
 // to another day (mouse or pen at once, a finger after holding it a moment). The day itself is the tab stop, so the chip is left out of
 // the tab order unless asked for.
-export default function TaskChip({ task, today, onOpen, startDrag, dragging, showDescription = false, tabIndex = -1 }) {
+export default function TaskChip({ task, today, onOpen, startDrag, dragging, showDescription = false }) {
     const { t } = useTranslation();
     const event = task.kind === 'event';
     const classes = [
@@ -38,7 +38,7 @@ export default function TaskChip({ task, today, onOpen, startDrag, dragging, sho
             type="button"
             className={classes}
             data-task-color={taskColorAttr(task)}
-            tabIndex={tabIndex}
+            tabIndex={-1}
             title={[taskTimeText(task), task.name, event && task.event_type?.name, task.location, task.repeat && t(`repeat_${task.repeat}`)].filter(Boolean).join(' · ')}
             onPointerDown={startDrag ? (e) => startDrag(e, task) : undefined}
             onClick={(e) => { e.stopPropagation(); onOpen(task); }}

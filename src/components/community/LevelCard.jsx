@@ -8,9 +8,9 @@ import LevelPlant from '../progress/LevelPlant';
 import { Link } from 'react-router-dom';
 
 // limit: at most this many rows (the next few unlocks)
-function UnlockRows({ steps, reached, t, limit = Infinity, className = '' }) {
+function UnlockRows({ steps, reached, t, limit = Infinity }) {
     return (
-        <ul className={`${styles.unlockList} ${className}`}>
+        <ul className={styles.unlockList}>
             {steps.flatMap(step => step.items.map((item, i) => ({ step, item, i }))).slice(0, limit).map(({ step, item, i }) => (
                 <li key={`${step.level}-${i}`} className={styles.unlockRow} data-unlocked={step.level <= reached}>
                     <span>{unlockText(t, item)}</span>

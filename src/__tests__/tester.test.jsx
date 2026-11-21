@@ -6,7 +6,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
 import { apiFetch } from '../features/api/api';
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
-import { readStoredUiVariant, setUiVariant, selectUiVariant, useApplyUiVariant, UI_VARIANT_IDS, setUiColors, selectColorChoice, readStoredUiColors } from '../features/tester/variants'
+import { UI_VARIANTS, readStoredUiVariant, setUiVariant, selectUiVariant, useApplyUiVariant, UI_VARIANT_IDS, setUiColors, selectColorChoice, readStoredUiColors } from '../features/tester/variants'
 import { useApplyTheme } from '../features/settings/theme'
 import { setAccent, setPalette } from '../features/settings/settingsAction'
 import Settings from '../components/Settings'
@@ -336,4 +336,8 @@ it('every variant has its texts', () => {
     const store = makeStore()
     for (const id of UI_VARIANT_IDS) store.dispatch(setUiVariant(id))
     expect(store.getState().settings.uiVariant).toBe(UI_VARIANT_IDS.at(-1))
+})
+
+it('the variant ids (kept in settings/colors) match the variants', () => {
+    expect(Object.keys(UI_VARIANTS)).toEqual(UI_VARIANT_IDS)
 })

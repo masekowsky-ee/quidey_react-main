@@ -1,0 +1,42 @@
+/* The free plan's limit reached: a small centred card, like PushOffer's */
+
+.backdrop{
+    composes: dialogBackdrop from '../ui.module.css';
+}
+
+.dialog{
+    composes: dialogCard from '../ui.module.css';
+}
+
+.badge{
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-bottom: 0.4rem;
+    color: var(--text-h);
+    background: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.title{
+    composes: dialogTitle from '../ui.module.css';
+}
+
+.text{
+    margin: 0 0 0.9rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.yes{
+    composes: btnYes from '../ui.module.css';
+}
+
+.later{
+    composes: btnNo from '../ui.module.css';
+    margin-top: 0.3rem;
+}
+

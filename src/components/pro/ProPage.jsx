@@ -2,6 +2,7 @@ import styles from './ProPage.module.css';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectAccess } from '../../features/auth/tester';
 import { useTranslation } from '../../i18n/useTranslation';
 import { fill, formatDate } from '../../features/helperFunction';
 import { fetchAccess } from '../../features/auth/authAction';
@@ -21,7 +22,7 @@ const FREE_ROWS = ['tasks', 'events', 'groups', 'sessions', 'friends', 'stats'];
 export default function ProPage() {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
-    const access = useSelector((state) => state.auth.access);
+    const access = useSelector(selectAccess);
     const [params, setParams] = useSearchParams();
     const inApp = sellsThroughPlay();
 
@@ -36,7 +37,9 @@ export default function ProPage() {
     const [notice, setNotice] = useState(() => (checkout === 'cancelled' ? { ok: false, text: t('proCheckoutCancelled') }
         : checkout ? { ok: true, text: t('proCheckoutThanks') } : null)); // { ok, text }
 
-    const load = () => fetchBilling().then(setBilling).catch(() => {});
+    const load = () => fetchBilling().then(setBilling).catch(() => setNotice({ ok: false, text: t('proError') }));
+    // once on opening: later loads follow a purchase, not a change of language
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => { load(); }, []);
     useEffect(() => {
         if (inApp) playCanReplace().then(setCanReplace);

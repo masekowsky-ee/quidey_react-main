@@ -7,14 +7,14 @@ import { useFocusClock } from '../features/session/useFocusClock';
 import { formatClock } from '../features/helperFunction';
 import { useTranslation } from '../i18n/useTranslation';
 import Icon from './icons.jsx';
+import { TIMER_MODE_LABEL } from '../features/settings/preferences';
 
 const MODES = ['timer', 'pomodoro', 'stopwatch'];
 
 // a two-digit part of the length as typed: the last two digits count ("05" + "7" → 57), at most max
 const typedPart = (raw, max) => Math.min(max, Number(String(raw).replace(/\D/g, '').slice(-2)) || 0);
-const MODE_LABEL = { timer: 'timerModeTimer', pomodoro: 'timerModePomodoro', stopwatch: 'timerModeStopwatch' };
 
-export function PomodoroLine({ className }) {
+function PomodoroLine({ className }) {
     const { t } = useTranslation();
     const { phase, round, config } = useSelector(state => state.session.pomodoro);
     const inCycle = round % config.every;
@@ -158,7 +158,7 @@ export default function TimerContainer(props){
                         <button key={mode} type="button" aria-pressed={timerMode === mode} disabled={inProgress && timerMode !== mode}
                             className={timerMode === mode ? styles.modeOn : styles.mode}
                             onClick={() => { if (timerMode !== mode) { setEditTimer(false); dispatch(setTimerMode(mode)); } }}>
-                            {t(MODE_LABEL[mode])}
+                            {t(TIMER_MODE_LABEL[mode])}
                         </button>)}
                 </div>
                 <Link to="/focus" className={styles.foldBtn} title={t('focusRoomOpen')} aria-label={t('focusRoomOpen')}>
