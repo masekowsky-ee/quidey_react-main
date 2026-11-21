@@ -57,7 +57,7 @@
 @media (max-width: 720px) {
   /* the floating tab bar: its capsule (3.25rem) and the gap under it (0.75rem) */
   .shell {
-    --tabbar-h: 4rem;
+    --tabbar-h: 4.5rem;
     --page-gutter: 1rem;
     padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
   }

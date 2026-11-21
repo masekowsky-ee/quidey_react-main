@@ -207,7 +207,7 @@ body{
     right: calc(0.75rem + env(safe-area-inset-right, 0px));
     bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
     max-width: 28rem;
-    height: 3.25rem;
+    height: 3.75rem;
     margin: 0 auto;
     padding: 0 0.35rem;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -352,7 +352,7 @@ body{
 
 @media (max-width: 720px){
     .boot{
-        --tabbar-h: 4rem;
+        --tabbar-h: 4.5rem;
         --gutter: 1rem;
     }
 

@@ -298,7 +298,7 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
                 <div className={styles.lightbox} role="dialog" aria-label={bigImage.name || t('noteImage')} onClick={() => setBigImage(null)}
                     onKeyDown={e => e.key === 'Escape' && setBigImage(null)}>
                     <img src={bigImage.data} alt={bigImage.name || t('noteImage')} />
-                    <button type="button" autoFocus className={styles.lightboxClose} aria-label={t('close')}><Icon name="close" size={20} /></button>
+                    <button type="button" autoFocus className={styles.lightboxClose} aria-label={t('close')} title={t('close')}><Icon name="close" size={20} /></button>
                 </div>}
         </article>
     );

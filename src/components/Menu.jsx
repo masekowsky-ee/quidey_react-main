@@ -27,10 +27,11 @@ import { openAuth } from '../features/auth/gate';
 
 // One entry: icon, label and an optional count badge (or a dot: something changed there);
 // the current page is highlighted (`match`: also on other addresses that belong to it)
-function MenuLink({ to, end, match, icon, label, onClick, count = 0, countLabel, news = false, newsLabel, tip }) {
+// inTabBar: the phone's tab bar has this place too, so the drawer leaves it out there (data-in-tabbar)
+function MenuLink({ to, end, match, icon, label, onClick, count = 0, countLabel, news = false, newsLabel, tip, inTabBar = false }) {
     const { pathname } = useLocation();
     return (
-        <NavLink to={to} end={end} onClick={onClick} data-part="menu-item" data-active={match?.(pathname) || undefined} data-tip={tip}
+        <NavLink to={to} end={end} onClick={onClick} data-part="menu-item" data-active={match?.(pathname) || undefined} data-tip={tip} data-in-tabbar={inTabBar || undefined}
             className={({ isActive }) => `${styles.menuItem} ${isActive || match?.(pathname) ? styles.active : ''}`}>
             <Icon name={icon} className={styles.menuIcon} />
             <span className={styles.menuLabel}>{label}</span>
@@ -179,16 +180,16 @@ export default function Menu(){
                     the settings */}
                 <nav className={styles.menuNav} aria-label={t('menu')}>
                     <div className={styles.menuList}>
-                        <MenuLink to="/" end icon="home" label={t('home')} onClick={onClose} />
-                        <MenuLink to="/calendar" icon="calendar" label={t('calendar')} onClick={onClose}
+                        <MenuLink to="/" end icon="home" label={t('home')} onClick={onClose} inTabBar />
+                        <MenuLink to="/calendar" icon="calendar" label={t('calendar')} onClick={onClose} inTabBar
                             count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
                         {/* the place to work and study (Pomodoro, notes), and guided routines */}
-                        <MenuLink to="/focus" icon="focus" label={t('focusRoom')} onClick={onClose} />
+                        <MenuLink to="/focus" icon="focus" label={t('focusRoom')} onClick={onClose} inTabBar />
                         <MenuLink to="/routines" icon="routine" label={t('routines')} onClick={onClose} tip="menu-routines" />
                         {/* testers: the notes area and collections (tasks, events and notes together) */}
                         <MenuLink to="/notes" icon="note" label={t('notesTitle')} onClick={onClose} tip="menu-notes" />
                         <MenuLink to="/collections" icon="collection" label={t('collections')} onClick={onClose} tip="menu-collections" />
-                        <MenuLink to="/study" icon="book" label={t('studyNav')} onClick={onClose} />
+                        <MenuLink to="/study" icon="book" label={t('studyNav')} onClick={onClose} inTabBar />
                         {/* friends, shared sessions, families and the feed: one place for other people */}
                         <MenuLink to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} onClick={onClose}
                             count={inviteCount + incomingCount + familyInviteCount} countLabel={t('communityCount')}

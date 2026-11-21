@@ -568,6 +568,12 @@ background: var(--surface-hover);
 
 /* iOS: a row is at least 44 pt tall (phones: the drawer comes in from the side) */
 @media (max-width: 720px) {
+  /* what the tab bar already holds (Start, Kalender, Fokus, Lernen) isn't repeated here: the drawer
+     is "More". Not while the tab bar is folded away (TabBar.jsx): then it is all there is. */
+  :global(body:not(:has([data-part="tabbar"][data-collapsed]))) .menuItem[data-in-tabbar] {
+    display: none;
+  }
+
   .menuItem {
     min-height: 2.75rem;
   }

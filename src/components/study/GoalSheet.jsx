@@ -295,7 +295,7 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
     return (
         <div className={own.panel} role="dialog" aria-modal="true" aria-labelledby={titleId} {...sheet.panel}>
             <SheetGrabber />
-            <button type="button" className={own.close} onClick={close} aria-label={t('close')}><Icon name="close" size={18} /></button>
+            <button type="button" className={own.close} onClick={close} aria-label={t('close')} title={t('close')}><Icon name="close" size={18} /></button>
             <div className={own.head} data-sheet-drag>
                 <h2 id={titleId} className={own.title}>{t('studyNewGoal')}</h2>
                 <span className={own.step}>{fill(t('studyStep'), { n: step })}</span>

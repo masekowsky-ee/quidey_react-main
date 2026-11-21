@@ -304,7 +304,7 @@ export default function PlanPreview({ onDone }) {
             {(sheet, close) => (
                 <div className={own.panel} role="dialog" aria-modal="true" aria-labelledby="planPreviewTitle" {...sheet.panel}>
                     <SheetGrabber />
-                    <button type="button" className={own.close} onClick={close} aria-label={t('close')}><Icon name="close" size={18} /></button>
+                    <button type="button" className={own.close} onClick={close} aria-label={t('close')} title={t('close')}><Icon name="close" size={18} /></button>
                     <div className={own.head} data-sheet-drag>
                         <h2 id="planPreviewTitle" className={own.title}>{t('studyPreviewTitle')}</h2>
                     </div>
