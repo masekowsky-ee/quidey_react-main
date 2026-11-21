@@ -2,27 +2,11 @@
    question before deleting a repeating task */
 
 .backdrop{
-    position: fixed;
-    inset: 0;
-    z-index: var(--z-alert);
-    display: grid;
-    place-items: center;
-    padding: 1rem;
-    background: var(--overlay);
-    animation: fadeIn 0.16s ease-out;
+    composes: dialogBackdrop from './ui.module.css';
 }
 
 .dialog{
-    width: min(24rem, 100%);
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    padding: 1.4rem 1.25rem 1rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-modal);
-    animation: rise 0.26s var(--spring-curve);
+    composes: dialogCard from './ui.module.css';
 }
 
 .badge{
@@ -38,11 +22,7 @@
 }
 
 .title{
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 650;
-    letter-spacing: -0.015em;
-    color: var(--text-h);
+    composes: dialogTitle from './ui.module.css';
 }
 
 .text{
@@ -62,14 +42,3 @@
     margin-top: 0.3rem;
 }
 
-@keyframes fadeIn{
-    from{ opacity: 0; }
-}
-
-@keyframes rise{
-    from{ opacity: 0; transform: translateY(8px) scale(0.98); }
-}
-
-@media (prefers-reduced-motion: reduce){
-    .backdrop, .dialog{ animation: none; }
-}

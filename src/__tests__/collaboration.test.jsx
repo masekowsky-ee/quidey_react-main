@@ -11,13 +11,14 @@ import toastReducer, { showToast, TOAST_MS } from '../features/toast/toast'
 import { setHomeLayout, setMotion } from '../features/settings/settingsAction'
 import { readStoredHomeLayout } from '../features/settings/homeLayout'
 import { readStoredMotion } from '../features/settings/motion'
-import { apiFetch, fill, toCsv, formatRelative } from '../features/helperFunction'
+import { fill, toCsv, formatRelative } from '../features/helperFunction';
+import { apiFetch } from '../features/api/api';
 import { translate } from '../i18n/useTranslation'
 import TeamHome from '../components/TeamHome'
 import TeamQuickPanel from '../components/together/TeamQuickPanel'
 import Toaster from '../components/Toaster'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

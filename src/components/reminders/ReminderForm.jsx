@@ -3,11 +3,12 @@ import own from './Reminders.module.css';
 import ui from '../ui.module.css';
 import { useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useTranslation } from '../../i18n/useTranslation';
+import { useTranslation } from '../../i18n/useTranslation';
+import Icon from '../icons.jsx';
 import { useFocusOnArrival } from '../../features/layout/dragDismiss';
 import { saveReminder, nextOccurrence, REMINDER_TEXT_MAX, weekdaysText } from '../../features/reminders/reminders';
 import { parseQuickEntry, stripFound } from '../../features/tasks/quickParse';
-import { dateKey } from '../../features/calendar/calendar';
+import { dateKey, hhmm } from '../../features/calendar/calendar';
 import { dueText, fill } from '../../features/helperFunction';
 import { showToast } from '../../features/toast/toast';
 import { KindSwitch } from '../task/KindFields.jsx';
@@ -23,7 +24,6 @@ function nextHour(now = new Date()) {
     at.setHours(at.getHours() + 1, 0, 0, 0);
     return at;
 }
-const hhmm = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 
 function initialFields(reminder, text) {
     if (reminder?.days) return { text: reminder.text, mode: 'weekly', date: dateKey(new Date()), time: reminder.atTime, days: reminder.days };
@@ -93,7 +93,7 @@ export default function ReminderForm({ reminder = null, initialText = '', sheet,
         <div className={styles.div} role="dialog" aria-modal="true" aria-labelledby={titleId} {...sheet?.panel}>
             {sheet && <SheetGrabber />}
             <button type="button" className={styles.closeBtn} onClick={() => onDone?.()} aria-label={t('close')}>
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+                <Icon name="mCross" size={24} />
             </button>
             <h2 id={titleId} data-sheet-drag>{t(reminder ? 'reminderEditTitle' : 'reminderNew')}</h2>
             <form className={styles.form} onSubmit={submit} noValidate>

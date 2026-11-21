@@ -3,9 +3,11 @@
 // beside my own entries (can be hidden: localStorage untisShow 'off'). Lessons become entries with
 // a `lesson` field, which the calendar's views leave alone (no dragging, no editor, not in the agenda).
 
-import { useEffect, useState, useSyncExternalStore } from 'react';
-import { apiFetch, CACHE_MEDIUM, CACHE_LONG } from '../helperFunction';
-import { minutesOfDay } from '../calendar/calendar';
+import { useEffect, useState } from 'react';
+import { apiFetch, CACHE_MEDIUM, CACHE_LONG } from '../api/api';
+import { minutesOfDay, timeText } from '../calendar/calendar';
+import { createStoredValue } from '../storedSetting';
+import { sharedResource } from '../sharedResource';
 
 const fetchUntisStatus = () => apiFetch('/api/untis', { cacheMs: CACHE_MEDIUM });
 export const searchUntisSchools = (q) => apiFetch(`/api/untis/schools?q=${encodeURIComponent(q)}`, { cacheMs: CACHE_LONG });
@@ -37,9 +39,6 @@ export function lessonsToEntries(lessons) {
     }));
 }
 
-const toMin = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
-const toHhmm = (min) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
-
 // A lesson takes the colour of its subject in Lernen (the subject's name, or the Untis name it was made from)
 export function colorLessons(entries, subjects) {
     if (!Array.isArray(subjects) || subjects.length === 0) return entries;
@@ -59,14 +58,14 @@ export function lessonBoxes(entries, name) {
     const days = new Map();
     for (const entry of entries) days.set(entry.due, [...(days.get(entry.due) ?? []), entry]);
     return [...days.entries()].map(([day, items]) => {
-        const start = Math.min(...items.map(item => toMin(item.due_time)));
-        const end = Math.max(...items.map(item => toMin(item.due_time) + item.duration_minutes));
+        const start = Math.min(...items.map(item => minutesOfDay(item.due_time)));
+        const end = Math.max(...items.map(item => minutesOfDay(item.due_time) + item.duration_minutes));
         return {
             ...items[0],
             id: `lessonbox-${day}`,
             name,
             due: day,
-            due_time: toHhmm(start),
+            due_time: timeText(start),
             duration_minutes: end - start,
             location: '',
             // the box is neutral; its lessons keep their subject's colour
@@ -77,33 +76,15 @@ export function lessonBoxes(entries, name) {
 }
 
 // showing them in the calendar (on unless switched off)
-const SHOW_KEY = 'untisShow';
-const listeners = new Set();
-const readShow = () => { try { return localStorage.getItem(SHOW_KEY) !== 'off'; } catch { return true; } };
-export function setShowLessons(on) {
-    try { localStorage.setItem(SHOW_KEY, on ? 'on' : 'off'); } catch { /* only for this visit */ }
-    listeners.forEach(listener => listener());
-}
-export const useShowLessons = () => useSyncExternalStore((l) => { listeners.add(l); return () => listeners.delete(l); }, readShow, readShow);
+const show = createStoredValue('untisShow', { fallback: true, parse: (text) => text !== 'off', encode: (on) => (on ? 'on' : 'off') });
+export const setShowLessons = show.set;
+export const useShowLessons = show.useValue;
 
-// the connection, asked once while the app runs (Settings changes it with rememberUntisStatus)
-let status = null;
-let loading = null;
-const statusListeners = new Set();
-// (null: not known, asked again by the next one who needs it)
-export function rememberUntisStatus(next) {
-    status = next;
-    loading = next ? Promise.resolve(next) : null;
-    statusListeners.forEach(listener => listener());
-}
-function loadStatus() {
-    loading ??= Promise.resolve().then(fetchUntisStatus).then(answer => { rememberUntisStatus(answer ?? null); return answer; }).catch(() => { loading = null; return null; });
-    return loading;
-}
-export function useUntisStatus() {
-    useEffect(() => { loadStatus(); }, []);
-    return useSyncExternalStore((l) => { statusListeners.add(l); return () => statusListeners.delete(l); }, () => status, () => status);
-}
+// the connection, asked once while the app runs (Settings changes it with rememberUntisStatus);
+// null: not known, asked again by the next one who needs it
+const untisStatus = sharedResource(fetchUntisStatus, { retryEmpty: true });
+export const rememberUntisStatus = (next) => untisStatus.set(next, { loaded: true });
+export const useUntisStatus = untisStatus.useValue;
 
 // the lessons from `from` to `to` (YYYY-MM-DD, ≤ 62 days) as calendar entries; [] while off,
 // not connected or loading. Asked again every few minutes while shown (the server fetches from

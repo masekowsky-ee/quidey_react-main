@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
+import { localeOf } from '../i18n/locale';
 import { deleteTaskAsking, leaveTask, updateTaskProps } from '../features/tasks/taskAction';
 import TaskInvites from './task/TaskInvites.jsx';
 import { fetchSharedHistory, togetherErrorText } from '../features/together/togetherAction';
@@ -24,7 +25,7 @@ import AgendaView from './calendar/AgendaView.jsx';
 import DayPanel from './calendar/DayPanel.jsx';
 import TaskForm from './TaskForm.jsx';
 import { FormSheet } from './QuickAdd.jsx';
-import Icon from './calendar/icons.jsx';
+import Icon from './icons.jsx';
 import { useMediaQuery } from '../features/layout/breakpoints';
 import { fetchSubjects, selectSubjects } from '../features/study/study';
 import { useUntisLessons, lessonBoxes, colorLessons, useShowLessons, setShowLessons, useUntisStatus } from '../features/untis/untis';
@@ -60,7 +61,7 @@ function useDismiss(open, close, ref) {
 // the tasks of a shared session or a family's calendar, which every member plans in.
 export default function Calendar() {
     const { t, language } = useTranslation();
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const dispatch = useDispatch();
 
     const ownTasks = useSelector(state => state.task.tasks);
@@ -119,14 +120,14 @@ export default function Calendar() {
     const hiddenFilters = (groupId !== 'all' ? 1 : 0) + (showDone ? 0 : 1);
     const [filtersOpen, setFiltersOpen] = useState(false);
     const filterRef = useRef(null);
-    const closeFilters = useCallback(() => setFiltersOpen(false), []);
+    const closeFilters = useCallback(() => setFiltersOpen(false), [setFiltersOpen]);
     useDismiss(filtersOpen, closeFilters, filterRef);
 
     // phones: views behind a menu button, search behind a magnifier
     const compact = useMediaQuery(COMPACT_QUERY);
     const [viewsOpen, setViewsOpen] = useState(false);
     const viewsRef = useRef(null);
-    const closeViews = useCallback(() => setViewsOpen(false), []);
+    const closeViews = useCallback(() => setViewsOpen(false), [setViewsOpen]);
     useDismiss(viewsOpen, closeViews, viewsRef);
     const [searchOpen, setSearchOpen] = useState(false);
     const searchRef = useRef(null);
@@ -348,7 +349,7 @@ export default function Calendar() {
     const sourcePicker = (
         <div className={styles.source}>
             <label className={`${styles.sourcePick} ${isShared ? styles.sourcePickShared : ''}`}>
-                <Icon name={isShared ? 'team' : 'calendar'} size={16} />
+                <Icon name={isShared ? 'mTeam' : 'mCalendar'} size={16} />
                 <select className={styles.sourceSelect} value={sourceValue} onChange={(e) => chooseSource(e.target.value)} aria-label={t('calendarOf')}>
                     <option value="mine">{t('calendarMine')}</option>
                     {!sourceListed && <option value={sourceValue}>{shared.data?.name ?? '…'}</option>}
@@ -361,13 +362,13 @@ export default function Calendar() {
                             {families.map(f => <option key={f.id} value={`family-${f.id}`}>{f.name}</option>)}
                         </optgroup>}
                 </select>
-                <span className={styles.sourceChevron}><Icon name="expand" size={18} /></span>
+                <span className={styles.sourceChevron}><Icon name="mExpand" size={18} /></span>
             </label>
             {isShared && shared.data &&
                 <Link to={sharedPage} className={styles.sourceLink}
                     aria-label={t(source.kind === 'session' ? 'calendarOpenSession' : 'calendarOpenFamily')}
                     title={t(source.kind === 'session' ? 'calendarOpenSession' : 'calendarOpenFamily')}>
-                    <Icon name="open" size={18} />
+                    <Icon name="mOpen" size={18} />
                 </Link>}
         </div>
     );
@@ -378,10 +379,10 @@ export default function Calendar() {
             {compact && sourceChoice && sourcePicker}
             {groups.length > 0 &&
                 <label className={styles.filterField}>
-                    <span>{t(taskGroups.collections ? 'collectionFilter' : 'filterGroup')}</span>
+                    <span>{t('collectionFilter')}</span>
                     <select className={styles.groupSelect} value={String(groupId)}
                         onChange={(e) => setGroupFilter(e.target.value === 'all' ? 'all' : groups.find(group => String(group.id) === e.target.value)?.id ?? 'all')}>
-                        <option value="all">{t(taskGroups.collections ? 'collectionAllFilter' : 'allGroups')}</option>
+                        <option value="all">{t('collectionAllFilter')}</option>
                         {groups.map(group => <option key={group.id} value={String(group.id)}>{group.emoji ? `${group.emoji} ${group.name}` : group.name}</option>)}
                     </select>
                 </label>}
@@ -398,7 +399,7 @@ export default function Calendar() {
                 </button>}
             <div className={styles.filterDivider} role="separator" />
             <button type="button" className={styles.exportBtn} onClick={() => { setFiltersOpen(false); exportIcs(); }} title={t('exportIcsHint')}>
-                <Icon name="download" size={18} />
+                <Icon name="mDownload" size={18} />
                 <span>{t('exportIcs')}</span>
             </button>
         </div>
@@ -414,7 +415,7 @@ export default function Calendar() {
                             <button type="button" className={styles.barBtn} aria-label={t('calendarViews')} title={t('calendarViews')} data-tip="calendar-views"
                                 aria-expanded={viewsOpen} aria-controls={viewsOpen ? 'calendarViewMenu' : undefined}
                                 onClick={() => setViewsOpen(open => !open)}>
-                                <Icon name="menu" size={22} />
+                                <Icon name="mMenu" size={22} />
                                 {overdueCount > 0 && <span className={styles.barDot} aria-hidden="true" />}
                             </button>
                             {viewsOpen &&
@@ -423,7 +424,7 @@ export default function Calendar() {
                                         <button key={name} type="button" role="menuitemradio" aria-checked={view === name} className={styles.viewItem}
                                             onClick={() => { setView(name); setViewsOpen(false); }}>
                                             {t(VIEW_LABELS[name])}
-                                            {view === name && <Icon name="check" size={18} />}
+                                            {view === name && <Icon name="mCheck" size={18} />}
                                         </button>
                                     ))}
                                     <div className={styles.filterDivider} role="separator" />
@@ -441,7 +442,7 @@ export default function Calendar() {
                         <button type="button" className={`${styles.barBtn} ${searchShown ? styles.barBtnOn : ''}`}
                             aria-label={t('searchTasks')} title={t('searchTasks')} aria-expanded={searchShown}
                             onClick={() => (searchShown ? closeSearch() : setSearchOpen(true))}>
-                            <Icon name="search" size={22} />
+                            <Icon name="mSearch" size={22} />
                         </button>
                         <div className={styles.filterWrap} ref={filterRef}>
                             <button type="button" className={`${styles.barBtn} ${hiddenFilters > 0 || isShared ? styles.barBtnOn : ''}`}
@@ -449,22 +450,22 @@ export default function Calendar() {
                                 title={t('calendarFilters')}
                                 aria-expanded={filtersOpen} aria-controls={filtersOpen ? 'calendarFilters' : undefined}
                                 onClick={() => setFiltersOpen(open => !open)}>
-                                <Icon name="filter" size={22} />
+                                <Icon name="mFilter" size={22} />
                                 {hiddenFilters > 0 && <span className={styles.barCount} aria-hidden="true">{hiddenFilters}</span>}
                             </button>
                             {filtersOpen && filterMenu}
                         </div>
-                        <button type="button" className={styles.barBtn} onClick={() => shift(-1)} aria-label={prevLabel} title={prevLabel}><Icon name="prev" size={22} /></button>
-                        <button type="button" className={styles.barBtn} onClick={() => shift(1)} aria-label={nextLabel} title={nextLabel}><Icon name="next" size={22} /></button>
+                        <button type="button" className={styles.barBtn} onClick={() => shift(-1)} aria-label={prevLabel} title={prevLabel}><Icon name="mPrev" size={22} /></button>
+                        <button type="button" className={styles.barBtn} onClick={() => shift(1)} aria-label={nextLabel} title={nextLabel}><Icon name="mNext" size={22} /></button>
                     </div>
                     {searchShown &&
                         <label className={styles.compactSearch}>
-                            <Icon name="search" size={18} />
+                            <Icon name="mSearch" size={18} />
                             <input ref={searchRef} type="search" value={query} onChange={(e) => setQuery(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); closeSearch(); } }}
                                 placeholder={t('searchTasks')} aria-label={t('searchTasks')} />
                             <button type="button" className={styles.searchClose} onClick={closeSearch} aria-label={t('close')} title={t('close')}>
-                                <Icon name="close" size={18} />
+                                <Icon name="mClose" size={18} />
                             </button>
                         </label>}
                     {shared.readOnly && <p className={styles.sourceNote}>{t('calendarSessionEnded')}</p>}
@@ -483,8 +484,8 @@ export default function Calendar() {
                             <button type="button" className={`${styles.todayBtn} ${isCurrentPeriod ? styles.todayBtnQuiet : ''}`} onClick={goToday} title={`${t('today')} (T)`}>
                                 {t('today')}
                             </button>
-                            <button type="button" className={styles.navBtn} onClick={() => shift(-1)} aria-label={prevLabel} title={prevLabel}><Icon name="prev" /></button>
-                            <button type="button" className={styles.navBtn} onClick={() => shift(1)} aria-label={nextLabel} title={nextLabel}><Icon name="next" /></button>
+                            <button type="button" className={styles.navBtn} onClick={() => shift(-1)} aria-label={prevLabel} title={prevLabel}><Icon name="mPrev" /></button>
+                            <button type="button" className={styles.navBtn} onClick={() => shift(1)} aria-label={nextLabel} title={nextLabel}><Icon name="mNext" /></button>
                         </div>
                     </div>
 
@@ -501,7 +502,7 @@ export default function Calendar() {
                         <div className={styles.filters}>
                             {sourceChoice && sourcePicker}
                             <label className={styles.search}>
-                                <Icon name="search" size={18} />
+                                <Icon name="mSearch" size={18} />
                                 <input type="search" value={query} onChange={(e) => setQuery(e.target.value)}
                                     placeholder={t('searchTasks')} aria-label={t('searchTasks')} />
                             </label>
@@ -510,7 +511,7 @@ export default function Calendar() {
                                 <button type="button" className={`${styles.filterBtn} ${hiddenFilters > 0 ? styles.filterBtnOn : ''}`}
                                     aria-expanded={filtersOpen} aria-controls={filtersOpen ? 'calendarFilters' : undefined}
                                     onClick={() => setFiltersOpen(open => !open)}>
-                                    <Icon name="filter" size={18} />
+                                    <Icon name="mFilter" size={18} />
                                     <span>{hiddenFilters > 0 ? fill(t('calendarFiltersActive'), { count: hiddenFilters }) : t('calendarFilters')}</span>
                                 </button>
                                 {filtersOpen && filterMenu}

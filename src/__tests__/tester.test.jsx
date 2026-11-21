@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { readStoredUiVariant, setUiVariant, selectUiVariant, useApplyUiVariant, UI_VARIANT_IDS, setUiColors, selectColorChoice, readStoredUiColors } from '../features/tester/variants'
 import { useApplyTheme } from '../features/settings/theme'
@@ -17,7 +17,7 @@ import CommandPalette from '../components/variants/CommandPalette'
 import DepartureBoard from '../components/variants/DepartureBoard'
 import Menu from '../components/Menu'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

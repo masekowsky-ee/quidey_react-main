@@ -1,4 +1,5 @@
-import { apiFetch, displayName, fill } from '../helperFunction';
+import { displayName, fill } from '../helperFunction';
+import { apiFetch, json } from '../api/api';
 import { selectFamilyInviteCount } from '../family/family';
 
 // The inbox: direct messages between friends, notifications (e.g. an admin's broadcast),
@@ -49,7 +50,7 @@ export const markConversationRead = (userId) => apiFetch(`/api/messages/${userId
 
 // Rejects with the API error (error.code: NOT_FRIENDS, INVALID_MESSAGE, RATE_LIMITED)
 export const sendMessage = (userId, body) =>
-    apiFetch(`/api/messages/${userId}`, { method: 'POST', body: JSON.stringify({ body }) });
+    apiFetch(`/api/messages/${userId}`, json('POST', { body }));
 
 // ---------- notifications ----------
 
@@ -89,7 +90,7 @@ export const FEEDBACK_CATEGORIES = ['idea', 'bug', 'praise', 'other'];
 // Mailed to the operator. Rejects with the API error (error.code: INVALID_MESSAGE, RATE_LIMITED, SEND_FAILED)
 // email: where an answer should go (empty: my account's address)
 export const sendFeedback = (category, message, email = '') =>
-    apiFetch('/api/feedback', { method: 'POST', body: JSON.stringify({ category, message, ...(email ? { email } : {}) }) });
+    apiFetch('/api/feedback', json('POST', { category, message, ...(email ? { email } : {}) }));
 
 // ---------- admin ----------
 
@@ -98,4 +99,4 @@ export const fetchBroadcasts = () => apiFetch('/api/admin/broadcasts');
 // A notice to every account (audience 'all') or only to testers and admins ('testers');
 // { id, audience, recipientCount, createdAt }
 export const sendBroadcast = (title, body, audience = 'all') =>
-    apiFetch('/api/admin/broadcasts', { method: 'POST', body: JSON.stringify({ title, body, audience }) });
+    apiFetch('/api/admin/broadcasts', json('POST', { title, body, audience }));

@@ -1,6 +1,7 @@
 import styles from '../Together.module.css';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import { displayName, formatRelative } from '../../features/helperFunction';
 import { describeEvent } from '../../features/together/format';
 import { postSharedMessage } from '../../features/together/togetherAction';
@@ -13,7 +14,7 @@ export default function ActivityFeed({ session, tall = false }) {
     const { t, language } = useTranslation();
     const run = useTogetherRun();
     const now = useNow(true, 30 * 1000);
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
 
     const [text, setText] = useState('');
     const [sending, setSending] = useState(false);

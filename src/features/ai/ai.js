@@ -5,41 +5,19 @@
 // quota: { available, scan: { used, max }, aiLine: { used, max }, resetsAt } or null (not loaded,
 // or the server couldn't be asked: then nothing is offered).
 
-import { useEffect, useSyncExternalStore } from 'react';
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
+import { sharedResource } from '../sharedResource';
 
-let quota = null;
-let loading = null;
-const listeners = new Set();
-const notify = () => listeners.forEach(listener => listener());
-const subscribe = (listener) => { listeners.add(listener); return () => listeners.delete(listener); };
+const aiQuota = sharedResource(() => apiFetch('/api/ai/quota'));
 
-export function forgetAiQuota() {
-    quota = null;
-    loading = null;
-    notify();
-}
-
-function loadAiQuota() {
-    loading ??= Promise.resolve()
-        .then(() => apiFetch('/api/ai/quota'))
-        .then(answer => { quota = answer ?? null; notify(); return quota; })
-        .catch(() => { loading = null; return null; });
-    return loading;
-}
+export const forgetAiQuota = aiQuota.forget;
 
 // reads what is left again (after a scan, which may have used or given back the day's one)
-export function refreshAiQuota() {
-    loading = null;
-    return loadAiQuota();
-}
+export const refreshAiQuota = aiQuota.refresh;
 
-const setQuota = (next) => { quota = { ...quota, ...next }; notify(); };
+const setQuota = (next) => aiQuota.set({ ...aiQuota.get(), ...next });
 
-export function useAiQuota() {
-    useEffect(() => { loadAiQuota(); }, []);
-    return useSyncExternalStore(subscribe, () => quota, () => quota);
-}
+export const useAiQuota = aiQuota.useValue;
 
 export const left = (part) => (part ? Math.max(0, part.max - part.used) : 0);
 
@@ -52,7 +30,7 @@ export async function readLineWithAi(text) {
         if (answer.quota) setQuota(answer.quota);
         return answer.entry;
     } catch (err) {
-        if (err.code === 'QUOTA_REACHED' && quota?.aiLine) setQuota({ aiLine: { ...quota.aiLine, used: quota.aiLine.max }, resetsAt: err.data?.resetsAt ?? quota.resetsAt });
+        if (err.code === 'QUOTA_REACHED' && aiQuota.get()?.aiLine) setQuota({ aiLine: { ...aiQuota.get().aiLine, used: aiQuota.get().aiLine.max }, resetsAt: err.data?.resetsAt ?? aiQuota.get().resetsAt });
         throw err;
     }
 }

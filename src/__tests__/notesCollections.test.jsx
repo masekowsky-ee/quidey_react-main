@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import rootReducer from '../features/rootReducer'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { setLanguage } from '../features/settings/settingsAction'
@@ -25,7 +25,7 @@ import GroupForm from '../components/GroupForm'
 import TaskContainer from '../components/TaskContainer'
 import { filterTasks } from '../features/calendar/calendar'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

@@ -4,14 +4,14 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { makeStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_ACCESS, SET_USER } from '../features/auth/authActionTypes'
 import { LIMIT_EVENT } from '../features/pro/pro'
 import BetaGate from '../components/BetaGate'
 import LimitDialog from '../components/pro/LimitDialog'
 import ProfileView from '../components/ProfileView'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

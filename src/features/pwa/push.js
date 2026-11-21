@@ -13,9 +13,11 @@
 // In the Android app the same flow runs on Firebase Cloud Messaging (native/nativePush.js): the
 // device's address is 'fcm:<token>', the permission is Android's (the branches say "app").
 import { useEffect, useSyncExternalStore } from 'react';
-import { apiFetch, apiUrl } from '../helperFunction';
+import { apiFetch, rawFetch, json } from '../api/api';
 import { installState } from './install';
 import { isNativeApp } from '../native/native';
+import { isStandalone } from '../usage/platform';
+import { PUSH_OPEN_MESSAGE } from '../realtime/events';
 import {
     nativePermission, nativePushAvailable, nativeSubscription, onNativePushInApp, onNativePushOpen, requestNativePermission, unregisterNative,
 } from '../native/nativePush';
@@ -129,10 +131,7 @@ async function currentSubscription() {
 // Hands this device's address to the server (for the account signed in now); kinds optional
 async function save(subscription, kinds) {
     const { endpoint, keys } = subscription.toJSON();
-    const data = await apiFetch('/api/push/subscription', {
-        method: 'PUT',
-        body: JSON.stringify({ endpoint, keys, ...(kinds ? { kinds } : {}) }),
-    });
+    const data = await apiFetch('/api/push/subscription', json('PUT', { endpoint, keys, ...(kinds ? { kinds } : {}) }));
     write(ENDPOINT_KEY, endpoint);
     return data.kinds;
 }
@@ -166,7 +165,7 @@ const failure = (step, err) => ({
 });
 
 async function removeFromServer(endpoint) {
-    if (endpoint) await apiFetch('/api/push/subscription', { method: 'DELETE', body: JSON.stringify({ endpoint }) }).catch(() => {});
+    if (endpoint) await apiFetch('/api/push/subscription', json('DELETE', { endpoint })).catch(() => {});
     write(ENDPOINT_KEY, null);
 }
 
@@ -201,11 +200,9 @@ const endpointHost = (subscription) => {
     try { return subscription ? new URL(subscription.endpoint).host : null; } catch { return '?'; }
 };
 
-const runsAsApp = () => Boolean(window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true);
-
 async function checkPush() {
     const support = pushSupport();
-    const facts = { checkedAt: new Date().toLocaleTimeString(), support, app: runsAsApp(), stored: read(WANTED_KEY) };
+    const facts = { checkedAt: new Date().toLocaleTimeString(), support, app: isStandalone(), stored: read(WANTED_KEY) };
     const decide = (result, changes) => set({ ...changes, diagnosis: { ...facts, result } });
     if (support !== 'supported') return decide(support, { status: support, kinds: null });
     if (isNativeApp()) return checkNativePush(facts, decide);
@@ -357,7 +354,7 @@ export async function sendTestPush() {
     try {
         const subscription = await currentSubscription();
         if (!subscription) throw new Error('Not subscribed');
-        await apiFetch('/api/push/test', { method: 'POST', body: JSON.stringify({ endpoint: subscription.endpoint }) });
+        await apiFetch('/api/push/test', json('POST', { endpoint: subscription.endpoint }));
         return true;
     } catch (err) {
         set({ error: 'pushErrorTest', detail: failure('test', err).detail });
@@ -372,12 +369,8 @@ export async function sendTestPush() {
 export function forgetPushOnSignOut(token, keep = false) {
     const endpoint = read(ENDPOINT_KEY);
     if (endpoint && token) {
-        fetch(apiUrl('/api/push/subscription'), {
-            method: 'DELETE',
-            keepalive: true,
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ endpoint }),
-        }).catch(() => {});
+        // rawFetch with the old token handed in: the sign-out removes the stored one right after
+        rawFetch('/api/push/subscription', { method: 'DELETE', keepalive: true, body: JSON.stringify({ endpoint }) }, token).catch(() => {});
     }
     if (!keep) {
         // "off", not nothing: the browser still holds the address, and the next start would
@@ -427,7 +420,7 @@ export function usePushSync(enabled, account, navigate) {
     useEffect(() => {
         if (typeof navigator === 'undefined' || !('serviceWorker' in navigator) || isNativeApp()) return;
         const onMessage = (event) => {
-            const url = event.data?.type === 'quidey:open' ? event.data.url : null;
+            const url = event.data?.type === PUSH_OPEN_MESSAGE ? event.data.url : null;
             // only addresses inside the app
             if (typeof url === 'string' && url.startsWith('/') && !url.startsWith('//')) navigate(url);
         };

@@ -9,10 +9,15 @@
 import { useEffect } from 'react';
 import { track } from '../usage/usage';
 import { useDispatch, useSelector, useStore } from 'react-redux';
-import { apiFetch, fill, CACHE_MEDIUM } from '../helperFunction';
+import { fill } from '../helperFunction';
+import { apiFetch, CACHE_MEDIUM } from '../api/api';
 import { showToast } from '../toast/toast';
 import { translate } from '../../i18n/useTranslation';
 import { playSound } from '../settings/sound';
+import { listReducer } from '../listReducer';
+import { isoWeekday, timeText, weekdaysText } from '../calendar/calendar';
+import { read, remove, write } from '../storedSetting';
+import { startChecking } from '../reminders/due';
 
 const SET_ROUTINES = 'SET_ROUTINES';
 const ROUTINE_SAVED = 'ROUTINE_SAVED';
@@ -42,23 +47,8 @@ export function templateRoutine(template, language) {
     };
 }
 
-export default function routinesReducer(state = { list: [], loaded: false }, action) {
-    switch (action.type) {
-        case SET_ROUTINES:
-            return { list: action.payload, loaded: true };
-        case ROUTINE_SAVED: {
-            const exists = state.list.some(routine => routine.id === action.payload.id);
-            return {
-                ...state,
-                list: exists ? state.list.map(routine => routine.id === action.payload.id ? action.payload : routine) : [...state.list, action.payload],
-            };
-        }
-        case ROUTINE_REMOVED:
-            return { ...state, list: state.list.filter(routine => routine.id !== action.payload) };
-        default:
-            return state;
-    }
-}
+// (not emptied on sign-out, as it always was)
+export default listReducer({ set: SET_ROUTINES, saved: ROUTINE_SAVED, removed: ROUTINE_REMOVED });
 
 export const fetchRoutines = () => async (dispatch) => {
     const list = await apiFetch('/api/routines', { cacheMs: CACHE_MEDIUM });
@@ -88,9 +78,6 @@ export const logRoutineRun = (id, run) => async (dispatch) => {
     return saved;
 };
 
-// Monday = 1 … Sunday = 7, like the server
-export const isoWeekday = (date = new Date()) => ((date.getDay() + 6) % 7) + 1;
-
 export const totalMinutes = (routine) => routine.steps.reduce((sum, step) => sum + (step.minutes || 0), 0);
 
 // planned for today, by time (those without a time last)
@@ -101,33 +88,35 @@ export const routinesForDay = (list, date = new Date()) => list
 // "Mo, Mi, Fr · 18:30"; every day / weekdays in words
 export function planText(routine, t) {
     if (routine.days.length === 0) return t('routineNotPlanned');
-    const days = routine.days.length === 7 ? t('routineEveryDay')
-        : routine.days.join() === '1,2,3,4,5' ? t('routineWeekdays')
-        : routine.days.map(day => t('weekDays', day - 1)).join(', ');
+    const days = weekdaysText(routine.days, t);
     return routine.atTime ? `${days} · ${routine.atTime}` : days;
 }
 
 // ---------- the run in progress ----------
 const RUN_KEY = 'routineRun';
 
-export function readRoutineRun() {
-    try {
-        const run = JSON.parse(localStorage.getItem(RUN_KEY) ?? 'null');
-        if (!run || typeof run.routineId !== 'number' || Date.now() - run.startedAt > 24 * 60 * 60 * 1000) return null;
+// a run left alone for longer than this is not taken up again
+const ROUTINE_RUN_MAX_AGE = 24 * 60 * 60 * 1000;
+
+export const readRoutineRun = () => read(RUN_KEY, {
+    parse: (text) => {
+        const run = JSON.parse(text ?? 'null');
+        if (!run || typeof run.routineId !== 'number' || Date.now() - run.startedAt > ROUTINE_RUN_MAX_AGE) return null;
         return run;
-    } catch {
-        return null;
-    }
-}
+    },
+    fallback: null,
+});
 export function storeRoutineRun(run) {
-    try {
-        if (run) localStorage.setItem(RUN_KEY, JSON.stringify(run));
-        else localStorage.removeItem(RUN_KEY);
-    } catch { /* only for this visit */ }
+    if (run) write(RUN_KEY, JSON.stringify(run));
+    else remove(RUN_KEY);
 }
 
 // ---------- while the app is open: "time for your routine" ----------
 const CHECK_MS = 30 * 1000;
+// a routine's reminder still shows this many minutes after its time (a task's: 60, a tester
+// reminder's: 10)
+const ROUTINE_LATE_MIN = 15;
+// today's routines already told about (until the page reloads)
 const told = new Set();
 
 export function useRoutineReminders(allowed) {
@@ -144,15 +133,15 @@ export function useRoutineReminders(allowed) {
         const check = () => {
             const state = store.getState();
             const now = new Date();
-            const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const hhmm = timeText(now.getHours() * 60 + now.getMinutes());
             const today = now.toDateString();
             for (const routine of routinesForDay(state.routines.list, now)) {
                 if (!routine.atTime || !routine.remind || routine.doneToday) continue;
                 const key = `${routine.id}@${today}`;
-                // from its time on, for 15 minutes (the app may have been opened a little later)
+                // from its time on, for ROUTINE_LATE_MIN minutes (the app may have been opened a little later)
                 const [h, m] = routine.atTime.split(':').map(Number);
                 const late = (now.getHours() * 60 + now.getMinutes()) - (h * 60 + m);
-                if (told.has(key) || late < 0 || late > 15 || hhmm < routine.atTime) continue;
+                if (told.has(key) || late < 0 || late > ROUTINE_LATE_MIN || hhmm < routine.atTime) continue;
                 told.add(key);
                 playSound('reminder');
                 const language = state.settings.language;
@@ -160,8 +149,6 @@ export function useRoutineReminders(allowed) {
                     { to: `/routines/${routine.id}/run`, detail: translate(language, 'routineTapToStart') }));
             }
         };
-        check();
-        const id = setInterval(check, CHECK_MS);
-        return () => clearInterval(id);
+        return startChecking(check, CHECK_MS);
     }, [allowed, store, dispatch]);
 }

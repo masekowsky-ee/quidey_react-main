@@ -3,7 +3,7 @@ import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 import { makeStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { setLanguage } from '../features/settings/settingsAction'
@@ -13,7 +13,7 @@ import { resetAssistantChat } from '../features/assistant/assistantApi'
 import { readGoalDraft, clearGoalDraft } from '../features/study/goalDraft'
 import AssistantFab from '../components/assistant/AssistantFab'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

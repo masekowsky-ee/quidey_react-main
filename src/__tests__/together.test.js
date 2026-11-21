@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { makeStore } from './helpers/store'
 import togetherReducer, { idleWork } from '../features/together/togetherReducer'
-import { apiFetch, formatDuration } from '../features/helperFunction'
+import { formatDuration } from '../features/helperFunction';
+import { apiFetch } from '../features/api/api';
 import {
     fetchSharedSessions, fetchSharedSession, createSharedSession, joinSharedSession,
     removeSharedMember, deleteSharedSession, reportSharedActivity, selectInviteCount, timeOf,
@@ -9,7 +10,7 @@ import {
 import { SET_SHARED_SESSION, SET_SHARED_SESSIONS, SHARED_SESSION_GONE } from '../features/together/togetherActionTypes'
 import { LOGOUT } from '../features/auth/authActionTypes'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

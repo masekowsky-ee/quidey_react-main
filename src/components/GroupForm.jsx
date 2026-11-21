@@ -2,7 +2,8 @@ import styles from './Form.module.css';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import TaskColorPicker from './task/TaskColorPicker.jsx';
-import {useTranslation} from '../i18n/useTranslation';
+import {useTranslation} from '../i18n/useTranslation';
+import Icon from './icons.jsx';
 import {setCustomError} from '../features/settings/settingsAction';
 import SheetGrabber from './SheetGrabber.jsx';
 import { createCollection, COLLECTION_NAME_MAX } from '../features/collections/collections';
@@ -38,7 +39,7 @@ export default function GroupForm(props){
         <div className={`${styles.div}`} role="dialog" aria-modal="true" aria-labelledby="createGroupTitle" {...sheet?.panel}>
             {sheet && <SheetGrabber />}
             <button className={styles.closeBtn} onClick={()=>{setCreateGroup(false)}} aria-label={t('close')}>
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+                <Icon name="mCross" size={24} />
             </button>
             <h2 id="createGroupTitle" data-sheet-drag>{t('collectionNew')}</h2>
             <form className={`${styles.form}`} onSubmit={(e)=>{handleSubmit(e)}}>

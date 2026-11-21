@@ -1,15 +1,13 @@
 import styles from '../Together.module.css';
 import own from './Family.module.css';
-import { useEffect, useId, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useId, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
 import { fill, formatDate } from '../../features/helperFunction';
 import { movableTasks, moveToFamily } from '../../features/family/family';
 import { refreshTasks } from '../../features/tasks/taskAction';
-import { useSheet } from '../../features/layout/dragDismiss';
 import { useFamilyRun } from './useFamilyRun';
-import SheetGrabber from '../SheetGrabber.jsx';
+import Dialog from '../Dialog.jsx';
 import Icon from '../icons';
 
 // "From my tasks": my own tasks and events, each moved into the family after a question (it
@@ -60,29 +58,10 @@ function MoveQuestion({ task, onAnswer }) {
     const { t } = useTranslation();
     const titleId = useId();
     const yesRef = useRef(null);
-    const sheet = useSheet(() => onAnswer(false));
-    const { dismiss } = sheet;
-
-    useEffect(() => {
-        const previous = document.activeElement;
-        yesRef.current?.focus();
-        const onKey = (e) => {
-            if (e.key !== 'Escape') return;
-            e.preventDefault();
-            e.stopPropagation();
-            dismiss();
-        };
-        window.addEventListener('keydown', onKey, true);
-        return () => {
-            window.removeEventListener('keydown', onKey, true);
-            previous?.focus?.();
-        };
-    }, [dismiss]);
-
-    return createPortal(
-        <div className={own.moveBackdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
-            <div className={own.moveDialog} role="alertdialog" aria-modal="true" aria-labelledby={titleId} {...sheet.panel} data-sheet-drag>
-                <SheetGrabber />
+    return (
+        <Dialog onClose={() => onAnswer(false)} role="alertdialog" labelledBy={titleId} initialFocus={yesRef} drag
+            backdropClassName={own.moveBackdrop} className={own.moveDialog}>
+            {(dismiss) => (<>
                 <h2 id={titleId} className={own.moveTitle}>{fill(t('familyMoveConfirmTitle'), { name: task.name })}</h2>
                 <p className={own.moveText}>{t('familyMoveConfirm')}</p>
                 <div className={own.moveActions}>
@@ -91,8 +70,7 @@ function MoveQuestion({ task, onAnswer }) {
                         <Icon name="arrowRight" size={18} /> {t('familyMoveYes')}
                     </button>
                 </div>
-            </div>
-        </div>,
-        document.body
+            </>)}
+        </Dialog>
     );
 }

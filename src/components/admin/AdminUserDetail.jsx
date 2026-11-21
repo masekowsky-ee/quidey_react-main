@@ -1,10 +1,9 @@
 import styles from './AdminUserDetail.module.css';
-import { createPortal } from 'react-dom';
-import { useEffect, useId } from 'react';
+import { useId } from 'react';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import { displayName, fill, parseDate } from '../../features/helperFunction';
-import { useSheet } from '../../features/layout/dragDismiss';
-import SheetGrabber from '../SheetGrabber.jsx';
+import Dialog from '../Dialog.jsx';
 import Icon from '../icons.jsx';
 
 const NONE = '–';
@@ -14,15 +13,7 @@ const NONE = '–';
 export default function AdminUserDetail({ user, onClose }) {
     const { t, language } = useTranslation();
     const titleId = useId();
-    const sheet = useSheet(onClose);
-    const { dismiss } = sheet;
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
-    useEffect(() => {
-        const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); dismiss(); } };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [dismiss]);
-
+    const locale = localeOf(language);
     const date = (value) => {
         const d = parseDate(value);
         return d ? d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }) : null;
@@ -67,10 +58,9 @@ export default function AdminUserDetail({ user, onClose }) {
         ['avatar', t(user.hasAvatar ? 'adminAnswerYes' : 'adminAnswerNo')],
     ];
 
-    return createPortal(
-        <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
-            <div className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby={titleId} {...sheet.panel}>
-                <SheetGrabber />
+    return (
+        <Dialog onClose={onClose} labelledBy={titleId} backdropClassName={styles.backdrop} className={styles.dialog}>
+            {(dismiss) => (<>
                 <div className={styles.head} data-sheet-drag>
                     <div className={styles.who}>
                         <h2 id={titleId} className={styles.title}>{displayName(user)}</h2>
@@ -88,8 +78,7 @@ export default function AdminUserDetail({ user, onClose }) {
                         </div>
                     ))}
                 </dl>
-            </div>
-        </div>,
-        document.body
+            </>)}
+        </Dialog>
     );
 }

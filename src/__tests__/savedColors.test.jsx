@@ -3,12 +3,12 @@ import { render, cleanup, screen, fireEvent, waitFor } from '@testing-library/re
 import { Provider } from 'react-redux'
 import { useState } from 'react'
 import { makeStore as baseStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import { addSavedColor, removeSavedColor, selectSavedColors, SAVED_COLORS_MAX } from '../features/tasks/savedColors'
 import TaskColorPicker from '../components/task/TaskColorPicker'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

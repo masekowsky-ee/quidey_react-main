@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen, fireEvent, act } from '@testing-library/react'
 import { makeStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { setLanguage, showForms } from '../features/settings/settingsAction'
@@ -11,7 +11,7 @@ import QuickAdd from '../components/QuickAdd'
 import SessionNotes from '../components/focus/SessionNotes'
 import NotesPage from '../components/notes/NotesPage'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

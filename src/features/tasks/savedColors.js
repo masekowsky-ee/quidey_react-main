@@ -3,7 +3,7 @@
 // (tasks, groups, event types, subjects, collections, notes) on every device offers them beside the
 // eight named ones. Newest first, each once, at most SAVED_COLORS_MAX.
 import { useSelector } from 'react-redux';
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { SAVED_COLORS_SET } from '../auth/authActionTypes';
 import { isOwnColor } from './taskColors';
 

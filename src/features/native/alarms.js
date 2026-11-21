@@ -13,7 +13,7 @@
 
 import { registerPlugin } from '@capacitor/core';
 import { isNativeApp } from './native';
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { translate } from '../../i18n/useTranslation';
 import { occurrences, fetchReminders, SNOOZE_MINUTES } from '../reminders/reminders';
 

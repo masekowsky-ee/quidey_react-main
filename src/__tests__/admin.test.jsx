@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { makeStore as baseStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import Admin from '../components/Admin'
 import Menu from '../components/Menu'
@@ -17,7 +17,7 @@ vi.mock('../features/admin/exportTable', () => ({
     downloadCsv: vi.fn(),
 }))
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

@@ -3,7 +3,8 @@ import { render, screen, fireEvent, within, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { makeStore as baseStore } from './helpers/store'
-import { apiFetch, isOverdue } from '../features/helperFunction'
+import { isOverdue } from '../features/helperFunction';
+import { apiFetch } from '../features/api/api';
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { setLanguage } from '../features/settings/settingsAction'
 import { updateEventType, deleteEventType } from '../features/tasks/taskAction'
@@ -19,7 +20,7 @@ import Stats from '../components/Stats'
 import EventTypeSettings from '../components/EventTypeSettings'
 import { DurationWheel } from '../components/task/DurationWheel'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

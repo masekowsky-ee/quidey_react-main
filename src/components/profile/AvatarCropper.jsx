@@ -1,9 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { clampPlacement, cropSquare, ZOOM_MAX } from '../../features/profile/avatars';
-import { useSheet } from '../../features/layout/dragDismiss';
 import { useTranslation } from '../../i18n/useTranslation';
-import SheetGrabber from '../SheetGrabber.jsx';
+import Dialog from '../Dialog.jsx';
 import Icon from '../icons.jsx';
 import styles from './AvatarCropper.module.css';
 
@@ -16,20 +14,12 @@ const KEY_STEP = 0.03;
 export default function AvatarCropper({ image, busy = false, onDone, onClose }) {
     const { t } = useTranslation();
     const titleId = useId();
-    const sheet = useSheet(onClose);
-    const { dismiss } = sheet;
     const stage = useRef(null);
     const [placement, setPlacement] = useState(START);
     const pointers = useRef(new Map());
     const gesture = useRef(null);
 
     const place = (next) => setPlacement(prev => clampPlacement(image, typeof next === 'function' ? next(prev) : next));
-
-    useEffect(() => {
-        const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); dismiss(); } };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [dismiss]);
 
     // the wheel zooms (not passive: the page mustn't scroll meanwhile)
     useEffect(() => {
@@ -92,10 +82,9 @@ export default function AvatarCropper({ image, busy = false, onDone, onClose }) 
         top: `${-sy * scale}%`,
     };
 
-    return createPortal(
-        <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
-            <div className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby={titleId} {...sheet.panel}>
-                <SheetGrabber />
+    return (
+        <Dialog onClose={onClose} labelledBy={titleId} backdropClassName={styles.backdrop} className={styles.dialog}>
+            {(dismiss) => (<>
                 <div className={styles.head} data-sheet-drag>
                     <h2 id={titleId} className={styles.title}>{t('avatarCropTitle')}</h2>
                     <button type="button" className={styles.close} onClick={() => dismiss()} aria-label={t('close')}>
@@ -126,8 +115,7 @@ export default function AvatarCropper({ image, busy = false, onDone, onClose }) 
                         {busy ? t('avatarCropSaving') : t('avatarCropSave')}
                     </button>
                 </div>
-            </div>
-        </div>,
-        document.body
+            </>)}
+        </Dialog>
     );
 }

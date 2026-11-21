@@ -279,7 +279,7 @@ export default function TaskForm(props){
         <div className={`${styles.div}`} role="dialog" aria-modal="true" aria-labelledby="createTaskTitle" {...sheet?.panel}>
             {sheet && <SheetGrabber />}
             <button className={styles.closeBtn} onClick={()=>{setCreateTask(false)}} aria-label={t('close')}>
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+                <Icon name="mCross" size={24} />
             </button>
             <h2 id="createTaskTitle" data-sheet-drag>{t(event ? 'createEventH2' : 'createTaskH2')}</h2>
             {session &&

@@ -2,14 +2,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { screen, fireEvent, act } from '@testing-library/react'
 import { makeStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_TASK_STATE, SET_EVENT_TYPES } from '../features/tasks/taskActionTypes'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { setLanguage } from '../features/settings/settingsAction'
 import { forgetAiQuota } from '../features/ai/ai'
 import TaskForm from '../components/TaskForm'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

@@ -1,0 +1,71 @@
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+/* an outline star; lit ones are filled in the tone's colour */
+.star {
+  color: var(--text-muted);
+}
+
+.star svg {
+  transition: fill var(--ease-out), color var(--ease-out);
+}
+
+.on {
+  color: var(--stars-on);
+}
+
+.on svg {
+  fill: currentColor;
+}
+
+.accent {
+  --stars-on: var(--primary-fg);
+}
+
+.fruit {
+  --stars-on: var(--plant-fruit);
+}
+
+.md {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.lg {
+  display: grid;
+  place-items: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: transform var(--ease), color var(--ease);
+}
+
+.lg:hover {
+  transform: scale(1.08);
+}
+
+.lg:focus-visible {
+  outline: 2px solid var(--primary-fg);
+  outline-offset: 1px;
+}
+
+/* iOS: a control is at least 44 pt on a touch screen (HIG) */
+@media (pointer: coarse) {
+  .md {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lg:hover {
+    transform: none;
+  }
+}

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
 
 // The device's time zone ("Europe/Berlin"), or undefined when the browser doesn't say
 function deviceTimezone() {

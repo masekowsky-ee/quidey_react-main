@@ -3,14 +3,14 @@ import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { makeStore as baseStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { downloadXlsx, downloadCsv } from '../features/admin/exportTable'
 import { usageSheets } from '../features/admin/usageSheets'
 import { translate } from '../i18n/useTranslation'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import Admin from '../components/Admin'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

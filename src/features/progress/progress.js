@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { apiFetch, fill } from '../helperFunction';
+import { fill } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { showToast } from '../toast/toast';
 import { COMMUNITY_PATHS } from '../community/paths';
 import { translate } from '../../i18n/useTranslation';

@@ -1,14 +1,13 @@
 import styles from './DeleteScopeDialog.module.css';
-import { useEffect, useId, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import { useId, useRef } from 'react';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import { answerDeleteScope, useDeleteScopeQuestion } from '../../features/tasks/deleteScope';
 import { isEvent } from '../../features/tasks/kinds';
 import { parseDate } from '../../features/helperFunction';
 import { dateKey } from '../../features/calendar/calendar';
 import Icon from '../icons';
-import SheetGrabber from '../SheetGrabber.jsx';
-import { useSheet } from '../../features/layout/dragDismiss';
+import Dialog from '../Dialog.jsx';
 
 const SCOPES = ['one', 'following', 'all'];
 
@@ -26,35 +25,15 @@ function ScopeQuestion({ task }) {
     const { t, language } = useTranslation();
     const titleId = useId();
     const firstRef = useRef(null);
-    // on phones a sheet: pulled down, nothing is deleted
-    const sheet = useSheet(() => answerDeleteScope(null));
-    const { dismiss } = sheet;
     const event = isEvent(task);
     const day = parseDate(dateKey(task.due));
-    const dayText = day ? day.toLocaleDateString(language === 'en' ? 'en-GB' : 'de-DE', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+    const dayText = day ? day.toLocaleDateString(localeOf(language), { weekday: 'short', day: 'numeric', month: 'short' }) : '';
 
-    useEffect(() => {
-        const previous = document.activeElement;
-        firstRef.current?.focus();
-        const onKey = (e) => {
-            if (e.key !== 'Escape') return;
-            // only this dialog closes, not the editor behind it
-            e.preventDefault();
-            e.stopPropagation();
-            dismiss();
-        };
-        window.addEventListener('keydown', onKey, true);
-        return () => {
-            window.removeEventListener('keydown', onKey, true);
-            previous?.focus?.();
-        };
-    }, [dismiss]);
-
-    return createPortal(
-        <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
-            <div className={styles.dialog} role="alertdialog" aria-modal="true" aria-labelledby={titleId}
-                {...sheet.panel} data-sheet-drag>
-                <SheetGrabber />
+    // on phones a sheet: pulled down, nothing is deleted
+    return (
+        <Dialog onClose={() => answerDeleteScope(null)} role="alertdialog" labelledBy={titleId} initialFocus={firstRef} drag
+            backdropClassName={styles.backdrop} className={styles.dialog}>
+            {(dismiss) => (<>
                 <span className={styles.badge} aria-hidden="true"><Icon name="repeat" size={20} /></span>
                 <h2 id={titleId} className={styles.title}>{t(event ? 'deleteScopeTitleEvent' : 'deleteScopeTitle')}</h2>
                 <p className={styles.name}>{task.name}</p>
@@ -71,8 +50,7 @@ function ScopeQuestion({ task }) {
                     ))}
                 </div>
                 <button type="button" className={styles.cancel} onClick={() => dismiss()}>{t('cancel')}</button>
-            </div>
-        </div>,
-        document.body
+            </>)}
+        </Dialog>
     );
 }

@@ -4,13 +4,13 @@ import { Provider } from 'react-redux'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { makeStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_USER } from '../features/auth/authActionTypes'
 import { badgesFor } from '../features/profile/badges'
 import UserProfile from '../components/UserProfile'
 import ProfileView from '../components/ProfileView'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

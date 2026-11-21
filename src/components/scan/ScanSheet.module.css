@@ -1,4 +1,24 @@
-/* The scan sheet (ScanSheet.jsx); its frame comes from the focus settings sheet */
+/* The scan sheet (ScanSheet.jsx): the shared dialog sheet with a head */
+
+.backdrop {
+    composes: dialogBackdrop from '../ui.module.css';
+}
+
+.sheet {
+    composes: dialogSheet from '../ui.module.css';
+}
+
+.head {
+    composes: dialogHead from '../ui.module.css';
+}
+
+.headTitle {
+    composes: dialogHeadTitle from '../ui.module.css';
+}
+
+.close {
+    composes: dialogClose from '../ui.module.css';
+}
 
 .body {
     display: flex;

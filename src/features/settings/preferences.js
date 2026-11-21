@@ -1,19 +1,11 @@
+import { read, write } from '../storedSetting';
+
 // Settings that are remembered in the browser between visits.
 // localStorage can throw (private mode, blocked storage), so reads fall back
 // to a default and writes fail silently: the setting then only lasts this visit.
 
-function readStored(key, allowed, fallback) {
-    try {
-        const stored = localStorage.getItem(key);
-        return allowed.includes(stored) ? stored : fallback;
-    } catch {
-        return fallback;
-    }
-}
-
-function store(key, value) {
-    try { localStorage.setItem(key, value); } catch { /* only for this visit */ }
-}
+const readStored = (key, allowed, fallback) => read(key, { allowed, fallback });
+const store = write;
 
 export const LANGUAGES = ['de', 'en'];
 // The device's language: German on a German device, English on every other. Used until a
@@ -96,15 +88,14 @@ export const POMODORO_LIMITS = {
 };
 export const validPomodoroValue = (key, value) =>
     Number.isInteger(value) && value >= POMODORO_LIMITS[key][0] && value <= POMODORO_LIMITS[key][1];
-export function readStoredPomodoro() {
-    try {
-        const stored = JSON.parse(localStorage.getItem('pomodoro') ?? 'null') ?? {};
+export const readStoredPomodoro = () => read('pomodoro', {
+    parse: (text) => {
+        const stored = JSON.parse(text ?? 'null') ?? {};
         return Object.fromEntries(Object.entries(POMODORO_DEFAULTS).map(([key, fallback]) =>
             [key, validPomodoroValue(key, stored[key]) ? stored[key] : fallback]));
-    } catch {
-        return { ...POMODORO_DEFAULTS };
-    }
-}
+    },
+    fallback: { ...POMODORO_DEFAULTS },
+});
 export const storePomodoro = (config) => store('pomodoro', JSON.stringify(config));
 
 // Focus sound in the Fokusraum: off or one of the noises made with the Web Audio API

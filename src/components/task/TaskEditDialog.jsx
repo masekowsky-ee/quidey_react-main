@@ -1,15 +1,13 @@
 import styles from '../CalendarDay.module.css';
-import { useEffect, useId, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import { useId } from 'react';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
 import { deleteTaskAsking, leaveTask, updateTaskProps } from '../../features/tasks/taskAction';
 import { removeSharedTask, updateSharedTask } from '../../features/together/togetherAction';
 import { showToast } from '../../features/toast/toast';
 import TaskEditor from '../calendar/TaskEditor.jsx';
-import Icon from '../calendar/icons.jsx';
-import SheetGrabber from '../SheetGrabber.jsx';
-import { useSheet } from '../../features/layout/dragDismiss';
+import Icon from '../icons.jsx';
+import Dialog from '../Dialog.jsx';
 
 // The calendar's task editor as a dialog (a sheet from the bottom on phones), for the task
 // list on Home: every option (time, reminder, repeat, colour, sharing, groups) in one place.
@@ -19,32 +17,23 @@ import { useSheet } from '../../features/layout/dragDismiss';
 // family's calendar: the same fields as a shared session's task; without remove there is no delete
 // button. subGroups (testers): the session's / family's sub-groups to move it between.
 export default function TaskEditDialog({ task, onClose, shared, handlers }) {
+    const titleId = useId();
+    // on phones a sheet: pulled down, it closes like a click next to it (without saving). Escape
+    // outside the editor's fields only (nested: the editor handles its own first)
+    return (
+        <Dialog onClose={onClose} labelledBy={titleId} nested backdropClassName={styles.backdrop}
+            className={`${styles.panel} ${styles.panelWide}`} panelProps={{ tabIndex: -1 }}>
+            {(dismiss) => <TaskEditBody task={task} shared={shared} handlers={handlers} dismiss={dismiss} titleId={titleId} />}
+        </Dialog>
+    );
+}
+
+function TaskEditBody({ task, shared, handlers, dismiss, titleId }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const titleId = useId();
-    const panelRef = useRef(null);
-    // on phones a sheet: pulled down, it closes like a click next to it (without saving)
-    const sheet = useSheet(onClose, panelRef);
-    const { dismiss } = sheet;
 
     const toast = (text, tone = 'success') => dispatch(showToast(text, tone));
     const reportError = () => toast(t('friendError_generic'), 'error');
-
-    // focus goes back to where it was (the edit button) once the dialog is gone
-    useEffect(() => {
-        const previous = document.activeElement;
-        return () => previous?.focus?.();
-    }, []);
-
-    // Escape outside the editor's fields (the editor handles its own)
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.defaultPrevented) return;
-            if (e.key === 'Escape') dismiss();
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [dismiss]);
 
     const run = async (action, doneText) => {
         try {
@@ -60,16 +49,14 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
         }
     };
 
-    return createPortal(
-        <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
-            <div className={`${styles.panel} ${styles.panelWide}`} role="dialog" aria-modal="true" aria-labelledby={titleId} {...sheet.panel} tabIndex={-1}>
-                <SheetGrabber />
+    return (
+        <>
                 <div className={styles.head} data-sheet-drag>
                     <div className={styles.titles}>
                         <h2 id={titleId} className={styles.title}>{t(task.kind === 'event' ? 'editEvent' : 'editTask')}</h2>
                     </div>
                     <button type="button" className={styles.closeBtn} onClick={() => dismiss()} aria-label={t('close')} title={`${t('close')} (Esc)`}>
-                        <Icon name="close" size={22} />
+                        <Icon name="mClose" size={22} />
                     </button>
                 </div>
                 {handlers
@@ -100,8 +87,6 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
                         onDelete={() => run(deleteTaskAsking(task), t('taskDeleted'))}
                         onLeave={() => run(leaveTask(task), t('taskLeft'))}
                     />}
-            </div>
-        </div>,
-        document.body
+        </>
     );
 }

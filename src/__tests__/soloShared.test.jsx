@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_TASK_STATE, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, DELETE_GROUP } from '../features/tasks/taskActionTypes'
 import { SET_MY_SHARED_TASKS, SET_SHARED_SESSION, SHARED_SESSION_GONE } from '../features/together/togetherActionTypes'
 import { selectSharedGroups, selectSharedSoloTasks, isSharedTaskId, sharedTaskIdOf } from '../features/together/togetherAction'
@@ -17,7 +17,7 @@ import TaskContainer from '../components/TaskContainer'
 import GroupBtnContainer from '../components/GroupBtnContainer'
 import Stats from '../components/Stats'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

@@ -3,7 +3,7 @@
 // the trash are under /api/tester/...; the server lets only testers set a note's folderId,
 // tags, color, archived or trashed. A note in the trash is deleted for good after TRASH_DAYS.
 
-import { apiFetch, CACHE_MEDIUM } from '../helperFunction';
+import { apiFetch, CACHE_MEDIUM } from '../api/api';
 import { translate } from '../../i18n/useTranslation';
 
 export const TRASH_DAYS = 30;

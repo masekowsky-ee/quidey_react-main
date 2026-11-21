@@ -2,6 +2,7 @@ import styles from './AdminUsage.module.css';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import { fill } from '../../features/helperFunction';
 import { showToast } from '../../features/toast/toast';
 import { adminErrorText, fetchAdminUsage, fetchAdminUsageRaw, usageQuery } from '../../features/admin/adminAction';
@@ -189,7 +190,7 @@ function UsageSkeleton() {
 export default function AdminUsage() {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const numberFormat = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
     const num = (value) => numberFormat.format(value ?? 0);
     const dayLabel = (iso) => parseDay(iso).toLocaleDateString(locale, { day: 'numeric', month: 'short' });

@@ -12,7 +12,7 @@
 // VITE_GOOGLE_CLIENT_ID: the OAuth client id of type "Web application" (the same the server lists
 // in GOOGLE_CLIENT_IDS). Without it the button isn't shown.
 import { registerPlugin } from '@capacitor/core';
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { isNativeApp } from '../native/native';
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';

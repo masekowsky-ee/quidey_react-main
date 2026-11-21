@@ -6,7 +6,7 @@ import { makeStore } from './helpers/store'
 import { setLanguage } from '../features/settings/settingsAction'
 import Settings from '../components/Settings'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(() => Promise.resolve({})),
 }))

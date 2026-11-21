@@ -4,13 +4,13 @@ import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { makeStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { LOGIN_SUCCESS, SET_ACCESS } from '../features/auth/authActionTypes'
 import { TIPS, BASIC_TIPS, tipsForPage, selectTips, resetTips } from '../features/tips/tips'
 import translations from '../i18n/translations'
 import FeatureTips from '../components/tips/FeatureTips'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

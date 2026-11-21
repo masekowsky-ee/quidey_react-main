@@ -1,4 +1,4 @@
-import { apiFetch } from '../helperFunction';
+import { apiFetch, json, errorText } from '../api/api';
 import { fetchAccess } from '../auth/authAction';
 
 // Admin panel requests. The panel keeps the lists in its own state, so these just
@@ -42,7 +42,7 @@ export const resetBetaRequest = (userId) =>
 // changes: { isPro?, isMax?, isAdmin?, isTester? }. Not for myself (the server refuses with code SELF),
 // and an owner's admin can't be taken away (code OWNER).
 export const updateAdminUser = (userId, changes) =>
-    adminChange(`/api/admin/users/${userId}`, { method: 'PATCH', body: JSON.stringify(changes) });
+    adminChange(`/api/admin/users/${userId}`, json('PATCH', changes));
 
 // Usage totals. params: { from, to, platform?, language?, plan? } (dates YYYY-MM-DD, local);
 // empty filters are left out. The raw hourly rows only for the export (400 USAGE_RANGE_TOO_BIG
@@ -58,10 +58,7 @@ export const fetchAdminUsage = (params) => () => apiFetch(`/api/admin/usage?${us
 export const fetchAdminUsageRaw = (params) => () => apiFetch(`/api/admin/usage/raw?${usageQuery(params)}`);
 
 // Translated message for an admin API error (keys adminError_<code>)
-export function adminErrorText(t, err) {
-    const key = `adminError_${err?.code}`;
-    return t(key) === key ? t('friendError_generic') : t(key);
-}
+export const adminErrorText = (t, err) => errorText(t, 'adminError', err?.code);
 
 export const selectIsAdmin = (state) => state.auth.access.isAdmin;
 export const selectAdminPendingCount = (state) => state.auth.access.adminPendingCount;

@@ -3,12 +3,12 @@ import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { makeStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import TaskNoteRow from '../components/task/TaskNoteRow'
 import { refreshTaskNotes } from '../features/tasks/taskAction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

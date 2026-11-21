@@ -8,6 +8,8 @@ import { selectReminders, dueOccurrence, reminderDone, snoozeReminder } from '..
 import { ringsNatively } from '../../features/native/alarms';
 import { playSound } from '../../features/settings/sound';
 import Icon from '../icons';
+import { useModal } from '../../features/layout/useModal';
+import { hhmm } from '../../features/calendar/calendar';
 
 const CHECK_MS = 15 * 1000;
 const SEEN_KEY = 'reminderSeen';
@@ -28,13 +30,11 @@ function markSeen(key) {
     } catch { /* only for this visit */ }
 }
 
-const hhmm = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 
 // While the app is open and a reminder's time comes: it covers the whole page (testers). Not in
 // the Android app when it rings them itself (the native alarm screen does that, also locked).
 // "Erledigt" ends it, "10 Min. später" (or Escape) rings again then.
 export default function ReminderAlert() {
-    const { t } = useTranslation();
     const dispatch = useDispatch();
     const list = useSelector(selectReminders);
     const [ringing, setRinging] = useState(null); // { reminder, at, key }
@@ -87,14 +87,14 @@ export default function ReminderAlert() {
         setRinging(null);
     }, [ringing, dispatch]);
 
-    useEffect(() => {
-        if (!ringing) return undefined;
-        const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); answer('snooze'); } };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [ringing, answer]);
-
     if (!ringing) return null;
+    return <Ringing ringing={ringing} busy={busy} answer={answer} doneRef={doneRef} />;
+}
+
+// the covering page while one rings: Escape snoozes it
+function Ringing({ ringing, busy, answer, doneRef }) {
+    const { t } = useTranslation();
+    useModal(() => answer('snooze'), { initialFocus: doneRef });
     return createPortal(
         <div className={styles.alert} role="alertdialog" aria-modal="true" aria-labelledby="reminder-alert-text" aria-describedby="reminder-alert-time">
             <div className={styles.alertBody}>

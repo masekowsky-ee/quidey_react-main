@@ -7,7 +7,8 @@ import { useDispatch } from 'react-redux';
 import { createNote, NOTE_BODY_MAX } from '../../features/focus/notebook';
 import { showToast } from '../../features/toast/toast';
 import { useFocusOnArrival } from '../../features/layout/dragDismiss';
-import { useTranslation } from '../../i18n/useTranslation';
+import { useTranslation } from '../../i18n/useTranslation';
+import Icon from '../icons.jsx';
 import SheetGrabber from '../SheetGrabber.jsx';
 import { KindSwitch } from '../task/KindFields.jsx';
 import ScanLink from '../scan/ScanLink.jsx';
@@ -46,7 +47,7 @@ export default function NoteQuickForm({ initialTitle = '', sheet, onKind, onScan
         <div className={styles.div} role="dialog" aria-modal="true" aria-labelledby="createNoteTitle" {...sheet?.panel}>
             {sheet && <SheetGrabber />}
             <button type="button" className={styles.closeBtn} onClick={() => onDone()} aria-label={t('close')}>
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+                <Icon name="mCross" size={24} />
             </button>
             <h2 id="createNoteTitle" data-sheet-drag>{t('createNoteH2')}</h2>
             <form className={styles.form} onSubmit={save} noValidate>

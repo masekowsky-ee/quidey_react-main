@@ -3,9 +3,9 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
 import { displayName, fill, toInputDate } from '../../features/helperFunction';
-import { dateKey, durationText, minutesOfDay, timeText } from '../../features/calendar/calendar';
+import { dateKey, durationText, minutesOfDay, remindersOf, timeText } from '../../features/calendar/calendar';
 import TaskOptionsFields from '../task/TaskOptionsFields.jsx';
-import { reminderLabel, remindersOf } from '../../features/tasks/reminders';
+import { reminderLabel } from '../../features/tasks/reminders';
 import { linkIsValid } from '../../features/tasks/taskFields';
 import { selectFocusByTask } from '../../features/tasks/plannedTime';
 import TaskSharing from '../task/TaskSharing.jsx';
@@ -16,7 +16,7 @@ import { EventTypePicker, KindSwitch } from '../task/KindFields.jsx';
 import { matchEventType } from '../../features/tasks/kinds';
 import { createdText } from '../../features/tasks/created';
 import CollectionPicker from '../collections/CollectionPicker.jsx';
-import Icon from './icons.jsx';
+import Icon from '../icons.jsx';
 
 // What is set under "More options", for the line next to the (closed) toggle:
 // "Weekly · At the start, 15 min before · Luigi's · Link · Bob"
@@ -216,7 +216,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
                         <input type="time" value={time} onPointerDown={dayForTime} onChange={(e) => { dayForTime(); setTime(e.target.value); }} />
                         {time &&
                             <button type="button" className={styles.clearTime} onClick={() => setTime('')} title={t('allDay')} aria-label={t('allDay')}>
-                                <Icon name="close" size={16} />
+                                <Icon name="mClose" size={16} />
                             </button>}
                     </span>
                     {!time && <small className={styles.allDayNote}>{t('allDay')}</small>}
@@ -260,7 +260,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             {!isOwner && task.owner && !showMore &&
                 <p className={styles.sharedNote}>{fill(t('sharedTaskHint'), { name: displayName(task.owner) })}</p>}
             <button type="button" ref={moreRef} className={styles.moreToggle} aria-expanded={showMore} onClick={toggleMore}>
-                <span className={`${styles.moreChevron} ${showMore ? styles.moreChevronOpen : ''}`} aria-hidden="true"><Icon name="next" size={18} /></span>
+                <span className={`${styles.moreChevron} ${showMore ? styles.moreChevronOpen : ''}`} aria-hidden="true"><Icon name="mNext" size={18} /></span>
                 <span className={styles.moreLabel}>{showMore ? t('fewerOptions') : t('moreOptions')}</span>
                 {!showMore && <span className={styles.moreSummary}>{optionsSummary(t, extras, Boolean(due), Boolean(time), task)}</span>}
             </button>
@@ -275,7 +275,7 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             <div className={styles.editorActions}>
                 {isOwner
                     ? onDelete && <button type="button" className={styles.deleteBtn} onClick={() => onDelete(task)} aria-label={`${t(event ? 'deleteEvent' : 'deleteTask')}: ${task.name}`} title={t(event ? 'deleteEvent' : 'deleteTask')}>
-                        <Icon name="delete" size={20} />
+                        <Icon name="mDelete" size={20} />
                     </button>
                     : onLeave && <button type="button" className={styles.leaveBtn} onClick={() => onLeave(task)}>{t('leaveTask')}</button>}
                 <span className={styles.spacer} />

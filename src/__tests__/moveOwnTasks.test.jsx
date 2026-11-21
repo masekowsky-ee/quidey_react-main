@@ -2,13 +2,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { screen, fireEvent, within, act } from '@testing-library/react'
 import { makeStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { setLanguage } from '../features/settings/settingsAction'
 import { REFRESH_TASKS } from '../features/tasks/taskActionTypes'
 import MoveMyTasks from '../components/family/MoveMyTasks'
 import ShareMyTasks from '../components/together/ShareMyTasks'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

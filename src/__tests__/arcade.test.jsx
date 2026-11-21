@@ -3,7 +3,7 @@ import { render, screen, fireEvent, act, waitFor, within } from '@testing-librar
 import { Provider } from 'react-redux'
 import { makeStore as baseStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import {
     worthSending, bestsByGame, bestOf, readMode, storeMode, nextTile, reflexLifeMs, reflexPoints, growPattern, patternStepMs, ARCADE_GAMES,
@@ -11,7 +11,7 @@ import {
 import ArcadePage from '../components/arcade/ArcadePage'
 import Reflex from '../components/arcade/Reflex'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

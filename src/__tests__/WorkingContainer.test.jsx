@@ -3,11 +3,11 @@ import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { createRef } from 'react'
 import { makeStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import WorkingContainer from '../components/WorkingContainer'
 import { addTaskTime } from '../features/session/sessionAction'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

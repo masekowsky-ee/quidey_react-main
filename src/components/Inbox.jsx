@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
+import { localeOf } from '../i18n/locale';
 import { displayName, fill, formatDate, getInitials } from '../features/helperFunction';
 import {
     fetchConversations, fetchConversation, sendMessage, fetchNotifications, markNotificationsRead,
@@ -37,7 +38,7 @@ function Avatar({ user }) {
 // "14:05" today, otherwise the date
 function useWhen() {
     const language = useSelector(state => state.settings.language);
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     return (value) => {
         const date = new Date(value);
         return date.toDateString() === new Date().toDateString()

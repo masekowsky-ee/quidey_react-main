@@ -2,6 +2,7 @@ import styles from './TourPreview.module.css';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import { fill } from '../../features/helperFunction';
 import { setAccent, setTheme } from '../../features/settings/settingsAction';
 import { ACCENT_SWATCHES } from '../../features/settings/preferences';
@@ -19,7 +20,7 @@ import dotStyles from '../presence/OnlineDot.module.css';
 // Monday 5 January 2026, for the names of the weekdays
 const A_MONDAY = Date.UTC(2026, 0, 5);
 const weekdays = (language) => {
-    const format = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { weekday: 'narrow', timeZone: 'UTC' });
+    const format = new Intl.DateTimeFormat(localeOf(language), { weekday: 'narrow', timeZone: 'UTC' });
     return Array.from({ length: 7 }, (_, i) => format.format(new Date(A_MONDAY + i * 86400000)));
 };
 

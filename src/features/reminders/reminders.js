@@ -13,41 +13,22 @@
 import { useEffect, useMemo } from 'react';
 import { track } from '../usage/usage';
 import { useDispatch, useSelector } from 'react-redux';
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { useRealtime, useSafetyPoll } from '../realtime/socket';
-import { isoWeekday } from '../routines/routines';
+import { isoWeekday, weekdaysText as weekdaysListText } from '../calendar/calendar';
+import { listReducer } from '../listReducer';
 import { LOGOUT } from '../auth/authActionTypes';
 
 const SET_REMINDERS = 'SET_REMINDERS';
 const REMINDER_SAVED = 'REMINDER_SAVED';
 const REMINDER_REMOVED = 'REMINDER_REMOVED';
-const RESET_REMINDERS = 'RESET_REMINDERS';
 
 export const REMINDER_TEXT_MAX = 200;
 export const SNOOZE_MINUTES = 10;
 // a due reminder still shows (and rings) this long after its time, like the server's limit
 const LATE_LIMIT_MS = 10 * 60 * 1000;
 
-export default function remindersReducer(state = { list: [], loaded: false }, action) {
-    switch (action.type) {
-        case SET_REMINDERS:
-            return { list: action.payload, loaded: true };
-        case REMINDER_SAVED: {
-            const exists = state.list.some(reminder => reminder.id === action.payload.id);
-            return {
-                ...state,
-                list: exists ? state.list.map(reminder => reminder.id === action.payload.id ? action.payload : reminder) : [...state.list, action.payload],
-            };
-        }
-        case REMINDER_REMOVED:
-            return { ...state, list: state.list.filter(reminder => reminder.id !== action.payload) };
-        case RESET_REMINDERS:
-        case LOGOUT:
-            return { list: [], loaded: false };
-        default:
-            return state;
-    }
-}
+export default listReducer({ set: SET_REMINDERS, saved: REMINDER_SAVED, removed: REMINDER_REMOVED, resetOn: [LOGOUT] });
 
 export const selectReminders = (state) => state.reminders.list;
 
@@ -145,9 +126,7 @@ export const isMissed = (reminder, now = new Date()) => !isDone(reminder) && !is
 
 // "Mo, Mi, Fr · 07:30", every day / Monday to Friday in words
 export function weekdaysText(reminder, t) {
-    const days = reminder.days.length === 7 ? t('routineEveryDay')
-        : reminder.days.join() === '1,2,3,4,5' ? t('routineWeekdays')
-        : reminder.days.map(day => t('weekDays', day - 1)).join(', ');
+    const days = weekdaysListText(reminder.days, t);
     return `${days} · ${reminder.atTime}`;
 }
 

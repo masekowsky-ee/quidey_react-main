@@ -9,6 +9,7 @@ import { addTask } from '../../features/tasks/taskAction';
 import { showToast } from '../../features/toast/toast';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import Icon from '../icons.jsx';
 import styles from './FocusRoom.module.css';
 import { useAwayTally } from '../../features/focus/away';
@@ -134,7 +135,7 @@ export function RoundRecap({ focusTask, onSaved }) {
     const save = async (e) => {
         e.preventDefault();
         if (!text.trim()) return;
-        const when = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date());
+        const when = new Intl.DateTimeFormat(localeOf(language), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date());
         try {
             const note = await createNote({
                 title: fill(t('recapNoteTitle'), { round: pomodoro.round, task: focusTask?.name ?? t('focusTitle') }),

@@ -2,29 +2,20 @@
    ([data-sheet]); colours only from the theme's tokens. */
 
 .backdrop{
-    position: fixed;
-    inset: 0;
-    z-index: var(--z-alert);
-    display: grid;
-    place-items: center;
-    padding: 1rem;
-    background: var(--overlay);
+    composes: dialogBackdrop from '../ui.module.css';
     overscroll-behavior: contain;
+    animation: none;
 }
 
 .dialog{
+    composes: dialogCard from '../ui.module.css';
     width: min(30rem, 100%);
     max-height: calc(100dvh - 2rem);
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
     gap: 0.75rem;
     padding: 1.25rem 1.25rem 1rem;
     text-align: left;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-modal);
+    animation: none;
 }
 
 .head{

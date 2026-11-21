@@ -5,7 +5,7 @@ import { formatDate, isOverdue, parseDate, sameDay } from '../../features/helper
 import { compareTasks, dateKey, monthDates, prioLevel } from '../../features/calendar/calendar';
 import TaskLabels from '../TaskLabels.jsx';
 import TaskMeta from '../task/TaskMeta.jsx';
-import Icon from './icons.jsx';
+import Icon from '../icons.jsx';
 import { taskColorAttr } from '../../features/tasks/taskColors';
 
 const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
@@ -32,10 +32,10 @@ function AgendaRow({ task, today, showDate, onOpenTask, onToggleDone, onSchedule
         <li className={classes} data-task-color={taskColorAttr(task)}>
             {/* an event isn't ticked off: it's done once it's over */}
             {event
-                ? <span className={styles.agendaEventMark} title={t(task.done ? 'eventOver' : 'kind_event')}><Icon name="calendar" size={16} /></span>
+                ? <span className={styles.agendaEventMark} title={t(task.done ? 'eventOver' : 'kind_event')}><Icon name="mCalendar" size={16} /></span>
                 : <button type="button" className={styles.check} aria-pressed={Boolean(task.done)} onClick={() => onToggleDone(task)}
                     aria-label={`${t(task.done ? 'reopen' : 'markDone')}: ${task.name}`} title={t(task.done ? 'reopen' : 'markDone')}>
-                    <Icon name="check" size={16} />
+                    <Icon name="mCheck" size={16} />
                 </button>}
             <div className={styles.agendaText}>
                 {task.due
@@ -101,7 +101,7 @@ export default function AgendaView({ focusedDate, today, tasks, tasksByDay, onOp
                                 {dayTasks.map(task => <AgendaRow key={task.id} task={task} {...rowProps} />)}
                             </ul>
                             : <button type="button" className={styles.agendaEmptyDay} onClick={() => onOpenDate(date, 'new')}>
-                                <Icon name="add" size={18} />{t('noTasks')}
+                                <Icon name="mAdd" size={18} />{t('noTasks')}
                             </button>
                         }
                     </section>

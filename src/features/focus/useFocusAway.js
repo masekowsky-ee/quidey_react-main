@@ -19,6 +19,7 @@ import { translate } from '../../i18n/useTranslation';
 import { fill } from '../helperFunction';
 import { showToast } from '../toast/toast';
 import { selectFocusTask } from '../session/sessionAction';
+import { startBeat } from '../session/beat';
 import { awakeBeat, inFocusRound, noteReturn, readTally, roundChange, startRound, endRound, today, writeTally, NUDGE_AFTER_MS } from './away';
 
 const QuideyAway = registerPlugin('QuideyAway');
@@ -74,20 +75,6 @@ async function hideNudge() {
     const registration = await workerRegistration();
     const shown = await registration?.getNotifications?.({ tag: NUDGE_TAG }).catch(() => []) ?? [];
     shown.forEach(notification => notification.close());
-}
-
-// a beat twice a second while hidden: a worker where there is one (a background tab slows the
-// page's own timers), else the page's timer
-function startBeat(onBeat) {
-    if (typeof Worker !== 'undefined') {
-        try {
-            const worker = new Worker(new URL('../session/titleTick.worker.js', import.meta.url));
-            worker.onmessage = onBeat;
-            return () => worker.terminate();
-        } catch { /* no worker: the page's timer below */ }
-    }
-    const id = setInterval(onBeat, 500);
-    return () => clearInterval(id);
 }
 
 function desktopSource(store, onBack) {

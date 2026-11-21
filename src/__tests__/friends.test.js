@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { makeStore } from './helpers/store'
 import friendsReducer from '../features/friends/friendsReducer'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import {
     fetchFriends, fetchFriendRequests, sendFriendRequest, acceptFriendRequest,
     removeFriendRequest, removeFriend, selectIncomingCount,
@@ -9,7 +9,7 @@ import {
 import { SET_FRIENDS, SET_FRIEND_REQUESTS } from '../features/friends/friendsActionTypes'
 import { LOGOUT } from '../features/auth/authActionTypes'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

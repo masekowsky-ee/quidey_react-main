@@ -4,7 +4,7 @@ import { fill, monthGrid, sameDay } from '../../features/helperFunction';
 import { dateKey, isoWeek, startOfMonth, formatFocus } from '../../features/calendar/calendar';
 import { useDayGridKeys } from '../../features/calendar/useDayGridKeys';
 import TaskChip from './TaskChip.jsx';
-import Icon from './icons.jsx';
+import Icon from '../icons.jsx';
 
 const MAX_VISIBLE_TASKS = 3;
 
@@ -72,7 +72,7 @@ export default function MonthView({ focusedDate, today, tasksByDay, focusByDay, 
                                         <button type="button" className={styles.cellAdd} tabIndex={-1}
                                             onClick={(e) => { e.stopPropagation(); onCreateOn(date); }}
                                             aria-label={fill(t('addEntryOnDay'), { date: longDate(date) })} title={fill(t('addEntryOnDay'), { date: longDate(date) })}>
-                                            <Icon name="add" size={16} />
+                                            <Icon name="mAdd" size={16} />
                                         </button>
                                         <div className={styles.cellHead} aria-hidden="true">
                                             <span className={styles.dayNum}>{date.getDate()}</span>

@@ -3,7 +3,7 @@
 // apiFetch's error (status, code, data). The planner's sessions are ordinary tasks, so whatever
 // changes them reloads the task list.
 
-import { apiFetch, CACHE_MEDIUM } from '../helperFunction';
+import { apiFetch, CACHE_MEDIUM } from '../api/api';
 import { track } from '../usage/usage';
 import { refreshTasks } from '../tasks/taskAction';
 

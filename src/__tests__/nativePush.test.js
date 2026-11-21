@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { enablePush, disablePush, refreshPush, pushSupport, resetPushState, usePushState } from '../features/pwa/push'
 import { requestNativePermission, unregisterNative } from '../features/native/nativePush'
 import { renderHook } from '@testing-library/react'
@@ -15,7 +15,7 @@ vi.mock('../features/native/nativePush', () => ({
     onNativePushOpen: () => () => {},
     onNativePushInApp: () => () => {},
 }))
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

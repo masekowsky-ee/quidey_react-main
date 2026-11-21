@@ -20,25 +20,16 @@
 }
 
 .backdrop{
-    position: fixed;
-    inset: 0;
+    composes: dialogBackdrop from '../ui.module.css';
     z-index: calc(var(--z-menu) + 10);
-    display: grid;
-    place-items: center;
-    padding: 1rem;
-    background: var(--overlay);
+    animation: none;
 }
 
 .dialog{
-    width: min(24rem, 100%);
-    display: flex;
-    flex-direction: column;
+    composes: dialogCard from '../ui.module.css';
     gap: 0.5rem;
     padding: 1.4rem 1.25rem 1.1rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-modal);
+    animation: none;
 }
 
 .title{

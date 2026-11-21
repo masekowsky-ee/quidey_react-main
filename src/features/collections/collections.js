@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
 
 export const SET_COLLECTIONS = 'SET_COLLECTIONS';
 const COLLECTION_SAVED = 'COLLECTION_SAVED';
@@ -120,7 +120,7 @@ const asGroup = (collection) => ({
 export const taskIdsIn = (collection) => new Set(collection.items.filter(item => item.kind === 'task').map(item => item.id));
 
 // what tasks are sorted into here: my collections (as groups; the server took my groups over once).
-// { collections, groups: [group], groupsOf(task): [group] }
+// { groups: [group], groupsOf(task): [group] }
 export function useTaskGroups() {
     const collections = useCollections();
     return useMemo(() => {
@@ -129,7 +129,7 @@ export function useTaskGroups() {
         collections.forEach((collection, index) => {
             for (const id of taskIdsIn(collection)) byTask.set(id, [...(byTask.get(id) ?? []), list[index]]);
         });
-        return { collections: true, groups: list, groupsOf: (task) => byTask.get(task.id) ?? [] };
+        return { groups: list, groupsOf: (task) => byTask.get(task.id) ?? [] };
     }, [collections]);
 }
 

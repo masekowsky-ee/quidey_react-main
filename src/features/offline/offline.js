@@ -11,9 +11,12 @@
 //
 // The copy belongs to one account: it is cleared on sign-out and never read by another account.
 import { kvGet, kvSet, kvDelete, kvKeys, kvClear } from './storage';
+import { session, tokenPayload } from '../api/session';
+import { SERVER_GONE_STATUSES, abortAfter, request } from '../api/transport';
+import { matchWrite } from './writes';
+import { CONNECTION_EVENT, SYNCED_EVENT } from '../realtime/events';
 
-export const CONNECTION_EVENT = 'quidey:connection';
-export const SYNCED_EVENT = 'quidey:synced';
+export { CONNECTION_EVENT, SYNCED_EVENT };
 
 // not kept offline: sign-in flows, money, the admin panel and the AI (needs the server anyway)
 const NEVER_CACHED = ['/api/auth/', '/api/billing', '/api/admin', '/api/ai/', '/api/assistant', '/api/push', '/api/usage'];
@@ -23,6 +26,8 @@ const ID_MAP_KEY = 'idmap';
 // an offline copy older than this is not shown any more (a very old list is worse than none)
 const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 200;
+
+// ---------- the timeouts (all in one place) ----------
 // a read that takes longer than this is answered from the saved copy, when there is one
 export const SLOW_MS = 8000;
 // ... and a read that still has no answer after this long is cancelled: a connection that leads
@@ -34,9 +39,17 @@ const NO_COPY_MS = 60000;
 // a change that gets no answer for this long is kept in the outbox instead (a connection that
 // is there but leads nowhere never says no)
 export const WRITE_TIMEOUT_MS = 10000;
+// the first request at start (probeAtStart) waits this long. authAction's START_CHECK_MS (the
+// /api/me check at start, which signs in from the saved answer) is the same kind of wait: keep
+// the two in the same range (5 s there, 3 s here), so neither holds the app back much longer.
+export const START_PROBE_MS = 3000;
+// while the server is unreachable one request in PROBE_MS tests whether it is back; the gap
+// doubles up to MAX_PROBE_MS (see mayTry below)
+const PROBE_MS = 15000;
+const MAX_PROBE_MS = 60000;
 
 let status = { offline: false, pending: 0, failed: 0 };
-let send = null; // the real request function, handed over by apiFetch
+let send = request; // the real request; withOffline(…, request) may hand over another (tests)
 let flushing = null;
 
 // While the server is known to be unreachable, requests do not go out: every one would hang for a
@@ -45,9 +58,6 @@ let flushing = null;
 // are answered from the saved copy, changes go to the outbox, and one request in PROBE_MS goes out
 // to find out whether the server is back. The `online` event and the app coming to the front probe
 // at once.
-const PROBE_MS = 15000;
-// the gap grows while the server stays away, so the probes themselves do not pile up
-const MAX_PROBE_MS = 60000;
 let nextTry = 0;
 let gap = PROBE_MS;
 function mayTry() {
@@ -68,11 +78,10 @@ export const probeNow = () => { nextTry = 0; };
 // answers at all. Without it the app's first dozen reads would all hang on a dead connection
 // before anything knew. Only once the app has started the sync (startOfflineSync), and only
 // signed in: a guest has no saved copy to fall back on.
-export const START_PROBE_MS = 3000;
 let syncStarted = false;
 let startProbe = null;
 function probeAtStart() {
-    if (!syncStarted || !localStorage.getItem('token')) return Promise.resolve();
+    if (!syncStarted || !session.token()) return Promise.resolve();
     startProbe ??= (async () => {
         try {
             await timed('/api/app-version?platform=android', {}, START_PROBE_MS);
@@ -99,14 +108,10 @@ function setStatus(change) {
 
 // the account id inside the JWT (not checked here, only to keep accounts apart on one device)
 export function tokenOwner(token) {
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-        return String(payload.userId ?? payload.id ?? payload.sub ?? '');
-    } catch {
-        return '';
-    }
+    const payload = tokenPayload(token);
+    return payload ? String(payload.userId ?? payload.id ?? payload.sub ?? '') : '';
 }
-const owner = () => tokenOwner(localStorage.getItem('token') ?? '') || localStorage.getItem('token')?.slice(-12) || 'guest';
+const owner = () => tokenOwner(session.token() ?? '') || session.token()?.slice(-12) || 'guest';
 const cacheKey = (url) => `${CACHE_PREFIX}${owner()}|${url}`;
 const outboxKey = () => `${OUTBOX_KEY}:${owner()}`;
 const idMapKey = () => `${ID_MAP_KEY}:${owner()}`;
@@ -117,7 +122,7 @@ const idMapKey = () => `${ID_MAP_KEY}:${owner()}`;
 // has nobody behind it (502-504, e.g. while the API restarts).
 const isUnreachable = (error) => (error instanceof TypeError && error.status === undefined)
     || error?.name === 'AbortError'
-    || [502, 503, 504].includes(error?.status);
+    || SERVER_GONE_STATUSES.includes(error?.status);
 
 function offlineError() {
     const error = new Error('You are offline');
@@ -153,22 +158,7 @@ export async function savedAnswer(url) {
     return (await savedRead(url))?.data;
 }
 
-// ---------- the writes that work offline ----------
-
-const ID = '([^/?]+)';
-const WRITES = [
-    { name: 'task:add', method: 'POST', pattern: /^\/api\/tasks$/, creates: true },
-    { name: 'task:edit', method: 'PUT', pattern: new RegExp(`^/api/tasks/${ID}$`) },
-    { name: 'task:delete', method: 'DELETE', pattern: new RegExp(`^/api/tasks/${ID}(\\?.*)?$`) },
-    { name: 'task:group-add', method: 'POST', pattern: new RegExp(`^/api/tasks/${ID}/groups/${ID}$`) },
-    { name: 'task:group-remove', method: 'DELETE', pattern: new RegExp(`^/api/tasks/${ID}/groups/${ID}$`) },
-    { name: 'session:save', method: 'POST', pattern: /^\/api\/sessions$/, creates: true },
-];
-
-function matchWrite(url, method = 'GET') {
-    const m = method.toUpperCase();
-    return WRITES.find((write) => write.method === m && write.pattern.test(url));
-}
+// ---------- the writes that work offline (the table is in ./writes.js) ----------
 
 let tempCounter = 0;
 const tempId = () => `local-${Date.now().toString(36)}${(tempCounter++).toString(36)}`;
@@ -180,43 +170,16 @@ function parseBody(options) {
 
 // The answer the app gets for a write that only went to the outbox. It carries what the server
 // would send back, as far as the app uses it; the truth follows when the outbox is sent.
-function localAnswer(write, url, options, id) {
-    const body = parseBody(options);
-    const now = new Date().toISOString();
-    switch (write.name) {
-        case 'task:add':
-            return { done: false, completed_at: null, created_at: now, isOwner: true, group_ids: [], ...body, id, pending: true };
-        case 'task:edit': {
-            const done = body.done === true;
-            return { ...body, id: body.id ?? url.match(write.pattern)[1], ...(done ? { completed_at: now } : {}), pending: true };
-        }
-        case 'task:delete':
-            return { deletedIds: [url.match(write.pattern)[1]] };
-        case 'session:save':
-            return { ...body, id, pending: true };
-        default:
-            return {};
-    }
-}
+const localAnswer = (write, url, options, id) =>
+    write.localAnswer({ url, body: parseBody(options), id, now: new Date().toISOString(), pattern: write.pattern });
 
-// the saved lists change with the write, so a restart while offline still shows it
-async function applyToSavedLists(write, url, answer) {
-    const listKey = cacheKey('/api/tasks');
+// the saved list changes with the write, so a restart while offline still shows it
+async function applyToSavedLists(write, answer) {
+    if (!write.list) return;
+    const listKey = cacheKey(write.list);
     const saved = await kvGet(listKey);
-    const sessionsKey = cacheKey('/api/sessions');
-    if (write.name === 'session:save') {
-        const sessions = await kvGet(sessionsKey);
-        if (sessions && Array.isArray(sessions.data)) await kvSet(sessionsKey, { ...sessions, data: [answer, ...sessions.data] });
-        return;
-    }
     if (!saved || !Array.isArray(saved.data)) return;
-    const idOf = (task) => String(task.id);
-    let data = saved.data;
-    if (write.name === 'task:add') data = [...data, answer];
-    else if (write.name === 'task:edit') data = data.map((task) => (idOf(task) === String(answer.id) ? { ...task, ...answer } : task));
-    else if (write.name === 'task:delete') data = data.filter((task) => !answer.deletedIds.map(String).includes(idOf(task)));
-    else return;
-    await kvSet(listKey, { ...saved, data });
+    await kvSet(listKey, { ...saved, data: write.applyToList(saved.data, answer) });
 }
 
 async function readOutbox() {
@@ -229,9 +192,8 @@ async function writeOutbox(list) {
 
 // the real request, given up after `ms` (the result counts as "server unreachable")
 function timed(url, options, ms) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), ms);
-    return send(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+    const { signal, done } = abortAfter(ms);
+    return send(url, { ...options, signal }).finally(done);
 }
 
 async function enqueue(write, url, options, key) {
@@ -239,7 +201,7 @@ async function enqueue(write, url, options, key) {
     const answer = localAnswer(write, url, options, id);
     const op = { key: key ?? newKey(), name: write.name, method: options.method.toUpperCase(), url, body: options.body ?? null, tempId: id, at: Date.now() };
     await writeOutbox([...(await readOutbox()), op]);
-    await applyToSavedLists(write, url, answer);
+    await applyToSavedLists(write, answer);
     return answer;
 }
 
@@ -260,7 +222,6 @@ const swapIds = (text, map) => {
 export function flushOutbox() {
     if (flushing) return flushing;
     flushing = (async () => {
-        if (!send) return 0;
         let queue = await readOutbox();
         if (queue.length === 0) return 0;
         const map = (await kvGet(idMapKey())) ?? {};
@@ -301,8 +262,8 @@ export const acknowledgeFailures = () => setStatus({ failed: 0 });
 
 // ---------- the one entry point apiFetch uses ----------
 
-export async function withOffline(url, options, request) {
-    send = request;
+export async function withOffline(url, options, transport = request) {
+    send = transport;
     await probeAtStart();
     const method = (options.method ?? 'GET').toUpperCase();
 
@@ -317,7 +278,7 @@ export async function withOffline(url, options, request) {
         if (!isCacheable(url)) {
             if (!mayTry()) throw offlineError();
             try {
-                const data = await request(url, options);
+                const data = await send(url, options);
                 reachable();
                 return data;
             } catch (error) {
@@ -334,7 +295,7 @@ export async function withOffline(url, options, request) {
         }
         // a read that takes too long is cancelled (sooner when there is a saved copy to show)
         const controller = options.signal ? null : new AbortController();
-        const live = request(url, controller ? { ...options, signal: controller.signal } : options).then((data) => {
+        const live = send(url, controller ? { ...options, signal: controller.signal } : options).then((data) => {
             reachable();
             saveRead(url, data).catch(() => {});
             if (status.pending > 0) flushOutbox().catch(() => {});
@@ -376,7 +337,7 @@ export async function withOffline(url, options, request) {
     try {
         const data = write
             ? await timed(url, { ...options, headers: { ...options.headers, ...(key ? { 'Idempotency-Key': key } : {}) } }, WRITE_TIMEOUT_MS)
-            : await request(url, options);
+            : await send(url, options);
         reachable();
         return data;
     } catch (error) {

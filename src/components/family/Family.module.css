@@ -101,15 +101,15 @@
 
 /* "Move “Essay”?" before one of my tasks goes into the family: a small centred card */
 .moveBackdrop{
-    composes: backdrop from '../task/DeleteScopeDialog.module.css';
+    composes: dialogBackdrop from '../ui.module.css';
 }
 
 .moveDialog{
-    composes: dialog from '../task/DeleteScopeDialog.module.css';
+    composes: dialogCard from '../ui.module.css';
 }
 
 .moveTitle{
-    composes: title from '../task/DeleteScopeDialog.module.css';
+    composes: dialogTitle from '../ui.module.css';
     overflow-wrap: anywhere;
 }
 

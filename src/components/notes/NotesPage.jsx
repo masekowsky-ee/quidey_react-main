@@ -11,6 +11,7 @@ import { useCollections } from '../../features/collections/collections';
 import { showToast } from '../../features/toast/toast';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import NoteEditor from './NoteEditor.jsx';
 import ScanSheet from '../scan/ScanSheet.jsx';
 import { useAiQuota } from '../../features/ai/ai';
@@ -31,7 +32,7 @@ function dayLabel(date, now, t, language) {
     if (sameDay(date, now)) return t('today');
     const before = new Date(now); before.setDate(before.getDate() - 1);
     if (sameDay(date, before)) return t('yesterday');
-    return new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', date.getFullYear() === now.getFullYear()
+    return new Intl.DateTimeFormat(localeOf(language), date.getFullYear() === now.getFullYear()
         ? { month: 'long' } : { month: 'long', year: 'numeric' }).format(date);
 }
 
@@ -244,7 +245,7 @@ export default function NotesPage() {
     const folder = view.kind === 'folder' ? folders.find(item => item.id === view.folderId) : null;
     const open = openId ? notes?.find(note => note.id === openId) : null;
     const folderName = (id) => folders.find(item => item.id === id);
-    const dateFmt = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short' });
+    const dateFmt = new Intl.DateTimeFormat(localeOf(language), { day: 'numeric', month: 'short' });
     const activeCount = (notes ?? []).filter(note => !note.archived).length;
     const groups = useMemo(() => groupNotes(shown, { sort, view, t, language }), [shown, sort, view, t, language]);
 

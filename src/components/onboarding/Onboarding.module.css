@@ -2,29 +2,14 @@
    (PushOffer.module.css); the yes lifted, the no grey (btnYes / btnNo in ui.module.css) */
 
 .backdrop{
-    position: fixed;
-    inset: 0;
-    z-index: var(--z-alert);
-    display: grid;
-    place-items: center;
-    padding: 1rem;
-    background: var(--overlay);
-    animation: fadeIn 0.16s ease-out;
+    composes: dialogBackdrop from '../ui.module.css';
 }
 
 .dialog{
-    width: min(24rem, 100%);
+    composes: dialogCard from '../ui.module.css';
     max-height: calc(100dvh - 2rem);
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
     padding: 1.4rem 1.25rem 1.1rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-modal);
-    animation: rise 0.26s var(--spring-curve);
 }
 
 .wide{
@@ -172,41 +157,8 @@
 }
 
 .stars{
-    display: flex;
     justify-content: center;
-    gap: 0.15rem;
     margin: 0.1rem 0 0.5rem;
-}
-
-.star{
-    display: grid;
-    place-items: center;
-    width: 2.9rem;
-    height: 2.9rem;
-    padding: 0;
-    color: var(--text-muted);
-    background: none;
-    border: 0;
-    border-radius: var(--radius-pill);
-    cursor: pointer;
-    transition: transform var(--ease), color var(--ease);
-}
-
-.star:hover{
-    transform: scale(1.08);
-}
-
-.star:focus-visible{
-    outline: 2px solid var(--primary-fg);
-    outline-offset: 1px;
-}
-
-.starOn{
-    color: var(--plant-fruit);
-}
-
-.starOn svg{
-    fill: currentColor;
 }
 
 .label{
@@ -239,15 +191,6 @@
     color: var(--danger);
 }
 
-@keyframes fadeIn{
-    from{ opacity: 0; }
-}
-
-@keyframes rise{
-    from{ opacity: 0; transform: translateY(8px) scale(0.98); }
-}
-
 @media (prefers-reduced-motion: reduce){
-    .backdrop, .dialog{ animation: none; }
-    .star:hover, .choice:hover .choiceArrow{ transform: none; }
+    .choice:hover .choiceArrow{ transform: none; }
 }

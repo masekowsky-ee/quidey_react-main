@@ -8,6 +8,7 @@ import { displayName, fill } from '../helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import { markNews } from './news';
 import { useRealtime, useRealtimeRefresh } from './socket';
+import { FRIENDS_CHANGED, INVITES_CHANGED, SESSION_CHANGED, TASKS_CHANGED } from './events';
 
 // what's in `after` but wasn't in `before` (by id). Nothing when `before` was never loaded:
 // after a reconnect (e.g. the server restarted) the first load would otherwise announce every
@@ -30,7 +31,7 @@ export function useLiveLists() {
     const quietly = (action) => dispatch(action).catch(() => {});
     const popup = (text, to, detail) => dispatch(showToast(text, 'info', { to, detail }));
 
-    useRealtimeRefresh(['friends:changed'], async () => {
+    useRealtimeRefresh([FRIENDS_CHANGED], async () => {
         const before = store.getState().friends;
         await Promise.all([quietly(fetchFriendRequests()), quietly(fetchFriends())]);
         const after = store.getState().friends;
@@ -41,7 +42,7 @@ export function useLiveLists() {
         for (const friend of newFriends) popup(fill(t('liveNewFriend'), { name: displayName(friend) }), COMMUNITY_PATHS.friends);
         if (newFriends.length > 0 || (before.friendsLoaded && after.friends.length < before.friends.length)) dispatch(markNews('social'));
     });
-    useRealtimeRefresh(['invites:changed', 'session:changed'], async () => {
+    useRealtimeRefresh([INVITES_CHANGED, SESSION_CHANGED], async () => {
         const before = store.getState().together;
         await Promise.all([quietly(fetchSharedSessions()),
             // the running sessions' tasks in the solo view
@@ -52,8 +53,8 @@ export function useLiveLists() {
         }
     });
     // something happened in one of my sessions (tasks, members, who works on what)
-    useRealtime('session:changed', () => dispatch(markNews('together')));
-    useRealtimeRefresh(['tasks:changed'], async () => {
+    useRealtime(SESSION_CHANGED, () => dispatch(markNews('together')));
+    useRealtimeRefresh([TASKS_CHANGED], async () => {
         const { invites: before, invitesLoaded } = store.getState().task;
         await Promise.all([quietly(refreshTasks()), quietly(fetchTaskInvites())]);
         for (const invite of added(before, store.getState().task.invites, invitesLoaded)) {

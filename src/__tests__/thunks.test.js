@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { makeStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { addTask, deleteTask, updateTaskProps } from '../features/tasks/taskAction'
 import { saveSessionData, setSessionParams, addWorkedTask, addTaskTime, updateCurrentSessionData } from '../features/session/sessionAction'
 
 // Replace only apiFetch; the formatting helpers stay real
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

@@ -3,13 +3,13 @@ import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { makeStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { useWorkReporter } from '../features/together/work'
 import { useLinkedWork } from '../features/together/linkedWork'
 import SharedSession from '../components/SharedSession'
 import Together from '../components/Together'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

@@ -1,6 +1,5 @@
 import styles from './Onboarding.module.css';
 import { useEffect, useId, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -9,8 +8,8 @@ import { COMMUNITY_PATHS, friendsPath } from '../../features/community/paths';
 import { showForms } from '../../features/settings/settingsAction';
 import { fill } from '../../features/helperFunction';
 import Icon from '../icons';
-import SheetGrabber from '../SheetGrabber.jsx';
-import { useSheet } from '../../features/layout/dragDismiss';
+import Stars from '../stars/Stars';
+import Dialog from '../Dialog.jsx';
 import { analyticsQuestionDue, askAnalyticsLater, setAnalyticsConsent, useAnalytics } from '../../features/native/analytics';
 import { usePushState } from '../../features/pwa/push';
 import { selectUsageConsent, setUsageConsent } from '../../features/auth/authAction';
@@ -67,38 +66,17 @@ function Card({ icon, title, text, children, wide = false, focusTitle = false, o
     const textId = useId();
     const cardRef = useRef(null);
     // on phones a sheet: pulled down, it closes like the no
-    const sheet = useSheet(onClose, cardRef);
-    const { dismiss } = sheet;
-
-    useEffect(() => {
-        const previous = document.activeElement;
-        const first = focusTitle ? cardRef.current?.querySelector('h2') : cardRef.current?.querySelector('button, textarea');
-        first?.focus();
-        const onKey = (e) => {
-            if (e.key !== 'Escape') return;
-            e.preventDefault();
-            e.stopPropagation();
-            dismiss();
-        };
-        window.addEventListener('keydown', onKey, true);
-        return () => {
-            window.removeEventListener('keydown', onKey, true);
-            previous?.focus?.();
-        };
-    }, [dismiss, focusTitle]);
-
-    return createPortal(
-        <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
-            <div {...sheet.panel} className={`${styles.dialog} ${wide ? styles.wide : ''}`} role="dialog" aria-modal="true"
-                aria-labelledby={titleId} aria-describedby={text ? textId : undefined}>
-                <SheetGrabber />
+    return (
+        <Dialog onClose={onClose} labelledBy={titleId} describedBy={text ? textId : undefined} panelRef={cardRef}
+            initialFocus={() => (focusTitle ? cardRef.current?.querySelector('h2') : cardRef.current?.querySelector('button, textarea'))}
+            backdropClassName={styles.backdrop} className={`${styles.dialog} ${wide ? styles.wide : ''}`}>
+            <>
                 <span className={styles.badge} aria-hidden="true" data-sheet-drag><Icon name={icon} size={20} /></span>
                 <h2 id={titleId} className={styles.title} data-sheet-drag tabIndex={focusTitle ? -1 : undefined}>{title}</h2>
                 {text && <p id={textId} className={styles.text}>{text}</p>}
                 {children}
-            </div>
-        </div>,
-        document.body
+            </>
+        </Dialog>
     );
 }
 
@@ -210,7 +188,6 @@ function UsageQuestion({ onLater }) {
     );
 }
 
-const STARS = [1, 2, 3, 4, 5];
 
 // "Gefällt dir Quidey?" → yes: stars (and a word, if they like); not really: what isn't good yet.
 // Sent as feedback (category "rating"), then a thank you.
@@ -219,7 +196,6 @@ function RatingQuestion() {
     // 'ask' | 'stars' | 'feedback' | 'thanks'
     const [step, setStep] = useState('ask');
     const [stars, setStars] = useState(0);
-    const [hovered, setHovered] = useState(0);
     const [message, setMessage] = useState('');
     const [state, setState] = useState({ sending: false, error: '' });
 
@@ -265,22 +241,13 @@ function RatingQuestion() {
     }
 
     const liked = step === 'stars';
-    const shown = hovered || stars;
     return (
         <Card key={step} icon={liked ? 'star' : 'feedback'} title={t(liked ? 'onbStarsTitle' : 'onbFeedbackTitle')}
             text={t(liked ? 'onbStarsText' : 'onbFeedbackText')}>
             <form className={styles.form} onSubmit={send}>
                 {liked && (
-                    <div className={styles.stars} role="radiogroup" aria-label={t('onbStarsTitle')} onPointerLeave={() => setHovered(0)}>
-                        {STARS.map((n) => (
-                            <button key={n} type="button" role="radio" aria-checked={stars === n}
-                                aria-label={fill(t(n === 1 ? 'onbStar' : 'onbStars'), { n })}
-                                className={`${styles.star} ${n <= shown ? styles.starOn : ''}`}
-                                onPointerEnter={() => setHovered(n)} onClick={() => setStars(n)}>
-                                <Icon name="star" size={30} />
-                            </button>
-                        ))}
-                    </div>
+                    <Stars className={styles.stars} tone="fruit" size="lg" value={stars} onChange={setStars}
+                        label={t('onbStarsTitle')} starLabel={(n) => fill(t(n === 1 ? 'onbStar' : 'onbStars'), { n })} />
                 )}
                 <label className={styles.label} htmlFor="onboardingMessage">{t(liked ? 'onbStarsMessage' : 'onbFeedbackMessage')}</label>
                 <textarea id="onboardingMessage" className={styles.message} rows={liked ? 3 : 5} maxLength={5000} value={message}

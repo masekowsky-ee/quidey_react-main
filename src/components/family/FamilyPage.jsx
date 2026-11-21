@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import { displayName, fill, formatDuration, formatRelative, parseDate, sameDay, toDateOnly } from '../../features/helperFunction';
 import { dateKey, taskTimeText } from '../../features/calendar/calendar';
 import { fetchFriends } from '../../features/friends/friendsAction';
@@ -26,7 +27,7 @@ import Avatar from '../together/Avatar';
 import TaskEditDialog from '../task/TaskEditDialog';
 import { KindSwitch } from '../task/KindFields';
 import MoveMyTasks from './MoveMyTasks.jsx';
-import Icon from '../calendar/icons.jsx';
+import Icon from '../icons.jsx';
 // the app's outline set, for what the calendar's icons don't have (flame, chevron)
 import AppIcon from '../icons';
 import FriendPicker from '../together/FriendPicker';
@@ -155,7 +156,7 @@ function FamilyLooks({ family, onChanged }) {
 // The board: one short text for everybody (any member changes it)
 function FamilyBoard({ family, onChanged }) {
     const { t, language } = useTranslation();
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const run = useFamilyRun();
     const now = useNow(true, 60 * 1000);
     const [editing, setEditing] = useState(false);
@@ -237,7 +238,7 @@ function FamilyList({ family, onChanged, subGroup }) {
             <button type="button" className={own.entryCheck} aria-pressed={task.done}
                 onClick={() => run(change(updateFamilyTask(family.id, task.id, { done: !task.done })), task.done ? null : 'toast_entryDone')}
                 aria-label={`${t(task.done ? 'markUndone' : 'markDone')}: ${task.name}`} title={t(task.done ? 'markUndone' : 'markDone')}>
-                <Icon name="check" size={14} />
+                <Icon name="mCheck" size={14} />
             </button>
             <span className={own.listName}>{task.name}</span>
             <AssigneeSelect family={family} value={task.assignee?.id} className={own.assigneeChip}
@@ -246,7 +247,7 @@ function FamilyList({ family, onChanged, subGroup }) {
             {canRemove(task)
                 ? <button type="button" className={own.entryEdit} onClick={() => run(change(removeFamilyTask(family.id, task.id)))}
                     aria-label={`${t('delete')}: ${task.name}`} title={t('delete')}>
-                    <Icon name="close" size={16} />
+                    <Icon name="mClose" size={16} />
                 </button>
                 : <span />}
         </li>
@@ -295,7 +296,7 @@ function FamilyTitle({ family, onChanged }) {
     return family.isOwner
         ? <h1 className={styles.title}>
             <button className={styles.renamable} title={t('rename')} onClick={() => setEditing(true)}>
-                {family.name} <span className={styles.editHint} aria-hidden="true"><Icon name="edit" size={18} /></span>
+                {family.name} <span className={styles.editHint} aria-hidden="true"><Icon name="mEdit" size={18} /></span>
             </button>
         </h1>
         : <h1 className={styles.title}>{family.name}</h1>;
@@ -307,7 +308,7 @@ function FamilyTitle({ family, onChanged }) {
 // sub-group and all of them.
 function Upcoming({ family, onChanged, subGroup, subGroups }) {
     const { t, language } = useTranslation();
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const run = useFamilyRun();
     const myUsername = useSelector(state => state.auth.user?.username);
     const today = toDateOnly(new Date());
@@ -372,11 +373,11 @@ function Upcoming({ family, onChanged, subGroup, subGroups }) {
                         <li key={task.id} className={own.entry} title={createdText(task, t, language, myUsername) || undefined}>
                             {task.kind === 'event'
                                 ? <span className={own.entryEvent} role="img" aria-label={t('kind_event')} title={t('kind_event')}>
-                                    <Icon name="calendar" size={14} />
+                                    <Icon name="mCalendar" size={14} />
                                 </span>
                                 : <button type="button" className={own.entryCheck} aria-pressed={false} onClick={() => toggleDone(task)}
                                     aria-label={`${t('markDone')}: ${task.name}`} title={t('markDone')}>
-                                    <Icon name="check" size={14} />
+                                    <Icon name="mCheck" size={14} />
                                 </button>}
                             <span className={`${own.entryWhen} ${sameDay(parseDate(task.due), today) ? own.entryToday : ''}`}>
                                 {dayText(task.due)}{task.due_time ? ` · ${taskTimeText(task)}` : ''}
@@ -395,7 +396,7 @@ function Upcoming({ family, onChanged, subGroup, subGroups }) {
                             </span>
                             <button type="button" className={own.entryEdit} onClick={() => setEditingId(task.id)}
                                 aria-label={`${t('editTask')}: ${task.name}`} title={t('editTask')}>
-                                <Icon name="edit" size={18} />
+                                <Icon name="mEdit" size={18} />
                             </button>
                         </li>
                     ))}
@@ -526,7 +527,7 @@ function Members({ family, onChanged }) {
 // The family's chat, newest at the bottom
 function FamilyChat({ family }) {
     const { t, language } = useTranslation();
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const run = useFamilyRun();
     const now = useNow(true, 30 * 1000);
     const { messages, hasMore, addMessages, loadOlder } = useFamilyChat(family.id);

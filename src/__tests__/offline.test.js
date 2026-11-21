@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { clearOffline, flushOutbox, forgetReads, connectionState, tokenOwner, probeNow, startOfflineSync, SLOW_MS, HARD_MS, WRITE_TIMEOUT_MS, START_PROBE_MS } from '../features/offline/offline'
 import { checkAuth } from '../features/auth/authAction'
 

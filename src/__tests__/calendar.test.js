@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { makeStore as baseStore } from './helpers/store'
-import { parseDate, formatDate, toInputDate, isOverdue, apiFetch } from '../features/helperFunction'
+import { parseDate, formatDate, toInputDate, isOverdue } from '../features/helperFunction';
+import { apiFetch } from '../features/api/api';
 import { updateTaskProps, addTask } from '../features/tasks/taskAction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import {
@@ -10,7 +11,7 @@ import {
 } from '../features/calendar/calendar'
 import { snapMinutes } from '../features/calendar/useTimelineDrag'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

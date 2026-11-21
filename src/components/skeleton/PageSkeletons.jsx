@@ -2,6 +2,7 @@ import styles from './PageSkeletons.module.css';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import { DESKTOP_QUERY, useMediaQuery } from '../../features/layout/breakpoints';
 import { COMMUNITY_PATHS, COMMUNITY_TABS } from '../../features/community/paths';
 import { addDays, readStoredCalendarView } from '../../features/calendar/calendar';
@@ -9,7 +10,7 @@ import { LegalFooter } from '../../legal/LegalFooter.jsx';
 import Logo from '../Logo';
 import Icon from '../icons';
 import { Bone, Skeleton, SkeletonRows } from './Skeleton.jsx';
-import { HomeSkeleton } from '../Home.jsx';
+import { HomeSkeleton } from './HomeSkeleton.jsx';
 
 // The shapes of the pages whose code loads when they are first opened (App's lazy PAGES):
 // shown by Suspense until it is there, and by the start screen (AppSkeleton). What is known
@@ -68,7 +69,7 @@ function MonthGrid({ date }) {
 function CalendarSkeleton() {
     const { t, language } = useTranslation();
     const [params] = useSearchParams();
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const view = ['month', 'week', 'agenda'].includes(params.get('view')) ? params.get('view') : readStoredCalendarView();
     const asked = params.get('date') ? new Date(`${params.get('date')}T00:00:00`) : new Date();
     const date = Number.isNaN(asked.getTime()) ? new Date() : asked;

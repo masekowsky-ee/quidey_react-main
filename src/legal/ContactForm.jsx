@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styles from './Legal.module.css';
-import { apiFetch } from '../features/helperFunction';
+import { apiFetch } from '../features/api/api';
 
 const ERRORS = {
     INVALID_NAME: 'Bitte gib deinen Namen ein (höchstens 100 Zeichen).',

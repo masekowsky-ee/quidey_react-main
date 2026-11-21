@@ -16,8 +16,9 @@ import routinesReducer from "./routines/routines";
 import collectionsReducer from "./collections/collections";
 import studyReducer from "./study/study";
 import remindersReducer from "./reminders/reminders";
+import { LOGOUT } from "./auth/authActionTypes";
 
-const rootReducer = combineReducers({
+const appReducer = combineReducers({
     task: taskReducer,
     session: sessionReducer,
     auth: authReducer,
@@ -36,5 +37,26 @@ const rootReducer = combineReducers({
     reminders: remindersReducer,
     study: studyReducer,
 });
+
+// Signing out starts every account's state again. Not reset, on purpose:
+//  - auth: handles LOGOUT itself (and keeps its token field in step with the device)
+//  - settings: language, theme, palette, accent, sound, motion, uiVariant, uiColors and the other
+//    preferences belong to the device, not to the account
+//  - toast: the "signed out" notice and any error toast must outlive the sign-out
+//  - session: the focus timer; sign-out resets it with resetFocus() (and its stored run)
+//  - task, collections, progress: the guest App marks them loaded-and-empty itself (App.jsx), a reset
+//    here would flash their skeletons first
+// friends, together, family, presence and reminders handle LOGOUT in their own reducers.
+const KEPT_ON_LOGOUT = ['auth', 'settings', 'toast', 'session', 'task', 'collections', 'progress',
+    'friends', 'together', 'family', 'presence', 'reminders'];
+
+const rootReducer = (state, action) => {
+    if (action.type === LOGOUT && state) {
+        const next = { ...state };
+        for (const key of Object.keys(next)) if (!KEPT_ON_LOGOUT.includes(key)) next[key] = undefined;
+        return appReducer(next, action);
+    }
+    return appReducer(state, action);
+};
 
 export default rootReducer;

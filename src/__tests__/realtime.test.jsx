@@ -3,7 +3,7 @@ import { render, screen, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { makeStore as baseStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_FRIENDS } from '../features/friends/friendsActionTypes'
 import { SET_SHARED_SESSION, SHARED_SESSION_EVENT } from '../features/together/togetherActionTypes'
 import { connectRealtime, disconnectRealtime, useRealtimeSession, REALTIME_RECONNECT } from '../features/realtime/socket'
@@ -17,7 +17,7 @@ import { setInboxUnread, selectMenuBadgeCount, noticeView } from '../features/in
 import translations from '../i18n/translations'
 import { io } from 'socket.io-client'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

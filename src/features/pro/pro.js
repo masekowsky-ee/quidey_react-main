@@ -8,7 +8,7 @@
 // limits: access.limits / access.usage; null for Pro, testers and admins).
 import { registerPlugin } from '@capacitor/core';
 import { useSelector } from 'react-redux';
-import { apiFetch, CACHE_MEDIUM, LIMIT_EVENT } from '../helperFunction';
+import { apiFetch, CACHE_MEDIUM, LIMIT_EVENT } from '../api/api';
 import { isNativeApp } from '../native/native';
 
 // The prices as shown (the real ones live at Stripe / in the Play Console: keep them the same)

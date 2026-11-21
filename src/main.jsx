@@ -13,7 +13,7 @@ import {Provider} from "react-redux";
 import store from "./features/store";
 import { registerServiceWorker } from './features/pwa/registerServiceWorker'
 import { listenForInstallPrompt } from './features/pwa/install'
-import { setupNativeApp } from './features/native/native'
+import { setupNativeApp } from './features/native/setup'
 import { startOfflineSync } from './features/offline/offline'
 import { platform } from './features/usage/platform'
 import { startOwnColors } from './features/tasks/ownColors'

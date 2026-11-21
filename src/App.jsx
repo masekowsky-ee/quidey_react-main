@@ -9,7 +9,7 @@ import shell from './components/AppShell.module.css'
 import CustomError from './components/CustomError.jsx';
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth, setUser, fetchAccess } from "./features/auth/authAction";
-import { PRO_REQUIRED_EVENT, SIGNED_OUT_EVENT } from "./features/helperFunction";
+import { PRO_REQUIRED_EVENT, SIGNED_OUT_EVENT } from './features/api/api';
 import { logout } from "./features/auth/authAction";
 import BetaGate from "./components/BetaGate.jsx";
 import AppSkeleton from "./components/skeleton/AppSkeleton.jsx";

@@ -8,7 +8,7 @@
 // they only get the tips about what came after it. A tip added later is in nobody's list, so
 // everybody sees it once: give every new feature a tip here (and its texts tip_<id>_title/_text).
 import { useSelector, shallowEqual } from 'react-redux';
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { TIPS_SET } from '../auth/authActionTypes';
 import { isCommunityPath } from '../community/paths';
 

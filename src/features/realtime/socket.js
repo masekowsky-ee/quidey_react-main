@@ -1,4 +1,7 @@
 import { useEffect, useRef } from 'react';
+import { apiBase } from '../api/transport';
+import { session } from '../api/session';
+import { REALTIME_RECONNECT, REALTIME_REJECTED, SESSION_JOIN, SESSION_LEAVE } from './events';
 
 // The live connection to the backend (Socket.IO): new direct messages, the shared sessions'
 // chat and the team's notices arrive right away. App connects while signed in with access and
@@ -10,9 +13,8 @@ import { useEffect, useRef } from 'react';
 // (see realtime.js in the backend). Polling stays only as a slow safety net.
 // REALTIME_RECONNECT fires after the connection came back, so pages load what they missed.
 
-export const REALTIME_RECONNECT = 'realtime:reconnect';
-// The server turned the connection down (login no longer valid, or no access any more)
-export const REALTIME_REJECTED = 'realtime:rejected';
+// (the names are in ./events.js)
+export { REALTIME_RECONNECT, REALTIME_REJECTED };
 
 let socket = null;
 // bumped on every connect/disconnect, so a client library that arrives late isn't used any more
@@ -24,8 +26,15 @@ function notify(event, payload) {
     for (const handler of listeners.get(event) ?? []) handler(payload);
 }
 
+// Adds a handler for an event; answers the function that takes it away again
+function subscribe(event, handler) {
+    if (!listeners.has(event)) listeners.set(event, new Set());
+    listeners.get(event).add(handler);
+    return () => listeners.get(event).delete(handler);
+}
+
 function joinSession(id) {
-    socket?.emit('session:join', id);
+    socket?.emit(SESSION_JOIN, id);
 }
 
 // Whether live updates arrive right now (then the safety-net polling can rest)
@@ -40,10 +49,9 @@ export async function connectRealtime() {
     const { io } = await import('socket.io-client');
     // signed out (or connected again) while the library was on its way
     if (mine !== generation || socket) return;
-    const base = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
-    socket = io(base || undefined, {
+    socket = io(apiBase() || undefined, {
         // read on every (re)connect, so a new token (password changed) is used right away
-        auth: (cb) => cb({ token: localStorage.getItem('token') }),
+        auth: (cb) => cb({ token: session.token() }),
     });
     let connectedBefore = false;
     socket.on('connect', () => {
@@ -56,7 +64,7 @@ export async function connectRealtime() {
     socket.on('disconnect', (reason) => {
         if (reason !== 'io server disconnect') return;
         const current = socket;
-        setTimeout(() => { if (socket === current && localStorage.getItem('token')) current.connect(); }, 1000);
+        setTimeout(() => { if (socket === current && session.token()) current.connect(); }, 1000);
     });
     // turned away by the server: App checks the access again (pro taken away, signed out)
     socket.on('connect_error', (err) => { if (err?.message === 'UNAUTHORIZED') notify(REALTIME_REJECTED); });
@@ -101,10 +109,7 @@ export function useRealtime(event, handler) {
     const latest = useRef(handler);
     useEffect(() => { latest.current = handler; });
     useEffect(() => {
-        const call = (payload) => latest.current(payload);
-        if (!listeners.has(event)) listeners.set(event, new Set());
-        listeners.get(event).add(call);
-        return () => listeners.get(event).delete(call);
+        return subscribe(event, (payload) => latest.current(payload));
     }, [event]);
 }
 
@@ -118,19 +123,14 @@ export function useRealtimeRefresh(events, refresh, accept = () => true) {
     const key = events.join(' ');
     useEffect(() => {
         let timer = null;
-        const handlers = [...key.split(' '), REALTIME_RECONNECT].map(event => {
-            const call = (payload) => {
-                if (event !== REALTIME_RECONNECT && !latest.current.accept(event, payload)) return;
-                clearTimeout(timer);
-                timer = setTimeout(() => latest.current.refresh(), REFRESH_DELAY_MS);
-            };
-            if (!listeners.has(event)) listeners.set(event, new Set());
-            listeners.get(event).add(call);
-            return [event, call];
-        });
+        const unsubscribe = [...key.split(' '), REALTIME_RECONNECT].map(event => subscribe(event, (payload) => {
+            if (event !== REALTIME_RECONNECT && !latest.current.accept(event, payload)) return;
+            clearTimeout(timer);
+            timer = setTimeout(() => latest.current.refresh(), REFRESH_DELAY_MS);
+        }));
         return () => {
             clearTimeout(timer);
-            for (const [event, call] of handlers) listeners.get(event).delete(call);
+            for (const off of unsubscribe) off();
         };
     }, [key]);
 }
@@ -145,7 +145,7 @@ export function useRealtimeSession(sessionId) {
             const left = sessions.get(sessionId) - 1;
             if (left > 0) return sessions.set(sessionId, left);
             sessions.delete(sessionId);
-            socket?.emit('session:leave', sessionId);
+            socket?.emit(SESSION_LEAVE, sessionId);
         };
     }, [sessionId]);
 }

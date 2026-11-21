@@ -2,13 +2,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { screen, act, within } from '@testing-library/react'
 import { makeStore as baseStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import { forgetAvatar } from '../features/profile/avatars'
 import ProfileAvatar from '../components/profile/ProfileAvatar'
 import AdminTesterFeedback from '../components/tester/AdminTesterFeedback'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

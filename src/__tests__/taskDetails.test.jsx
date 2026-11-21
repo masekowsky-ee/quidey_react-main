@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { makeStore as baseStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_TASK_STATE, SET_TASK_INVITES, EDIT_DISPLAYGROUP } from '../features/tasks/taskActionTypes'
 import { setLanguage } from '../features/settings/settingsAction'
 import {
@@ -23,7 +23,7 @@ import Calendar from '../components/Calendar'
 import TaskForm from '../components/TaskForm'
 import TaskInvites from '../components/task/TaskInvites'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

@@ -1,4 +1,63 @@
+import { session } from "../api/session";
 import { LOGIN_SUCCESS, LOGOUT, SET_USER, SET_ACCESS, TOUR_SEEN, SAVED_COLORS_SET, TIPS_SET } from "./authActionTypes";
+
+// What /api/me says about my access, as it stands before the server answered (and after sign-out).
+// SET_ACCESS reads the server's answer field by field with these defaults (FIELD_READERS below):
+// a field the server doesn't send (an older backend) falls back to what is here.
+//
+// closed beta: may I use the app? checked = the server answered (until then nothing is shown)
+// betaRequest: my request for access, { status: 'pending' | 'approved' | 'declined', reason, createdAt } or null
+// isAdmin: sees the admin panel; adminPendingCount: open beta requests (admins only)
+// isTester: sees features not released to everyone yet (see features/auth/tester.js)
+// allDayReminderTime: "HH:MM", where tasks without a time count their reminders from (tasks/reminders.js)
+// tourSeen: false only for a new account that hasn't closed the intro tour yet (it opens by itself then)
+// savedColors: my own colours ("#rrggbb", newest first) every colour picker offers (tasks/savedColors.js)
+// tipsSeen / tipsOff: the feature tips I have seen / hid (features/tips/tips.js)
+// max: Quidey Max { active, gift, until }, a superset of Pro (admins count as Max).
+// isPro: may use the app (the name is older than Quidey Pro). pro: Quidey Pro { active, gift,
+// until }; accessMode: 'beta' | 'open'; limits / usage: the free plan's (null without limits),
+// see features/pro/pro.js; proSales: whether Pro is on sale (features/pro/flag.js). hasPassword: false for an account made with Google without one.
+const DEFAULT_ACCESS = {
+    checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null, allDayReminderTime: '12:00', tourSeen: true, userId: null, savedColors: [], tipsSeen: [], tipsOff: false,
+    pro: { active: false, gift: false, until: null }, max: { active: false, gift: false, until: null }, proSales: false, trial: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false,
+    // anonymous usage statistics: my answer (choice 'granted' | 'denied' | null = not asked), when, which version of the question
+    usageConsent: { choice: null, at: null, version: null },
+};
+
+const orDefault = (key) => (value) => value ?? DEFAULT_ACCESS[key];
+const asList = (value) => (Array.isArray(value) ? value : []);
+// how each field of the server's answer is read (the rest of DEFAULT_ACCESS is only `checked`)
+const FIELD_READERS = {
+    isPro: Boolean,
+    isAdmin: Boolean,
+    isTester: Boolean,
+    // my own id (my profile picture, for one)
+    userId: orDefault('userId'),
+    adminPendingCount: orDefault('adminPendingCount'),
+    betaRequest: orDefault('betaRequest'),
+    allDayReminderTime: orDefault('allDayReminderTime'),
+    tourSeen: (value) => value !== false,
+    savedColors: asList,
+    tipsSeen: asList,
+    tipsOff: Boolean,
+    pro: orDefault('pro'),
+    max: orDefault('max'),
+    proSales: Boolean,
+    // chose "continue with the trial version": all features with the free plan's limits
+    trial: Boolean,
+    accessMode: (value) => (value === 'open' ? 'open' : 'beta'),
+    limits: orDefault('limits'),
+    usage: orDefault('usage'),
+    hasPassword: (value) => value !== false,
+    googleLinked: Boolean,
+    usageConsent: orDefault('usageConsent'),
+};
+
+const readAccess = (me) => {
+    const access = { checked: true };
+    for (const [key, read] of Object.entries(FIELD_READERS)) access[key] = read(me[key]);
+    return access;
+};
 
 const initialState = {
     token: null,
@@ -8,28 +67,11 @@ const initialState = {
         email: null,
         birth_date: null,
     },
-    // closed beta: may I use the app? checked = the server answered (until then nothing is shown)
-    // betaRequest: my request for access, { status: 'pending' | 'approved' | 'declined', reason, createdAt } or null
-    // isAdmin: sees the admin panel; adminPendingCount: open beta requests (admins only)
-    // isTester: sees features not released to everyone yet (see features/auth/tester.js)
-    // allDayReminderTime: "HH:MM", where tasks without a time count their reminders from (tasks/reminders.js)
-    // tourSeen: false only for a new account that hasn't closed the intro tour yet (it opens by itself then)
-    // savedColors: my own colours ("#rrggbb", newest first) every colour picker offers (tasks/savedColors.js)
-    // tipsSeen / tipsOff: the feature tips I have seen / hid (features/tips/tips.js)
-    // max: Quidey Max { active, gift, until }, a superset of Pro (admins count as Max).
-    // isPro: may use the app (the name is older than Quidey Pro). pro: Quidey Pro { active, gift,
-    // until }; accessMode: 'beta' | 'open'; limits / usage: the free plan's (null without limits),
-    // see features/pro/pro.js; proSales: whether Pro is on sale (features/pro/flag.js). hasPassword: false for an account made with Google without one.
-    access: {
-        checked: false, isPro: false, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null, allDayReminderTime: '12:00', tourSeen: true, userId: null, savedColors: [], tipsSeen: [], tipsOff: false,
-        pro: { active: false, gift: false, until: null }, max: { active: false, gift: false, until: null }, proSales: false, trial: false, accessMode: 'beta', limits: null, usage: null, hasPassword: true, googleLinked: false,
-        // anonymous usage statistics: my answer (choice 'granted' | 'denied' | null = not asked), when, which version of the question
-        usageConsent: { choice: null, at: null, version: null },
-    },
+    access: DEFAULT_ACCESS,
 };
 
 // the token is read when the store is made (not when this file loads): signed in or not is what is on the device then
-const authReducer = (state = { ...initialState, token: localStorage.getItem('token') || null }, action) => {
+const authReducer = (state = { ...initialState, token: session.token() || null }, action) => {
     switch (action.type) {
         case LOGIN_SUCCESS:
             return {
@@ -45,38 +87,10 @@ const authReducer = (state = { ...initialState, token: localStorage.getItem('tok
                 ...state,
                 token: null,
                 user: null,
-                access: initialState.access,
+                access: DEFAULT_ACCESS,
             };
         case SET_ACCESS:
-            return {
-                ...state,
-                access: {
-                    checked: true,
-                    isPro: Boolean(action.payload.isPro),
-                    isAdmin: Boolean(action.payload.isAdmin),
-                    isTester: Boolean(action.payload.isTester),
-                    // my own id (my profile picture, for one)
-                    userId: action.payload.userId ?? null,
-                    adminPendingCount: action.payload.adminPendingCount ?? 0,
-                    betaRequest: action.payload.betaRequest ?? null,
-                    allDayReminderTime: action.payload.allDayReminderTime ?? initialState.access.allDayReminderTime,
-                    tourSeen: action.payload.tourSeen !== false,
-                    savedColors: Array.isArray(action.payload.savedColors) ? action.payload.savedColors : [],
-                    tipsSeen: Array.isArray(action.payload.tipsSeen) ? action.payload.tipsSeen : [],
-                    tipsOff: Boolean(action.payload.tipsOff),
-                    pro: action.payload.pro ?? initialState.access.pro,
-                    max: action.payload.max ?? initialState.access.max,
-                    proSales: Boolean(action.payload.proSales),
-                    // chose "continue with the trial version": all features with the free plan's limits
-                    trial: Boolean(action.payload.trial),
-                    accessMode: action.payload.accessMode === 'open' ? 'open' : 'beta',
-                    limits: action.payload.limits ?? null,
-                    usage: action.payload.usage ?? null,
-                    hasPassword: action.payload.hasPassword !== false,
-                    googleLinked: Boolean(action.payload.googleLinked),
-                    usageConsent: action.payload.usageConsent ?? initialState.access.usageConsent,
-                },
-            };
+            return { ...state, access: readAccess(action.payload) };
         case TOUR_SEEN:
             return { ...state, access: { ...state.access, tourSeen: true } };
         case TIPS_SET:

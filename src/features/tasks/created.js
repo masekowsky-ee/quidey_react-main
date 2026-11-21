@@ -1,4 +1,5 @@
 import { displayName, fill } from '../helperFunction';
+import { localeOf } from '../../i18n/locale';
 
 // When an entry was made and by whom, whichever list it comes from: own tasks carry created_at
 // and owner (null: mine, else the friend who shared it with me), a session's or a family's
@@ -8,7 +9,7 @@ export function createdText(task, t, language, myUsername) {
     const value = task.created_at ?? task.createdAt;
     const at = value ? new Date(value) : null;
     if (!at || Number.isNaN(at.getTime())) return '';
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const when = fill(t('createdOn'), {
         date: at.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' }),
         time: at.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }),

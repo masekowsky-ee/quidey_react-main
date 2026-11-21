@@ -2,7 +2,7 @@ import styles from './QuickAdd.module.css';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { showForms } from '../features/settings/settingsAction';
-import { useSheet } from '../features/layout/dragDismiss';
+import Dialog from './Dialog.jsx';
 import { openAuth } from '../features/auth/gate';
 import TaskForm from './TaskForm.jsx';
 import ReminderForm from './reminders/ReminderForm.jsx';
@@ -57,22 +57,9 @@ function QuickAddForm({ sheet, close, reminder }) {
 // Escape, its cross, saving or a click next to it take it back the way it came.
 // children(sheet, close): the card spreads sheet.panel on itself (TaskForm, GroupForm).
 export function FormSheet({ onClose, children }) {
-    const sheet = useSheet(onClose);
-    const { dismiss } = sheet;
-
-    useEffect(() => {
-        const previous = document.activeElement;
-        const onKey = (e) => { if (e.key === 'Escape' && !e.defaultPrevented) dismiss(); };
-        window.addEventListener('keydown', onKey);
-        return () => {
-            window.removeEventListener('keydown', onKey);
-            previous?.focus?.();
-        };
-    }, [dismiss]);
-
     return (
-        <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
-            {children(sheet, dismiss)}
-        </div>
+        <Dialog onClose={onClose} nested portal={false} panel={false} backdropClassName={styles.backdrop}>
+            {(dismiss, sheet) => children(sheet, dismiss)}
+        </Dialog>
     );
 }

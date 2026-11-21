@@ -1,5 +1,6 @@
 import { useDispatch, useStore } from 'react-redux';
-import { apiFetch, displayName, fill } from '../helperFunction';
+import { displayName, fill } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { showToast } from '../toast/toast';
 import { playSound } from '../settings/sound';
 import { useTranslation } from '../../i18n/useTranslation';

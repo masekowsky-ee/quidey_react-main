@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { read, write } from '../storedSetting';
 
 // How much the app moves: 'minimal' (quiet fades), 'normal' (livelier springs, a little
 // confetti) or 'extreme' (big springs, blur, lots of confetti). The opening animation plays on
@@ -9,17 +10,12 @@ export const MOTION_LEVELS = ['minimal', 'normal', 'extreme'];
 const STORAGE_KEY = 'motion';
 const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
 
-export function readStoredMotion() {
-    try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (MOTION_LEVELS.includes(stored)) return stored;
-    } catch { /* storage blocked: fall back to the system */ }
-    return window.matchMedia?.(REDUCE_QUERY).matches ? 'minimal' : 'normal';
-}
+export const readStoredMotion = () => read(STORAGE_KEY, {
+    allowed: MOTION_LEVELS,
+    fallback: window.matchMedia?.(REDUCE_QUERY).matches ? 'minimal' : 'normal',
+});
 
-export function storeMotion(level) {
-    try { localStorage.setItem(STORAGE_KEY, level); } catch { /* still applied, just not remembered */ }
-}
+export const storeMotion = (level) => write(STORAGE_KEY, level);
 
 export const useMotionLevel = () => useSelector((state) => state.settings.motion);
 

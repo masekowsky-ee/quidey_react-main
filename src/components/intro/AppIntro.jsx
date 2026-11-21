@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import styles from './AppIntro.module.css';
 import { readStoredMotion } from '../../features/settings/motion';
+import { session } from '../../features/api/session';
 
 // Remotion only loads for the intro, not with the app
 const IntroPlayer = lazy(() => import('./IntroPlayer'));
@@ -11,7 +12,7 @@ const IntroPlayer = lazy(() => import('./IntroPlayer'));
 // didn't ask for), not on a page opened by a link (a notice, the calendar, a legal page:
 // opened to see something right away) and not in tests. Visitors who aren't signed in get the
 // sign-in screen at once. Read once at start: changing the setting later doesn't replay it.
-const signedIn = () => { try { return Boolean(localStorage.getItem('token')); } catch { return false; } };
+const signedIn = () => Boolean(session.token());
 const openedFresh = () => {
     try {
         const navigation = performance.getEntriesByType?.('navigation')?.[0];

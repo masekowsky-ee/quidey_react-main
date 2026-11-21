@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act } from '@testing-library/react'
 import { makeStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch, toCsv, SIGNED_OUT_EVENT } from '../features/helperFunction'
+import { toCsv } from '../features/helperFunction';
+import { apiFetch, SIGNED_OUT_EVENT } from '../features/api/api';
 import { changePassword, logoutEverywhere } from '../features/auth/authAction'
 import { LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { contentSecurityPolicy, headersFile } from '../../security-headers.js'

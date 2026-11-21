@@ -1,6 +1,7 @@
-import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, GET_NOTES, REFRESH_TASKS, TASK_REPLACED, SET_TASK_INVITES, TASK_INVITE_ACCEPTED, TASK_INVITE_REMOVED, TASK_SHARE_REMOVED, SET_EVENT_TYPES, EVENT_TYPE_SAVED, EVENT_TYPE_REMOVED } from './taskActionTypes';
+import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, EDIT_DISPLAYGROUP, DELETE_GROUP_TASKS, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, GET_NOTES, REFRESH_TASKS, TASK_REPLACED, SET_TASK_INVITES, TASK_INVITE_ACCEPTED, TASK_INVITE_REMOVED, TASK_SHARE_REMOVED, SET_EVENT_TYPES, EVENT_TYPE_SAVED, EVENT_TYPE_REMOVED } from './taskActionTypes';
 import { track } from '../usage/usage';
-import { apiFetch, toInputDate } from '../helperFunction';
+import { toInputDate } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { askDeleteScope, isRepeating } from './deleteScope';
 import { dateKey } from '../calendar/calendar';
 import { offerPushAfterTask } from '../pwa/push';
@@ -266,16 +267,6 @@ export const editDisplaygroup = (group, groupToDisplayId) => {
                 payload: {group, tasks},
             });
         }
-    };
-}
-
-export const addGroupTasks = (groupId, taskId) => {
-    return async (dispatch) => {
-        await apiFetch(`/api/tasks/${taskId}/groups/${groupId}`, {method: "POST"});
-        dispatch({
-            type: ADD_GROUP_TASKS,
-            payload: { taskId, groupId },
-        });
     };
 }
 

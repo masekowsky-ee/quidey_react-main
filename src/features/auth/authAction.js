@@ -1,17 +1,18 @@
 import { LOGIN_SUCCESS, LOGOUT, SET_USER, SET_ACCESS, TOUR_SEEN } from "./authActionTypes";
-import { apiFetch, apiUrl } from '../helperFunction';
+import { apiFetch, rawFetch, json, session } from '../api/api';
+import { loadInto } from '../api/load';
+import { SERVER_GONE_STATUSES, abortAfter } from '../api/transport';
 import { forgetAccount, forgetToken, listAccounts, rememberAccount, switchAccount } from './accounts';
-import { forgetPushOnSignOut, refreshPush } from '../pwa/push';
-import { resetFocus } from '../session/sessionAction';
-import { clearFocusRun } from '../session/focusRun';
-import { cancelAlarms } from '../native/alarms';
+import { teardownAccount } from './teardown';
 import { setUsageEnabled } from '../usage/usage';
-import { forgetReads, saveAnswer, savedAnswer } from '../offline/offline';
+import { refreshPush } from '../pwa/push';
+import { resetFocus } from '../session/sessionAction';
+import { saveAnswer, savedAnswer } from '../offline/offline';
 
 // Signed in (password, Google): { token, username } from the server
 const finishSignIn = (data) => {
     return async (dispatch) => {
-        localStorage.setItem("token", data.token);
+        session.set(data.token);
         // stays on this device next to the accounts signed in before (to switch between them)
         rememberAccount({ username: data.username, token: data.token, displayName: data.display_name });
         dispatch({ type: LOGIN_SUCCESS, payload: { token: data.token, username: data.username } });
@@ -23,10 +24,7 @@ const finishSignIn = (data) => {
 // Signs in with the username or the email address (the server tells them apart by the "@")
 export const loginSuccess = (username, password) => {
     return async (dispatch) => {
-        const data = await apiFetch("/api/login", {
-            method: "POST",
-            body: JSON.stringify({ username, password }),
-        });
+        const data = await apiFetch("/api/login", json('POST', { username, password }));
         // the server sends the real username, also after signing in with the email address
         await dispatch(finishSignIn({ ...data, username: data.username ?? username }));
     };
@@ -38,7 +36,7 @@ export const loginSuccess = (username, password) => {
 // Rejects with the API error (error.code: GOOGLE_INVALID, GOOGLE_OTHER_ACCOUNT, GOOGLE_DISABLED).
 export const signInWithGoogle = (idToken) => {
     return async (dispatch) => {
-        const data = await apiFetch('/api/auth/google', { method: 'POST', body: JSON.stringify({ idToken }) });
+        const data = await apiFetch('/api/auth/google', json('POST', { idToken }));
         if (data.signup) return data.signup;
         await dispatch(finishSignIn(data));
         return null;
@@ -49,25 +47,16 @@ export const signInWithGoogle = (idToken) => {
 // Rejects with the API error (error.code: INVALID_USERNAME, USERNAME_TAKEN, TOO_YOUNG, GOOGLE_SIGNUP_EXPIRED, …).
 export const registerWithGoogle = ({ signupToken, username, displayName, birthDate }) => {
     return async (dispatch, getState) => {
-        const data = await apiFetch('/api/auth/google/register', {
-            method: 'POST',
-            body: JSON.stringify({
+        const data = await apiFetch('/api/auth/google/register', json('POST', {
                 signupToken, username, display_name: displayName, birth_date: birthDate,
                 language: getState().settings?.language, accept_terms: true, accept_privacy: true, confirm_age: true,
-            }),
-        });
+            }));
         await dispatch(finishSignIn(data));
     };
 };
 
 // Asks the server whether I may use the app (closed beta) and how my access request stands
-export const fetchAccess = () => {
-    return async (dispatch) => {
-        const me = await apiFetch('/api/me');
-        dispatch({ type: SET_ACCESS, payload: me });
-        return me;
-    };
-};
+export const fetchAccess = () => loadInto(SET_ACCESS, '/api/me');
 
 // The intro tour was closed (finished or skipped): it won't open by itself again, on any device.
 // Shown at once; if the server can't be reached, it opens again on the next start.
@@ -82,10 +71,7 @@ export const markTourSeen = () => {
 // Rejects with the API error (error.code: REASON_TOO_SHORT, REASON_TOO_LONG, ALREADY_REQUESTED, ALREADY_PRO).
 export const requestBetaAccess = (reason) => {
     return async (dispatch, getState) => {
-        const betaRequest = await apiFetch('/api/beta-requests', {
-            method: 'POST',
-            body: JSON.stringify({ reason }),
-        });
+        const betaRequest = await apiFetch('/api/beta-requests', json('POST', { reason }));
         dispatch({ type: SET_ACCESS, payload: { ...getState().auth.access, betaRequest } });
     };
 };
@@ -94,7 +80,7 @@ export const requestBetaAccess = (reason) => {
 // The access is asked again, so the app opens.
 export const startTrial = () => {
     return async (dispatch) => {
-        await apiFetch('/api/trial', { method: 'POST', body: JSON.stringify({}) });
+        await apiFetch('/api/trial', json('POST', {}));
         await dispatch(fetchAccess());
     };
 };
@@ -103,36 +89,32 @@ export const startTrial = () => {
 // (the app loads again as that one); otherwise it's the sign-in.
 export const logout = () => {
     return (dispatch, getState) => {
-        // this account's queued usage events are gone with it
-        setUsageEnabled(false);
-        const token = localStorage.getItem('token');
-        // the offline copy of this account's data goes with it (before the token, which names the owner)
-        forgetReads().catch(() => {});
+        const token = session.token();
         forgetToken(token);
         forgetAccount(getState().auth.user?.username);
         const next = listAccounts()[0];
-        // no more push notifications for this account here (with another one taking over,
-        // they go over to that one on its start)
-        forgetPushOnSignOut(token, Boolean(next));
-        // the reminders' alarm clock (Android app) rings for nobody now; the next account sets its own
-        cancelAlarms();
         if (next) {
+            // another account takes over: the app loads again as that one (switchAccount ends with
+            // a second, harmless teardown), and the push notifications go over to it on its start
+            teardownAccount({ leaving: true, token, keepPush: true, freezeFocus: true });
             switchAccount(next.username);
             return;
         }
-        localStorage.removeItem('token');
         dispatch(resetFocus());
-        clearFocusRun();
+        teardownAccount({ leaving: true, token });
+        session.clear();
         dispatch({ type: LOGOUT });
     };
 };
 
-// how long the check at start waits for the server when the device has a saved answer
+// how long the check at start waits for the server when the device has a saved answer. The same
+// kind of wait as offline.js START_PROBE_MS (the first request of the offline layer): the two do
+// not have to agree, but neither should hold the app back much longer than the other.
 const START_CHECK_MS = 5000;
 
 export const checkAuth = () => {
     return async (dispatch) => {
-        const token = localStorage.getItem("token");
+        const token = session.token();
 
         if(!token) {
             return;
@@ -150,23 +132,20 @@ export const checkAuth = () => {
         // with a saved answer to fall back on, a server that doesn't answer (a connection that
         // leads nowhere never says no) is given up on after a few seconds
         const hasSaved = Boolean(await savedAnswer('/api/me'));
-        const controller = new AbortController();
-        const timer = hasSaved ? setTimeout(() => controller.abort(), START_CHECK_MS) : null;
+        const { signal, done } = abortAfter(hasSaved ? START_CHECK_MS : 0);
         let response;
         try {
-            response = await fetch(apiUrl("/api/me"), {
-                headers: { Authorization: `Bearer ${token}` },
-                signal: controller.signal,
-            });
+            // rawFetch, not apiFetch: the answer's status decides here (a real rejection signs out)
+            response = await rawFetch('/api/me', { signal }, token);
         } catch {
             // backend not reachable (not started yet, offline): keep the token, try again on the next load
             await fromSaved();
             return;
         } finally {
-            clearTimeout(timer);
+            done();
         }
         // a gateway with nobody behind it (the API restarts): the same as no connection
-        if ([502, 503, 504].includes(response.status)) {
+        if (SERVER_GONE_STATUSES.includes(response.status)) {
             await fromSaved();
             return;
         }
@@ -174,7 +153,7 @@ export const checkAuth = () => {
         // only a real rejection signs out; a server error (e.g. 500 from the dev proxy) keeps the token
         if (response.status === 401 || response.status === 403) {
             forgetToken(token);
-            localStorage.removeItem("token");
+            session.clear();
             dispatch({ type: LOGOUT });
             return;
         }
@@ -197,7 +176,7 @@ export const setUser = () => {
         const data = await apiFetch(`/api/users`, {method: "GET"});
 
         // the name shown in the account switcher
-        if (data?.[0]) rememberAccount({ username: data[0].username, token: localStorage.getItem('token'), displayName: data[0].display_name });
+        if (data?.[0]) rememberAccount({ username: data[0].username, token: session.token(), displayName: data[0].display_name });
         dispatch({
             type: SET_USER,
             payload: data,
@@ -210,10 +189,7 @@ export const setUser = () => {
 // Rejects with the API error (error.code: INVALID_DISPLAY_NAME, INVALID_EMAIL, EMAIL_TAKEN).
 export const updateProfile = (display_name, email) => {
     return async (dispatch) => {
-        const user = await apiFetch('/api/users', {
-            method: 'PUT',
-            body: JSON.stringify({ display_name, email }),
-        });
+        const user = await apiFetch('/api/users', json('PUT', { display_name, email }));
         dispatch({ type: SET_USER, payload: [user] });
         return user;
     };
@@ -222,10 +198,7 @@ export const updateProfile = (display_name, email) => {
 // Confirms my email address with the token from the verification link (works signed out too).
 // Rejects with the API error (error.code: INVALID_TOKEN, TOKEN_EXPIRED).
 export function verifyEmail(token) {
-    return apiFetch('/api/verify-email', {
-        method: 'POST',
-        body: JSON.stringify({ token }),
-    });
+    return apiFetch('/api/verify-email', json('POST', { token }));
 }
 
 // Sends me a new verification link; older links stop working.
@@ -238,10 +211,7 @@ export function resendVerificationMail() {
 // if an unconfirmed account has it. The server answers the same either way.
 // Rejects with the API error (error.code: INVALID_EMAIL, RATE_LIMITED).
 export function requestVerificationMail(email) {
-    return apiFetch('/api/resend-verification', {
-        method: 'POST',
-        body: JSON.stringify({ email }),
-    });
+    return apiFetch('/api/resend-verification', json('POST', { email }));
 }
 
 // Rejects with the API error (error.code: WRONG_PASSWORD, WEAK_PASSWORD).
@@ -249,12 +219,9 @@ export function requestVerificationMail(email) {
 // An account made with Google sets its first password without a current one (currentPassword '').
 export const changePassword = (currentPassword, newPassword) => {
     return async (dispatch, getState) => {
-        const data = await apiFetch('/api/users/password', {
-            method: 'PUT',
-            body: JSON.stringify({ currentPassword, newPassword }),
-        });
+        const data = await apiFetch('/api/users/password', json('PUT', { currentPassword, newPassword }));
         if (data?.token) {
-            localStorage.setItem('token', data.token);
+            session.set(data.token);
             rememberAccount({ username: getState().auth.user?.username, token: data.token });
             dispatch({ type: LOGIN_SUCCESS, payload: { token: data.token, username: getState().auth.user?.username } });
         }
@@ -279,10 +246,7 @@ export const logoutEverywhere = () => {
 // Rejects with the API error (error.code: WRONG_PASSWORD, WRONG_USERNAME, LAST_ADMIN, RATE_LIMITED).
 export const deleteAccount = (confirmation) => {
     return async (dispatch) => {
-        await apiFetch('/api/users', {
-            method: 'DELETE',
-            body: JSON.stringify(confirmation),
-        });
+        await apiFetch('/api/users', json('DELETE', confirmation));
         dispatch(logout());
     };
 }
@@ -295,10 +259,7 @@ export const register = (username, display_name, email, birth_date, password) =>
     return async (dispatch, getState) => {
         // the confirmation mail comes in the app's language
         const language = getState().settings?.language;
-        await apiFetch("/api/register", {
-            method: "POST",
-            body: JSON.stringify({ username, display_name, email, birth_date, password, language, accept_terms: true, accept_privacy: true, confirm_age: true }),
-        });
+        await apiFetch("/api/register", json('POST', { username, display_name, email, birth_date, password, language, accept_terms: true, accept_privacy: true, confirm_age: true }));
     };
 }
 export const selectUsageConsent = (state) => state.auth.access.usageConsent;
@@ -306,10 +267,7 @@ export const selectUsageConsent = (state) => state.auth.access.usageConsent;
 // Answer the question about the anonymous usage statistics (works before beta access too)
 export const setUsageConsent = (granted) => {
     return async (dispatch, getState) => {
-        const usageConsent = await apiFetch('/api/profile/usage-consent', {
-            method: 'PUT',
-            body: JSON.stringify({ granted: Boolean(granted) }),
-        });
+        const usageConsent = await apiFetch('/api/profile/usage-consent', json('PUT', { granted: Boolean(granted) }));
         dispatch({ type: SET_ACCESS, payload: { ...getState().auth.access, usageConsent } });
         setUsageEnabled(usageConsent.choice === 'granted', getState().auth.access.userId);
         return usageConsent;

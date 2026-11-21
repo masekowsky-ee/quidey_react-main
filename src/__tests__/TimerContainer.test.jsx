@@ -2,14 +2,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { screen, fireEvent, act } from '@testing-library/react'
 import { makeStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { setFocusTask } from '../features/session/sessionAction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { readFocusRun, storeFocusRun } from '../features/session/focusRun'
 import TimerContainer from '../components/TimerContainer'
 
 // Stopping the timer saves the session, starting it sets the alarm: don't hit a real server
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn().mockResolvedValue({ id: 1 }),
 }))

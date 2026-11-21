@@ -2,11 +2,13 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { showToast } from '../toast/toast';
 import { playSound } from '../settings/sound';
-import { apiFetch, fill, parseDate } from '../helperFunction';
+import { fill, parseDate } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { translate } from '../../i18n/useTranslation';
 import { dateKey, durationText, minutesOfDay, remindersOf, taskStart, timeText } from '../calendar/calendar';
 import { pushCovers, pushRemindsByDefault } from '../pwa/push';
 import { SET_ACCESS } from '../auth/authActionTypes';
+import { rememberedSet, startChecking } from '../reminders/due';
 
 // Reminders work while the app is open: a toast, and a system notification when allowed.
 // A reminder still shows when the app is opened late, until an hour after the task started.
@@ -18,17 +20,16 @@ import { SET_ACCESS } from '../auth/authActionTypes';
 // GET /api/me → allDayReminderTime, 12:00 until changed): "at the start" is that time on its
 // day, "1 day before" that time the day before. The server pushes and mails by the same rules.
 const CHECK_EVERY_MS = 20 * 1000;
+// how long after its start a task's reminder still shows (the routines' is 15 minutes, the tester
+// reminders' 10)
 const LATE_LIMIT_MS = 60 * 60 * 1000;
-const STORAGE_KEY = 'shownReminders';
-const MAX_REMEMBERED = 200;
+const shownReminders = rememberedSet('shownReminders', 200);
 
 const DEFAULT_ALL_DAY_TIME = '12:00';
 // at most this many per task (like the server)
 export const REMINDERS_MAX = 5;
 
 export const selectAllDayTime = (state) => state.auth.access.allDayReminderTime ?? DEFAULT_ALL_DAY_TIME;
-
-export { remindersOf };
 
 // The label of one reminder: "Zum Beginn", "15 min vorher"; for a task without a time
 // "Am Tag", "1 Tag vorher", "2 Tage vorher", "1 Woche vorher"
@@ -79,19 +80,6 @@ export function dueReminders(tasks, now, shown, allDayTime) {
     return due;
 }
 
-function readShown() {
-    try {
-        const list = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
-        return new Set(Array.isArray(list) ? list : []);
-    } catch {
-        return new Set();
-    }
-}
-
-function storeShown(shown) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...shown].slice(-MAX_REMEMBERED))); } catch { /* only this visit */ }
-}
-
 // Asks for permission to show system notifications; called when a reminder is set (a click,
 // which browsers require). Without permission the in-app toast still shows.
 export function askForReminderPermission() {
@@ -125,7 +113,7 @@ export function useTaskReminders(enabled = true) {
     useEffect(() => {
         if (!enabled) return;
         const check = () => {
-            const shown = readShown();
+            const shown = shownReminders.read();
             const due = dueReminders(tasks, new Date(), shown, allDayTime);
             for (const { task, minutes, keys } of due) {
                 const text = task.due_time
@@ -136,12 +124,10 @@ export function useTaskReminders(enabled = true) {
                 notify(task.name, text, reminderKey(task, minutes));
             }
             if (due.length > 0) {
-                storeShown(shown);
+                shownReminders.save(shown);
                 playSound('reminder');
             }
         };
-        check();
-        const interval = setInterval(check, CHECK_EVERY_MS);
-        return () => clearInterval(interval);
+        return startChecking(check, CHECK_EVERY_MS);
     }, [enabled, tasks, language, allDayTime, dispatch]);
 }

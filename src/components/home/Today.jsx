@@ -7,6 +7,7 @@ import { createNote } from '../../features/focus/notebook';
 import { FOCUS_GOALS, readStoredFocusGoal, storeFocusGoal } from '../../features/settings/preferences';
 import { showToast } from '../../features/toast/toast';
 import { fill, formatClock, parseDate, sameDay, dueText, isOverdue } from '../../features/helperFunction';
+import { hhmm } from '../../features/calendar/calendar';
 import { isEvent } from '../../features/tasks/kinds';
 import { selectTasksLoaded } from '../../features/tasks/taskAction';
 import { selectHasMax } from '../../features/pro/pro';
@@ -121,20 +122,20 @@ function UpNext({ tasks }) {
     const hasMax = useSelector(selectHasMax);
     const loaded = useSelector(selectTasksLoaded);
     const now = new Date();
-    const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const nowText = hhmm(now);
     const items = useMemo(() => tasks
         .filter(task => !task.done && task.due)
         .filter(task => {
             const due = parseDate(task.due);
             if (!due) return false;
-            if (isEvent(task)) return due > now || (sameDay(due, now) && (!task.due_time || task.due_time.slice(0, 5) >= hhmm));
+            if (isEvent(task)) return due > now || (sameDay(due, now) && (!task.due_time || task.due_time.slice(0, 5) >= nowText));
             return !isOverdue(task, now);
         })
         .sort((a, b) => `${a.due}${a.due_time ?? '99'}`.localeCompare(`${b.due}${b.due_time ?? '99'}`))
         .slice(0, 3),
     // the minute is enough
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tasks, hhmm]);
+    [tasks, nowText]);
     const overdue = tasks.filter(task => isOverdue(task, now)).length;
 
     return (

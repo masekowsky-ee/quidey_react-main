@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { editDisplaygroup, selectTasksLoaded } from '../features/tasks/taskAction';
+import { editDisplaygroup } from '../features/tasks/taskAction';
 import { selectSharedGroups } from '../features/together/togetherAction';
 import styles from './GroupBtnContainer.module.css';
 import { groupColorAttr } from '../features/tasks/taskColors';
@@ -45,12 +45,10 @@ export default function GroupBtnContainer({ setCreateGroup }){
     const barRef = useEdgeFades();
 
     // my groups (or collections), without a group named "all" from older accounts: that is the "All" chip itself
-    const { groups, collections: asCollections } = useTaskGroups();
+    const { groups } = useTaskGroups();
     const groupToDisplay = useSelector(state => state.task.groupToDisplay);
-    // my groups come with my tasks, collections on their own: until then two chips' shapes
-    const tasksLoaded = useSelector(selectTasksLoaded);
-    const collectionsLoaded = useSelector(selectCollectionsLoaded);
-    const loaded = asCollections ? collectionsLoaded : tasksLoaded;
+    // collections load on their own: until then two chips' shapes
+    const loaded = useSelector(selectCollectionsLoaded);
     const shown = groupToDisplay.group;
     const showingAll = !shown?.id || shown.name === 'all';
 
@@ -58,7 +56,7 @@ export default function GroupBtnContainer({ setCreateGroup }){
     const sharedGroups = useSelector(selectSharedGroups);
     const shownSharedGone = shown?.shared && !sharedGroups.some(g => g.id === shown.id);
     // a collection deleted (here or on its page), or one shown before the test ended
-    const shownCollectionGone = shown?.collection && (!asCollections || (collectionsLoaded && !groups.some(g => g.id === shown.id)));
+    const shownCollectionGone = shown?.collection && (loaded && !groups.some(g => g.id === shown.id));
 
     // the shown session's group (or collection) just went away: back to all tasks
     useEffect(() => {
@@ -96,7 +94,7 @@ export default function GroupBtnContainer({ setCreateGroup }){
                 </button>
             ))}
             <button type="button" className={styles.addChip} onClick={() => setCreateGroup(true)}
-                title={t(asCollections ? 'collectionNew' : 'createGroupH2')} aria-label={t(asCollections ? 'collectionNew' : 'createGroupH2')}>
+                title={t('collectionNew')} aria-label={t('collectionNew')}>
                 <Icon name="plus" className={styles.addIcon} strokeWidth={2} />
             </button>
         </div>

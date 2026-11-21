@@ -8,7 +8,7 @@
 // API: POST /api/arcade/scores { game, level, score, ranked }, GET /api/arcade/me,
 // GET /api/arcade/leaderboard?game=&level=, DELETE /api/arcade/ranked (off every board).
 
-import { apiFetch, CACHE_SHORT } from '../helperFunction';
+import { apiFetch, CACHE_SHORT } from '../api/api';
 
 // max: the most the server takes (the same numbers as ARCADE_GAMES in the api)
 export const ARCADE_GAMES = [

@@ -251,6 +251,85 @@
     background-color: var(--overlay);
 }
 
+/* A dialog (Dialog.jsx): the dimmed page it stands over, and the small centred card on it.
+   Compose both and override only what differs (width, padding, z-index). The keyframes are
+   The two keyframes live here (names are local to this file, so only classes of this file can
+   use them: compose `fadeIn` for a plain fade). */
+.dialogBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-alert);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: var(--overlay);
+    animation: fadeIn 0.16s ease-out;
+}
+
+.dialogCard {
+    width: min(24rem, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.4rem 1.25rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+    animation: rise 0.26s var(--spring-curve);
+}
+
+.dialogTitle {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    color: var(--text-h);
+}
+
+/* A wider card that scrolls as a whole, with a head (title + close) at its top: the focus
+   settings, the scan sheet */
+.dialogSheet {
+    composes: dialogCard;
+    width: min(34rem, 100%);
+    max-height: min(88dvh, 52rem);
+    overflow: auto;
+    gap: 0.5rem;
+}
+
+.dialogHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.dialogHeadTitle {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 650;
+    color: var(--text-h);
+}
+
+.fadeIn {
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+}
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dialogBackdrop,
+    .dialogCard {
+        animation: none;
+    }
+}
+
 /* Visually hidden, still read by screen readers. Modules compose this under their own .srOnly */
 .srOnly {
     position: absolute;
@@ -408,6 +487,14 @@
 
 .iconHover:active {
     transform: scale(0.94);
+}
+
+/* the close button of a dialog's head */
+.dialogClose {
+    composes: iconHover;
+    flex: none;
+    width: 1.75rem;
+    height: 1.75rem;
 }
 
 /* Delete control (button or bare svg): turns red on hover */

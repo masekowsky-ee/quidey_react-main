@@ -3,15 +3,12 @@
 // it is caught at startup (listenForInstallPrompt in main.jsx) and kept here. Safari on
 // iPhone / iPad has no such event: there the settings explain the share menu instead.
 import { useSyncExternalStore } from 'react';
-import { isNativeApp } from '../native/native';
+import { runsAsApp } from '../usage/platform';
 
 let deferredPrompt = null;
 let installed = false;
 const listeners = new Set();
 const notify = () => listeners.forEach((listener) => listener());
-
-// the Android app (Capacitor) is installed by definition
-const runsAsApp = () => isNativeApp() || window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
 // A plain browser tab: not the Android app, not the installed web app (e.g. the Fokusraum's
 // full-screen button exists only here; an app window already has the whole screen)

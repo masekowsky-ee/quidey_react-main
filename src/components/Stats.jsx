@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
-import { apiFetch, fill, mondayIndex, CACHE_SHORT } from '../features/helperFunction';
+import { localeOf } from '../i18n/locale';
+import { fill, mondayIndex } from '../features/helperFunction';
+import { apiFetch, CACHE_SHORT } from '../features/api/api';
 import { fetchOwnProfile, profileColorAttr } from '../features/profile/profileOptions';
 import { RANGES, hoursText, periodOf, periodQuery, sumByBucket } from '../features/stats/period';
 import { isTaskColor, groupColorAttr } from '../features/tasks/taskColors';
@@ -12,7 +14,7 @@ import CompletedTasks from './CompletedTasks.jsx';
 import SessionList from './stats/SessionList.jsx';
 import TimeChart from './stats/TimeChart.jsx';
 import TogetherStats from './stats/TogetherStats.jsx';
-import Icon from './calendar/icons.jsx';
+import Icon from './icons.jsx';
 import { Bone, Skeleton } from './skeleton/Skeleton.jsx';
 import { usePlan } from '../features/pro/pro';
 
@@ -174,7 +176,7 @@ function Overview({ period, stats, error, t, locale }) {
 // The period and tab are in the address, so a view can be bookmarked.
 export default function Stats() {
     const { t, language } = useTranslation();
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const [params, setParams] = useSearchParams();
     const tab = TABS.includes(params.get('tab')) ? params.get('tab') : 'overview';
     // the free plan (after the beta) sees this week; longer periods come with Quidey Pro
@@ -246,7 +248,7 @@ export default function Stats() {
                     <div className={styles.stepper}>
                         <button type="button" className={styles.stepBtn} disabled={range === 'all' || limited}
                             onClick={() => update({ offset: offset - 1 })} aria-label={t('periodPrevious')} title={t('periodPrevious')}>
-                            <Icon name="prev" size={20} />
+                            <Icon name="mPrev" size={20} />
                         </button>
                         <p className={styles.periodName} aria-live="polite">
                             <strong>{title}</strong>
@@ -254,7 +256,7 @@ export default function Stats() {
                         </p>
                         <button type="button" className={styles.stepBtn} disabled={range === 'all' || offset >= 0}
                             onClick={() => update({ offset: offset + 1 })} aria-label={t('periodNext')} title={t('periodNext')}>
-                            <Icon name="next" size={20} />
+                            <Icon name="mNext" size={20} />
                         </button>
                     </div>
                 </div>}

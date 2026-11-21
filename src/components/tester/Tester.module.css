@@ -241,40 +241,10 @@
   gap: 0.5rem;
 }
 
-.stars {
+.starRow {
   display: flex;
   align-items: center;
   gap: 0.15rem;
-}
-
-/* an outline star; lit ones are filled in the accent (a rating is data) */
-.star {
-  width: 2.25rem;
-  height: 2.25rem;
-  color: var(--text-muted);
-}
-
-.star svg {
-  transition: fill var(--ease-out), color var(--ease-out);
-}
-
-.starOn {
-  color: var(--primary-fg);
-}
-
-.starOn svg {
-  fill: currentColor;
-}
-
-@media (hover: hover) {
-  /* hovering a star previews it and the ones before it */
-  .stars:hover .star {
-    color: var(--primary-fg);
-  }
-
-  .stars:hover .star:hover ~ .star {
-    color: var(--text-muted);
-  }
 }
 
 .clearStars {
@@ -411,13 +381,5 @@
 
   .rankItem:not(:has(.favorite)) .rankBar {
     grid-column: 1 / -1;
-  }
-}
-
-/* iOS: a control is at least 44 pt on a touch screen (HIG) */
-@media (pointer: coarse) {
-  .star {
-    min-width: 2.75rem;
-    min-height: 2.75rem;
   }
 }

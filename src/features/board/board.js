@@ -7,8 +7,9 @@
 // pinnedAt, owner, mine, canRemove } (pictures with their data only from fetchBoardNote).
 
 import { useCallback, useEffect, useState } from 'react';
-import { apiFetch } from '../helperFunction';
+import { apiFetch, json } from '../api/api';
 import { useRealtime } from '../realtime/socket';
+import { BOARD_CHANGED } from '../realtime/events';
 
 export const BOARD_NOTES_MAX = 30;
 const BASES = { family: '/api/families', session: '/api/shared-sessions' };
@@ -16,7 +17,7 @@ const boardUrl = (kind, id) => `${BASES[kind]}/${id}/board`;
 
 const fetchBoard = (kind, id) => apiFetch(boardUrl(kind, id));
 export const fetchBoardNote = (kind, id, pinId) => apiFetch(`${boardUrl(kind, id)}/${pinId}`);
-export const pinToBoard = (kind, id, noteId) => apiFetch(boardUrl(kind, id), { method: 'POST', body: JSON.stringify({ noteId }) });
+export const pinToBoard = (kind, id, noteId) => apiFetch(boardUrl(kind, id), json('POST', { noteId }));
 export const unpinFromBoard = (kind, id, pinId) => apiFetch(`${boardUrl(kind, id)}/${pinId}`, { method: 'DELETE' });
 // [{ kind, id, pinId }]
 export const fetchNoteBoards = (noteId) => apiFetch(`/api/notebook/${noteId}/boards`);
@@ -29,7 +30,7 @@ export function useBoard(kind, id) {
         .then(list => setPins(Array.isArray(list) ? list : []))
         .catch(() => setPins(prev => prev ?? [])), [kind, id]);
     useEffect(() => { load(); }, [load]);
-    useRealtime('board:changed', (change) => { if (change?.kind === kind && change?.id === id) load(); });
+    useRealtime(BOARD_CHANGED, (change) => { if (change?.kind === kind && change?.id === id) load(); });
     return { pins, setPins, reload: load };
 }
 

@@ -1,31 +1,15 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { applyFavicon } from './favicon';
-import { VARIANT_COLORS, useColorChoice } from '../tester/variants';
+import { VARIANT_COLORS, applyBarColor, useColorChoice } from './colors';
+import { read, write } from '../storedSetting';
 
 export const THEMES = ['dark', 'light', 'system'];
 const STORAGE_KEY = 'theme';
 const LIGHT_QUERY = '(prefers-color-scheme: light)';
-// --surface-bar of the default palette in each theme (index.css), for the mobile browser's bars
-// where the stylesheet can't be read
-const BAR_COLORS = { dark: '#0e0d0c', light: '#f5f5f3' };
-
-// The mobile browser's bars match the header: --surface-bar of the theme and palette now on <html>
-function applyBarColor(resolved) {
-    const fromCss = getComputedStyle(document.documentElement).getPropertyValue('--surface-bar').trim();
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', fromCss || BAR_COLORS[resolved]);
-}
-
 // The saved choice, or 'system' (the device's light or dark) when nothing valid is saved.
 // localStorage can throw (private mode, blocked storage), so this never assumes it works.
-export function readStoredTheme() {
-    try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        return THEMES.includes(stored) ? stored : 'system';
-    } catch {
-        return 'system';
-    }
-}
+export const readStoredTheme = () => read(STORAGE_KEY, { allowed: THEMES, fallback: 'system' });
 
 // 'system' follows the operating system; the others are used as they are
 export function resolveTheme(theme, systemPrefersLight) {
@@ -42,7 +26,7 @@ export function useApplyTheme() {
     const { variant, palette, accent } = useColorChoice();
 
     useEffect(() => {
-        try { localStorage.setItem(STORAGE_KEY, theme); } catch { /* not saved, still applied */ }
+        write(STORAGE_KEY, theme); // not saved when storage is blocked, still applied
 
         const media = window.matchMedia?.(LIGHT_QUERY);
         const set = (resolved) => {

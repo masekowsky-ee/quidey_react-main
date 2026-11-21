@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import { LIMIT_EVENT } from '../features/pro/pro'
 import ProPage from '../components/pro/ProPage'
@@ -12,7 +12,7 @@ import LimitDialog from '../components/pro/LimitDialog'
 import CancelForm from '../legal/CancelForm'
 import Stats from '../components/Stats'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))
@@ -85,7 +85,7 @@ describe('Quidey Pro: the page', () => {
 
 describe('the free plan is full', () => {
     it('apiFetch announces LIMIT_REACHED; the dialog says it kindly and leads to the beta card while Pro is off', async () => {
-        const { apiFetch: realFetch } = await vi.importActual('../features/helperFunction')
+        const { apiFetch: realFetch } = await vi.importActual('../features/api/api')
         globalThis.fetch = vi.fn(async () => new Response(JSON.stringify({ error: 'x', code: 'LIMIT_REACHED', limit: 'tasks', max: 10 }), { status: 403 }))
         apiFetch.mockImplementation(async () => ({}))
         renderWith(<LimitDialog />)

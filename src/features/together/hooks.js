@@ -4,6 +4,7 @@ import { fetchSharedSession, togetherErrorText } from './togetherAction';
 import { showToast } from '../toast/toast';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useRealtime, useRealtimeRefresh, useRealtimeSession, useSafetyPoll } from '../realtime/socket';
+import { SESSION_EVENT, SESSION_CHANGED } from '../realtime/events';
 import { SHARED_SESSION_EVENT } from './togetherActionTypes';
 
 // An open session loads again when the server says it changed (tasks, members, who works on
@@ -31,11 +32,11 @@ export function useSharedSession(id) {
 
     // the live chat, once the server let me see the session (i.e. I'm a member)
     useRealtimeSession(session ? id : null);
-    useRealtime('session:event', (payload) => {
+    useRealtime(SESSION_EVENT, (payload) => {
         if (payload?.sessionId === id) dispatch({ type: SHARED_SESSION_EVENT, payload });
     });
     // changes (and whatever happened while the connection was down), loaded once per burst
-    useRealtimeRefresh(['session:changed'], () => { if (id) load(); }, (event, payload) => payload?.sessionId === id);
+    useRealtimeRefresh([SESSION_CHANGED], () => { if (id) load(); }, (event, payload) => payload?.sessionId === id);
 
     return { session, missing: missingId === id && !session };
 }

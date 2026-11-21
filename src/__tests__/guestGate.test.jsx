@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { OPEN_AUTH_EVENT, openAuth, isGuestPath } from '../features/auth/gate'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 
 // What a visitor without an account can open, and the window that asks them to sign in
 let seen

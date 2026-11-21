@@ -68,6 +68,19 @@ export function timeText(minutes) {
     return `${String(Math.floor(day / 60)).padStart(2, '0')}:${String(day % 60).padStart(2, '0')}`;
 }
 
+// a Date's local time of day as "09:30"
+export const hhmm = (date) => timeText(date.getHours() * 60 + date.getMinutes());
+
+// Monday = 1 … Sunday = 7, like the server
+export const isoWeekday = (date = new Date()) => ((date.getDay() + 6) % 7) + 1;
+
+// Weekdays (numbers from 1 = Monday) in words: "Jeden Tag", "Werktags", or "Mo, Mi, Fr"
+export function weekdaysText(days, t) {
+    if (days.length === 7) return t('routineEveryDay');
+    if (days.join() === '1,2,3,4,5') return t('routineWeekdays');
+    return days.map(day => t('weekDays', day - 1)).join(', ');
+}
+
 // When a task starts: its day at its time (local), null for a task without a day or time
 export function taskStart(task) {
     const day = parseDate(task?.due);

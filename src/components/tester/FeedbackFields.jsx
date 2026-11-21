@@ -1,7 +1,7 @@
 import { useId, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styles from './Tester.module.css';
-import Icon from '../icons';
+import Stars from '../stars/Stars';
 import { useTranslation } from '../../i18n/useTranslation';
 import { fill } from '../../features/helperFunction';
 import { COMMENT_MAX, RATING_MAX, saveTesterFeedback } from '../../features/tester/feedback';
@@ -40,15 +40,10 @@ export default function FeedbackFields({ topic, name, entry, onSaved }) {
 
     return (
         <div className={styles.feedback}>
-            <div className={styles.stars} role="radiogroup" aria-label={fill(t('testerRatingLabel'), { name })}>
-                {Array.from({ length: RATING_MAX }, (_, i) => i + 1).map(value => (
-                    <button key={value} type="button" role="radio" aria-checked={rating === value}
-                        className={`${styles.star} ${rating !== null && value <= rating ? styles.starOn : ''}`}
-                        aria-label={fill(t('testerStar'), { count: value })} title={fill(t('testerStar'), { count: value })}
-                        onClick={() => save({ rating: rating === value ? null : value })}>
-                        <Icon name="star" size={20} strokeWidth={1.6} />
-                    </button>
-                ))}
+            <div className={styles.starRow}>
+                <Stars value={rating} max={RATING_MAX} label={fill(t('testerRatingLabel'), { name })}
+                    starLabel={(count) => fill(t('testerStar'), { count })}
+                    onChange={(value) => save({ rating: rating === value ? null : value })} />
                 {rating !== null &&
                     <button type="button" className={styles.clearStars} onClick={() => save({ rating: null })}>
                         {t('testerRatingClear')}

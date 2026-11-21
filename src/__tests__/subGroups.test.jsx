@@ -3,7 +3,7 @@ import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { makeStore as baseStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_TASK_STATE, EDIT_DISPLAYGROUP } from '../features/tasks/taskActionTypes'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { SET_MY_SHARED_TASKS } from '../features/together/togetherActionTypes'
@@ -16,7 +16,7 @@ import TaskForm from '../components/TaskForm'
 import SharedTaskList from '../components/together/SharedTaskList'
 import FamilyPage from '../components/family/FamilyPage'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

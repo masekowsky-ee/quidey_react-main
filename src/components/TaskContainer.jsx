@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {deleteTaskAsking, deleteGroup, deleteGroupTasks, editGroup, updateTaskProps, editDisplaygroup, leaveTask, isSharedWithMe, selectTasksLoaded} from '../features/tasks/taskAction'
 import TaskColorButton from './task/TaskColorButton.jsx'
-import TaskRow, { TaskRowSkeleton } from './task/TaskRow.jsx'
-import { Bone, Skeleton } from './skeleton/Skeleton.jsx'
+import TaskRow from './task/TaskRow.jsx'
+import { SkeletonPanel } from './skeleton/TaskListSkeleton.jsx'
 import ConfirmDeleteButton from './ConfirmDeleteButton.jsx'
 import Icon from './icons.jsx'
 import { createPortal } from 'react-dom';
@@ -29,34 +29,6 @@ import { selectCollections, taskIdsIn, updateCollection, deleteCollection, remov
 
 // seconds between two rows when the list cascades in
 const CASCADE_STEP = { minimal: 0.025, normal: 0.035, extreme: 0.045 };
-
-// The task list on Home: the open tasks of the shown group (or all of them, with the tasks of
-// my shared sessions), then, when asked for, the done ones. The task in focus is left out.
-// The list's shape while my tasks are on their way: open rows, grey where the tasks will be
-function SkeletonPanel() {
-    return (
-        <Skeleton className={styles.panel}>
-            <ul className={styles.list}>
-                {[0, 1, 2, 3].map(i => <TaskRowSkeleton key={i} index={i} />)}
-            </ul>
-        </Skeleton>
-    );
-}
-
-// The whole section before the app knows it may load anything (the start screen, see AppSkeleton)
-export function TaskListSkeleton() {
-    const { t } = useTranslation();
-    return (
-        <section className={styles.section}>
-            <div className={styles.sectionHead}>
-                <span className={styles.collapseBtn}><Icon name="chevronDown" className={styles.chevron} /></span>
-                <h2 className={styles.sectionTitle}>{t('taskContainer')}</h2>
-                <div className={styles.headActions}><Bone pill w="9.5rem" h="2.25rem" /></div>
-            </div>
-            <SkeletonPanel />
-        </section>
-    );
-}
 
 // open tasks shown at first on Home (own look)
 const PLAIN_ROWS = 6;

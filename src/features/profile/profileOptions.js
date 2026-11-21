@@ -1,4 +1,4 @@
-import { apiFetch, CACHE_SHORT } from '../helperFunction';
+import { apiFetch, CACHE_SHORT } from '../api/api';
 import { TASK_COLORS } from '../tasks/taskColors';
 
 // What a profile can be set up with. The api checks the same lists (index.js, "Profiles").

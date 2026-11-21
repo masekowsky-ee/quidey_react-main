@@ -3,13 +3,13 @@ import { render, screen, fireEvent, within, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { makeStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { setLanguage } from '../features/settings/settingsAction'
 import Calendar from '../components/Calendar'
 import WeekDaysContainer from '../components/WeekDaysContainer'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

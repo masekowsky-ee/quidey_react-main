@@ -4,6 +4,7 @@ import { fetchNotes, createNote, removeNote } from '../../features/focus/noteboo
 import { showToast } from '../../features/toast/toast';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import NoteEditor from '../notes/NoteEditor.jsx';
 import Notebook from './Notebook.jsx';
 import ScanSheet from '../scan/ScanSheet.jsx';
@@ -57,7 +58,7 @@ export default function SessionNotes({ goal, focusTask }) {
     const start = async () => {
         if (creating) return;
         setCreating(true);
-        const date = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short' }).format(new Date());
+        const date = new Intl.DateTimeFormat(localeOf(language), { day: 'numeric', month: 'short' }).format(new Date());
         try {
             const made = await createNote({
                 title: wanted || fill(t('noteNewTitle'), { date }),

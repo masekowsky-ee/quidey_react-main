@@ -8,8 +8,9 @@
 // avatars:changed { userId } (live) forgets one, so the new picture comes in.
 
 import { useEffect, useSyncExternalStore } from 'react';
-import { apiFetch, apiUrl } from '../helperFunction';
+import { apiFetch, rawFetch, json } from '../api/api';
 import { useRealtime } from '../realtime/socket';
+import { AVATARS_CHANGED } from '../realtime/events';
 
 const BATCH_MS = 30;
 const versions = new Map();   // user id -> version (string) | null (none)
@@ -26,8 +27,7 @@ async function loadPicture(id, version) {
     if (loading.has(id) || pictures.get(id)?.version === version) return;
     loading.add(id);
     try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(apiUrl(`/api/avatars/${id}?v=${encodeURIComponent(version)}`), { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+        const res = await rawFetch(`/api/avatars/${id}?v=${encodeURIComponent(version)}`);
         if (!res.ok) return;
         const url = URL.createObjectURL(await res.blob());
         const old = pictures.get(id);
@@ -80,7 +80,7 @@ export function useAvatarUrl(userId) {
 
 // App: pictures changed live are loaded again
 export function useAvatarRealtime() {
-    useRealtime('avatars:changed', ({ userId } = {}) => { if (userId) forgetAvatar(userId); });
+    useRealtime(AVATARS_CHANGED, ({ userId } = {}) => { if (userId) forgetAvatar(userId); });
 }
 
 // ---------- setting one ----------
@@ -159,7 +159,7 @@ export function circlePicture(image, placement) {
 }
 
 export async function saveAvatar(myId, data) {
-    await apiFetch('/api/profile/avatar', { method: 'PUT', body: JSON.stringify({ data }) });
+    await apiFetch('/api/profile/avatar', json('PUT', { data }));
     forgetAvatar(myId);
 }
 

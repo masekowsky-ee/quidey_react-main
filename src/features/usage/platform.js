@@ -1,5 +1,17 @@
 import { isNativeApp } from '../native/native';
 
+// The installed web app: a window of its own (display-mode: standalone), or iOS' home-screen app
+export function isStandalone() {
+    try {
+        return Boolean(window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true);
+    } catch {
+        return false;
+    }
+}
+
+// The Android app or the installed web app (not a browser tab)
+export const runsAsApp = () => isNativeApp() || isStandalone();
+
 // Where Quidey runs, as the usage statistics and the API name it: the Android app, the installed
 // web app (display-mode: standalone) or a browser tab
 export function platform() {

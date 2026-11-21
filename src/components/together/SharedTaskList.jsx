@@ -19,7 +19,7 @@ import { taskColorAttr } from '../../features/tasks/taskColors';
 import Avatar from './Avatar';
 import TaskMeta from '../task/TaskMeta.jsx';
 import TaskEditDialog from '../task/TaskEditDialog.jsx';
-import Icon from '../calendar/icons.jsx';
+import Icon from '../icons.jsx';
 
 const FILTERS = ['all', 'mine', 'free'];
 
@@ -123,7 +123,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                 {/* an event isn't ticked off: it's done once it's over */}
                 {event
                     ? <span className={styles.eventMark} title={t(task.done ? 'eventOver' : 'kind_event')}>
-                        <Icon name="calendar" size={18} />
+                        <Icon name="mCalendar" size={18} />
                     </span>
                     : <input
                         type="checkbox"
@@ -174,10 +174,10 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                             ? <button className={styles.secondaryBtn} onClick={() => dispatch(pauseFocus())}>{t('pause')}</button>
                             : <button className={styles.acceptBtn} onClick={() => dispatch(workOnSharedTask(session, task))}>{t('workOnThis')}</button>)}
                         <button className={styles.quietBtn} onClick={() => setEditTaskId(task.id)} aria-label={`${t('editTask')}: ${task.name}`} title={t('editTask')}>
-                            <Icon name="edit" size={18} />
+                            <Icon name="mEdit" size={18} />
                         </button>
                         {canRemove(task) && (
-                            <button className={styles.quietBtn} onClick={() => run(removeSharedTask(id, task.id))} aria-label={`${t('taskDeleteBtn')}: ${task.name}`} title={t('taskDeleteBtn')}><Icon name="close" size={18} /></button>
+                            <button className={styles.quietBtn} onClick={() => run(removeSharedTask(id, task.id))} aria-label={`${t('taskDeleteBtn')}: ${task.name}`} title={t('taskDeleteBtn')}><Icon name="mClose" size={18} /></button>
                         )}
                     </div>
                 )}
@@ -245,7 +245,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                             {shareable.map(task => <option key={task.id} value={task.id}>{task.name}</option>)}
                         </select>
                         : <button type="button" className={styles.linkAction} onClick={() => setPickOwn(true)}>
-                            <Icon name="add" size={16} /> {t('shareOwnTask')}
+                            <Icon name="mAdd" size={16} /> {t('shareOwnTask')}
                         </button>
                     )}
                 </div>
@@ -259,7 +259,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
                     {done.length > 0 && (
                         <>
                             <button className={styles.doneToggle} aria-expanded={showDone} onClick={() => setShowDone(v => !v)}>
-                                <span className={`${styles.doneChevron} ${showDone ? styles.doneChevronOpen : ''}`} aria-hidden="true"><Icon name="next" size={16} /></span> {t('done')} ({done.length})
+                                <span className={`${styles.doneChevron} ${showDone ? styles.doneChevronOpen : ''}`} aria-hidden="true"><Icon name="mNext" size={16} /></span> {t('done')} ({done.length})
                             </button>
                             {showDone && <ul className={styles.scrollList}>{done.map(row)}</ul>}
                         </>

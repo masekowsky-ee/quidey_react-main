@@ -1,6 +1,5 @@
 import styles from '../CalendarDay.module.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../i18n/useTranslation';
 import { displayName, fill, isOverdue, mondayIndex, sameDay } from '../../features/helperFunction';
@@ -10,9 +9,9 @@ import TaskLabels from '../TaskLabels.jsx';
 import TaskEditor from './TaskEditor.jsx';
 import DayTimeline from './DayTimeline.jsx';
 import TaskMeta from '../task/TaskMeta.jsx';
-import Icon from './icons.jsx';
+import Icon from '../icons.jsx';
 import SheetGrabber from '../SheetGrabber.jsx';
-import { useSheet } from '../../features/layout/dragDismiss';
+import Dialog from '../Dialog.jsx';
 import { taskColorAttr } from '../../features/tasks/taskColors';
 import { isEvent } from '../../features/tasks/kinds';
 
@@ -32,11 +31,11 @@ function TaskRow({ task, today, personal, allowEvents, remindsAll, editing, onEd
                 {/* an event isn't ticked off: it's done once it's over */}
                 {event
                     ? <span className={styles.eventMark} title={t(task.done ? 'eventOver' : 'kind_event')}>
-                        <Icon name="calendar" size={16} />
+                        <Icon name="mCalendar" size={16} />
                     </span>
                     : <button type="button" className={styles.check} aria-pressed={Boolean(task.done)} onClick={() => onToggleDone(task)}
                         aria-label={`${t(task.done ? 'reopen' : 'markDone')}: ${task.name}`} title={t(task.done ? 'reopen' : 'markDone')}>
-                        <Icon name="check" size={16} />
+                        <Icon name="mCheck" size={16} />
                     </button>}
                 <div className={styles.rowText}>
                     <button type="button" className={styles.rowName} onClick={editing ? onCloseEdit : onEdit} aria-expanded={editing}>
@@ -53,7 +52,7 @@ function TaskRow({ task, today, personal, allowEvents, remindsAll, editing, onEd
                     {level && <span className={styles.prioPill} title={t(PRIO_TEXT[level])}>{task.prio}</span>}
                     {!editing &&
                         <button type="button" className={styles.editBtn} onClick={onEdit} aria-label={`${t('editTask')}: ${task.name}`} title={t('editTask')}>
-                            <Icon name="edit" size={18} />
+                            <Icon name="mEdit" size={18} />
                         </button>}
                 </div>
             </div>
@@ -74,7 +73,7 @@ function PreviewRow({ task, onOpenSeries, onDelete }) {
         <li className={`${styles.row} ${styles.rowPreview} ${event ? styles.rowEvent : ''}`} data-task-color={taskColorAttr(task)}>
             <div className={styles.rowMain}>
                 <span className={styles.eventMark} title={t('repeatPreview')}>
-                    <Icon name="repeat" size={16} />
+                    <Icon name="mRepeat" size={16} />
                 </span>
                 <div className={styles.rowText}>
                     <span className={styles.rowNameStatic}>{task.name}</span>
@@ -85,11 +84,11 @@ function PreviewRow({ task, onOpenSeries, onDelete }) {
                     {onOpenSeries &&
                         <button type="button" className={styles.editBtn} onClick={() => onOpenSeries(task.repeatOf)}
                             aria-label={`${t('editSeries')}: ${task.name}`} title={t('editSeries')}>
-                            <Icon name="edit" size={18} />
+                            <Icon name="mEdit" size={18} />
                         </button>}
                     <button type="button" className={styles.editBtn} onClick={() => onDelete(task)}
                         aria-label={`${t(event ? 'deleteEvent' : 'deleteTask')}: ${task.name}`} title={t(event ? 'deleteEvent' : 'deleteTask')}>
-                        <Icon name="delete" size={18} />
+                        <Icon name="mDelete" size={18} />
                     </button>
                 </div>
             </div>
@@ -106,16 +105,23 @@ function PreviewRow({ task, onOpenSeries, onDelete }) {
 // its keys are the form's.
 // personal: false in a shared calendar (session or family): no groups, reminders or sharing,
 // each task says who added it, and only who added it (or the owner) can delete it (canRemove).
-export default function DayPanel({
+export default function DayPanel(props) {
+    const panelRef = useRef(null);
+    // on phones a sheet: pulled down, it closes. Escape: the dialog's (nested: a field's own first)
+    return (
+        <Dialog onClose={props.onClose} nested panel={false} panelRef={panelRef} backdropClassName={styles.backdrop}
+            initialFocus={() => (props.initialTaskId ? null : panelRef.current)}>
+            {(dismiss, sheet) => <DayPanelBody {...props} dismiss={dismiss} sheet={sheet} />}
+        </Dialog>
+    );
+}
+
+function DayPanelBody({
     date, today, tasks, focus, sharedEntries, initialTaskId, locale, longDate, personal = true, allowEvents = false, remindsAll = false, paused = false,
-    onClose, onShiftDay, onCreate, onToggleDone, onSaveTask, onDeleteTask, onLeaveTask, onOpenGroup, onOpenSeries,
+    onShiftDay, onCreate, onToggleDone, onSaveTask, onDeleteTask, onLeaveTask, onOpenGroup, onOpenSeries, dismiss, sheet,
 }) {
     const { t } = useTranslation();
     const key = dateKey(date);
-    const panelRef = useRef(null);
-    // on phones a sheet: pulled down, it closes
-    const sheet = useSheet(onClose, panelRef);
-    const { dismiss } = sheet;
     // the task being edited, remembered with its day so changing the day closes the editor
     const [editing, setEditing] = useState({ day: key, id: initialTaskId });
     const editingId = editing.day === key ? editing.id : null;
@@ -148,27 +154,17 @@ export default function DayPanel({
     const nextKey = dateKey(addDays(date, 1));
     const dropDay = drag?.target === 'day' ? drag.day : null;
 
-    // focus starts in the panel and goes back afterwards
-    useEffect(() => {
-        const previous = document.activeElement;
-        if (!initialTaskId) panelRef.current?.focus();
-        return () => { previous?.focus?.(); };
-        // only when the panel opens
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
     useEffect(() => {
         const onKey = (e) => {
             if (paused || e.defaultPrevented) return;
-            if (e.key === 'Escape') dismiss();
-            else if (!isTyping(e.target) && !e.altKey && !e.ctrlKey && !e.metaKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+            if (!isTyping(e.target) && !e.altKey && !e.ctrlKey && !e.metaKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
                 e.preventDefault();
                 onShiftDay(e.key === 'ArrowLeft' ? -1 : 1);
             }
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [paused, dismiss, onShiftDay]);
+    }, [paused, onShiftDay]);
 
     const leave = async (task) => {
         const ok = await onLeaveTask(task);
@@ -191,14 +187,13 @@ export default function DayPanel({
     const sessions = focus?.sessions ?? [];
     const clockText = (value) => new Date(value).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
-    return createPortal(
-        <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
+    return (
             <div className={`${styles.panel} ${editingTask ? styles.panelWide : styles.panelTimeline}`} role="dialog" aria-modal="true" aria-labelledby="dayPanelTitle" {...sheet.panel} tabIndex={-1}>
                 <SheetGrabber />
                 <div className={styles.head} data-sheet-drag>
                     <button type="button" className={`${styles.navBtn} ${dropDay === prevKey ? styles.dropOn : ''}`} data-drop-day={prevKey}
                         onClick={() => onShiftDay(-1)} aria-label={t('previousDay')} title={t('previousDay')}>
-                        <Icon name="prev" />
+                        <Icon name="mPrev" />
                     </button>
                     <div className={styles.titles}>
                         <span className={styles.weekday}>
@@ -209,14 +204,14 @@ export default function DayPanel({
                     </div>
                     <button type="button" className={`${styles.navBtn} ${dropDay === nextKey ? styles.dropOn : ''}`} data-drop-day={nextKey}
                         onClick={() => onShiftDay(1)} aria-label={t('nextDay')} title={t('nextDay')}>
-                        <Icon name="next" />
+                        <Icon name="mNext" />
                     </button>
                     <button type="button" className={styles.addDayBtn} onClick={() => onCreate(null)}
                         aria-label={fill(t('addEntryOnDay'), { date: longDate(date) })} title={fill(t('addEntryOnDay'), { date: longDate(date) })}>
-                        <Icon name="add" size={22} />
+                        <Icon name="mAdd" size={22} />
                     </button>
                     <button type="button" className={styles.closeBtn} onClick={() => dismiss()} aria-label={t('close')} title={`${t('close')} (Esc)`}>
-                        <Icon name="close" size={22} />
+                        <Icon name="mClose" size={22} />
                     </button>
                 </div>
 
@@ -292,7 +287,5 @@ export default function DayPanel({
                     }
                     </DayTimeline>}
             </div>
-        </div>,
-        document.body
     );
 }

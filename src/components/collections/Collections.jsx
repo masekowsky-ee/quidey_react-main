@@ -12,6 +12,7 @@ import { groupColorAttr, taskColorAttr } from '../../features/tasks/taskColors';
 import { showToast } from '../../features/toast/toast';
 import { fill, dueText, parseDate } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import TaskEditDialog from '../task/TaskEditDialog.jsx';
 import TaskColorPicker from '../task/TaskColorPicker.jsx';
 import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
@@ -26,7 +27,7 @@ function useNotes() {
     return [notes, setNotes];
 }
 
-const dayFormat = (language) => new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+const dayFormat = (language) => new Intl.DateTimeFormat(localeOf(language), { weekday: 'short', day: 'numeric', month: 'short' });
 
 // "2 Events · 5 Aufgaben (3 offen) · 1 Notiz"
 function countsLine(t, { events, tasks, notes }) {

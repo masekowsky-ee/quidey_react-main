@@ -1,11 +1,9 @@
-import { useEffect, useId, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import { useId, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { useSheet } from '../../features/layout/dragDismiss';
 import { fill, sameDay, parseDate } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
-import SheetGrabber from '../SheetGrabber.jsx';
+import Dialog from '../Dialog.jsx';
 import Icon from '../icons.jsx';
 import { PomodoroLengths } from './FocusTimer.jsx';
 import { useAwayTally, todaysAway } from '../../features/focus/away';
@@ -60,29 +58,11 @@ export default function FocusSettingsSheet({ onClose, fullscreen }) {
     const { t } = useTranslation();
     const titleId = useId();
     const closeRef = useRef(null);
-    const sheet = useSheet(onClose);
-    const { dismiss } = sheet;
 
-    useEffect(() => {
-        const previous = document.activeElement;
-        closeRef.current?.focus();
-        const onKey = (e) => {
-            if (e.key !== 'Escape') return;
-            e.preventDefault();
-            e.stopPropagation();
-            dismiss();
-        };
-        window.addEventListener('keydown', onKey, true);
-        return () => {
-            window.removeEventListener('keydown', onKey, true);
-            previous?.focus?.();
-        };
-    }, [dismiss]);
-
-    return createPortal(
-        <div className={styles.settingsBackdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
-            <div className={styles.settingsSheet} role="dialog" aria-modal="true" aria-labelledby={titleId} {...sheet.panel}>
-                <SheetGrabber />
+    return (
+        <Dialog onClose={onClose} labelledBy={titleId} initialFocus={closeRef}
+            backdropClassName={styles.settingsBackdrop} className={styles.settingsSheet}>
+            {(dismiss) => (<>
                 <div className={styles.settingsHead} data-sheet-drag>
                     <h2 id={titleId} className={styles.settingsTitle}>{t('focusSettings')}</h2>
                     <button type="button" ref={closeRef} className={styles.iconMini} onClick={() => dismiss()} aria-label={t('focusSettingsClose')}>
@@ -110,8 +90,7 @@ export default function FocusSettingsSheet({ onClose, fullscreen }) {
                             </button>}
                     </div>
                 </div>
-            </div>
-        </div>,
-        document.body
+            </>)}
+        </Dialog>
     );
 }

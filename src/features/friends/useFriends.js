@@ -6,12 +6,14 @@ import { fetchFriends } from './friendsAction';
 export function useFriends() {
     const dispatch = useDispatch();
     const friends = useSelector(state => state.friends.friends);
+    // the reducer's flag: set once the server answered, so a user without friends is not asked again on every mount
+    const friendsLoaded = useSelector(state => state.friends.friendsLoaded);
     const [loaded, setLoaded] = useState(false);
     useEffect(() => {
-        if (loaded || friends.length > 0) return;
+        if (loaded || friendsLoaded || friends.length > 0) return;
         let active = true;
         dispatch(fetchFriends()).catch(() => {}).finally(() => { if (active) setLoaded(true); });
         return () => { active = false; };
-    }, [dispatch, friends.length, loaded]);
+    }, [dispatch, friends.length, friendsLoaded, loaded]);
     return friends;
 }

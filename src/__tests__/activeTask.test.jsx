@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { makeStore as baseStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { setMotion } from '../features/settings/settingsAction'
 import WorkingContainer from '../components/WorkingContainer'
@@ -13,7 +13,7 @@ import CompletedTasks from '../components/CompletedTasks'
 import Home from '../components/Home'
 import LegalPage from '../legal/LegalPage'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

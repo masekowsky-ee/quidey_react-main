@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {useTranslation} from '../../i18n/useTranslation'
+import { localeOf } from '../../i18n/locale';
 import { fetchSharedHistory } from '../../features/together/togetherAction';
 import { inPeriod } from '../../features/stats/period';
 import { groupSittings, sittingGapMs } from '../../features/stats/sittings';
@@ -51,7 +52,7 @@ export default function SessionList({ period }){
     const sittings = groupSittings(workedSessionData, sittingGapMs(pomodoro));
     const sessionCount = sittings.reduce((sum, sitting) => sum + sitting.rounds, 0);
     const language = useSelector(state => state.settings.language);
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
 
     const browserTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 

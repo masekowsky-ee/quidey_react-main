@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const spies = vi.hoisted(() => ({ trackEvent: vi.fn(), track: vi.fn() }))
 vi.mock('../features/native/analytics', async (importOriginal) => ({ ...(await importOriginal()), trackEvent: spies.trackEvent }))
 vi.mock('../features/usage/usage', async (importOriginal) => ({ ...(await importOriginal()), track: spies.track }))
-vi.mock('../features/helperFunction', async (importOriginal) => ({ ...(await importOriginal()), apiFetch: vi.fn(async () => ({ id: 1 })) }))
+vi.mock('../features/api/api', async (importOriginal) => ({ ...(await importOriginal()), apiFetch: vi.fn(async () => ({ id: 1 })) }))
 
 import { createNote as createNotebookNote } from '../features/focus/notebook'
 import { createNote as createTaskNote } from '../features/tasks/taskAction'

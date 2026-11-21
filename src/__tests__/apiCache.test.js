@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { apiFetch, clearApiCache } from '../features/helperFunction';
+import { apiFetch, clearApiCache } from '../features/api/api';
 
 const ok = (body) => Promise.resolve({ ok: true, json: () => Promise.resolve(body) });
 

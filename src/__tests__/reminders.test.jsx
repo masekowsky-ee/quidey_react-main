@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { screen, fireEvent, act } from '@testing-library/react'
 import { makeStore as baseStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import { occurrences, nextOccurrence, dueOccurrence, isMissed, sortReminders, fetchReminders } from '../features/reminders/reminders'
 import { alarmsFor } from '../features/native/alarms'
@@ -11,7 +11,7 @@ import QuickAdd from '../components/QuickAdd'
 import ReminderList from '../components/reminders/ReminderList'
 import ReminderAlert from '../components/reminders/ReminderAlert'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

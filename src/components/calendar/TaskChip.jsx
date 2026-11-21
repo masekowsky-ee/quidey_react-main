@@ -2,7 +2,7 @@ import styles from '../Calendar.module.css';
 import { prioLevel, taskTimeText } from '../../features/calendar/calendar';
 import { isOverdue } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
-import Icon from './icons';
+import Icon from '../icons.jsx';
 import { taskColorAttr } from '../../features/tasks/taskColors';
 import GoalShape from '../study/GoalShape.jsx';
 
@@ -51,7 +51,7 @@ export default function TaskChip({ task, today, onOpen, startDrag, dragging, sho
                 {/* before the name: a long name is cut off at the end */}
                 {task.repeat && <span className={styles.chipRepeat} role="img" aria-label={t(`repeat_${task.repeat}`)}>↻</span>}
                 {task.name}
-                {shared && <span className={styles.chipShared} title={t('sharedWithLabel')} role="img" aria-label={t('sharedWithLabel')}><Icon name="team" size={12} /></span>}
+                {shared && <span className={styles.chipShared} title={t('sharedWithLabel')} role="img" aria-label={t('sharedWithLabel')}><Icon name="mTeam" size={12} /></span>}
             </span>
             {showDescription && event && task.event_type && <span className={styles.chipType}>{task.event_type.name}</span>}
             {showDescription && task.location && <span className={styles.chipMeta}>⌖ {task.location}</span>}

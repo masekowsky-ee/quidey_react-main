@@ -4,13 +4,14 @@ import { MemoryRouter, Routes, Route, Navigate, Link, useLocation } from 'react-
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
-import { apiFetch, toInputDate } from '../features/helperFunction'
+import { toInputDate } from '../features/helperFunction';
+import { apiFetch } from '../features/api/api';
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { parseParts } from '../features/study/parseParts'
 import StudyPage from '../components/study/StudyPage'
 import TesterOnly from '../components/TesterOnly'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

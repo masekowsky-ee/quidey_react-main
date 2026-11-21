@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
+import { localeOf } from '../i18n/locale';
 import { displayName, fill, formatDate, formatRelative, getInitials } from '../features/helperFunction';
 import { showToast } from '../features/toast/toast';
 import {
@@ -66,7 +67,7 @@ function RequestsTab() {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
     const run = useAdminRun();
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const [scope, setScope] = useState('pending');
     const [requests, setRequests] = useState(null);
     const [busyId, setBusyId] = useState(null);
@@ -361,7 +362,7 @@ function UsersTab() {
 function OverviewTab() {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const [data, setData] = useState(null);
     const [now, setNow] = useState(() => Date.now());
 
@@ -431,7 +432,7 @@ const AUDIENCE_KEYS = {
 function BroadcastTab() {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [audience, setAudience] = useState('all');

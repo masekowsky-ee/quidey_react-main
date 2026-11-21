@@ -6,11 +6,11 @@ import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import { makeStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { signInWithGoogle, registerWithGoogle, deleteAccount } from '../features/auth/authAction'
 import { GoogleSignupForm } from '../components/auth/GoogleSignIn'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))
@@ -79,7 +79,7 @@ describe('sign in with Google: the return from Google', () => {
         vi.resetModules()
         sessionStorage.setItem('googleState', 'abc')
         window.history.replaceState(null, '', '/auth/google#state=abc&id_token=tok123')
-        const { apiFetch: fetchMock } = await import('../features/helperFunction')
+        const { apiFetch: fetchMock } = await import('../features/api/api')
         fetchMock.mockResolvedValue({ signup: SIGNUP })
         const { default: Profile } = await import('../components/Profile')
         const { default: reducer } = await import('../features/rootReducer')

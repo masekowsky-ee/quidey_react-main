@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { makeStore } from './helpers/store'
-import { apiFetch, SIGNED_OUT_EVENT } from '../features/helperFunction'
-import { track, flushUsage, setUsageEnabled, resetUsage, platform } from '../features/usage/usage'
+import { apiFetch, SIGNED_OUT_EVENT } from '../features/api/api';
+import { track, flushUsage, setUsageEnabled, resetUsage } from '../features/usage/usage'
+import { platform } from '../features/usage/platform'
 import { trackView, trackAction } from '../features/usage/track'
 import { setUsageConsent, selectUsageConsent } from '../features/auth/authAction'
 

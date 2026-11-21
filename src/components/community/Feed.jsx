@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import { sameDay } from '../../features/helperFunction';
 import { FEED_POST_MAX, fetchFeed, fetchMoreFeed, postToFeed } from '../../features/feed/feed';
 import { fetchFriends } from '../../features/friends/friendsAction';
 import { friendsPath } from '../../features/community/paths';
 import FeedEntry from './FeedEntry';
 
-const locale = (language) => (language === 'de' ? 'de-DE' : 'en-GB');
+const locale = localeOf;
 
 // "Today", "Yesterday", "Monday, 20 October"
 function dayLabel(date, t, language, now = new Date()) {

@@ -4,12 +4,12 @@ import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { makeStore } from './helpers/store'
 import authReducer from '../features/auth/authReducer'
-import { apiFetch, PRO_REQUIRED_EVENT } from '../features/helperFunction'
+import { apiFetch, PRO_REQUIRED_EVENT } from '../features/api/api';
 import { loginSuccess, requestBetaAccess } from '../features/auth/authAction'
 import { SET_ACCESS, LOGOUT } from '../features/auth/authActionTypes'
 import App from '../App'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

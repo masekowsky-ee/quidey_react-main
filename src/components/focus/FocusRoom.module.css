@@ -455,29 +455,19 @@
 
 /* ---------- Fokus-Einstellungen (a sheet) ---------- */
 .settingsBackdrop {
-    composes: backdrop from '../task/DeleteScopeDialog.module.css';
+    composes: dialogBackdrop from '../ui.module.css';
 }
 
 .settingsSheet {
-    composes: dialog from '../task/DeleteScopeDialog.module.css';
-    width: min(34rem, 100%);
-    max-height: min(88dvh, 52rem);
-    overflow: auto;
-    gap: 0.5rem;
+    composes: dialogSheet from '../ui.module.css';
 }
 
 .settingsHead {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
+    composes: dialogHead from '../ui.module.css';
 }
 
 .settingsTitle {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 650;
-    color: var(--text-h);
+    composes: dialogHeadTitle from '../ui.module.css';
 }
 
 .settingsBody {
@@ -625,10 +615,7 @@
 }
 
 .iconMini {
-    composes: iconHover from '../ui.module.css';
-    flex: none;
-    width: 1.75rem;
-    height: 1.75rem;
+    composes: dialogClose from '../ui.module.css';
 }
 
 .chips {

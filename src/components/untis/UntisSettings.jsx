@@ -10,6 +10,7 @@ import {
 } from '../../features/untis/untis';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import PasswordInput from '../PasswordInput.jsx';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
@@ -91,7 +92,7 @@ export default function UntisSettings() {
 
     if (status.connected) {
         const when = status.lastSyncAt
-            ? new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(status.lastSyncAt))
+            ? new Intl.DateTimeFormat(localeOf(language), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(status.lastSyncAt))
             : null;
         return (
             <div className={styles.box}>

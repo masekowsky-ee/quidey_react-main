@@ -1,4 +1,4 @@
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { UI_VARIANT_IDS } from './variants';
 
 // What testers think of what they test: per topic 1-5 stars and/or a comment, saved on the

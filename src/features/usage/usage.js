@@ -4,10 +4,9 @@
 // without sending. Never content, names or ids: only metric names from the lists below.
 // The queue belongs to the account that made it (`{ userId, events }`): events of another account
 // (another tab signed in as someone else, a queue left from before) are dropped, never sent.
-import { apiUrl, SIGNED_OUT_EVENT } from '../helperFunction';
+import { rawFetch, SIGNED_OUT_EVENT, session } from '../api/api';
+import { tokenPayload } from '../api/session';
 import { platform } from './platform';
-
-export { platform };
 
 const KEY = 'usageQueue';
 const QUEUE_MAX = 500;
@@ -31,20 +30,10 @@ let queue = [];
 let timer = null;
 let listening = false;
 
-const readToken = () => {
-    try { return localStorage.getItem('token'); } catch { return null; /* blocked storage */ }
-};
+const readToken = () => session.token();
 
 // the account a sign-in token belongs to (its payload carries userId), null when it can't be read
-const tokenUser = (token) => {
-    try {
-        const part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-        const id = JSON.parse(atob(part.padEnd(part.length + ((4 - (part.length % 4)) % 4), '='))).userId;
-        return id ?? null;
-    } catch {
-        return null;
-    }
-};
+const tokenUser = (token) => tokenPayload(token)?.userId ?? null;
 
 // what a reload left, only when it belongs to this account (the old plain list has no account: dropped)
 const readStored = (userId) => {
@@ -136,12 +125,7 @@ export async function flushUsage({ keepalive = false } = {}) {
         store();
         let status;
         try {
-            const response = await fetch(apiUrl('/api/usage'), {
-                method: 'POST',
-                keepalive,
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, 'X-Quidey-Platform': platform() },
-                body: body(events),
-            });
+            const response = await rawFetch('/api/usage', { method: 'POST', keepalive, body: body(events) }, token);
             status = response.status;
         } catch {
             status = 0;

@@ -5,6 +5,7 @@ import { fetchFolders, duplicateOf, titleOf } from '../../features/notes/notes';
 import { showToast } from '../../features/toast/toast';
 import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import NoteEditor from '../notes/NoteEditor.jsx';
 import ScanSheet from '../scan/ScanSheet.jsx';
 import { useAiQuota } from '../../features/ai/ai';
@@ -82,7 +83,7 @@ export default function Notebook({ focusTask }) {
     if (open) return <NoteEditor key={open.id} note={open} focusTask={focusTask} onChange={onChange} onDelete={() => deleteNote(open.id)} onClose={() => setOpenId(null)}
         full folders={folders} onTrash={() => trashNote(open.id)} onDuplicate={(note) => newNote({ copy: duplicateOf(note, t('noteCopyWord')) })} />;
 
-    const dateFmt = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short' });
+    const dateFmt = new Intl.DateTimeFormat(localeOf(language), { day: 'numeric', month: 'short' });
     return (
         <div className={styles.list}>
             <div className={styles.listHead}>

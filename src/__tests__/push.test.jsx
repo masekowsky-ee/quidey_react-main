@@ -3,7 +3,7 @@ import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { makeStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { addTask } from '../features/tasks/taskAction'
 import {
     keyBytes, pushSupport, refreshPush, enablePush, disablePush, offerPushAfterTask, forgetPushOnSignOut,
@@ -13,7 +13,7 @@ import { devServiceWorkerSource, serviceWorkerSource, PUBLIC_FILES } from '../..
 import Settings from '../components/Settings'
 import PushOffer from '../components/PushOffer'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

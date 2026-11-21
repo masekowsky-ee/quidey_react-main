@@ -23,12 +23,12 @@
     animation: appear 0.3s ease-out both;
 }
 
-@keyframes appear{
-    from{ opacity: 0; translate: 0 0.5rem; }
-}
-
 @keyframes fadeIn{
     from{ opacity: 0; }
+}
+
+@keyframes appear{
+    from{ opacity: 0; translate: 0 0.5rem; }
 }
 
 /* with little motion it only fades in */

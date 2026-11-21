@@ -3,7 +3,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { makeStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import { playPlans, buyInPlay, restorePlayPurchases, managePlaySubscription, upgradeInPlay, PLAY_PRODUCTS } from '../features/pro/pro'
 import ProPage from '../components/pro/ProPage'
@@ -20,7 +20,7 @@ vi.mock('../features/native/native', async (importOriginal) => ({
     ...(await importOriginal()),
     isNativeApp: () => true,
 }))
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

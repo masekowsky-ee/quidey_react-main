@@ -3,7 +3,7 @@ import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { makeStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import { fetchProgress, levelStartXp, requiredLevel, tierFor, UNLOCKS, nextUnlocks } from '../features/progress/progress'
 import { sectionAt } from '../features/realtime/news'
@@ -11,7 +11,7 @@ import { isCommunityPath } from '../features/community/paths'
 import Community from '../components/community/Community'
 import ProfileEditor from '../components/profile/ProfileEditor'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

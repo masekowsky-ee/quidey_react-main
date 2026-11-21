@@ -13,7 +13,7 @@
 // Everything is a no-op in the browser.
 import { registerPlugin } from '@capacitor/core';
 import { isNativeApp } from './native';
-import { apiUrl } from '../helperFunction';
+import { rawFetch } from '../api/api';
 
 const QuideyUpdate = registerPlugin('QuideyUpdate');
 
@@ -67,8 +67,8 @@ async function buildNumber() {
 
 async function askServer(build) {
     try {
-        // plain fetch: this is public, it must also work signed out, and it must never be answered from the offline copy
-        const response = await fetch(apiUrl(`/api/app-version?platform=android&version=${encodeURIComponent(build)}`));
+        // rawFetch (no offline layer): this is public, it must also work signed out (no token), and it must never be answered from the offline copy
+        const response = await rawFetch(`/api/app-version?platform=android&version=${encodeURIComponent(build)}`, {}, null);
         return response.ok ? await response.json() : null;
     } catch {
         return null;
@@ -136,7 +136,7 @@ export async function finishUpdate() {
     }
 }
 
-// from setupNativeApp: on start, and whenever the app comes back to the front
+// from setupNativeApp (setup.js): on start, and whenever the app comes back to the front
 export async function startUpdateChecks(App) {
     if (!isNativeApp()) return;
     QuideyUpdate.addListener?.('downloaded', () => set({ status: 'ready', error: false }));

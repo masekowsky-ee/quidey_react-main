@@ -4,9 +4,7 @@
 // onDone({ notes, entries, plan }) says how much was made.
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useSheet } from '../../features/layout/dragDismiss';
 import { useAiQuota, left } from '../../features/ai/ai';
 import { filesToSource, scanMaterial } from '../../features/ai/scan';
 import { createNote, fetchNotes } from '../../features/focus/notebook';
@@ -16,21 +14,26 @@ import { showToast } from '../../features/toast/toast';
 import { fill, dueText } from '../../features/helperFunction';
 import { durationText, timeText } from '../../features/calendar/calendar';
 import { useTranslation } from '../../i18n/useTranslation';
-import SheetGrabber from '../SheetGrabber.jsx';
+import Dialog from '../Dialog.jsx';
 import Icon from '../icons.jsx';
 import { NoteView } from '../notes/NoteView.jsx';
-import frame from '../focus/FocusRoom.module.css';
 import styles from './ScanSheet.module.css';
 
 const SOURCES = ['file', 'note', 'text'];
 
 export default function ScanSheet({ onClose, onDone }) {
-    const { t } = useTranslation();
-    const dispatch = useDispatch();
     const titleId = useId();
     const closeRef = useRef(null);
-    const sheet = useSheet(onClose);
-    const { dismiss } = sheet;
+    return (
+        <Dialog onClose={onClose} labelledBy={titleId} initialFocus={closeRef} backdropClassName={styles.backdrop} className={styles.sheet}>
+            {(dismiss) => <ScanForm dismiss={dismiss} onDone={onDone} titleId={titleId} closeRef={closeRef} />}
+        </Dialog>
+    );
+}
+
+function ScanForm({ dismiss, onDone, titleId, closeRef }) {
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
     const quota = useAiQuota();
     const scansLeft = left(quota?.scan);
 
@@ -48,7 +51,6 @@ export default function ScanSheet({ onClose, onDone }) {
     const [planDue, setPlanDue] = useState('');
     const subjects = useSelector(state => state.study.subjects);
 
-    useEffect(() => { closeRef.current?.focus(); }, []);
     useEffect(() => {
         if (sourceKind === 'note' && notes === null) fetchNotes().then(setNotes).catch(() => setNotes([]));
     }, [sourceKind, notes]);
@@ -136,13 +138,11 @@ export default function ScanSheet({ onClose, onDone }) {
     const back = quota?.resetsAt ? new Date(quota.resetsAt) : null;
     const planNeedsDay = result?.plan && keep.plan && !planDue;
 
-    return createPortal(
-        <div className={frame.settingsBackdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
-            <div className={frame.settingsSheet} role="dialog" aria-modal="true" aria-labelledby={titleId} {...sheet.panel}>
-                <SheetGrabber />
-                <div className={frame.settingsHead} data-sheet-drag>
-                    <h2 id={titleId} className={frame.settingsTitle}>{t('scanTitle')}</h2>
-                    <button type="button" ref={closeRef} className={frame.iconMini} onClick={() => dismiss()} aria-label={t('close')}>
+    return (
+        <>
+                <div className={styles.head} data-sheet-drag>
+                    <h2 id={titleId} className={styles.headTitle}>{t('scanTitle')}</h2>
+                    <button type="button" ref={closeRef} className={styles.close} onClick={() => dismiss()} aria-label={t('close')}>
                         <Icon name="close" size={18} />
                     </button>
                 </div>
@@ -257,8 +257,6 @@ export default function ScanSheet({ onClose, onDone }) {
                             </button>
                         </div>
                     </section>}
-            </div>
-        </div>,
-        document.body
+        </>
     );
 }

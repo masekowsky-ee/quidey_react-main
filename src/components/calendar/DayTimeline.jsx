@@ -8,7 +8,7 @@ import { taskColorAttr } from '../../features/tasks/taskColors';
 import { isEvent } from '../../features/tasks/kinds';
 import TaskMeta from '../task/TaskMeta.jsx';
 import TaskLabels from '../TaskLabels.jsx';
-import Icon from './icons.jsx';
+import Icon from '../icons.jsx';
 import GoalShape from '../study/GoalShape.jsx';
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
@@ -139,12 +139,12 @@ export default function DayTimeline({
                 {!event && !task.projected &&
                     <button type="button" className={styles.blockCheck} aria-pressed={Boolean(task.done)} onClick={() => onToggleDone(task)}
                         aria-label={`${t(task.done ? 'reopen' : 'markDone')}: ${task.name}`} title={t(task.done ? 'reopen' : 'markDone')}>
-                        <span className={styles.checkCircle}><Icon name="check" size={12} /></span>
+                        <span className={styles.checkCircle}><Icon name="mCheck" size={12} /></span>
                     </button>}
                 <div className={styles.entryText}>
                     {timed &&
                         <span className={styles.blockTime}>
-                            {task.projected && <Icon name="repeat" size={12} />}
+                            {task.projected && <Icon name="mRepeat" size={12} />}
                             {/* a planned study session: its goal's symbol */}
                             {task.study && <GoalShape shape={task.study.goalShape} size={11} color={task.study.subjectColor} />}
                             {taskTimeText(task)}
@@ -168,7 +168,7 @@ export default function DayTimeline({
                             aria-label={task.projected ? `${t('repeatPreview')}: ${task.name}` : `${t('editTask')}: ${task.name}`}
                             aria-describedby={task.projected ? undefined : hintId}
                             onClick={() => onOpen(task)} onKeyDown={(e) => onEntryKey(e, task)}>
-                            {!timed && task.projected && <Icon name="repeat" size={12} />}
+                            {!timed && task.projected && <Icon name="mRepeat" size={12} />}
                             <span className={styles.entryName}>{task.name}</span>
                         </button>}
                     {/* the details: shown with a long block, under the pointer / focus with a short one (nothing is cut off) */}
@@ -216,7 +216,7 @@ export default function DayTimeline({
 
                     {hoverSlot !== null && !drag &&
                         <div className={styles.slotHover} style={{ '--start': hoverSlot }} aria-hidden="true">
-                            <Icon name="add" size={14} />
+                            <Icon name="mAdd" size={14} />
                             {timeText(hoverSlot)}
                         </div>}
 

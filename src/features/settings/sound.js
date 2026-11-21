@@ -1,3 +1,5 @@
+import { read, write } from '../storedSetting';
+
 // Quidey's sounds, made on the spot with the Web Audio API (no sound files). They all share one
 // voice so they are recognisable together: a soft sine bell with a quiet octave and a short glassy
 // tine, a little echo of "air" behind it, notes of A major pentatonic, and the signature motif
@@ -7,19 +9,16 @@ export const SOUND_LEVELS = ['off', 'soft', 'full'];
 const STORAGE_KEY = 'sound';
 const VOLUME = { off: 0, soft: 0.45, full: 0.9 };
 
-export function readStoredSound() {
-    try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (SOUND_LEVELS.includes(stored)) return stored;
-    } catch { /* storage blocked: the default */ }
-    return 'soft';
-}
+export const readStoredSound = () => read(STORAGE_KEY, { allowed: SOUND_LEVELS, fallback: 'soft' });
 
+// The level playSound uses. Kept here as well as in redux (settings.sound) on purpose: with storage
+// blocked the stored value can't carry it, and the sound code must not need a store.
+// setSound (settings actions) calls storeSound first, so the two stay in step.
 let level = readStoredSound();
 
 export function storeSound(next) {
     level = next;
-    try { localStorage.setItem(STORAGE_KEY, next); } catch { /* still applied, just not remembered */ }
+    write(STORAGE_KEY, next);
 }
 
 let ctx = null;

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styles from './AdminTesterFeedback.module.css';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import { displayName, fill } from '../../features/helperFunction';
 import { showToast } from '../../features/toast/toast';
 import { UI_VARIANT_IDS, DEFAULT_UI_VARIANT } from '../../features/tester/variants';
@@ -126,7 +127,7 @@ function LiveNow({ byTopic, testers, locale }) {
 export default function AdminTesterFeedback() {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const [data, setData] = useState(null);
 
     useEffect(() => {

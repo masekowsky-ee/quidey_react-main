@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import {
-    apiFetch, apiUrl, formatDate, toInputDate, formatClock, getInitials,
-    toDateOnly, sameDay, mondayIndex, monthGrid, dueText,
-} from '../features/helperFunction'
+import { formatDate, toInputDate, formatClock, getInitials, toDateOnly, sameDay, mondayIndex, monthGrid, dueText } from '../features/helperFunction';
+import { apiFetch, apiUrl } from '../features/api/api';
 import { translate } from '../i18n/useTranslation'
 
 // The API sends a date column as "local midnight, written in UTC".

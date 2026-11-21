@@ -5,6 +5,8 @@ import styles from './DayPlan.module.css';
 import TaskEditDialog from '../task/TaskEditDialog.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
+import { hhmm } from '../../features/calendar/calendar';
 import { fill, parseDate, sameDay } from '../../features/helperFunction';
 import { isEvent } from '../../features/tasks/kinds';
 import { endOf } from '../../features/tasks/eventTimes';
@@ -12,7 +14,6 @@ import { selectTasksLoaded } from '../../features/tasks/taskAction';
 import { routinesForDay } from '../../features/routines/routines';
 import { FOCUS_GOALS, readStoredFocusGoal, storeFocusGoal } from '../../features/settings/preferences';
 
-const hhmm = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 
 // Today in order of the clock: the events (also the ones already over, quieter), the tasks that
 // have a time, the routines planned for today; "now" between what is over and what comes. Events
@@ -44,7 +45,7 @@ export default function DayPlan({ tasks }) {
 
     // "now" goes before the first timed thing still to come
     const nowAt = items.findIndex(item => item.time && item.time > nowText);
-    const date = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'numeric' }).format(now);
+    const date = new Intl.DateTimeFormat(localeOf(language), { weekday: 'short', day: 'numeric', month: 'numeric' }).format(now);
     const taskInEditor = open && tasks.find(task => task.id === open);
 
     const row = (item) => {

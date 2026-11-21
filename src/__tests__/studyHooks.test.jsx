@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { setFocusTask } from '../features/session/sessionAction'
 import { updateTaskProps } from '../features/tasks/taskAction'
@@ -13,7 +13,7 @@ import TaskChip from '../components/calendar/TaskChip'
 import ReplanCard from '../components/study/ReplanCard'
 import FocusTimer from '../components/focus/FocusTimer'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

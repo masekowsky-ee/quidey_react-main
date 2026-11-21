@@ -5,14 +5,14 @@ import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { PUBLIC_FILES } from '../../pwa.js'
 import TaskContainer from '../components/TaskContainer'
 import AppSkeleton from '../components/skeleton/AppSkeleton'
 import { GateSkeleton, RouteSkeleton } from '../components/skeleton/PageSkeletons'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

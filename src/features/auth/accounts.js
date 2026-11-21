@@ -4,9 +4,8 @@
 // address, kept so the switcher can show the other accounts' pictures (only friends may load them
 // from the server). Nothing leaves the device.
 // Switching loads the app again, so no list, socket or timer of the other account stays behind.
-import { clearFocusRun } from '../session/focusRun';
-import { cancelAlarms } from '../native/alarms';
-import { setUsageEnabled } from '../usage/usage';
+import { session } from '../api/session';
+import { teardownAccount } from './teardown';
 
 const KEY = 'accounts';
 export const MAX_ACCOUNTS = 5;
@@ -52,27 +51,17 @@ export function forgetAccount(username) {
     store(listAccounts().filter(account => !sameName(account.username, username)));
 }
 
-export const currentToken = () => {
-    try {
-        return localStorage.getItem('token');
-    } catch {
-        return null;
-    }
-};
+export const currentToken = () => session.token();
 
 // The accounts other than the one in use
 export const otherAccounts = (username) => listAccounts().filter(account => !sameName(account.username, username));
 
 function reloadAs(token) {
-    // the queued usage events belong to the account that made them: gone before the token changes
-    setUsageEnabled(false);
-    // a focus session running here belongs to the account that started it
-    clearFocusRun({ freeze: true });
-    // and so do the reminders' alarms (Android app): the other account sets its own on its start
-    cancelAlarms();
+    // usage events, focus run and alarms belong to the account that made them: gone before the token changes
+    teardownAccount({ freezeFocus: true });
     try {
-        if (token) localStorage.setItem('token', token);
-        else localStorage.removeItem('token');
+        if (token) session.set(token);
+        else session.clear();
         for (const key of PER_ACCOUNT_KEYS) localStorage.removeItem(key);
     } catch { /* blocked storage: the reload shows the sign-in */ }
     window.location.assign('/');

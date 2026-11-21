@@ -2,7 +2,7 @@
 // a PDF, photos, one of my notes or pasted text → a study plan, notes, tasks/events. Nothing is made
 // until the person keeps it in the preview (ScanSheet.jsx).
 
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { shrinkImage } from '../focus/notebook';
 import { refreshAiQuota } from './ai';
 

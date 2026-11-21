@@ -5,15 +5,16 @@ import { Link } from 'react-router-dom';
 import { useBoard, fetchBoardNote, pinToBoard, unpinFromBoard, boardErrorText, BOARD_NOTES_MAX } from '../../features/board/board';
 import { fetchNotes } from '../../features/focus/notebook';
 import { titleOf, matchesQuery, sortNotes } from '../../features/notes/notes';
-import { useSheet, useFocusOnArrival } from '../../features/layout/dragDismiss';
+import { useFocusOnArrival } from '../../features/layout/dragDismiss';
 import { useNow } from '../../features/together/work';
 import { showToast } from '../../features/toast/toast';
 import { displayName, fill, formatRelative } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import { NoteView } from '../notes/NoteView.jsx';
 import NotePreview from '../notes/NotePreview.jsx';
 import Avatar from '../together/Avatar';
-import SheetGrabber from '../SheetGrabber.jsx';
+import Dialog from '../Dialog.jsx';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
 import styles from './NoteBoard.module.css';
@@ -22,29 +23,20 @@ import styles from './NoteBoard.module.css';
 function BoardSheet({ title, onClose, children, wide = false }) {
     const { t } = useTranslation();
     const titleId = useId();
-    const sheet = useSheet(onClose);
-    const { dismiss } = sheet;
-    // away the way it came, then closed, then `then` (dismiss(then) alone would skip onClose)
-    const close = (then) => dismiss(() => { onClose(); then?.(); });
-    useEffect(() => {
-        const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); dismiss(); } };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [dismiss]);
-    return createPortal(
-        <div className={styles.backdrop} {...sheet.backdrop} onPointerDown={(e) => { if (e.target === e.currentTarget) dismiss(); }}>
-            <div className={styles.dialog} data-wide={wide || undefined} role="dialog" aria-modal="true" aria-labelledby={titleId} {...sheet.panel}>
-                <SheetGrabber />
+    return (
+        <Dialog onClose={onClose} labelledBy={titleId} backdropClassName={styles.backdrop} className={styles.dialog}
+            panelProps={{ 'data-wide': wide || undefined }}>
+            {(dismiss) => (<>
                 <div className={styles.head} data-sheet-drag>
                     <h2 id={titleId} className={styles.title}>{title}</h2>
                     <button type="button" className={styles.close} onClick={() => dismiss()} aria-label={t('close')}>
                         <Icon name="close" size={18} />
                     </button>
                 </div>
-                {children(close)}
-            </div>
-        </div>,
-        document.body
+                {/* away the way it came, then closed, then `then` (dismiss(then) alone would skip onClose) */}
+                {children((then) => dismiss(() => { onClose(); then?.(); }))}
+            </>)}
+        </Dialog>
     );
 }
 
@@ -52,7 +44,7 @@ function BoardSheet({ title, onClose, children, wide = false }) {
 function PinnedNote({ kind, boardId, pin, onClose, onRemove }) {
     const { t, language } = useTranslation();
     const now = useNow(true, 60 * 1000);
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const [full, setFull] = useState(null);
     const [bigImage, setBigImage] = useState(null);
     useEffect(() => {
@@ -163,7 +155,7 @@ export default function NoteBoard({ kind, id, canPin = true }) {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
     const now = useNow(true, 60 * 1000);
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
     const { pins, setPins, reload } = useBoard(kind, id);
     const [open, setOpen] = useState(null);
     const [picking, setPicking] = useState(false);

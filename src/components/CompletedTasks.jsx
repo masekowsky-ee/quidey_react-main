@@ -1,6 +1,7 @@
 import styles from './stats/SessionList.module.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../i18n/useTranslation';
+import { localeOf } from '../i18n/locale';
 import { updateTaskProps } from '../features/tasks/taskAction';
 import { formatDate } from '../features/helperFunction';
 import TaskLabels from './TaskLabels.jsx';
@@ -17,7 +18,7 @@ export default function CompletedTasks({ together }) {
     const dispatch = useDispatch();
     const tasks = useSelector(state => state.task.tasks);
     const language = useSelector(state => state.settings.language);
-    const locale = language === 'de' ? 'de-DE' : 'en-GB';
+    const locale = localeOf(language);
 
     // past events aren't ticked off: their time is in the statistics instead
     const done = tasks

@@ -1,6 +1,6 @@
 import { SET_SESSION_PARAMS, SAVE_SESSION_DATA, UPDATE_CURRENT_SESSION_DATA, SET_TIMER, ADD_WORKED_TASK, ADD_TASK_TIME, SET_WORKED_SESSIONS, SET_TIMER_MODE, CLOCK_TICK, SET_FOCUS_TASK, SET_POMODORO, RESET_FOCUS } from "./sessionActionTypes";
 import { openAuth } from '../auth/gate';
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { isSharedTaskId, sharedTaskIdOf, selectSharedSoloTasks } from '../together/togetherAction';
 import { storeTimerMode, storePomodoro } from '../settings/preferences';
 import { playSound } from '../settings/sound';

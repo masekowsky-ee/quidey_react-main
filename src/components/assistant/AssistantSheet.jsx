@@ -18,6 +18,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useSheet, useFocusOnArrival } from '../../features/layout/dragDismiss';
+import { useModal } from '../../features/layout/useModal';
 import {
     sendAssistant, useAssistantChat, updateChat, setReadAloud, getReadAloud, newMessageId,
     ASSISTANT_TIMEOUT_MS, MESSAGE_MAX,
@@ -88,22 +89,16 @@ export default function AssistantSheet({ onClose, onReply }) {
         stopSpeaking();
         dismiss();
     };
-    const closeRef = useRef(close);
-    useEffect(() => { closeRef.current = close; });
+    // Escape closes (after anything inside that took it) and the focus goes back where it was
+    useModal(close, { nested: true });
 
-    // Escape closes; gone (closed, pulled down, the page changed): nothing late is applied, the
-    // focus goes back where it was
+    // gone (closed, pulled down, the page changed): nothing late is applied
     useEffect(() => {
         // what is left today, fresh: the app's copy is from before this chat's last answers
         refreshAiQuota();
-        const previous = document.activeElement;
-        const onKey = (e) => { if (e.key === 'Escape' && !e.defaultPrevented) closeRef.current(); };
-        window.addEventListener('keydown', onKey);
         return () => {
-            window.removeEventListener('keydown', onKey);
             dropRef.current();
             stopSpeaking();
-            previous?.focus?.();
         };
     }, []);
 

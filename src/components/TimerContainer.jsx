@@ -14,34 +14,6 @@ const MODES = ['timer', 'pomodoro', 'stopwatch'];
 const typedPart = (raw, max) => Math.min(max, Number(String(raw).replace(/\D/g, '').slice(-2)) || 0);
 const MODE_LABEL = { timer: 'timerModeTimer', pomodoro: 'timerModePomodoro', stopwatch: 'timerModeStopwatch' };
 
-// The inline timer as it will look, for the start screen (AppSkeleton): its mode and time come
-// from this device, so they are shown as they are; nothing in it works yet
-export function TimerSkeleton() {
-    const { t } = useTranslation();
-    const { timer, timerMode } = useSelector(state => state.session);
-    return (
-        <div className={styles.inlinePanel} data-part="timer">
-            <div className={styles.panelHead}>
-                <div className={styles.modeSwitch} aria-hidden="true">
-                    {MODES.map(mode =>
-                        <button key={mode} type="button" tabIndex={-1} className={timerMode === mode ? styles.modeOn : styles.mode}>
-                            {t(MODE_LABEL[mode])}
-                        </button>)}
-                </div>
-            </div>
-            <div className={styles.div}>
-                <h2 className={timerMode === 'stopwatch' ? styles.stopwatchH2 : styles.timerH2}>{formatClock(timer.time)}</h2>
-                <div className={styles.progress} />
-                <div className={styles.timerNav}>
-                    <button type="button" className={styles.btnGo} tabIndex={-1} aria-hidden="true">
-                        <Icon name="play" className={styles.ctrlIcon} strokeWidth={2} />
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-}
-
 // Pomodoro: which phase is on and the rounds of this cycle as dots (filled = done)
 export function PomodoroLine({ className }) {
     const { t } = useTranslation();

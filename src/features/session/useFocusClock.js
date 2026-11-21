@@ -15,7 +15,11 @@ import { fill } from '../helperFunction';
 // Mounted in the app shell (so the timer runs on every page) and in the timer panel; when more
 // than one is mounted only one of them counts.
 
+// a quarter second: the timer shows whole seconds, so a tick never lags a second display by long
 const TICK_MS = 250;
+// Whoever ticked last: every mounted copy of this hook ticks, but only the first to tick since
+// `owner` was free counts (see tick below); the owner frees it in its cleanup, and the next copy's
+// tick takes over. Call-order rule: a copy must not tick once it has cleaned up.
 let owner = null;
 
 const ENDED_TEXT = { timer: 'focusEndedTimer', focus: 'focusEndedFocus', short: 'focusEndedBreak', long: 'focusEndedBreak' };

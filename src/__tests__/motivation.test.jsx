@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { makeStore } from './helpers/store'
 import { renderWithStore } from './helpers/render'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_FRIENDS } from '../features/friends/friendsActionTypes'
 import { rememberPresence } from '../features/presence/presence'
 import { fetchProgress, nextStreakMilestone } from '../features/progress/progress'
@@ -16,7 +16,7 @@ import LevelPlant from '../components/progress/LevelPlant'
 import PlantCard from '../components/progress/PlantCard'
 import { useApplyTheme } from '../features/settings/theme'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

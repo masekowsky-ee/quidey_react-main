@@ -12,7 +12,7 @@ vi.mock('../features/focus/notebook', async (importOriginal) => ({
     fetchNote: vi.fn(),
     updateNote: vi.fn(() => Promise.resolve({})),
 }))
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(() => Promise.resolve([])),
 }))

@@ -4,11 +4,11 @@ import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { makeStore } from './helpers/store'
 import { setLanguage } from '../features/settings/settingsAction'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import LegalPage from '../legal/LegalPage'
 import { OWNER, LEGAL_VERSION_DATE } from '../legal/owner'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

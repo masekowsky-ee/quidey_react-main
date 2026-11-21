@@ -13,7 +13,7 @@
 //   answer is spoken by the toggle as it is when it arrives, not as it was when the message was sent)
 
 import { useSyncExternalStore } from 'react';
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
 
 const HISTORY_TURNS = 10;
 // a request can take up to about 4 minutes on the server (6 model calls, each with a retry)

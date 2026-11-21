@@ -100,7 +100,7 @@ Build, signing and store steps: `README-android.md`, `STORE.md`. In short:
 - Realtime: `socket.io-client` (`src/features/realtime/socket.js`, `useRealtime(event, handler)`),
   loaded with a dynamic import only once signed in.
 - Icons: one outline set, `src/components/icons.jsx` (`<Icon name size? />`, 24px grid, 1.7
-  stroke); the calendar keeps its own `calendar/icons.jsx`. No icon files in `src/assets/`.
+  stroke); the calendar's filled Material icons live in the same file as `mPrev`, `mNext`, `mTeam`, … No icon files in `src/assets/`.
 - Code splitting: every page except Home is `lazy()` in `App.jsx` (`PAGES`), preloaded when the
   app is idle (`preloadPages`); `LegalFooter` lives in its own file so the legal texts stay
   lazy. `vite.config.js` puts react / router / state / motion in their own long-cached chunks.

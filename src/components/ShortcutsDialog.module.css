@@ -2,31 +2,18 @@
    them, one row each (ShortcutsDialog.jsx) */
 
 .backdrop{
-    position: fixed;
-    inset: 0;
-    z-index: var(--z-alert);
-    display: grid;
-    place-items: center;
-    padding: 1rem;
-    background: var(--overlay);
+    composes: dialogBackdrop from './ui.module.css';
     overscroll-behavior: contain;
-    animation: fadeIn 0.16s ease-out;
 }
 
 .dialog{
+    composes: dialogCard from './ui.module.css';
     width: min(26rem, 100%);
     max-height: calc(100dvh - 2rem);
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
     gap: 0.5rem;
     padding: 1.25rem 1.25rem 1rem;
     text-align: left;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-modal);
-    animation: rise 0.26s var(--spring-curve);
 }
 
 .head{
@@ -124,20 +111,6 @@
     border-radius: var(--radius-sm);
 }
 
-@keyframes fadeIn{
-    from{ opacity: 0; }
-}
-
-@keyframes rise{
-    from{ opacity: 0; transform: translateY(0.75rem) scale(0.98); }
-}
-
-@media (prefers-reduced-motion: reduce){
-    .backdrop,
-    .dialog{
-        animation: fadeIn 0.16s ease-out;
-    }
-}
 
 /* iOS: a control is at least 44 pt on a touch screen (HIG) */
 @media (pointer: coarse) {

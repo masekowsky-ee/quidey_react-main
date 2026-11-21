@@ -1,29 +1,17 @@
 import { SET_FRIENDS, SET_FRIEND_REQUESTS, FRIEND_REQUEST_SENT, FRIEND_ADDED, FRIEND_REQUEST_REMOVED, FRIEND_REMOVED } from './friendsActionTypes';
-import { apiFetch } from '../helperFunction';
+import { apiFetch, json } from '../api/api';
+import { loadInto } from '../api/load';
 import { noteAction } from '../onboarding/onboarding';
 
-export const fetchFriends = () => {
-    return async (dispatch) => {
-        const friends = await apiFetch('/api/friends');
-        dispatch({ type: SET_FRIENDS, payload: friends });
-    };
-};
+export const fetchFriends = () => loadInto(SET_FRIENDS, '/api/friends');
 
-export const fetchFriendRequests = () => {
-    return async (dispatch) => {
-        const requests = await apiFetch('/api/friends/requests');
-        dispatch({ type: SET_FRIEND_REQUESTS, payload: requests });
-    };
-};
+export const fetchFriendRequests = () => loadInto(SET_FRIEND_REQUESTS, '/api/friends/requests');
 
 // Resolves to 'pending' (request sent) or 'accepted' (they had already asked you).
 // Rejects with the API error; error.code tells the UI which message to show.
 export const sendFriendRequest = (username) => {
     return async (dispatch) => {
-        const data = await apiFetch('/api/friends/requests', {
-            method: 'POST',
-            body: JSON.stringify({ username }),
-        });
+        const data = await apiFetch('/api/friends/requests', json('POST', { username }));
         if (data.status === 'accepted') {
             dispatch({ type: FRIEND_ADDED, payload: { friend: data.friend, userId: data.friend.id } });
         } else {

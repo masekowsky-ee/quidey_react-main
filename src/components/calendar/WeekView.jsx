@@ -4,7 +4,7 @@ import { fill, sameDay } from '../../features/helperFunction';
 import { dateKey, weekDates, formatFocus } from '../../features/calendar/calendar';
 import { useDayGridKeys } from '../../features/calendar/useDayGridKeys';
 import TaskChip from './TaskChip.jsx';
-import Icon from './icons.jsx';
+import Icon from '../icons.jsx';
 
 // Monday to Sunday side by side (stacked on phones), every task of a day with its description.
 // A plus in a day's top right corner (on hover; always on touch screens) opens the new-task form.
@@ -65,7 +65,7 @@ export default function WeekView({ focusedDate, today, tasksByDay, focusByDay, d
                                 aria-label={fill(t('addEntryOnDay'), { date: longDate(date) })}
                                 title={fill(t('addEntryOnDay'), { date: longDate(date) })}
                             >
-                                <Icon name="add" size={18} />
+                                <Icon name="mAdd" size={18} />
                             </button>
                         </div>
                     );

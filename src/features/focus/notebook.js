@@ -4,7 +4,7 @@
 // Attachments: links { kind: 'link', url, title } and pictures { kind: 'image', data, name }
 // (pasted or picked, made small here first: at most IMAGE_MAX_SIDE pixels and IMAGE_MAX_BYTES).
 
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { track } from '../usage/usage';
 
 export const NOTE_IMAGES_MAX = 4;

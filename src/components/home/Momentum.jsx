@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
+import { localeOf } from '../../i18n/locale';
 import { displayName, fill } from '../../features/helperFunction';
 import { COMMUNITY_PATHS, friendsPath } from '../../features/community/paths';
 import { challengeAmount, challengeTitle, fetchRanking, formatNumber, nextStreakMilestone, tierFor } from '../../features/progress/progress';
@@ -22,7 +23,7 @@ function StreakCard({ progress }) {
     const { t, language } = useTranslation();
     const { streak, streakToday, bestStreak, recentDays = [] } = progress;
     const next = nextStreakMilestone(streak, progress.streakMilestones);
-    const weekday = (day) => new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { weekday: 'narrow', timeZone: 'UTC' })
+    const weekday = (day) => new Intl.DateTimeFormat(localeOf(language), { weekday: 'narrow', timeZone: 'UTC' })
         .format(new Date(`${day}T00:00:00Z`));
     const state = streakToday ? 'lit' : streak > 0 ? 'waiting' : 'none';
 
@@ -163,7 +164,7 @@ function FriendsCard() {
 // seven days (known already), grey where streak, challenges, level and friends will be
 export function MomentumSkeleton({ stacked = false }) {
     const { t, language } = useTranslation();
-    const weekday = new Intl.DateTimeFormat(language === 'de' ? 'de-DE' : 'en-GB', { weekday: 'narrow' });
+    const weekday = new Intl.DateTimeFormat(localeOf(language), { weekday: 'narrow' });
     const lastDays = Array.from({ length: 7 }, (_, i) => { const day = new Date(); day.setDate(day.getDate() - 6 + i); return day; });
     return (
         // as tall as the loaded cards, so the week below doesn't move

@@ -7,7 +7,7 @@
 // friend, shared session or family counts as one (noteAction, called from the actions that make
 // them). Never two questions at once, and none while the push question is open.
 import { useSyncExternalStore } from 'react';
-import { apiFetch } from '../helperFunction';
+import { apiFetch } from '../api/api';
 import { installState } from '../pwa/install';
 import { pushAsking } from '../pwa/push';
 import { trackAction } from '../usage/track';

@@ -3,7 +3,7 @@ import { render, cleanup, screen, fireEvent, waitFor, within } from '@testing-li
 import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { makeStore } from './helpers/store'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import {
     fetchSubjects, saveSubject, deleteSubject, fetchGoal, fetchGoals, deleteGoal,
@@ -15,7 +15,7 @@ import { NATIVE_CHANNELS } from '../features/native/nativePush'
 import translations from '../i18n/translations'
 import Settings from '../components/Settings'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

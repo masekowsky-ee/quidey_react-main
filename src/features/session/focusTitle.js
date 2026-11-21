@@ -13,6 +13,7 @@ import { isNativeApp } from '../native/native';
 import { translate } from '../../i18n/useTranslation';
 import { selectFocusTask, PHASE_LABEL } from './sessionAction';
 import { clockText } from './focusNotification';
+import { startBeat } from './beat';
 
 // The title for `now`, or null while nothing runs
 export function focusTitle(state, language, now) {
@@ -27,19 +28,6 @@ export function focusTitle(state, language, now) {
         ? translate(language, PHASE_LABEL[pomodoro.phase])
         : selectFocusTask(state)?.name ?? translate(language, PHASE_LABEL.focus);
     return `▶ ${clockText(Math.floor(ms / 1000) * 1000)} · ${label}`;
-}
-
-// calls onBeat twice a second; returns the stop
-function startBeat(onBeat) {
-    if (typeof Worker !== 'undefined') {
-        try {
-            const worker = new Worker(new URL('./titleTick.worker.js', import.meta.url), { type: 'module' });
-            worker.onmessage = onBeat;
-            return () => worker.terminate();
-        } catch { /* no worker here: the page's own timer below */ }
-    }
-    const interval = setInterval(onBeat, 500);
-    return () => clearInterval(interval);
 }
 
 export function useFocusTitle(enabled) {

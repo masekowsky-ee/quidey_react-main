@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { makeStore as baseStore } from './helpers/store'
 import { LOGIN_SUCCESS } from '../features/auth/authActionTypes'
-import { apiFetch } from '../features/helperFunction'
+import { apiFetch } from '../features/api/api';
 import { installState } from '../features/pwa/install'
 import { addTask, addGroup, updateTaskProps } from '../features/tasks/taskAction'
 import {
@@ -13,7 +13,7 @@ import {
 } from '../features/onboarding/onboarding'
 import OnboardingPrompts from '../components/onboarding/OnboardingPrompts'
 
-vi.mock('../features/helperFunction', async (importOriginal) => ({
+vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
     apiFetch: vi.fn(),
 }))

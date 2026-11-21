@@ -1,12 +1,15 @@
 import { useDispatch, useStore } from 'react-redux';
 import { COMMUNITY_PATHS } from '../community/paths';
-import { apiFetch, displayName, fill } from '../helperFunction';
+import { displayName, fill } from '../helperFunction';
+import { apiFetch, json, errorText } from '../api/api';
+import { loadInto } from '../api/load';
 import { dateKey } from '../calendar/calendar';
 import { LOGOUT } from '../auth/authActionTypes';
 import { showToast } from '../toast/toast';
 import { noteAction } from '../onboarding/onboarding';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useRealtimeRefresh, useSafetyPoll } from '../realtime/socket';
+import { FAMILY_CHANGED } from '../realtime/events';
 
 // Quidey Family: a fixed group of accounts with a shared calendar, a
 // list (entries without a day), a board, and a chat of their own, apart from the shared sessions. The store keeps only the list of my
@@ -45,13 +48,7 @@ export default function familyReducer(state = initialState, action) {
 export const selectFamilies = (state) => state.family.families;
 export const selectFamilyInviteCount = (state) => state.family.invites.length;
 
-const send = (method, body) => ({ method, body: body === undefined ? undefined : JSON.stringify(body) });
-
-export const fetchFamilies = () => async (dispatch) => {
-    const data = await apiFetch(base);
-    dispatch({ type: SET_FAMILIES, payload: data });
-    return data;
-};
+export const fetchFamilies = () => loadInto(SET_FAMILIES, base);
 
 // Each change answers with the whole family; the list (names, counts) is loaded again afterwards
 const familyChange = (url, options) => async (dispatch) => {
@@ -65,25 +62,25 @@ const familyChange = (url, options) => async (dispatch) => {
 //   week: { weekStart, people: [{ userId, xp, focusMin, streak }] } }
 export const fetchFamily = (id) => apiFetch(familyUrl(id));
 export const createFamily = (name, friendIds = []) => async (dispatch) => {
-    const family = await dispatch(familyChange(base, send('POST', { name, friendIds })));
+    const family = await dispatch(familyChange(base, json('POST', { name, friendIds })));
     noteAction('family');
     return family;
 };
-export const renameFamily = (id, name) => familyChange(familyUrl(id), send('PATCH', { name }));
+export const renameFamily = (id, name) => familyChange(familyUrl(id), json('PATCH', { name }));
 // changes: { emoji?, color? } (owner), { note? } (any member; '' clears it)
-export const updateFamily = (id, changes) => familyChange(familyUrl(id), send('PATCH', changes));
-export const joinFamily = (id) => familyChange(`${familyUrl(id)}/join`, send('POST'));
-export const inviteToFamily = (id, userIds) => familyChange(`${familyUrl(id)}/invites`, send('POST', { userIds }));
+export const updateFamily = (id, changes) => familyChange(familyUrl(id), json('PATCH', changes));
+export const joinFamily = (id) => familyChange(`${familyUrl(id)}/join`, json('POST'));
+export const inviteToFamily = (id, userIds) => familyChange(`${familyUrl(id)}/invites`, json('POST', { userIds }));
 
 // My own id ('me'): leave or decline. Someone else's (owner only): remove them.
 export const removeFamilyMember = (id, userId) => async (dispatch) => {
-    await apiFetch(`${familyUrl(id)}/members/${userId}`, send('DELETE'));
+    await apiFetch(`${familyUrl(id)}/members/${userId}`, json('DELETE'));
     if (userId === 'me') dispatch({ type: FAMILY_GONE, payload: id });
     dispatch(fetchFamilies()).catch(() => {});
 };
 
 export const deleteFamily = (id) => async (dispatch) => {
-    await apiFetch(familyUrl(id), send('DELETE'));
+    await apiFetch(familyUrl(id), json('DELETE'));
     dispatch({ type: FAMILY_GONE, payload: id });
 };
 
@@ -92,10 +89,10 @@ export const deleteFamily = (id) => async (dispatch) => {
 // task: { name, and optionally kind ('task' | 'event', an event needs a day), due, due_time, prio, description,
 // duration_minutes, location, link, details, color, reminders (reach every member; only with a day),
 // assignee_id (a joined member, or null), group_id (a sub-group) }. Without a day it is an item on the family's list.
-export const addFamilyTask = (id, task) => apiFetch(`${familyUrl(id)}/tasks`, send('POST', task));
+export const addFamilyTask = (id, task) => apiFetch(`${familyUrl(id)}/tasks`, json('POST', task));
 // One of my own open tasks / events moves in (it leaves my list): extra { group_id?, assignee_id? }.
 // Resolves to the family; rejects with TASK_REPEATS, TASK_SHARED, TASK_DONE or TASK_NOT_FOUND.
-export const moveToFamily = (id, taskId, extra = {}) => apiFetch(`${familyUrl(id)}/tasks`, send('POST', { taskId, ...extra }));
+export const moveToFamily = (id, taskId, extra = {}) => apiFetch(`${familyUrl(id)}/tasks`, json('POST', { taskId, ...extra }));
 
 // What of mine can move into a family: my own open tasks and coming events, not repeating ones
 // (a family's entries don't repeat) and not ones shared with somebody (they'd lose them)
@@ -104,26 +101,22 @@ export function movableTasks(tasks, today = new Date()) {
     return tasks.filter(task => task.isOwner !== false && !task.done && !task.repeat && !(task.sharedWith?.length)
         && (task.kind !== 'event' || (task.due && dateKey(task.due) >= todayKey)));
 }
-export const updateFamilyTask = (id, taskId, changes) => apiFetch(`${familyUrl(id)}/tasks/${taskId}`, send('PATCH', changes));
-export const removeFamilyTask = (id, taskId) => apiFetch(`${familyUrl(id)}/tasks/${taskId}`, send('DELETE'));
+export const updateFamilyTask = (id, taskId, changes) => apiFetch(`${familyUrl(id)}/tasks/${taskId}`, json('PATCH', changes));
+export const removeFamilyTask = (id, taskId) => apiFetch(`${familyUrl(id)}/tasks/${taskId}`, json('DELETE'));
 
 // Sub-groups (experimental, testers); deleting one keeps its entries
-export const addFamilySubGroup = (id, name) => apiFetch(`/api/families/${id}/groups`, send('POST', { name }));
-export const removeFamilySubGroup = (id, groupId) => apiFetch(`/api/families/${id}/groups/${groupId}`, send('DELETE'));
+export const addFamilySubGroup = (id, name) => apiFetch(`${familyUrl(id)}/groups`, json('POST', { name }));
+export const removeFamilySubGroup = (id, groupId) => apiFetch(`${familyUrl(id)}/groups/${groupId}`, json('DELETE'));
 
 // ---------- the chat ----------
 
 // { messages: [{ id, user, text, createdAt }] (oldest first), hasMore }
 export const fetchFamilyMessages = (id, before) =>
     apiFetch(`${familyUrl(id)}/messages${before ? `?before=${before}` : ''}`);
-export const sendFamilyMessage = (id, text) => apiFetch(`${familyUrl(id)}/messages`, send('POST', { text }));
+export const sendFamilyMessage = (id, text) => apiFetch(`${familyUrl(id)}/messages`, json('POST', { text }));
 
 // Translated message for an API error
-export function familyErrorText(t, err) {
-    const key = `familyError_${err?.code}`;
-    const text = t(key);
-    return text === key ? t('friendError_generic') : text;
-}
+export const familyErrorText = (t, err) => errorText(t, 'familyError', err?.code);
 
 // App-wide: my families and invites, loaded at the start and whenever the server
 // says one changed (a new invite comes with a toast); polled only as the safety net
@@ -148,5 +141,5 @@ export function useFamilyList(enabled) {
         }
     };
     useSafetyPoll(load, { everyMs: 60 * 1000, enabled: on, immediately: true });
-    useRealtimeRefresh(['family:changed'], () => { if (on) load(); });
+    useRealtimeRefresh([FAMILY_CHANGED], () => { if (on) load(); });
 }
