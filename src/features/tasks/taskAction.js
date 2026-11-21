@@ -10,11 +10,14 @@ import { noteAction } from '../onboarding/onboarding';
 // Action creators for task management
 export const fetchTaskState = () => {
     return async (dispatch) => {
-        const tasks = await apiFetch("/api/tasks");
-        const groups = await apiFetch("/api/groups");
-        const notes = await apiFetch("/api/notes");
-        // the types are only extra: the list works without them
-        const eventTypes = await apiFetch("/api/event-types").catch(() => undefined);
+        // all four at once (one round trip of waiting, not four one after the other); the types
+        // are only extra: the list works without them
+        const [tasks, groups, notes, eventTypes] = await Promise.all([
+            apiFetch("/api/tasks"),
+            apiFetch("/api/groups"),
+            apiFetch("/api/notes"),
+            apiFetch("/api/event-types").catch(() => undefined),
+        ]);
         dispatch({ type: SET_TASK_STATE, payload: {tasks, groups, notes, eventTypes} });
     }
 }

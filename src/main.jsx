@@ -15,10 +15,13 @@ import { registerServiceWorker } from './features/pwa/registerServiceWorker'
 import { listenForInstallPrompt } from './features/pwa/install'
 import { setupNativeApp } from './features/native/native'
 import { startOfflineSync } from './features/offline/offline'
+import { platform } from './features/usage/platform'
 import { startOwnColors } from './features/tasks/ownColors'
 
 registerServiceWorker()
 listenForInstallPrompt()
+// <html data-platform>: web, pwa or android (index.css: the Android app draws cheaper surfaces)
+document.documentElement.dataset.platform = platform()
 setupNativeApp(store)
 startOfflineSync()
 startOwnColors()

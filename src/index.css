@@ -1026,6 +1026,16 @@ code {
   }
 }
 
+/* The Android app's WebView has to blur everything behind a bar or sheet again on every frame,
+   which costs it its smoothness (scrolling under the header, sheets rising): there the bars are
+   solid and the dimmed page behind a dialog isn't blurred. Same look as "reduce transparency". */
+:root[data-platform="android"] {
+  --material-bar: var(--surface-bar);
+  --material-thick: var(--surface);
+  --material-blur: none;
+  --scrim-blur: 0px;
+}
+
 /* Reduce transparency: frosted becomes solid */
 @media (prefers-reduced-transparency: reduce) {
   :root {
