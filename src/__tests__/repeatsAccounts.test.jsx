@@ -66,7 +66,6 @@ describe('keywords of event types', () => {
         wrap(store, <TaskForm setCreateTask={() => {}} />)
 
         fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Arbeit Lager' } })
-        // a task offers to become such an event
         fireEvent.click(screen.getByRole('button', { name: /Fits “Arbeit”/ }))
         expect(screen.getByText(/Picked by itself because the name contains “Arbeit”/)).toBeInTheDocument()
         expect(screen.getByRole('radio', { name: 'Arbeit' })).toBeChecked()

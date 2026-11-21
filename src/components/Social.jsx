@@ -49,14 +49,12 @@ export default function Social() {
     const { friends: byName, incoming, outgoing } = useSelector(state => state.friends);
     const presence = useSelector(state => state.presence);
     const isOnline = (friend) => presence[friend.id] ?? friend.online ?? false;
-    // who has the app open first (by name, as before, within each)
     const friends = [...byName.filter(isOnline), ...byName.filter(friend => !isOnline(friend))];
     const me = useSelector(state => state.auth.user);
     const homeLayout = useSelector(state => state.settings.homeLayout);
     const navigate = useNavigate();
     const runTogether = useTogetherRun();
 
-    // one click from a friend to a shared session with them ("Ann & Ben")
     const workTogether = async (friend) => {
         setBusyId(friend.id);
         const myName = me?.display_name || me?.username || t('you');
@@ -78,11 +76,9 @@ export default function Social() {
     const tab = TABS.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'friends';
     const setTab = (next) => setSearchParams(next === 'friends' ? {} : { tab: next }, { replace: true });
 
-    // which row is busy (button disabled) and which friend is waiting for "really remove?"
     const [busyId, setBusyId] = useState(null);
     const [confirmRemoveId, setConfirmRemoveId] = useState(null);
 
-    // fresh lists whenever the page is opened
     useEffect(() => {
         dispatch(fetchFriends()).catch(() => {});
         dispatch(fetchFriendRequests()).catch(() => {});
@@ -99,7 +95,6 @@ export default function Social() {
         }
     };
 
-    // ---------- add ----------
     const [username, setUsername] = useState('');
     const [sending, setSending] = useState(false);
     const [feedback, setFeedback] = useState(null); // { ok: boolean, text }
@@ -122,7 +117,6 @@ export default function Social() {
     };
 
     return (
-        // a tab of the Gemeinschaft page, which has the title
         <div className={styles.embedded}>
             <div className={styles.tabs} role="tablist" aria-label={t('friends')}>
                 {TABS.map(key => (

@@ -36,7 +36,6 @@ export const showToast = (text, tone = 'info', { to, detail, action } = {}) => (
     return id;
 };
 
-// The toast's button was pressed: its action runs once and the toast goes
 export const runToastAction = (id) => (dispatch) => {
     const run = actions.get(id);
     actions.delete(id);

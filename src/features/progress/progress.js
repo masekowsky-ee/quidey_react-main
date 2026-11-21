@@ -90,7 +90,6 @@ export function unlockText(t, item) {
     }
 }
 
-// The next few levels that unlock something, after `level`
 export const nextUnlocks = (level, count = 3) => UNLOCKS.filter(step => step.level > level).slice(0, count);
 
 // ---------- the store ----------
@@ -175,7 +174,6 @@ export const fetchProgress = () => async (dispatch, getState) => {
     return data;
 };
 
-// This week among friends
 export const fetchRanking = () => async (dispatch) => {
     const data = await apiFetch('/api/progress/friends');
     dispatch({ type: RANKING_LOADED, payload: data });

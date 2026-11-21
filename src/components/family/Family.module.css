@@ -17,7 +17,6 @@
     gap: 0.75rem;
 }
 
-/* the family's emoji on its colour, in the list */
 .listEmoji{
     flex-shrink: 0;
     display: inline-flex;
@@ -40,7 +39,6 @@
 .calendarLink{
     font-size: 0.85rem;
     font-weight: 600;
-    /* full ink: readable on the page and on a card */
     color: var(--text-h);
     text-decoration: none;
     text-underline-offset: 3px;
@@ -77,7 +75,6 @@
     padding: 0.6rem 0;
 }
 
-/* a small round tick, like the calendar's */
 .entryCheck{
     display: inline-flex;
     align-items: center;
@@ -134,7 +131,6 @@
     composes: btnNo from '../ui.module.css';
 }
 
-/* an event in its place: nothing to tick, it's done once it's over */
 .entryEvent{
     display: inline-flex;
     align-items: center;
@@ -182,7 +178,6 @@
 
 /* ---------- looks: the family's emoji on its colour ---------- */
 
-/* --task-color comes from the page's data-task-color (the family's colour) */
 .familyPage{
     --family-tint: var(--task-color, var(--surface-strong));
 }
@@ -381,7 +376,6 @@ button.emojiBadge:hover{
     border-color: transparent;
 }
 
-/* who takes care of it: a select that looks like a quiet chip */
 .assigneeChip{
     max-width: 8.5rem;
     height: 1.9rem;

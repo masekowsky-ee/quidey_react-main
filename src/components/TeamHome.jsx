@@ -46,7 +46,6 @@ export default function TeamHome() {
     }, [dispatch]);
 
     const open = sessions.filter(s => !s.endedAt);
-    // the one I picked, else the one I'm working in, else the newest
     const selectedId = open.some(s => s.id === chosenId)
         ? chosenId
         : (open.find(s => s.id === work.sessionId) ?? open[0])?.id ?? null;

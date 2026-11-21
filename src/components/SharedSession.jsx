@@ -20,7 +20,6 @@ import { calendarLink } from '../features/calendar/sources';
 import NoteBoard from './board/NoteBoard.jsx';
 
 import Icon from './icons';
-// Title of a session; the owner can click it to rename the session
 export function SessionTitle({ session, className }) {
     const { t } = useTranslation();
     const run = useTogetherRun();
@@ -60,7 +59,6 @@ export function SessionTitle({ session, className }) {
         : <h1 className={className}>{session.name}</h1>;
 }
 
-// End / delete (owner) or leave (member), each with a confirmation step
 export function SessionActions({ session, onGone }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();

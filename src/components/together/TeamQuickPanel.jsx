@@ -31,7 +31,6 @@ export default function TeamQuickPanel() {
     const waiting = inviteCount + requestCount;
     const running = sessions.filter(s => !s.endedAt);
 
-    // fresh numbers when opened; closes on Escape and on clicks outside
     useEffect(() => {
         if (!open) return;
         dispatch(fetchSharedSessions()).catch(() => {});

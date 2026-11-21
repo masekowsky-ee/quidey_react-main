@@ -115,7 +115,6 @@ export const fetchFamilyMessages = (id, before) =>
     apiFetch(`${familyUrl(id)}/messages${before ? `?before=${before}` : ''}`);
 export const sendFamilyMessage = (id, text) => apiFetch(`${familyUrl(id)}/messages`, json('POST', { text }));
 
-// Translated message for an API error
 export const familyErrorText = (t, err) => errorText(t, 'familyError', err?.code);
 
 // App-wide: my families and invites, loaded at the start and whenever the server

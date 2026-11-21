@@ -52,7 +52,6 @@ export function useLiveLists() {
             popup(fill(t('liveSessionInvite'), { name: displayName(invite.invitedBy ?? invite.owner) }), COMMUNITY_PATHS.sessions, invite.name);
         }
     });
-    // something happened in one of my sessions (tasks, members, who works on what)
     useRealtime(SESSION_CHANGED, () => dispatch(markNews('together')));
     useRealtimeRefresh([TASKS_CHANGED], async () => {
         const { invites: before, invitesLoaded } = store.getState().task;

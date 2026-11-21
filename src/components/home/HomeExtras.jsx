@@ -13,7 +13,6 @@ import Icon from '../icons.jsx';
 import { pinCardNote } from '../../features/home/cardNote';
 import styles from './HomeExtras.module.css';
 
-// how many of each kind Home's list shows
 const SHOWN = 6;
 
 // Events, reminders and notes in Home's list, under the tasks, as far as the list head's labels
@@ -117,7 +116,6 @@ export default function HomeExtras({ kinds, onDragNote }) {
             </section>),
     ].filter(Boolean);
 
-    // nothing asked for beyond the tasks: they have their own list
     if (!kinds.some(kind => kind !== 'tasks')) return null;
     if (sections.length === 0) {
         return kinds.includes('tasks') ? null : <p className={styles.empty}>{t('homeKindsEmpty')}</p>;

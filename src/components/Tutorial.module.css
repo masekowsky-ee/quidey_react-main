@@ -51,7 +51,6 @@
     color: var(--text-muted);
 }
 
-/* Thin bar under the counter: how far along the tour is */
 .progress{
     height: 2px;
     margin-top: -0.6rem;
@@ -80,7 +79,6 @@
     cursor: grabbing;
 }
 
-/* the step's scene on a sunken well */
 .stage{
     flex: none;
     height: 10rem;
@@ -101,7 +99,6 @@
     text-align: left; /* #root centres */
 }
 
-/* the chapter's name, or the greeting on the first card */
 .eyebrow{
     margin: 0;
     font-size: 0.8125rem;
@@ -128,7 +125,6 @@
     text-wrap: pretty;
 }
 
-/* Two or three short tips with a small mark */
 .tips{
     width: 100%;
     margin: 0.15rem 0 0;
@@ -159,7 +155,6 @@
     background: var(--border-strong);
 }
 
-/* Welcome: every chapter as a chip, to jump straight there */
 .chapters{
     display: flex;
     flex-wrap: wrap;
@@ -175,7 +170,6 @@
     border-radius: var(--radius-pill);
 }
 
-/* Last card: three first things to do */
 .firstSteps{
     width: 100%;
     display: flex;
@@ -226,7 +220,6 @@
     transform: translateX(3px);
 }
 
-/* "Open calendar ->": to the page the step is about */
 .open{
     composes: ghostBtn from './ui.module.css';
     display: inline-flex;
@@ -255,7 +248,6 @@
     gap: 0.4rem;
 }
 
-/* Small pill per step; the current one is wider and in full ink */
 .dot{
     position: relative;
     width: 0.5rem;
@@ -317,7 +309,6 @@
     height: 2.5rem;
 }
 
-/* keyboard hint, only where there is a keyboard */
 .keys{
     margin: -0.25rem 0 0;
     text-align: center;
@@ -331,7 +322,6 @@
     }
 }
 
-/* wide screens: the scene beside the words, one height for every step */
 @media (min-width: 900px){
     .dialog{
         width: min(50rem, 100%);

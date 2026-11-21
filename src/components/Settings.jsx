@@ -55,7 +55,6 @@ const LEGACY_AREAS = { look: 'language', plan: 'start', app: 'notifications' };
 function SettingsNav({ groups, current, onPick }) {
     const { t } = useTranslation();
     const nav = useRef(null);
-    // on a phone the row follows the section being read
     useEffect(() => {
         const row = nav.current;
         const button = row?.querySelector(`[data-section="${current}"]`);
@@ -310,7 +309,6 @@ export default function Settings(){
     ];
     const motionLevel = useSelector((state) => state.settings.motion);
     const soundLevel = useSelector((state) => state.settings.sound);
-    // a new level is heard at once
     const chooseSound = (level) => {
         dispatch(setSound(level));
         playSound('done');
@@ -318,28 +316,23 @@ export default function Settings(){
     const defaultSessionMinutes = useSelector((state) => state.settings.defaultSessionMinutes);
     const showSharedTasks = useSelector((state) => state.settings.showSharedTasks);
     const installState = useInstallState();
-    // Android in the browser: the app as a file (features/native/androidApk.js)
     const apk = apkOffer();
-    // the Android app with Firebase: may it count how it is used
     const analytics = useAnalytics();
     const dispatch = useDispatch();
     const { hash } = useLocation();
     const navigate = useNavigate();
     const smooth = useMotionLevel() !== 'minimal';
-    // the old area names lead to the first section of what they held
     const legacy = LEGACY_AREAS[hash.slice(1)];
     useEffect(() => {
         if (legacy) navigate({ hash: `#${legacy}` }, { replace: true });
     }, [legacy, navigate]);
     useHashTarget();
 
-    // the sections there are on this device (some only where they apply)
     const there = { alarms: isNativeApp(), analytics: analytics.available, android: Boolean(apk), install: installState !== 'unavailable' };
     const groups = GROUPS.map(group => ({ ...group, sections: group.sections.filter(([id]) => there[id] ?? true) }));
     const ids = groups.flatMap(group => group.sections.map(([id]) => id));
     const idsKey = ids.join();
 
-    // the section being read: the one at the upper part of the screen
     const [current, setCurrent] = useState(() => LEGACY_AREAS[hash.slice(1)] ?? (ids.includes(hash.slice(1)) ? hash.slice(1) : ids[0]));
     useEffect(() => {
         if (typeof IntersectionObserver === 'undefined') return undefined;
@@ -396,7 +389,6 @@ export default function Settings(){
                                 <span className={styles.rowLabel}>{t('schemeSetting')}</span>
                                 <span className={styles.rowHint}>{t('schemeSettingHint')}</span>
                             </span>
-                            {/* a palette and its accent in one go; each tile shows both halves with the accent on them */}
                             <div className={styles.swatches} role="group" aria-label={t('schemeSetting')}>
                                 {COLOR_SCHEMES.map((scheme) => {
                                     const chosen = palette === scheme.palette && accent === scheme.accent;
@@ -422,7 +414,6 @@ export default function Settings(){
                                 <span className={styles.rowLabel}>{t('paletteSetting')}</span>
                                 <span className={styles.rowHint}>{inVariant ? fill(t('paletteSettingHintVariant'), { name: variantName }) : t('paletteSettingHint')}</span>
                             </span>
-                            {/* each tile: the palette's dark half and its light half, a card on each */}
                             <div className={styles.swatches} role="group" aria-label={t('paletteSetting')}>
                                 {paletteOptions.map(([value, { dark, light }]) => (
                                     <button key={value} type="button"
@@ -544,13 +535,11 @@ export default function Settings(){
                                 <a href={APK_URL} download="Quidey.apk" className={styles.installButton}>{t('androidAppDownload')}</a>
                             </SettingRow>
                         </SettingSection>}
-                    {/* only where this browser can install it */}
                     {installState !== 'unavailable' &&
                         <SettingSection id="install" title={t('installApp')} description={t('settingsAppHint')}>
                             <SettingRow title={t('installApp')}
                                 hint={t({ installed: 'installAppDone', ios: 'installAppIos', prompt: 'installAppHint' }[installState])}>
                                 {installState === 'prompt' && (
-                                    // the APK is the screen's one primary where there is one
                                     <button type="button" className={apk ? styles.tourButton : styles.installButton} onClick={promptInstall}>{t('installAppButton')}</button>
                                 )}
                             </SettingRow>

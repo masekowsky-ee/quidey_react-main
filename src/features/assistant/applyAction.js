@@ -80,7 +80,6 @@ export function prepareActions(actions, tasks) {
             cards.push(card);
         }
     }
-    // a "change" that changes nothing on my copy is no question
     const shown = cards.filter(card => card.type !== 'update_entry' || changeRows(card.task, card.action.changes).length > 0);
     return { cards: shown, missing: missing.size };
 }
@@ -108,7 +107,6 @@ async function createEntry(entry, dispatch) {
         due_time: time,
         duration_minutes: entry.durationMinutes ?? null,
         color: entry.color ?? null,
-        // reminders need a day
         reminders: due ? reminders : [],
     }));
     return { undo: () => dispatch(deleteTask(task.id)) };

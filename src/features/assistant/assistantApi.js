@@ -20,7 +20,6 @@ const HISTORY_TURNS = 10;
 export const ASSISTANT_TIMEOUT_MS = 5 * 60 * 1000;
 export const MESSAGE_MAX = 2000;
 
-// what goes to the server: the conversation's own turns, not notes, errors or unanswered messages
 function historyOf(messages) {
     return messages
         .filter(m => (m.role === 'user' || m.role === 'assistant') && !m.unanswered && m.content.trim())

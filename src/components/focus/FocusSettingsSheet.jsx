@@ -12,7 +12,6 @@ import { awayPlatform } from '../../features/focus/useFocusAway';
 import { ParkingLot, FocusSounds, StudyMethod } from './StudyTools.jsx';
 import styles from './FocusRoom.module.css';
 
-// Today in numbers: focus minutes and sessions (saved ones plus the one going on)
 function TodayLine() {
     const { t } = useTranslation();
     const saved = useSelector(state => state.session.workedSessionData);

@@ -63,7 +63,6 @@ export default function Header(){
         <div className={`${styles.header} ${nav === 'top' ? styles.undocked : ''} ${nav === 'bar' ? styles.bar : ''}`} data-part="header">
             <>
                 <div className={styles.div} data-part="header-row">
-                    {/* tablets only: desktop has the sidebar, phones the tab bar's "More" */}
                     <button onClick={()=>showMenu()} className={`${styles.btn} ${styles.menuBtn}`}
                         aria-label={badgeCount > 0 ? `${t('menu')}, ${badgeCount} ${t('inboxUnread')}` : hasNews ? `${t('menu')}, ${t('menuNews')}` : t('menu')}>
                         <svg className={styles.svg} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
@@ -74,7 +73,6 @@ export default function Header(){
                         <Logo className={styles.brandMark} />
                         <span className={styles.brandText}>Quidey</span>
                     </Link>
-                    {/* the app's own look on wide screens: the main places as words beside the logo */}
                     {nav === 'bar' && <TopNav inline />}
                     <div className={styles.center}>
                         {activeTimer &&
@@ -96,7 +94,6 @@ export default function Header(){
                             </button>}
                     </div>
                     <div className={styles.end}>
-                        {/* the command bar from everywhere (Übersicht has its field in the middle) */}
                         {!commandBar &&
                             <button type="button" className={styles.btn} onClick={openCommands}
                                 aria-label={`${t('commandSearch')} (${t('commandShortcut')})`} title={`${t('commandSearch')} (${t('commandShortcut')})`}

@@ -19,7 +19,6 @@ import { apkOffer } from '../../features/native/androidApk';
 import { useAnalytics } from '../../features/native/analytics';
 import TaskEditDialog from '../task/TaskEditDialog.jsx';
 
-// how many tasks a search shows at most
 const TASKS_SHOWN = 6;
 
 // "Übung" finds "ubung", "Uebung" too
@@ -50,7 +49,6 @@ export default function CommandPalette() {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
     const [index, setIndex] = useState(0);
-    // the task whose editor a search opened
     const [editTaskId, setEditTaskId] = useState(null);
     const editTask = tasks.find(task => task.id === editTaskId);
     const inputRef = useRef(null);
@@ -127,7 +125,6 @@ export default function CommandPalette() {
 
     const shown = useMemo(() => {
         const words = normalize(query.trim()).split(/\s+/).filter(Boolean);
-        // tasks only once something is typed: the open ones, soonest day first
         const found = words.length === 0 ? [] : tasks
             .filter(task => !task.done && matches(words, task.name))
             .sort((a, b) => (parseDate(a.due)?.getTime() ?? Infinity) - (parseDate(b.due)?.getTime() ?? Infinity))

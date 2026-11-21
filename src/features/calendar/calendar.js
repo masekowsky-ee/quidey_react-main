@@ -30,7 +30,6 @@ export const startOfMonth = (date) => new Date(date.getFullYear(), date.getMonth
 // The 7 days (Monday to Sunday) of the week a day is in
 export const weekDates = (date) => Array.from({ length: 7 }, (_, i) => addDays(startOfWeek(date), i));
 
-// All days of a day's month
 export function monthDates(date) {
     const days = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
     return Array.from({ length: days }, (_, i) => new Date(date.getFullYear(), date.getMonth(), i + 1));
@@ -238,7 +237,6 @@ export function formatFocus(seconds, short = false) {
     return h > 0 ? `${h} h ${m} min` : `${m} min`;
 }
 
-// The view the calendar opened with last time, remembered in the browser
 export function readStoredCalendarView() {
     try {
         const stored = localStorage.getItem('calendarView');

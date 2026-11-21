@@ -92,7 +92,6 @@ function FamilyLinks({ onClick }) {
 export default function Menu(){
     const docked = useMenuDocked();
     const nav = useNavModel();
-    // a drawer on wide screens too, when the main places are tabs in the header ("bar", "top")
     const undocked = nav === 'top' || nav === 'bar';
     const showMenu = useSelector((state) => state.settings.showMenu);
     const isOpen = showMenu && !docked;
@@ -147,12 +146,10 @@ export default function Menu(){
         return () => clearTimeout(back);
     }, [isOpen, fromRight, dispatch]);
 
-    // a new page (also by the browser's back button) closes the drawer
     useEffect(() => {
         dispatch(setShowMenu(false));
     }, [pathname, dispatch]);
 
-    // Escape closes the open drawer
     useEffect(() => {
         if (!isOpen) return;
         const onKey = (e) => { if (e.key === 'Escape') dispatch(setShowMenu(false)); };
@@ -185,14 +182,11 @@ export default function Menu(){
                         <MenuLink to="/" end icon="home" label={t('home')} onClick={onClose} inTabBar />
                         <MenuLink to="/calendar" icon="calendar" label={t('calendar')} onClick={onClose} inTabBar
                             count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
-                        {/* the place to work and study (Pomodoro, notes), and guided routines */}
                         <MenuLink to="/focus" icon="focus" label={t('focusRoom')} onClick={onClose} inTabBar />
                         <MenuLink to="/routines" icon="routine" label={t('routines')} onClick={onClose} tip="menu-routines" />
-                        {/* testers: the notes area and collections (tasks, events and notes together) */}
                         <MenuLink to="/notes" icon="note" label={t('notesTitle')} onClick={onClose} tip="menu-notes" />
                         <MenuLink to="/collections" icon="collection" label={t('collections')} onClick={onClose} tip="menu-collections" />
                         <MenuLink to="/study" icon="book" label={t('studyNav')} onClick={onClose} inTabBar />
-                        {/* friends, shared sessions, families and the feed: one place for other people */}
                         <MenuLink to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} onClick={onClose}
                             count={inviteCount + incomingCount + familyInviteCount} countLabel={t('communityCount')}
                             news={news.together || news.social || news.feed} newsLabel={t('menuNews')} />
@@ -201,28 +195,22 @@ export default function Menu(){
                         <MenuLink to="/inbox" icon="inbox" label={t('inbox')} onClick={onClose}
                             count={inboxCount} countLabel={t('inboxUnread')} />
                         <MenuLink to="/stats" icon="history" label={t('history')} onClick={onClose} tip="menu-stats" />
-                        {/* small games, with a leaderboard (also the beta screen's waiting room) */}
                         <MenuLink to="/arcade" icon="gamepad" label={t('arcade')} onClick={onClose} tip="menu-arcade" />
                     </div>
                 </nav>
 
-                {/* settings, feedback and admin sit at the bottom, the account last */}
                 <div className={styles.menuBottom} data-slide-container>
-                    {/* testers: switch the interface variant, rate what is being tested */}
                     {isTester && <MenuLink to="/tester" icon="flask" label={t('testerNav')} onClick={onClose} />}
                     {isAdmin && (
                         <MenuLink to="/admin" icon="admin" label={t('admin')} onClick={onClose}
                             count={adminPendingCount} countLabel={t('adminOpenRequests')} />
                     )}
-                    {/* Quidey Pro: supporting the development (once it's switched on) */}
                     {proOn && <MenuLink to="/pro" icon="heart" label={t('proNav')} onClick={onClose} />}
                     <MenuLink to="/settings" icon="settings" label={t('settings')} onClick={onClose} />
                     <MenuLink to="/feedback" icon="feedback" label={t('feedback')} onClick={onClose} />
-                    {/* who is signed in: profile, switch accounts, add one, sign out */}
                     <div className={styles.account}>
                         {token ? <AccountSwitcher onNavigate={onClose} compact={nav === 'rail'} />
                             : <>
-                                {/* the short tour, for visitors without an account */}
                                 <button type="button" className={styles.tourLink} onClick={() => { onClose(); dispatch(setShowTutorial(true)); }}>{t('guestInviteOpen')}</button>
                                 <button type="button" className={styles.signIn} onClick={() => { onClose(); openAuth(); }}>{t('signIn')}</button>
                             </>}

@@ -96,7 +96,6 @@ describe('reminders in the app (testers)', () => {
         const saved = once({ id: 7, at: new Date(new Date().setHours(18, 0, 0, 0)).toISOString() })
         apiFetch.mockResolvedValueOnce(saved)
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Speichern' })) })
-        // (the task form asked for the friends before)
         const [, init] = apiFetch.mock.calls.find(([path]) => path === '/api/tester/reminders')
         const body = JSON.parse(init.body)
         expect(body.text).toBe('Mama anrufen')

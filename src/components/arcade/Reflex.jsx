@@ -44,7 +44,6 @@ export default function Reflex({ onFinish }) {
         finish.current?.(scoreRef.current);
     };
 
-    // a light that goes out untouched ends the run
     useEffect(() => {
         if (phase !== 'running' || tile === null) return undefined;
         const timer = setTimeout(() => end('missed', tile), reflexLifeMs(hits));

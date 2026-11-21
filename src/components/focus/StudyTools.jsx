@@ -100,7 +100,6 @@ export function FocusSounds() {
 
 const METHODS = ['recall', 'feynman', 'spaced', 'interleave', 'blurting'];
 
-// Study methods: one at a time, with what to do in this round
 export function StudyMethod() {
     const { t } = useTranslation();
     const [method, setMethod] = useStored('focusMethod', 'recall');
@@ -127,7 +126,6 @@ export function RoundRecap({ focusTask, onSaved }) {
     const { lastRound } = useAwayTally();
     const onBreak = timerMode === 'pomodoro' && pomodoro.phase !== 'focus' && pomodoro.round > 0;
     if (!onBreak) return null;
-    // the round just done, where time elsewhere can be told (useFocusAway.js)
     const mark = awayPlatform() !== null && lastRound
         ? (lastRound.count ? fill(t('awayRoundCount'), { n: lastRound.count }) : t('awayRoundClean'))
         : null;

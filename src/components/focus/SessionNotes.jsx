@@ -36,7 +36,6 @@ export default function SessionNotes({ goal, focusTask }) {
     const [creating, setCreating] = useState(false);
     const aiQuota = useAiQuota();
     const [scanning, setScanning] = useState(false);
-    // a note made from the click: the cursor goes straight into it
     const [justMade, setJustMade] = useState(null);
 
     const wanted = goal.trim();
@@ -72,7 +71,6 @@ export default function SessionNotes({ goal, focusTask }) {
             <div className={styles.notesHead}>
                 <h2 id="session-notes-title" className={styles.cardLabel}><Icon name="note" size={16} /> {t('sessionNotesTitle')}</h2>
                 <div className={styles.notesHeadActions}>
-                    {/* study material read by the AI (the whole notebook has its own button) */}
                     {!showAll && aiQuota?.available &&
                         <button type="button" className={styles.textBtn} onClick={() => setScanning(true)}>{t('scanTitle')}</button>}
                     <button type="button" className={styles.textBtn} onClick={() => setShowAll(all => !all)} aria-pressed={showAll}>

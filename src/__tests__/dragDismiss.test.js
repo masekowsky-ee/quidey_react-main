@@ -9,7 +9,6 @@ describe('sheet and drawer gestures', () => {
         // 1000 px/s carries on for about half a metre of screen: 499 px
         expect(project(1000)).toBeCloseTo(499, 0)
         expect(project(-1000)).toBeCloseTo(-499, 0)
-        // a snappier deceleration carries less far
         expect(project(1000, 0.99)).toBeLessThan(project(1000))
     })
 
@@ -26,7 +25,6 @@ describe('sheet and drawer gestures', () => {
     it('measures the speed over the last moment only', () => {
         expect(velocityOf([])).toBe(0)
         expect(velocityOf([{ at: 0, t: 0 }])).toBe(0)
-        // 50 px in 50 ms
         expect(velocityOf([{ at: 0, t: 0 }, { at: 25, t: 25 }, { at: 50, t: 50 }])).toBeCloseTo(1000)
         // an old sample from before the finger stopped doesn't count
         expect(velocityOf([{ at: 0, t: 0 }, { at: 200, t: 300 }, { at: 200, t: 390 }])).toBe(0)
@@ -35,9 +33,7 @@ describe('sheet and drawer gestures', () => {
     it('dismisses past half the panel, or on a flick from anywhere', () => {
         expect(shouldDismiss(100, 0, 600)).toBe(false)
         expect(shouldDismiss(320, 0, 600)).toBe(true)
-        // a short pull, thrown down
         expect(shouldDismiss(60, 800, 600)).toBe(true)
-        // pulled far but thrown back up: it stays
         expect(shouldDismiss(320, -400, 600)).toBe(false)
     })
 })
@@ -65,9 +61,7 @@ describe('springs in Apple\'s terms', () => {
         expect(settle.stiffness).toBeCloseTo((2 * Math.PI / 0.4) ** 2)
         // critically damped: damping = 2 * sqrt(stiffness * mass)
         expect(settle.damping).toBeCloseTo(2 * Math.sqrt(settle.stiffness))
-        // a lower ratio bounces: less damping for the same stiffness
         expect(spring(0.4, 0.8).damping).toBeLessThan(settle.damping)
-        // a quicker response is stiffer
         expect(spring(0.2, 1).stiffness).toBeGreaterThan(settle.stiffness)
     })
 })

@@ -27,7 +27,6 @@
   outline-offset: 3px;
 }
 
-/* where the colour sits: a ring in the page's ink around the colour itself */
 .marker {
   position: absolute;
   width: 1rem;

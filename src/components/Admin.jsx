@@ -25,7 +25,6 @@ const SEARCH_DELAY_MS = 300;
 const PAGE_SIZE = 50;
 const SORTS = ['newest', 'oldest', 'name'];
 
-// run(action, successKey) dispatches, shows a toast either way, resolves to the result or null
 function useAdminRun() {
     const dispatch = useDispatch();
     const { t } = useTranslation();
@@ -41,7 +40,6 @@ function useAdminRun() {
     }, [dispatch, t]);
 }
 
-// onOpen: the person area becomes a button (the users list opens the detail sheet with it)
 function Person({ user, onOpen }) {
     const inner = (
         <>
@@ -61,7 +59,6 @@ function StatusChip({ status, t }) {
     return <span className={styles[`chip_${status}`] ?? styles.chip}>{t(`requestStatus_${status}`)}</span>;
 }
 
-// ---------- requests ----------
 
 function RequestsTab() {
     const { t, language } = useTranslation();
@@ -83,7 +80,6 @@ function RequestsTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch, scope]);
 
-    // replaces the user in the list, or drops them when only open requests are shown
     const apply = (updated) => setRequests(list => scope === 'pending' && updated.request?.status !== 'pending'
         ? list.filter(u => u.id !== updated.id)
         : list.map(u => (u.id === updated.id ? updated : u)));
@@ -151,7 +147,6 @@ function RequestsTab() {
     );
 }
 
-// ---------- users ----------
 
 function UsersTab() {
     const { t, language } = useTranslation();
@@ -171,7 +166,6 @@ function UsersTab() {
     const [busyId, setBusyId] = useState(null);
     const [confirm, setConfirm] = useState(null); // { id, isAdmin } waiting for "really?"
 
-    // searches as you type, a moment after the last key; a new search or sort starts at page 1
     useEffect(() => {
         let cancelled = false;
         generation.current += 1;
@@ -357,7 +351,6 @@ function UsersTab() {
     );
 }
 
-// ---------- overview ----------
 
 function OverviewTab() {
     const { t, language } = useTranslation();

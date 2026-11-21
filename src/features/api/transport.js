@@ -67,7 +67,6 @@ export async function request(url, options = {}) {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const error = new Error(errorData.error || "Request failed");
-        // status and the API's error code let the UI show a translated message
         error.status = response.status;
         error.code = errorData.code;
         // which input the server refused (INVALID_INPUT)

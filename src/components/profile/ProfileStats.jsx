@@ -6,7 +6,6 @@ import { badgesFor } from '../../features/profile/badges';
 import { groupColorAttr } from '../../features/tasks/taskColors';
 import Icon from '../icons';
 
-// The day `daysAgo` days before `today` (a local Date)
 const dayBefore = (today, daysAgo) => new Date(today.getFullYear(), today.getMonth(), today.getDate() - daysAgo);
 
 // 0 = nothing, 1-4 = a quarter of the busiest day each
@@ -17,7 +16,6 @@ function Heatmap({ daily, today, t }) {
     const [hovered, setHovered] = useState(null);
     const max = Math.max(...daily);
     const todayRow = mondayIndex(today);
-    // fill up the first week before the oldest day and the rest of this week after today
     const lead = (todayRow + 1) % 7;
     const cells = [
         ...Array.from({ length: lead }, (_, i) => ({ key: `lead${i}`, blank: true })),
@@ -54,7 +52,6 @@ function Heatmap({ daily, today, t }) {
     );
 }
 
-// Focus per day for the last two weeks
 function LastDays({ daily, today, t }) {
     const [hovered, setHovered] = useState(null);
     const days = daily.slice(-14).map((ms, i) => ({ ms, date: dayBefore(today, 13 - i) }));
@@ -81,7 +78,6 @@ function LastDays({ daily, today, t }) {
     );
 }
 
-// Horizontal bars with a label and a duration, longest = full width
 function DurationRows({ title, rows }) {
     const max = Math.max(0, ...rows.map(r => r.ms));
     return (

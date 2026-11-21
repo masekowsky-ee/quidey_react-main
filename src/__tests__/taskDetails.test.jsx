@@ -308,18 +308,15 @@ describe('calendar with times and sharing', () => {
     it('edits time, planned time, location and reminder', async () => {
         const store = makeStore([{ ...lunch, sharedWith: [] }])
         renderCalendar('/calendar?date=2026-10-22&day=2026-10-22&task=5', store)
-        // opened from the address straight into the editor; the options start closed, with a summary
         expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue('Lunch')
         const toggle = screen.getByRole('button', { name: /More options/ })
         expect(toggle).toHaveAttribute('aria-expanded', 'false')
         expect(toggle).toHaveTextContent('Luigi')
-        // the planned time sits on wheels that open from its field
         expect(screen.queryByRole('spinbutton', { name: 'Planned time: Hours' })).not.toBeInTheDocument()
         fireEvent.click(screen.getByRole('button', { name: '1 h 30 min' }))
         fireEvent.click(screen.getByRole('button', { name: '1 h', pressed: false }))
         fireEvent.click(toggle)
         fireEvent.change(screen.getByLabelText('Time'), { target: { value: '13:00' } })
-        // reminders are toggles: any number of them
         const reminders = within(screen.getByRole('group', { name: 'Reminders' }))
         fireEvent.click(reminders.getByRole('button', { name: '15 min before', pressed: false }))
         fireEvent.click(reminders.getByRole('button', { name: 'At the start', pressed: false }))
@@ -389,7 +386,6 @@ describe('create task form', () => {
         fireEvent.change(screen.getByLabelText(/^Time/), { target: { value: '12:30' } })
         fireEvent.click(screen.getByRole('button', { name: /More options/ }))
         fireEvent.change(screen.getByRole('textbox', { name: 'Location' }), { target: { value: 'Luigi' } })
-        // 1 h 30 min on the wheels, by keyboard: one hour down, six steps of five minutes
         fireEvent.click(screen.getByRole('button', { name: 'None' }))
         fireEvent.keyDown(screen.getByRole('spinbutton', { name: 'Planned time: Hours' }), { key: 'ArrowDown' })
         const minutes = screen.getByRole('spinbutton', { name: 'Planned time: Minutes' })
@@ -421,11 +417,9 @@ describe('create task form', () => {
         const atTheStart = () => within(screen.getByRole('group', { name: 'Reminders' })).getByRole('button', { name: /^(At the start|On the day)$/ })
         expect(atTheStart()).toBeDisabled()
         expect(screen.getByText('Reminders need the task to have a day.')).toBeInTheDocument()
-        // the time field is open without a day: a time takes today
         fireEvent.pointerDown(screen.getByLabelText(/^Time/))
         expect(screen.getByLabelText('Due Date')).toHaveValue(dateKey(new Date()))
         expect(atTheStart()).toBeEnabled()
-        // without a time, reminders count from my all-day time
         expect(screen.getByText(/Without a time, Quidey reminds you at 12:00/)).toBeInTheDocument()
         expect(atTheStart()).toHaveTextContent('On the day')
         fireEvent.change(screen.getByLabelText(/^Time/), { target: { value: '09:00' } })

@@ -13,7 +13,6 @@ export default function Logo({ className, title }) {
         <svg className={className} viewBox="9 5 50 50" role={title ? 'img' : undefined}
             aria-label={title} aria-hidden={title ? undefined : 'true'}>
             <defs>
-                {/* the ring gets a gap where the short arm of the check passes */}
                 <mask id={`${id}-cut`} maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
                     <rect width="64" height="64" fill="#fff" />
                     <path d="M27 32l9 12" stroke="#000" strokeWidth="10.5" strokeLinecap="round" />

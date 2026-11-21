@@ -75,14 +75,12 @@
   color: var(--text-muted);
 }
 
-/* what a new variant takes over: a quiet line, not a warning */
 .note {
   max-width: 65ch;
   font-size: 0.875rem;
   color: var(--text-muted);
 }
 
-/* one panel, the variants (or features) as rows divided by hairlines */
 .list {
   composes: panel from '../ui.module.css';
   list-style: none;
@@ -102,7 +100,6 @@
   border-top: 1px solid var(--border);
 }
 
-/* the variant in use: a step lighter, like a selected row */
 .row[data-active] {
   background: var(--surface-hover);
 }
@@ -187,7 +184,6 @@
   grid-template-columns: 0.9rem minmax(0, 1fr);
 }
 
-/* tabs on top: the nav is a band across, the body below */
 .preview[data-nav="top"] {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: 1.1rem minmax(0, 1fr);
@@ -198,7 +194,6 @@
   border-bottom: 1px solid color-mix(in srgb, var(--p-ink) 14%, transparent);
 }
 
-/* a command bar: a field floating at the top of the body */
 .preview[data-nav="command"] .previewBody::before {
   content: '';
   height: 0.55rem;
@@ -328,7 +323,6 @@
   border-radius: var(--radius-pill);
 }
 
-/* the empty column a ranking without favourite leaves stays */
 .rankItem:not(:has(.favorite)) .rankBar {
   grid-column: 3;
 }

@@ -128,7 +128,6 @@ async function currentSubscription() {
     return (await registration?.pushManager.getSubscription()) ?? null;
 }
 
-// Hands this device's address to the server (for the account signed in now); kinds optional
 async function save(subscription, kinds) {
     const { endpoint, keys } = subscription.toJSON();
     const data = await apiFetch('/api/push/subscription', json('PUT', { endpoint, keys, ...(kinds ? { kinds } : {}) }));
@@ -319,7 +318,6 @@ export async function enablePush() {
     });
 }
 
-// Turns them off for this device: gone from the server, and the browser drops the address
 export function disablePush() {
     set({ busy: true, error: null, detail: null });
     write(WANTED_KEY, 'off');
@@ -413,7 +411,6 @@ export function usePushSync(enabled, account, navigate) {
         if (enabled) refreshPush();
     }, [enabled, account]);
 
-    // app: a tapped notification, and the test shown while the app is open
     useEffect(() => onNativePushOpen(navigate), [navigate]);
     useEffect(() => onNativePushInApp(), []);
 

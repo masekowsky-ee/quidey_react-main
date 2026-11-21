@@ -106,7 +106,6 @@ export default function ArcadePage({ waiting = false }) {
     const pickMode = (next) => { setMode(next); storeMode(next); };
     const pickLevel = (next) => { storeLevel(gameId, next); setLevels(prev => ({ ...prev, [gameId]: next })); };
 
-    // a run's score (the quiz games: every right answer, with the streak so far)
     const onScore = useCallback(async (score) => {
         const forGame = gameId;
         const forLevel = levels[forGame];

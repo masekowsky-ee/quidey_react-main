@@ -20,14 +20,12 @@ import { usePlan } from '../features/pro/pro';
 
 const TABS = ['overview', 'sessions', 'done'];
 
-// The period from the address: ?range=week|month|year|all&offset=-1
 function readPeriodParams(params) {
     const range = RANGES.includes(params.get('range')) ? params.get('range') : 'week';
     const offset = range === 'all' ? 0 : Math.min(0, Math.trunc(Number(params.get('offset')) || 0));
     return { range, offset };
 }
 
-// "This week", "Last week", "13–19 Oct 2026"; "October 2026"; "2025"; "Everything"
 function periodTitle(t, locale, period) {
     const { range, offset } = period;
     if (range === 'all') return t('periodAll');
@@ -68,12 +66,10 @@ function chartBuckets(t, locale, period, stats) {
         }
         return { key, label, longLabel, focus: focus[key] ?? 0, events: events[key] ?? 0 };
     });
-    // a label on every column while they fit; otherwise every few (31 days: 1, 6, 11, ...)
     const labelEvery = buckets.length > 16 ? 5 : buckets.length > 12 ? 2 : 1;
     return { buckets, labelEvery };
 }
 
-// Horizontal bars, longest = full width: label (with a dot in its colour), bar, value
 function Bars({ rows, empty }) {
     const max = Math.max(0, ...rows.map(r => r.ms));
     if (rows.length === 0) return <p className={styles.empty}>{empty}</p>;
@@ -190,7 +186,6 @@ export default function Stats() {
     const query = periodQuery(basePeriod);
     const period = range === 'all' && stats.query === query ? periodOf('all', 0, new Date(), stats.data?.firstDay) : basePeriod;
 
-    // the period's numbers, again when a session was saved or the period changes
     useEffect(() => {
         let current = true;
         apiFetch(`/api/stats${query}`, { cacheMs: CACHE_SHORT })
@@ -200,7 +195,6 @@ export default function Stats() {
     }, [query, sessionCount]);
     const shownStats = stats.query === query ? stats : { data: null, error: false };
 
-    // my activity of all time (the same numbers friends may see on my profile)
     const [profile, setProfile] = useState(null);
     useEffect(() => {
         let current = true;

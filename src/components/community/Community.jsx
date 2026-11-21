@@ -70,7 +70,6 @@ export default function Community() {
             <header className={styles.head}>
                 <div className={styles.headText}>
                     <h1 className={styles.title}>{t('community')}</h1>
-                    {/* the finding first: where I stand and how far the next level is */}
                     <p className={styles.summary} aria-live="polite">
                         {progress?.nextLevelXp === null ? fill(t('communitySummaryMax'), {
                             level: progress.level, tier: t(`tier_${tierFor(progress.level).id}`),

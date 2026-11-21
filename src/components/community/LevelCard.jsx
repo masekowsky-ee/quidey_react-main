@@ -54,7 +54,6 @@ export default function LevelCard() {
 
     const { level, xp, levelStartXp, nextLevelXp } = progress;
     const reached = progress.unlockLevel ?? level;
-    // on the top level there is no next one: the track is full
     const top = nextLevelXp === null;
     const share = top ? 1 : Math.min(1, Math.max(0, (xp - levelStartXp) / (nextLevelXp - levelStartXp)));
     const tier = tierFor(level);
@@ -73,7 +72,6 @@ export default function LevelCard() {
             </div>
 
             <div className={styles.levelTop}>
-                {/* the plant grows with the level (large on the profile, where it can be replayed) */}
                 <Link to="/profile" className={styles.levelPlant} aria-label={t('plantOpen')} title={t('plantOpen')}>
                     <LevelPlant level={level} share={share} size={64} />
                 </Link>

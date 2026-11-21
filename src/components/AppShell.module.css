@@ -34,7 +34,6 @@
   pointer-events: none;
 }
 
-/* the pages and the footer under them */
 .main {
   flex: 1;
   display: flex;
@@ -78,7 +77,6 @@
    look is "bar"; testers' interface variants bring their own. "top" puts the main places as tabs in a second header row (the menu
    is a drawer then), "rail" is a narrow column of icons, "command" a compact sidebar. */
 @media (min-width: 1100px) {
-  /* the app's own look: no sidebar, the main places sit in the header's one row */
   .shell[data-nav="bar"] {
     --sidebar-w: 0px;
   }

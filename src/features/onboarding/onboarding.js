@@ -12,11 +12,8 @@ import { installState } from '../pwa/install';
 import { pushAsking } from '../pwa/push';
 import { trackAction } from '../usage/track';
 
-// the install question comes from this action on (while the browser can install Quidey)
 export const INSTALL_AFTER = 3;
-// the rating question comes with the first success after this many actions
 export const RATING_AFTER = 10;
-// what counts as a success: a task done, a new friend
 const SUCCESSES = ['done', 'friend'];
 // a moment for the tick and its toast before the rating question comes
 export const RATING_DELAY_MS = 1200;
@@ -61,7 +58,6 @@ export function startOnboarding(username) {
     if (account && !load()) save({ actions: 0, installAsked: false, ratingAsked: false });
 }
 
-// The tour of a new account was closed: what now?
 export function askNextSteps() {
     if (load()) set({ asking: 'next' });
 }
@@ -96,7 +92,6 @@ export function noteAction(kind) {
     }
 }
 
-// The open question is answered or closed
 export function closeOnboarding() {
     set({ asking: null });
 }

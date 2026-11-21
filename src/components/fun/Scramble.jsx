@@ -12,7 +12,6 @@ function newRound(language, level, previous) {
     let entry = pick(list);
     while (list.length > 1 && entry[0] === previous) entry = pick(list);
     const [word, hint] = entry;
-    // easy gives the first letter away for free
     return { word, hint, letters: [...scramble(word)], picked: [], revealed: SCRAMBLE_LEVELS[level].given, result: null };
 }
 
@@ -31,9 +30,7 @@ export default function Scramble({ level = 'normal', onScore }) {
 
     const { word, hint, letters, picked, revealed, result } = round;
     const finished = result === 'right' || result === 'skipped';
-    // revealed letters are fixed at the start of the answer
     const guess = word.slice(0, revealed) + picked.map((i) => letters[i]).join('');
-    // letters bought with "reveal" (not the free one on easy)
     const hintsUsed = revealed - settings.given;
 
     const check = (nextPicked) => {
@@ -54,7 +51,6 @@ export default function Scramble({ level = 'normal', onScore }) {
         }
     };
 
-    // letters still to place: all minus the revealed ones (removed once each) minus the picked ones
     const available = (() => {
         const free = letters.map((_, i) => i);
         for (const ch of word.slice(0, revealed)) {
@@ -88,7 +84,6 @@ export default function Scramble({ level = 'normal', onScore }) {
 
     const reshuffle = () => setRound((r) => ({ ...r, letters: shuffle(r.letters), picked: [], result: null }));
 
-    // typing picks the first free tile with that letter
     useEffect(() => {
         const onKey = (e) => {
             if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -124,7 +119,6 @@ export default function Scramble({ level = 'normal', onScore }) {
                 {settings.category ? fill(t('scrambleCategory'), { hint }) : fill(t('scrambleNoCategory'), { n: word.length })}
             </p>
 
-            {/* the answer so far */}
             <div key={shake} className={`${styles.answerRow} ${shake && result === 'wrong' ? styles.shake : ''}`} aria-label={guess || undefined}>
                 {[...word].map((ch, i) => {
                     const shown = result === 'skipped' ? ch : guess[i];

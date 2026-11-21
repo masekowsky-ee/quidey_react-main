@@ -26,7 +26,6 @@ export default function AuthDialog() {
         return () => window.removeEventListener(OPEN_AUTH_EVENT, onOpen);
     }, []);
 
-    // signed in: the window has done its job (adjusted while rendering, not in an effect)
     const [seenToken, setSeenToken] = useState(token);
     if (token !== seenToken) {
         setSeenToken(token);

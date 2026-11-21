@@ -8,7 +8,6 @@ import { TIERS, formatNumber, tierFor } from '../../features/progress/progress';
 import { COMMUNITY_PATHS } from '../../features/community/paths';
 import LevelPlant from './LevelPlant';
 
-// a replay takes about this long, however high the level
 const REPLAY_MS = 4200;
 
 // My plant, large: how far it has grown (the level and its name, the way to the next one), and
@@ -17,7 +16,6 @@ const REPLAY_MS = 4200;
 export default function PlantCard() {
     const { t, language } = useTranslation();
     const progress = useSelector(state => state.progress.data);
-    // the level shown: null = today's
     const [shown, setShown] = useState(null);
     const [playing, setPlaying] = useState(false);
     const timer = useRef(null);
@@ -37,7 +35,6 @@ export default function PlantCard() {
         setPlaying(false);
     };
 
-    // from the seed to today: one level per step
     const replay = () => {
         stop();
         if (level <= 1) return;

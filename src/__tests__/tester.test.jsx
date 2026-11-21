@@ -91,7 +91,6 @@ describe('interface variants', () => {
         renderHook(() => useApplyUiVariant(), { wrapper })
         expect(document.documentElement.dataset.ui).toBeUndefined()
         await act(async () => { store.dispatch(setUiVariant('tafel')) })
-        // once its styles have loaded
         await vi.waitFor(() => expect(document.documentElement.dataset.ui).toBe('tafel'))
         await act(async () => { store.dispatch(setUiVariant('current')) })
         expect(document.documentElement.dataset.ui).toBeUndefined()
@@ -168,7 +167,6 @@ describe('the Tester page', () => {
         const schulheft = screen.getByRole('radiogroup', { name: 'Schulheft bewerten' })
         expect(within(schulheft).getByRole('radio', { name: '4 von 5 Sternen' })).toHaveAttribute('aria-checked', 'true')
         expect(screen.getByLabelText('Kommentar zu Schulheft')).toHaveValue('Ruhig.')
-        // "current" is in use until another one is picked
         expect(screen.getAllByText('Aktiv')).toHaveLength(1)
     })
 
@@ -199,7 +197,6 @@ describe('the Tester page', () => {
         expect(within(row).getByRole('status')).toHaveTextContent('Gespeichert')
         expect(within(row).getByRole('button', { name: 'Speichern' })).toBeDisabled()
 
-        // the same star again takes it away
         await act(async () => { fireEvent.click(within(tafel).getByRole('radio', { name: '2 von 5 Sternen' })) })
         expect(calls.at(-1).body).toEqual({ rating: null })
     })
@@ -271,7 +268,6 @@ describe('the command bar', () => {
         expect(screen.queryByRole('dialog')).toBeNull()
         await act(async () => { fireEvent.keyDown(window, { key: 'k', ctrlKey: true }) })
         const input = screen.getByRole('combobox')
-        // testers also get "Neue Erinnerung"
         fireEvent.change(input, { target: { value: 'neue' } })
         expect(screen.getAllByRole('option').map(o => o.textContent)).toEqual(['Neue Aufgabe oder Termin', 'Neue Erinnerung'])
         fireEvent.change(input, { target: { value: 'neue auf' } })

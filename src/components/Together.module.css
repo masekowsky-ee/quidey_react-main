@@ -95,7 +95,6 @@
     max-height: min(26rem, 60vh);
     overflow-y: auto;
     overscroll-behavior: contain;
-    /* room for the scrollbar */
     padding-right: 0.25rem;
 }
 
@@ -271,8 +270,6 @@
     color: var(--text-h);
     font-variant-numeric: tabular-nums;
 }
-
-/* ---------- tasks ---------- */
 
 .addTask{
     display: flex;
@@ -542,7 +539,6 @@ a.primaryBtn{
         flex-wrap: wrap;
     }
 
-    /* buttons drop under the name instead of squeezing it */
     .taskRow .actions,
     .row .actions{
         width: 100%;
@@ -577,7 +573,6 @@ a.primaryBtn{
     min-width: 0;
 }
 
-/* The owner can click the title to rename */
 .renamable{
     padding: 0;
     font: inherit;
@@ -630,7 +625,6 @@ a.primaryBtn{
     min-width: 0;
 }
 
-/* sticks while the task list scrolls by */
 .roomSide{
     position: sticky;
     top: calc(var(--header-h) + 1rem);
@@ -789,7 +783,6 @@ a.primaryBtn{
     margin-top: 0.2rem;
 }
 
-/* Assignment as a quiet pill; filled when somebody is assigned */
 .assigneeSelect,
 .assigneeSelectSet{
     max-width: 11rem;
@@ -918,7 +911,6 @@ a.primaryBtn{
     border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
 }
 
-/* the start form, when opened from "New session" */
 .highlight{
     border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
@@ -940,7 +932,6 @@ a.primaryBtn{
     composes: segmentActive from './ui.module.css';
 }
 
-/* top of the solo home page */
 /* in Home's title row, on its right: the hint (when there is one), then Solo | Team */
 .soloStrip{
     min-width: 0;
@@ -1114,7 +1105,6 @@ a.primaryBtn{
     min-height: 26rem;
 }
 
-/* a long member list scrolls on its own, so the chat keeps its space */
 .teamColTeam > section:first-child{
     flex-shrink: 0;
     max-height: 45%;
@@ -1153,7 +1143,6 @@ a.primaryBtn{
 /* ---------- smaller screens ---------- */
 
 @media (max-width: 1280px) {
-    /* focus above tasks on the left, the team stays a sidebar on the right */
     .teamGrid{
         grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
         grid-template-areas:
@@ -1204,7 +1193,6 @@ a.primaryBtn{
     }
 }
 
-/* Task or event for the add field */
 .kindToggle{
     composes: segmented from './ui.module.css';
     align-self: flex-start;
@@ -1231,13 +1219,11 @@ a.primaryBtn{
     .addRow{
         flex-wrap: wrap;
     }
-    /* the switch on its own line, the name field under it at full width */
     .addRow > input:first-of-type{
         flex: 1 1 100%;
     }
 }
 
-/* An event: a calendar mark instead of the tick, a soft tint of its colour */
 .taskEvent{
     background-color: color-mix(in srgb, var(--task-color, var(--primary)) 6%, transparent);
 }
@@ -1255,7 +1241,6 @@ a.primaryBtn{
     color: var(--text-muted);
 }
 
-/* "Done (3)": the chevron turns down while the list is open */
 .doneChevron{
     display: inline-flex;
     vertical-align: -0.2em;
@@ -1266,7 +1251,6 @@ a.primaryBtn{
     transform: rotate(90deg);
 }
 
-/* a small tick before a finished task's name */
 .doneMark{
     margin-right: 0.3rem;
     vertical-align: -0.1em;
@@ -1278,7 +1262,6 @@ a.primaryBtn{
     vertical-align: -0.15em;
 }
 
-/* a quiet text action under the add row ("Add one of my tasks") */
 .linkAction{
     align-self: flex-start;
     display: inline-flex;

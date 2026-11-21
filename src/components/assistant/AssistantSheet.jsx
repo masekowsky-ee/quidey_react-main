@@ -50,12 +50,10 @@ export default function AssistantSheet({ onClose, onReply }) {
     const titleId = useId();
     const fieldRef = useRef(null);
     const scrollRef = useRef(null);
-    // the running request: { messageId, controller, timedOut }; null when none
     const request = useRef(null);
     const [text, setText] = useState('');
     const [pending, setPending] = useState(false);
     const [ended, setEnded] = useState(false);
-    // what is left today, from the last answer (else from GET /api/ai/quota)
     const [answerLeft, setAnswerLeft] = useState(null);
 
     const sheet = useSheet(onClose);
@@ -89,7 +87,6 @@ export default function AssistantSheet({ onClose, onReply }) {
         stopSpeaking();
         dismiss();
     };
-    // Escape closes (after anything inside that took it) and the focus goes back where it was
     useModal(close, { nested: true });
 
     // gone (closed, pulled down, the page changed): nothing late is applied
@@ -109,7 +106,6 @@ export default function AssistantSheet({ onClose, onReply }) {
 
     const deps = { dispatch, getState: store.getState, navigate };
 
-    // the new entries of one answer: made at once, one toast to undo them all
     async function makeEntries(messageId, cards) {
         const undos = [];
         const names = [];
@@ -305,7 +301,6 @@ function Message({ message, deps, onCardChange, onLeave }) {
     );
 }
 
-// "Fr 21.11." from "2026-11-21"
 function useDay() {
     const { t } = useTranslation();
     return (value) => {
@@ -392,7 +387,6 @@ function ActionCard({ card, deps, onChange, onLeave }) {
         );
     }
 
-    // a move or a delete: my own copy of the entry and what changes, then Bestätigen / Abbrechen
     const kindId = `${id}-kind`;
     const rows = type === 'update_entry' ? changeRows(card.task, action.changes) : [];
     const task = card.task;

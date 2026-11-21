@@ -35,7 +35,6 @@ function Avatar({ user }) {
     return <span className={styles.avatar} aria-hidden="true">{getInitials(displayName(user))}</span>;
 }
 
-// "14:05" today, otherwise the date
 function useWhen() {
     const language = useSelector(state => state.settings.language);
     const locale = localeOf(language);
@@ -47,7 +46,6 @@ function useWhen() {
     };
 }
 
-// ---------- messages ----------
 
 // selected: the conversation open beside the list (wide screens), marked in it
 // The friends to write to: the ones I haven't written with yet first (all of them once I have)
@@ -85,12 +83,10 @@ function Conversations({ onOpen, selected = null, newChat = true }) {
 
     const load = useCallback(() => fetchConversations().then(setConversations).catch(setError), []);
     useEffect(() => { load(); }, [load]);
-    // new messages move their conversation to the top, read ones lose their count
     useRealtime('message:new', load);
     useRealtime('inbox:read', load);
     useRealtime(REALTIME_RECONNECT, load);
 
-    // friends I haven't written with yet, to start a conversation
     const talkedTo = new Set((conversations ?? []).map(c => c.user.id));
     const others = friends.filter(friend => !talkedTo.has(friend.id));
 
@@ -150,13 +146,11 @@ function Thread({ userId, onBack }) {
         !prev || prev.messages.some(m => m.id === message.id) ? prev : { ...prev, messages: [...prev.messages, message] }
     ));
 
-    // new messages show up live while the conversation is open, and count as read
     useRealtime('message:new', ({ user, message } = {}) => {
         if (user?.id !== userId || !message) return;
         addMessage(message);
         if (!message.fromMe) markConversationRead(userId).catch(() => {});
     });
-    // whatever came while the connection was down
     useRealtime(REALTIME_RECONNECT, load);
 
     const count = thread?.messages.length ?? 0;
@@ -216,7 +210,6 @@ function Thread({ userId, onBack }) {
     );
 }
 
-// ---------- requests ----------
 
 function Requests() {
     const { t } = useTranslation();
@@ -294,7 +287,6 @@ function Requests() {
     );
 }
 
-// ---------- notices ----------
 
 function Notices() {
     const { t } = useTranslation();
@@ -324,7 +316,6 @@ function Notices() {
         return () => clearTimeout(seenTimer.current);
     }, [load]);
 
-    // a new notice shows up on top right away; one that grew ("Ann added 3 entries") moves up in its place
     useRealtime('notification:new', (notice) => {
         if (!notice?.id) return;
         setNotices(prev => (!prev ? prev : [notice, ...prev.filter(n => n.id !== notice.id)]));
@@ -367,10 +358,8 @@ function Notices() {
     );
 }
 
-// ---------- reminders (worked out from the tasks) ----------
 
 function Reminders() {
-    // my own reminders on top, the tasks' below
     return (
         <>
             <ReminderList />
@@ -384,7 +373,6 @@ function TaskReminders({ below = false }) {
     const tasks = useSelector(state => state.task.tasks);
     const allDayTime = useSelector(selectAllDayTime);
     const when = useWhen();
-    // read the clock once per visit of the tab
     const [now] = useState(() => Date.now());
 
     // one row per reminder (a task can have several); a task without a time counts from my all-day time
@@ -429,7 +417,6 @@ function TaskReminders({ below = false }) {
     );
 }
 
-// ---------- the page ----------
 
 export default function Inbox() {
     const { t } = useTranslation();
@@ -450,7 +437,6 @@ export default function Inbox() {
 
     const go = (next, extra = {}) => setSearchParams(next === 'messages' && !extra.with ? {} : { tab: next, ...extra }, { replace: !extra.with });
     const counts = { messages: unread.messages, requests: requestCount, notices: unread.notifications, reminders: 0 };
-    // wide screens: the conversations stay beside the open one
     const split = useMediaQuery(DESKTOP_QUERY) && tab === 'messages';
     const openConversation = (id) => go('messages', { with: String(id) });
 

@@ -12,7 +12,7 @@
 }
 
 .innerDiv{
-    composes: lifted from './ui.module.css'; /* floats over the page: the white sheet */
+    composes: lifted from './ui.module.css';
     padding: 2rem;
     max-width: min(28rem, calc(100vw - 2rem));
     box-sizing: border-box;

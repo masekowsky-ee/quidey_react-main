@@ -124,7 +124,6 @@ describe('news from the live lists', () => {
         await act(async () => {})
         expect(store.getState().toast.map(toast => [toast.text, toast.to])).toEqual([['Freundschaftsanfrage von Ben', '/community/friends?tab=requests']])
 
-        // the same list again: nothing new
         await serverSends('friends:changed', {})
         await wait(REFRESH_DELAY_MS)
         await act(async () => {})

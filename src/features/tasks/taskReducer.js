@@ -1,6 +1,5 @@
 import { ADD_TASK, DELETE_TASK, ADD_GROUP, DELETE_GROUP, ADD_GROUP_TASKS, DELETE_GROUP_TASKS, EDIT_DISPLAYGROUP, EDIT_GROUP, CREATE_NOTE, DELETE_NOTE, GET_NOTES, SET_TASK_STATE, UPDATE_TASK_PROPS, EDIT_NOTE, REFRESH_TASKS, TASK_REPLACED, SET_TASK_INVITES, TASK_INVITE_ACCEPTED, TASK_INVITE_REMOVED, TASK_SHARE_REMOVED, SET_EVENT_TYPES, EVENT_TYPE_SAVED, EVENT_TYPE_REMOVED } from './taskActionTypes';
 
-// task.group_ids: the groups a task is in (for its labels)
 const withGroupIds = (task, change) => ({ ...task, group_ids: change(task.group_ids ?? []) });
 
 // The fields of an updated task the api sent back. null counts (a cleared description
@@ -63,7 +62,6 @@ const taskReducer = (state = initialState, action) => {
             };
         }
         case EVENT_TYPE_REMOVED: {
-            // its events stay, without a type
             const untyped = (task) => (task.event_type_id === action.payload ? { ...task, event_type_id: null, event_type: null } : task);
             return {
                 ...state,
@@ -210,7 +208,6 @@ const taskReducer = (state = initialState, action) => {
         case EDIT_NOTE:
             return {
                 ...state,
-                // Replace the matching note with the row returned by the API
                 notes: state.notes.map(note => note.id === action.payload.id ? action.payload : note),
             }
 

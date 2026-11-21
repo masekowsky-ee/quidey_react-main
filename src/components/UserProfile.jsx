@@ -31,7 +31,6 @@ export default function UserProfile() {
     const [state, setState] = useState({ username: null, status: 'loading', profile: null });
     const [busy, setBusy] = useState(false);
 
-    // bumped after a friend request, so the profile loads again
     const [version, setVersion] = useState(0);
 
     useEffect(() => {
@@ -44,7 +43,6 @@ export default function UserProfile() {
         return () => { current = false; };
     }, [username, version]);
 
-    // a friend request from here; the profile loads again, so a new friend shows everything at once
     const run = async (action) => {
         setBusy(true);
         try {
@@ -61,7 +59,6 @@ export default function UserProfile() {
     const status = state.username === username ? state.status : 'loading';
     if (status === 'ready' && profile.relation === 'self') return <Navigate to="/profile" replace />;
 
-    // the profile card's shape: banner, avatar over its edge, name, handle, a few lines
     if (status === 'loading') {
         return (
             <Skeleton className={styles.page}>

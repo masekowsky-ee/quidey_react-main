@@ -32,7 +32,6 @@
     color: var(--text-muted);
 }
 
-/* the yes stands out, the no is grey (shared with the onboarding questions) */
 .yes{
     composes: btnYes from './ui.module.css';
 }

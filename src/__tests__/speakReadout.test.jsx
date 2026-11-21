@@ -321,12 +321,10 @@ describe('the assistant speaking its answers', () => {
     it('uses the toggle as it is when the answer arrives, not as it was when sent', async () => {
         openSheet(makeStore(MAX_ON))
         await say('Hallo')
-        // switched on during the wait
         fireEvent.click(screen.getByRole('button', { name: 'Antworten vorlesen' }))
         await answer()
         expect(spoken).toHaveLength(1)
 
-        // and switched off during the wait of the next
         await say('Und noch eins')
         fireEvent.click(screen.getByRole('button', { name: 'Antworten vorlesen' }))
         await answer()

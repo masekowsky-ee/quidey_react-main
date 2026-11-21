@@ -181,7 +181,6 @@
     min-height: 2rem;
 }
 
-/* cheering on: a quiet outlined pill; pressed, it fills with the ink (never the accent) */
 .cheer{
     display: inline-flex;
     align-items: center;
@@ -263,7 +262,6 @@
 
 /* ---------- states ---------- */
 
-/* the shared bone: grey, with the soft light running across */
 .skeleton{
     composes: bone from '../skeleton/Skeleton.module.css';
 }

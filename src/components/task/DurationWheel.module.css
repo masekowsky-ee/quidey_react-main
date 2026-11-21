@@ -23,7 +23,6 @@
     gap: 0.35rem;
 }
 
-/* Looks like the other inputs: a box with the value and a small chevron */
 .value{
     flex: 1;
     min-width: 0;
@@ -124,7 +123,6 @@
     gap: 1.25rem;
 }
 
-/* the band in the middle that holds the chosen numbers */
 .wheels::before{
     content: '';
     position: absolute;
@@ -151,7 +149,6 @@
     overscroll-behavior: contain;
     scroll-snap-type: y mandatory;
     scrollbar-width: none;
-    /* numbers fade out towards the top and bottom */
     mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent);
     border-radius: var(--radius-sm);
 }
@@ -168,7 +165,6 @@
 .items{
     list-style: none;
     margin: 0;
-    /* room above the first and below the last number, so both reach the band */
     padding: calc(var(--wheel-item) * 2) 0;
 }
 

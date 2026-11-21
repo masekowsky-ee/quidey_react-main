@@ -34,7 +34,6 @@ export default function Profile({ initialSignState = 0, initialEmail = '', googl
     const [birthDate, setBirthDate] = useState("");
     const [email, setEmail] = useState(initialEmail);
     const [displayName, setDisplayName] = useState("");
-    // the three things to agree to before signing up, all required
     const [consents, setConsents] = useState({ terms: false, privacy: false, age: false });
     const toggleConsent = (key) => (e) => setConsents(prev => ({ ...prev, [key]: e.target.checked }));
 
@@ -60,7 +59,6 @@ export default function Profile({ initialSignState = 0, initialEmail = '', googl
         dispatch(logout());
     }
 
-    // the error box (CustomError) reads its message from the store
     const setCustomError = (error) => dispatch(showError(error));
 
     // The server's reason as a translated message (error.code, or the HTTP status for sign-in)
@@ -125,7 +123,6 @@ export default function Profile({ initialSignState = 0, initialEmail = '', googl
         } else if (!consents.age) {
             setCustomError({bool: true, message: t('authError_AGE_CONFIRMATION_REQUIRED')});
         } else {
-            // on failure everything stays filled in, so only the wrong field needs fixing
             once(() => dispatch(register(username.trim(), displayName, email, birthDate, password))
                 .then(() => {
                     // on to sign in, which works once the link in the mail is opened
@@ -138,11 +135,9 @@ export default function Profile({ initialSignState = 0, initialEmail = '', googl
         }
     }
 
-    // ---------- Sign in with Google ----------
     // a Google account without a Quidey account yet: { token, email, name, username } (then the
     // card asks for the rest instead of showing the tabs)
     const [googleSignup, setGoogleSignup] = useState(null);
-    // back from Google's page (web): its answer from the address
     const [googleResult] = useState(() => (googleReturn ? readGoogleReturn() : null));
     const [googleBusy, setGoogleBusy] = useState(() => Boolean(googleResult?.idToken));
     const googleError = (err) => {
@@ -169,9 +164,7 @@ export default function Profile({ initialSignState = 0, initialEmail = '', googl
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [googleResult]);
 
-    // 0 = sign in, 1 = sign up
     const [signState, setSignState] = useState(initialSignState);
-    // accounts still signed in on this device (while adding another one): one tap goes back
     const [savedAccounts] = useState(() => (signedIn ? [] : listAccounts()));
 
     const signArr = ['signIn', 'signUp'];

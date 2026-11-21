@@ -54,7 +54,6 @@
     text-align: left;
 }
 
-/* name on the left, one fact on the right (ui.module.css) */
 .cardHead{
     composes: panelHead from '../ui.module.css';
     margin: 0;
@@ -112,7 +111,6 @@
     fill: color-mix(in srgb, var(--streak) 55%, transparent);
 }
 
-/* a lit flame flickers a little, unless motion is minimal */
 :global(:root:not([data-motion="minimal"])) .card[data-streak="lit"] .flame svg{
     transform-origin: 50% 90%;
     animation: flicker 2.8s ease-in-out infinite;
@@ -139,7 +137,6 @@
     font-size: 0.9375rem;
 }
 
-/* the number in the serif, like the page titles */
 .streakNumber strong{
     font: 400 2.75rem/1 var(--serif);
     letter-spacing: -0.02em;
@@ -204,7 +201,6 @@
     font-weight: 500;
 }
 
-/* Home's side column (the app's own look): the number says it, no flame beside it */
 .stacked .flame{
     display: none;
 }

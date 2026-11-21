@@ -17,10 +17,8 @@ const parse = (text) => {
 
 export const androidApk = () => (import.meta.env.VITE_ANDROID_APK ? parse(import.meta.env.VITE_ANDROID_APK) : null);
 
-// an Android phone or tablet, in the browser (the app itself has nothing to download)
 const onAndroidBrowser = () => !isNativeApp() && /Android/i.test(window.navigator.userAgent);
 
-// what the settings offer: the APK's details, or null where there is none to offer
 export const apkOffer = () => (onAndroidBrowser() ? androidApk() : null);
 
 // "6,2 MB"

@@ -8,7 +8,6 @@ import { offerPushAfterTask } from '../pwa/push';
 import { noteAction } from '../onboarding/onboarding';
 
 
-// Action creators for task management
 export const fetchTaskState = () => {
     return async (dispatch) => {
         // all four at once (one round trip of waiting, not four one after the other); the types
@@ -173,7 +172,6 @@ export const shareTask = (taskId, userIds) => {
     };
 }
 
-// Tasks friends sent me that I haven't answered
 export const fetchTaskInvites = () => {
     return async (dispatch) => {
         const invites = await apiFetch("/api/task-shares");
@@ -181,7 +179,6 @@ export const fetchTaskInvites = () => {
     };
 }
 
-// Accept: the task joins my list
 export const acceptTaskInvite = (inviteId) => {
     return async (dispatch) => {
         const task = await apiFetch(`/api/task-shares/${inviteId}/accept`, { method: "POST" });
@@ -215,7 +212,6 @@ export const unshareTask = (taskId, shareId) => {
 
 export const selectTaskInviteCount = (state) => state.task.invites.length;
 
-// Someone else's task shared with me (as opposed to my own)
 export const isSharedWithMe = (task) => Boolean(task?.owner);
 
 // color: one of TASK_COLORS or null

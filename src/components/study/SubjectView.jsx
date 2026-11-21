@@ -101,7 +101,6 @@ export default function SubjectView({ subjectId }) {
                             <Icon name="edit" size={14} /> {t('studyEditSubject')}
                         </button>
                     )}
-                    {/* a subject the Untis timetable made can be folded away (archived), not deleted */}
                     {subject && !subject.fromUntis && <ConfirmDeleteButton onConfirm={remove} label={fill(t('studyDeleteSubject'), { name: subject.name })} />}
                 </div>
             </header>
@@ -117,7 +116,6 @@ export default function SubjectView({ subjectId }) {
                 <p className={styles.empty}>{t('studyGoalsEmpty')}</p>
             ) : (
                 <>
-                    {/* school life: what is still to do, then what is finished (with its grade) */}
                     {openGoals.length > 0 && <ul className={styles.list} aria-label={t('studyOpenWork')}>{openGoals.map(goal => goalRow(goal, false))}</ul>}
                     {finishedGoals.length > 0 && (
                         <>

@@ -30,7 +30,6 @@ function voiceFor(synth, lang) {
     return local.find(exact) ?? local.find(sameLanguage) ?? voices.find(exact) ?? voices.find(sameLanguage) ?? null;
 }
 
-// the stop function of the speech going on, if any
 let current = null;
 
 export function stopSpeaking() {

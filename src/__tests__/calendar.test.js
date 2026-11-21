@@ -187,7 +187,6 @@ describe('iCalendar export', () => {
         const physical = ics.split('\r\n')
         const encoder = new TextEncoder()
         for (const line of physical) expect(encoder.encode(line).length).toBeLessThanOrEqual(75)
-        // unfolding gives the original line back
         expect(ics.replace(/\r\n /g, '')).toContain(`SUMMARY:${'ä'.repeat(100)}`)
     })
 })

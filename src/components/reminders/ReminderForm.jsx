@@ -18,7 +18,6 @@ import { useWhenText } from './whenText';
 
 const DAYS = [1, 2, 3, 4, 5, 6, 7];
 
-// the next full hour (a new reminder's time until one is picked)
 function nextHour(now = new Date()) {
     const at = new Date(now);
     at.setHours(at.getHours() + 1, 0, 0, 0);

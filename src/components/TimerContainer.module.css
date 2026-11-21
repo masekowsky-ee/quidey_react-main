@@ -1,7 +1,6 @@
 /* Folded: a round button at the bottom left (the right corner is Home's add button); with the
    time beside the icon while a session is on */
 .fab{
-    /* the same shape as the add button (ui.module.css .fab), only the colours differ */
     composes: fab from './ui.module.css';
     left: calc(1rem + var(--sidebar-w, 0px) + env(safe-area-inset-left, 0px));
     color: var(--text-h);
@@ -30,7 +29,6 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* running (not paused) */
 .fabDot{
     position: absolute;
     top: 0.3rem;
@@ -42,7 +40,6 @@
     animation: livePulse 1.6s ease-in-out infinite;
 }
 
-/* Open: a small panel in the same corner, mode switch on top */
 .panel{
     position: fixed;
     left: calc(1rem + var(--sidebar-w, 0px) + env(safe-area-inset-left, 0px));
@@ -71,7 +68,6 @@
     gap: 0.5rem;
 }
 
-/* Timer | Stoppuhr */
 .modeSwitch{
     display: inline-flex;
     padding: 0.15rem;
@@ -113,7 +109,6 @@
     height: 2rem;
 }
 
-/* time, progress and controls in one row */
 .div{
     display: flex;
     flex-direction: row;
@@ -172,7 +167,6 @@
     cursor: pointer;
 }
 
-/* Thin progress line, takes the remaining width of the pill */
 .progress{
     flex: 1;
     height: 4px;
@@ -190,7 +184,6 @@
     margin: 0;
 }
 
-/* a stopwatch has no end: a quiet line that breathes while it runs */
 .stopwatchLine{
     height: 100%;
     width: 100%;
@@ -262,7 +255,6 @@
     height: 1.3rem;
 }
 
-/* the length typed straight into its parts (the arrows still step it) */
 .setTimerInput{
     width: 2.6em;
     height: auto;
@@ -346,7 +338,6 @@
     white-space: nowrap;
 }
 
-/* a break is a different moment: its name in the accent */
 .phaseLine[data-phase="short"],
 .phaseLine[data-phase="long"]{
     color: var(--primary);
@@ -382,7 +373,6 @@
     grid-area: phase;
 }
 
-/* three modes and two buttons: the panel head may wrap on narrow phones */
 .panelHead > a.foldBtn{
     margin-left: auto;
 }
@@ -394,7 +384,6 @@
     }
 }
 
-/* the corner panel: the phase on its own line above time, bar and controls */
 .panel .div:has(.phaseLine){
     flex-wrap: wrap;
     row-gap: 0.2rem;

@@ -59,7 +59,6 @@
     composes: btnNo from '../ui.module.css';
 }
 
-/* the small print under the answers (the analytics question: where to change it, the policy) */
 .fine{
     margin: 0.7rem 0 0;
     font-size: 0.8rem;
@@ -71,8 +70,6 @@
     color: inherit;
     text-decoration: underline;
 }
-
-/* what first: one row per way, like the tour's first steps */
 
 .choices{
     display: flex;
@@ -147,8 +144,6 @@
     color: var(--text-h);
     transform: translateX(2px);
 }
-
-/* do you like it: stars, a field, send */
 
 .form{
     display: flex;

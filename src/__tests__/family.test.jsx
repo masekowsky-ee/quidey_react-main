@@ -254,7 +254,6 @@ describe('Quidey Family', () => {
         expect(within(upcoming()).getByText('Grandma and Grandpa visit')).toBeInTheDocument()
         expect(screen.queryByRole('textbox', { name: 'Name' })).not.toBeInTheDocument()
 
-        // ticking off takes it out of what's coming up
         await act(async () => { fireEvent.click(within(upcoming()).getByRole('button', { name: 'Mark as done: Bake a cake' })) })
         expect(JSON.parse(sent('PATCH', '/api/families/3/tasks/94')[0][1].body)).toEqual({ done: true })
         expect(within(upcoming()).queryByText('Bake a cake')).not.toBeInTheDocument()
@@ -394,7 +393,6 @@ describe('Quidey Family: board, list, who does what, the week', () => {
         const list = screen.getByRole('heading', { name: 'List' }).closest('section')
         expect(within(list).getByText('Milk')).toBeInTheDocument()
         expect(within(list).getByText('1 open')).toBeInTheDocument()
-        // not in "coming up": it has no day
         expect(within(screen.getByRole('heading', { name: 'Coming up' }).closest('section')).queryByText('Milk')).not.toBeInTheDocument()
 
         await act(async () => { fireEvent.change(within(list).getByRole('combobox', { name: 'Who takes care of it?: Milk' }), { target: { value: '1' } }) })
@@ -426,7 +424,6 @@ describe('Quidey Family: board, list, who does what, the week', () => {
         const me = within(members).getByRole('link', { name: 'Me' }).closest('li')
         expect(within(me).queryByText('online')).not.toBeInTheDocument()
 
-        // Bo closes the app
         await serverSends('presence:changed', { userId: 2, online: false })
         expect(within(bo).queryByText('online')).not.toBeInTheDocument()
     })

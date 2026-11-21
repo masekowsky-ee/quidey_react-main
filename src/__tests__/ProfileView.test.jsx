@@ -32,7 +32,6 @@ const type = (label, value) => fireEvent.change(screen.getByLabelText(label), { 
 describe('ProfileView', () => {
     beforeEach(() => {
         apiFetch.mockReset()
-        // the friends list is loaded on open
         apiFetch.mockImplementation(async (url) => url === '/api/friends' ? [{ id: 2, username: 'anna' }] : {})
     })
 

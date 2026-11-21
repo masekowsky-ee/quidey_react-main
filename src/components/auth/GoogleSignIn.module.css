@@ -60,7 +60,6 @@
     flex: none;
 }
 
-/* the sign-up form's head: whose Google account it is */
 .intro {
     display: flex;
     gap: 0.75rem;

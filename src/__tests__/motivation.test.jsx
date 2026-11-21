@@ -143,9 +143,7 @@ describe('streak', () => {
 
         const friends = screen.getByRole('heading', { name: 'Freunde' }).closest('section')
         expect(within(friends).getByText('1 Freund online')).toBeInTheDocument()
-        // Ann: her face (online) and her streak
         expect(within(friends).getAllByRole('link', { name: 'Ann' })).toHaveLength(2)
-        // the streaks of friends: Ann's, Ben has none
         expect(within(friends).getByLabelText('12 Tage in Folge')).toBeInTheDocument()
     })
 

@@ -19,7 +19,6 @@ export default function WeekDaysContainer(){
     const {t} = useTranslation();
 
     const tasks = useSelector(state => state.task.tasks);
-    // the days are known at once, what is on them only once my tasks are there
     const loaded = useSelector(selectTasksLoaded);
 
     const today = toDateOnly(new Date());
@@ -48,7 +47,6 @@ export default function WeekDaysContainer(){
                                         <li key={task.id} data-task-color={taskColorAttr(task)}
                                             className={[isEvent(task) ? styles.event : PRIO_CLASS[prioLevel(task.prio)], task.done && styles.done].filter(Boolean).join(' ') || undefined}
                                             title={[task.name, taskTimeText(task), task.event_type?.name].filter(Boolean).join(' · ')}>
-                                            {/* the name has the chip's width, the time a quiet line under it */}
                                             <span className={styles.name}>{task.name}</span>
                                             {task.due_time && <span className={styles.time}>{task.due_time}</span>}
                                         </li>

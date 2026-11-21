@@ -24,10 +24,8 @@ import styles from './Notes.module.css';
 
 const LAYOUT_KEY = 'notesLayout';
 const SORT_KEY = 'notesSort';
-// the colours of the folder tiles, one per folder (by its id)
 const FOLDER_TONES = 5;
 
-// A day group's heading in the list: today, yesterday, else the month (and the year when it isn't this one)
 function dayLabel(date, now, t, language) {
     const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
     if (sameDay(date, now)) return t('today');
@@ -57,7 +55,6 @@ function groupNotes(notes, { sort, view, t, language }) {
     return groups;
 }
 
-// The folders as coloured tiles above the notes (phones; beside the list a side menu does it)
 function FolderTiles({ folders, count, onPick }) {
     return (
         <ul className={styles.folderTiles}>
@@ -77,7 +74,6 @@ const stored = (key, allowed, fallback) => {
 };
 const store = (key, value) => { try { localStorage.setItem(key, value); } catch { /* private mode */ } };
 
-// One entry of the views beside the list
 function ViewButton({ current, icon, emoji, label, count, onClick }) {
     return (
         <button type="button" className={styles.viewBtn} aria-current={current ? 'true' : undefined} onClick={onClick}>
@@ -88,7 +84,6 @@ function ViewButton({ current, icon, emoji, label, count, onClick }) {
     );
 }
 
-// A new folder: emoji + name, Enter makes it
 function NewFolder({ onCreate, onCancel }) {
     const { t } = useTranslation();
     const [name, setName] = useState('');
@@ -253,7 +248,6 @@ export default function NotesPage() {
                 </div>
                 <div className={styles.headActions}>
                     <Link to="/collections" className={styles.ghostLink}><Icon name="collection" size={16} /> {t('collections')}</Link>
-                    {/* study material read by the AI into notes, entries and a study plan */}
                     {aiQuota?.available &&
                         <button type="button" className={styles.ghostLink} onClick={() => setScanning(true)}>
                             <Icon name="brain" size={16} /> {t('scanTitle')}
@@ -427,7 +421,6 @@ export default function NotesPage() {
                 </section>
             </div>
 
-            {/* phones: the round new-note button at the thumb, as in a notes app */}
             {!open &&
                 <button type="button" className={styles.noteFab} onClick={() => newNote()} aria-hidden="true" tabIndex={-1} title={t('noteNewLong')}>
                     <Icon name="edit" size={22} />

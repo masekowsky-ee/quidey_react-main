@@ -18,7 +18,6 @@ import { Bone } from '../skeleton/Skeleton.jsx';
 import SessionMarker from '../study/SessionMarker.jsx';
 import { unpinSession } from '../../features/study/study';
 
-// While my tasks are on their way: a row's shape, its name and line of details grey
 const SKELETON_NAME_WIDTHS = ['62%', '46%', '71%', '38%', '55%'];
 export function TaskRowSkeleton({ index = 0 }) {
     return (
@@ -34,7 +33,6 @@ export function TaskRowSkeleton({ index = 0 }) {
     );
 }
 
-// The round check at the start of a row: empty while open (a tick shows on hover), filled when done
 function Check({ done, onToggle, label }) {
     return (
         <button type="button" className={`${styles.check} ${done ? styles.checkDone : ''}`} onClick={onToggle} data-part="task-check"
@@ -44,7 +42,6 @@ function Check({ done, onToggle, label }) {
     );
 }
 
-// Grabbed to drag the task into the focus area
 function DragHandle({ onPointerDown, label }) {
     return (
         <span className={styles.drag} onPointerDown={onPointerDown} style={{ touchAction: 'none' }} aria-hidden="true" title={label}>
@@ -165,7 +162,6 @@ const TaskRow = forwardRef(function TaskRow({
                                 title={removeLabel ?? t('removeFromGroup')} aria-label={`${removeLabel ?? t('removeFromGroup')}: ${task.name}`}>
                                 <Icon name="close" className={styles.actionIcon} />
                             </button>}
-                        {/* a repeating task asks what goes instead (DeleteScopeDialog) */}
                         {onDelete && <ConfirmDeleteButton onConfirm={onDelete} label={`${deleteLabel}: ${task.name}`} title={deleteLabel} ask={!isRepeating(task) || isSharedWithMe(task)} />}
                     </>}
             </div>

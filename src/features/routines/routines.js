@@ -56,7 +56,6 @@ export const fetchRoutines = () => async (dispatch) => {
     return list;
 };
 
-// a routine without id is new
 export const saveRoutine = (routine) => async (dispatch) => {
     const body = JSON.stringify({ name: routine.name, emoji: routine.emoji || null, steps: routine.steps, days: routine.days, atTime: routine.atTime || null, remind: routine.remind });
     const saved = routine.id

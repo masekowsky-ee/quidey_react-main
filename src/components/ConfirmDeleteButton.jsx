@@ -3,7 +3,6 @@ import styles from './ConfirmDeleteButton.module.css';
 import Icon from './icons';
 import { useTranslation } from '../i18n/useTranslation';
 
-// how long the "Really delete?" question stays before the button calms down again
 const ARMED_MS = 4000;
 
 // A delete that asks once, in place: the first click turns the bin into "Really delete?",

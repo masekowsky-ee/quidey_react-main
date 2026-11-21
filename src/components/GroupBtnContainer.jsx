@@ -27,7 +27,6 @@ function useEdgeFades() {
         bar.addEventListener('scroll', update, { passive: true });
         const resize = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(update);
         resize?.observe(bar);
-        // chips come and go (a new group, a session ended)
         const mutations = typeof MutationObserver === 'undefined' ? null : new MutationObserver(update);
         mutations?.observe(bar, { childList: true, subtree: true, characterData: true });
         cleanup.current = () => {
@@ -47,18 +46,14 @@ export default function GroupBtnContainer({ setCreateGroup }){
     // my groups (or collections), without a group named "all" from older accounts: that is the "All" chip itself
     const { groups } = useTaskGroups();
     const groupToDisplay = useSelector(state => state.task.groupToDisplay);
-    // collections load on their own: until then two chips' shapes
     const loaded = useSelector(selectCollectionsLoaded);
     const shown = groupToDisplay.group;
     const showingAll = !shown?.id || shown.name === 'all';
 
-    // one group per shared session I'm in; not deletable, they go away when I leave or it ends
     const sharedGroups = useSelector(selectSharedGroups);
     const shownSharedGone = shown?.shared && !sharedGroups.some(g => g.id === shown.id);
-    // a collection deleted (here or on its page), or one shown before the test ended
     const shownCollectionGone = shown?.collection && (loaded && !groups.some(g => g.id === shown.id));
 
-    // the shown session's group (or collection) just went away: back to all tasks
     useEffect(() => {
         if (shownSharedGone || shownCollectionGone) dispatch(editDisplaygroup(shown, shown.id));
     }, [shownSharedGone, shownCollectionGone, shown, dispatch]);

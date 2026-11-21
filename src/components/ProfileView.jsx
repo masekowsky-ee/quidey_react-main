@@ -44,7 +44,6 @@ export default function ProfileView({ onSignOut }) {
 
     const focusMs = sessions.reduce((sum, ws) => sum + (ws.totalTime ?? 0) * 1000, 0);
 
-    // ---------- the profile friends see, and my statistics ----------
     const [profile, setProfile] = useState(null);
     const [customizing, setCustomizing] = useState(false);
     const [draft, setDraft] = useState(null); // live preview while customizing
@@ -63,7 +62,6 @@ export default function ProfileView({ onSignOut }) {
     }
     useHashTarget();
 
-    // fresh numbers whenever my sessions change (a finished session shows up right away)
     useEffect(() => {
         let current = true;
         fetchOwnProfile().then(data => { if (current) setProfile(data); }).catch(() => {});
@@ -75,7 +73,6 @@ export default function ProfileView({ onSignOut }) {
         setDraft(null);
     };
 
-    // name, handle and member-since come from my account (they change in "Account" below)
     const shown = {
         ...profile,
         ...draft,
@@ -84,7 +81,6 @@ export default function ProfileView({ onSignOut }) {
         memberSince: user?.created_at ?? profile?.memberSince,
     };
 
-    // ---------- account details ----------
     const [editing, setEditing] = useState(false);
     const [form, setForm] = useState({ displayName: '', email: '' });
     const [saving, setSaving] = useState(false);
@@ -112,7 +108,6 @@ export default function ProfileView({ onSignOut }) {
         }
     };
 
-    // ---------- email verification ----------
     const unverified = Boolean(user?.email) && user?.email_verified === false;
     const [sendingMail, setSendingMail] = useState(false);
     const sendVerificationMail = async () => {
@@ -128,7 +123,6 @@ export default function ProfileView({ onSignOut }) {
         }
     };
 
-    // ---------- password ----------
     const emptyPasswords = { current: '', next: '', confirm: '' };
     const [passwords, setPasswords] = useState(emptyPasswords);
     const [changing, setChanging] = useState(false);
@@ -161,7 +155,6 @@ export default function ProfileView({ onSignOut }) {
         }
     };
 
-    // sign out on all devices, after a "really?"
     const [confirmEverywhere, setConfirmEverywhere] = useState(false);
     const [signingOutEverywhere, setSigningOutEverywhere] = useState(false);
     const signOutEverywhere = async () => {
@@ -220,7 +213,6 @@ export default function ProfileView({ onSignOut }) {
             </ProfileCard>
             {customMessage && <p className={styles.success} role="status">{customMessage}</p>}
 
-            {/* the level plant, large: watch it grow from the seed */}
             <PlantCard />
 
             {customizing && profile && (
@@ -236,7 +228,6 @@ export default function ProfileView({ onSignOut }) {
                 />
             )}
 
-            {/* the numbers in short; heat map, badges and the periods are on the statistics page */}
             <section className={styles.card}>
                 <div className={styles.cardHead}>
                     <h2 className={styles.cardTitle}>{t('stats')}</h2>
@@ -258,7 +249,6 @@ export default function ProfileView({ onSignOut }) {
                 </div>
             </section>
 
-            {/* Quidey Pro: supporting the development (once it's switched on) */}
             {proOn && <section className={styles.card} id="pro">
                 <div className={styles.cardHead}>
                     <h2 className={styles.cardTitle}>Quidey Pro</h2>

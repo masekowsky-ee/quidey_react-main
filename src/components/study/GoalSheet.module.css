@@ -1,6 +1,6 @@
 /* The create-goal sheet and the plan preview (sheets over the study pages) */
 .panel{
-    composes: lifted from '../ui.module.css'; /* floats over the page: the white sheet */
+    composes: lifted from '../ui.module.css';
     position: relative;
     box-sizing: border-box;
     width: min(36rem, 100%);
@@ -182,7 +182,6 @@
     border-radius: var(--radius-md, 0.6rem);
 }
 
-/* a day: its date in a narrow column, its sessions beside it */
 .agenda{
     display: flex;
     flex-direction: column;
@@ -235,7 +234,6 @@
     list-style: none;
 }
 
-/* a session: the subject's colour as a short bar at its start */
 .session{
     border-radius: var(--radius-md, 0.6rem);
     transition: background-color 0.2s var(--ease-out, ease-out);
@@ -331,7 +329,6 @@ button.sessionMain:focus-visible{
     transform: rotate(180deg);
 }
 
-/* moving it: a day back, the day, the time, a day on */
 .mover{
     display: flex;
     flex-wrap: wrap;
@@ -399,7 +396,6 @@ button.sessionMain:focus-visible{
     cursor: pointer;
 }
 
-/* sessions that go away: quiet, at the end */
 .dropped{
     padding-left: 3.75rem;
 }

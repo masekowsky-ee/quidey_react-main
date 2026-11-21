@@ -2,7 +2,6 @@ import { SET_SESSION_PARAMS, SAVE_SESSION_DATA, UPDATE_CURRENT_SESSION_DATA, SET
 import { readStoredSessionMinutes, readStoredTimerMode, readStoredPomodoro, TIMER_MODES } from "../settings/preferences";
 import { readFocusRun } from "./focusRun";
 
-// The default session length from the settings (30 minutes unless changed)
 const DEFAULT_SESSION_MS = readStoredSessionMinutes() * 60 * 1000;
 const START_MODE = readStoredTimerMode();
 
@@ -18,7 +17,6 @@ const freshSessionData = () => ({
 const freshPomodoro = (config = readStoredPomodoro()) => ({ phase: 'focus', round: 0, config });
 export const phaseMs = (pomodoro) => pomodoro.config[pomodoro.phase] * 60 * 1000;
 
-// What the timer starts from in a mode
 const startTime = (mode, sessionMs, pomodoro) =>
     mode === 'stopwatch' ? 0 : mode === 'pomodoro' ? phaseMs(pomodoro) : sessionMs;
 
@@ -117,7 +115,6 @@ const sessionReducer = (state = initialState(), action) => {
             };
         }
         case SET_TIMER_MODE: {
-            // a fresh start in the new mode
             const pomodoro = action.payload === 'pomodoro' ? freshPomodoro(state.pomodoro.config) : state.pomodoro;
             return {
                 ...state,

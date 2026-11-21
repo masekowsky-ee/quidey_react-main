@@ -281,7 +281,6 @@
     color: var(--text-muted);
 }
 
-/* search what I have, or make something new in it */
 .addBar {
     composes: panel from '../ui.module.css';
     display: flex;

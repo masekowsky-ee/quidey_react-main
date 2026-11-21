@@ -29,7 +29,6 @@ export function shuffle(list, rng = Math.random) {
 
 export const LEVELS = ['easy', 'normal', 'hard'];
 
-// The chosen difficulty of a game, remembered in the browser
 export function readLevel(game) {
     try {
         const stored = localStorage.getItem(`funLevel:${game}`);
@@ -178,13 +177,11 @@ const SEQUENCE_KINDS = [
 
 export const SEQUENCE_KIND_COUNT = SEQUENCE_KINDS.length;
 
-// The kinds a difficulty can draw from
 export const sequenceKindsFor = (level) => {
     const upTo = LEVELS.indexOf(level);
     return SEQUENCE_KINDS.map((k, i) => (LEVELS.indexOf(k.level) <= upTo ? i : -1)).filter((i) => i >= 0);
 };
 
-// On hard the answer is typed in instead of picked from four choices
 export const sequenceIsTyped = (level) => level === 'hard';
 
 // A puzzle: five numbers, the next one, four answer choices (one right) and the rule behind it.

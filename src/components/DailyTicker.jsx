@@ -16,7 +16,6 @@ export default function DailyTicker() {
     const text = `${line[language] ?? line.en}${year ? `, ${year}` : ''}`;
     const label = t(`lineOf_${line.type}`);
 
-    // closes on a click elsewhere and on Escape
     useEffect(() => {
         if (!open) return;
         const onDown = (e) => { if (!wrapRef.current?.contains(e.target)) setOpen(false); };

@@ -4,7 +4,6 @@
   gap: 0.25rem;
 }
 
-/* a note with more lines: its first line, opening the notebook */
 .open {
   flex: 1;
   min-width: 0;

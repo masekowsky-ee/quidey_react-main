@@ -28,10 +28,8 @@ export default function TaskChip({ task, today, onOpen, startDrag, dragging, sho
         // a lesson from the Untis timetable: quiet, a cancelled one struck through
         task.lesson && styles.chipLesson,
         task.lesson?.status === 'cancelled' && styles.chipCancelled,
-        // a planned study session: its goal's symbol stands where the dot is
         task.study && styles.chipHasShape,
     ].filter(Boolean).join(' ');
-    // the month view only has room for the start
     const time = showDescription ? taskTimeText(task) : (task.due_time ?? '');
     const shared = isShared(task);
 
@@ -48,7 +46,6 @@ export default function TaskChip({ task, today, onOpen, startDrag, dragging, sho
             {task.study && <span className={styles.chipShape} data-study-shape=""><GoalShape shape={task.study.goalShape} size={10} color={task.study.subjectColor} /></span>}
             <span className={styles.chipName}>
                 {time && <span className={styles.chipTime}>{time}</span>}
-                {/* before the name: a long name is cut off at the end */}
                 {task.repeat && <span className={styles.chipRepeat} role="img" aria-label={t(`repeat_${task.repeat}`)}>↻</span>}
                 {task.name}
                 {shared && <span className={styles.chipShared} title={t('sharedWithLabel')} role="img" aria-label={t('sharedWithLabel')}><Icon name="mTeam" size={12} /></span>}

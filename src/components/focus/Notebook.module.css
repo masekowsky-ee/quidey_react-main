@@ -42,7 +42,6 @@
     border-color: var(--border-strong);
 }
 
-/* "Scannen" beside it: quieter still (only where the AI is set up) */
 .smallGhost {
     composes: ghostBtn from '../ui.module.css';
     display: inline-flex;
@@ -56,7 +55,6 @@
     border-radius: var(--radius-pill);
 }
 
-/* "Neu": a quiet tonal button (the timer's start is the room's one filled button) */
 .smallPrimary {
     color: var(--text-h);
     background: color-mix(in oklab, var(--text-h) 8%, transparent);
@@ -144,7 +142,6 @@
     white-space: nowrap;
 }
 
-/* nothing written yet / only attachments: quieter than a note's own words */
 .rowPreview[data-empty] {
     font-style: italic;
     opacity: 0.75;

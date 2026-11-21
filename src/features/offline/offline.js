@@ -137,7 +137,6 @@ const isCacheable = (url) => url.startsWith('/api/') && !NEVER_CACHED.some((pref
 
 async function saveRead(url, data) {
     await kvSet(cacheKey(url), { at: Date.now(), data });
-    // keep the copy small: the oldest entries of this account go first
     const keys = await kvKeys(`${CACHE_PREFIX}${owner()}|`);
     if (keys.length <= MAX_ENTRIES) return;
     const entries = await Promise.all(keys.map(async (key) => [key, (await kvGet(key))?.at ?? 0]));
@@ -288,7 +287,6 @@ export async function withOffline(url, options, transport = request) {
             }
         }
         const entry = await savedRead(url);
-        // known to be unreachable: the saved copy, without trying the network
         if (!mayTry()) {
             if (entry) return entry.data;
             throw offlineError();
@@ -350,7 +348,6 @@ export async function withOffline(url, options, transport = request) {
 
 // ---------- housekeeping ----------
 
-// everything of this device's offline copy (sign-out)
 export async function clearOffline() {
     await kvClear();
     nextTry = 0;
@@ -371,12 +368,10 @@ async function loadPending() {
     setStatus({ pending: (await readOutbox()).length });
 }
 
-// when the connection is back, or the app is opened again, the outbox goes out
 export function startOfflineSync() {
     syncStarted = true;
     // the outbox goes out when it may (one attempt per PROBE_MS while the server is unreachable)
     const run = () => { if (mayTry()) flushOutbox().catch(() => {}); };
-    // the connection is back, or the app is in front again: look right away
     const now = () => { probeNow(); run(); };
     const goesOffline = () => unreachable();
     window.addEventListener('online', now);

@@ -63,7 +63,6 @@ export default function WordGuess({ level = 'normal', onScore }) {
         }
     };
 
-    // typing on a real keyboard
     useEffect(() => {
         const onKey = (e) => {
             if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -95,7 +94,6 @@ export default function WordGuess({ level = 'normal', onScore }) {
     });
 
     let status = message;
-    // the more tries were needed, the calmer the praise (the last entry for anything past six)
     if (won) status = t('guessWon', Math.min(guesses.length, 6) - 1);
     else if (over) status = fill(t('guessLost'), { word: answer });
 

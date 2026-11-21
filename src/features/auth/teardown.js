@@ -15,16 +15,13 @@ import { forgetReads } from '../offline/offline';
 import { forgetPushOnSignOut } from '../pwa/push';
 
 export function teardownAccount({ leaving = false, token = null, keepPush = false, freezeFocus = false } = {}) {
-    // this account's queued usage events are gone with it
     setUsageEnabled(false);
     if (leaving) {
         // the offline copy of this account's data goes with it (before the token, which names the owner)
         forgetReads().catch(() => {});
-        // no more push notifications for this account here
         forgetPushOnSignOut(token, keepPush);
     }
     // the reminders' alarm clock (Android app) rings for nobody now; the next account sets its own
     cancelAlarms();
-    // a focus session running here belongs to the account that started it
     clearFocusRun({ freeze: freezeFocus });
 }

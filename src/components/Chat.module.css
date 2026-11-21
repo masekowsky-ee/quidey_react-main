@@ -38,7 +38,6 @@
     flex-direction: column;
     gap: 0.55rem;
     overscroll-behavior: contain;
-    /* older entries fade out at the top edge instead of being cut off hard */
     mask-image: linear-gradient(to bottom, transparent 0, #000 1.25rem);
 }
 
@@ -47,7 +46,6 @@
     flex-shrink: 0;
 }
 
-/* in the team sidebar the feed fills whatever height is left */
 .feedTall{
     flex: 1;
     min-height: 0;

@@ -13,7 +13,6 @@ import { formatClock, fill } from '../../features/helperFunction';
 import { selectTimerInProgress } from '../../features/session/sessionAction';
 import { showToast } from '../../features/toast/toast';
 
-// "30:00", "1:05:00": hours only when there are any
 const clockText = (ms) => formatClock(ms).replace(/^00:/, '');
 
 // A note in Home's white card: its title in the serif and its text as it reads (headings, lists,

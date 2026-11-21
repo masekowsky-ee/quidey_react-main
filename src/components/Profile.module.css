@@ -22,7 +22,6 @@
 
 /* ---------- Signed in ---------- */
 
-/* Card title with an action on the right ("Edit profile") */
 .cardHead{
     display: flex;
     flex-direction: row;
@@ -38,7 +37,6 @@
 
 /* ---------- stats ---------- */
 
-/* label over value, the three columns split by quiet dividers (no boxes inside the card) */
 .stats{
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -98,7 +96,6 @@
     composes: btnPrimary from './ui.module.css';
 }
 
-/* Text-only until hovered */
 .cardHead .quietBtn{
     padding: 0.25rem 0.7rem;
     font-size: 0.85rem;
@@ -113,7 +110,6 @@
     border-color: var(--btn-border);
 }
 
-/* Sign-in screen after signing up / when the address isn't confirmed: what to do next */
 .verifyNotice{
     display: flex;
     flex-direction: column;
@@ -137,7 +133,6 @@
     color: var(--text-h);
 }
 
-/* email field + "send new link" (also on the /verify-email page) */
 .resendForm{
     display: flex;
     flex-direction: column;
@@ -150,7 +145,6 @@
     align-self: flex-end;
 }
 
-/* Under an email address that isn't confirmed yet: a small badge and "send new link" */
 .verifyRow{
     display: flex;
     flex-wrap: wrap;
@@ -242,7 +236,6 @@
     border-color: var(--danger);
 }
 
-/* Sign out | sign out on all devices */
 .signOutRow{
     display: flex;
     flex-direction: row;
@@ -300,7 +293,6 @@
 
 .tabs{
     composes: tabBar from './ui.module.css';
-    /* sign in | sign up: the two halves of the card */
     width: 100%;
 }
 
@@ -318,7 +310,6 @@
     gap: 0.9rem;
 }
 
-/* Label above its input */
 .field{
     flex: 1;
     min-width: 0;
@@ -338,7 +329,6 @@
     width: 100%;
 }
 
-/* Two short fields side by side, stacked on narrow screens */
 .fieldRow{
     display: flex;
     flex-direction: row;
@@ -357,14 +347,12 @@
     margin-top: 0.4rem;
 }
 
-/* the consent checkboxes under the sign-up form */
 .consents{
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
 }
 
-/* one consent: checkbox and text */
 .consent{
     display: flex;
     align-items: flex-start;
@@ -385,7 +373,6 @@
     color: var(--primary-fg);
 }
 
-/* Accounts still signed in on this device, above the sign-in form */
 .savedAccounts{
     display: flex;
     flex-direction: column;

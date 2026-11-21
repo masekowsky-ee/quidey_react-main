@@ -14,7 +14,6 @@ export function useTaskDrag(onDrop) {
     const endRef = useRef(null);
 
     useEffect(() => { onDropRef.current = onDrop; }, [onDrop]);
-    // a drag in progress ends with the page
     useEffect(() => () => endRef.current?.(), []);
 
     const startDrag = useCallback((e, task) => {

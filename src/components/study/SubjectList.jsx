@@ -40,7 +40,6 @@ function SubjectRow({ subject, onArchive, onColor, tip }) {
                 ) : (
                     <span className={styles.meta}>{t('studyNoGoal')}</span>
                 )}
-                {/* the two averages: all exams, and everything else that was graded */}
                 <span className={styles.meta} data-tip={tip}>
                     <span>{fill(t('studyAvgExam'), { value: formatGrade(subject.exam?.avg, language) })}</span>
                     <span>{fill(t('studyAvgOther'), { value: formatGrade(subject.other?.avg, language) })}</span>
@@ -104,7 +103,6 @@ export default function SubjectList() {
                 <div className={styles.actions}>
                     <Link to="/settings#study" className={styles.btn}>{t('studyOpenSettings')}</Link>
                     <Link to="/settings#untis" className={styles.btn}>{t('studyOpenUntis')}</Link>
-                    {/* a syllabus or exam plan read by the AI into a study goal (ScanSheet) */}
                     {aiQuota?.available &&
                         <button type="button" className={styles.btn} onClick={() => setScanning(true)}>
                             <Icon name="brain" size={14} /> {t('scanTitle')}

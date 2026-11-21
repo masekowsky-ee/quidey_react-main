@@ -31,7 +31,6 @@ function SchoolSearch({ picked, onPick }) {
         const id = setTimeout(() => searchUntisSchools(q).then(list => setFound(Array.isArray(list) ? list : [])).catch(() => setFound([])), 400);
         return () => clearTimeout(id);
     }, [query]);
-    // fewer than three letters: nothing listed (the last search's results wait for the next)
     const shown = query.trim().length >= 3 ? found : [];
     if (picked) {
         return (
@@ -109,7 +108,6 @@ export default function UntisSettings() {
                     <input type="checkbox" checked={show} onChange={e => setShowLessons(e.target.checked)} />
                     <span>{t('untisShowInCalendar')}</span>
                 </label>
-                {/* homework put in Untis becomes a task (day, the lesson's time, the text); only with a login */}
                 {status.mode === 'login' &&
                     <label className={styles.switch}>
                         <input type="checkbox" checked={status.homeworkToTasks !== false} disabled={busy}

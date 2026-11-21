@@ -25,7 +25,6 @@
     animation: panelIn 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Editing a task: more room, so the fields sit side by side instead of piling up */
 .panelWide{
     width: min(720px, 100%);
     max-height: calc(100vh - 2rem);
@@ -113,7 +112,6 @@
     composes: iconBtn from './ui.module.css';
 }
 
-/* a new entry on this day: the new-task form opens on it */
 .addDayBtn{
     composes: iconBtnRound from './ui.module.css';
 }
@@ -151,8 +149,6 @@
     transform: none;
 }
 
-/* ---------- Tasks of the day ---------- */
-
 .list{
     list-style: none;
     margin: 0;
@@ -188,7 +184,6 @@
     --chip-color: color-mix(in srgb, var(--primary) 40%, var(--text-muted));
 }
 
-/* An event: a softly tinted row in its (type's) colour */
 .rowEvent{
     background-color: color-mix(in srgb, var(--task-color, var(--primary)) 7%, transparent);
 }
@@ -228,7 +223,6 @@
     gap: 0.7rem;
 }
 
-/* Round tick to mark a task done */
 .check{
     flex-shrink: 0;
     width: 1.5rem;
@@ -293,7 +287,6 @@
     white-space: pre-line;
 }
 
-/* in a shared calendar: who put the task in */
 .addedBy{
     font-size: 0.75rem;
     color: var(--text-muted);
@@ -355,8 +348,6 @@
     text-align: center;
     color: var(--text-muted);
 }
-
-/* ---------- Editing a task ---------- */
 
 .editor{
     display: flex;
@@ -429,7 +420,6 @@
     margin: 0.5rem 0 0;
 }
 
-/* Optional time: empty means the whole day */
 .timeField{
     flex: 0 1 9.5rem;
     min-width: 8rem;
@@ -540,7 +530,6 @@
     color: var(--text-muted);
 }
 
-/* when and by whom it was made: a footnote, quieter than the fields */
 .createdNote{
     margin: 0;
     font-size: 0.76rem;
@@ -552,7 +541,6 @@
     flex-shrink: 0;
 }
 
-/* what is set inside, while closed */
 .moreSummary{
     min-width: 0;
     overflow: hidden;
@@ -595,8 +583,6 @@
 .editorActions > .saveBtn{
     min-width: 5.5rem;
 }
-
-/* ---------- Focus sessions of the day ---------- */
 
 .focus{
     padding-top: 0.85rem;
@@ -725,10 +711,8 @@
     color: var(--text-muted);
 }
 
-/* sits closer to the name above it (TypeHint) */
 .typeHintTight{ margin-top: -0.3rem; }
 
-/* the chevron points right while closed, down while open */
 .moreChevron{ display: inline-flex; transition: transform var(--ease); }
 .moreChevronOpen{ transform: rotate(90deg); }
 
@@ -761,8 +745,6 @@
 .srOnly {
   composes: srOnly from './ui.module.css';
 }
-
-/* --- entries without a time --- */
 
 .allDay{
     /* the hours below give way, not this row */
@@ -804,8 +786,6 @@
     color: var(--text-muted);
 }
 
-/* --- the hours --- */
-
 .timeline{
     position: relative;
     flex: 1 1 auto;
@@ -828,7 +808,6 @@
     height: var(--hour);
 }
 
-/* the hour's line starts after the labels */
 .hourRow::after{
     content: '';
     position: absolute;
@@ -926,7 +905,6 @@
     color: var(--danger);
 }
 
-/* a coming repeat: only an outline until it's real */
 .entryPreview,
 .entryPreview:hover{
     background: transparent;
@@ -974,7 +952,6 @@
     flex-basis: 100%;
 }
 
-/* the opened Untis day: a quiet way back to the one box */
 .lessonsClose{
     align-self: flex-start;
     margin: 0 0 0.4rem;
@@ -1017,7 +994,6 @@
     color: var(--danger);
 }
 
-/* the entry being dragged stays as a trace where it was */
 .entryDragging{
     opacity: 0.35;
 }
@@ -1047,7 +1023,6 @@
     column-gap: 0.5rem;
 }
 
-/* the name opens the entry; its hit area covers the whole entry */
 .entryOpen{
     display: inline-flex;
     align-items: center;
@@ -1144,7 +1119,6 @@
     white-space: nowrap;
 }
 
-/* a short block: time and name on one line */
 .block[data-short] .entryText{
     flex-direction: row;
     align-items: center;
@@ -1252,7 +1226,6 @@
     color: var(--text-h);
 }
 
-/* a place that takes the dragged entry: the all-day row, the arrows for another day */
 .dropOn,
 .head > .dropOn{
     background-color: color-mix(in srgb, var(--primary) 14%, var(--surface));
@@ -1260,7 +1233,6 @@
     outline-offset: -1.5px;
 }
 
-/* following the pointer off the hours; above a finger, since it would cover it */
 .dragChip{
     position: fixed;
     z-index: calc(var(--z-modal) + 10);
@@ -1285,8 +1257,6 @@
     }
 }
 
-/* --- now --- */
-
 .nowLine{
     position: absolute;
     z-index: 3;
@@ -1307,7 +1277,6 @@
     background: var(--primary);
 }
 
-/* the focus sessions follow the hours */
 .timeline > .focus{
     margin: 0 0 0.5rem;
 }

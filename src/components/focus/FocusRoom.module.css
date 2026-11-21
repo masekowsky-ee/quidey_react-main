@@ -131,7 +131,6 @@
     transition: stroke-dashoffset 1s linear;
 }
 
-/* a stopwatch has no end: the ring breathes while it runs */
 .ringLive {
     stroke: var(--primary);
     opacity: 0.35;
@@ -756,7 +755,6 @@
     background: linear-gradient(to right, var(--primary) var(--progress, 0%), transparent var(--progress, 0%));
 }
 
-/* subject and topic of the study session in focus */
 .studyLine {
   margin: 0;
   font-size: 0.875rem;
@@ -772,7 +770,6 @@
     margin-left: auto;
 }
 
-/* Fokus-Einstellungen → Ruhemodus */
 .switchRow {
     display: flex;
     align-items: flex-start;

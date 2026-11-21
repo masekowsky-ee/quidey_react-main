@@ -27,7 +27,6 @@
     transition: opacity 0.22s var(--ease-out, ease-out), transform 0.3s var(--spring-curve, ease-out);
 }
 
-/* a control taller than the window: the tip sits inside its top, no arrow */
 .tip[data-side="inside"] .arrow{
     display: none;
 }
@@ -114,7 +113,6 @@
     outline-offset: 2px;
 }
 
-/* around the control that is explained: exactly its box (and its corners), the line inside it */
 .ring{
     position: fixed;
     z-index: 899;

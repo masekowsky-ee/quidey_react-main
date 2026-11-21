@@ -25,7 +25,6 @@ export default function VerifyEmail() {
     const signedIn = useSelector(state => Boolean(state.auth.token));
     const isPro = useSelector(state => state.auth.access.isPro);
 
-    // 'checking' | 'verified' | 'expired' | 'invalid' | 'error'
     const [status, setStatus] = useState(token ? 'checking' : 'invalid');
     const [resend, setResend] = useState(null); // null | 'sending' | 'sent' | 'failed'
 
@@ -43,7 +42,6 @@ export default function VerifyEmail() {
         return () => { active = false; };
     }, [token]);
 
-    // the profile shows the new state right away
     useEffect(() => {
         if (status === 'verified' && signedIn && isPro) dispatch(setUser()).catch(() => {});
     }, [status, signedIn, isPro, dispatch]);

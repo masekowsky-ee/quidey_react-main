@@ -33,7 +33,6 @@ export const TIPS = [
     { id: 'tabbar', page: anyPage, target: '[data-tip="tabbar"]' },
     // shows itself the first time the app goes offline (the line it points at is only there then)
     { id: 'offline', page: anyPage, target: '[data-tip="offline"]' },
-    // pages
     { id: 'add', page: (p) => p === '/', target: '[data-part="add-fab"]' },
     // Quidey Max only: without Max there is no button, so the tip waits
     { id: 'assistant', page: (p) => p === '/', target: '[data-part="assistant-fab"]' },

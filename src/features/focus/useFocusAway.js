@@ -32,7 +32,6 @@ export function awayPlatform() {
     return window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(pointer: coarse)').matches ? 'desktop' : null;
 }
 
-// the round runs right now (not paused)
 const running = (state) => inFocusRound(state) && state.session.timer.active;
 
 const minutesText = (ms) => Math.max(1, Math.round(ms / 60000));

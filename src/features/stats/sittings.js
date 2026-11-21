@@ -9,7 +9,6 @@ const MINUTE = 60 * 1000;
 // How long a pause may be inside one sitting: the longest Pomodoro break plus 5 minutes
 export const sittingGapMs = (pomodoro) => (Math.max(pomodoro.short, pomodoro.long) + 5) * MINUTE;
 
-// Time per task over several sessions, most first
 function addTasks(sessions) {
     const byId = new Map();
     for (const s of sessions) {

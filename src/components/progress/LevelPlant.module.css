@@ -26,12 +26,10 @@
     overflow: visible;
 }
 
-/* every part grows and moves to its new place when the level changes */
 .part{
     transition: transform 0.9s var(--spring-bounce);
 }
 
-/* and grows in from its base when it first appears */
 .grow{
     animation: growIn 0.8s cubic-bezier(0.34, 1.45, 0.64, 1) both;
 }
@@ -108,7 +106,6 @@
     fill: var(--plant-fruit);
 }
 
-/* fireflies drift a little (not with minimal motion) */
 :global(:root:not([data-motion="minimal"])) .firefly > .grow{
     animation: growIn 0.8s cubic-bezier(0.34, 1.45, 0.64, 1) both, drift 3.2s ease-in-out 0.8s infinite alternate;
 }
@@ -134,7 +131,6 @@
     fill: var(--plant-soil);
 }
 
-/* the pot in the profile's colour, or a warm clay */
 .pot{
     fill: color-mix(in srgb, var(--task-color, #c2410c) 70%, var(--plant-soil));
 }

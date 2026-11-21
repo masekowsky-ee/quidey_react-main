@@ -27,7 +27,6 @@ export const PAGES = {
   ProPage: { load: () => import('../../components/pro/ProPage.jsx') },
 };
 
-// the app's pages (not the sign-in or legal texts) in the background, when nothing else runs
 export function preloadPages() {
   const load = () => {
     for (const { load: page, preload } of Object.values(PAGES)) {

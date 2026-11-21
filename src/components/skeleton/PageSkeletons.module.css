@@ -5,7 +5,6 @@
 
 /* ---------- containers ---------- */
 
-/* Calendar, Gemeinschaft */
 .wide{
     composes: page from '../ui.module.css';
     width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
@@ -28,12 +27,10 @@
     text-align: left;
 }
 
-/* Inbox, profiles, everything simple */
 .column{
     composes: pageColumn from '../ui.module.css';
 }
 
-/* Statistics */
 .stats{
     composes: pageColumn from '../ui.module.css';
     width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
@@ -261,7 +258,6 @@ div.communityTabs > button{
     font-size: 0.875rem;
 }
 
-/* the summary's second line: it wraps on a phone */
 .phoneOnly{
     display: none;
 }
@@ -275,7 +271,6 @@ div.communityTabs > button{
         display: block;
     }
 
-    /* tabs share the width as their names need it, so all of them fit a phone */
     div.communityTabs{
         width: 100%;
         border-radius: var(--radius);
@@ -302,7 +297,6 @@ div.communityTabs > button{
     min-width: 0;
 }
 
-/* phones and narrow tablets: the rail only above the feed */
 .layout:not([data-tab="feed"]) .rail{
     display: none;
 }
@@ -429,7 +423,6 @@ div.communityTabs > button{
     margin-top: -2.75rem;
 }
 
-/* the ring in the card's colour that sets the avatar off the banner */
 .avatar{
     box-shadow: 0 0 0 4px var(--surface);
 }
@@ -501,7 +494,6 @@ div.communityTabs > button{
         gap: 1rem;
     }
 
-    /* on a phone a setting's name stands above its control */
     .settingRow{
         flex-direction: column;
         align-items: stretch;

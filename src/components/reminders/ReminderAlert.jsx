@@ -56,7 +56,6 @@ export default function ReminderAlert() {
     }, [list]);
 
     useEffect(() => {
-        // the first look right after this render (the list may just have come)
         const first = setTimeout(check, 0);
         const id = setInterval(check, CHECK_MS);
         window.addEventListener('focus', check);
@@ -91,7 +90,6 @@ export default function ReminderAlert() {
     return <Ringing ringing={ringing} busy={busy} answer={answer} doneRef={doneRef} />;
 }
 
-// the covering page while one rings: Escape snoozes it
 function Ringing({ ringing, busy, answer, doneRef }) {
     const { t } = useTranslation();
     useModal(() => answer('snooze'), { initialFocus: doneRef });

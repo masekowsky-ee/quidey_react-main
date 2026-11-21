@@ -208,7 +208,6 @@
   }
 }
 
-/* the eight days as one timetable: shared rules, no gaps, the weekday in a header row */
 :root[data-ui="schulheft"] [data-part="week"] > div {
   gap: 0;
   border: 1px solid var(--grid-strong);
@@ -340,7 +339,6 @@
   color: var(--ink);
 }
 
-/* the timer's figures in ink, set on the squares */
 :root[data-ui="schulheft"] [data-part="timer"] {
   border-color: var(--grid-strong);
 }

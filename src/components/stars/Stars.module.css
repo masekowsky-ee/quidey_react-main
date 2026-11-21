@@ -4,7 +4,6 @@
   gap: 0.15rem;
 }
 
-/* an outline star; lit ones are filled in the tone's colour */
 .star {
   color: var(--text-muted);
 }

@@ -42,7 +42,6 @@ export default function LogoIntro() {
     const check = interpolate(frame, [18, 44], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: ease });
     const settle = spring({ frame: frame - 34, fps, config: { damping: 14, stiffness: 140 } });
     const word = interpolate(frame, [38, 62], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: ease });
-    // everything lifts away softly at the end
     const out = interpolate(frame, [80, INTRO_FRAMES], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
 
     return (

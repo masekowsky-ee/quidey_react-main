@@ -104,7 +104,6 @@ export function occurrences(reminder, from, to) {
         .filter((at, i, list) => i === 0 || at.getTime() !== list[i - 1].getTime());
 }
 
-// The next time it rings from `now` on, or null
 export function nextOccurrence(reminder, now = new Date()) {
     const horizon = new Date(now.getTime() + 8 * 24 * 60 * 60 * 1000);
     if (!isWeekly(reminder)) {
@@ -114,7 +113,6 @@ export function nextOccurrence(reminder, now = new Date()) {
     return occurrences(reminder, now, horizon)[0] ?? null;
 }
 
-// Ringing right now: its time came within LATE_LIMIT_MS (and it isn't done)
 export function dueOccurrence(reminder, now = new Date()) {
     const recent = occurrences(reminder, new Date(now.getTime() - LATE_LIMIT_MS), now);
     return recent.at(-1) ?? null;
@@ -130,7 +128,6 @@ export function weekdaysText(reminder, t) {
     return `${days} · ${reminder.atTime}`;
 }
 
-// open ones by their next time (missed first), then the done ones
 export function sortReminders(list, now = new Date()) {
     const rank = (reminder) => {
         if (isDone(reminder)) return [3, -new Date(reminder.doneAt).getTime()];

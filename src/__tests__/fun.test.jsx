@@ -235,7 +235,6 @@ describe('tutorial', () => {
         const store = signIn()
         renderTutorial(store)
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-        // nor before the server has answered
         const early = makeStore()
         early.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'bob' } })
         renderTutorial(early)
@@ -262,14 +261,12 @@ describe('tutorial', () => {
         )
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-        // the tour lives in the settings, area "App"
         fireEvent.click(screen.getByRole('button', { name: 'Einführung starten' }))
         expect(screen.getByRole('dialog')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Zurück' })).toBeDisabled()
 
         fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
         expect(screen.getByRole('heading', { name: 'Aufgaben und Events' })).toBeInTheDocument()
-        // jump to the last step with the dots, then finish
         const dots = within(screen.getByRole('tablist', { name: 'Einführung' })).getAllByRole('tab')
         expect(dots).toHaveLength(9)
         fireEvent.click(dots.at(-1))
@@ -381,7 +378,6 @@ describe('the daily line', () => {
             </Provider>
         )
         const label = translations.de[`lineOf_${lineOfDay().type}`]
-        // hidden behind the bulb until it is tapped
         expect(screen.queryByRole('link', { name: new RegExp(`^${label}`) })).not.toBeInTheDocument()
         fireEvent.click(screen.getByRole('button', { name: label }))
         fireEvent.click(screen.getByRole('link', { name: new RegExp(`^${label}`) }))

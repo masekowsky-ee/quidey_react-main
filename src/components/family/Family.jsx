@@ -13,7 +13,6 @@ import ProfileAvatar from '../profile/ProfileAvatar';
 import FriendPicker from '../together/FriendPicker';
 import { friendsPath } from '../../features/community/paths';
 
-// Start a family: name + friends to invite
 function NewFamily({ onCreated }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();

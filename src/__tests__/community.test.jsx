@@ -158,7 +158,6 @@ describe('Gemeinschaft page', () => {
         const tabs = screen.getByRole('navigation', { name: 'Bereiche von Sozial' })
         expect(within(tabs).getAllByRole('link').map(link => link.textContent)).toEqual(['Feed', 'Fortschritt', 'Sitzungen', 'Freunde', 'Family'])
         expect(within(tabs).getByRole('link', { name: 'Fortschritt' })).toHaveAttribute('href', '/community/progress')
-        // the feed has no level card or challenges beside it any more
         expect(screen.queryByRole('progressbar', { name: '520 von 675 XP' })).not.toBeInTheDocument()
         expect(screen.queryByRole('region', { name: 'Heute' })).not.toBeInTheDocument()
     })

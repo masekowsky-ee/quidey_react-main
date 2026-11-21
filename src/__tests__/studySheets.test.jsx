@@ -126,7 +126,6 @@ function open(path) {
     )
 }
 
-// step 1 filled and left; the parts typed
 async function toStepTwo({ parts = 'Grenzwerte\nAbleitungen' } = {}) {
     open('/study/1?new=goal')
     const dialog = await screen.findByRole('dialog')
@@ -161,7 +160,6 @@ describe('create sheet', () => {
         const estimate = bodyOf(calls(`${BASE}/estimate`, 'POST')[0])
         expect(estimate).toMatchObject({ subjectId: 1, subjectName: 'Mathe', kind: 'exam', parts: ['Grenzwerte', 'Ableitungen'] })
         expect(estimate.ai).toBe(false)
-        // a stepper change is manual
         fireEvent.click(within(dialog).getByRole('button', { name: 'Mehr Zeit: Grenzwerte' }))
         fireEvent.click(within(dialog).getByRole('button', { name: 'Plan ansehen' }))
         await screen.findByRole('button', { name: 'Übernehmen' })
@@ -407,7 +405,6 @@ describe('a goal sheet left for the study times', () => {
         settings.windows = [{ weekday: 1, start: '16:00', end: '18:00' }]
         fireEvent.click(await screen.findByText('ZURÜCK'))
         const back = await screen.findByRole('dialog')
-        // the sheet is open again on the topics, with what was typed
         expect(await screen.findByLabelText('Themen, eins pro Zeile')).toHaveValue('Grenzwerte\nAbleitungen')
         fireEvent.click(within(back).getByRole('button', { name: 'Zurück' }))
         expect(within(back).getByLabelText('Name des Ziels')).toHaveValue('Klausur Analysis')
@@ -475,7 +472,6 @@ describe('plan preview', () => {
         expect(within(dialog).getByText('1 Sitzung von dir verschoben')).toBeTruthy()
         expect(within(dialog).getByRole('button', { name: /^Grenzwerte, .* 09:30, von dir verschoben/ })).toBe(session)
 
-        // Aufgabe 1 moved and put back: not sent
         fireEvent.click(within(dialog).getByRole('button', { name: /^Aufgabe 1, / }))
         const other = within(dialog).getByRole('group', { name: 'Aufgabe 1 verschieben' })
         fireEvent.click(within(other).getByRole('button', { name: 'Einen Tag früher' }))

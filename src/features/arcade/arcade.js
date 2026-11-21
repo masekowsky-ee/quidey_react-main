@@ -56,7 +56,6 @@ export function worthSending(known, score, ranked) {
 export const REFLEX_TILES = 16;
 export const reflexLifeMs = (hits) => Math.max(420, Math.round(1250 * 0.95 ** Math.floor(hits / 8)));
 export const reflexPoints = (reactionMs, lifeMs) => (reactionMs <= lifeMs / 3 ? 2 : 1);
-// the next lit tile: never the same one twice in a row
 export function nextTile(previous, rng = Math.random) {
     const tile = Math.floor(rng() * (REFLEX_TILES - 1));
     return previous === null || previous === undefined || tile < previous ? tile : tile + 1;

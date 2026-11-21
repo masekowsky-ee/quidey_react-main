@@ -82,7 +82,6 @@ describe('password change and sign out everywhere', () => {
 
 describe('security headers of the site', () => {
     it('allow the API server and nothing else to be called', () => {
-        // the live connection (WebSocket) to the same host is allowed too
         expect(contentSecurityPolicy('https://api.quidey.com/some/path')).toContain("connect-src 'self' https://api.quidey.com wss://api.quidey.com;")
         expect(contentSecurityPolicy('http://localhost:3000')).toContain("connect-src 'self' http://localhost:3000 ws://localhost:3000;")
         expect(contentSecurityPolicy('')).toContain("connect-src 'self';")

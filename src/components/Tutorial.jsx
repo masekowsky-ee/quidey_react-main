@@ -48,14 +48,12 @@ const GUEST_STEPS = [
     { id: 'join' },
 ];
 
-// the last step's first things to do
 const FIRST_STEPS = [
     { newTask: true, label: 'tutNewTask', icon: 'plus' },
     { to: friendsPath('add'), label: 'tutFindFriends', icon: 'social' },
     { to: '/profile', label: 'tutDesignProfile', icon: 'profile' },
 ];
 
-// a swipe this far (px) or this fast (px/s) turns the page
 const SWIPE_DISTANCE = 60;
 const SWIPE_SPEED = 400;
 
@@ -88,13 +86,10 @@ export default function Tutorial() {
     const level = useMotionLevel();
     const celebrate = useCelebrate(0);
     const [index, setIndex] = useState(0);
-    // direction of the last move, for the slide animation: 1 next, -1 back
     const [dir, setDir] = useState(1);
     const nextRef = useRef(null);
     const dialogRef = useRef(null);
-    // where the focus was before the tour opened, it goes back there afterwards
     const returnFocus = useRef(null);
-    // this one opened by itself for a new account
     const firstTour = useRef(false);
 
     const guest = useSelector((state) => !state.auth.token);
@@ -113,10 +108,8 @@ export default function Tutorial() {
         dispatch(markTipSeen('navMoreSocial'));
     }, [username, tourSeen, dispatch]);
 
-    // a visitor who opened the tour doesn't need the invitation to it any more
     useEffect(() => { if (open && guest) markInviteDone(); }, [open, guest]);
 
-    // focus goes to the main button, so Enter walks through the tour
     useEffect(() => {
         if (!open) return;
         returnFocus.current = document.activeElement;
@@ -131,7 +124,6 @@ export default function Tutorial() {
             if (nextSteps) askNextSteps();
         }
         dispatch(setShowTutorial(false));
-        // the next tour starts at the beginning
         setIndex(0);
         setDir(1);
         if (restoreFocus) returnFocus.current?.focus?.();
@@ -147,7 +139,6 @@ export default function Tutorial() {
         dismiss(guest ? () => openAuth('signup') : undefined);
     };
 
-    // out of the tour, to a page or into the new-task form; the tour is done then
     const act = (go) => {
         close({ restoreFocus: false, nextSteps: false });
         if (go.newTask) dispatch(showForms(true));
@@ -179,7 +170,6 @@ export default function Tutorial() {
         return () => window.removeEventListener('keydown', onKey);
     });
 
-    // Tab stays inside the dialog while it is open
     const trapFocus = (e) => {
         if (e.key !== 'Tab') return;
         const items = [...(dialogRef.current?.querySelectorAll(FOCUSABLE) ?? [])];

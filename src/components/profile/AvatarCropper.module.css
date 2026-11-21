@@ -79,7 +79,6 @@
     pointer-events: none;
 }
 
-/* the window: a circle that fills the stage, everything around it dimmed */
 .ring{
     position: absolute;
     inset: 0;

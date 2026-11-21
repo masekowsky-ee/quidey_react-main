@@ -71,7 +71,6 @@ describe('the task in focus', () => {
             const store = makeStore([list[1]])
             renderHome(store)
             expect(screen.getByRole('button', { name: 'Als erledigt markieren' })).toBeInTheDocument()
-            // finished somewhere else (calendar, another device)
             act(() => { store.dispatch({ type: SET_TASK_STATE, payload: { tasks: [{ ...list[1], done: true }], groups: [], notes: [] } }) })
             expect(screen.queryByRole('button', { name: 'Als erledigt markieren' })).toBeNull()
         })
@@ -100,7 +99,6 @@ describe('the task in focus', () => {
         it('bursts on "extreme"', async () => {
             await finish('extreme')
             expect(animate.mock.calls.length).toBeGreaterThanOrEqual(60)
-            // the second burst follows a moment later
             await waitFor(() => expect(animate).toHaveBeenCalledTimes(100))
             expect(apiFetch).toHaveBeenCalledWith('/api/tasks/1', expect.objectContaining({ method: 'PUT' }))
         })
@@ -153,7 +151,6 @@ describe('editing a task on Home', () => {
         home(store)
         fireEvent.click(screen.getByRole('button', { name: 'Bearbeiten: Erste' }))
         const dialog = screen.getByRole('dialog', { name: 'Bearbeiten' })
-        // the same editor as in the calendar, with its extra options
         expect(within(dialog).getByRole('button', { name: /Weitere Optionen/ })).toBeTruthy()
         const name = within(dialog).getByLabelText('Name')
         fireEvent.change(name, { target: { value: 'Erste neu' } })

@@ -21,7 +21,6 @@ export default function ProfileCard({ profile, limited = false, heading: Heading
             <div className={styles.banner} data-banner={limited ? 'none' : (profile.banner ?? DEFAULT_BANNER)} aria-hidden="true" />
             <div className={styles.body}>
                 <div className={styles.top}>
-                    {/* a friend's profile: the green dot while they have the app open */}
                     <ProfileAvatar user={limited ? { ...profile, emoji: null, color: null, frame: null } : profile} size="large"
                         presence={profile.relation === 'friend'} />
                     {children && <div className={styles.actions}>{children}</div>}
@@ -37,7 +36,6 @@ export default function ProfileCard({ profile, limited = false, heading: Heading
                     <>
                         {profile.level > 0 && (
                             <p className={styles.levelLine}>
-                                {/* the level plant: how far they have grown */}
                                 <LevelPlant level={profile.level} size={40} />
                                 <span>
                                     <strong>{fill(t('levelLabel'), { level: profile.level })}</strong> · {t(`tier_${tierFor(profile.level).id}`)}

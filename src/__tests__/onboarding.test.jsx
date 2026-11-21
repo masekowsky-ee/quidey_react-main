@@ -79,7 +79,6 @@ describe('onboarding: when it asks', () => {
         act(() => { startOnboarding('ann'); times(INSTALL_AFTER, 'task') })
         expect(asked()).toBe('none')
 
-        // already installed: no question either
         installState.mockReturnValue('installed')
         act(() => noteAction('group'))
         expect(asked()).toBe('none')
@@ -98,7 +97,6 @@ describe('onboarding: when it asks', () => {
         installState.mockReturnValue('installed')
         renderPrompts()
         act(() => { startOnboarding('ann'); times(RATING_AFTER, 'task') })
-        // the eleventh, but no success
         act(() => noteAction('group'))
         act(() => vi.advanceTimersByTime(RATING_DELAY_MS))
         expect(asked()).toBe('none')
@@ -109,7 +107,6 @@ describe('onboarding: when it asks', () => {
         expect(asked()).toBe('rating')
         expect(screen.getByRole('heading', { name: 'Gefällt dir Quidey?' })).toBeInTheDocument()
 
-        // only once
         act(() => fireEvent.keyDown(window, { key: 'Escape' }))
         act(() => { noteAction('done'); vi.advanceTimersByTime(RATING_DELAY_MS) })
         expect(asked()).toBe('none')

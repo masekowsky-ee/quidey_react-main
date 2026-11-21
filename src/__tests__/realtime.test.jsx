@@ -97,7 +97,6 @@ describe('live chats and notices', () => {
         await serverSends('message:new', { user: ben, message: { id: 3, body: 'Bist du da?', fromMe: false, createdAt: now() } })
         expect(screen.getByText('Bist du da?')).toBeInTheDocument()
         expect(apiFetch).toHaveBeenCalledWith('/api/messages/2/read', { method: 'POST' })
-        // no toast for the conversation I'm reading
         expect(screen.queryByText('Neue Nachricht von Ben')).not.toBeInTheDocument()
 
         // the same message twice (my other tab, or the answer to sending) is shown once
@@ -263,7 +262,6 @@ describe('shared session chat', () => {
 
         store.dispatch({ type: SHARED_SESSION_EVENT, payload: { sessionId: 5, event: message(2, 'b') } })
         store.dispatch({ type: SHARED_SESSION_EVENT, payload: { sessionId: 5, event: message(2, 'b') } })
-        // another session's chat doesn't end up here
         store.dispatch({ type: SHARED_SESSION_EVENT, payload: { sessionId: 6, event: message(9, 'x') } })
         expect(store.getState().together.current.events.map(e => e.text)).toEqual(['a', 'b'])
 
@@ -271,7 +269,6 @@ describe('shared session chat', () => {
         store.dispatch({ type: SET_SHARED_SESSION, payload: { session: session([message(1, 'a')]), seq: 2 } })
         expect(store.getState().together.current.events.map(e => e.text)).toEqual(['a', 'b'])
 
-        // a newer poll has it itself: still once
         store.dispatch({ type: SET_SHARED_SESSION, payload: { session: session([message(1, 'a'), message(2, 'b'), message(3, 'c')]), seq: 3 } })
         expect(store.getState().together.current.events.map(e => e.text)).toEqual(['a', 'b', 'c'])
     })

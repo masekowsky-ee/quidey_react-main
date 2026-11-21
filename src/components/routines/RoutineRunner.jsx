@@ -44,7 +44,6 @@ export default function RoutineRunner({ routine }) {
     const leftMs = stepMs - elapsedStep;
     const overtime = stepMs > 0 && leftMs <= 0;
 
-    // the step's time is up: one sound (and a buzz on phones), once per step
     useEffect(() => {
         if (overtime && !paused && rang.current !== run.step) {
             rang.current = run.step;

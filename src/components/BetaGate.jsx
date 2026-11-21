@@ -117,7 +117,6 @@ export default function BetaGate() {
                     </div>
                 )}
 
-                {/* the trial version: all features, with limits */}
                 {!trial && (
                     <div className={styles.proCard}>
                         <Icon name="check" className={styles.proHeart} />
@@ -130,7 +129,6 @@ export default function BetaGate() {
                 )}
                 {trial && <Link to="/" className={styles.secondaryBtn}>{t('trialBack')}</Link>}
 
-                {/* the waiting room */}
                 <Link to="/arcade" className={styles.proCard}>
                     <Icon name="gamepad" className={styles.proHeart} />
                     <span>
@@ -139,7 +137,6 @@ export default function BetaGate() {
                     </span>
                 </Link>
 
-                {/* Pro gets in right away, and supports the development (once it's switched on) */}
                 {proOn && <Link to="/pro" className={styles.proCard}>
                     <Icon name="heart" className={styles.proHeart} />
                     <span>

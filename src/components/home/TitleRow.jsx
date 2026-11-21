@@ -10,14 +10,12 @@ import { localeOf } from '../../i18n/locale';
 import { Bone } from '../skeleton/Skeleton.jsx';
 import SoloTogetherStrip from '../together/SoloTogetherStrip.jsx';
 
-// "Thursday, 22 October": known before anything is loaded (also for the start screen's skeleton)
 function useTodayTitle() {
     const { language } = useTranslation();
     return new Intl.DateTimeFormat(localeOf(language),
         { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
 }
 
-// "Guten Morgen" / "Guten Tag" / "Guten Abend" by the hour
 function greetingKey(hour) {
     if (hour >= 5 && hour < 11) return 'greetMorning';
     if (hour >= 11 && hour < 17) return 'greetDay';
@@ -91,7 +89,6 @@ export default function TitleRow({ tasks, focusTask = null, sentence = false }) 
                     : <>
                         <span>{fill(t('openTasksCount'), { count: open.length })}</span>
                         {dueToday > 0 && <span>{fill(t('dueTodayCount'), { count: dueToday })}</span>}
-                        {/* the overdue ones wait in the calendar's agenda: one tap there */}
                         {overdue > 0 &&
                             <Link to={`/calendar?view=agenda&date=${dateKey(today)}`} className={styles.overdue}>
                                 {fill(t('overdueCount'), { count: overdue })}

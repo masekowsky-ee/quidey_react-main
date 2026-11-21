@@ -45,7 +45,6 @@ export async function scanMaterial({ wants, source }) {
         const answer = await apiFetch('/api/ai/scan', { method: 'POST', body: JSON.stringify({ wants, source }) });
         return answer.result;
     } finally {
-        // a fresh count of what is left (also after a refusal)
         refreshAiQuota();
     }
 }

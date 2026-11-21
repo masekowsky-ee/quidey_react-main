@@ -58,7 +58,6 @@ function Tab({ to, end, match, menuOpen, tip, ...inner }) {
     );
 }
 
-// a swipe: this far (px) along y, and more along y than along x
 const SWIPE = 24;
 
 // Phones: the main pages at the thumb (Start, Kalender, Fokus, Lernen), the rest of the menu
@@ -94,7 +93,6 @@ export default function TabBar() {
         const touch = e.touches[0];
         start.current = { x: touch.clientX, y: touch.clientY };
     };
-    // the capsule follows the finger down a little, so the swipe is felt before it folds away
     const onTouchMove = (e) => {
         if (collapsed || !start.current || !pillRef.current) return;
         const dy = e.touches[0].clientY - start.current.y;

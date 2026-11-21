@@ -23,7 +23,6 @@ function RoutineEditor({ initial, onClose }) {
     const dispatch = useDispatch();
     const [routine, setRoutine] = useState(() => ({ ...EMPTY, ...initial, steps: (initial?.steps ?? EMPTY.steps).map(step => ({ ...step })) }));
     const [saving, setSaving] = useState(false);
-    // slides in; on phones a sheet that is pulled down to cancel
     const sheet = useSheet(onClose);
     const nameRef = useRef(null);
     useFocusOnArrival(nameRef);

@@ -41,7 +41,6 @@ export const rememberPresence = (people) => ({
 export const useOnline = (userId, fallback = false) =>
     useSelector(state => state.presence[userId] ?? fallback);
 
-// My friends who have the app open, by name
 const selectOnlineFriends = (state) => state.friends.friends.filter(friend => state.presence[friend.id] ?? friend.online);
 export const useOnlineFriends = () => useSelector(selectOnlineFriends, shallowEqual);
 

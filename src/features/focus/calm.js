@@ -7,13 +7,11 @@ import { useSelector } from 'react-redux';
 import { inFocusRound } from './away';
 import { createStoredValue } from '../storedSetting';
 
-// on unless switched off
 const calm = createStoredValue('focusCalm', { fallback: true, parse: (text) => text !== 'off', encode: (on) => (on ? 'on' : 'off') });
 export const readCalm = calm.get;
 export const setCalm = calm.set;
 export const useCalmSetting = calm.useValue;
 
-// the round runs (not paused) in the Fokusraum, and calm mode is on
 export const isCalm = (state, pathname, on) => on && pathname === '/focus' && inFocusRound(state) && state.session.timer.active;
 
 export function useCalm(pathname) {

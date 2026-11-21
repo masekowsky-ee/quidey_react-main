@@ -73,7 +73,6 @@ describe('quick entry: a day, time and priority in the name', () => {
         expect(parse('Abgabe 24.12.')).toMatchObject({ name: 'Abgabe', due: '2026-12-24' })
         expect(parse('Klausur 3.1.')).toMatchObject({ name: 'Klausur', due: '2027-01-03' })
         expect(parse('Klausur 3.2.27')).toMatchObject({ name: 'Klausur', due: '2027-02-03' })
-        // no such day: it stays in the name
         expect(parse('Feier 31.2.')).toMatchObject({ name: 'Feier 31.2.', due: null })
     })
 
@@ -86,7 +85,6 @@ describe('quick entry: a day, time and priority in the name', () => {
         expect(parse('Morgenroutine')).toMatchObject({ name: 'Morgenroutine', found: [] })
         expect(parse('Treffen 9 am Bahnhof')).toMatchObject({ time: null })
         expect(parse('Wow!')).toMatchObject({ name: 'Wow!', prio: null })
-        // nothing but a day is no task: the text stays the name
         expect(parse('heute')).toMatchObject({ name: 'heute', due: null, found: [] })
     })
 
@@ -168,12 +166,10 @@ describe('the command bar for everybody and the keyboard shortcuts', () => {
         await act(async () => { fireEvent.keyDown(document.body, { key: '/' }) })
         const input = screen.getByRole('combobox')
         fireEvent.change(input, { target: { value: 'essay' } })
-        // the done one is left out
         const options = screen.getAllByRole('option')
         expect(options).toHaveLength(1)
         expect(options[0]).toHaveTextContent('Essay Statistik')
         await act(async () => { fireEvent.keyDown(input, { key: 'Enter' }) })
-        // the task's editor, with its name in the field
         expect(screen.getByDisplayValue('Essay Statistik')).toBeInTheDocument()
     })
 
@@ -210,9 +206,7 @@ describe('the command bar for everybody and the keyboard shortcuts', () => {
         fireEvent.change(input, { target: { value: 'requests' } })
         expect(screen.getByRole('option', { name: 'Requests, Inbox' })).toBeInTheDocument()
         expect(screen.getByRole('option', { name: 'Requests, Friends' })).toBeInTheDocument()
-        // the admin's tabs only for admins
         expect(screen.getAllByRole('option')).toHaveLength(2)
-        // where it sits is searched too
         fireEvent.change(input, { target: { value: 'statistics sessions' } })
         expect(screen.getAllByRole('option')).toHaveLength(1)
         fireEvent.change(input, { target: { value: 'accent' } })

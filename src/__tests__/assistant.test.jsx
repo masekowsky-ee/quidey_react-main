@@ -94,7 +94,6 @@ describe('the assistant button', () => {
     })
 
     it('opens the chat over the page', () => {
-        // the toggle is there where the device can speak
         window.speechSynthesis = { speak() {}, cancel() {}, getVoices: () => [], addEventListener() {}, removeEventListener() {} }
         window.SpeechSynthesisUtterance = function Utterance() {}
         open()

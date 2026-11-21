@@ -62,14 +62,12 @@ describe('profile picture in a circle', () => {
 
     it('the circle is always covered: zoom from 1, the picture moves only as far as it reaches', () => {
         expect(clampPlacement(image, { zoom: 0.5, x: 0, y: 0 })).toEqual({ zoom: 1, x: 0, y: 0 })
-        // 400 × 200 at zoom 1: two circle widths wide, one high
         expect(clampPlacement(image, { zoom: 1, x: 3, y: 1 })).toEqual({ zoom: 1, x: 0.5, y: 0 })
         expect(clampPlacement(image, { zoom: 9, x: 0, y: 0 }).zoom).toBe(4)
     })
 
     it('the square cut out of the picture is the one under the circle', () => {
         expect(cropSquare(image, { zoom: 1, x: 0, y: 0 })).toEqual({ sx: 100, sy: 0, side: 200 })
-        // moved right as far as it goes: the left end of the picture is in the circle
         expect(cropSquare(image, { zoom: 1, x: 0.5, y: 0 })).toEqual({ sx: 0, sy: 0, side: 200 })
         expect(cropSquare(image, { zoom: 2, x: 0, y: 0 })).toEqual({ sx: 150, sy: 50, side: 100 })
     })

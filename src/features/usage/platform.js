@@ -9,7 +9,6 @@ export function isStandalone() {
     }
 }
 
-// The Android app or the installed web app (not a browser tab)
 export const runsAsApp = () => isNativeApp() || isStandalone();
 
 // Where Quidey runs, as the usage statistics and the API name it: the Android app, the installed

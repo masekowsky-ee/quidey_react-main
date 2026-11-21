@@ -4,9 +4,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { durationText } from '../../features/calendar/calendar';
 
 import Icon from '../icons';
-// height of one number in a wheel (the same as --wheel-item in the css)
 const ITEM_PX = 36;
-// how long the wheel has to be still before the number under the band counts
 const SETTLE_MS = 120;
 const QUICK = [15, 30, 60, 120, 240, 480];
 
@@ -16,7 +14,6 @@ const QUICK = [15, 30, 60, 120, 240, 480];
 function Wheel({ value, max, onChange, label, unit, pad = false }) {
     const ref = useRef(null);
     const settle = useRef(null);
-    // the number the wheel was last turned to, so a value it set itself doesn't scroll it again
     const shown = useRef(value);
     const items = Array.from({ length: max + 1 }, (_, i) => i);
     const text = (n) => (pad ? String(n).padStart(2, '0') : String(n));
@@ -29,10 +26,8 @@ function Wheel({ value, max, onChange, label, unit, pad = false }) {
         else el.scrollTop = n * ITEM_PX;
     };
 
-    // the value changed from outside (a quick pick, opening): turn the wheel to it
     useEffect(() => {
         if (shown.current !== value || ref.current?.scrollTop === 0) scrollTo(value, shown.current !== value);
-        // only when the value changes
     }, [value]);
 
     useEffect(() => () => clearTimeout(settle.current), []);

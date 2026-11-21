@@ -7,7 +7,6 @@ import { TASK_COLORS } from '../features/tasks/taskColors'
 // index.css. This guards the link between them (a renamed or retuned one would silently go wrong).
 const css = readFileSync('src/index.css', 'utf8')
 
-// the declarations of the first rule whose selector is exactly `selector`
 function declarations(selector) {
     const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const match = new RegExp(`^${escaped}\\s*\\{([^}]*)\\}`, 'm').exec(css)

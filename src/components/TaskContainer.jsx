@@ -27,10 +27,8 @@ import TodayEvents from './task/TodayEvents.jsx'
 import KindChips from './home/KindChips.jsx'
 import { selectCollections, taskIdsIn, updateCollection, deleteCollection, removeFromCollection } from '../features/collections/collections'
 
-// seconds between two rows when the list cascades in
 const CASCADE_STEP = { minimal: 0.025, normal: 0.035, extreme: 0.045 };
 
-// open tasks shown at first on Home (own look)
 const PLAIN_ROWS = 6;
 
 export default function TaskContainer(props){
@@ -38,18 +36,14 @@ export default function TaskContainer(props){
     // plain: the app's own Home (today's events are in "Dein Tag" beside it, the list doesn't fold,
     // "5 erledigt" and "Neue Aufgabe" are quiet text buttons; the add button in the corner is the loud one)
     const plain = Boolean(props.plain);
-    // Home's labels (Aufgaben, Events, Erinnerungen, Notizen) in the head of "All": the kinds shown; tasks hidden when off
     const { kinds, onToggleKind } = props;
     const tasksOff = Boolean(kinds) && !kinds.includes('tasks');
     // Home's own look shows the first few open tasks, the rest one tap away, so the list stays
     // about as long as the column beside it
     const [expanded, setExpanded] = useState(false);
-    // "All": the study plan's later sessions shown too (see plannedStudy)
     const [showPlanned, setShowPlanned] = useState(false);
 
-    // whether the Done list is shown; only this component uses it
     const [showDone, setShowDone] = useState(false);
-    // the whole list folded away (the title stays, with the number of open tasks)
     const [collapsed, setCollapsed] = useState(false);
 
     const {t} = useTranslation();
@@ -75,7 +69,6 @@ export default function TaskContainer(props){
     const groups = useSelector(state => state.task.groups);
     const groupToDisplay = useSelector(state => state.task.groupToDisplay);
 
-    // the task open in the full editor (all options), or null; looked up live so changes show
     const [editTaskId, setEditTaskId] = useState(null);
     const taskInEditor = editTaskId === null ? null : tasks.find(task => task.id === editTaskId);
     const closeEditor = useCallback(() => setEditTaskId(null), []);
@@ -91,9 +84,7 @@ export default function TaskContainer(props){
     const sharedInAll = showSharedTasks ? sharedTasks : [];
     const hiddenSharedCount = showingAll && !showSharedTasks ? sharedTasks.filter(task => !task.done).length : 0;
     const toggleSharedTasks = () => dispatch(setShowSharedTasks(!showSharedTasks));
-    // the shown group as stored (one of my own, not "all", a session's or a collection), or undefined
     const shownGroupRow = showingAll || shownGroup?.shared || shownGroup?.collection ? undefined : groups.find(g => g.id === shownGroup.id);
-    // testers: a collection in place of a group, its tasks (events among them) found in mine
     const collections = useSelector(selectCollections);
     const shownCollection = shownGroup?.collection ? collections.find(c => c.id === shownGroup.collectionId) : undefined;
     // a session's group: one of its sub-groups can be picked too (kept on the shown group, so
@@ -111,13 +102,11 @@ export default function TaskContainer(props){
         ? inSubGroup(shownShared?.tasks ?? [], subGroup)
         : shownGroup?.collection ? tasks.filter(task => collectionTaskIds?.has(task.id))
         : showingAll ? [...groupToDisplay.tasks, ...sharedInAll] : groupToDisplay.tasks;
-    // tasks put back from the work area go to the end, in the order they were put back
     const releasedRank = (task) => releasedIds.indexOf(task.id);
     const listTasks = releasedIds.length === 0 ? groupTasks : [
         ...groupTasks.filter(task => releasedRank(task) === -1),
         ...groupTasks.filter(task => releasedRank(task) !== -1).sort((a, b) => releasedRank(a) - releasedRank(b)),
     ];
-    // events aren't to-dos: today's show in their own strip above the list, all of them in the calendar
     const todoTasks = listTasks.filter(task => !isEvent(task));
     const openTasks = todoTasks.filter(task => !task.done && task.id !== activeTask?.id);
     const doneTasks = todoTasks.filter(task => task.done && task.id !== activeTask?.id);
@@ -131,7 +120,6 @@ export default function TaskContainer(props){
         .filter(task => isEvent(task) && dateKey(task.due) === todayKey)
         .sort((a, b) => (minutesOfDay(a.due_time) ?? -1) - (minutesOfDay(b.due_time) ?? -1));
 
-    // a click on a task's label opens that group (or the session's group)
     const openGroup = (group) => {
         const target = group.shared ? sharedGroups.find(g => g.sessionId === group.sessionId) : group;
         if (target) dispatch(editDisplaygroup(target, shownGroup?.id));
@@ -157,7 +145,6 @@ export default function TaskContainer(props){
             .catch(reportError);
     };
 
-    // my task is deleted; a task a friend shared with me is only left (it stays theirs)
     const handleTaskDelete = (task) => {
         if (isSharedWithMe(task)) {
             dispatch(leaveTask(task))
@@ -181,7 +168,6 @@ export default function TaskContainer(props){
 
     const inOwnGroup = Boolean(groupToDisplay.group.name) && !showingAll && !shownGroup?.shared;
 
-    // the props of a row, by kind of task
     const rowProps = (task, index) => {
         const base = { task, motionProps: rowMotion(index), onOpenGroup: openGroup };
         if (task.shared) {
@@ -233,17 +219,13 @@ export default function TaskContainer(props){
                         ? `${shownCollection.emoji ? `${shownCollection.emoji} ` : ''}${shownCollection.name}`
                         : shownGroup?.name && !showingAll ? shownGroup.name : t('taskContainer')}
                 </h2>
-                {/* "All" has its count in the page's title row */}
                 {!showingAll && <span className={styles.openCount}>{fill(t('openTasksCount'), { count: openTasks.length })}</span>}
-                {/* the shown group's colour (one of my own groups) */}
                 {shownGroupRow &&
                     <TaskColorButton task={shownGroupRow} label={t('groupColor')}
                         onChange={(color) => dispatch(editGroup(shownGroupRow.id, { color }, shownGroupRow)).catch(reportError)} />}
-                {/* the group goes, its tasks stay */}
                 {shownGroupRow &&
                     <ConfirmDeleteButton label={`${t('deleteGroup')}: ${shownGroupRow.name}`} title={t('deleteGroup')}
                         onConfirm={() => dispatch(deleteGroup(shownGroupRow.id)).catch(reportError)} />}
-                {/* a collection: the same, and its own page (with its events and notes) */}
                 {shownCollection && <>
                     <TaskColorButton task={shownCollection} label={t('collectionColor')}
                         onChange={(color) => dispatch(updateCollection(shownCollection.id, { color })).catch(reportError)} />

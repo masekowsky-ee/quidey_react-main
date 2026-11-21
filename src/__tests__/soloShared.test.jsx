@@ -113,7 +113,6 @@ describe('solo sessions with shared tasks', () => {
 
     it('the focus timer on a session task runs the session stopwatch, an own task stops it', async () => {
         const store = makeStore()
-        // the server answers with the session as it is now (the task still there)
         apiFetch.mockResolvedValue({ id: 5, name: 'Lerngruppe', me: 1, endedAt: null, people: [], events: [],
             tasks: [{ id: 12, name: 'Slides', description: null, done: false, assignee: null, totalMs: 200000, time: [{ userId: 1, ms: 90000 }] }] })
         const shared = selectSharedSoloTasks(store.getState())[0]
@@ -238,14 +237,11 @@ describe('solo task list', () => {
         expect(screen.getByText('Slides')).toBeInTheDocument()
 
         fireEvent.click(screen.getByRole('button', { name: 'Aufgaben aus gemeinsamen Sitzungen ausblenden' }))
-        // the row leaves with its exit animation
         await waitFor(() => expect(screen.queryByText('Slides')).not.toBeInTheDocument())
         expect(screen.getByText('Own task')).toBeInTheDocument()
-        // only the open one counts
         expect(screen.getByText('1 Aufgaben aus gemeinsamen Sitzungen ausgeblendet')).toBeInTheDocument()
         expect(localStorage.getItem('showSharedTasks')).toBe('0')
 
-        // the session's own group still shows them
         apiFetch.mockResolvedValue({ id: 5, name: 'Lerngruppe', me: 1, endedAt: null, people: [], events: [], tasks: [] })
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Lerngruppe\s*1/ })) })
         expect(screen.getByText('Slides')).toBeInTheDocument()
@@ -277,7 +273,6 @@ describe('solo task list', () => {
         renderList(store)
         fireEvent.click(within(screen.getByText('Own task').closest('li')).getByRole('button', { name: 'Bearbeiten: Own task' }))
         const dialog = screen.getByRole('dialog')
-        // it is in "Uni" already: another one can be added
         expect(within(dialog).getByText('In weitere Sammlung …')).toBeInTheDocument()
         expect(within(dialog).queryByText('Zu Gruppe hinzufügen')).not.toBeInTheDocument()
     })
@@ -297,9 +292,7 @@ describe('sessions in the statistics', () => {
         const entry = screen.getByRole('link', { name: 'Lerngruppe' }).closest('li')
         expect(within(entry).getByText('Gemeinsame Sitzung')).toBeInTheDocument()
         expect(within(entry).getByText('15 min', { selector: '[class*=duration]' })).toBeInTheDocument()
-        // the stat for team time
         expect(screen.getByText('Gemeinsam').previousSibling).toHaveTextContent('15 min')
-        // a solo session with a shared task: tagged with the session's name
         const tag = screen.getByTitle('Gemeinsame Sitzung: Lerngruppe')
         expect(tag).toHaveTextContent('Slides')
     })

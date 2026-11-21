@@ -133,10 +133,8 @@ function DayPanelBody({
     }
     const isToday = sameDay(date, today);
 
-    // ---------- the timeline ----------
     const gridRef = useRef(null);
     const scrollerRef = useRef(null);
-    // a move being saved: shown at its new place until the list has it (or it failed)
     const [pending, setPending] = useState(null);
     const moveTo = useCallback(async (task, changes) => {
         setPending({ id: task.id, changes });
@@ -182,7 +180,6 @@ function DayPanelBody({
         if (ok) setEditing({ day: key, id: null });
     };
 
-    // the entry open in its editor (in place of the timeline); gone from the day (moved, deleted): none
     const editingTask = editingId === null ? null : tasks.find(task => task.id === editingId) ?? null;
     const sessions = focus?.sessions ?? [];
     const clockText = (value) => new Date(value).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });

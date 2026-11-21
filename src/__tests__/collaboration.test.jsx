@@ -257,7 +257,6 @@ describe('Team home', () => {
         expect(screen.getByRole('heading', { name: /Session 6/ })).toBeInTheDocument()
         expect(screen.getByRole('heading', { name: 'Meine Arbeit' })).toBeInTheDocument()
         expect(screen.getByRole('heading', { name: 'Aktivität & Chat' })).toBeInTheDocument()
-        // the invite waits on top
         expect(screen.getByText('lädt dich ein zu')).toBeInTheDocument()
 
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Session 5' })) })

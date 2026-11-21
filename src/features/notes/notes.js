@@ -90,13 +90,11 @@ export function cleanTag(value) {
 }
 
 // ---------- the text ----------
-// a line as it reads: list / heading / quote marks, dividers and **bold** / `code` marks dropped
 const plainLine = (line) => line.replace(/^\s*(- \[( |x|X)\] |#{1,2} |[-*] |\d{1,3}\. |> )/, '').replace(/^-{3,}$/, '')
     .replace(/\*\*([^*\n]+)\*\*/g, '$1').replace(/`([^`\n]+)`/g, '$1').trim();
 
 export const firstLine = (body) => (body ?? '').split('\n').map(plainLine).find(Boolean) ?? '';
 
-// the first heading written in the text ("# Analysis", "## Proofs"), as it reads, or ''
 const HEADING = /^\s*#{1,2} +(.+)$/;
 const headingOf = (body) => {
     for (const line of (body ?? '').split('\n')) {
@@ -107,8 +105,6 @@ const headingOf = (body) => {
     return '';
 };
 
-// What a note is called in lists: the title the user gave it; without one the first heading in
-// its text, else the text's first line ('' when there is nothing)
 export const titleOf = (note) => (note?.title ?? '').trim() || headingOf(note?.body) || firstLine(note?.body);
 
 // What a note's row shows under its title, always: the lines that read (after the one standing in
@@ -183,7 +179,6 @@ export function downloadNote(note) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// days until a note in the trash goes for good
 export const daysLeftInTrash = (note, now = Date.now()) => note.trashedAt
     ? Math.max(0, TRASH_DAYS - Math.floor((now - new Date(note.trashedAt).getTime()) / 86400000))
     : TRASH_DAYS;

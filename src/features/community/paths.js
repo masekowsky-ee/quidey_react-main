@@ -12,7 +12,6 @@ export const COMMUNITY_PATHS = {
 
 export const COMMUNITY_TABS = ['feed', 'progress', 'sessions', 'friends', 'family'];
 
-// the friends tab with its own sub tab (add, requests)
 export const friendsPath = (tab) => (tab ? `${COMMUNITY_PATHS.friends}?tab=${tab}` : COMMUNITY_PATHS.friends);
 
 // Everything that belongs to the page, for the menu's highlight: its tabs, one session, one

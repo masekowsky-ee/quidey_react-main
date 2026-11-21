@@ -67,7 +67,6 @@ export async function kvKeys(prefix = '') {
     return (keys ?? []).filter((key) => typeof key === 'string' && key.startsWith(prefix));
 }
 
-// everything of the offline copy (sign-out, switching the account)
 export async function kvClear() {
     const db = await openDb();
     if (!db) { memory.clear(); return; }

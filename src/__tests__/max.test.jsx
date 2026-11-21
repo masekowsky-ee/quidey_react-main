@@ -201,7 +201,6 @@ describe('Max: a Stripe Pro waiting for its payment', () => {
         await act(async () => { renderPro(makeStore({ pro: { active: true } })) })
         expect(screen.queryByRole('button', { name: /Auf Max upgraden/ })).not.toBeInTheDocument()
         expect(screen.getByText(/Bitte zuerst die Zahlung im Kundenportal klären/)).toBeInTheDocument()
-        // the way to settle it stays
         expect(screen.getByRole('button', { name: /verwalten/i })).toBeInTheDocument()
     })
 

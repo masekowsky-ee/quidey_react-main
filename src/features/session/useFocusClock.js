@@ -34,7 +34,6 @@ export function useFocusClock() {
             if (owner && owner !== me) return;
             owner = me;
             if (!dispatch(catchUpClock())) return;
-            // the countdown is over
             const ended = dispatch(countdownEnded());
             const after = store.getState();
             const language = after.settings.language;

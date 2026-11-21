@@ -47,7 +47,6 @@ function ReplanCardContent() {
     else if (conflict) text = t('studyCardConflict');
 
     const view = async () => {
-        // the goals' kinds name the shortfall banners
         await dispatch(fetchGoals()).catch(() => {});
         setPreview(true);
     };

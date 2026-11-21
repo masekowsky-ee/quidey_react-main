@@ -31,7 +31,6 @@ export default function WorkPanel({ session, large = false }) {
         run(setSharedTaskDone(session.id, current.id, true), 'toast_taskDone');
     };
 
-    // events happen, nobody works on them with the stopwatch
     const open = session.tasks.filter(task => !task.done && task.kind !== 'event');
     const suggestions = [
         ...open.filter(task => task.assignee?.id === session.me),

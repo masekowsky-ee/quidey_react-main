@@ -172,7 +172,6 @@ main.page {
         var(--surface);
 }
 
-/* "Spare 30 %": big, warm, impossible to miss */
 .saveBadge {
     position: absolute;
     top: -0.85rem;

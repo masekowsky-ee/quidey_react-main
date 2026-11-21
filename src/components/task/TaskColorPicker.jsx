@@ -6,7 +6,6 @@ import { TASK_COLORS, isOwnColor, hslToHex } from '../../features/tasks/taskColo
 import { useSavedColors, addSavedColor, removeSavedColor } from '../../features/tasks/savedColors';
 import ColorWheel from './ColorWheel.jsx';
 
-// where the wheel starts for a new colour (the wheel's own start)
 const NEW_COLOR = hslToHex({ h: 200, s: 65, l: 48 });
 
 // The colour of a task (a group, an event type, …): a row of round swatches (radio buttons, so

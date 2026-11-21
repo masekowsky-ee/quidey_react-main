@@ -45,7 +45,6 @@
     transform: none;
 }
 
-/* the group's colour (data-task-color sets --task-color) */
 .dot{
     flex-shrink: 0;
     width: 0.5rem;
@@ -54,7 +53,6 @@
     background-color: var(--task-color);
 }
 
-/* tasks from a shared session: the team color */
 .sessionLabel{
     color: var(--primary-fg);
 }
@@ -65,7 +63,6 @@
     white-space: nowrap;
 }
 
-/* shared with a friend (or by one): the accent color, not clickable */
 .friendLabel{
     display: inline-flex;
     align-items: center;

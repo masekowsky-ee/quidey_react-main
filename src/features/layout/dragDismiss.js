@@ -149,7 +149,6 @@ export function useDragDismiss(ref, { onDismiss, enabled = true, axis = 'y', dir
             backdrop()?.style.removeProperty('--drag-progress');
         };
 
-        // put away by a button or a key: the same path and spring as a flick that let it go
         leaveRef.current = (done) => {
             if (leaving) return;
             if (reducedMotion() || panel.offsetHeight === 0) { done?.(); return; }
@@ -178,7 +177,6 @@ export function useDragDismiss(ref, { onDismiss, enabled = true, axis = 'y', dir
             if (e.target.closest?.(KEEP)) return;
             if (from && !e.target.closest?.(from)) return;
             if (!from && !horizontal && panel.scrollTop > 0) return;
-            // caught mid-spring: carry on from where it is on screen
             spring$?.stop();
             spring$ = null;
             gesture = { id: e.pointerId, start: along(e) - offset, startAcross: across(e), active: offset !== 0, samples: [] };
@@ -197,7 +195,6 @@ export function useDragDismiss(ref, { onDismiss, enabled = true, axis = 'y', dir
             const moved = along(e) - gesture.start;
             if (!gesture.active) {
                 const sideways = Math.abs(across(e) - gesture.startAcross);
-                // scrolling or swiping the other way: not ours
                 if (sideways > SLOP && sideways > Math.abs(moved)) { gesture = null; return; }
                 if (Math.abs(moved) < SLOP) return;
                 // the drag starts here, without a jump: the slop is taken off
@@ -207,7 +204,6 @@ export function useDragDismiss(ref, { onDismiss, enabled = true, axis = 'y', dir
             const raw = along(e) - gesture.start;
             gesture.samples.push({ at: raw, t: e.timeStamp });
             if (gesture.samples.length > 8) gesture.samples.shift();
-            // away: 1:1 with the finger; the other way: it has nowhere to go and stays on its edge
             paint(raw);
             e.preventDefault();
         };
@@ -237,7 +233,6 @@ export function useDragDismiss(ref, { onDismiss, enabled = true, axis = 'y', dir
             });
         };
 
-        // the click that ends a drag on the close button isn't a click
         const onClick = (e) => {
             if (!swallowClick) return;
             e.stopPropagation();

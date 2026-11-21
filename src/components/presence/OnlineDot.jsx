@@ -7,7 +7,6 @@ export default function OnlineDot({ large = false }) {
     return <span className={`${styles.dot} ${large ? styles.large : ''}`} aria-hidden="true" />;
 }
 
-// "online" as a word with a small dot, next to a name
 export function OnlineLabel() {
     const { t } = useTranslation();
     return <span className={styles.label}>{t('online')}</span>;

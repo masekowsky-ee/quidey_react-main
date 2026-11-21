@@ -13,7 +13,6 @@ import { REALTIME_RECONNECT, REALTIME_REJECTED, SESSION_JOIN, SESSION_LEAVE } fr
 // (see realtime.js in the backend). Polling stays only as a slow safety net.
 // REALTIME_RECONNECT fires after the connection came back, so pages load what they missed.
 
-// (the names are in ./events.js)
 export { REALTIME_RECONNECT, REALTIME_REJECTED };
 
 let socket = null;
@@ -26,7 +25,6 @@ function notify(event, payload) {
     for (const handler of listeners.get(event) ?? []) handler(payload);
 }
 
-// Adds a handler for an event; answers the function that takes it away again
 function subscribe(event, handler) {
     if (!listeners.has(event)) listeners.set(event, new Set());
     listeners.get(event).add(handler);
@@ -104,7 +102,6 @@ export function useSafetyPoll(run, { everyMs, connectedEveryMs = everyMs * 5, en
     }, [enabled, everyMs, connectedEveryMs, immediately]);
 }
 
-// Calls handler(payload) for every `event` from the server while the component is mounted
 export function useRealtime(event, handler) {
     const latest = useRef(handler);
     useEffect(() => { latest.current = handler; });

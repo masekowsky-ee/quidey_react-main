@@ -181,7 +181,6 @@
   caret-color: var(--primary-fg);
 }
 
-/* signage is square: buttons and fields too */
 :root[data-ui="tafel"] :where(button) {
   border-radius: var(--radius);
   font-weight: 600;
@@ -261,7 +260,6 @@
   order: 3;
 }
 
-/* the next days as small boards: day and date in the white of the signs */
 :root[data-ui="tafel"] [data-part="week-day"] {
   border-radius: var(--radius);
 }

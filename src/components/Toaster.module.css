@@ -1,7 +1,7 @@
 /* Bottom center, above the docked timer */
 .toaster{
     position: fixed;
-    left: calc(50% + var(--sidebar-w, 0px) / 2); /* centred over the content, beside a sidebar */
+    left: calc(50% + var(--sidebar-w, 0px) / 2);
     bottom: calc(5.5rem + var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px));
     transform: translateX(-50%);
     z-index: var(--z-alert);
@@ -50,7 +50,6 @@
 }
 
 
-/* A message or notice that came in: a compact card, the text opens it, × closes it */
 .link{
     display: flex;
     align-items: center;
@@ -116,7 +115,6 @@
     box-shadow: none;
 }
 
-/* a toast with one action (Undo): the text, then the action as an ink text button */
 .action{
     display: flex;
     align-items: center;

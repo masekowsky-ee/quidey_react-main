@@ -4,7 +4,6 @@ export const SHARED_SESSION_GONE = "SHARED_SESSION_GONE";
 // a chat message that came in live (Socket.IO)
 export const SHARED_SESSION_EVENT = "SHARED_SESSION_EVENT";
 
-// shared sessions in the solo view and the history
 export const SET_MY_SHARED_TASKS = "SET_MY_SHARED_TASKS";
 export const SET_SHARED_HISTORY = "SET_SHARED_HISTORY";
 

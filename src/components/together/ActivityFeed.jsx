@@ -4,7 +4,6 @@ import { postSharedMessage } from '../../features/together/togetherAction';
 import { useTogetherRun } from '../../features/together/hooks';
 import ChatPanel, { ChatEvent } from './ChatPanel';
 
-// What happened in the session and the chat, newest at the bottom
 export default function ActivityFeed({ session, tall = false }) {
     const { t } = useTranslation();
     const run = useTogetherRun();

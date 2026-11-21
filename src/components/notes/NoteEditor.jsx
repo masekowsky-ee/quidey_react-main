@@ -21,7 +21,6 @@ import own from './Notes.module.css';
 
 const SAVE_AFTER_MS = 700;
 
-// Tags as chips; a new one is typed and taken with Enter, a comma or a space
 function TagField({ tags, onChange }) {
     const { t } = useTranslation();
     const [value, setValue] = useState('');
@@ -81,7 +80,6 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
         return body;
     };
 
-    // the pictures' data comes with the single note
     useEffect(() => {
         if (!note.attachments.some(item => item.kind === 'image' && !item.data)) return;
         fetchNote(note.id).then(loaded => setDraft(prev => ({ ...prev, attachments: loaded.attachments }))).catch(() => {});
@@ -109,7 +107,6 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [note.id, onChange, dispatch]);
 
-    // title and text as they are now; a text over the limit isn't sent (the status says so)
     const textChange = () => {
         const body = takeBody();
         if (body.length > NOTE_BODY_MAX) { setStatus('tooLong'); return null; }
@@ -134,7 +131,6 @@ export default function NoteEditor({ note, focusTask, onChange, onDelete, onClos
         bodyFrom.current = getBody;
         edit({});
     };
-    // what is still waiting is saved when the note is closed
     useEffect(() => () => {
         if (pending.current) {
             clearTimeout(pending.current);

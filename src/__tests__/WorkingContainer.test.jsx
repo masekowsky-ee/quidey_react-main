@@ -26,7 +26,6 @@ function renderCard(activeTask) {
     return { store, setActiveTask, rerender: (t) => view.rerender(ui(t)) }
 }
 
-// German is the default language
 const descriptionInput = () => screen.getByPlaceholderText('Beschreibung')
 const puts = () => apiFetch.mock.calls.filter(([, options]) => options?.method === 'PUT')
 

@@ -107,7 +107,6 @@ export default function GoalView({ goalId }) {
     const [asking, setAsking] = useState(false);
     const [partName, setPartName] = useState('');
     const [editing, setEditing] = useState(false);
-    // finished: the grade is offered (skippable)
     const [grading, setGrading] = useState(false);
     const [preview, setPreview] = useState(false);
     const [prompt, setPrompt] = useState(false);
@@ -128,7 +127,6 @@ export default function GoalView({ goalId }) {
     const sessions = useMemo(() => [...(goal?.sessions ?? [])]
         .sort((a, b) => a.due.localeCompare(b.due) || (a.dueTime ?? '').localeCompare(b.dueTime ?? '')), [goal]);
 
-    // the planner plans this goal: active and its day not over
     const dateOnly = goal?.planMode === 'none';
     const planned = goal?.status === 'active' && !isPastGoal(goal) && !dateOnly;
 
@@ -181,7 +179,6 @@ export default function GoalView({ goalId }) {
     const setStatus = (status) => run(() => updateGoal(goalId, { status }))
         .then(() => { if (status === 'done') setGrading(true); });
 
-    // the settings sheet put away: a new date, time or mode of a planned goal opens the preview
     const settingsClosed = (change) => {
         setEditing(false);
         if (change?.status === 'done') setGrading(true);

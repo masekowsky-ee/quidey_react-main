@@ -28,7 +28,6 @@ export const INTEREST_MAX = 24;
 export const profileColorAttr = (profile) =>
     PROFILE_COLORS.includes(profile?.color) ? profile.color : undefined;
 
-// My own profile, with all my statistics
 export function fetchOwnProfile() {
     return apiFetch('/api/profile');
 }

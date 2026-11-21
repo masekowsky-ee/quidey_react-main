@@ -7,7 +7,6 @@ export const TASK_COLORS = ['red', 'orange', 'yellow', 'green', 'teal', 'blue', 
 // --task-color. The same colour in both themes (it is the one that was picked).
 export const HEX_COLOR = /^#[0-9a-f]{6}$/;
 export const isOwnColor = (value) => typeof value === 'string' && HEX_COLOR.test(value);
-// one of the eight names or a colour of one's own
 export const isTaskColor = (value) => TASK_COLORS.includes(value) || isOwnColor(value);
 
 // "#rrggbb" <-> { h 0-360, s 0-100, l 0-100 } for the wheel

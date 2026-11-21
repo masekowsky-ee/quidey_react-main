@@ -46,7 +46,6 @@ import { useFocusOnArrival } from '../features/layout/dragDismiss';
 // or family's calendar with a target ({ kind, name, events, save(fields) }): the entry goes there,
 // with the same shared fields as a session's.
 export default function TaskForm(props){
-    // sheet: QuickAdd's FormSheet (slides in, swiped down on phones)
     // onReminder(name): testers' "Erinnerung" choice, QuickAdd swaps in the reminder form;
     // initialKind / initialName: coming back from there
     const {setCreateTask, sheet, onReminder, onNote, onScan, initialKind = 'task', initialName = '', initialDue = '', initialTime = '', target = null, group} = props;
@@ -65,7 +64,6 @@ export default function TaskForm(props){
         : undefined;
     const subGroupId = session ? shownSubGroup(session.subGroups, groupToDisplay.group.subGroupId ?? null) : null;
     const subGroupName = session?.subGroups.find(group => group.id === subGroupId)?.name;
-    // the entry goes into a shared place (a session, a family): nothing personal in the form then
     const elsewhere = Boolean(session || target);
     // the group (or collection) the new one goes into: the calendar names its filter's (group, null
     // for none), elsewhere it's the one shown on Home
@@ -81,7 +79,6 @@ export default function TaskForm(props){
         extras: { ...EMPTY_EXTRAS, reminders: defaultReminders() },
     });
     const { kind, name, due, time, duration, prio, description, color, extras, eventTypeId, typeByHand, match } = draft;
-    // the switch used by hand: what the name says no longer decides
     const [kindByHand, setKindByHand] = useState(initialKind !== 'task');
     const [showMore, setShowMore] = useState(false);
     const [shareWith, setShareWith] = useState([]);
@@ -90,7 +87,6 @@ export default function TaskForm(props){
     // saving, for the fields still empty; "Ignore" keeps the name as it was typed
     const [ignoreQuick, setIgnoreQuick] = useState(false);
     const parsed = useMemo(() => parseQuickEntry(name, undefined, { eventTypes: types }), [name, types]);
-    // a time range or one of my types in the name makes it an event (where events can go)
     const nameMakesEvent = !ignoreQuick && !kindByHand && kind === 'task' && parsed.kind === 'event' && destination.events;
     const effectiveKind = nameMakesEvent ? 'event' : kind;
     const event = effectiveKind === 'event';
@@ -103,9 +99,7 @@ export default function TaskForm(props){
         ...(event && !elsewhere && !typeByHand && parsed.eventTypeId && { type: parsed.eventTypeId }),
         ...(!elsewhere && parsed.reminders.length > 0 && { reminder: parsed.reminders }),
     };
-    // the words in the name for what was taken over (a time range is read as 'time')
     const quickKinds = Object.keys(quick);
-    // what is saved: the typed fields, with what the name said in the empty ones
     const saved = {
         name: quickKinds.length > 0 ? stripFound(name, parsed.found, quickKinds) : name,
         kind: effectiveKind,
@@ -237,7 +231,6 @@ export default function TaskForm(props){
                     }} />}
                 {/* the plus button's form: study material read by the AI instead (QuickAdd swaps in the scan sheet) */}
                 {!elsewhere && <ScanLink onScan={onScan} />}
-                {/* the form opens to be typed into: the name has the focus (on a touch screen once the sheet is up) */}
                 <div className={styles.nameRow}>
                     <input ref={nameRef} className={`${styles.input} ${styles.grow}`} type="text" placeholder={t(event ? 'eventName' : 'taskName')} aria-label={t(event ? 'eventName' : 'taskName')}
                         aria-describedby={quickParts.length > 0 ? 'quick-add-hint' : undefined}
@@ -253,7 +246,6 @@ export default function TaskForm(props){
                         </span>
                         <button type="button" className={styles.quickIgnore} onClick={() => setIgnoreQuick(true)}>{t('quickAddIgnore')}</button>
                     </p>}
-                {/* "Erinnere mich …": testers make a reminder of it */}
                 {parsed.kind === 'reminder' && onReminder && !elsewhere && !ignoreQuick &&
                     <TypeHint icon={<Icon name="alarm" size={14} />} onClick={() => onReminder(stripFound(name, parsed.found, ['asReminder']))}>
                         {' '}{t('quickAddAsReminder')}
@@ -265,12 +257,10 @@ export default function TaskForm(props){
                         <span className={styles.aiLeft}>{fill(t('aiLeft'), { n: aiLeft })}</span>
                     </button>}
                 {aiState?.message && <p className={styles.aiStatus} role="status" aria-label={t('aiHelpStatus')}>{aiState.message}</p>}
-                {/* a task whose name fits a type: one tap makes it such an event */}
                 {!event && !elsewhere && match &&
                     <TypeHint color={match.type.color} onClick={draft.suggestEvent}>
                         {fill(t('keywordSuggestEvent'), { type: match.type.name })}
                     </TypeHint>}
-                {/* day and time, each with its name above it */}
                 <div className={event ? styles.whenEvent : styles.whenTask}>
                     <label className={`${styles.whenField} ${styles.whenDay}`}>
                         <span className={styles.fieldLabel}>{t(event ? 'eventDay' : 'dueDate')}</span>

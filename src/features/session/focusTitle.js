@@ -15,7 +15,6 @@ import { selectFocusTask, PHASE_LABEL } from './sessionAction';
 import { clockText } from './focusNotification';
 import { startBeat } from './beat';
 
-// The title for `now`, or null while nothing runs
 export function focusTitle(state, language, now) {
     const { timer, timerMode, pomodoro, runningSince } = state.session;
     if (!timer.active || runningSince == null) return null;

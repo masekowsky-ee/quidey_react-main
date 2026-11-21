@@ -166,7 +166,6 @@ describe('creating an event', () => {
         expect(screen.queryByLabelText(/Priority/)).not.toBeInTheDocument()
         fireEvent.change(screen.getByRole('textbox', { name: 'Event name' }), { target: { value: 'Shift' } })
 
-        // without a day it is refused
         routes({})
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Create' })) })
         expect(bodyOf('/api/tasks', 'POST')).toBeUndefined()
@@ -333,7 +332,6 @@ describe("an event's start, end and length", () => {
         expect(endDayOffset('22:00', 240)).toBe(1)
         // a trip over several days keeps its days, only the end's time changes
         expect(fromEnd('17:00', '14:00', 26 * 60)).toEqual({ time: '14:00', duration: 27 * 60 })
-        // no start yet: it goes back from the end by an hour (or the length there is)
         expect(fromEnd('11:00', '', null)).toEqual({ time: '10:00', duration: 60 })
         expect(fromEnd('11:00', '', 30)).toEqual({ time: '10:30', duration: 30 })
         expect(fromEnd('', '14:00', 120)).toEqual({ time: '14:00', duration: null })

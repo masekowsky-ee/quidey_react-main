@@ -134,7 +134,6 @@ describe('Settings page', () => {
         const store = makeStore()
         renderWithStore(<Settings />, { store })
 
-        // nothing chosen yet: the device's
         expect(screen.getByRole('button', { name: 'System' })).toHaveAttribute('aria-pressed', 'true')
 
         fireEvent.click(screen.getByRole('button', { name: 'Hell' }))

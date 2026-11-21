@@ -66,7 +66,6 @@ export default function TaskSharing({ task }) {
     );
 }
 
-// The people a task was sent to, "invited" until they accept
 function ShareList({ shares, onRemove }) {
     const { t } = useTranslation();
     if (shares.length === 0) return null;

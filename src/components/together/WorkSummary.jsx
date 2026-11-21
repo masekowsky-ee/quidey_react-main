@@ -17,7 +17,6 @@ export default function WorkSummary({ session }) {
     const [view, setView] = useState('people');
 
     const me = session.me;
-    // my numbers include what the stopwatch hasn't delivered yet, the others' their running time
     const timeFor = (task, userId) => timeOf(task, userId)
         + (userId === me ? localMs(work, task.id, now) : othersRunningMs(session, userId, task.id, now));
 
@@ -102,7 +101,6 @@ export default function WorkSummary({ session }) {
                                 <span className={styles.name}>{task.done && <Icon name="check" size={13} strokeWidth={2.2} className={styles.doneMark} />}{task.name}</span>
                                 <span className={styles.timeMain}>{formatDuration(total)}</span>
                             </div>
-                            {/* one colored part per person */}
                             <div className={styles.stackBar} aria-hidden="true">
                                 {byPerson.map((entry, i) => (
                                     <div key={entry.user.id} data-slot={i % 4} style={{ width: `${entry.ms / total * 100}%` }} />

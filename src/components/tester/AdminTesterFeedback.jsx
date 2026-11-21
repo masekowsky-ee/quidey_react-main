@@ -10,7 +10,6 @@ import { Link } from 'react-router-dom';
 import { SkeletonRows } from '../skeleton/Skeleton.jsx';
 import { TEST_FEATURES, UI_TOPICS, featureTopic, fetchAllTesterFeedback, variantTopic } from '../../features/tester/feedback';
 
-// For each tester, which variant(s) they gave their most stars: topic -> how many testers
 function favouriteCounts(topics) {
     const best = new Map(); // user id -> { rating, topics }
     for (const topic of topics.filter(item => UI_TOPICS.includes(item.topic))) {
@@ -28,7 +27,6 @@ function favouriteCounts(topics) {
     return counts;
 }
 
-// How the stars of one topic spread: five columns, 1 to 5
 function Spread({ spread }) {
     const most = Math.max(1, ...spread);
     return (
@@ -136,7 +134,6 @@ export default function AdminTesterFeedback() {
             .then(result => { if (!cancelled) setData(result); })
             .catch(() => { if (!cancelled) { setData({ testers: 0, topics: [] }); dispatch(showToast(t('friendError_generic'), 'error')); } });
         return () => { cancelled = true; };
-    // t only changes with the language
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch]);
 

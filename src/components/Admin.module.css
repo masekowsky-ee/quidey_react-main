@@ -26,7 +26,6 @@
     margin-bottom: 1rem;
 }
 
-/* Requests | Users | Overview */
 .tabs{
     composes: tabBar from './ui.module.css';
 }
@@ -360,7 +359,6 @@
     gap: 0.4rem;
 }
 
-/* Pro / Admin switches */
 .toggle,
 .toggleOn{
     display: inline-flex;
@@ -415,7 +413,6 @@
     gap: 1rem;
 }
 
-/* an odd one out at the end fills its row */
 .stat:last-child:nth-child(3n + 1){
     grid-column: 1 / -1;
 }

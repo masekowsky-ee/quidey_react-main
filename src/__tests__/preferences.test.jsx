@@ -83,7 +83,6 @@ describe('accent on <html>', () => {
     it('follows the setting', () => {
         const store = makeStore()
         renderHook(() => useApplyTheme(), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> })
-        // Abendrot (sunset) unless another one was chosen
         expect(document.documentElement.dataset.accent).toBe('sunset')
 
         store.dispatch(setAccent('green'))
@@ -137,7 +136,6 @@ describe('Settings page', () => {
 
     it('a new session length applies to the idle timer right away', () => {
         const store = renderSettings()
-        // the timer's length is in the "Planen" area
         fireEvent.click(screen.getByRole('button', { name: '45' }))
 
         expect(store.getState().settings.defaultSessionMinutes).toBe(45)

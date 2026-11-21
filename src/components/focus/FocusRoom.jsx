@@ -42,7 +42,6 @@ export default function FocusRoom() {
     const fullscreen = useFullscreen();
     const calm = useCalm(useLocation().pathname);
 
-    // focus sounds play on while the settings are closed, and stop when the Fokusraum is left
     useEffect(() => () => stopNoise(), []);
 
     return (

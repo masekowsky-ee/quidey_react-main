@@ -58,7 +58,6 @@ export function HomeSkeleton() {
     );
 }
 
-// The focus column's card with nothing in focus yet, for the start screen (AppSkeleton)
 export function FocusSkeleton() {
     const { t } = useTranslation();
     return (
@@ -75,7 +74,6 @@ export function FocusSkeleton() {
     );
 }
 
-// The inline timer as it will look, for the start screen (AppSkeleton): its mode and time come
 // from this device, so they are shown as they are; nothing in it works yet
 export function TimerSkeleton() {
     const { t } = useTranslation();

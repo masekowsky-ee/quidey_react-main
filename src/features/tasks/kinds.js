@@ -65,7 +65,6 @@ export function eventEnd(task) {
     return new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, start + (Number(task.duration_minutes) || 0));
 }
 
-// Whether an event is going on right now
 export function isEventNow(task, now = new Date()) {
     const end = eventEnd(task);
     if (!end || task.done) return false;

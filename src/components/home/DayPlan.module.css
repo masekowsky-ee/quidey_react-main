@@ -68,7 +68,6 @@
   color: var(--text-muted);
 }
 
-/* over already: quieter */
 li[data-done] .name {
   color: var(--text-muted);
 }
@@ -87,7 +86,6 @@ li[data-done] .name {
   color: var(--text-muted);
 }
 
-/* today's focus against the goal, at the foot of the card */
 .focus {
   display: flex;
   flex-direction: column;

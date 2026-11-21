@@ -49,7 +49,6 @@ export function focusNotice(state, language) {
         running,
         countDown: !stopwatch,
         base,
-        // standing still: the time as it stands
         time: running ? null : clockText(timer.time),
     };
 }

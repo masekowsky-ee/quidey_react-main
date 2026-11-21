@@ -41,7 +41,6 @@ export function toCsv(rows) {
     return rows.map(row => row.map(cell).join(',')).join('\r\n');
 }
 
-// Offers text as a file download
 export function downloadFile(filename, text, type = 'text/csv') {
     // the BOM makes Excel read umlauts correctly; other formats (e.g. .ics) must not start with one
     const parts = type === 'text/csv' ? ['﻿', text] : [text];
@@ -61,7 +60,6 @@ export function displayName(user) {
     return user?.displayName || user?.username || '?';
 }
 
-// Same calendar day, time of day dropped (local time)
 export function toDateOnly(date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }

@@ -23,5 +23,4 @@ export const clearCardNote = () => set(null);
 
 const subscribe = (listener) => { listeners.add(listener); return () => listeners.delete(listener); };
 
-// the id of the note in the card, or null
 export const useCardNote = () => useSyncExternalStore(subscribe, () => current, () => null);

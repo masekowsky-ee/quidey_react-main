@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, spring, useMotionLevel } from '../features/settings/motion';
 import { useTranslation } from '../i18n/useTranslation';
 
-// how far (px) or how fast (px/s) a toast has to be swiped to count
 const SWIPE_DISTANCE = 60;
 const SWIPE_VELOCITY = 500;
 
@@ -45,7 +44,6 @@ function useSwipe({ onClose, onOpen, exit }) {
     };
 }
 
-// Plain feedback ("Invite sent"): a click or a swipe closes it
 const PlainToast = forwardRef(function PlainToast({ toast, onClose, ...motionProps }, ref) {
     const swipe = useSwipe({ onClose, exit: motionProps.exit });
     return (

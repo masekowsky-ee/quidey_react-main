@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { pressDrag } from './pressDrag';
 import { minutesOfDay, timeText } from './calendar';
 
-// the timeline moves in quarter hours
 const SNAP_MINUTES = 15;
 const LAST_START = 24 * 60 - SNAP_MINUTES;
 

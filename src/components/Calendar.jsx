@@ -40,7 +40,6 @@ const isTyping = (el) => el?.closest?.('input, textarea, select, [contenteditabl
 // phones: the toolbar folds into one row of icons (the same width as the grid's phone layout)
 const COMPACT_QUERY = '(max-width: 640px)';
 
-// A popover that closes on a click elsewhere or Escape
 function useDismiss(open, close, ref) {
     useEffect(() => {
         if (!open) return undefined;
@@ -66,7 +65,6 @@ export default function Calendar() {
     const dispatch = useDispatch();
 
     const ownTasks = useSelector(state => state.task.tasks);
-    // my groups, or for testers my collections in their place
     const taskGroups = useTaskGroups();
     const ownSessions = useSelector(state => state.session.workedSessionData);
     const sharedHistory = useSelector(state => state.together.history);
@@ -74,7 +72,6 @@ export default function Calendar() {
     const families = useSelector(selectFamilies);
 
     const [params, setParams] = useSearchParams();
-    // which calendar: mine, a shared session's or a family's
     const source = parseCalendarSource(params.get('cal'));
     const shared = useSharedCalendar(source);
     const isShared = source.kind !== 'mine';
@@ -94,7 +91,6 @@ export default function Calendar() {
     const untisConnected = useUntisStatus()?.connected;
     const showLessons = useShowLessons();
     const lessons = useUntisLessons(!isShared && showLessons, dateKey(addDays(focusedDate, -31)), dateKey(addDays(focusedDate, 31)));
-    // a day of lessons is one box (opened in the day panel)
     // the lessons carry their Lernen subject's colour
     const subjects = useSelector(selectSubjects);
     const lessonDays = useMemo(() => lessonBoxes(colorLessons(lessons, subjects), t('untisBoxName')), [lessons, subjects, t]);
@@ -108,7 +104,6 @@ export default function Calendar() {
     // with ?task=<id>, e.g. "open in calendar" from the task list
     const [openTaskId, setOpenTaskId] = useState(() => (openDay && Number(params.get('task'))) || null);
 
-    // filters
     const groups = isShared ? [] : taskGroups.groups;
     const { groupsOf } = taskGroups;
     const inGroup = useMemo(() => (task, id) => groupsOf(task).some(group => group.id === id), [groupsOf]);
@@ -124,7 +119,6 @@ export default function Calendar() {
     const closeFilters = useCallback(() => setFiltersOpen(false), [setFiltersOpen]);
     useDismiss(filtersOpen, closeFilters, filterRef);
 
-    // phones: views behind a menu button, search behind a magnifier
     const compact = useMediaQuery(COMPACT_QUERY);
     const [viewsOpen, setViewsOpen] = useState(false);
     const viewsRef = useRef(null);
@@ -132,7 +126,6 @@ export default function Calendar() {
     useDismiss(viewsOpen, closeViews, viewsRef);
     const [searchOpen, setSearchOpen] = useState(false);
     const searchRef = useRef(null);
-    // a search typed stays in view until it's cleared
     const searchShown = searchOpen || query !== '';
     useEffect(() => { if (searchOpen) searchRef.current?.focus(); }, [searchOpen]);
     const closeSearch = () => { setQuery(''); setSearchOpen(false); };
@@ -140,7 +133,6 @@ export default function Calendar() {
 
     const shown = useMemo(() => filterTasks(tasks, { groupId, showDone, query, inGroup }), [tasks, groupId, showDone, query, inGroup]);
     const tasksByDay = useMemo(() => groupByDay(shown), [shown]);
-    // the agenda lists what I plan: not the timetable's lessons
     const agendaTasks = useMemo(() => shown.filter(task => !task.lesson), [shown]);
     const agendaByDay = useMemo(() => groupByDay(agendaTasks), [agendaTasks]);
     // the month and week grids also show the coming repeats of repeating tasks (a year ahead of
@@ -160,7 +152,6 @@ export default function Calendar() {
     const focusByDay = useMemo(() => toFocusByDay(sessions), [sessions]);
     const overdueCount = shown.filter(task => isOverdue(task, today)).length;
 
-    // my work in shared sessions, listed on the day I last worked on them
     useEffect(() => {
         dispatch(fetchSharedHistory()).catch(() => {});
     }, [dispatch]);
@@ -176,7 +167,6 @@ export default function Calendar() {
         }, { replace: true });
     }, [shared.gone, dispatch, setParams, t]);
 
-    // ---------- address ----------
 
     const update = (changes) => setParams(prev => {
         const next = new URLSearchParams(prev);
@@ -205,7 +195,6 @@ export default function Calendar() {
         update({ date: dateKey(next), day: dateKey(next) });
     };
 
-    // ---------- texts ----------
 
     const longDate = (date, withWeekday = false) => date.toLocaleDateString(locale, withWeekday
         ? { weekday: 'long', day: 'numeric', month: 'long' }
@@ -219,7 +208,6 @@ export default function Calendar() {
         const format = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' });
         title = format.formatRange ? format.formatRange(start, addDays(start, 6)) : `${format.format(start)} – ${format.format(addDays(start, 6))}`;
     }
-    // phones: month and year; the week view adds its number and shortens the month to fit
     const compactTitle = view === 'week'
         ? `${t('weekShort')} ${isoWeek(focusedDate)} · ${focusedDate.toLocaleDateString(locale, { month: 'short', year: 'numeric' })}`
         : `${t('months', focusedDate.getMonth())} ${focusedDate.getFullYear()}`;
@@ -229,7 +217,6 @@ export default function Calendar() {
     const prevLabel = t(view === 'week' ? 'previousWeek' : 'previousMonth');
     const nextLabel = t(view === 'week' ? 'nextWeek' : 'nextMonth');
 
-    // ---------- changing tasks ----------
 
     const toast = (text, tone = 'success') => dispatch(showToast(text, tone));
     const errorText = { session: togetherErrorText, family: familyErrorText }[source.kind];
@@ -237,15 +224,12 @@ export default function Calendar() {
     const movedText = (key) => fill(t('taskMovedTo'), { date: longDate(fromKey(key), true) });
     const newTaskGroup = groupId === 'all' ? null : groups.find(group => group.id === groupId);
 
-    // a change to a task: in my own list, or in the shared calendar shown
     const changeTask = (task, changes) => (isShared ? shared.update(task.id, changes) : dispatch(updateTaskProps(changes, task)));
 
-    // ---------- adding ----------
 
     // the new-task form, opened on a day (a day's plus, the day's timeline: also at a time).
     // In a shared calendar the entry goes there (target); in mine into the filtered group.
     const [createAt, setCreateAt] = useState(null);
-    // a visitor without an account can't add: the sign-in window instead of the form
     const requireAccount = useRequireAccount();
     const openCreate = (date, time = null) => requireAccount(() => setCreateAt({ due: dateKey(date), time }));
     const createTarget = isShared ? {
@@ -283,7 +267,6 @@ export default function Calendar() {
     const removeTask = async (task) => {
         try {
             if (isShared) await shared.remove(task.id);
-            // a repeating one asks first what goes (also a coming repeat, by its day)
             else if (!(await dispatch(deleteTaskAsking(task)))) return false;
             toast(t('taskDeleted'), 'info');
             return true;
@@ -305,7 +288,6 @@ export default function Calendar() {
         }
     };
 
-    // a group label filters the calendar by that group
     const openGroup = (group) => { if (!group.shared && group.id) setGroupFilter(group.id); };
 
     const exportIcs = () => {
@@ -316,7 +298,6 @@ export default function Calendar() {
         downloadFile(isShared ? `quidey-${source.kind}-${source.id}.ics` : 'quidey-tasks.ics', toIcs(withDay, { groupName, allDayTime }), 'text/calendar');
     };
 
-    // ---------- choosing the calendar ----------
 
     const openSessions = sharedSessions.filter(session => !session.endedAt);
     const sourceValue = calendarSourceKey(source) ?? 'mine';
@@ -345,7 +326,6 @@ export default function Calendar() {
     const openKey = openDay ? dateKey(openDay) : null;
     const viewProps = { focusedDate, today, tasksByDay, focusByDay, onFocusDate: focusDate, onOpenDate: openDate, onCreateOn: openCreate, dayLabel, longDate };
 
-    // which calendar (only when there's a choice): a pill beside the other controls, on phones in the filters
     const sourceChoice = openSessions.length > 0 || families.length > 0 || isShared;
     const sourcePicker = (
         <div className={styles.source}>
@@ -374,7 +354,6 @@ export default function Calendar() {
         </div>
     );
 
-    // the rarer controls behind one button: group, done ones, export (on phones also the calendar)
     const filterMenu = (
         <div className={styles.filterMenu} id="calendarFilters" role="group" aria-label={t('calendarFilters')}>
             {compact && sourceChoice && sourcePicker}
@@ -412,7 +391,6 @@ export default function Calendar() {
             {compact
                 ? <header className={`${styles.toolbar} ${styles.toolbarCompact}`}>
                     <div className={styles.compactBar}>
-                        {/* the views (and today) behind one menu button */}
                         <div className={styles.menuWrap} ref={viewsRef}>
                             <button type="button" className={styles.barBtn} aria-label={t('calendarViews')} title={t('calendarViews')} data-tip="calendar-views"
                                 aria-expanded={viewsOpen} aria-controls={viewsOpen ? 'calendarViewMenu' : undefined}
@@ -508,7 +486,6 @@ export default function Calendar() {
                                 <input type="search" value={query} onChange={(e) => setQuery(e.target.value)}
                                     placeholder={t('searchTasks')} aria-label={t('searchTasks')} />
                             </label>
-                            {/* the rarer controls wait behind one button: group, done ones, export */}
                             <div className={styles.filterWrap} ref={filterRef}>
                                 <button type="button" className={`${styles.filterBtn} ${hiddenFilters > 0 ? styles.filterBtnOn : ''}`}
                                     aria-expanded={filtersOpen} aria-controls={filtersOpen ? 'calendarFilters' : undefined}

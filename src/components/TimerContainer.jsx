@@ -14,7 +14,6 @@ const MODES = ['timer', 'pomodoro', 'stopwatch'];
 const typedPart = (raw, max) => Math.min(max, Number(String(raw).replace(/\D/g, '').slice(-2)) || 0);
 const MODE_LABEL = { timer: 'timerModeTimer', pomodoro: 'timerModePomodoro', stopwatch: 'timerModeStopwatch' };
 
-// Pomodoro: which phase is on and the rounds of this cycle as dots (filled = done)
 export function PomodoroLine({ className }) {
     const { t } = useTranslation();
     const { phase, round, config } = useSelector(state => state.session.pomodoro);
@@ -50,10 +49,8 @@ export default function TimerContainer(props){
     const pomodoro = timerMode === 'pomodoro';
     useFocusClock();
 
-    // folded away at first; it keeps running while folded
     const [open, setOpen] = useState(false);
 
-    // derived from the timer on every render, so it can never lag a tick behind
     const timeToDisplay = formatClock(timer.time);
 
 
@@ -110,7 +107,6 @@ export default function TimerContainer(props){
         }
     }
 
-    // Opens the editor pre-filled with the given time
     const editTimerFunc = (ms) => {
         setEditTimer(true);
         setNewH(Math.floor(ms / 3600000));
@@ -142,7 +138,6 @@ export default function TimerContainer(props){
     }
 
     if (!open && !inline) {
-        // folded: just the icon, with the time next to it while a session is on
         return (
             <button className={`${styles.fab} ${inProgress ? styles.fabBusy : ''}`} onClick={() => setOpen(true)}
                 aria-label={inProgress ? `${t('openTimer')}, ${timeToDisplay}` : t('openTimer')} title={t('openTimer')}>
@@ -153,7 +148,6 @@ export default function TimerContainer(props){
         );
     }
 
-    // the countdown can be set by clicking its time (Pomodoro's lengths are set in the Fokusraum)
     const canEdit = timerMode === 'timer';
 
     return(
@@ -210,7 +204,6 @@ export default function TimerContainer(props){
                         <div style={{width: `${percentWidth}%`}} className={styles.progressFill}></div>
                     </div>}
                 <div className={styles.timerNav}>
-                    {/* also once a countdown is over: it starts again with the last length */}
                     {!timer.active && !editTimer &&
                         <button className={styles.btnGo} onClick={()=>timerAction('start')} aria-label="start timer">
                             <Icon name="play" className={styles.ctrlIcon} strokeWidth={2} />

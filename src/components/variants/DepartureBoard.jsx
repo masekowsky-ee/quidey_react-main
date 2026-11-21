@@ -11,7 +11,6 @@ import { useTaskGroups } from '../../features/collections/collections';
 const SHOWN = 8;
 const NOW_WINDOW_MIN = 5;
 
-// What a row's last column says, and whether it is a change worth the board's yellow
 function noteOf(task, nowMin, activeId, t) {
     if (task.id === activeId) return { text: t('boardFocus'), state: 'now' };
     if (isOverdue(task)) return { text: t('boardLate'), state: 'late' };
@@ -31,9 +30,7 @@ function noteOf(task, nowMin, activeId, t) {
 // what is happening now or about to.
 export default function DepartureBoard({ tasks, activeTask }) {
     const { t } = useTranslation();
-    // a group of mine, or for testers a collection
     const { groupsOf } = useTaskGroups();
-    // the board counts on by the minute
     const [now, setNow] = useState(() => new Date());
     useEffect(() => {
         const id = setInterval(() => setNow(new Date()), 30 * 1000);

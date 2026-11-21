@@ -82,7 +82,6 @@ export const startWork = (session, task) => (dispatch, getState) => {
 export const stopWork = (options) => (dispatch, getState) =>
     getState().together.work.taskId ? dispatch(switchWork(null, options)) : Promise.resolve();
 
-// Sends a report when REPORT_EVERY_MS have passed
 export const tickWork = () => (dispatch, getState) => {
     const work = getState().together.work;
     if (work.taskId && Date.now() - work.since >= REPORT_EVERY_MS) return dispatch(switchWork({ ...work }));
@@ -117,7 +116,6 @@ export function workTotalMs(work, now) {
     return work.baseMs + work.workedMs + runningMs(work, now);
 }
 
-// Current time, updated every `everyMs` while `active`
 export function useNow(active = true, everyMs = 1000) {
     const [now, setNow] = useState(() => Date.now());
     useEffect(() => {

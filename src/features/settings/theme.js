@@ -11,14 +11,11 @@ const LIGHT_QUERY = '(prefers-color-scheme: light)';
 // localStorage can throw (private mode, blocked storage), so this never assumes it works.
 export const readStoredTheme = () => read(STORAGE_KEY, { allowed: THEMES, fallback: 'system' });
 
-// 'system' follows the operating system; the others are used as they are
 export function resolveTheme(theme, systemPrefersLight) {
     if (theme === 'system') return systemPrefersLight ? 'light' : 'dark';
     return theme === 'light' ? 'light' : 'dark';
 }
 
-// Applies the chosen theme to <html data-theme>, saves it, and keeps following
-// the operating system while 'system' is selected
 export function useApplyTheme() {
     const theme = useSelector(state => state.settings.theme);
     // the palette and accent of the interface in use: a tester's variant has its own (or the one
@@ -31,7 +28,6 @@ export function useApplyTheme() {
         const media = window.matchMedia?.(LIGHT_QUERY);
         const set = (resolved) => {
             document.documentElement.dataset.theme = resolved;
-            // the colour palette (the ground): <html data-palette>, colours in index.css
             document.documentElement.dataset.palette = palette;
             applyBarColor(resolved);
         };

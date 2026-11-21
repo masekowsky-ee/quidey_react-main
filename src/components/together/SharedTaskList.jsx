@@ -42,11 +42,9 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
     const intoSubGroup = subGroup ? { group_id: subGroup } : {};
 
     const [newTask, setNewTask] = useState('');
-    // what the field adds: a task, or an event on a day (today unless another is picked)
     const [newKind, setNewKind] = useState('task');
     const [newDay, setNewDay] = useState(() => toInputDate(new Date()));
     const [newTime, setNewTime] = useState('');
-    // "add one of my tasks" stays a quiet link until it's wanted
     const [pickOwn, setPickOwn] = useState(false);
     const [filter, setFilter] = useState('all');
     const [showDone, setShowDone] = useState(false);
@@ -61,7 +59,6 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
 
     const totalOn = (task) => task.totalMs + localMs(work, task.id, now)
         + session.people.reduce((sum, p) => sum + othersRunningMs(session, p.user.id, task.id, now), 0);
-    // who works on a task right now: me from my own stopwatch, the others from the server
     const workersOn = (taskId) => session.people.filter(p =>
         p.user.id === me ? workingOn === taskId : p.workingOn === taskId);
 
@@ -92,7 +89,6 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
         if (!task.done) dispatch(dropSharedFocus(id, task.id));
         if (!task.done && workingOn === task.id) await dispatch(stopWork());
         if (await run(setSharedTaskDone(id, task.id, !task.done)) && task.sourceTaskId) {
-            // it's one of my own tasks, which was marked too
             dispatch(fetchTaskState()).catch(() => {});
         }
     };
@@ -120,7 +116,6 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
         return (
             <li key={task.id} className={`${styles.taskRow} ${task.done ? styles.taskDone : ''} ${mine ? styles.taskMine : ''} ${event ? styles.taskEvent : ''}`}
                 data-task-color={taskColorAttr(task)} title={createdText(task, t, language, myUsername) || undefined}>
-                {/* an event isn't ticked off: it's done once it's over */}
                 {event
                     ? <span className={styles.eventMark} title={t(task.done ? 'eventOver' : 'kind_event')}>
                         <Icon name="mCalendar" size={18} />

@@ -22,9 +22,7 @@ function renderTimer(focus = null) {
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks: [taskA, taskB], groups: [], notes: [] } })
     if (focus) store.dispatch(setFocusTask(focus))
     renderWithStore(<TimerContainer />, { store })
-    // folded into the corner button at first
     fireEvent.click(screen.getByRole('button', { name: 'Timer öffnen' }))
-    // another task taken into focus while the timer runs (Home, Fokusraum)
     const switchTask = (task) => act(() => { store.dispatch(setFocusTask(task)) })
     return { store, switchTask }
 }
@@ -152,7 +150,6 @@ describe('TimerContainer', () => {
             fireEvent.click(screen.getByRole('button', { name: 'start timer' }))
             await sleepPhone(25 * 60 * 1000)
 
-            // the round is saved and the break is ready
             expect(store.getState().session.pomodoro).toMatchObject({ phase: 'short', round: 1 })
             expect(screen.getByText('00:05:00')).toBeInTheDocument()
             expect(screen.getByText('Kurze Pause')).toBeInTheDocument()
@@ -298,7 +295,6 @@ describe('TimerContainer', () => {
 
         // used to show "null : null : null"
         expect(screen.queryByText('null')).not.toBeInTheDocument()
-        // the parts are fields to type into (any length, not only the arrows' steps)
         expect(['Stunden', 'Minuten', 'Sekunden'].map(name => screen.getByLabelText(name).value)).toEqual(['00', '30', '00'])
         fireEvent.change(screen.getByLabelText('Minuten'), { target: { value: '307' } })
         expect(screen.getByLabelText('Minuten').value).toBe('07')

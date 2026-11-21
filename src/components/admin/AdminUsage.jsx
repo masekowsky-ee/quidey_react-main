@@ -34,7 +34,6 @@ function presetRange(preset, today) {
     return { from: addDays(today, -(days - 1)), to: today };
 }
 
-// A y scale with at most four steps above zero
 const STEPS = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000, 10000];
 function scaleFor(max) {
     const step = STEPS.find(s => Math.ceil(max / s) <= 4) ?? Math.ceil(max / 4);

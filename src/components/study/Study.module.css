@@ -151,7 +151,6 @@
     line-height: 1.25;
 }
 
-/* the goal's shape before its name, sitting on the title's x-height */
 .titleShape{
     vertical-align: 0;
 }
@@ -430,7 +429,6 @@
     color: var(--danger);
 }
 
-/* the line under a planned session's name (task rows) */
 .marker{
     display: inline-flex;
     align-items: center;
@@ -440,7 +438,6 @@
     color: var(--task-color, var(--text-muted));
 }
 
-/* the Home card asking to adjust the plan */
 .replanCard{
     composes: panel from '../ui.module.css';
     display: flex;
@@ -460,7 +457,6 @@
     color: var(--text-h);
 }
 
-/* homework from Untis offered as tasks (HomeworkSuggestions) */
 .suggestions{
     display: flex;
     flex-direction: column;

@@ -155,7 +155,6 @@ describe('notifications on this device', () => {
         await waitFor(() => expect(bodyOf('/api/push/subscription', 'PUT').kinds).toEqual({ digest: false }))
         expect(screen.getByRole('group', { name: 'Dein Tag' }).querySelector('[aria-pressed="true"]').textContent).toBe('Aus')
 
-        // new entries by others and chat messages in families and sessions: a switch of its own
         expect(screen.getByText('Neue Einträge von anderen und Nachrichten im Chat')).toBeInTheDocument()
         const groups = screen.getByRole('group', { name: 'Familien und Sitzungen' })
         fireEvent.click(groups.querySelector('button[aria-pressed="false"]'))

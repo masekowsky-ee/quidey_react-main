@@ -103,7 +103,6 @@ export const saveAllDayTime = (time) => {
     };
 };
 
-// Watches my tasks and shows their reminders when they are due
 export function useTaskReminders(enabled = true) {
     const dispatch = useDispatch();
     const tasks = useSelector(state => state.task.tasks);

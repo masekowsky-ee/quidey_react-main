@@ -24,7 +24,6 @@ describe('addTask', () => {
         expect(apiFetch).toHaveBeenCalledTimes(1)
         expect(apiFetch.mock.calls[0][0]).toBe('/api/tasks')
         expect(bodyOf(apiFetch.mock.calls[0])).toMatchObject({ name: 'Write report', due: '2026-10-20', description: 'desc', prio: '50' })
-        // group_ids: not in any group yet (for the labels)
         expect(store.getState().task.tasks).toEqual([{ id: 7, name: 'Write report', due: '2026-10-20', prio: 50, group_ids: [] }])
     })
 
@@ -201,7 +200,6 @@ describe('starting again after a countdown is over', () => {
         apiFetch.mockResolvedValue({})
         store.dispatch(setTimerMode('timer'))
         store.dispatch(params({ time: 7 * 60 * 1000 + 30 * 1000 }))
-        // over: it stands at zero
         store.dispatch(set(0, false))
         store.dispatch(startFocus())
         expect(store.getState().session.timer).toEqual({ time: 450000, active: true })

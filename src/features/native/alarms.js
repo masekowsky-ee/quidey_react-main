@@ -24,7 +24,7 @@ const AHEAD_MS = 14 * 24 * 60 * 60 * 1000;
 // Android allows a few hundred alarms per app; plenty below that
 const MAX_ALARMS = 100;
 
-let available = null; // null: not asked yet
+let available = null;
 let lastStatus = null;
 
 // { exact, fullScreen, notifications } (each true/false), or null: no alarms here
@@ -51,7 +51,6 @@ export function openAlarmSettings(which) {
     return QuideyAlarms.openSettings({ which }).catch(() => {});
 }
 
-// The coming times of every reminder, at most MAX_ALARMS, soonest first
 export function alarmsFor(list, now = new Date()) {
     const to = new Date(now.getTime() + AHEAD_MS);
     return list
@@ -66,7 +65,6 @@ async function tellServer(alarms) {
     await apiFetch('/api/tester/reminders/device', { method: 'PUT', body: JSON.stringify({ endpoint, alarms }) }).catch(() => {});
 }
 
-// Sets this device's alarms to the reminders' coming times (replacing all set before)
 export async function syncAlarms(list, language) {
     const status = await alarmStatus();
     if (!status) return;

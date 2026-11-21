@@ -24,7 +24,6 @@
   text-align: left;
 }
 
-/* only while open, so no shadow peeks in from the edge */
 .menuDiv.open {
   transform: translateX(0);
   box-shadow: var(--shadow-float);
@@ -47,8 +46,6 @@
   transform: translateX(0);
 }
 
-/* The product's mark and name on top, level with the header's row; the close button only in
-   the drawer */
 .menuHead {
   display: flex;
   align-items: center;
@@ -102,7 +99,6 @@
     box-shadow: none;
   }
 
-  /* exactly as tall as the header, so the logo sits on its line */
   .menuHead {
     height: var(--header-bar-h);
     margin: 0 0 12px;
@@ -138,7 +134,6 @@
   gap: 2px;
 }
 
-/* Settings, tutorial and admin: pushed to the bottom of the panel */
 .menuBottom {
   position: relative;
   isolation: isolate;
@@ -150,12 +145,10 @@
   gap: 2px;
 }
 
-/* Icon | label | (badge on the right) */
 .menuItem {
   display: flex;
   align-items: center;
   gap: 12px;
-  /* resting entries are a step quieter; the page you are on brightens to full ink */
   color: var(--text-muted);
   text-decoration: none;
   font-size: 0.9375rem;
@@ -188,7 +181,6 @@
 .active {
   color: var(--text-h);
   font-weight: 600;
-  /* clearly the page you are on (before the sliding mark is there) */
   background: color-mix(in srgb, var(--text-h) 11%, transparent);
 }
 
@@ -251,7 +243,6 @@
   transform: scale(0.96);
 }
 
-/* Number of open friend requests next to "Social" */
 .badge {
   display: inline-block;
   min-width: 1.25rem;
@@ -264,13 +255,11 @@
   text-align: center;
   vertical-align: 0.1em;
   font-variant-numeric: tabular-nums;
-  /* a count that needs doing: ink on the strongest surface, not the accent */
   color: var(--text-h);
   background-color: var(--surface-strong);
   border-radius: 999px;
 }
 
-/* Something changed there since I last looked (no count of its own) */
 .dot {
   flex-shrink: 0;
   width: 0.55rem;
@@ -305,7 +294,6 @@
   display: flex;
 }
 
-/* my families, indented under "Gemeinschaft" like the online row */
 .familyLinks {
   list-style: none;
   margin: 0 0 4px calc(12px + 1.35rem + 12px - 2px);
@@ -351,7 +339,6 @@
   white-space: nowrap;
 }
 
-/* overlapping a little, each with a ring in the menu's colour */
 .onlineFaces > span {
   width: 1.5rem;
   height: 1.5rem;
@@ -415,7 +402,6 @@
   }
 }
 
-/* "normal" motion: the panel swings in a little, the entries follow with a soft spring */
 :global(:root[data-motion="normal"]) .menuDiv{
   transition: transform 0.55s cubic-bezier(0.34, 1.25, 0.64, 1);
 }
@@ -449,7 +435,6 @@
   }
 }
 
-/* "minimal" motion: the entries slide in shortly after the panel */
 :global(:root[data-motion="minimal"]) .menuDiv.open .menuItem{
   animation: menuItemSoft 0.4s var(--spring-curve) both;
 }
@@ -468,7 +453,6 @@
   }
 }
 
-/* the signed-in account, last in the menu */
 .account {
   margin-top: 8px;
   padding-top: 8px;
@@ -509,7 +493,6 @@
     display: block;
   }
 
-  /* "rail": a narrow column of icons, each name small under its icon */
   .menuDiv.rail {
     padding: 0 6px 12px;
     padding-left: calc(6px + env(safe-area-inset-left, 0px));
@@ -550,7 +533,6 @@
     height: 1.4rem;
   }
 
-  /* counts and dots sit on the icon's corner */
   .rail .badge,
   .rail .dot {
     position: absolute;
@@ -569,13 +551,11 @@
   }
 }
 
-/* "Anmelden" at the foot of the menu, for a visitor without an account */
 .signIn{
 composes: btnPrimary from './ui.module.css';
 width: 100%;
 }
 
-/* "Kurz erklärt" above the sign-in button, for a visitor without an account */
 .tourLink{
 width: 100%;
 margin-bottom: 0.5rem;

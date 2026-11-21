@@ -43,7 +43,6 @@ export default function DayPlan({ tasks }) {
         return [...fromTasks, ...fromRoutines].sort((a, b) => (a.time ?? '').localeCompare(b.time ?? ''));
     }, [tasks, routines]);
 
-    // "now" goes before the first timed thing still to come
     const nowAt = items.findIndex(item => item.time && item.time > nowText);
     const date = new Intl.DateTimeFormat(localeOf(language), { weekday: 'short', day: 'numeric', month: 'numeric' }).format(now);
     const taskInEditor = open && tasks.find(task => task.id === open);
@@ -85,7 +84,6 @@ export default function DayPlan({ tasks }) {
     );
 }
 
-// "40 min focus today · goal 120 min", the goal a select; a thin line for how far it is
 function FocusToday() {
     const { t } = useTranslation();
     const serverMin = useSelector(state => state.progress.data?.todayFocusMin ?? 0);

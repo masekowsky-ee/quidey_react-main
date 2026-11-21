@@ -1,13 +1,11 @@
 /* Shared building blocks. Pull them into a component class with
    `composes: panel from './ui.module.css';` instead of copying the rules. */
 
-/* Pushes page content below the fixed header */
 .page {
     transition: padding-top var(--ease);
     padding-top: var(--header-h);
 }
 
-/* Centered reading column for simple pages (settings, profile, history) */
 .pageColumn {
     composes: page;
     width: min(680px, calc(100% - 2 * var(--page-gutter, 1rem)));
@@ -30,7 +28,6 @@
     text-wrap: balance;
 }
 
-/* Quiet sentence-case title at the top of a card */
 .cardTitle {
     margin: 0 0 1rem;
     font-size: 0.875rem;
@@ -39,7 +36,6 @@
     color: var(--text-h);
 }
 
-/* Pill-shaped group of options where exactly one is active */
 .segmented {
     position: relative;
     isolation: isolate;
@@ -191,7 +187,6 @@
     border-radius: var(--radius-lg);
 }
 
-/* The one lifted sheet on a page (the task in focus): white on the paper, a step up in the dark */
 .lifted {
     background-color: var(--sheet);
     border: 1px solid var(--panel-edge);
@@ -229,14 +224,12 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* Panel with comfortable padding, the basic block of the simple pages */
 .card {
     composes: panel;
     padding: 1.5rem;
     box-shadow: none;
 }
 
-/* Box that hangs from the header: no top border, rounded bottom corners */
 .sheet {
     background-color: var(--surface);
     border: 1px solid var(--border);
@@ -244,7 +237,6 @@
     border-radius: 0 0 var(--radius) var(--radius);
 }
 
-/* Dimmed full-screen backdrop */
 .overlay {
     position: fixed;
     inset: 0;
@@ -387,7 +379,6 @@
     transform: scale(0.98);
 }
 
-/* ...and its no: grey and quiet, the same size, so it's clearly the other way out */
 .btnNo {
     width: 100%;
     height: 2.75rem;
@@ -421,7 +412,6 @@
     }
 }
 
-/* Selected tab or filter: a neutral raised pill with the label in full ink */
 .btnLight {
     background: var(--surface-strong);
     color: var(--text-h);
@@ -455,13 +445,11 @@
     transform: scale(0.94);
 }
 
-/* Round variant */
 .iconBtnRound {
     composes: iconBtn;
     border-radius: 50%;
 }
 
-/* Button that only shows its background on hover */
 .ghostBtn {
     background-color: transparent;
     border-color: transparent;
@@ -473,7 +461,6 @@
     border-color: transparent;
 }
 
-/* Bare clickable svg: it brightens on hover, settles on press */
 .iconHover {
     cursor: pointer;
     opacity: 0.8;
@@ -489,7 +476,6 @@
     transform: scale(0.94);
 }
 
-/* the close button of a dialog's head */
 .dialogClose {
     composes: iconHover;
     flex: none;
@@ -497,7 +483,6 @@
     height: 1.75rem;
 }
 
-/* Delete control (button or bare svg): turns red on hover */
 .deleteBtn {
     composes: iconHover;
 }
@@ -571,7 +556,6 @@
 
 /* ---------- Shared recipes (formerly copied per module) ---------- */
 
-/* A list without bullets, one item under the other */
 .listColumn {
     list-style: none;
     margin: 0;
@@ -580,7 +564,6 @@
     flex-direction: column;
 }
 
-/* Title left, controls right */
 .headRow {
     display: flex;
     align-items: center;
@@ -588,7 +571,6 @@
     gap: 1rem;
 }
 
-/* Small quiet button (ghost, 2rem high) */
 .ghostSmall {
     composes: ghostBtn;
     height: 2rem;
@@ -596,7 +578,6 @@
     font-size: 0.8rem;
 }
 
-/* A button that reads as an underlined text link */
 .textLink {
     padding: 0;
     min-width: 0;
@@ -611,7 +592,6 @@
     text-underline-offset: 2px;
 }
 
-/* Pill-shaped quiet link/button with a hairline border */
 .ghostLinkPill {
     composes: ghostBtn;
     display: inline-flex;

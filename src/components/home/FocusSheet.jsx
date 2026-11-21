@@ -19,7 +19,6 @@ import { plannedProgress, selectFocusByTask } from '../../features/tasks/planned
 import { useTaskGroups } from '../../features/collections/collections';
 import { useActiveTaskActions } from '../../features/home/useActiveTaskActions';
 
-// "30:00", "1:05:00": hours only when there are any
 const clockText = (ms) => formatClock(ms).replace(/^00:/, '');
 
 const MODES = [['timer', 'timerModeTimer'], ['pomodoro', 'timerModePomodoro'], ['stopwatch', 'timerModeStopwatch']];
@@ -43,7 +42,6 @@ export default function FocusSheet({ dropZoneRef, activeTask, setActiveTask, onR
     const focusByTask = useSelector(selectFocusByTask);
     const notes = useSelector(state => state.task.notes);
     const { groupsOf } = useTaskGroups();
-    // a note put in the card takes the task's place on show (the task and the timer stay as they are)
     const cardNote = useCardNote();
 
     const stopwatch = timerMode === 'stopwatch';
@@ -52,13 +50,11 @@ export default function FocusSheet({ dropZoneRef, activeTask, setActiveTask, onR
     const own = activeTask && !activeTask.shared;
     const taskNotes = own ? (notes ?? []).filter(note => note.task_id === activeTask.id) : [];
 
-    // description and notes, opened for one task (another task starts folded)
     const [openFor, setOpenFor] = useState(null);
     const open = openFor !== null && openFor === activeTask?.id;
     const setOpen = (value) => setOpenFor(value ? activeTask.id : null);
     const [editLength, setEditLength] = useState(false);
 
-    // what is known about the task, on one line
     const progress = own ? plannedProgress(activeTask, focusByTask) : null;
     const meta = [];
     if (activeTask) {
@@ -108,7 +104,6 @@ export default function FocusSheet({ dropZoneRef, activeTask, setActiveTask, onR
                     : <span className={styles.time} role="timer" aria-live="off">{clockText(timer.time)}</span>}
             </div>
 
-            {/* the session's progress while one is on; before that how far the task is against its plan */}
             <div className={styles.progress} aria-hidden="true">
                 {inProgress || stopwatch && timer.active
                     ? (stopwatch
@@ -192,7 +187,6 @@ export default function FocusSheet({ dropZoneRef, activeTask, setActiveTask, onR
     );
 }
 
-// Its shape before anything is loaded: the timer's time is known on this device
 export function FocusSheetSkeleton() {
     const { t } = useTranslation();
     const { timer } = useSelector(state => state.session);

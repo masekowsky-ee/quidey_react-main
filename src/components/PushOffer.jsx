@@ -19,7 +19,6 @@ function Question() {
     const titleId = useId();
     const textId = useId();
     const yesRef = useRef(null);
-    // on phones a sheet: pulled down, it is a no
     return (
         <Dialog onClose={() => answerPushOffer(false)} role="alertdialog" labelledBy={titleId} describedBy={textId}
             initialFocus={yesRef} drag backdropClassName={styles.backdrop} className={styles.dialog}>

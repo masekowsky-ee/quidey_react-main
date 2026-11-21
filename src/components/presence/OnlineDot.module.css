@@ -21,13 +21,11 @@
     pointer-events: none;
 }
 
-/* a large profile avatar: the dot sits on its rim */
 .large{
     right: 4%;
     bottom: 4%;
 }
 
-/* a word next to a name ("online"), in the same green */
 .label{
     display: inline-flex;
     align-items: center;

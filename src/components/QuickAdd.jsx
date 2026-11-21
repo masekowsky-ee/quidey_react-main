@@ -17,12 +17,10 @@ export default function QuickAdd() {
     const dispatch = useDispatch();
     const open = useSelector(state => state.settings.showForms);
     const guest = useSelector(state => !state.auth.token);
-    // a visitor without an account can't add anything: the sign-in window instead of the form
     useEffect(() => {
         if (guest && open) { openAuth(); dispatch(showForms(false)); }
     }, [guest, open, dispatch]);
     if (!open || guest) return null;
-    // "Material scannen" in the form: the scan sheet in its place
     if (open === 'scan') return <ScanSheet onClose={() => dispatch(showForms(false))} />;
     return (
         <FormSheet onClose={() => dispatch(showForms(false))}>
@@ -33,7 +31,6 @@ export default function QuickAdd() {
 
 function QuickAddForm({ sheet, close, reminder }) {
     const dispatch = useDispatch();
-    // what was typed goes along when switching between the two forms
     const [form, setForm] = useState(() => ({ kind: reminder ? 'reminder' : 'task', text: takePendingText() }));
     // the sheet is already up when the kind is switched: the new form takes its place without
     // sliding in from the bottom edge again (data-swapped, index.css)

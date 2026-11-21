@@ -61,7 +61,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    box-shadow: inset 3px 0 0 var(--task-color); /* the colour edge of a real TaskRow */
+    box-shadow: inset 3px 0 0 var(--task-color);
     animation: rise 0.45s var(--spring-curve) both;
 }
 
@@ -103,7 +103,6 @@
     corner-shape: round;
 }
 
-/* the task gets its tick a moment after it came in */
 .rowTicks .check{
     animation: tick 0.35s 1.1s var(--spring-curve) both;
 }
@@ -213,7 +212,6 @@
     animation: rise 0.4s var(--spring-curve) both;
 }
 
-/* picked up, carried one day to the right (a column and its gap) and put down */
 .chipMoves{
     position: relative;
     z-index: 1;
@@ -462,7 +460,6 @@
     transform: scale(1.08);
 }
 
-/* the chosen one: a ring in the ink colour, set off by the stage */
 .swatch[aria-pressed="true"]{
     box-shadow: 0 0 0 2px var(--surface-inset), 0 0 0 4px var(--text-h);
 }
@@ -493,7 +490,6 @@
     background: var(--surface-strong);
 }
 
-/* a bit of data in the chosen accent */
 .sample{
     width: 9rem;
     height: 6px;
@@ -608,7 +604,6 @@
     background: var(--text-muted);
 }
 
-/* the part to look for is drawn in full ink and pulses twice */
 .navTop span,
 .navBottom span,
 .device[data-nav="drawer"] .navButton{
@@ -666,7 +661,6 @@
     50%{ opacity: 0.45; }
 }
 
-/* minimal motion or "reduce motion": the end state, nothing moving */
 :global(:root[data-motion="minimal"]) .scene *{
     animation-duration: 0s !important;
     animation-delay: 0s !important;

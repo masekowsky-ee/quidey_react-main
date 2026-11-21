@@ -16,7 +16,6 @@ import { selectUsageConsent, setUsageConsent } from '../../features/auth/authAct
 import { showToast } from '../../features/toast/toast';
 import { askUsageLater, usageAskedLater } from '../../features/usage/askLater';
 
-// the analytics question waits a moment after the app is there (and after any other question)
 export const ANALYTICS_DELAY_MS = 1500;
 
 // The questions of a new account's first days (features/onboarding/onboarding.js): what first,
@@ -36,7 +35,6 @@ export default function OnboardingPrompts() {
     const free = !asking && !pushAsking && !tourOpen;
     const usageDue = usageChoice === null && accessChecked && !usageAskedLater() && free;
     const [usageReady, setUsageReady] = useState(false);
-    // the usage card goes first; the analytics card follows once it is answered or put aside
     const analyticsDue = analyticsQuestionDue() && free && !usageDue;
     const [analyticsReady, setAnalyticsReady] = useState(false);
 
@@ -60,12 +58,10 @@ export default function OnboardingPrompts() {
     return null;
 }
 
-// The centred card; Escape, a click beside it or the no closes it
 function Card({ icon, title, text, children, wide = false, focusTitle = false, onClose = closeOnboarding }) {
     const titleId = useId();
     const textId = useId();
     const cardRef = useRef(null);
-    // on phones a sheet: pulled down, it closes like the no
     return (
         <Dialog onClose={onClose} labelledBy={titleId} describedBy={text ? textId : undefined} panelRef={cardRef}
             initialFocus={() => (focusTitle ? cardRef.current?.querySelector('h2') : cardRef.current?.querySelector('button, textarea'))}
@@ -80,7 +76,6 @@ function Card({ icon, title, text, children, wide = false, focusTitle = false, o
     );
 }
 
-// what a new account can do first; `newTask` opens the form, `to` a page
 const FIRST_THINGS = [
     { id: 'task', icon: 'plus', newTask: true },
     { id: 'friends', icon: 'social', to: friendsPath('add') },
@@ -193,7 +188,6 @@ function UsageQuestion({ onLater }) {
 // Sent as feedback (category "rating"), then a thank you.
 function RatingQuestion() {
     const { t } = useTranslation();
-    // 'ask' | 'stars' | 'feedback' | 'thanks'
     const [step, setStep] = useState('ask');
     const [stars, setStars] = useState(0);
     const [message, setMessage] = useState('');

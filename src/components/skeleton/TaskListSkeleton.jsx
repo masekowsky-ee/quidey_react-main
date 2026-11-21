@@ -4,7 +4,6 @@ import Icon from '../icons';
 import { Bone, Skeleton } from './Skeleton.jsx';
 import { TaskRowSkeleton } from '../task/TaskRow.jsx';
 
-// The list's shape while my tasks are on their way: open rows, grey where the tasks will be
 export function SkeletonPanel() {
     return (
         <Skeleton className={taskStyles.panel}>
@@ -15,7 +14,6 @@ export function SkeletonPanel() {
     );
 }
 
-// The whole section before the app knows it may load anything (the start screen, see AppSkeleton)
 export function TaskListSkeleton() {
     const { t } = useTranslation();
     return (

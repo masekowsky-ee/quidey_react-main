@@ -14,7 +14,6 @@ export default function HomeworkSuggestions({ subjectId = null }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const [items, setItems] = useState([]);
-    // typed minutes per suggestion (a string while typing); untouched ones use the estimate
     const [minutes, setMinutes] = useState({});
     const [busy, setBusy] = useState(null);
 

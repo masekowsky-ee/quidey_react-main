@@ -55,12 +55,10 @@ describe('email verification', () => {
         type('Passwort', 'password123')
         type('Passwort bestätigen', 'password123')
 
-        // without accepting the terms nothing is sent
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Registrieren' })) })
         expect(apiFetch).not.toHaveBeenCalled()
         expect(screen.getByText('Bitte akzeptiere die Nutzungsbedingungen.')).toBeInTheDocument()
 
-        // each of the three is required on its own
         fireEvent.click(screen.getByRole('checkbox', { name: /Nutzungsbedingungen/ }))
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Registrieren' })) })
         expect(screen.getByText(/Datenschutzerklärung gelesen hast/)).toBeInTheDocument()
@@ -79,7 +77,6 @@ describe('email verification', () => {
         expect(store.getState().auth.token).toBeNull()
         expect(screen.getByText(/Bitte bestätige deine E-Mail-Adresse/)).toBeInTheDocument()
         expect(screen.getByText(/ann@example\.com/)).toBeInTheDocument()
-        // the spam folder, written out beside a small "i"
         expect(screen.getByText('Wenn du die E-Mail nicht siehst, schau doch mal in deinen Spam-Ordner.')).toBeInTheDocument()
     })
 

@@ -43,7 +43,6 @@ export default function GoalSheet({ subjectId = null, onClose }) {
     const createdRef = useRef(null);
     const setCreated = (goal) => { createdRef.current = goal; setCreatedState(goal); };
     const finish = () => {
-        // closed (by hand or done): nothing of the draft is kept
         clearGoalDraft();
         if (createdRef.current) navigate(`/study/goals/${createdRef.current.id}`);
         else onClose();
@@ -66,7 +65,6 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
     const nameRef = useRef(null);
     useFocusOnArrival(nameRef);
 
-    // a draft of this sheet (left for the study times and back): what was typed comes back, on the topics
     const { pathname } = useLocation();
     const [draft] = useState(() => goalDraftFor(subjectId));
     const [step, setStep] = useState(draft ? Math.min(draft.step ?? 1, 2) : 1);
@@ -81,7 +79,6 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
     const [noWindows, setNoWindows] = useState(false);
 
     const [text, setText] = useState(draft?.text ?? '');
-    // estimate per part name: { minutes, source }; a manual one is never overwritten
     const [known, setKnown] = useState(draft?.known ?? {});
     const [estimating, setEstimating] = useState(false);
     const [aiFailed, setAiFailed] = useState(false);
@@ -93,7 +90,6 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
 
     useStudyLoad((d) => [d(fetchSubjects()), !settings && d(fetchStudySettings())]);
 
-    // every change is kept while the sheet is open (not once the goal is made)
     useEffect(() => {
         if (created) { clearGoalDraft(); return; }
         writeGoalDraft({ path: pathname, subjectId, step: Math.min(step, 2), fields, text, known, reviewOn, away: false });
@@ -113,7 +109,6 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
         ...(subject && !inline ? { subjectId: subject.id } : {}),
         subjectName: subjectName.slice(0, SUBJECT_MAX), kind: fields.kind, due: fields.due,
     });
-    // an AI answer the sheet already has beats a plain default
     const remember = (name, e) => (e.source === 'default' && aiCache.current[name]) || { minutes: e.minutes, source: e.source };
     const keepAi = (names, estimates) => names.forEach((name, i) => {
         const e = estimates?.[i];
@@ -140,7 +135,6 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
             setAiFailed(Boolean(result.aiFailed));
         } catch {
             if (id !== requestId.current) return;
-            // an estimate that failed: the defaults, so the goal can still be made
             setKnown(prev => {
                 const next = { ...prev };
                 for (const name of names) if (!next[name]) next[name] = remember(name, { minutes: DEFAULT_MINUTES[fields.kind], source: 'default' });
@@ -178,7 +172,6 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
         }
     };
 
-    // entering step 2 and every change of the list: a plain estimate after a short pause
     const namesKey = names.join('\n');
     useEffect(() => {
         if (step !== 2 || names.length === 0) return undefined;
@@ -218,7 +211,6 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
         else setStep(2);
     };
 
-    // the subject of the goal: the picked one, or the new one made now (and kept for a retry)
     const resolveSubject = async () => {
         if (!inline) return subject?.id;
         try {
@@ -233,7 +225,6 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
         }
     };
 
-    // "Nur Termin": no topics, no plan; the goal is made now and opened
     const createDateOnly = async () => {
         setBusy(true);
         setError(null);
@@ -422,7 +413,6 @@ function GoalForm({ sheet, close, subjectId, created, setCreated, done }) {
                 <p className={own.hint}>{t('studyNoWindowsHint')}</p>
                 <div className={own.footer}>
                     <button type="button" className={styles.btn} onClick={() => { setNoWindows(false); setStep(2); }}>{t('studyBackStep')}</button>
-                    {/* the draft stays: Lernen opens the sheet again when you come back */}
                     <Link to="/settings#study" className={styles.btn} onClick={() => writeGoalDraft({ ...readGoalDraft(), away: true })}>{t('studyOpenSettings')}</Link>
                 </div>
             </div>

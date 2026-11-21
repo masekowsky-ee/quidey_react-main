@@ -26,7 +26,6 @@ export default function ReminderList() {
     const loaded = useSelector(state => state.reminders.loaded);
     const [editing, setEditing] = useState(null);
     const [busy, setBusy] = useState(null);
-    // read the clock once per visit (the list re-sorts when it changes)
     const [now] = useState(() => new Date());
 
     const run = async (id, action) => {

@@ -17,7 +17,6 @@ const ZOOM = [1.9, 1.75, 1.45, 1.22, 1, 1, 1, 1];
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-// A leaf with its base at (0, 0), pointing up, 17 units long at size 1
 const LEAF = 'M0 0C5-4 6-11 0-17C-6-11-5-4 0 0Z';
 
 // One part of the plant, drawn around its own (0, 0) and placed at (x, y), turned by `angle`
@@ -34,7 +33,6 @@ function Part({ x = 0, y = 0, angle = 0, scale = 1, className, children }) {
     );
 }
 
-// a circle of radius 10, grown to radius r
 const Blob = ({ r, className, ...place }) => (
     <Part {...place} scale={r / 10}><circle r={10} className={className} /></Part>
 );
@@ -48,7 +46,6 @@ const Leaf = ({ tone = 1, ...place }) => (
     <Part {...place}><path d={LEAF} className={styles[`leaf${tone}`]} /></Part>
 );
 
-// a round crown of overlapping circles, its middle at (x, y)
 function Crown({ id, x, y, r, blossoms = 0, fruits = 0 }) {
     const lobes = [[0, 0, 1], [-0.62, 0.22, 0.72], [0.62, 0.22, 0.72], [-0.32, -0.42, 0.68], [0.34, -0.38, 0.66]];
     const spots = [[-0.45, -0.1], [0.4, -0.25], [0.05, 0.35], [-0.15, -0.55], [0.55, 0.2], [-0.6, 0.3], [0.2, -0.05], [-0.3, 0.15]];
@@ -72,7 +69,6 @@ function Crown({ id, x, y, r, blossoms = 0, fruits = 0 }) {
     );
 }
 
-// A tree: trunk from the ground at (x, BASE_Y) up `height`, crown of radius r on top
 function Tree({ id, x, height, r, blossoms = 0, fruits = 0, roots = false }) {
     const top = BASE_Y - height;
     return (
@@ -82,7 +78,6 @@ function Tree({ id, x, height, r, blossoms = 0, fruits = 0, roots = false }) {
                     <path d="M-3 0C-8 2-12 3-16 6M3 0C8 2 12 3 16 6M0 1C0 4-1 6-2 8" className={styles.root} />
                 </Part>
             )}
-            {/* a unit trunk (2 wide at the foot, 1 at the top), stretched to its width and height */}
             <Part key={`${id}-trunk`} x={x} y={BASE_Y} scale={[2 + height / 22, height]}>
                 <path d="M-1 0L-0.55-1L0.55-1L1 0Z" className={styles.trunk} />
             </Part>
@@ -94,7 +89,6 @@ function Tree({ id, x, height, r, blossoms = 0, fruits = 0, roots = false }) {
     );
 }
 
-// Everything that stands in the pot or on the island at `level` (+ `share` of the next)
 function scene(level, share) {
     const L = clamp(level, 1, 50);
     const tier = TIERS.indexOf(tierFor(L));
@@ -102,14 +96,12 @@ function scene(level, share) {
     const parts = [];
 
     if (tier === 0) {
-        // seed: half in the soil; level 2 sends up a tip
         parts.push(<Part key="seed" x={CX} y={BASE_Y - 1} scale={1}><ellipse rx={5} ry={3.4} className={styles.seed} /></Part>);
         if (g >= 1.5) parts.push(<Leaf key="tip" x={CX + 1} y={BASE_Y - 3} angle={12} scale={0.25 + (g - 1.5) * 0.3} />);
         return parts;
     }
 
     if (tier <= 2) {
-        // sprout and sapling: one stem, leaves in pairs up along it
         const height = tier === 1 ? 10 + (g - 3) * 4 : 22 + (g - 6) * 5.5;
         parts.push(<Stem key="stem" x={CX} y={BASE_Y} height={height} />);
         const pairs = tier === 1 ? 1 : Math.min(5, 1 + Math.floor(g - 5));
@@ -124,7 +116,6 @@ function scene(level, share) {
     }
 
     if (tier === 3) {
-        // shrub: three stems fanning out, full of leaves; berries from level 12
         const height = 32 + (g - 10) * 2.2;
         [-24, 0, 24].forEach((angle, s) => {
             parts.push(<Stem key={`stem${s}`} x={CX} y={BASE_Y} angle={angle} height={height * (s === 1 ? 1 : 0.85)} />);
@@ -144,7 +135,6 @@ function scene(level, share) {
         return parts;
     }
 
-    // from here on a tree (and later more) on a little island of grass
     if (tier === 4) {
         parts.push(<Tree key="main" id="main" x={CX} height={42 + (g - 15) * 2} r={20 + (g - 15) * 0.9} />);
     } else if (tier === 5) {
@@ -162,13 +152,11 @@ function scene(level, share) {
         parts.push(<Tree key="side1" id="side1" x={CX + 32} height={27} r={12} />);
         parts.push(<Tree key="main" id="main" x={CX} height={52 + (g - 40) * 0.5} r={28 + (g - 40) * 0.35}
             blossoms={8} fruits={Math.min(8, 4 + Math.floor((g - 40) / 2.5))} roots />);
-        // fireflies around the old tree, one more every two levels
         const flies = [[-38, -70], [36, -84], [-22, -98], [42, -56], [-44, -42], [24, -104]];
         flies.slice(0, Math.min(flies.length, 1 + Math.floor((g - 40) / 2))).forEach(([dx, dy], i) => {
             parts.push(<Part key={`fly${i}`} x={CX + dx} y={BASE_Y + dy} className={styles.firefly}><circle r={1.6} className={styles.fly} /></Part>);
         });
     }
-    // grass tufts on the island
     const tufts = tier >= 6 ? [[-40, 0.9], [-14, 0.7], [18, 0.8], [44, 0.9]] : [[-36, 0.8], [36, 0.7]];
     tufts.forEach(([dx, k], i) => {
         parts.push(

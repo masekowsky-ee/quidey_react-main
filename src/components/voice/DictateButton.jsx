@@ -5,7 +5,6 @@ import { useRef } from 'react';
 import MicButton from './MicButton.jsx';
 
 export default function DictateButton({ insert, className }) {
-    // how much of this dictation's text is already in
     const done = useRef(0);
     return (
         <MicButton className={className} continuous

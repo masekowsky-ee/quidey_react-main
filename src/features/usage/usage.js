@@ -32,7 +32,6 @@ let listening = false;
 
 const readToken = () => session.token();
 
-// the account a sign-in token belongs to (its payload carries userId), null when it can't be read
 const tokenUser = (token) => tokenPayload(token)?.userId ?? null;
 
 // what a reload left, only when it belongs to this account (the old plain list has no account: dropped)

@@ -183,7 +183,6 @@
     max-width: 20rem;
 }
 
-/* side beside the rest */
 @container notes (min-width: 44rem) {
     .layout {
         grid-template-columns: 12.5rem minmax(0, 1fr);
@@ -252,7 +251,6 @@
     }
 }
 
-/* list and open note side by side */
 @container notes (min-width: 64rem) {
     .layout {
         grid-template-columns: 12.5rem minmax(17rem, 22rem) minmax(0, 1fr);
@@ -316,7 +314,6 @@
     height: 2rem;
 }
 
-/* "Neuer Ordner" beside "Neue Notiz": a quiet grey folder */
 .folderBtn {
     composes: iconHover from '../ui.module.css';
     flex: none;
@@ -725,7 +722,6 @@
     list-style: none;
 }
 
-/* beside the list the side menu lists the folders */
 @container notes (min-width: 44rem) {
     .folderTiles {
         display: none;
@@ -752,7 +748,6 @@
     cursor: pointer;
 }
 
-/* the sheet of paper in the folder, and the folder's front over it */
 .folderTile::before {
     content: '';
     position: absolute;
@@ -816,7 +811,6 @@
     color: var(--text-h);
 }
 
-/* tiles: the text on a rounded card, the title and the day under it, centred */
 .rows[data-layout="grid"] {
     grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
     gap: 1rem 0.75rem;
@@ -879,7 +873,6 @@
     font-size: 0.75rem;
 }
 
-/* the round new-note button: phones only (wider, "Neue Notiz" is in the header) */
 .noteFab {
     composes: fab from '../ui.module.css';
     right: calc(1rem + env(safe-area-inset-right, 0px));

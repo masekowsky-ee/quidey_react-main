@@ -36,7 +36,6 @@ function KeywordEditor({ type, onChange }) {
                 <input className={styles.keywordInput} value={draft} maxLength={40}
                     placeholder={keywords.length ? t('keywordAddMore') : t('keywordAdd')}
                     aria-label={fill(t('keywordAddFor'), { name: type.name })}
-                    // a comma ends a word, like Enter
                     onChange={(e) => (e.target.value.endsWith(',') ? add(e.target.value) : setDraft(e.target.value))}
                     onBlur={() => add()}
                     onKeyDown={(e) => {
@@ -50,7 +49,6 @@ function KeywordEditor({ type, onChange }) {
 // My event types, as a list to keep: rename (Enter or leaving the field), colour, keywords, order
 // (up / down) and delete (its events stay, without a type); add new ones, or take suggestions.
 // The statistics add up past events per type. Reached from the editor as /settings#event-types.
-// embedded: inside a settings section that already names it (no card, title or hint of its own)
 export default function EventTypeSettings({ embedded = false }) {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
@@ -84,7 +82,6 @@ export default function EventTypeSettings({ embedded = false }) {
         dispatch(updateEventType(type.id, { name })).catch(fail);
     };
 
-    // swap with the neighbour: both get their place in the list as position
     const move = async (index, by) => {
         const other = index + by;
         if (other < 0 || other >= types.length) return;

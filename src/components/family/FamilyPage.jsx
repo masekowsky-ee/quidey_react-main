@@ -71,7 +71,6 @@ function useFamily(id) {
     useEffect(() => { load(); }, [load]);
     useSafetyPoll(load, { everyMs: 60 * 1000 });
     useRealtimeRefresh(['family:changed'], load, (event, payload) => Number(payload?.familyId) === id);
-    // a change answered with the whole family: show it right away
     const show = useCallback((family) => {
         seq.current++;
         setState({ id, family, missing: false });
@@ -277,7 +276,6 @@ function FamilyList({ family, onChanged, subGroup }) {
     );
 }
 
-// Title; the owner clicks it to rename
 function FamilyTitle({ family, onChanged }) {
     const { t } = useTranslation();
     const run = useFamilyRun();
@@ -323,7 +321,6 @@ function Upcoming({ family, onChanged, subGroup, subGroups }) {
     const [onlyMine, setOnlyMine] = useState(false);
     const editing = family.tasks.find(task => task.id === editingId) ?? null;
 
-    // every change answers with the whole family, which is shown right away
     const change = (request) => request.then(onChanged);
     const toggleDone = (task) => run(change(updateFamilyTask(family.id, task.id, { done: !task.done })),
         task.done ? null : 'toast_entryDone');
@@ -521,7 +518,6 @@ function Members({ family, onChanged }) {
     );
 }
 
-// The family's chat, newest at the bottom
 function FamilyChat({ family }) {
     const { t } = useTranslation();
     const run = useFamilyRun();
@@ -570,11 +566,9 @@ export default function FamilyPage() {
     const dispatch = useDispatch();
     const id = Number(useParams().id);
     const { family, missing, show } = useFamily(id);
-    // sub-groups: one choice for the calendar entries and the list
     const run = useFamilyRun();
     const [subGroupPick, setSubGroupPick] = useState(null);
 
-    // who of them has the app open (kept current live afterwards)
     useEffect(() => { if (family) dispatch(rememberPresence(family.people)); }, [family, dispatch]);
 
     if (missing || !Number.isInteger(id) || id <= 0) {
@@ -593,7 +587,6 @@ export default function FamilyPage() {
     const memberCount = family.people.filter(person => person.status === 'joined').length;
     const subGroups = family.groups ?? [];
     const subGroup = shownSubGroup(subGroups, subGroupPick);
-    // every change answers with the whole family, which is shown right away
     const changeSubGroups = async (request) => {
         const changed = await run(request);
         if (changed) show(changed);

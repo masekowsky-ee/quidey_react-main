@@ -101,7 +101,6 @@
   --type-caption: 500 0.75rem/1.3 var(--sans);
   --track-caption: 0.004em;
 
-  /* Buttons are flat: one fill, a quiet edge */
   --btn-border: var(--control-border);
   --btn-border-hover: var(--border-strong);
   --btn-highlight: none;
@@ -492,7 +491,6 @@ h3 {
   text-wrap: balance;
 }
 
-/* tracking per size: the larger, the tighter (see --type-* above) */
 h1 {
   font-size: 1.5rem;
   line-height: 1.18;
@@ -533,7 +531,6 @@ small {
   letter-spacing: var(--track-caption);
 }
 
-/* figures that line up and don't jitter while they count */
 time, data, output {
   font-variant-numeric: tabular-nums;
 }
@@ -741,7 +738,6 @@ code {
    transform (centering, slide-ins, a sheet being dragged). */
 
 :root[data-motion="extreme"] {
-  /* every transition built on the shared easing overshoots and springs back */
   --spring: cubic-bezier(0.34, 1.7, 0.64, 1);
   --ease: 0.5s var(--spring);
   --ease-out: 0.5s var(--spring);
@@ -759,7 +755,6 @@ code {
     translate: 0 -2px;
   }
 
-  /* icon buttons tilt and grow */
   :root[data-motion="extreme"] :where(button:has(svg):not(:disabled)):hover {
     scale: 1.2;
     rotate: -8deg;
@@ -767,7 +762,6 @@ code {
   }
 }
 
-/* a press squashes the button hard, it springs back on release */
 :root[data-motion="extreme"] :where(button:not(:disabled)):active {
   scale: 0.86;
   transition-duration: 0.08s;
@@ -778,7 +772,6 @@ code {
   transition: scale var(--ease), border-color 0.2s ease, background-color 0.2s ease;
 }
 
-/* dialogs bounce up out of the page */
 :root[data-motion="extreme"] [role="dialog"],
 :root[data-motion="extreme"] [role="alertdialog"] {
   animation: extremeDialogIn 0.65s var(--spring) backwards;
@@ -831,7 +824,6 @@ code {
   }
 }
 
-/* minimal: a quiet cross-fade, nothing moves */
 :root[data-motion="minimal"] :where(button, a) {
   transition: background-color var(--ease), border-color var(--ease), color var(--ease),
     box-shadow var(--ease), opacity var(--ease);
@@ -961,7 +953,6 @@ code {
     animation: sheetUp 0.6s var(--spring-curve) backwards;
   }
 
-  /* while a finger holds it, it follows the finger and nothing else */
   :root [data-sheet][data-dragging] {
     user-select: none;
   }

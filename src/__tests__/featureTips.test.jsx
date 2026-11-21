@@ -85,7 +85,6 @@ describe('feature tips: showing them', () => {
         expect(await screen.findByRole('dialog', { name: 'Alles Neue fängt hier an' })).toBeTruthy()
         fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
         expect(await screen.findByRole('dialog', { name: 'Dein Fokus' })).toBeTruthy()
-        // the tab bar isn't on the screen: this is the last one for now
         fireEvent.click(screen.getByRole('button', { name: 'Verstanden' }))
         expect(screen.queryByRole('dialog')).toBeNull()
         expect(selectTips(store.getState()).seen).toEqual(['navHome', 'navStudy', 'add', 'focus'])

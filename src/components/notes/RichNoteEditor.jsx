@@ -93,7 +93,6 @@ export default function RichNoteEditor({ body, onChange, label, placeholder = ''
         }),
     });
 
-    // the "more" list closes on a click beside it or Escape
     useEffect(() => {
         if (!moreOpen) return undefined;
         const away = (e) => { if (!more.current?.contains(e.target)) setMoreOpen(false); };
@@ -105,7 +104,6 @@ export default function RichNoteEditor({ body, onChange, label, placeholder = ''
 
     const run = (step) => step(editor.chain().focus()).run();
     const currentLine = () => editor.state.selection.$from.parent.textContent.trim();
-    // dictation: plain words at the cursor
     const insertText = (text) => editor.chain().focus().insertContent(text).run();
 
     const toolButton = (key, pressed, step, content) => (

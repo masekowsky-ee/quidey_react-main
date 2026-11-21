@@ -88,7 +88,6 @@ export const setDefaultSessionMinutes = (minutes) => {
     };
 };
 
-// Opens (true) or closes (false) the intro tour
 export const setShowTutorial = (show) => ({
     type: SET_SHOW_TUTORIAL,
     payload: show

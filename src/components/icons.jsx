@@ -18,7 +18,6 @@ const PATHS = {
     menu: <path d="M4 7h16M4 12h16M4 17h10M18 15l1 2 2 .5-2 .5-1 2-1-2-2-.5 2-.5 1-2z" />,
     more: <><circle cx="5.5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="18.5" cy="12" r="1" /></>,
 
-    // actions (task rows, the focus panel, the timer)
     plus: <path d="M12 5v14M5 12h14" />,
     check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
     edit: <><path d="M14.5 5.5l4 4L9 19H5v-4l9.5-9.5z" /><path d="M12.5 7.5l4 4" /></>,
@@ -41,7 +40,6 @@ const PATHS = {
     peak: <path d="M2.5 19.5l7-11.5 3.6 6 2.1-3.2 6.3 8.7H2.5zM7.6 11.3l1.9 1.7 1.8-1.6" />,
     flame: <path d="M12 21c-3.7 0-6.2-2.5-6.2-5.8 0-3.4 2.7-5.2 3.7-8.7.4 1.9 1.4 3.1 2.5 3.7.3-2.7 1.4-5.2 3.5-6.8-.4 3.1 2.7 5.8 2.7 9.7 0 4.4-2.7 7.9-6.2 7.9z" />,
     star: <path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8L12 3.5z" />,
-    // notifications on this device (settings, the question after the first task)
     info: <><circle cx="12" cy="12" r="8.5" /><path d="M12 11v5.5M12 7.8v.2" /></>,
     alarm: <><circle cx="12" cy="13" r="7.5" /><path d="M12 9.5V13l2.3 1.8M4 5.5L6.5 3M20 5.5L17.5 3M7 19.5L5.5 21M17 19.5l1.5 1.5" /></>,
     bell: <><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15L6 16.5z" /><path d="M10 20.5a2 2 0 0 0 4 0" /></>,
@@ -49,12 +47,10 @@ const PATHS = {
     sun: <><circle cx="12" cy="12" r="3.8" /><path d="M12 2.8v2.2M12 19v2.2M2.8 12h2.2M19 12h2.2M5.5 5.5l1.6 1.6M16.9 16.9l1.6 1.6M5.5 18.5l1.6-1.6M16.9 7.1l1.6-1.6" /></>,
     moon: <path d="M19.5 14.6A7.6 7.6 0 0 1 9.4 4.5a7.6 7.6 0 1 0 10.1 10.1z" />,
     tag: <><path d="M4 4.5h7.2l8.3 8.3a1.5 1.5 0 0 1 0 2.1l-4.6 4.6a1.5 1.5 0 0 1-2.1 0L4.5 11.2V4.5H4z" /><circle cx="8.5" cy="8.5" r="1.2" /></>,
-    // the Tester page: a lab flask
     flask: <><path d="M9.5 3.5h5M10.5 3.5v5.2L5 18.2a1.5 1.5 0 0 0 1.3 2.3h11.4a1.5 1.5 0 0 0 1.3-2.3l-5.5-9.5V3.5" /><path d="M7.6 14h8.8" /></>,
     search: <><circle cx="10.5" cy="10.5" r="6" /><path d="M15 15l5 5" /></>,
     arrowRight: <path d="M5 12h14M13.5 6.5L19 12l-5.5 5.5" />,
     download: <path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14" />,
-    // the Fokusraum, Pomodoro, routines, notes
     expand: <path d="M14.5 4.5h5v5M19.5 4.5L13 11M9.5 19.5h-5v-5M4.5 19.5L11 13" />,
     skip: <path d="M6 5.5l9 6.5-9 6.5v-13zM18 5.5v13" />,
     coffee: <><path d="M5 9.5h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5v-5z" /><path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16M8.5 3.5v3M12 3.5v3" /></>,
@@ -65,25 +61,20 @@ const PATHS = {
     link: <><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" /><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></>,
     image: <><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="9.5" r="1.6" /><path d="M20.5 15.5l-5-5-9 9" /></>,
     checklist: <><rect x="4" y="4.5" width="5" height="5" rx="1" /><rect x="4" y="14.5" width="5" height="5" rx="1" /><path d="M5.5 17l1 1 2-2.2M12 7h8M12 17h8" /></>,
-    // the AI assistant (Quidey Max): a large four-pointed spark and a small one
     sparkle: <><path d="M10 3.5c.6 3.9 2.6 5.9 6.5 6.5-3.9.6-5.9 2.6-6.5 6.5-.6-3.9-2.6-5.9-6.5-6.5 3.9-.6 5.9-2.6 6.5-6.5z" /><path d="M18 14.5c.3 1.7 1.3 2.7 3 3-1.7.3-2.7 1.3-3 3-.3-1.7-1.3-2.7-3-3 1.7-.3 2.7-1.3 3-3z" /></>,
     brain: <><path d="M9 4.5a3 3 0 0 0-3 3 3 3 0 0 0-2 5.2A3 3 0 0 0 7 17.5a3 3 0 0 0 5 1.5V6a3 3 0 0 0-3-1.5z" /><path d="M15 4.5a3 3 0 0 1 3 3 3 3 0 0 1 2 5.2 3 3 0 0 1-3 4.8 3 3 0 0 1-5 1.5" /></>,
     mic: <><rect x="9" y="3.5" width="6" height="11" rx="3" /><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5" /></>,
     lightbulb: <><path d="M9 17.5h6M10 20.5h4M12 3.5a6 6 0 0 0-3.5 10.9c.4.3.5.7.5 1.1v.5h6v-.5c0-.4.2-.8.5-1.1A6 6 0 0 0 12 3.5z" /></>,
-    // the notes area and collections (testers)
     folder: <path d="M3.5 7a1.5 1.5 0 0 1 1.5-1.5h4.2l2 2.2H19a1.5 1.5 0 0 1 1.5 1.5v8.3A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5V7z" />,
     archive: <><rect x="3.5" y="4.5" width="17" height="4" rx="1" /><path d="M5 8.5v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-10M10 12.5h4" /></>,
     collection: <><path d="M12 3.5l8.5 4.5-8.5 4.5L3.5 8 12 3.5z" /><path d="M3.5 12l8.5 4.5 8.5-4.5M3.5 16l8.5 4.5 8.5-4.5" /></>,
     copy: <><rect x="8.5" y="8.5" width="11" height="11" rx="2" /><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5" /></>,
     grid: <><rect x="4" y="4" width="6.5" height="6.5" rx="1.5" /><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" /><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" /><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" /></>,
     list: <path d="M8.5 6.5h11M8.5 12h11M8.5 17.5h11M4.5 6.5h.5M4.5 12h.5M4.5 17.5h.5" />,
-    // study goals (testers)
     book: <><path d="M5 4.5h11a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2v-13z" /><path d="M5 17.5a2 2 0 0 1 2-2h11M9 8.5h6" /></>,
     arrowUp: <path d="M12 19V5M6 11l6-6 6 6" />,
     arrowDown: <path d="M12 5v14M6 13l6 6 6-6" />,
-    // Quidey Pro: supporting the development
     heart: <path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z" />,
-    // the arcade: a game pad
     gamepad: <><path d="M7.5 7.5h9a4.5 4.5 0 0 1 4.5 4.5v2.8a2.7 2.7 0 0 1-4.9 1.6L14.6 14H9.4l-1.5 2.4A2.7 2.7 0 0 1 3 14.8V12a4.5 4.5 0 0 1 4.5-4.5z" /><path d="M8 9.8v3.4M6.3 11.5h3.4M15.2 10.6h.01M17.2 12.4h.01" /></>,
 };
 

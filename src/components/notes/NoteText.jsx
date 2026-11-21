@@ -22,7 +22,6 @@ function PlainNoteText({ body, onChange, label, placeholder, autoFocus, tools, o
         const end = value.indexOf('\n', at);
         return value.slice(start, end === -1 ? value.length : end).replace(/^\s*(- \[( |x|X)\] |#{1,2} |[-*] |\d{1,3}\. |> )/, '').trim();
     };
-    // dictation into the plain field: at the cursor, handed over like typing
     const insertText = (text) => {
         const el = document.getElementById(id);
         if (!el) return;

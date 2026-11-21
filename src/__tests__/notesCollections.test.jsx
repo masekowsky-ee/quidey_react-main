@@ -325,7 +325,6 @@ describe('collections in place of groups (testers)', () => {
         await act(async () => {})
         const chips = screen.getByRole('group', { name: t('groups') })
         expect(within(chips).queryByRole('button', { name: 'Uni' })).toBeNull()
-        // the task's label is the collection too
         expect(screen.getAllByTitle(t('collectionShow'))).toHaveLength(1)
 
         await act(async () => { fireEvent.click(within(chips).getByRole('button', { name: /Klausur/ })) })
@@ -334,7 +333,6 @@ describe('collections in place of groups (testers)', () => {
         expect(screen.getByRole('link', { name: `${t('collectionOpenPage')}: Klausur` }).getAttribute('href')).toBe('/collections/5')
         const list = screen.getByRole('list', { name: t('toDo') })
         expect(list.textContent).toContain('Ableiten')
-        // the other row leaves (after its way out)
         await waitFor(() => expect(list.textContent).not.toContain('Einkaufen'))
 
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: `${t('collectionRemoveTask')}: Ableiten` })) })

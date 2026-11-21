@@ -30,7 +30,6 @@ describe('sessionReducer', () => {
         vi.setSystemTime(new Date('2026-11-04T08:00:00Z'))
         const started = sessionReducer(saved, setTimer(THIRTY_MIN, true))
         expect(started.currentSessionData.date).toBe('2026-11-04T08:00:00.000Z')
-        // paused and started again: still the same session, dated when it began
         vi.setSystemTime(new Date('2026-11-04T08:20:00Z'))
         const paused = sessionReducer({ ...started, currentSessionData: { ...started.currentSessionData, totalTime: 600 } }, setTimer(1000, false))
         const again = sessionReducer(paused, setTimer(1000, true))

@@ -8,7 +8,6 @@ const jwt = (userId) => `x.${btoa(JSON.stringify({ userId }))}.y`
 
 const json = (data, status = 200) => Promise.resolve(new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } }))
 const down = () => Promise.reject(new TypeError('Failed to fetch'))
-// the copy of a read is written right after the answer
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 // a connection that is there but leads nowhere: never answers, gives up when told to
@@ -142,7 +141,6 @@ describe('the start of the app', () => {
             const outcome = expect(read).rejects.toMatchObject({ code: 'OFFLINE' })
             await vi.advanceTimersByTimeAsync(START_PROBE_MS + 100)
             await outcome
-            // only the probe went out: the read never touched the dead connection
             expect(fetchMock.mock.calls.length).toBe(1)
             expect(fetchMock.mock.calls[0][0]).toMatch(/app-version/)
         } finally {
@@ -203,7 +201,6 @@ describe('writes while offline', () => {
         const [firstUrl, first] = fetchMock.mock.calls[0]
         expect(firstUrl).toMatch(/\/api\/tasks$/)
         expect(first.headers['Idempotency-Key']).toBeTruthy()
-        // the temporary id became the real one, in the address and in the body
         const [secondUrl, second] = fetchMock.mock.calls[1]
         expect(secondUrl).toMatch(/\/api\/tasks\/42$/)
         expect(JSON.parse(second.body).id).toBe(42)

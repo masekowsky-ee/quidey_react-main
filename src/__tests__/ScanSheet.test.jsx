@@ -75,7 +75,6 @@ describe('scanning study material', () => {
         expect(posts('/api/ai/scan')[0]).toEqual({ wants: ['notes', 'entries'], source: { kind: 'text', text: 'Klausur Biologie am 2.12., Themen: Zellatmung, Fotosynthese' } })
         const preview = screen.getByRole('region', { name: 'Gefunden' })
         expect(within(preview).getByRole('checkbox', { name: /Zellatmung/ })).toBeChecked()
-        // the second entry is left out
         fireEvent.click(within(preview).getByRole('checkbox', { name: /Protokoll abgeben/ }))
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Übernehmen' })) })
         expect(posts('/api/notebook')).toEqual([expect.objectContaining({ title: 'Zellatmung', body: '# Zellatmung\n- Glykolyse\n- [ ] Schaubild' })])

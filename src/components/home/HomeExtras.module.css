@@ -39,7 +39,6 @@
   border-bottom: none;
 }
 
-/* a note's row also has its buttons: show it in the card, and the handle to drag it there */
 .withActions {
   display: flex;
   align-items: center;

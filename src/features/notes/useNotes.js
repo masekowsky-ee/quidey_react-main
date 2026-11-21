@@ -39,7 +39,6 @@ export function useNotes({ enabled = true } = {}) {
     // the scan sheet made notes: they are not in the list yet
     const onScanDone = useCallback((made) => { if (made.notes) refetch(); }, [refetch]);
 
-    // a saved note replaces its old self
     const merge = useCallback((saved) => {
         setNotes(prev => prev?.map(note => note.id === saved.id ? saved : note) ?? prev);
     }, []);

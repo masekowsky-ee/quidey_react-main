@@ -44,7 +44,6 @@
   font-size: 1.0625rem;
 }
 
-/* column heads in sentence case, quieter than the rows they head */
 .table th {
   padding: 0.3rem 1.1rem;
   font-size: 0.8125rem;
@@ -92,7 +91,6 @@
   text-align: right;
 }
 
-/* the board's yellow: a plate behind what is happening now or in a few minutes */
 tr[data-state="now"] .flip,
 tr[data-state="soon"] .flip {
   display: inline-block;
@@ -112,7 +110,6 @@ tr[data-state="late"] .flip {
   color: var(--b-signal);
 }
 
-/* a changed note flips in like a split-flap panel (not with minimal motion) */
 :global(:root:not([data-motion="minimal"])) .flip {
   animation: flipIn 0.42s var(--spring-curve) both;
   transform-origin: 50% 0;
@@ -154,7 +151,6 @@ tr[data-state="late"] .flip {
     padding-inline: 0.75rem;
   }
 
-  /* phones: the group column gives way, the name keeps its room */
   .track {
     display: none;
   }

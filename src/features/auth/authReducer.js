@@ -26,7 +26,6 @@ const DEFAULT_ACCESS = {
 
 const orDefault = (key) => (value) => value ?? DEFAULT_ACCESS[key];
 const asList = (value) => (Array.isArray(value) ? value : []);
-// how each field of the server's answer is read (the rest of DEFAULT_ACCESS is only `checked`)
 const FIELD_READERS = {
     isPro: Boolean,
     isAdmin: Boolean,

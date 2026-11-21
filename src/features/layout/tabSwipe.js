@@ -56,7 +56,6 @@ function ownsSwipe(target) {
     return false;
 }
 
-// something open over the page: the menu, a sheet, a dialog
 const overlayOpen = () => Boolean(document.querySelector('[aria-modal="true"], [data-sheet-backdrop], [data-drawer-overlay]'));
 
 // the current page's wrapper (App.jsx: the motion.div inside <main>)
@@ -125,7 +124,6 @@ export function useTabSwipe({ enabled = true } = {}) {
             const touch = e.touches[0];
             // the screen's edges belong to the system's back gesture
             if (touch.clientX < EDGE || touch.clientX > window.innerWidth - EDGE) return;
-            // caught mid-spring: carry on from where the page is
             if (spring$) { spring$.stop(); spring$ = null; }
             const caught = offset !== 0 && shown?.isConnected;
             gesture = { x: touch.clientX, y: touch.clientY, t: e.timeStamp, sideways: caught, page: caught ? shown : null, base: caught ? offset : 0, samples: [] };
@@ -137,7 +135,6 @@ export function useTabSwipe({ enabled = true } = {}) {
             let dx = touch.clientX - gesture.x;
             const dy = touch.clientY - gesture.y;
             if (!gesture.sideways) {
-                // scrolling up or down: not a swipe
                 if (Math.abs(dy) > SLOP && Math.abs(dy) * SIDEWAYS > Math.abs(dx)) { gesture = null; return; }
                 if (Math.abs(dx) < SLOP) return;
                 gesture.sideways = true;
@@ -152,7 +149,6 @@ export function useTabSwipe({ enabled = true } = {}) {
             gesture.samples.push({ at: raw, t: e.timeStamp });
             if (gesture.samples.length > 8) gesture.samples.shift();
             if (!gesture.page) return;
-            // 1:1 where there is a tab beside it, a rubber band where the menu is what comes
             const target = tabIndexOf(current.current.pathname, current.current.study) + (raw < 0 ? 1 : -1);
             const free = target >= 0 && target < tabPaths(current.current.study).length;
             show(gesture.page, free ? raw : rubberband(raw, window.innerWidth));
@@ -167,12 +163,10 @@ export function useTabSwipe({ enabled = true } = {}) {
             const velocity = e.type === 'touchcancel' ? 0 : velocityOf(gesture.samples, e.timeStamp) * 1000;
             gesture = null;
             if (!sideways) return;
-            // where the flick is heading: the page's resting place if it were let go
             const heading = raw + project(velocity);
             const swiped = raw !== 0 && Math.sign(heading) === Math.sign(raw)
                 && Math.abs(dy) * SIDEWAYS <= Math.abs(raw)
                 && (Math.abs(heading) >= SHARE * window.innerWidth || Math.abs(raw) >= DISTANCE)
-                // a word being selected is not a swipe
                 && String(window.getSelection?.() ?? '').length === 0;
             if (!swiped) { if (page) settle(page, 0, velocity); return; }
 
@@ -186,11 +180,9 @@ export function useTabSwipe({ enabled = true } = {}) {
             }
             const go = () => { offset = 0; shown = null; navigate(paths[next], { state: { tabSwipe: step } }); };
             if (!page) { go(); return; }
-            // the old page goes on the way the finger threw it, then the new one comes in
             settle(page, -step * window.innerWidth * 0.4, velocity, go);
         };
 
-        // the system took the touch away: the page goes back
         const onCancel = () => {
             if (gesture?.page) settle(gesture.page, 0, 0);
             gesture = null;

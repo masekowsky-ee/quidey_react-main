@@ -4,7 +4,6 @@
 // worker the page's own timer does it.
 const BEAT_MS = 500; // twice a second: titleTick.worker.js beats at the same rate
 
-// calls onBeat on every beat; returns the stop
 export function startBeat(onBeat) {
     if (typeof Worker !== 'undefined') {
         try {

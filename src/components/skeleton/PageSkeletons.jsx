@@ -17,7 +17,6 @@ import { HomeSkeleton } from './HomeSkeleton.jsx';
 // before any data (titles, tabs, today's month) is text; the rest grey. Inert: nothing in them
 // works yet.
 
-// A tab bar as the page draws it, the active one raised; labels only, nothing to click yet
 function Tabs({ className = styles.tabs, labels, active }) {
     return (
         <div className={className}>
@@ -28,7 +27,6 @@ function Tabs({ className = styles.tabs, labels, active }) {
     );
 }
 
-// ---------- calendar: title, controls, this month's grid (the days are known, their tasks not) ----------
 
 function MonthGrid({ date }) {
     const { t } = useTranslation();
@@ -103,7 +101,6 @@ function CalendarSkeleton() {
     );
 }
 
-// ---------- Gemeinschaft: title, tabs, the tab (beside "online now" when I have friends) ----------
 
 function CommunitySkeleton() {
     const { t } = useTranslation();
@@ -156,7 +153,6 @@ function CommunitySkeleton() {
     );
 }
 
-// ---------- inbox: title, tabs, the conversations (beside the open one on a wide screen) ----------
 
 const INBOX_TABS = ['messages', 'requests', 'notices', 'reminders'];
 
@@ -179,7 +175,6 @@ function InboxSkeleton() {
     );
 }
 
-// ---------- statistics: title, tabs, period, tiles, the chart, two lists ----------
 
 const STATS_TABS = ['overview', 'sessions', 'done'];
 const RANGES = ['week', 'month', 'year', 'all'];
@@ -227,7 +222,6 @@ function StatsSkeleton() {
     );
 }
 
-// ---------- profiles: the card (banner, avatar over its edge, name), more cards below ----------
 
 function ProfileCardSkeleton({ own }) {
     return (
@@ -247,7 +241,6 @@ function ProfileCardSkeleton({ own }) {
     );
 }
 
-// mine (/profile) with its title, or somebody else's (/u/:username)
 function ProfileSkeleton({ own }) {
     const { t } = useTranslation();
     return (
@@ -262,7 +255,6 @@ function ProfileSkeleton({ own }) {
     );
 }
 
-// ---------- settings: title and areas, then a label column beside a panel per section ----------
 
 function SettingsSkeleton() {
     const { t } = useTranslation();
@@ -287,7 +279,6 @@ function SettingsSkeleton() {
     );
 }
 
-// ---------- anything else (sessions, families, admin, feedback, …): a title and a card of rows ----------
 
 function ColumnSkeleton() {
     return (
@@ -319,7 +310,6 @@ export function RouteSkeleton({ pathname, fade = false }) {
     return <Skeleton fade={fade} inert><Page /></Skeleton>;
 }
 
-// Signed out: the sign-in screen's shape (wordmark, the card with sign in | sign up, the footer)
 export function GateSkeleton() {
     const { t } = useTranslation();
     const { pathname } = useLocation();

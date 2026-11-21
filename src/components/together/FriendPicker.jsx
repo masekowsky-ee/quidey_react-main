@@ -1,7 +1,6 @@
 import styles from '../Together.module.css';
 import { getInitials, displayName } from '../../features/helperFunction';
 
-// Friends as toggle chips, for choosing who to invite
 export default function FriendPicker({ friends, selected, onChange }) {
     const toggle = (id) => onChange(selected.includes(id) ? selected.filter(x => x !== id) : [...selected, id]);
     return (

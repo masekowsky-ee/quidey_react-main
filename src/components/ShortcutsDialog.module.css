@@ -98,7 +98,6 @@
     color: var(--text);
 }
 
-/* how to write a day, time and priority into a new task's name */
 .tip{
     margin: 0.25rem 0 0;
     padding: 0.6rem 0.75rem;

@@ -22,7 +22,6 @@ import styles from './Collections.module.css';
 
 const dayFormat = (language) => new Intl.DateTimeFormat(localeOf(language), { weekday: 'short', day: 'numeric', month: 'short' });
 
-// "2 Events · 5 Aufgaben (3 offen) · 1 Notiz"
 function countsLine(t, { events, tasks, notes }) {
     const open = tasks.filter(task => !task.done).length;
     return [
@@ -37,7 +36,6 @@ const upcoming = (events) => {
     return events.find(event => !event.done && parseDate(event.due) >= today) ?? null;
 };
 
-// ---------- all collections ----------
 function CollectionList() {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
@@ -115,7 +113,6 @@ function CollectionList() {
     );
 }
 
-// ---------- putting something in ----------
 const KINDS = [['task', 'collectionKindTask'], ['event', 'collectionKindEvent'], ['note', 'collectionKindNote']];
 
 // Search what I have (tasks, events, notes not in it yet) or make something new right in it
@@ -217,7 +214,6 @@ function Row({ children, onRemove, removeLabel, color }) {
     );
 }
 
-// ---------- one collection ----------
 function CollectionDetail({ id }) {
     const { t, language } = useTranslation();
     const dispatch = useDispatch();
@@ -232,7 +228,6 @@ function CollectionDetail({ id }) {
     const [description, setDescription] = useState(collection?.description ?? '');
     const days = dayFormat(language);
 
-    // the fields follow the collection once it has loaded (or another one is opened)
     const [shownId, setShownId] = useState(collection ? id : null);
     if (collection && shownId !== id) {
         setShownId(id);

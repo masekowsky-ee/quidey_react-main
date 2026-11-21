@@ -12,5 +12,4 @@ import testerTexts from './testerTexts'
 import tourTexts from './tourTexts'
 import base from './base'
 
-// English texts of the whole app: the base list plus the feature files next to it
 export default Object.assign({}, base, arcadeTexts, assistantTexts, communityTexts, flowTexts, focusTexts, moreTexts, notesTexts, proTexts, reminderTexts, studyTexts, testerTexts, tourTexts)

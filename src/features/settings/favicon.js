@@ -14,7 +14,6 @@ const ACCENT_COLORS = {
     pine: '#3f9e7f',
 };
 
-// The logo as an SVG file in one color (see components/Logo.jsx)
 function logoSvg(color) {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="9 5 50 50">`
         + `<defs><mask id="cut" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">`

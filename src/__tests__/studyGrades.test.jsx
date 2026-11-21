@@ -154,7 +154,6 @@ describe('Lernen as school life: grades', () => {
     })
 
     it('finishing a goal offers the grade; skipping saves nothing', async () => {
-        // a goal whose day is over asks "Als erledigt markieren"; the sheet follows
         goals = [goalOf({ id: 13, name: 'Vorbei', status: 'active', due: '2020-01-01' })]
         open('/study/goals/13')
         fireEvent.click(await screen.findByRole('button', { name: 'Als erledigt markieren' }))

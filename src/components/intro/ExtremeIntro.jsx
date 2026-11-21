@@ -18,15 +18,12 @@ export default function ExtremeIntro() {
     const { fps } = useVideoConfig();
     const ease = Easing.bezier(0.32, 0.72, 0, 1);
 
-    // logo: spins and grows in with an overshoot, ring and check draw themselves
     const spin = spring({ frame, fps, config: { damping: 11, stiffness: 70 } });
     const ring = interpolate(frame, [4, 38], [0, 1], { ...clamp, easing: ease });
     const check = interpolate(frame, [36, IMPACT], [0, 1], { ...clamp, easing: Easing.in(Easing.cubic) });
-    // the impact squashes the mark and lets it bounce back
     const punch = spring({ frame: frame - IMPACT, fps, config: { damping: 7, stiffness: 260 } });
     const squash = frame < IMPACT ? 1 : 1.25 - 0.25 * punch;
 
-    // screen shake right after the impact, dying out
     const shakeLeft = interpolate(frame, [IMPACT, IMPACT + 22], [1, 0], clamp);
     const shakeX = Math.sin(frame * 2.7) * 14 * shakeLeft;
     const shakeY = Math.cos(frame * 3.3) * 10 * shakeLeft;
@@ -34,18 +31,14 @@ export default function ExtremeIntro() {
     const flash = interpolate(frame, [IMPACT, IMPACT + 3, IMPACT + 14], [0, 0.55, 0], clamp);
     const glow = interpolate(frame, [0, IMPACT, IMPACT + 30, 170], [0, 0.35, 0.8, 0.45], clamp);
 
-    // the mark moves aside to make room for the name
     const slide = spring({ frame: frame - 72, fps, config: { damping: 14, stiffness: 90 } });
 
-    // the accent line under the name
     const line = interpolate(frame, [128, 150], [0, 1], { ...clamp, easing: ease });
 
-    // the camera pushes through at the end
     const push = interpolate(frame, [184, EXTREME_FRAMES], [0, 1], { ...clamp, easing: Easing.in(Easing.cubic) });
 
     return (
         <AbsoluteFill style={{ overflow: 'hidden', opacity: 1 - push }}>
-            {/* accent glow breathing behind everything */}
             <AbsoluteFill style={{
                 // closest-side: fully faded before the edges of the 16:9 frame
                 background: `radial-gradient(circle closest-side, color-mix(in srgb, ${COLOR} ${Math.round(glow * 45)}%, transparent) 0%, transparent 100%)`,
@@ -58,7 +51,6 @@ export default function ExtremeIntro() {
                 transform: `translate(${shakeX}px, ${shakeY}px) scale(${1 + push * 1.8})`,
                 filter: `blur(${push * 12}px)`,
             }}>
-                {/* shock waves from the impact */}
                 {[0, 9].map((delay) => {
                     const t = interpolate(frame, [IMPACT + delay, IMPACT + delay + 45], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
                     return (
@@ -75,7 +67,6 @@ export default function ExtremeIntro() {
                     );
                 })}
 
-                {/* sparks flying out and falling */}
                 {Array.from({ length: SPARKS }, (_, i) => {
                     const t = interpolate(frame, [IMPACT, IMPACT + 70], [0, 1], clamp);
                     if (t <= 0 || t >= 1) return null;

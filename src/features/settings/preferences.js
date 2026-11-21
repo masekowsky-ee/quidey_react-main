@@ -23,7 +23,6 @@ export const storeLanguage = (language) => store('language', language);
 
 // Accent color palettes; the values live in index.css under [data-accent]
 export const ACCENTS = ['green', 'ocean', 'violet', 'sunset', 'rose', 'cherry', 'gold', 'pine'];
-// "Abendrot" (sunset) unless another one was chosen
 const DEFAULT_ACCENT = 'sunset';
 export const readStoredAccent = () => readStored('accent', ACCENTS, DEFAULT_ACCENT);
 // the swatch shown for each accent (its dark-mode colour) and its name's translation key
@@ -65,19 +64,15 @@ export const COLOR_SCHEMES = [
     { id: 'papier', label: 'schemePapier', palette: 'papier', accent: 'pine' },
 ];
 
-// Length of a new session in minutes
 export const SESSION_LENGTHS = [15, 25, 30, 45, 60];
 export const readStoredSessionMinutes = () =>
     Number(readStored('sessionMinutes', SESSION_LENGTHS.map(String), '30'));
 export const storeSessionMinutes = (minutes) => store('sessionMinutes', String(minutes));
 
-// How the focus time is measured: a countdown ("timer"), counting up from zero ("stopwatch"),
-// or Pomodoro (focus and breaks taking turns)
 export const TIMER_MODES = ['timer', 'stopwatch', 'pomodoro'];
 export const readStoredTimerMode = () => readStored('timerMode', TIMER_MODES, 'timer');
 export const storeTimerMode = (mode) => store('timerMode', mode);
 
-// Pomodoro lengths in minutes and after how many focus rounds the long break comes
 const POMODORO_DEFAULTS = { focus: 25, short: 5, long: 15, every: 4 };
 // any whole number within these (minutes; `every`: focus rounds)
 export const POMODORO_LIMITS = {

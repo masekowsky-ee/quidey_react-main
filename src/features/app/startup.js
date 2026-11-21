@@ -98,14 +98,10 @@ export function useSignedInData(allowed) {
   const dispatch = useDispatch();
   useSafetyPoll(() => {
     dispatch(fetchFriendRequests()).catch(() => {});
-    // friends (with who of them is online, for the menu and Home)
     dispatch(fetchFriends()).catch(() => {});
     dispatch(fetchSharedSessions()).catch(() => {});
-    // the shared sessions' tasks for the solo view
     dispatch(fetchMySharedTasks()).catch(() => {});
-    // tasks friends sent me
     dispatch(fetchTaskInvites()).catch(() => {});
-    // unread messages and notices for the inbox badge
     dispatch(fetchInboxUnread()).catch(() => {});
   }, { everyMs: REQUEST_REFRESH_MS, enabled: allowed, immediately: true });
 }
@@ -122,16 +118,13 @@ export function useAppServices(allowed, token, navigate) {
   }, [allowed, token]);
   useInboxRealtime();
   useLiveLists();
-  // friends coming online or going away
   usePresenceRealtime(dispatch);
   useClearNews();
-  // Quidey Family: my families and invites
   useFamilyList(allowed);
   // XP, levels and challenges: looked at again after every session and ticked-off task;
   // the feed reloads when a friend's entry comes
   useProgressWatcher(allowed);
   useFeedRealtime();
-  // profile pictures that changed are loaded again
   useAvatarRealtime();
 
   // tasks shared with friends change on their side (announced live, see useLiveLists), my own
@@ -139,15 +132,12 @@ export function useAppServices(allowed, token, navigate) {
   // fetchTaskState just loaded them)
   useSafetyPoll(() => dispatch(refreshTasks()).catch(() => {}), { everyMs: REQUEST_REFRESH_MS, enabled: allowed });
 
-  // reminders of tasks with a time, while the app is open
   useTaskReminders(allowed);
   // ...and by mail when a task asks for it: the server needs my time zone and language
   useAccountLocale(allowed);
-  // an event that ends while the app is open shows as done right then
   useEventEnds(allowed);
   // push notifications on this device: checked on every start, a click opens their page
   usePushSync(allowed, token, navigate);
-  // routines planned for a time of day: a toast while the app is open
   useRoutineReminders(allowed);
   // reminders: loaded, live, handed to the Android app's alarm clock
   useReminders(allowed);
@@ -156,9 +146,7 @@ export function useAppServices(allowed, token, navigate) {
   useFocusTitle(allowed);
   // leaving the app during focus: counted, nudged, welcomed back (only where a screen turned off can be told apart)
   useFocusAway(allowed);
-  // phones: a sideways swipe goes to the tab beside it (and past the ends, the menu)
   useTabSwipe({ enabled: allowed });
-  // the chosen option of every group of options slides from one to the next
   useSlidingActive();
   // phones: the on-screen keyboard's height, so sheets (the add form) stand above it
   useKeyboardInset();

@@ -30,7 +30,6 @@ function onBack(store, canGoBack, minimize) {
     else minimize();
 }
 
-// The status and navigation bars' icons: light on the dark theme, dark on the light one
 function followTheme() {
     const apply = () => {
         const style = document.documentElement.dataset.theme === 'light' ? SystemBarsStyle.Light : SystemBarsStyle.Dark;
@@ -48,13 +47,10 @@ export async function setupNativeApp(store) {
     // back from the background: the focus clock, the lists and the socket catch up as on a
     // browser tab that gets the focus again
     App.addListener('resume', () => window.dispatchEvent(new Event('focus')));
-    // Google Analytics for Firebase: whether it's there, and the remembered answer handed over
     const { setupAnalytics } = await import('./analytics');
     setupAnalytics();
-    // is there a newer version of the app? (on start and whenever it comes back to the front)
     const { startUpdateChecks } = await import('./appUpdate');
     startUpdateChecks(App);
-    // links, launcher shortcuts and "Share → Quidey"
     const { setupDeepLinks } = await import('./deepLinks');
     setupDeepLinks(store, App);
 }

@@ -17,7 +17,6 @@ const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styl
 // The shortest a block is drawn, in minutes: on a touch screen tall enough to hit with a finger
 const coarsePointer = () => Boolean(window.matchMedia?.('(pointer: coarse)')?.matches);
 const minLength = () => (coarsePointer() ? 45 : 30);
-// a block shorter than this puts time and name on one line and leaves the details out
 // a block shorter than this shows its time and name on one line; the rest opens under the pointer / focus
 const SHORT_MINUTES = 60;
 
@@ -39,10 +38,8 @@ export default function DayTimeline({
     const { t } = useTranslation();
     const isToday = sameDay(date, today);
     const [now, setNow] = useState(nowMinutes);
-    // the free spot under the mouse (minutes), where a click would add
     const [hoverSlot, setHoverSlot] = useState(null);
 
-    // the quarter hour at a point of the hours, null on an entry (or without a layout)
     const slotAt = (e) => {
         if (e.target.closest?.('[data-block]')) return null;
         const rect = gridRef.current?.getBoundingClientRect();
@@ -60,16 +57,13 @@ export default function DayTimeline({
         setHoverSlot(slotAt(e));
     };
 
-    // the line for now moves with the clock
     useEffect(() => {
         if (!isToday) return undefined;
         const id = setInterval(() => setNow(nowMinutes()), 30 * 1000);
         return () => clearInterval(id);
     }, [isToday]);
 
-    // the Untis timetable of the day is one box until it is opened here
     const [lessonsOpen, setLessonsOpen] = useState(false);
-    // a change being saved already shows where it goes
     const shown = useMemo(() => tasks
         .flatMap(task => (task.lesson?.box && lessonsOpen ? task.lesson.items : [task]))
         .map(task => (pending?.id === task.id ? { ...task, ...pending.changes } : task)), [tasks, pending, lessonsOpen]);
@@ -109,7 +103,6 @@ export default function DayTimeline({
         onShiftTime(task, e.key === 'ArrowUp' ? -15 : 15);
     };
 
-    // the press that starts a drag: anywhere on the entry but its own controls (tick, link, label)
     const onEntryPointerDown = (e, task) => {
         if (e.target.closest?.('a, button:not([data-entry-open])')) return;
         startDrag(e, task);
@@ -145,12 +138,10 @@ export default function DayTimeline({
                     {timed &&
                         <span className={styles.blockTime}>
                             {task.projected && <Icon name="mRepeat" size={12} />}
-                            {/* a planned study session: its goal's symbol */}
                             {task.study && <GoalShape shape={task.study.goalShape} size={11} color={task.study.subjectColor} />}
                             {taskTimeText(task)}
                         </span>}
                     {task.lesson?.box
-                        // the timetable's day: one box, opened to the lessons by a tap
                         ? <button type="button" className={styles.entryOpen} aria-expanded="false" data-entry-open=""
                             aria-label={fill(t('untisBoxLabel'), { from: timeText(minutesOfDay(task.due_time)), to: timeText(minutesOfDay(task.due_time) + task.duration_minutes), n: task.lesson.items.length })}
                             onClick={() => setLessonsOpen(true)}>
@@ -171,7 +162,6 @@ export default function DayTimeline({
                             {!timed && task.projected && <Icon name="mRepeat" size={12} />}
                             <span className={styles.entryName}>{task.name}</span>
                         </button>}
-                    {/* the details: shown with a long block, under the pointer / focus with a short one (nothing is cut off) */}
                     {!task.lesson?.box &&
                         <div className={styles.blockDetails}>
                             <TaskMeta task={task} showTime={false} />
@@ -243,7 +233,6 @@ export default function DayTimeline({
                 {children}
             </div>
 
-            {/* off the hour grid (the top row, the arrows) the entry follows the pointer */}
             {drag && drag.target !== 'time' && createPortal(
                 <div className={styles.dragChip} style={{ left: drag.x, top: drag.y }} aria-hidden="true">
                     {drag.target === 'allday' ? `${drag.task.name} · ${t('allDay')}` : drag.task.name}

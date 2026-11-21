@@ -4,7 +4,6 @@ import { read, write } from '../storedSetting';
 // feature keeps its own late limit (how long after its time a reminder still shows: a task's 60
 // minutes, a routine's 15), its own check and its own wording.
 
-// Runs check now and then every everyMs; returns the stop (for an effect's cleanup)
 export function startChecking(check, everyMs) {
     check();
     const id = setInterval(check, everyMs);

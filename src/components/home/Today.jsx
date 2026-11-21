@@ -25,7 +25,6 @@ const RING = 2 * Math.PI * 26;
 function FocusGoal() {
     const { t } = useTranslation();
     const serverMin = useSelector(state => state.progress.data?.todayFocusMin ?? 0);
-    // the session going on now isn't saved yet: it counts already
     const runningSec = useSelector(state => state.session.currentSessionData.totalTime);
     const running = useSelector(selectTimerInProgress);
     const time = useSelector(state => state.session.timer.time);
@@ -59,7 +58,6 @@ function FocusGoal() {
     );
 }
 
-// Routines planned for today, with their time; start one with a tap
 function RoutinesToday() {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -116,7 +114,6 @@ function ReadoutButton({ tasks }) {
     );
 }
 
-// What comes next: today's coming events and the tasks due soonest
 function UpNext({ tasks }) {
     const { t } = useTranslation();
     const hasMax = useSelector(selectHasMax);
@@ -133,7 +130,6 @@ function UpNext({ tasks }) {
         })
         .sort((a, b) => `${a.due}${a.due_time ?? '99'}`.localeCompare(`${b.due}${b.due_time ?? '99'}`))
         .slice(0, 3),
-    // the minute is enough
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tasks, nowText]);
     const overdue = tasks.filter(task => isOverdue(task, now)).length;
@@ -164,7 +160,6 @@ function UpNext({ tasks }) {
     );
 }
 
-// A thought written down in passing: goes into the notebook (Fokusraum)
 function QuickNote() {
     const { t } = useTranslation();
     const dispatch = useDispatch();

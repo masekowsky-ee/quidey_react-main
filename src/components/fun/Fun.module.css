@@ -1,7 +1,5 @@
 /* The Arcade's quiz games (word guess, letter salad, number sequence) */
 
-/* ---------- shared game parts ---------- */
-
 .game{
     /* Result colors, the same whatever accent is chosen: green = right spot,
        yellow = in the word elsewhere, grey = not in the word */
@@ -119,7 +117,6 @@
     border-color: var(--res-absent);
 }
 
-/* typed answer (hard number sequences) */
 .answerForm{
     display: flex;
     gap: 0.5rem;
@@ -431,7 +428,6 @@
     animation: shakeExtreme 0.5s ease-in-out;
 }
 
-/* "normal" motion: letters hop a little */
 :global(:root[data-motion="normal"]) .letter:not(:disabled):hover{
     rotate: -5deg;
     scale: 1.1;

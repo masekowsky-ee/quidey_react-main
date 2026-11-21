@@ -18,7 +18,6 @@ export default function ColorWheel({ value, onCommit }) {
     const [text, setText] = useState(() => (HEX_COLOR.test(value ?? '') ? value : hslToHex(hexToHsl(value) ?? START)));
     const wheelRef = useRef(null);
     const draft = useRef(hsl);
-    // what was handed on last: leaving the wheel or the slider hands on only a change
     const sent = useRef(HEX_COLOR.test(value ?? '') ? value : null);
 
     const show = (next) => {
@@ -34,7 +33,6 @@ export default function ColorWheel({ value, onCommit }) {
         onCommit(hex);
     };
 
-    // the point under the pointer as hue (0 at the top, clockwise) and saturation (0 in the middle)
     const fromPointer = (e) => {
         const box = wheelRef.current.getBoundingClientRect();
         const x = e.clientX - (box.left + box.width / 2);
@@ -80,7 +78,6 @@ export default function ColorWheel({ value, onCommit }) {
         if (next) { draft.current = next; setHsl(next); }
     };
 
-    // the wheel is drawn at the chosen lightness; the marker sits where hue and saturation point
     const ring = `conic-gradient(${HUES.map(h => `hsl(${h} 100% ${hsl.l}%)`).join(', ')})`;
     const middle = `radial-gradient(closest-side, hsl(0 0% ${hsl.l}%), hsl(0 0% ${hsl.l}% / 0))`;
     const angle = (hsl.h - 90) * Math.PI / 180;

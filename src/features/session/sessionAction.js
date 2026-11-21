@@ -52,7 +52,6 @@ export const resetFocus = () => ({ type: RESET_FOCUS });
 
 const selectCurrentSessionData = (state) => state.session.currentSessionData;
 
-// The length the countdown is measured against (a stopwatch has none)
 const selectTimerTotal = (state) => state.session.timerMode === 'pomodoro'
     ? phaseMs(state.session.pomodoro)
     : state.session.sessionParams.time;
@@ -212,7 +211,6 @@ export const stopFocus = () => (dispatch, getState) => {
     return dispatch(saveIfWorked());
 };
 
-// the name of each Pomodoro phase (translation keys)
 export const PHASE_LABEL = { focus: 'pomodoroFocus', short: 'pomodoroShort', long: 'pomodoroLong' };
 
 // Pomodoro: what comes after a phase (focus → short break, every n-th → long break, break → focus)
@@ -222,7 +220,6 @@ function nextPhase(pomodoro) {
     return { phase: round % pomodoro.config.every === 0 ? 'long' : 'short', round };
 }
 
-// Skips to the next Pomodoro phase by hand (the focus time so far still counts)
 export const skipPhase = () => (dispatch, getState) => {
     const { pomodoro, timer } = getState().session;
     if (timer.active) { dispatch(setTimer(timer.time, false)); cancelAlarm(); }
@@ -260,7 +257,6 @@ export const addWorkedTask = (task) => {
     }
 }
 
-// Books worked time (seconds) on a task in the current session
 export const addTaskTime = (task, seconds) => {
     return {
         type: ADD_TASK_TIME,

@@ -8,7 +8,6 @@ div.page{
     width: min(var(--content-w), calc(100% - 2 * var(--page-gutter, 1rem)));
 }
 
-/* the title; the list of sections is beside the page */
 .head{
     margin: 2.5rem 0 1rem;
 }
@@ -17,7 +16,6 @@ div.page{
     margin: 0;
 }
 
-/* the list of sections in a column that stays in sight, the sections beside it */
 .layout{
     display: grid;
     grid-template-columns: 13.5rem minmax(0, 1fr);
@@ -128,7 +126,6 @@ div.page{
     flex-direction: column;
 }
 
-/* A group: its name and sentence above its settings. Groups are split by one full-width rule. */
 .section{
     /* a jump to it (/settings#appearance) stops below the fixed header (and the chip row on a phone) */
     scroll-margin-top: calc(var(--header-h, 4rem) + 1rem + var(--settings-nav-h, 0px));
@@ -167,7 +164,6 @@ div.page{
     color: var(--text-muted);
 }
 
-/* the settings themselves: one lightness step above the page, no edge */
 .sectionPanel{
     min-width: 0;
     max-width: 46rem;
@@ -176,7 +172,6 @@ div.page{
     border-radius: var(--radius-lg);
 }
 
-/* a setting whose control needs the width (the colour swatches): name above it */
 .rowStack{
     display: flex;
     flex-direction: column;
@@ -191,7 +186,6 @@ div.page{
     border-top: 1px solid var(--btn-border);
 }
 
-/* the event types inside a section that names them */
 .embedded{
     display: flex;
     flex-direction: column;
@@ -213,7 +207,6 @@ div.page{
     composes: cardTitle from './ui.module.css';
 }
 
-/* One setting: label on the left, control on the right */
 .row{
     display: flex;
     flex-direction: row;
@@ -228,7 +221,6 @@ div.page{
     color: var(--text-h);
 }
 
-/* Settings in one card are separated by a thin line */
 .row + .row{
     margin-top: 0.9rem;
     padding-top: 0.9rem;
@@ -250,7 +242,6 @@ div.page{
     white-space: nowrap;
 }
 
-/* every sound once, to listen to */
 .soundChips{
     display: flex;
     flex-wrap: wrap;
@@ -262,7 +253,6 @@ div.page{
     font-size: 0.85rem;
 }
 
-/* the all-day reminder time */
 .timeInput{
     flex-shrink: 0;
     width: 7.5rem;
@@ -277,14 +267,12 @@ div.page{
     opacity: 0.6;
 }
 
-/* a notification setting that didn't go through */
 .pushError{
     margin: 0.9rem 0 0;
     font-size: 0.85rem;
     color: var(--danger);
 }
 
-/* what the last check of this device saw, closed until asked for */
 .pushDiagnosis{
     margin-top: 0.9rem;
     padding-top: 0.9rem;
@@ -329,7 +317,6 @@ div.page{
     overflow-wrap: anywhere;
 }
 
-/* Label with a short explanation under it */
 .rowText{
     display: flex;
     flex-direction: column;
@@ -349,7 +336,6 @@ div.page{
 
 /* ---------- accent color swatches ---------- */
 
-/* six colours: one row of six, or two rows of three, never a lone tile on its own row */
 .swatches{
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -402,7 +388,6 @@ div.page{
     font-weight: 500;
 }
 
-/* a palette: its dark half and its light half, each a page with a card and a line of text on it */
 .palettePreview{
     display: flex;
     width: 3.25rem;
@@ -439,7 +424,6 @@ div.page{
     opacity: 0.7;
 }
 
-/* a colour scheme: the same two halves, the ink line in the scheme's accent */
 .schemeSwatch .palettePreview{
     width: 4.5rem;
     height: 2.5rem;
@@ -472,7 +456,6 @@ div.page{
     scale: 1.35;
 }
 
-/* "normal" motion: swatches lift, their dot grows a little */
 :global(:root[data-motion="normal"]) .swatches > .swatch:hover{
     translate: 0 -3px;
     scale: 1.03;
@@ -515,7 +498,6 @@ div.page{
     border-top: 1px solid var(--btn-border);
 }
 
-/* the keywords under a type: removable chips and a field for one more */
 .keywords{
     display: flex;
     flex-wrap: wrap;

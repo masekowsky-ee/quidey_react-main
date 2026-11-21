@@ -177,7 +177,6 @@ describe('customizing my profile', () => {
         await renderOwn()
         expect(apiFetch).toHaveBeenCalledWith('/api/profile')
         expect(screen.getByRole('link', { name: /Alle Statistiken/ })).toHaveAttribute('href', '/stats')
-        // heat map and badges moved to the statistics page
         expect(screen.queryByText('Abzeichen (0 von 10)')).not.toBeInTheDocument()
     })
 
@@ -197,7 +196,6 @@ describe('customizing my profile', () => {
         fireEvent.keyDown(tag, { key: 'Enter' })
         fireEvent.click(screen.getByLabelText(/Freunde dürfen meine Statistiken sehen/))
 
-        // the card at the top already shows it
         expect(screen.getAllByText('Lerne Bio')).toHaveLength(1)
         expect(screen.getByText('Hallo!', { selector: 'p' })).toBeInTheDocument()
 

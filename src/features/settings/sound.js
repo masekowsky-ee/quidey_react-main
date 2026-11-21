@@ -76,7 +76,6 @@ function osc(type, freq, t, len, into) {
     return node;
 }
 
-// one struck note in Quidey's voice
 function bell(t, step, len = 0.5, gain = 0.4) {
     const f = hz(step);
     osc('sine', f, t, len, envelope(t, len, gain));
@@ -84,7 +83,6 @@ function bell(t, step, len = 0.5, gain = 0.4) {
     osc('sine', f * 5.04, t, 0.09, envelope(t, 0.09, gain * 0.1, 0.002));
 }
 
-// a soft, muffled knock
 function knock(t, step, len = 0.25, gain = 0.45) {
     const muffle = ctx.createBiquadFilter();
     muffle.type = 'lowpass';

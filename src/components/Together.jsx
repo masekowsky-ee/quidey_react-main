@@ -49,7 +49,6 @@ export default function Together() {
         dispatch(fetchSharedSessions()).catch(() => {});
     }, [dispatch]);
 
-    // "New session" from the header jumps straight to the form
     const wantsNew = searchParams.get('new') === '1';
     useEffect(() => {
         if (wantsNew) document.getElementById('sharedSessionName')?.focus();
@@ -75,7 +74,6 @@ export default function Together() {
     const past = sessions.filter(s => s.endedAt);
 
     return (
-        // a tab of the Gemeinschaft page, which has the title
         <div className={styles.embedded}>
             <p className={styles.lead}>{t('togetherIntro')}</p>
 

@@ -20,7 +20,6 @@ export const takeHomeworkSuggestion = (id, minutes) => apiFetch(`/api/untis/sugg
 export const dismissHomeworkSuggestion = (id) => apiFetch(`/api/untis/suggestions/${id}/dismiss`, { method: 'POST' });
 const fetchUntisLessons = (from, to) => apiFetch(`/api/untis/lessons?from=${from}&to=${to}`, { cacheMs: CACHE_MEDIUM });
 
-// lessons as calendar entries (events with a time, read-only)
 export function lessonsToEntries(lessons) {
     return (lessons ?? []).map(lesson => ({
         id: `lesson-${lesson.id}`,

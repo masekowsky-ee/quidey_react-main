@@ -8,7 +8,6 @@ import GuestLocked from '../../components/guest/GuestLocked.jsx'
 import { PAGES } from './pages.js'
 import { ROUTES, REDIRECTS, ENTRY_ROUTES } from './routeTable.js'
 
-// every page of the table, lazy (Home and the beta screen are part of the first load)
 const COMPONENTS = {
   Home,
   BetaGate,
@@ -52,7 +51,6 @@ export function GuestRoutes({ location }) {
   )
 }
 
-// signed in with access: the whole app
 export function AppRoutes({ location, access, proOn, homeLayout }) {
   const ctx = { access, proOn }
   return (
@@ -68,7 +66,6 @@ export function AppRoutes({ location, access, proOn, homeLayout }) {
   )
 }
 
-// signed in without access: the beta screen and its waiting room
 export function WaitingRoutes({ proOn, pageLoading }) {
   const ArcadePage = COMPONENTS.ArcadePage
   const ProPage = COMPONENTS.ProPage

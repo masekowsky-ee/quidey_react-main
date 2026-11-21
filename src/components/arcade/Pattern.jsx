@@ -30,7 +30,6 @@ export default function Pattern({ onFinish }) {
         setPhase('showing');
     };
 
-    // the pattern played: each pad lights and sounds in turn, then it is my turn
     useEffect(() => {
         if (phase !== 'showing') return undefined;
         const step = patternStepMs(pattern.length);
@@ -56,7 +55,6 @@ export default function Pattern({ onFinish }) {
             return;
         }
         if (pos + 1 < pattern.length) { setPos(pos + 1); return; }
-        // all of it: one more
         setPattern(prev => growPattern(prev));
         setPhase('showing');
     };

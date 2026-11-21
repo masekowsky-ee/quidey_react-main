@@ -228,7 +228,6 @@
   :root[data-ui="uebersicht"] [data-part="home-focus"] { grid-area: focus; position: static; }
   :root[data-ui="uebersicht"] [data-part="home-momentum"] { grid-area: momentum; }
 
-  /* the momentum strip stacks in its narrow module */
   :root[data-ui="uebersicht"] [data-part="home-momentum"] > * {
     display: flex;
     flex-direction: column;
@@ -262,7 +261,6 @@
   color: var(--text-h);
 }
 
-/* the list's and focus's own titles read the same way */
 :root[data-ui="uebersicht"] #tasks-title,
 :root[data-ui="uebersicht"] #focus-title {
   min-height: 0;
@@ -284,7 +282,6 @@
   gap: 0.5rem;
 }
 
-/* the eight days as dense cells of one table */
 :root[data-ui="uebersicht"] [data-part="week"] > div {
   gap: 0;
   border: 1px solid var(--border);
@@ -309,7 +306,6 @@
   background: var(--surface-hover);
 }
 
-/* rows: dense, a hairline apart */
 :root[data-ui="uebersicht"] [data-part="task-row"] {
   min-height: 2.5rem;
   padding-block: 0.25rem;

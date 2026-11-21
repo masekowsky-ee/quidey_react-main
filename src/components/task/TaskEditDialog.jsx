@@ -49,7 +49,6 @@ function TaskEditBody({ task, shared, handlers, dismiss, titleId }) {
         }
     };
 
-    // where the task is kept: a shared session, somewhere else (handlers: a family's calendar) or mine
     const where = handlers ? {
         personal: false,
         allowEvents: Boolean(handlers.allowEvents),

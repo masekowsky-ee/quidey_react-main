@@ -78,7 +78,6 @@ export function useAvatarUrl(userId) {
     return url;
 }
 
-// App: pictures changed live are loaded again
 export function useAvatarRealtime() {
     useRealtime(AVATARS_CHANGED, ({ userId } = {}) => { if (userId) forgetAvatar(userId); });
 }

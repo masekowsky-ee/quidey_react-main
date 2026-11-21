@@ -13,7 +13,6 @@ import { saveAnswer, savedAnswer } from '../offline/offline';
 const finishSignIn = (data) => {
     return async (dispatch) => {
         session.set(data.token);
-        // stays on this device next to the accounts signed in before (to switch between them)
         rememberAccount({ username: data.username, token: data.token, displayName: data.display_name });
         dispatch({ type: LOGIN_SUCCESS, payload: { token: data.token, username: data.username } });
         // right after signing in: who may use the app goes in, everybody else to the beta screen

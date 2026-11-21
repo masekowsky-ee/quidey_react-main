@@ -47,7 +47,6 @@ function Welcome() {
     );
 }
 
-// a task (ticks itself off) and an event with its time
 function Plan() {
     const { t } = useTranslation();
     return (
@@ -70,7 +69,6 @@ function Plan() {
     );
 }
 
-// the focus ring of a 25 minute session, counting down
 const SESSION = 25 * 60;
 const RING = 2 * Math.PI * 42;
 function Focus() {
@@ -93,7 +91,6 @@ function Focus() {
     );
 }
 
-// one week: an event, two tasks, one of them moving a day on
 function Calendar() {
     const { language } = useTranslation();
     const days = weekdays(language);
@@ -113,7 +110,6 @@ function Calendar() {
     );
 }
 
-// the plant growing through the first levels, beside the streak's flame and an XP bar
 function Grow() {
     const { t } = useTranslation();
     const level = useCounter(1, 14, 260);
@@ -129,7 +125,6 @@ function Grow() {
     );
 }
 
-// friends' faces (two online) and a feed entry with a cheer
 const FACES = [['M', 'violet', true], ['J', 'teal', true], ['L', 'orange', false], ['S', 'blue', false]];
 function Together() {
     const { t } = useTranslation();
@@ -151,7 +146,6 @@ function Together() {
     );
 }
 
-// a week of focus and event time as stacked columns (the statistics' pair of colours)
 const WEEK = [[3, 2], [5, 2], [2, 4], [6, 1], [4, 3], [1, 0], [2, 0]];
 function Stats() {
     const { t, language } = useTranslation();
@@ -179,7 +173,6 @@ function Stats() {
 
 const THEMES = [['dark', 'themeDark', 'moon'], ['light', 'themeLight', 'sun'], ['system', 'themeSystem', 'switch']];
 
-// the real thing: accent and theme, changed right away
 function Yours() {
     const { t } = useTranslation();
     const dispatch = useDispatch();
@@ -207,7 +200,6 @@ function Yours() {
     );
 }
 
-// a sketch of the app with its navigation lit: header button, tab bar or tabs on top
 function Ready({ nav }) {
     return (
         <div className={styles.device} data-nav={nav}>

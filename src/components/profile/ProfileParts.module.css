@@ -17,13 +17,11 @@
     background: color-mix(in srgb, var(--tint) 14%, var(--surface));
 }
 
-/* the stored styles stay, drawn flat: no gradients in the app */
 .banner[data-banner="gradient"]{
     background: color-mix(in srgb, var(--tint) 62%, var(--surface));
 }
 
 .banner[data-banner="aurora"]{
-    /* two flat bands of the colour, the lower one deeper */
     background: color-mix(in srgb, var(--tint) 30%, var(--surface));
     box-shadow: inset 0 -2.75rem 0 color-mix(in srgb, var(--tint) 70%, var(--surface));
 }
@@ -48,14 +46,12 @@
 }
 
 .banner[data-banner="glow"]{
-    /* the dark ground with one band of colour along its foot */
     background: var(--surface-inset);
     box-shadow: inset 0 -0.75rem 0 color-mix(in srgb, var(--tint) 85%, var(--surface));
 }
 
 /* unlocked by level (src/features/progress/progress.js) */
 .banner[data-banner="rings"]{
-    /* tree rings around a point near the left edge, like a cut trunk */
     background:
         repeating-radial-gradient(circle at 18% 120%,
             color-mix(in srgb, var(--tint) 55%, var(--surface)) 0 3px,
@@ -63,7 +59,6 @@
 }
 
 .banner[data-banner="topo"]{
-    /* contour lines of a hill: thin rings around two summits */
     background:
         repeating-radial-gradient(ellipse at 72% 40%,
             transparent 0 10px, color-mix(in srgb, var(--tint) 60%, transparent) 10px 11.5px),
@@ -73,7 +68,6 @@
 }
 
 .banner[data-banner="sky"]{
-    /* a night sky: two sizes of stars on the dark ground, a strip of horizon in the colour */
     background:
         radial-gradient(circle, var(--text-h) 1px, transparent 1.5px) 0 0 / 37px 29px,
         radial-gradient(circle, color-mix(in srgb, var(--tint) 80%, var(--text-h)) 0.8px, transparent 1.3px) 11px 13px / 23px 19px,
@@ -81,7 +75,6 @@
     box-shadow: inset 0 -0.5rem 0 color-mix(in srgb, var(--tint) 70%, var(--surface));
 }
 
-/* Nothing to show to non-friends: a quiet strip */
 .banner[data-banner="none"]{
     height: 4.5rem;
     background: var(--surface-inset);
@@ -96,7 +89,6 @@
     padding: 0 1.5rem 1.5rem;
 }
 
-/* avatar hanging over the banner's edge, actions on the right */
 .top{
     display: flex;
     flex-direction: row;
@@ -224,7 +216,6 @@
     width: 5.5rem;
     height: 5.5rem;
     font-size: 1.9rem;
-    /* a ring in the card colour sets it off the banner */
     box-shadow: 0 0 0 4px var(--surface);
 }
 
@@ -247,7 +238,6 @@
     outline-offset: 5px;
 }
 
-/* a ring with a small moon going round it, slowly */
 .avatarLarge[data-frame="orbit"]{
     position: relative;
     box-shadow: 0 0 0 4px var(--surface), 0 0 0 6px color-mix(in srgb, var(--tint) 55%, var(--surface));
@@ -279,7 +269,6 @@
     }
 }
 
-/* the frame needs room on the editor's preview tiles too */
 .choiceFace[data-frame]{
     --tint: var(--task-color, var(--primary));
 }
@@ -404,7 +393,6 @@
     color: var(--text-muted);
 }
 
-/* value over label, separated by hairlines rather than boxes */
 .tiles{
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -460,7 +448,6 @@
     }
 }
 
-/* heat map: one column per week, Monday on top; one hue from light to strong */
 .heatWrap{
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
@@ -508,7 +495,6 @@
     outline-offset: 1px;
 }
 
-/* what the pointer is on, in words (the cells are too small for labels) */
 .readout{
     min-height: 1.2rem;
     margin: 0;
@@ -537,7 +523,6 @@
     margin-left: 0.25rem;
 }
 
-/* bars for the last 14 days, from a shared baseline */
 .bars{
     display: grid;
     grid-template-columns: repeat(14, minmax(0, 1fr));
@@ -578,7 +563,6 @@
     text-align: center;
 }
 
-/* horizontal bars: weekdays, top groups */
 .rows{
     display: flex;
     flex-direction: column;
@@ -664,7 +648,6 @@
     font-weight: 600;
 }
 
-/* badges: earned ones in full colour, the rest faded */
 .badges{
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
@@ -697,7 +680,6 @@
     opacity: 0.55;
 }
 
-/* an earned badge: its outline in the one data hue */
 .badgeIcon{
     display: inline-flex;
     color: var(--primary-fg);
@@ -790,7 +772,6 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* rows of choices (emoji, colour, banner): radio buttons drawn as tiles */
 .choices{
     display: flex;
     flex-wrap: wrap;
@@ -834,7 +815,6 @@
     background: var(--surface-strong);
 }
 
-/* a choice my level hasn't unlocked: readable, dimmed, with the level it comes at */
 .choice[data-locked="true"]{
     cursor: not-allowed;
 }
@@ -936,7 +916,6 @@
     background: var(--tint);
 }
 
-/* the accent option: half accent, half page, so it reads as "follows the accent" */
 .swatchAccent{
     background: linear-gradient(135deg, var(--primary) 50%, var(--surface-strong) 50%);
 }
@@ -1076,7 +1055,6 @@
     }
 }
 
-/* the plain look (chats, sessions, boards): initials on a neutral circle, no profile colour */
 .avatarPlain,
 .avatarPlainSmall{
     flex-shrink: 0;
@@ -1104,7 +1082,6 @@
     font-size: 0.6875rem;
 }
 
-/* working right now */
 .avatarLive{
     box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary);
 }

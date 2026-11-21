@@ -21,7 +21,6 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-/* the plus button's four (task, event, reminder, note): two by two */
 .kindFour{
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -200,14 +199,12 @@
     color: var(--primary-fg);
 }
 
-/* "Picked by itself: the name contains „Arbeit“" */
 .autoNote{
     margin: 0;
     font-size: 0.78rem;
     color: var(--text-muted);
 }
 
-/* A task whose name fits an event type: offers to become such an event */
 .typeHint{
     align-self: flex-start;
     display: inline-flex;

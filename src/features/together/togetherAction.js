@@ -115,10 +115,8 @@ export const selectInviteCount = (state) => state.together.invites.length;
 
 // ---------- shared sessions in the solo view and the history ----------
 
-// Running sessions I joined, with their tasks (the groups on the solo home page)
 export const fetchMySharedTasks = () => loadInto(SET_MY_SHARED_TASKS, '/api/shared-sessions/my-tasks');
 
-// My work in shared sessions, for the history page
 export const fetchSharedHistory = () => loadInto(SET_SHARED_HISTORY, '/api/shared-sessions/history');
 
 // Ids of shared tasks in the solo view: "shared-<id>", so they never clash with own task ids
@@ -167,5 +165,4 @@ export const selectSharedSoloTasks = createSelector(
 // Translated message for an API error, using the error code the backend sends
 export const togetherErrorText = (t, err) => errorText(t, 'togetherError', err?.code);
 
-// Milliseconds one person spent on one task of a session
 export const timeOf = (task, userId) => task.time.find(t => t.userId === userId)?.ms ?? 0;

@@ -37,7 +37,6 @@ export default function TeamPresence({ session }) {
             total: person.totalMs + (person.user.id === me ? myExtra : othersRunningMs(session, person.user.id, undefined, now)),
         };
     });
-    // working people first, then the others, invited last
     const rank = (p) => (p.status === 'invited' ? 2 : p.task ? 0 : 1);
     people.sort((a, b) => rank(a) - rank(b));
     const workingCount = people.filter(p => p.task).length;

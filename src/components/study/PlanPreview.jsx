@@ -203,7 +203,6 @@ export function PlanPreviewContent({ onCancel, onApplied }) {
     const [busy, setBusy] = useState(false);
     const [changed, setChanged] = useState(false);
     const [error, setError] = useState(null);
-    // key -> { date, time }, for the preview with this hash
     const [moves, setMoves] = useState({ hash: null, byKey: {} });
     const [open, setOpen] = useState(null);
     const hash = preview?.inputHash ?? null;
@@ -217,7 +216,6 @@ export function PlanPreviewContent({ onCancel, onApplied }) {
         return () => { alive = false; };
     }, [dispatch]);
 
-    // at: { date, time } or null (back to where the planner put it)
     const setMove = (key, session, at) => {
         if (key == null) return;
         const next = { ...byKey };

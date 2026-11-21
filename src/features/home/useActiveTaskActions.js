@@ -24,7 +24,6 @@ export function useActiveTaskActions(activeTask, setActiveTask, { echo = false }
     const noteInputRef = useRef(null);
     useEffect(() => { if (addingNote) noteInputRef.current?.focus(); }, [addingNote]);
 
-    // finishing the task in focus is worth a burst on "normal", a big one on "extreme"
     const markDone = (e) => {
         playSound('done');
         const target = e?.currentTarget;

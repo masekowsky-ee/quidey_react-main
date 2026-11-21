@@ -7,7 +7,6 @@
   text-align: left;
 }
 
-/* same size and place as the task list's title beside it */
 .focusTitle {
   display: flex;
   align-items: center;
@@ -34,7 +33,6 @@
   background-color: transparent;
 }
 
-/* a task is being dragged: the target answers */
 .currentTaskDiv.dropReady {
   border-color: var(--primary);
   background-color: color-mix(in srgb, var(--primary) 7%, transparent);
@@ -87,7 +85,6 @@
   overflow-wrap: break-word;
 }
 
-/* the head is where the card is grabbed to swipe it away */
 .swipeHandle {
   cursor: grab;
   touch-action: pan-y;
@@ -102,7 +99,6 @@
   height: 1.2rem;
 }
 
-/* put the task back: quiet */
 .taskCardHead > .releaseBtn {
   flex-shrink: 0;
   width: 2rem;
@@ -114,7 +110,6 @@
   color: var(--text-h);
 }
 
-/* done: the one filled control on the card */
 .taskCardHead > .doneBtn {
   flex-shrink: 0;
   width: 2rem;
@@ -130,7 +125,6 @@
   box-shadow: none;
 }
 
-/* time spent on it in this session, and its day */
 .taskTime {
   margin-top: -0.4rem;
   font-size: 0.8125rem;
@@ -143,7 +137,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* description being edited: same size as the text it replaces */
 .descInput {
   width: 100%;
 }
@@ -205,7 +198,6 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  /* many notes scroll inside the card instead of stretching it */
   max-height: min(18rem, 45vh);
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -277,7 +269,6 @@
     height: 1.5rem;
   }
 
-  /* no dragging on phones (the rows' focus button does it), so only the hint stays */
   .dropTitle {
     display: none;
   }

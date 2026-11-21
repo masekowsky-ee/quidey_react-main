@@ -19,7 +19,6 @@
     border-color: var(--control-border);
 }
 
-/* listening: filled, with a slow ring that says the microphone is open */
 .mic[data-listening] {
     color: var(--primary-text);
     background: var(--primary);

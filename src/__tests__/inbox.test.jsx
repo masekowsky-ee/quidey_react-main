@@ -65,7 +65,6 @@ describe('inbox', () => {
         await act(async () => { renderAt(makeStore(), '/inbox', <Inbox />) })
 
         expect(screen.getByText('Kommst du morgen?')).toBeInTheDocument()
-        // Cleo has no conversation yet: offered to start one
         expect(screen.getByRole('button', { name: /Cleo/ })).toBeInTheDocument()
 
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Ben/ })) })

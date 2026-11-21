@@ -81,7 +81,6 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
     const event = kind === 'event';
     const sliderValue = Math.min(100, Math.max(0, Number(prio ?? 50)));
 
-    // closed at first (the editor stays short); the toggle says what is set in it
     const [showMore, setShowMore] = useState(false);
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
@@ -90,7 +89,6 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
 
     useEffect(() => { nameRef.current?.focus(); }, []);
 
-    // opening "More options" brings them into view (the panel is short on small windows)
     const moreRef = useRef(null);
     const toggleMore = () => {
         const opening = !showMore;
@@ -129,7 +127,6 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
                 <input ref={nameRef} value={name} maxLength={200}
                     onChange={(e) => { draft.changeName(e.target.value); setError(''); }} aria-invalid={Boolean(error) && !name.trim()} />
             </label>
-            {/* a task whose name fits a type: one tap makes it such an event */}
             {!event && canChangeKind && match &&
                 <TypeHint className={styles.typeHintTight} color={match.type.color} onClick={draft.suggestEvent}>
                     {fill(t('keywordSuggestEvent'), { type: match.type.name })}

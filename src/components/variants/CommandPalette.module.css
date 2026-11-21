@@ -53,7 +53,6 @@
   outline: none;
 }
 
-/* the cross that closes it (Escape does too); also for touch, where there is no Escape */
 .close {
   composes: iconBtn from '../ui.module.css';
   flex-shrink: 0;
@@ -115,7 +114,6 @@
   white-space: nowrap;
 }
 
-/* a task's day, on the right */
 .optionMeta {
   flex-shrink: 0;
   margin-left: auto;

@@ -10,7 +10,6 @@ import { groupSittings, sittingGapMs } from '../../features/stats/sittings';
 import { fill } from '../../features/helperFunction';
 
 import Icon from '../icons';
-// 95 -> "1 h 35 min", 40 -> "40 min"
 function formatMinutes(totalMinutes) {
     const h = Math.floor(totalMinutes / 60);
     const m = totalMinutes % 60;
@@ -25,7 +24,6 @@ function formatTaskTime(seconds) {
     return formatMinutes(Math.round(seconds / 60));
 }
 
-// The team icon used on shared-session labels
 function TeamIcon() {
     return <svg xmlns="http://www.w3.org/2000/svg" height="13px" viewBox="0 -960 960 960" width="13px" fill="currentColor" aria-hidden="true"><path d="M40-272q0-34 17.5-62.5T104-378q62-31 126-46.5T360-440q66 0 130 15.5T616-378q29 15 46.5 43.5T680-272v32q0 33-23.5 56.5T600-160H120q-33 0-56.5-23.5T40-240v-32Zm320-208q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47Z"/></svg>;
 }
@@ -38,7 +36,6 @@ export default function SessionList({ period }){
     const { t } = useTranslation();
     const dispatch = useDispatch();
 
-    // my work in shared sessions; shown between the solo sessions, by when I last worked on it
     const allShared = useSelector(state => state.together.history);
     const sharedHistory = (allShared ?? []).filter(entry => inPeriod(period, entry.lastWorkedAt));
     useEffect(() => {
@@ -64,7 +61,6 @@ export default function SessionList({ period }){
         ...sharedHistory.map(entry => ({ kind: 'shared', key: `shared-${entry.id}`, date: new Date(entry.lastWorkedAt), data: entry })),
     ].sort((a, b) => b.date - a.date);
 
-    // each row's length bar is measured against the longest entry in the list
     const entryMinutes = (entry) => entry.kind === 'shared'
         ? Math.max(1, Math.round(entry.data.myMs / 60000))
         : Math.ceil((entry.data.totalTime ?? 0) / 60);

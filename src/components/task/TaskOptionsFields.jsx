@@ -13,12 +13,10 @@ import { usePushState } from '../../features/pwa/push';
 const TIMED_REMINDERS = [0, 5, 10, 15, 30, 60, 120, 1440];
 const ALL_DAY_REMINDERS = [0, 1440, 2880, 10080];
 
-// The choices, plus any unusual value the task already has
 const withCurrent = (list, current) => [...new Set([...list, ...current])].sort((a, b) => a - b);
 
 // how often a repeating task comes back at most (like the server)
 const REPEAT_LEFT_MAX = 1000;
-// what "ends after …" starts with
 const REPEAT_LEFT_DEFAULT = 10;
 
 // The optional details of a task: reminders, repeating, location, link and extra info (a task's
@@ -79,7 +77,6 @@ export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = 
                             {pushOff && <> {t('reminderPushOff')} <Link to="/settings#app">{t('reminderPushOffLink')}</Link></>}
                         </>}
                 </p>}
-            {/* mails go to the task's owner, so only they see the switch */}
             {personal && canMail && hasReminder &&
                 <label className={styles.checkRow}>
                     <input type="checkbox" checked={Boolean(value.reminder_email)}
@@ -97,7 +94,6 @@ export default function TaskOptionsFields({ value, onChange, hasTime, hasDate = 
                 </select>
             </label>}
             {personal && !hasDate && <p id={`${id}-repeat-hint`} className={styles.hint}>{t('repeatNeedsDate')}</p>}
-            {/* a repeat can end: never, or after a number of times */}
             {personal && hasDate && value.repeat &&
                 <fieldset className={styles.repeatEnd}>
                     <legend className={styles.repeatEndLegend}>{t('repeatEnds')}</legend>

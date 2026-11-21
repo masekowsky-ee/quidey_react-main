@@ -1,15 +1,12 @@
-// Action types for task management
 export const ADD_TASK = "ADD_TASK";
 export const DELETE_TASK = "DELETE_TASK";
 export const UPDATE_TASK_PROPS = "UPDATE_TASK_PROPS";
 
-//notes
 export const CREATE_NOTE = "CREATE_NOTE";
 export const DELETE_NOTE = "DELETE_NOTE";
 export const EDIT_NOTE = "EDIT_NOTE";
 export const GET_NOTES = "GET_NOTES";
 
-// Action types for group management
 export const ADD_GROUP = "ADD_GROUP";
 export const DELETE_GROUP = "DELETE_GROUP";
 export const EDIT_DISPLAYGROUP = "EDIT_GROUP_TASKS"; 
@@ -21,7 +18,6 @@ export const SET_TASK_STATE = "SET_TASK_STATE";
 // the task list fetched again (friends may have changed shared tasks)
 export const REFRESH_TASKS = "REFRESH_TASKS";
 
-// tasks shared with friends
 export const TASK_REPLACED = "TASK_REPLACED";
 export const SET_TASK_INVITES = "SET_TASK_INVITES";
 export const TASK_INVITE_ACCEPTED = "TASK_INVITE_ACCEPTED";

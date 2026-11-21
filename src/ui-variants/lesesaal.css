@@ -146,7 +146,6 @@
   caret-color: var(--primary);
 }
 
-/* titles in the serif, the rest stays the sans */
 :root[data-ui="lesesaal"] h1,
 :root[data-ui="lesesaal"] [data-part="home-title"] h1 {
   font-family: var(--serif);
@@ -252,7 +251,6 @@
     var(--surface);
 }
 
-/* the lamp's brass rim: one short solid line along the top of the pool */
 :root[data-ui="lesesaal"] [data-part="focus"][data-active] > h2 + div::before {
   content: '';
   position: absolute;
@@ -282,7 +280,6 @@
   line-height: 1.25;
 }
 
-/* no task: the lamp is off, an empty desk */
 :root[data-ui="lesesaal"] [data-part="focus"]:not([data-active]) > h2 + div {
   border-color: var(--border);
   background: transparent;

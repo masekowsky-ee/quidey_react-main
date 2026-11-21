@@ -249,7 +249,6 @@ export function parseQuickEntry(text, now = new Date(), { eventTypes = [] } = {}
         take('prio', p[0]);
     }
 
-    // a time of day needs a day: today
     if (time && !due) due = toInputDate(now);
 
     const name = tidy(rest);

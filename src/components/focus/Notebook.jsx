@@ -70,7 +70,6 @@ export default function Notebook({ focusTask }) {
                     <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('noteSearch')} aria-label={t('noteSearch')} />
                 </div>
                 <button type="button" className={styles.smallPrimary} onClick={startNote}><Icon name="plus" size={16} /> {t('noteNew')}</button>
-                {/* study material read by the AI into notes, entries (and for testers a study plan) */}
                 {aiQuota?.available &&
                     <button type="button" className={styles.smallGhost} onClick={() => setScanning(true)}><Icon name="brain" size={16} /> {t('scanTitle')}</button>}
             </div>

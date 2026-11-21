@@ -32,7 +32,6 @@ export default function TaskNoteRow({ taskId, note, className }) {
                     <span className={styles.text}>{firstLine || t('noteUntitled')}</span>
                     <Icon name="note" size={14} />
                 </Link>}
-            {/* a fuller note is deleted in the notebook (with its trash), not with one tap here */}
             {inline &&
                 <button type="button" onClick={() => dispatch(deleteNote(taskId, note.id))}
                     title={t('deleteNote')} aria-label={`${t('deleteNote')}: ${firstLine}`}>

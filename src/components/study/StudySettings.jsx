@@ -28,7 +28,6 @@ function Form({ settings }) {
     const [error, setError] = useState(null);
     const [saved, setSaved] = useState(false);
     const [preview, setPreview] = useState(false);
-    // the planning part of what the server has now, to see whether a save changed it
     const [planning, setPlanning] = useState(() => planningOf(settings));
 
     const touch = (change) => { setSaved(false); setError(null); change(); };

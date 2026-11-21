@@ -12,7 +12,6 @@ import Icon from './icons.jsx'
 import { motion, useDragControls } from 'motion/react'
 import { useActiveTaskActions } from '../features/home/useActiveTaskActions'
 
-// how far (px) or how fast (px/s) the card has to be swiped to put the task back
 const SWIPE_DISTANCE = 110;
 const SWIPE_SPEED = 600;
 
@@ -23,9 +22,7 @@ export default function WorkingContainer (props) {
     const {dropZoneRef, activeTask, setActiveTask, onRelease, dragging = false } = props;
 
     const {t} = useTranslation();
-    // a second, smaller burst follows the first on "extreme"
     const { markDone, saveDescription, addNote, addingNote, setAddingNote, noteInputRef } = useActiveTaskActions(activeTask, setActiveTask, { echo: true });
-    // the card can be swiped sideways by its head (not by the fields inside it)
     const dragControls = useDragControls();
     const startSwipe = (e) => { if (!e.target.closest('button, input, textarea')) dragControls.start(e); };
     const onSwipeEnd = (_, info) => {
@@ -38,7 +35,6 @@ export default function WorkingContainer (props) {
     const [editActiveDescription, setEditActiveDescription] = useState(false);
     const onDescriptionBlur = (e) => { setEditActiveDescription(false); saveDescription(e); };
 
-    // name, then "put back" and "done"; the head is where the card is grabbed to swipe it away
     const head = (
         <div className={`${styles.taskCardHead} ${styles.swipeHandle}`} onPointerDown={startSwipe}>
             <h2 className={styles.taskTitle}>{activeTask?.name}</h2>

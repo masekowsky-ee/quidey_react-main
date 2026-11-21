@@ -27,7 +27,6 @@ export function useSharedSession(id) {
         .catch(err => { if (err.status === 404) setMissingId(id); }), [dispatch, id]);
 
     useEffect(() => { if (id) load(); }, [load, id]);
-    // the safety net: every POLL_MS, while live updates arrive only every other time
     useSafetyPoll(load, { everyMs: POLL_MS, connectedEveryMs: 2 * POLL_MS, enabled: Boolean(id) });
 
     // the live chat, once the server let me see the session (i.e. I'm a member)

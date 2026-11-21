@@ -28,7 +28,6 @@ export default function CompletedTasks({ together }) {
 
     if (done.length === 0 && elsewhere.length === 0) return <div className={`${styles.card} ${styles.empty}`}>{t('noCompletedTasks')}</div>;
 
-    // by day of completion, in the order above
     const days = [];
     for (const task of done) {
         const when = task.completed_at ? new Date(task.completed_at) : null;

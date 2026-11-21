@@ -11,7 +11,6 @@ import { loadLanguage } from './i18n/translations'
 Object.defineProperty(window.navigator, 'language', { value: 'de-DE', configurable: true })
 Object.defineProperty(window.navigator, 'languages', { value: ['de-DE', 'de'], configurable: true })
 
-// No animations in tests: leaving rows and toasts are gone at once
 MotionGlobalConfig.skipAnimations = true
 
 // jsdom has no IntersectionObserver (motion's whileInView needs one): nothing is ever "in view"
@@ -24,7 +23,6 @@ if (typeof globalThis.IntersectionObserver === 'undefined') {
     }
 }
 
-// Unmount rendered components between tests so they don't leak into each other
 afterEach(() => cleanup())
 
 // Quidey opens for visitors without an account too (src/features/auth/gate.js): a store made in a

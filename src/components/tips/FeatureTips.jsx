@@ -5,9 +5,7 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { tipsForPage, useTips, markTipSeen, turnTipsOff, syncTips } from '../../features/tips/tips';
 import styles from './FeatureTips.module.css';
 
-// how often the page is looked at for a tip's control (it may still be loading, or a sheet is open)
 const LOOK_MS = 400;
-// room kept to the window's edges, and between the control and the tip
 const EDGE = 10;
 const GAP = 12;
 
@@ -27,7 +25,6 @@ function visibleRect(el) {
     return rect;
 }
 
-// the first match of the selector list that can be seen
 function findTarget(selector) {
     for (const el of document.querySelectorAll(selector)) {
         if (visibleRect(el)) return el;
@@ -68,7 +65,6 @@ export default function FeatureTips() {
     const tips = useTips();
     const titleId = useId();
     const [found, setCurrent] = useState(null);
-    // another tip of this page can be shown after this one ("Weiter" rather than "Fertig")
     const [more, setMore] = useState(false);
     const tipRef = useRef(null);
     const ringRef = useRef(null);
@@ -85,7 +81,6 @@ export default function FeatureTips() {
         if (tips.ready && username) dispatch(syncTips());
     }, [tips.ready, username, dispatch]);
 
-    // look for the first pending tip whose control is on the screen
     useEffect(() => {
         if (!pendingKey || tourOpen) return undefined;
         const ids = pendingKey.split(',');
@@ -152,7 +147,6 @@ export default function FeatureTips() {
         return () => document.removeEventListener('keydown', onKey, true);
     }, [current, dispatch]);
 
-    // using the control the tip points at answers it: the tip goes (a click, a tap, typing or focus in it)
     useEffect(() => {
         if (!current) return undefined;
         const used = (e) => {

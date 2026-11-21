@@ -79,7 +79,6 @@ export default function ProfileEditor({ profile, onChange, onSaved, onClose }) {
         }
     };
 
-    // locked: above my level, unless it is what the profile already has
     const lockedLevel = (name, value) => {
         const needed = requiredLevel(name, value);
         return needed > level && saved[name] !== value ? needed : null;

@@ -16,7 +16,6 @@ vi.mock('../features/api/api', async (importOriginal) => ({
     apiFetch: vi.fn(async () => ({})),
 }))
 
-// the browser's speech recognition, played by the test
 let current
 class FakeRecognition {
     constructor() { current = this; this.started = false; this.stopped = false }

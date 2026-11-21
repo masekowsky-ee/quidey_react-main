@@ -13,7 +13,6 @@ const initialOf = (name) => (String(name ?? '?').trim()[0] ?? '?').toUpperCase()
 // Who is signed in, at the foot of the menu: a tap opens the accounts on this device (one tap
 // switches), the profile, "add account" and "sign out". onNavigate: the drawer closes when a
 // link is used.
-// compact: only the avatar (the narrow rail of a tester variant); the accounts open beside it
 export default function AccountSwitcher({ onNavigate, compact = false }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
@@ -28,7 +27,6 @@ export default function AccountSwitcher({ onNavigate, compact = false }) {
     const others = open ? otherAccounts(username) : [];
     const canAdd = open && listAccounts().length < MAX_ACCOUNTS;
 
-    // closes on a click elsewhere and on Escape (focus back on the button)
     useEffect(() => {
         if (!open) return undefined;
         const onDown = (e) => { if (!wrapRef.current?.contains(e.target)) setOpen(false); };
@@ -46,7 +44,6 @@ export default function AccountSwitcher({ onNavigate, compact = false }) {
         };
     }, [open]);
 
-    // my profile picture (see avatars.js)
     const picture = myPicture;
     // kept on this device with the account, so the other accounts' switcher shows it too
     useEffect(() => {

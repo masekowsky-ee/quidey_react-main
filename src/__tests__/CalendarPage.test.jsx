@@ -26,7 +26,6 @@ const TASKS = [
 const GROUPS = [{ id: 10, name: 'Health' }, { id: 99, name: 'all' }]
 const COLLECTIONS = [{ id: 10, name: 'Health', emoji: null, color: null, items: [{ kind: 'task', id: 1 }] }]
 
-// where the router is, to check the address the calendar writes
 function LocationSpy() {
     const { search } = useLocation()
     return <output data-testid="location" hidden>{search}</output>
@@ -76,7 +75,6 @@ describe('month view', () => {
         expect(within(cell('2026-10-19')).getByText('Dentist')).toBeInTheDocument()
         expect(within(cell('2026-10-21')).getByText('Report')).toBeInTheDocument()
         expect(cell('2026-10-19')).toHaveAttribute('aria-current', 'date')
-        // one overdue task (Old bill, 12 Oct)
         expect(screen.getByRole('button', { name: '1 overdue' })).toBeInTheDocument()
     })
 
@@ -116,7 +114,6 @@ describe('month view', () => {
         expect(screen.getByText('Dentist')).toBeInTheDocument()
         fireEvent.change(screen.getByRole('searchbox', { name: 'Search tasks' }), { target: { value: '' } })
         expect(screen.getByText('Finished thing')).toBeInTheDocument()
-        // the rarer filters wait behind "Filters", which then counts them
         fireEvent.click(screen.getByRole('button', { name: 'Filters' }))
         fireEvent.click(screen.getByRole('button', { name: 'Show done' }))
         expect(screen.queryByText('Finished thing')).not.toBeInTheDocument()
@@ -125,7 +122,6 @@ describe('month view', () => {
 
     it('filters by collection (in place of groups)', () => {
         setup()
-        // the hidden "all" group is not offered
         fireEvent.click(screen.getByRole('button', { name: 'Filters' }))
         expect(screen.queryByRole('option', { name: 'all' })).not.toBeInTheDocument()
         fireEvent.change(screen.getByRole('combobox', { name: 'Filter by collection' }), { target: { value: 'collection-10' } })
@@ -135,7 +131,6 @@ describe('month view', () => {
 })
 
 describe('toolbar on a phone', () => {
-    // a 390px wide screen: only the phone's width query matches
     beforeEach(() => {
         window.matchMedia = vi.fn((query) => ({
             matches: /max-width: (640|720)px/.test(query),
@@ -152,7 +147,6 @@ describe('toolbar on a phone', () => {
         for (const name of ['Calendar view', 'Search tasks', 'Filters', 'Previous month', 'Next month']) {
             expect(screen.getByRole('button', { name })).toBeInTheDocument()
         }
-        // no view switch and no search field until asked for
         expect(screen.queryByRole('group', { name: 'Calendar view' })).not.toBeInTheDocument()
         expect(screen.queryByRole('searchbox')).not.toBeInTheDocument()
     })
@@ -442,7 +436,6 @@ describe('day timeline', () => {
         const reading = block('Read chapter').closest('[data-block]')
         expect(lecture.style.getPropertyValue('--start')).toBe('540')
         expect(lecture.style.getPropertyValue('--length')).toBe('90')
-        // they overlap, so they share the width
         expect(reading.style.getPropertyValue('--cols')).toBe('2')
         expect(block('Laundry').closest('[data-drop-allday]')).not.toBeNull()
         expect(within(dialog()).getByText('09:00–10:30')).toBeInTheDocument()

@@ -47,7 +47,6 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* outlined: the screen's one filled action is the feed's "Share" */
 .secondaryBtn{
     flex: none;
     display: inline-flex;
@@ -158,7 +157,6 @@
     min-width: 0;
 }
 
-/* phones and narrow tablets: the rail only above the feed */
 .layout:not([data-tab="feed"]) .rail{
     display: none;
 }
@@ -293,7 +291,6 @@
     color: var(--text-h);
 }
 
-/* the way to the next level: a track as long as the step, the XP inside it filled */
 .track{
     position: relative;
     height: 8px;
@@ -319,7 +316,6 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* Quidey grows like a plant: the eight level names on one line, passed ones filled */
 .growth{
     display: grid;
     grid-template-columns: repeat(8, 1fr);
@@ -609,7 +605,6 @@ a.rankName:hover{
     height: 0.5rem;
 }
 
-/* a friend's streak beside their XP: a small flame and the days */
 .rankStreak{
     display: inline-flex;
     align-items: center;
@@ -686,7 +681,6 @@ a.rankName:hover{
 
 /* ---------- loading and errors: the layout, grey where the values will be ---------- */
 
-/* the shared bone: grey, with the soft light running across */
 .skeleton{
     composes: bone from '../skeleton/Skeleton.module.css';
 }
@@ -715,7 +709,6 @@ a.rankName:hover{
         margin-top: 1.5rem;
     }
 
-    /* tabs share the width as their names need it, so all five fit a phone */
     .tabs{
         display: flex;
         width: 100%;

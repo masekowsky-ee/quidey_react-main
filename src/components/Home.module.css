@@ -16,7 +16,6 @@
   text-align: left;
 }
 
-/* the greeting, the day's numbers under it */
 .titleRow {
   display: flex;
   flex-wrap: wrap;
@@ -43,7 +42,6 @@
   letter-spacing: var(--track-display);
 }
 
-/* the second line: what today is about, in grey; a long task name stops after two lines */
 .lead {
   color: var(--text-muted);
   display: -webkit-box;
@@ -54,7 +52,6 @@
   padding-top: 0.12em;
 }
 
-/* the day in sentences (the app's own look): 18px, the overdue ones as a red link */
 .sentence {
   max-width: 60ch;
   margin-top: 1rem;
@@ -78,7 +75,6 @@
   color: var(--text);
 }
 
-/* "Friday, 6 November · 7 open · 3 due today · 1 overdue": the dots sit between the parts */
 .summary > * + *::before {
   content: '·';
   display: inline-block;
@@ -95,7 +91,6 @@
   border-radius: var(--radius-sm);
 }
 
-/* a link to the agenda: underlined where it is looked at */
 a.overdue:hover,
 a.overdue:focus-visible {
   text-decoration: underline;
@@ -123,7 +118,6 @@ a.overdue:focus-visible {
   min-width: 0;
 }
 
-/* the focus sheet and the day are as tall as each other */
 .focusArea,
 .dayArea {
   align-self: stretch;
@@ -159,7 +153,6 @@ a.overdue:focus-visible {
   min-width: 0;
 }
 
-/* the groups and the list, on a tonal panel */
 .listBlock {
   composes: panel from './ui.module.css';
   display: flex;
@@ -169,7 +162,6 @@ a.overdue:focus-visible {
   min-width: 0;
 }
 
-/* "Coming up": the next days, with their own heading */
 .weekBlock {
   display: flex;
   flex-direction: column;
@@ -185,7 +177,6 @@ a.overdue:focus-visible {
   letter-spacing: 0;
 }
 
-/* testers' variants: the focus column beside the list */
 .focusCol {
   display: flex;
   flex-direction: column;
@@ -193,7 +184,6 @@ a.overdue:focus-visible {
   min-width: 0;
 }
 
-/* narrower: the task in focus comes first, above the groups and the list */
 @media (max-width: 1099px) {
   .focusCol {
     order: -1;
@@ -205,13 +195,11 @@ a.overdue:focus-visible {
     grid-template-columns: minmax(0, 1fr) 22.25rem;
   }
 
-  /* testers' variants: list and a 22rem focus column */
   .columns:has(> .focusCol) {
     grid-template-columns: minmax(0, 1fr) 22rem;
     gap: 1.5rem;
   }
 
-  /* stays in view while the list scrolls */
   .focusCol {
     position: sticky;
     top: calc(var(--header-h) + 1.5rem);

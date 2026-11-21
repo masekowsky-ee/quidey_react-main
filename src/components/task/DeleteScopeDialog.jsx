@@ -17,7 +17,6 @@ const SCOPES = ['one', 'following', 'all'];
 export default function DeleteScopeDialog() {
     const question = useDeleteScopeQuestion();
     if (!question) return null;
-    // a new question gets a fresh dialog (and focus)
     return <ScopeQuestion key={question.task.id} task={question.task} />;
 }
 
@@ -29,7 +28,6 @@ function ScopeQuestion({ task }) {
     const day = parseDate(dateKey(task.due));
     const dayText = day ? day.toLocaleDateString(localeOf(language), { weekday: 'short', day: 'numeric', month: 'short' }) : '';
 
-    // on phones a sheet: pulled down, nothing is deleted
     return (
         <Dialog onClose={() => answerDeleteScope(null)} role="alertdialog" labelledBy={titleId} initialFocus={firstRef} drag
             backdropClassName={styles.backdrop} className={styles.dialog}>

@@ -115,13 +115,9 @@ describe('Shared session page', () => {
     it('shows tasks, who is working on what, the feed, and who worked how long', async () => {
         await renderSession()
         expect(screen.getByRole('heading', { name: /Study group/ })).toBeInTheDocument()
-        // ben works on Slides right now
         expect(within(card('Team')).getByText('an Slides')).toBeInTheDocument()
-        // assignment shown on the task
         expect(within(taskRow('Slides')).getByRole('combobox')).toHaveValue('2')
-        // the feed says it in words
         expect(within(card('Aktivität & Chat')).getByText('Ben arbeitet an „Slides“')).toBeInTheDocument()
-        // summary: ben 2 min, ann 1 min
         const summary = card('Wer hat woran gearbeitet')
         expect(within(summary).getByText('2 min', { selector: '[class*=timeMain]' })).toBeInTheDocument()
         expect(within(summary).getByText('67%')).toBeInTheDocument()
@@ -175,7 +171,6 @@ describe('Shared session page', () => {
         await renderSession()
         await act(async () => { fireEvent.change(within(taskRow('Report')).getByRole('combobox'), { target: { value: '2' } }) })
         expect(calls.at(-1)).toMatchObject({ url: '/api/shared-sessions/5/tasks/10', method: 'PATCH', body: { assigneeId: 2 } })
-        // "assigned to me" filter: ben has both now, ann (me) none
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Für mich/ })) })
         expect(screen.getByText('Keine offenen Aufgaben in diesem Filter.')).toBeInTheDocument()
     })

@@ -33,7 +33,6 @@ describe('toInputDate', () => {
 })
 
 describe('dueText', () => {
-    // Thursday, 22 October 2026
     const now = new Date(2026, 9, 22, 15, 30)
     const t = (key, index) => translate('de', key, index)
 

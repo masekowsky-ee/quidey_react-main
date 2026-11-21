@@ -60,7 +60,6 @@ function useMinimized(enabled) {
     const active = useSelector(state => state.session.timer.active);
     const inProgress = useSelector(selectTimerInProgress);
     const [minimized, setMinimized] = useState(false);
-    // folds on every start (also after a pause), unfolds once the run is over
     const [seen, setSeen] = useState({ active, inProgress });
     if (seen.active !== active || seen.inProgress !== inProgress) {
         setSeen({ active, inProgress });
@@ -178,7 +177,6 @@ export default function FocusTimer() {
                     </button>}
             </div>
 
-            {/* the countdown's length: only while nothing runs (Pomodoro lengths: Fokus-Einstellungen) */}
             {!inProgress && timerMode === 'timer' &&
                 <div className={styles.lengths}>
                     <DurationInput label={t('focusLength')} ms={sessionParams.time} presets={[...SESSION_LENGTHS, 90]}

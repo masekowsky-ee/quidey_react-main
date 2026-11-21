@@ -3,7 +3,6 @@ import { hoursNumber } from '../../features/study/study';
 import { useTranslation } from '../../i18n/useTranslation';
 import styles from './Study.module.css';
 
-// A thin bar, value 0..1
 export function ProgressBar({ value, label }) {
     const share = Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0));
     return (

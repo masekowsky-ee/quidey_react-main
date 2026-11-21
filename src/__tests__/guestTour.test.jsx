@@ -62,7 +62,6 @@ describe('the guest tour', () => {
         await click(within(invite()).getByRole('button', { name: 'Nicht jetzt' }))
         expect(invite()).toBeNull()
         expect(localStorage.getItem('guestTourInvite')).toBe('done')
-        // the next visit: only the device remembers
         cleanup()
         resetInviteForTests()
         await renderApp('/')

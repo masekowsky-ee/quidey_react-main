@@ -73,7 +73,6 @@ export function pressDrag(e, { onStart, onMove, onDrop, onCancel, scroller } = {
     const activate = () => {
         holdTimer = null;
         active = true;
-        // no text gets selected while dragging
         window.getSelection?.()?.removeAllRanges?.();
         // the finger covers the item: a short tick says it's lifted (where the device can)
         if (touch) {

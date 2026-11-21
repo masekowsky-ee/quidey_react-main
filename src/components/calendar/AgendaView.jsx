@@ -11,7 +11,6 @@ import { taskColorAttr } from '../../features/tasks/taskColors';
 const PRIO_CLASS = { high: styles.prioHigh, medium: styles.prioMedium, low: styles.prioLow };
 const PRIO_TEXT = { high: 'prioHigh', medium: 'prioMedium', low: 'prioLow' };
 
-// A task without a day gets one here: pick the date, then "Schedule"
 function ScheduleField({ task, onSchedule }) {
     const { t } = useTranslation();
     const [day, setDay] = useState('');
@@ -63,7 +62,6 @@ export default function AgendaView({ focusedDate, today, tasks, tasksByDay, onOp
     const overdue = isCurrentMonth
         ? tasks.filter(task => isOverdue(task, today)).sort((a, b) => parseDate(a.due) - parseDate(b.due) || compareTasks(a, b))
         : [];
-    // overdue tasks are only listed under "Overdue", not again on their day
     const tasksOn = (date) => (tasksByDay[dateKey(date)] ?? []).filter(task => !isCurrentMonth || !isOverdue(task, today));
     const days = monthDates(focusedDate).filter(date => tasksOn(date).length > 0 || sameDay(date, today));
     const undated = tasks.filter(task => !task.due).sort(compareTasks);

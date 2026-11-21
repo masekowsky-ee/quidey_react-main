@@ -22,7 +22,6 @@
   gap: 0.5rem;
 }
 
-/* a plate: the seat number over the person */
 .seat {
   display: flex;
   flex-direction: column;

@@ -20,7 +20,6 @@ const QuideyUpdate = registerPlugin('QuideyUpdate');
 const DISMISS_KEY = 'updateDismissed';
 // "Später" hides the offer for this long (a required update can't be put off)
 export const DISMISS_MS = 3 * 24 * 60 * 60 * 1000;
-// asking the server again when the app comes back to the front, at most this often
 const RECHECK_MS = 6 * 60 * 60 * 1000;
 // Play marks an update that must not wait with priority 5 (set in the Play Console / API)
 const PLAY_REQUIRED_PRIORITY = 5;
@@ -86,7 +85,6 @@ async function askPlay() {
 // Asks both. `force` skips the "not more often than" rule.
 async function checkForUpdate({ force = false } = {}) {
     if (!isNativeApp()) return state.status;
-    // while a download runs or is waiting to be installed, nothing changes
     if (state.status === 'downloading' || state.status === 'ready') return state.status;
     if (!force && Date.now() - lastCheck < RECHECK_MS && state.status !== 'required') return state.status;
     lastCheck = Date.now();
@@ -100,7 +98,6 @@ async function checkForUpdate({ force = false } = {}) {
     return state.status;
 }
 
-// "Später" on an offered update
 export function dismissUpdate() {
     if (state.status !== 'available') return;
     try {
@@ -109,7 +106,6 @@ export function dismissUpdate() {
     set({ status: 'none' });
 }
 
-// "Jetzt aktualisieren": through Play when it can, else the store page / download
 export async function startUpdate() {
     if (!isNativeApp()) return;
     const required = state.status === 'required';
@@ -127,7 +123,6 @@ export async function startUpdate() {
     else set({ error: true });
 }
 
-// the downloaded update is installed, the app restarts
 export async function finishUpdate() {
     try {
         await QuideyUpdate.complete();

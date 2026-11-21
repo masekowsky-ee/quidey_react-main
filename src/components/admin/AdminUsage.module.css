@@ -21,7 +21,6 @@
     composes: cardTitle from '../Admin.module.css';
 }
 
-/* heatmap metric: on phones three equal columns, a long name wraps instead of running out */
 .metricSwitch{
     composes: segmented from '../Admin.module.css';
 }
@@ -163,7 +162,6 @@
     min-width: 0;
 }
 
-/* Phones: the six ranges in two columns instead of one long pill */
 @media (max-width: 640px) {
     .range{
         display: grid;
@@ -213,7 +211,6 @@
 
 /* ---------- heatmap ---------- */
 
-/* the grid keeps its width and scrolls inside this box on narrow screens */
 .heatScroll{
     overflow-x: auto;
     overscroll-behavior-x: contain;
@@ -227,7 +224,6 @@
     outline-offset: 2px;
 }
 
-/* 24 hour columns: tight cells, the box scrolls on phones */
 .heatTable th,
 .heatTable td{
     padding-inline: 0.3rem;

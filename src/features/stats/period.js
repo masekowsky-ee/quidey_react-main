@@ -66,7 +66,6 @@ export function sumByBucket(unit, days) {
     return sums;
 }
 
-// Whether a moment (Date or text) lies in the period (everything: always)
 export function inPeriod(period, value) {
     if (!period.from) return true;
     const day = toDateOnly(new Date(value));

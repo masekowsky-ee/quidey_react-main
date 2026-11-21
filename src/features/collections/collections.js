@@ -76,7 +76,6 @@ export const selectCollectionsLoaded = (state) => state.collections.loaded;
 
 export const hasItem = (collection, item) => collection.items.some(entry => entry.kind === item.kind && entry.id === item.id);
 
-// the collections a task / event / note is in
 export const collectionsOf = (list, item) => list.filter(collection => hasItem(collection, item));
 
 // what is in a collection, found in what the app has: tasks (state.task.tasks, events among
@@ -96,7 +95,6 @@ export function collectionContents(collection, tasks, notes) {
     };
 }
 
-// loads my collections once
 export function useCollections() {
     const dispatch = useDispatch();
     const loaded = useSelector(selectCollectionsLoaded);
@@ -116,7 +114,6 @@ const asGroup = (collection) => ({
     name: collection.name, emoji: collection.emoji, color: collection.color, description: collection.description,
 });
 
-// the ids of the tasks (events among them) in a collection
 export const taskIdsIn = (collection) => new Set(collection.items.filter(item => item.kind === 'task').map(item => item.id));
 
 // what tasks are sorted into here: my collections (as groups; the server took my groups over once).

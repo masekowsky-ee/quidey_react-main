@@ -10,7 +10,6 @@ import { fill } from '../../features/helperFunction';
 import { UI_VARIANTS, UI_VARIANT_IDS, setUiVariant, useUiVariant } from '../../features/tester/variants';
 import { TEST_FEATURES, featureTopic, fetchMyTesterFeedback, variantTopic } from '../../features/tester/feedback';
 
-// One interface variant: how it looks, what it is, use it, rate it
 function VariantRow({ variant, active, entry, onSaved }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();

@@ -21,7 +21,6 @@ let fetchMock
 const usageCalls = () => fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/api/usage'))
 const bodyOf = (call) => JSON.parse(call[1].body)
 const queued = () => JSON.parse(sessionStorage.getItem('usageQueue') ?? 'null')?.events ?? []
-// a sign-in token as the server makes it (only the payload is read here)
 const ME = 7
 const tokenFor = (userId) => `h.${btoa(JSON.stringify({ userId, username: 'u', tv: 0 })).replace(/=+$/, '')}.sig`
 

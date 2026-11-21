@@ -12,7 +12,6 @@ import FeedEntry from './FeedEntry';
 
 const locale = localeOf;
 
-// "Today", "Yesterday", "Monday, 20 October"
 function dayLabel(date, t, language, now = new Date()) {
     if (sameDay(date, now)) return t('today');
     const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
@@ -23,7 +22,6 @@ function dayLabel(date, t, language, now = new Date()) {
     });
 }
 
-// entries in order, grouped by the day they last changed on
 function byDay(entries) {
     const groups = [];
     for (const entry of entries) {
@@ -35,7 +33,6 @@ function byDay(entries) {
     return groups;
 }
 
-// Share what I'm working on with my friends (the screen's one filled button)
 function Composer() {
     const { t } = useTranslation();
     const dispatch = useDispatch();

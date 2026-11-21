@@ -35,7 +35,6 @@
     max-width: 30rem;
 }
 
-/* task or event, the planned time / length and the event's type: the same space as the inputs */
 .form > fieldset,
 .form > div:not(.rowDiv):not(.prioHead):not(.more){
     margin-bottom: 0.75rem;
@@ -53,7 +52,6 @@
     min-width: 0;
 }
 
-/* priority: optional, shows "–" until the slider is touched */
 .prioHead{
     display: flex;
     flex-direction: row;
@@ -85,7 +83,6 @@
     transform: none;
 }
 
-/* no priority yet: the slider waits, dimmed, in the middle */
 .prioUnset input[type='range']{
     opacity: 0.45;
 }
@@ -95,7 +92,6 @@
     opacity: 1;
 }
 
-/* "More options": duration, reminder, location, link, extra info, friends */
 .moreToggle{
     align-self: flex-start;
     gap: 0.35rem;
@@ -209,13 +205,11 @@
     color: var(--text-h);
 }
 
-/* "Material scannen" under the kind switch: a quiet way to the scan sheet, as much room above as below */
 .scanLink{
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
     align-self: flex-start;
-    /* the switch above already keeps 0.75rem: the same below */
     margin: 0 0 0.75rem;
     padding: 0;
     font: inherit;
@@ -232,7 +226,6 @@
     color: var(--text-h);
 }
 
-/* the name with the microphone beside it: the button as tall as the field, on its line */
 .nameRow{
     display: flex;
     align-items: stretch;
@@ -254,7 +247,6 @@
     border-radius: var(--radius-sm, 8px);
 }
 
-/* day and time with their names above them: a task's day + time, an event's day, start – end */
 .whenTask,
 .whenEvent{
     display: grid;
@@ -306,7 +298,6 @@
     }
 }
 
-/* a note's text in the plus button's form: room to write, scrolls inside when long */
 .noteBody{
     min-height: 10rem;
     max-height: 45dvh;
@@ -315,13 +306,11 @@
     text-align: left;
 }
 
-/* the priority, now under "Weitere Optionen" */
 .prioBlock{
     display: flex;
     flex-direction: column;
 }
 
-/* a long line the rules hardly understood: "Mit KI lesen" with today's helps left (features/ai/ai.js) */
 .aiHelp{
     display: inline-flex;
     align-items: center;
@@ -361,7 +350,6 @@
     color: var(--text-muted);
 }
 
-/* "More options": the chevron points right while closed, down while open */
 .moreIcon,
 .moreIconOpen{
     flex-shrink: 0;
@@ -372,7 +360,6 @@
     transform: rotate(-90deg);
 }
 
-/* an event's start – end (the margin as under the inputs, so the dash sits at their middle) */
 .timeDash{
     align-self: center;
     margin-bottom: 0.5rem;

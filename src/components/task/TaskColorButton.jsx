@@ -5,7 +5,6 @@ import { useTranslation } from '../../i18n/useTranslation';
 import { isOwnColor, isTaskColor } from '../../features/tasks/taskColors';
 import TaskColorPicker from './TaskColorPicker.jsx';
 
-// distance kept to the window's edges
 const EDGE = 8;
 
 // A small dot in the task's colour; a click opens the swatches right next to it.

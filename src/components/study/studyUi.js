@@ -3,14 +3,12 @@ import { useTranslation } from '../../i18n/useTranslation';
 
 export const KINDS = ['exam', 'assignment', 'presentation', 'other'];
 
-// Whole days from today to a due day (YYYY-MM-DD)
 export function daysUntil(due, now = new Date()) {
     const day = parseDate(due);
     if (!day) return null;
     return Math.round((toDateOnly(day) - toDateOnly(now)) / 86400000);
 }
 
-// "heute" / "morgen" / "in 12 Tagen" / "vor 2 Tagen"
 export function countdownText(due, t, now = new Date()) {
     const days = daysUntil(due, now);
     if (days == null) return '';
@@ -31,7 +29,6 @@ export function goalStateKey(goal, now = new Date()) {
 // Whether a saved goal change moves the plan (date, time, mode): then the preview opens (ruling 30)
 export const changesPlan = (change) => Boolean(change) && ['due', 'dueTime', 'planMode', 'studyFrom', 'studyTo'].some(key => key in change);
 
-// A server error as a sentence: its code's text, else the general one
 export function useStudyError() {
     const { t } = useTranslation();
     return (err) => {

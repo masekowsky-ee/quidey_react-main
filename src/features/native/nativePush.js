@@ -78,7 +78,6 @@ export async function nativeSubscription(language) {
     return { endpoint, toJSON: () => ({ endpoint }) };
 }
 
-// Off on this device: Firebase forgets the token
 export async function unregisterNative() {
     const { PushNotifications } = await load();
     await PushNotifications.unregister().catch(() => {});

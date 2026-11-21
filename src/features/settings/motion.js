@@ -69,7 +69,6 @@ export const MOTION = {
             transition: { ...BOUNCE, opacity: { duration: 0.3 }, filter: { duration: 0.45 } },
         },
     },
-    // task rows: in, out, and sliding to a new place
     row: {
         minimal: {
             layout: 'position',
@@ -159,7 +158,6 @@ export const MOTION = {
             transition: { ...BOUNCE, opacity: { duration: 0.2 }, filter: { duration: 0.3 } },
         }),
     },
-    // a game on the fun page when it starts
     game: {
         minimal: {
             initial: { opacity: 0 },

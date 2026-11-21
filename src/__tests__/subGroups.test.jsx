@@ -41,7 +41,6 @@ function makeStore({ isTester = false } = {}) {
     return store
 }
 
-// Home shows the session's group (and maybe one of its sub-groups)
 function showSession(store, subGroupId) {
     const [group] = selectSharedGroups(store.getState())
     store.dispatch({ type: EDIT_DISPLAYGROUP, payload: { group: { ...group, subGroupId }, tasks: [] } })
@@ -118,7 +117,6 @@ describe('a new task while a session’s group is shown on Home', () => {
         const setCreateTask = vi.fn()
         wrap(<TaskForm setCreateTask={setCreateTask} />, store)
         expect(screen.getByText(/Goes into the session “Lerngruppe”/)).toBeInTheDocument()
-        // nothing personal: no sharing with friends
         fireEvent.click(screen.getByRole('button', { name: /More options/ }))
         expect(screen.queryByText(t('shareWithFriends'))).toBeNull()
 

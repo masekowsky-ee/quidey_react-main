@@ -120,7 +120,6 @@ describe('closed beta', () => {
         await act(async () => { fireEvent.click(submit) })
         expect(apiFetch).toHaveBeenCalledWith('/api/beta-requests', { method: 'POST', body: JSON.stringify({ reason: 'I want to plan my study group' }) })
 
-        // the form is gone for good; the request is shown instead
         expect(screen.getByText('Anfrage gesendet')).toBeInTheDocument()
         expect(screen.getByText('I want to plan my study group')).toBeInTheDocument()
         expect(screen.queryByRole('button', { name: 'Zugang anfragen' })).not.toBeInTheDocument()
@@ -151,7 +150,6 @@ describe('closed beta', () => {
         await signIn(store)
         expect(screen.queryByRole('heading', { name: 'Quidey ist in der geschlossenen Beta' })).not.toBeInTheDocument()
 
-        // the server refused a request: access is checked again
         api.me = { ...api.me, isPro: false }
         await act(async () => { window.dispatchEvent(new Event(PRO_REQUIRED_EVENT)) })
         expect(screen.getByRole('heading', { name: 'Quidey ist in der geschlossenen Beta' })).toBeInTheDocument()

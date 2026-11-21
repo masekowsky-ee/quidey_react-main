@@ -8,7 +8,6 @@ import ProfileAvatar from '../profile/ProfileAvatar';
 import { formatNumber } from '../../features/progress/progress';
 import Icon from '../icons';
 
-// the top five, and me below them when I'm further down
 const SHOWN = 5;
 
 // This week among friends: XP since Monday, most first. Only friends who show their

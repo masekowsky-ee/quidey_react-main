@@ -67,7 +67,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* five little columns, 1 to 5 stars, as tall as their share */
 .spread {
   display: inline-grid;
   grid-template-columns: repeat(5, 0.45rem);

@@ -47,17 +47,13 @@ export default function Home(){
     // testers' interface variants arrange Home their own way (src/ui-variants) and add a part:
     // the departure board (Abfahrtstafel), the reading room's seats (Lesesaal)
     const uiVariant = useUiVariant();
-    // which kinds of entries the list shows: tasks, events, reminders, notes
     const [kinds, toggleKind] = useHomeKinds();
 
-    // the new-task form opens over any page (QuickAdd in the shell); Home's button opens it too
     const setCreateTask = useCallback((open) => dispatch(showForms(Boolean(open))), [dispatch]);
     const [createGroup, setCreateGroupOpen] = useState(false);
-    // a visitor without an account can't make a group: the sign-in window instead
     const requireAccount = useRequireAccount();
     const setCreateGroup = (open) => (open ? requireAccount(() => setCreateGroupOpen(true)) : setCreateGroupOpen(false));
 
-    // --- task in focus, drag & drop ---
     // The task in focus lives in the store (the Fokusraum and the timer on every page use it):
     // a task from a shared session is read live, so done/assignee changes show up; it's gone
     // (nothing active) when I left the session or it ended. One of my own leaves the work area
@@ -67,15 +63,12 @@ export default function Home(){
     const focusPicked = useSelector(state => state.session.focusPicked);
     const setActiveTask = useCallback((next) =>
         dispatch(setFocusTask(typeof next === 'function' ? next(focusTask) : next)), [dispatch, focusTask]);
-    // an open task to start with (only before one was ever chosen), never one that's already done
     const starterTask = tasks.find(task => !task.done && !isEvent(task)) || null;
     useEffect(() => {
         if (!focusPicked && starterTask) dispatch(setFocusTask(starterTask));
     }, [focusPicked, starterTask, dispatch]);
-    // tasks put back from the work area (not done): shown at the end of the list, latest last
     const [releasedIds, setReleasedIds] = useState([]);
 
-    // the shared sessions' tasks; changes arrive live afterwards (useLiveLists in App)
     useEffect(() => {
         dispatch(fetchMySharedTasks()).catch(() => {});
     }, [dispatch]);
@@ -157,14 +150,12 @@ export default function Home(){
         };
     }, [draggedTask, handlePointerMove, handlePointerUp]);
 
-    // one timer at any time: in the focus column on wide screens, in the corner otherwise
     const timerPanel = <TimerContainer inline={desktop} />;
 
     const listedTasks = showSharedTasks ? [...tasks, ...sharedTasks] : tasks;
     const groupForm = createGroup && <FormSheet onClose={() => setCreateGroupOpen(false)}>
         {(sheet, close) => <GroupForm sheet={sheet} setCreateGroup={(value) => { if (!value) close(); }} />}
     </FormSheet>;
-    // the list's props, the same in both layouts (the app's own look adds plain + the kind filter)
     const listProps = {
         activeTask, releasedIds, onActivate: activateTask, setCreateTask, handlePointerDown, draggedTask, dragPosition, dragOffset,
     };
@@ -214,16 +205,13 @@ export default function Home(){
         </div>
     );
 
-    // testers' interface variants: the arrangement their stylesheets (src/ui-variants) expect
     return (
         <div className={styles.page} data-part="home">
             <TitleRow tasks={listedTasks} focusTask={activeTask} />
             {uiVariant === 'tafel' && <DepartureBoard tasks={listedTasks} activeTask={activeTask} />}
-            {/* streak, today's challenges and level, friends: what keeps one going */}
             <div data-part="home-momentum" data-label={t('momentumTitle')}>
                 <Momentum />
             </div>
-            {/* the day at a glance: focus goal, routines, what's next, a quick note */}
             <ReplanCard />
             <Today tasks={listedTasks} />
             <TaskInvites />

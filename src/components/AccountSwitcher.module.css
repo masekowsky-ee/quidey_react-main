@@ -193,7 +193,6 @@
     transform-origin: bottom left;
 }
 
-/* my profile picture fills the circle */
 .avatarPicture{
     display: block;
     width: 100%;

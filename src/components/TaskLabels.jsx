@@ -31,7 +31,6 @@ export default function TaskLabels({ task, onOpenGroup: openFromProp }) {
     }
 
     const names = groupsOf(task);
-    // a task a friend shared with me, or my task that friends joined
     const joined = (task.sharedWith ?? []).filter(share => share.status === 'accepted');
     const sharedText = task.owner
         ? fill(t('sharedBy'), { name: displayName(task.owner) })

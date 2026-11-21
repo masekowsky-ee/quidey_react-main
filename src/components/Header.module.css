@@ -79,7 +79,6 @@
     width: 1.5rem;
 }
 
-/* Menu button | logo | timer (when running) | home button, all on one line */
 .div{
     flex: 1;
     min-height: 0;
@@ -91,7 +90,6 @@
     gap: 0.5rem;
 }
 
-/* Running timer: compact pill centered between the two buttons */
 .timerChip{
     /* as wide as its content: dot, time and (for a countdown) a short progress line */
     flex: 0 1 auto;
@@ -118,7 +116,6 @@
     }
 }
 
-/* Green when running (with a soft pulse), grey when paused */
 .timerDot{
     flex-shrink: 0;
     width: 0.5rem;
@@ -176,7 +173,6 @@
         height: 1.75rem;
     }
 
-    /* phones: dot and time only, the header has no room for more */
     .timerChip{
         gap: 0.35rem;
         padding: 0.2rem 0.55rem;
@@ -200,7 +196,6 @@
 
 /* ---------- collaboration: work pill, quick panel ---------- */
 
-/* Timers in the middle; they share the space and shrink before the buttons do */
 .center{
     flex: 1 1 auto;
     min-width: 0;
@@ -215,7 +210,6 @@
     flex: 0 1 auto;
 }
 
-/* Team button and home button on the right */
 .end{
     flex-shrink: 0;
     display: flex;
@@ -229,7 +223,6 @@
     height: 2.75rem;
 }
 
-/* The streak: a small flame and the days. Amber and filled once today counts. */
 .streakPill{
     display: inline-flex;
     align-items: center;
@@ -251,7 +244,6 @@
     color: var(--streak-ink, var(--plant-fruit));
 }
 
-/* today counts: the number in ink and the flame filled; the pill itself stays plain */
 .streakPill[data-lit="true"]{
     color: var(--text-h);
 }
@@ -265,7 +257,6 @@
     background: var(--hover-wash);
 }
 
-/* The inbox at the end of the bar, from every page; the unread count as a badge. On it: ink. */
 .inboxBtn{
     position: relative;
 }
@@ -274,7 +265,6 @@
     color: var(--text-h);
 }
 
-/* My team stopwatch: like the timer chip, with the task name and a pause button */
 .teamPill{
     flex: 0 1 18rem;
     min-width: 0;
@@ -360,7 +350,6 @@
     border: 1px solid var(--control-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-float);
-    /* it grows out of its button (top right), not out of its own middle */
     transform-origin: top right;
     animation: chipIn var(--ease);
     /* above everything else in the header (the daily line comes later in the page) */
@@ -417,7 +406,6 @@ a.quickRowBtn{
     text-decoration: none;
 }
 
-/* a family's emoji on its colour, as in the families list */
 .quickEmoji{
     flex-shrink: 0;
     display: inline-flex;
@@ -516,7 +504,6 @@ a.quickRowBtn{
         height: 2.5rem;
     }
 
-    /* the clock says enough on a phone */
     .teamPillTask{
         display: none;
     }
@@ -535,7 +522,6 @@ a.quickRowBtn{
 
 /* ---------- logo ---------- */
 
-/* The logo mark in the accent plus the name in plain ink */
 .brand{
     flex-shrink: 0;
     display: inline-flex;
@@ -645,7 +631,6 @@ a.quickRowBtn{
     }
 }
 
-/* Tiny screens: the mark alone */
 @media (max-width: 359px){
     .brandText{
         display: none;
@@ -662,7 +647,6 @@ a.quickRowBtn{
     scale: 1.2;
 }
 
-/* "normal" motion: the logo tilts and grows a little */
 :global(:root[data-motion="normal"]) .brandMark{
     transition: rotate 0.5s cubic-bezier(0.34, 1.35, 0.64, 1), scale 0.4s cubic-bezier(0.34, 1.35, 0.64, 1);
 }
@@ -672,7 +656,6 @@ a.quickRowBtn{
     scale: 1.1;
 }
 
-/* Something unread somewhere (messages, requests, invites): a count on the menu button */
 .menuBtn{
     position: relative;
 }
@@ -695,7 +678,6 @@ a.quickRowBtn{
     pointer-events: none;
 }
 
-/* Only news without a count (a friend accepted, something changed in a session): a dot */
 .menuDot{
     position: absolute;
     top: 0.45rem;
@@ -731,7 +713,6 @@ a.quickRowBtn{
     }
 }
 
-/* Phones: the tab bar's "More" opens the menu, so the logo starts the row */
 @media (max-width: 720px) {
     .div > .menuBtn{
         display: none;
@@ -743,7 +724,6 @@ a.quickRowBtn{
 }
 
 /* ---------- testers' interface variants (features/tester/variants.js) ---------- */
-/* "tabs on top": the menu is a drawer on wide screens too, so its button and the logo stay */
 @media (min-width: 1100px) {
     .undocked .div > .menuBtn{
         display: inline-flex;
@@ -801,7 +781,6 @@ a.quickRowBtn{
     border-radius: 4px;
 }
 
-/* phones and tablets: the magnifier alone */
 @media (max-width: 1099px) {
     .commandBtn{
         flex: none;
@@ -818,7 +797,6 @@ a.quickRowBtn{
     }
 }
 
-/* the running timer leads to the Fokusraum */
 a.timerChip {
     color: inherit;
     text-decoration: none;
@@ -894,7 +872,6 @@ a.timerChip {
     }
 }
 
-/* "Anmelden": a visitor without an account, top right; the one filled button of the screen */
 .signIn{
 composes: btnPrimary from './ui.module.css';
 margin-left: 0.5rem;

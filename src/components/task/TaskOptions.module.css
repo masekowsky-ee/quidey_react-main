@@ -144,7 +144,6 @@
     transition: transform var(--ease-out), box-shadow var(--ease-out);
 }
 
-/* "no colour": an empty ring with a slash */
 .swatchNone{
     background:
         linear-gradient(135deg, transparent calc(50% - 1px), var(--text-muted) calc(50% - 1px), var(--text-muted) calc(50% + 1px), transparent calc(50% + 1px));
@@ -164,7 +163,6 @@
     outline-offset: 4px;
 }
 
-/* the small plus at the end: a new colour of my own; the same round dot as the swatches */
 .addSwatch{
     display: inline-flex;
     align-items: center;
@@ -252,7 +250,6 @@
     color: var(--danger);
 }
 
-/* the dot in the task list that opens the swatches */
 .colorButtonWrap{
     position: relative;
     display: inline-flex;
@@ -283,10 +280,9 @@
     height: 0.95rem;
 }
 
-/* placed by TaskColorButton (fixed, kept inside the window) */
 .colorPopover{
     position: fixed;
-    z-index: calc(var(--z-modal) + 1); /* also above a dialog */
+    z-index: calc(var(--z-modal) + 1);
     box-sizing: border-box;
     width: max-content;
     max-width: min(16.5rem, calc(100vw - 2rem));
@@ -338,7 +334,6 @@
     transform: none;
 }
 
-/* picked: brighter ink on a stronger ground, with a tick */
 .reminderChoices > button[aria-pressed="true"],
 .reminderChoices > button[aria-pressed="true"]:hover{
     color: var(--text-h);
@@ -355,7 +350,6 @@
     cursor: default;
 }
 
-/* "Also by mail" under the reminders */
 .checkRow{
     display: flex;
     align-items: center;
@@ -510,7 +504,6 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* an event's type: a dot in its colour and the name */
 .metaType{
     display: inline-flex;
     align-items: center;
@@ -527,7 +520,6 @@
     background-color: var(--task-color, var(--text-muted));
 }
 
-/* a task's planned time; once there is focus time, how much of it ("1 h / 2 h") */
 .metaPlanned{
     display: inline-flex;
     align-items: center;
@@ -660,7 +652,6 @@
     }
 }
 
-/* When a repeat ends: never, or after a number of times */
 .repeatEnd{
     display: flex;
     flex-wrap: wrap;

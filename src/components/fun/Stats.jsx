@@ -1,6 +1,5 @@
 import styles from './Fun.module.css';
 
-// Row of small numbers above a game: [{ label, value }]
 export default function Stats({ items }) {
     return (
         <dl className={styles.stats}>

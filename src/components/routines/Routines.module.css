@@ -159,7 +159,6 @@
     margin-top: 0.5rem;
 }
 
-/* the templates as one list on a tonal panel: emoji, name, length; a hairline between them */
 .templateGrid {
     composes: panel from '../ui.module.css';
     display: flex;

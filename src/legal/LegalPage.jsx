@@ -52,7 +52,6 @@ function Address() {
 // phone is optional in owner.js (then a second quick way to reach you is needed, see there)
 const hasPhone = (phone) => phone && !/^[-\s]*$/.test(phone);
 
-// email plus a second quick way (phone if set, the contact form always)
 function ContactLines() {
     return (
         <p>

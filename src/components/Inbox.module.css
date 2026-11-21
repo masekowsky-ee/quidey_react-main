@@ -88,7 +88,6 @@ button.row:hover{
     background: var(--hover-wash);
 }
 
-/* the conversation open beside the list: the same neutral pill as the current page in the menu */
 button.rowSelected,
 button.rowSelected:hover{
     background: var(--surface-strong);
@@ -111,7 +110,6 @@ button.rowSelected:hover{
     display: grid;
     grid-template-columns: 22rem minmax(0, 1fr);
     gap: 1rem;
-    /* the list and the open conversation end on one line */
     align-items: stretch;
 }
 
@@ -124,7 +122,6 @@ button.rowSelected:hover{
     min-height: 24rem;
 }
 
-/* the messages fill the panel, the box to write in sits at its foot */
 .splitThread > .thread{
     flex: 1;
 }
@@ -139,7 +136,6 @@ button.rowSelected:hover{
     color: var(--text-muted);
 }
 
-/* nothing open: a sentence and the friends to write to, from the top of the pane */
 .pickPane{
     display: flex;
     flex-direction: column;

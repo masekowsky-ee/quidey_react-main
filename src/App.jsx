@@ -44,7 +44,6 @@ import {
   useGuestSeed, useSignedInStart, useAccessGuard, useSignedInData, useAppServices, useUsage,
 } from './features/app/startup.js';
 
-// while the mail link's page is on its way: its shape
 const gateLoading = <GateSkeleton />;
 
 function App(){
@@ -54,7 +53,6 @@ function App(){
   // <html lang>: German or English, as the app speaks (screen readers, hyphenation)
   const language = useSelector((state) => state.settings.language);
   useEffect(() => { document.documentElement.lang = language; }, [language]);
-  // testers: the interface variant they picked (<html data-ui>), its way of navigating
   useApplyUiVariant();
   const navModel = useNavModel();
   const motionLevel = useMotionLevel();
@@ -89,10 +87,8 @@ function App(){
   useAppServices(allowed, token, navigate);
 
   const location = useLocation();
-  // calm mode: while a focus round runs in the Fokusraum, the navigation steps back (features/focus/calm.js)
   const calm = useCalm(location.pathname);
   useUsage(allowed, access, location.pathname);
-  // while a page's code is on its way (only the first time, and briefly): that page's shape
   const pageLoading = <RouteSkeleton pathname={location.pathname} fade />;
 
   // the link from the verification mail works signed in or not, and before beta access
@@ -100,7 +96,6 @@ function App(){
   // Impressum, Datenschutz and terms must open for everybody, signed in or not
   if (LEGAL_PATHS.includes(location.pathname)) return <Suspense fallback={pageLoading}><LegalPage /></Suspense>;
   // signed out: the app itself, as a guest (below); the landing page is its own site on quidey.com
-  // the app's frame until the server says whether I may use it
   if (signedIn && !access.checked) return <AppSkeleton />;
   if (signedIn && !access.isPro) {
     return (
@@ -135,11 +130,9 @@ function App(){
         </>}
         <QuickAdd/>
         {!guest && <ReminderAlert/>}
-        {/* the round add button, bottom right, on the planning pages */}
         <AddFab/>
         {/* Quidey Max: the AI assistant, round at the bottom left, on the same pages */}
         {!guest && <AssistantFab/>}
-        {/* Ctrl/⌘ K or "/": search tasks, jump, do; "?": the keyboard shortcuts */}
         <CommandPalette/>
         <ShortcutsDialog/>
         {/* the free plan is full (after the beta): the way to Quidey Pro */}

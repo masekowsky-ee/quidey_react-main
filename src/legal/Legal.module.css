@@ -61,7 +61,6 @@
     color: var(--primary-fg);
 }
 
-/* an unfilled value from owner.js */
 .todo{
     padding: 0 0.25rem;
     color: #fff;
@@ -131,7 +130,6 @@
     font: inherit;
 }
 
-/* the field only bots fill in */
 .trap{
     position: absolute;
     left: -10000px;
@@ -162,7 +160,6 @@
     align-self: flex-start;
 }
 
-/* the cancel form's choice of cancellation (radio buttons) */
 fieldset.field {
     margin: 0;
     padding: 0;

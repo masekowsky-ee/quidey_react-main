@@ -12,14 +12,12 @@ import { showToast } from '../features/toast/toast';
 
 // A new collection (collections took the place of groups)
 export default function GroupForm(props){
-    // sheet: the FormSheet it sits in (slides in, swiped down on phones)
     const {setCreateGroup, sheet} = props;
 
     const dispatch = useDispatch();
 
     const { t } = useTranslation();
 
-    // the group's colour: its tasks get a dot in it
     const [color, setColor] = useState(null);
 
     const handleSubmit = (e) => {

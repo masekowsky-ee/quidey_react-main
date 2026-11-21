@@ -14,7 +14,6 @@
     composes: cardTitle from './ui.module.css';
 }
 
-/* Friends | Add | Requests */
 .tabs{
     composes: tabBar from './ui.module.css';
 }
@@ -27,14 +26,12 @@
     gap: 0.45rem;
 }
 
-/* Number of friends, quiet */
 .count{
     font-size: 0.75rem;
     opacity: 0.7;
     font-variant-numeric: tabular-nums;
 }
 
-/* Open requests, green so they get noticed */
 .badge{
     min-width: 1.25rem;
     padding: 0 0.35rem;
@@ -84,13 +81,11 @@
     white-space: nowrap;
 }
 
-/* the name opens the profile */
 .name:hover{
     text-decoration: underline;
     text-underline-offset: 3px;
 }
 
-/* the name, and "online" beside it */
 .nameLine{
     display: flex;
     align-items: baseline;
@@ -103,7 +98,6 @@
     font-size: 1rem;
 }
 
-/* what a friend is working on (their profile status) */
 .status{
     font-size: 0.8rem;
     color: var(--text);
@@ -150,7 +144,6 @@
     height: auto;
 }
 
-/* Text-only until hovered, for actions that shouldn't shout */
 .actions .quietBtn{
     background: transparent;
     border-color: transparent;
@@ -252,7 +245,6 @@
         flex-wrap: wrap;
     }
 
-    /* buttons drop under the name instead of squeezing it */
     .actions{
         width: 100%;
         justify-content: flex-end;
@@ -279,7 +271,6 @@
     box-shadow: none;
 }
 
-/* "Remove" shows where the row is looked at (always on touch) */
 @media (hover: hover) and (pointer: fine){
     .revealBtn{
         opacity: 0;

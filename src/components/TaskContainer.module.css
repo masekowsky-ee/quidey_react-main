@@ -8,7 +8,6 @@
   text-align: left;
 }
 
-/* chevron | title | count | (group colour) ............ done toggle | new task */
 .sectionHead {
   display: flex;
   align-items: center;
@@ -41,7 +40,6 @@
   margin-left: auto;
 }
 
-/* folds the whole list away */
 .collapseBtn {
   composes: iconBtn from './ui.module.css';
   width: 2rem;
@@ -50,7 +48,6 @@
   color: var(--text-muted);
 }
 
-/* testers: the shown collection's own page */
 .openCollection {
   composes: iconBtn from './ui.module.css';
   width: 2rem;
@@ -98,7 +95,6 @@
   margin-top: -0.25rem;
 }
 
-/* Home's own look: quiet text buttons in the list's head ("5 erledigt", "Neue Aufgabe") */
 .textBtn {
   height: 2.25rem;
   padding: 0 0.75rem;
@@ -123,7 +119,6 @@
   color: var(--text-h);
 }
 
-/* "4 weitere zeigen": the rest of the list, on request */
 .moreRows {
   width: 100%;
   height: 2.75rem;
@@ -143,7 +138,6 @@
   }
 }
 
-/* the rows sit straight on the list's panel, a hairline above each */
 .plainList {
   margin: 0 -0.25rem;
 }
@@ -155,7 +149,6 @@
   overscroll-behavior: contain;
 }
 
-/* the study plan's later sessions, folded away: one quiet row under the list */
 .plannedRow {
   display: flex;
   align-items: center;
@@ -185,7 +178,6 @@
   }
 }
 
-/* Shows/hides the Done list; count in a small badge */
 .doneToggle {
   height: 2.25rem;
   gap: 0.5rem;
@@ -220,7 +212,6 @@
   background-color: var(--surface-hover);
 }
 
-/* the session's note or the group's description, under the title */
 .groupNote {
   margin: -0.25rem 0 0;
   font-size: 0.875rem;
@@ -259,7 +250,6 @@
   color: var(--text-muted);
 }
 
-/* nothing open: the panel keeps its frame and says so */
 .empty {
   padding: 2rem 0.75rem;
 }
@@ -275,7 +265,6 @@
   color: var(--text-muted);
 }
 
-/* the task under the pointer while it is dragged */
 .dragGhost {
   position: fixed;
   z-index: var(--z-drag);
@@ -305,7 +294,6 @@
     row-gap: 0.5rem;
   }
 
-  /* the actions on their own line, the new task button at its end */
   .headActions {
     flex-basis: 100%;
     margin-left: 0;
@@ -322,7 +310,6 @@
   }
 }
 
-/* Tasks of shared sessions in "All": shown (eye) or taken out (crossed eye, muted) */
 /* Session tasks in "All" or not: a quiet eye beside the one primary action, its name in the
    tooltip (the same switch is in the settings) */
 .sharedToggle {
@@ -361,7 +348,6 @@
   height: 1.1rem;
 }
 
-/* while they are taken out, a line says so and brings them back */
 .hiddenNote {
   display: flex;
   flex-wrap: wrap;
@@ -388,7 +374,6 @@
   background: none;
 }
 
-/* phones: the eye alone, the label would push the buttons off the row */
 @media (max-width: 720px) {
   .sharedToggleLabel {
     display: none;

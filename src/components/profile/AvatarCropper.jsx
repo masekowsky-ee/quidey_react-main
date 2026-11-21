@@ -53,7 +53,6 @@ export default function AvatarCropper({ image, busy = false, onDone, onClose }) 
             place({ ...start.placement, zoom: start.placement.zoom * (spread() / start.spread) });
             return;
         }
-        // one circle width dragged = the picture moved by one circle width
         const w = width();
         place({ ...start.placement, x: start.placement.x + (e.clientX - start.pointer.x) / w, y: start.placement.y + (e.clientY - start.pointer.y) / w });
     };
