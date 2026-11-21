@@ -4,6 +4,7 @@ import '@testing-library/jest-dom/vitest'
 import { afterEach, beforeEach } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import { MotionGlobalConfig } from 'motion/react'
+import { loadLanguage } from './i18n/translations'
 
 // The app takes the device's language until one is picked; tests run on a German "device"
 // (jsdom says en-US), so the app speaks German in them unless a test sets English
@@ -29,3 +30,6 @@ afterEach(() => cleanup())
 // Quidey opens for visitors without an account too (src/features/auth/gate.js): a store made in a
 // test counts as signed in unless the test clears the token itself (guest tests do)
 beforeEach(() => localStorage.setItem('token', 'test-token'))
+
+// Tests read both languages synchronously, so they are loaded before any test file runs
+await Promise.all([loadLanguage('de'), loadLanguage('en')])

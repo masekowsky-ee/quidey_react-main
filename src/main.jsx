@@ -17,6 +17,7 @@ import { setupNativeApp } from './features/native/native'
 import { startOfflineSync } from './features/offline/offline'
 import { platform } from './features/usage/platform'
 import { startOwnColors } from './features/tasks/ownColors'
+import { loadLanguage } from './i18n/translations'
 
 registerServiceWorker()
 listenForInstallPrompt()
@@ -26,7 +27,8 @@ setupNativeApp(store)
 startOfflineSync()
 startOwnColors()
 
-createRoot(document.getElementById('root')).render(
+// the texts of the chosen language are a chunk of their own: render once it is here
+loadLanguage(store.getState().settings.language).then(() => createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Provider store={store}>
@@ -35,4 +37,4 @@ createRoot(document.getElementById('root')).render(
       <AppIntro />
     </BrowserRouter>
   </StrictMode>,
-)
+))

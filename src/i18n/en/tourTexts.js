@@ -1,0 +1,121 @@
+export default {
+    tutSkip: 'Skip',
+    tutBack: 'Back',
+    tutNext: 'Next',
+    tutDone: "Let's go",
+    tutHello: 'Hi {name}!',
+    tutOpen: 'Open {page}',
+    tutKeys: '← → to browse · Esc closes',
+    tutJump: 'Jump straight to a chapter',
+    tutNewTask: 'Create your first task',
+    tutFindFriends: 'Find friends',
+    tutDesignProfile: 'Design your profile',
+    tutFirstSteps: 'Your first steps',
+
+    tut_welcome_short: 'Start',
+    tut_welcome_title: 'Welcome to Quidey!',
+    tut_welcome_text: 'Your planner for learning and studying. In about a minute you will see how planning, focus and studying together fit together here.',
+    tut_welcome_tips: [
+        'Move on with "Next", the arrow keys, or just swipe sideways.',
+        'Feel free to skip. You can restart the tour any time under Settings → App.',
+    ],
+
+    tut_plan_short: 'Plan',
+    tut_plan_title: 'Tasks and events',
+    tut_plan_text: '"New" in the header adds something from any page. Only the name is required, add everything else whenever you like.',
+    tut_plan_tips: [
+        'A task is ticked off by you. An event like a lecture or a shift has a day and is done once it is over.',
+        'Set groups, priority, colour, planned time and repeats in the editor.',
+        'Reminders show up in the app, and by email if you want.',
+    ],
+
+    tut_focus_short: 'Focus',
+    tut_focus_title: 'Focus time that counts',
+    tut_focus_text: 'Pick a task and start the timer. Every minute is booked onto that task and ends up in your statistics.',
+    tut_focus_tips: [
+        'Tap the focus icon on a task, or drag it into the "Focus" column.',
+        'The timer counts down, the stopwatch counts up. Set the default length in the settings.',
+        'The running time stays visible in the header, whichever page you are on.',
+    ],
+
+    tut_calendar_short: 'Calendar',
+    tut_calendar_title: 'Your week at a glance',
+    tut_calendar_text: 'Month, week or agenda: the calendar shows tasks and events together. Just drag an entry onto another day.',
+    tut_calendar_tips: [
+        'Repeat weekly, monthly or yearly, with an end if you like.',
+        'The toolbar switches to the calendars of your shared sessions and families.',
+        'Accept tasks your friends share with you here.',
+    ],
+
+    tut_grow_short: 'Grow',
+    tut_grow_title: 'Streak, XP and your plant',
+    tut_grow_text: 'Every day with focus extends your streak. Focus minutes, finished tasks and challenges give XP, and your plant grows with every level.',
+    tut_grow_tips: [
+        '1 XP per focus minute and 5 per finished task, plus three challenges a day and two a week.',
+        'Every level unlocks more for your profile: emojis, colours, banners, frames and titles.',
+        'The flame in the header shows your streak. It burns once today counts.',
+    ],
+
+    tut_together_short: 'Together',
+    tut_together_title: 'Study with friends',
+    tut_together_text: 'Social holds everything with other people: the feed, friends, shared sessions and families. Messages land in your inbox.',
+    tut_together_tips: [
+        'Sessions: one shared task list, a stopwatch for everyone and a chat, all live.',
+        'Family: a fixed group with a shared calendar, a board and its own chat.',
+        'Cheer friends on in the feed. A green dot shows who is online right now; whether you show up like that is up to you in your profile.',
+    ],
+
+    tut_stats_short: 'Look back',
+    tut_stats_title: 'See what you got done',
+    tut_stats_text: 'Your statistics show your focus time and how long your events took, per week, month, year or all time.',
+    tut_stats_tips: [
+        'Give events a type like "Work": then you see e.g. "32 h Work" for the month.',
+        'The arrows take you back week by week or month by month.',
+        'Plus a 26-week heat map, your finished tasks and your badges.',
+    ],
+
+    tut_yours_short: 'Your style',
+    tut_yours_title: 'Make it yours',
+    tut_yours_text: 'Try it right here: an accent colour and light or dark. Everything else is in the settings.',
+    tut_yours_tips: [
+        'Six colour palettes for the ground of the app.',
+        'How much motion you like: minimal, normal or extreme.',
+        'Install Quidey under Settings → App and it starts like any other app.',
+    ],
+
+    tut_ready_short: 'Go',
+    tut_ready_title: 'Always at hand',
+    tut_ready_text_phone: 'Home, calendar, focus and social are at the bottom, the inbox at the top right. Everything else is behind "More".',
+    tut_ready_text_drawer: 'The menu button on the left of the header leads to every page, your account and the settings.',
+    tut_ready_text_bar: 'The bar at the top takes you to Home, Calendar, Focus room, Social, Inbox and Statistics. "More" holds the rest, your account and the settings.',
+    tut_ready_text_sidebar: 'The sidebar on the left holds every page, with settings, feedback and your account at the bottom.',
+    tut_ready_text_other: 'Every page is in the navigation of your interface, settings and account are in the menu.',
+    tut_ready_tips: [
+        'Something missing or broken? Write to us via "Feedback" in the menu.',
+        'Psst: try clicking the light bulb and the window behind it.',
+    ],
+    tut_ready_tester: 'As a tester you find the test area in the menu, with new interfaces to try.',
+    // the short tour for visitors without an account (Tutorial.jsx, GUEST_STEPS)
+    tut_join_short: 'Account',
+    tut_join_title: 'Ready to start?',
+    tut_join_text: 'With an account Quidey keeps your tasks, events and focus time, and you find it all again on every device.',
+    tut_join_tips: [
+        'Signing in or up takes one window, Google included.',
+        'You can find this short tour any time in the menu under “Quick tour”.',
+    ],
+    tutGuestSignUp: 'Create account',
+    guestInviteTitle: 'New here?',
+    guestInviteText: 'In a minute you see what Quidey can do.',
+    guestInviteOpen: 'Quick tour',
+    guestInviteLater: 'Not now',
+
+    tutDemo_task: 'Summarise chapter 3',
+    tutDemo_taskMeta: 'Today · High',
+    tutDemo_event: 'Statistics lecture',
+    tutDemo_eventMeta: '10:00 · 90 min',
+    tutDemo_focusLeft: 'left',
+    tutDemo_feed: '2 h 10 min focus today',
+    tutDemo_level: 'Level {level}',
+    tutDemo_focus: 'Focus',
+    tutDemo_events: 'Events',
+}
