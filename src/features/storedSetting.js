@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { createListeners } from './externalStore';
 
 // The one way settings are kept on this device (localStorage). Storage can throw (private mode,
 // blocked or full), so a read falls back to a default and a write fails silently: the setting then
@@ -28,14 +29,13 @@ export function remove(key) {
 // A stored value that components follow (useSyncExternalStore): get/set it, and every hook
 // re-reads after a set. `encode` turns the value into the stored text.
 export function createStoredValue(key, { fallback, parse, encode }) {
-    const listeners = new Set();
+    const { subscribe, notify } = createListeners();
     const get = () => read(key, { fallback, parse });
-    const subscribe = (listener) => { listeners.add(listener); return () => listeners.delete(listener); };
     return {
         get,
         set(value) {
             write(key, encode(value));
-            listeners.forEach(listener => listener());
+            notify();
         },
         useValue: () => useSyncExternalStore(subscribe, get, get),
     };

@@ -1,6 +1,8 @@
 // Logic of the fun page games, kept free of React so it can be tested on its own.
 // Everything random takes an rng (() => number in [0, 1)) so tests can pass a seeded one.
 
+import { read, write } from '../storedSetting';
+
 // Small seeded generator (mulberry32)
 export function makeRng(seed) {
     let a = seed >>> 0;
@@ -29,18 +31,9 @@ export function shuffle(list, rng = Math.random) {
 
 export const LEVELS = ['easy', 'normal', 'hard'];
 
-export function readLevel(game) {
-    try {
-        const stored = localStorage.getItem(`funLevel:${game}`);
-        return LEVELS.includes(stored) ? stored : 'normal';
-    } catch {
-        return 'normal';
-    }
-}
+export const readLevel = (game) => read(`funLevel:${game}`, { allowed: LEVELS, fallback: 'normal' });
 
-export function storeLevel(game, level) {
-    try { localStorage.setItem(`funLevel:${game}`, level); } catch { /* only for this visit */ }
-}
+export const storeLevel = (game, level) => write(`funLevel:${game}`, level);
 
 // ---------- word guess ----------
 
@@ -204,13 +197,13 @@ export function makeSequence(rng = Math.random, kind, level = 'normal') {
 const bestKey = (game, level) => `funBest:${game}:${level}`;
 
 export function readBest(game, level = 'normal') {
-    try { return Number(localStorage.getItem(bestKey(game, level))) || 0; } catch { return 0; }
+    return read(bestKey(game, level), { parse: text => Number(text) || 0, fallback: 0 });
 }
 
 // Saves the score if it beats the old best; returns the best after that
 export function saveBest(game, level, score) {
     const best = readBest(game, level);
     if (score <= best) return best;
-    try { localStorage.setItem(bestKey(game, level), String(score)); } catch { /* only for this visit */ }
+    write(bestKey(game, level), String(score));
     return score;
 }

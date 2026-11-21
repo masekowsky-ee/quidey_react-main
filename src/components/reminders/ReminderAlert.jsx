@@ -9,6 +9,7 @@ import { ringsNatively } from '../../features/native/alarms';
 import { playSound } from '../../features/settings/sound';
 import Icon from '../icons';
 import { useModal } from '../../features/layout/useModal';
+import { read, write } from '../../features/storedSetting';
 import { hhmm } from '../../features/calendar/calendar';
 
 const CHECK_MS = 15 * 1000;
@@ -16,18 +17,15 @@ const SEEN_KEY = 'reminderSeen';
 const SEEN_MAX = 50;
 
 // the times already shown here ("<id>@<ms>"), so a reload doesn't bring one back
-function readSeen() {
-    try {
-        const list = JSON.parse(localStorage.getItem(SEEN_KEY) ?? '[]');
+const readSeen = () => read(SEEN_KEY, {
+    parse: (text) => {
+        const list = JSON.parse(text ?? '[]');
         return Array.isArray(list) ? list : [];
-    } catch {
-        return [];
-    }
-}
+    },
+    fallback: [],
+});
 function markSeen(key) {
-    try {
-        localStorage.setItem(SEEN_KEY, JSON.stringify([...readSeen().filter(k => k !== key), key].slice(-SEEN_MAX)));
-    } catch { /* only for this visit */ }
+    write(SEEN_KEY, JSON.stringify([...readSeen().filter(k => k !== key), key].slice(-SEEN_MAX)));
 }
 
 

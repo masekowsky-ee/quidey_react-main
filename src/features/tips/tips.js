@@ -9,8 +9,10 @@
 // everybody sees it once: give every new feature a tip here (and its texts tip_<id>_title/_text).
 import { useSelector, shallowEqual } from 'react-redux';
 import { apiFetch } from '../api/api';
+import { read, write } from '../storedSetting';
 import { TIPS_SET } from '../auth/authActionTypes';
 import { isCommunityPath } from '../community/paths';
+import { paths } from '../app/navTable';
 
 const isPath = (base) => (pathname) => pathname === base || pathname.startsWith(`${base}/`);
 const anyPage = () => true;
@@ -39,25 +41,25 @@ export const TIPS = [
     { id: 'focus', page: (p) => p === '/', target: '[data-part="home-focus"], [data-part="focus"]' },
     { id: 'list', page: (p) => p === '/', target: '[data-part="home-list"], [data-part="task-list"]' },
     { id: 'search', page: (p) => p === '/', target: '[data-tip="search"]' },
-    { id: 'calendarViews', page: isPath('/calendar'), target: '[data-tip="calendar-views"]' },
-    { id: 'calendarDrag', page: isPath('/calendar'), target: '[data-tip="calendar-grid"]' },
-    { id: 'focusGoal', page: isPath('/focus'), target: '[data-tip="focus-goal"]' },
-    { id: 'focusTimer', page: isPath('/focus'), target: '[data-tip="focus-timer"]' },
-    { id: 'focusNotes', page: isPath('/focus'), target: '[data-tip="focus-notes"]' },
-    { id: 'focusSettings', page: isPath('/focus'), target: '[data-tip="focus-settings"]' },
-    { id: 'studyGoal', page: (p) => p === '/study', target: '[data-tip="study-new-goal"]' },
-    { id: 'studySubject', page: (p) => p === '/study', target: '[data-tip="study-new-subject"]' },
-    { id: 'studyGrades', page: (p) => p === '/study', target: '[data-tip="study-grades"]' },
-    { id: 'homeworkSuggestions', page: (p) => p === '/study', target: '[data-tip="homework-suggestions"]' },
-    { id: 'notesNew', page: isPath('/notes'), target: '[data-tip="notes-new"]' },
-    { id: 'notesFolder', page: isPath('/notes'), target: '[data-tip="notes-folder"]' },
-    { id: 'notesSearch', page: isPath('/notes'), target: '[data-tip="notes-search"]' },
-    { id: 'routines', page: isPath('/routines'), target: '[data-tip="routine-new"]' },
-    { id: 'collections', page: isPath('/collections'), target: '[data-tip="collection-new"]' },
+    { id: 'calendarViews', page: isPath(paths.calendar), target: '[data-tip="calendar-views"]' },
+    { id: 'calendarDrag', page: isPath(paths.calendar), target: '[data-tip="calendar-grid"]' },
+    { id: 'focusGoal', page: isPath(paths.focus), target: '[data-tip="focus-goal"]' },
+    { id: 'focusTimer', page: isPath(paths.focus), target: '[data-tip="focus-timer"]' },
+    { id: 'focusNotes', page: isPath(paths.focus), target: '[data-tip="focus-notes"]' },
+    { id: 'focusSettings', page: isPath(paths.focus), target: '[data-tip="focus-settings"]' },
+    { id: 'studyGoal', page: (p) => p === paths.study, target: '[data-tip="study-new-goal"]' },
+    { id: 'studySubject', page: (p) => p === paths.study, target: '[data-tip="study-new-subject"]' },
+    { id: 'studyGrades', page: (p) => p === paths.study, target: '[data-tip="study-grades"]' },
+    { id: 'homeworkSuggestions', page: (p) => p === paths.study, target: '[data-tip="homework-suggestions"]' },
+    { id: 'notesNew', page: isPath(paths.notes), target: '[data-tip="notes-new"]' },
+    { id: 'notesFolder', page: isPath(paths.notes), target: '[data-tip="notes-folder"]' },
+    { id: 'notesSearch', page: isPath(paths.notes), target: '[data-tip="notes-search"]' },
+    { id: 'routines', page: isPath(paths.routines), target: '[data-tip="routine-new"]' },
+    { id: 'collections', page: isPath(paths.collections), target: '[data-tip="collection-new"]' },
     { id: 'community', page: isCommunityPath, target: '[data-tip="community-tabs"]' },
-    { id: 'stats', page: isPath('/stats'), target: '[data-tip="stats-tabs"]' },
-    { id: 'statsPeriod', page: isPath('/stats'), target: '[data-tip="stats-period"]' },
-    { id: 'avatar', page: isPath('/profile'), target: '[data-tip="avatar-upload"]' },
+    { id: 'stats', page: isPath(paths.stats), target: '[data-tip="stats-tabs"]' },
+    { id: 'statsPeriod', page: isPath(paths.stats), target: '[data-tip="stats-period"]' },
+    { id: 'avatar', page: isPath(paths.profile), target: '[data-tip="avatar-upload"]' },
     // wherever they turn up: in the drawer, in forms and sheets, on session and family pages
     // phones: Statistiken lives in the drawer
     { id: 'menuStats', page: anyPage, target: '[data-tip="menu-stats"]' },
@@ -110,22 +112,22 @@ const localKey = (getState) => {
 };
 function readLocal(getState) {
     const key = localKey(getState);
-    try {
-        const value = key ? JSON.parse(localStorage.getItem(key) ?? 'null') : null;
-        return {
-            seen: Array.isArray(value?.seen) ? value.seen.filter(id => typeof id === 'string') : [],
-            off: value?.off === true,
-        };
-    } catch {
-        return { seen: [], off: false };
-    }
+    if (!key) return { seen: [], off: false };
+    return read(key, {
+        parse: (text) => {
+            const value = JSON.parse(text ?? 'null');
+            return {
+                seen: Array.isArray(value?.seen) ? value.seen.filter(id => typeof id === 'string') : [],
+                off: value?.off === true,
+            };
+        },
+        fallback: { seen: [], off: false },
+    });
 }
 function writeLocal(getState, value) {
     const key = localKey(getState);
     if (!key) return;
-    try {
-        localStorage.setItem(key, JSON.stringify({ seen: value.seen.slice(-LOCAL_MAX), off: value.off }));
-    } catch { /* full or blocked: the server's list still counts */ }
+    write(key, JSON.stringify({ seen: value.seen.slice(-LOCAL_MAX), off: value.off }));
 }
 
 // Once the server has answered (/api/me): what this device saw that the server doesn't know yet is

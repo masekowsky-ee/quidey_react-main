@@ -6,8 +6,9 @@
 // { actions, installAsked, ratingAsked }. Every task created or ticked off, group, friend request,
 // friend, shared session or family counts as one (noteAction, called from the actions that make
 // them). Never two questions at once, and none while the push question is open.
-import { useSyncExternalStore } from 'react';
 import { apiFetch } from '../api/api';
+import { read, write } from '../storedSetting';
+import { createExternalStore } from '../externalStore';
 import { installState } from '../pwa/install';
 import { pushAsking } from '../pwa/push';
 import { trackAction } from '../usage/track';
@@ -19,30 +20,25 @@ const SUCCESSES = ['done', 'friend'];
 export const RATING_DELAY_MS = 1200;
 
 // asking: null | 'next' (what first) | 'install' | 'rating'
-let state = { asking: null };
+const store = createExternalStore({ asking: null });
 let account = null;
 let ratingTimer = null;
-const listeners = new Set();
-const set = (changes) => {
-    state = { ...state, ...changes };
-    listeners.forEach((listener) => listener());
-};
+const set = (changes) => store.set(state => ({ ...state, ...changes }));
 
 const key = (username) => `onboarding:${username}`;
 
 const load = () => {
     if (!account) return null;
-    try {
-        const record = JSON.parse(localStorage.getItem(key(account)));
-        return record && typeof record.actions === 'number' ? record : null;
-    } catch {
-        return null;
-    }
+    return read(key(account), {
+        parse: (text) => {
+            const record = JSON.parse(text);
+            return record && typeof record.actions === 'number' ? record : null;
+        },
+        fallback: null,
+    });
 };
 
-const save = (record) => {
-    try { localStorage.setItem(key(account), JSON.stringify(record)); } catch { /* blocked storage: only this visit */ }
-};
+const save = (record) => write(key(account), JSON.stringify(record));
 
 // The account signed in right now (App shell); another account has its own questions
 export function setOnboardingAccount(username) {
@@ -75,13 +71,13 @@ export function noteAction(kind) {
     if (!record) return;
     record.actions += 1;
     save(record);
-    if (state.asking || pushAsking()) return;
+    if (store.get().asking || pushAsking()) return;
 
     if (!record.ratingAsked && record.actions > RATING_AFTER && SUCCESSES.includes(kind)) {
         save({ ...record, ratingAsked: true });
         clearTimeout(ratingTimer);
         ratingTimer = setTimeout(() => {
-            if (!state.asking && !pushAsking()) set({ asking: 'rating' });
+            if (!store.get().asking && !pushAsking()) set({ asking: 'rating' });
         }, RATING_DELAY_MS);
         return;
     }
@@ -104,16 +100,11 @@ export const sendRating = ({ liked, stars, message = '' }) =>
         body: JSON.stringify({ category: 'rating', liked, ...(liked ? { stars } : {}), message }),
     });
 
-const subscribe = (listener) => {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-};
-
-export const useOnboarding = () => useSyncExternalStore(subscribe, () => state, () => state);
+export const useOnboarding = store.use;
 
 // Only for tests: back to the start
 export function resetOnboarding() {
     clearTimeout(ratingTimer);
     account = null;
-    state = { asking: null };
+    store.set({ asking: null }, { silent: true });
 }

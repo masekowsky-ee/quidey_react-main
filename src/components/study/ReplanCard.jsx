@@ -9,15 +9,12 @@ import { useTranslation } from '../../i18n/useTranslation';
 import PlanPreview from './PlanPreview.jsx';
 import { useStudyLoad } from './useStudyLoad.js';
 import styles from './Study.module.css';
+import { read, write } from '../../features/storedSetting';
 
 const LATER_KEY = 'studyLater';
 const today = () => toInputDate(new Date());
-const laterToday = () => {
-    try { return localStorage.getItem(LATER_KEY) === today(); } catch { return false; }
-};
-const storeLater = () => {
-    try { localStorage.setItem(LATER_KEY, today()); } catch { /* only for this visit */ }
-};
+const laterToday = () => read(LATER_KEY) === today();
+const storeLater = () => write(LATER_KEY, today());
 
 // Home, testers only: asks to adjust the plan when a goal is behind (and not dismissed), time was
 // freed or an appointment overlaps a session. Ansehen opens the preview in place, Später hides the

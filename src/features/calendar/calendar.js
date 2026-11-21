@@ -1,6 +1,7 @@
 // Date math and task helpers for the calendar. Days are local dates; a day is identified
 // by its key "YYYY-MM-DD" (the same text <input type="date"> and the api use).
 import { parseDate, toDateOnly, toInputDate, mondayIndex } from '../helperFunction';
+import { read, write } from '../storedSetting';
 
 export const CALENDAR_VIEWS = ['month', 'week', 'agenda'];
 
@@ -240,18 +241,9 @@ export function formatFocus(seconds, short = false) {
     return h > 0 ? `${h} h ${m} min` : `${m} min`;
 }
 
-export function readStoredCalendarView() {
-    try {
-        const stored = localStorage.getItem('calendarView');
-        return CALENDAR_VIEWS.includes(stored) ? stored : 'month';
-    } catch {
-        return 'month';
-    }
-}
+export const readStoredCalendarView = () => read('calendarView', { allowed: CALENDAR_VIEWS, fallback: 'month' });
 
-export function storeCalendarView(view) {
-    try { localStorage.setItem('calendarView', view); } catch { /* only for this visit */ }
-}
+export const storeCalendarView = (view) => write('calendarView', view);
 
 // ---------- iCalendar export ----------
 

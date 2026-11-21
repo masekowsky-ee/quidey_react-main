@@ -9,19 +9,16 @@ import ScanSheet from '../scan/ScanSheet.jsx';
 import { useAiQuota } from '../../features/ai/ai';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
+import { read, write, remove } from '../../features/storedSetting';
 import styles from './FocusRoom.module.css';
 
 // Which note belongs to the session: { id, goal, day } on this device. The same goal on the
 // same day writes on in the same note; a new goal (or a new day) gets a new one.
 const STORE_KEY = 'focusSessionNote';
-function readSessionNote() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY) ?? 'null'); } catch { return null; }
-}
+const readSessionNote = () => read(STORE_KEY, { parse: text => JSON.parse(text ?? 'null'), fallback: null });
 function storeSessionNote(value) {
-    try {
-        if (value) localStorage.setItem(STORE_KEY, JSON.stringify(value));
-        else localStorage.removeItem(STORE_KEY);
-    } catch { /* only for this visit */ }
+    if (value) write(STORE_KEY, JSON.stringify(value));
+    else remove(STORE_KEY);
 }
 
 // Step three of the Fokusraum: the session's note, waiting to be written. Nothing is made until

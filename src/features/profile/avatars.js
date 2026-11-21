@@ -8,6 +8,7 @@
 // avatars:changed { userId } (live) forgets one, so the new picture comes in.
 
 import { useEffect, useSyncExternalStore } from 'react';
+import { createListeners } from '../externalStore';
 import { apiFetch, rawFetch, json } from '../api/api';
 import { useRealtime } from '../realtime/socket';
 import { AVATARS_CHANGED } from '../realtime/events';
@@ -16,12 +17,10 @@ const BATCH_MS = 30;
 const versions = new Map();   // user id -> version (string) | null (none)
 const pictures = new Map();   // user id -> { version, url }
 const loading = new Set();
-const listeners = new Set();
 let wanted = new Set();
 let timer = null;
 
-const notify = () => listeners.forEach(listener => listener());
-const subscribe = (listener) => { listeners.add(listener); return () => listeners.delete(listener); };
+const { subscribe, notify } = createListeners();
 
 async function loadPicture(id, version) {
     if (loading.has(id) || pictures.get(id)?.version === version) return;

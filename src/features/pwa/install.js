@@ -4,11 +4,11 @@
 // iPhone / iPad has no such event: there the settings explain the share menu instead.
 import { useSyncExternalStore } from 'react';
 import { runsAsApp } from '../usage/platform';
+import { createListeners } from '../externalStore';
 
 let deferredPrompt = null;
 let installed = false;
-const listeners = new Set();
-const notify = () => listeners.forEach((listener) => listener());
+const { subscribe, notify } = createListeners();
 
 // A plain browser tab: not the Android app, not the installed web app (e.g. the Fokusraum's
 // full-screen button exists only here; an app window already has the whole screen)
@@ -50,11 +50,6 @@ export async function promptInstall() {
     if (outcome === 'accepted') installed = true;
     notify();
 }
-
-const subscribe = (listener) => {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-};
 
 export function useInstallState() {
     return useSyncExternalStore(subscribe, installState);

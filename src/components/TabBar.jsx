@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { COMMUNITY_PATHS, isCommunityPath } from '../features/community/paths';
+import { isCommunityPath } from '../features/community/paths';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectIsAdmin } from '../features/auth/tester';
 import styles from './TabBar.module.css';
@@ -15,6 +15,7 @@ import { selectFamilyInviteCount } from '../features/family/family';
 import { useOnlineFriends } from '../features/presence/presence';
 import { fill } from '../features/helperFunction';
 import { tabIndexOf } from '../features/layout/tabSwipe';
+import { NAV } from '../features/app/navTable';
 
 function Count({ count, label }) {
     if (count <= 0) return null;
@@ -69,6 +70,7 @@ const SWIPE = 24;
 // at the bottom edge; a tap on the handle or a swipe up brings it back.
 export default function TabBar() {
     const { t } = useTranslation();
+    const item = (id, label = NAV[id].label) => ({ to: NAV[id].path, icon: NAV[id].icon, label: t(label) });
     const dispatch = useDispatch();
     const news = useSelector(state => state.news);
     const inviteCount = useSelector(selectInviteCount);
@@ -116,13 +118,13 @@ export default function TabBar() {
         <nav className={styles.bar} aria-label={t('mainNav')} data-part="tabbar" data-collapsed={collapsed || undefined}>
             <div ref={pillRef} className={styles.pill} style={{ '--tabs': 5 }} inert={collapsed} aria-hidden={collapsed || undefined} {...swipe} data-tip="tabbar">
                 <Indicator index={menuOpen ? 4 : tabIndexOf(pathname, study)} />
-                <Tab menuOpen={menuOpen} to="/" end icon="home" label={t('home')} tip="nav-home" />
-                <Tab menuOpen={menuOpen} to="/calendar" icon="calendar" label={t('calendar')} tip="nav-calendar"
+                <Tab menuOpen={menuOpen} {...item('home')} end tip="nav-home" />
+                <Tab menuOpen={menuOpen} {...item('calendar')} tip="nav-calendar"
                     count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
-                <Tab menuOpen={menuOpen} to="/focus" icon="focus" label={t('focusTab')} tip="nav-focus" />
+                <Tab menuOpen={menuOpen} {...item('focus', NAV.focus.tabLabel)} tip="nav-focus" />
                 {study
-                    ? <Tab menuOpen={menuOpen} to="/study" icon="book" label={t('studyNav')} tip="nav-study" />
-                    : <Tab menuOpen={menuOpen} to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} tip="nav-community"
+                    ? <Tab menuOpen={menuOpen} {...item('study')} tip="nav-study" />
+                    : <Tab menuOpen={menuOpen} {...item('community')} match={isCommunityPath} tip="nav-community"
                         count={communityCount} countLabel={t('communityCount')}
                         news={communityNews} newsLabel={t('menuNews')}
                         online={onlineFriends} onlineLabel={onlineLabel} />}

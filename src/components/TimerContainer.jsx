@@ -8,6 +8,7 @@ import { formatClock } from '../features/helperFunction';
 import { useTranslation } from '../i18n/useTranslation';
 import Icon from './icons.jsx';
 import { TIMER_MODE_LABEL } from '../features/settings/preferences';
+import { paths } from '../features/app/navTable';
 
 const MODES = ['timer', 'pomodoro', 'stopwatch'];
 
@@ -161,7 +162,7 @@ export default function TimerContainer(props){
                             {t(TIMER_MODE_LABEL[mode])}
                         </button>)}
                 </div>
-                <Link to="/focus" className={styles.foldBtn} title={t('focusRoomOpen')} aria-label={t('focusRoomOpen')}>
+                <Link to={paths.focus} className={styles.foldBtn} title={t('focusRoomOpen')} aria-label={t('focusRoomOpen')}>
                     <Icon name="expand" className={styles.foldIcon} />
                 </Link>
                 {!inline &&

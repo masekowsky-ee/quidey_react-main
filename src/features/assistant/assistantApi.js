@@ -12,7 +12,7 @@
 //   readAloud: the sheet's "read answers aloud" toggle (getReadAloud() = its value right now: an
 //   answer is spoken by the toggle as it is when it arrives, not as it was when the message was sent)
 
-import { useSyncExternalStore } from 'react';
+import { createExternalStore } from '../externalStore';
 import { apiFetch } from '../api/api';
 
 const HISTORY_TURNS = 10;
@@ -39,37 +39,34 @@ export async function sendAssistant(messages, language, { signal } = {}) {
 // ---------- the chat of this app run ----------
 
 const EMPTY = { owner: null, messages: [], readAloud: false };
-let chat = EMPTY;
+const store = createExternalStore(EMPTY);
 let nextId = 1;
-const listeners = new Set();
-const emit = () => listeners.forEach(listener => listener());
-const subscribe = (listener) => { listeners.add(listener); return () => listeners.delete(listener); };
 
-const forOwner = (owner) => (chat.owner === owner ? chat : { ...EMPTY, owner, readAloud: chat.readAloud });
+const forOwner = (owner) => {
+    const chat = store.get();
+    return chat.owner === owner ? chat : { ...EMPTY, owner, readAloud: chat.readAloud };
+};
 
 export const newMessageId = () => nextId++;
 
 // fn(messages) → the new messages, for this account
 export function updateChat(owner, fn) {
     const current = forOwner(owner);
-    chat = { ...current, messages: fn(current.messages) };
-    emit();
+    store.set({ ...current, messages: fn(current.messages) });
 }
 
 export function setReadAloud(on) {
-    chat = { ...chat, readAloud: Boolean(on) };
-    emit();
+    store.set(chat => ({ ...chat, readAloud: Boolean(on) }));
 }
 
-export const getReadAloud = () => chat.readAloud;
+export const getReadAloud = () => store.get().readAloud;
 
 export function resetAssistantChat() {
-    chat = EMPTY;
-    emit();
+    store.set(EMPTY);
 }
 
 // { messages, readAloud } of this account
 export function useAssistantChat(owner) {
-    const snapshot = useSyncExternalStore(subscribe, () => chat, () => chat);
+    const snapshot = store.use();
     return snapshot.owner === owner ? snapshot : { ...EMPTY, owner, readAloud: snapshot.readAloud };
 }

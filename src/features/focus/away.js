@@ -9,6 +9,8 @@
 
 import { useSyncExternalStore } from 'react';
 import { selectTimerInProgress } from '../session/sessionAction';
+import { read, write } from '../storedSetting';
+import { createListeners } from '../externalStore';
 
 const AWAY_MIN_MS = 10 * 1000;      // shorter looks elsewhere don't count
 export const NUDGE_AFTER_MS = 20 * 1000;   // one nudge after this long away (where it can be told)
@@ -58,19 +60,20 @@ export const endRound = (tally) => ({ ...tally, lastRound: tally.round });
 export const today = () => new Date().toDateString();
 
 export function readTally() {
-    try {
-        const stored = JSON.parse(localStorage.getItem(STORE_KEY) ?? 'null');
-        if (stored && typeof stored === 'object') return { ...emptyTally(stored.day), ...stored };
-    } catch { /* nothing kept */ }
-    return emptyTally(today());
+    return read(STORE_KEY, {
+        parse: (text) => {
+            const stored = JSON.parse(text ?? 'null');
+            return stored && typeof stored === 'object' ? { ...emptyTally(stored.day), ...stored } : emptyTally(today());
+        },
+        fallback: emptyTally(today()),
+    });
 }
 
-const listeners = new Set();
+const { subscribe: subscribeTally, notify } = createListeners();
 export function writeTally(tally) {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(tally)); } catch { /* full or blocked */ }
-    listeners.forEach(listener => listener());
+    write(STORE_KEY, JSON.stringify(tally));
+    notify();
 }
-const subscribeTally = (listener) => { listeners.add(listener); return () => listeners.delete(listener); };
 
 // today's numbers (zero once the day is over)
 export const todaysAway = (tally) => (tally.day === today() ? { count: tally.count, ms: tally.ms } : { count: 0, ms: 0 });
@@ -79,8 +82,7 @@ export const todaysAway = (tally) => (tally.day === today() ? { count: tally.cou
 let cachedRaw;
 let cached;
 const snapshot = () => {
-    let raw = null;
-    try { raw = localStorage.getItem(STORE_KEY); } catch { /* blocked */ }
+    const raw = read(STORE_KEY);
     if (raw !== cachedRaw || cached === undefined) { cachedRaw = raw; cached = readTally(); }
     return cached;
 };

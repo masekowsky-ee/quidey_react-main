@@ -25,6 +25,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, useMotionLevel } from '../features/settings/motion';
 import { useDragDismiss } from '../features/layout/dragDismiss';
 import { openAuth } from '../features/auth/gate';
+import { NAV } from '../features/app/navTable';
 
 // One entry: icon, label and an optional count badge (or a dot: something changed there);
 // the current page is highlighted (`match`: also on other addresses that belong to it)
@@ -109,6 +110,7 @@ export default function Menu(){
     const familyInviteCount = useSelector(selectFamilyInviteCount);
     const news = useSelector(state => state.news);
     const { t } = useTranslation();
+    const item = (id, label = NAV[id].label) => ({ to: NAV[id].path, icon: NAV[id].icon, label: t(label) });
     const proOn = useProOn();
     const { pathname } = useLocation();
 
@@ -180,35 +182,35 @@ export default function Menu(){
                     the settings */}
                 <nav className={styles.menuNav} aria-label={t('menu')}>
                     <div className={styles.menuList} data-slide-container>
-                        <MenuLink to="/" end icon="home" label={t('home')} onClick={onClose} inTabBar />
-                        <MenuLink to="/calendar" icon="calendar" label={t('calendar')} onClick={onClose} inTabBar
+                        <MenuLink {...item('home')} end onClick={onClose} inTabBar />
+                        <MenuLink {...item('calendar')} onClick={onClose} inTabBar
                             count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
-                        <MenuLink to="/focus" icon="focus" label={t('focusRoom')} onClick={onClose} inTabBar />
-                        <MenuLink to="/routines" icon="routine" label={t('routines')} onClick={onClose} tip="menu-routines" />
-                        <MenuLink to="/notes" icon="note" label={t('notesTitle')} onClick={onClose} tip="menu-notes" />
-                        <MenuLink to="/collections" icon="collection" label={t('collections')} onClick={onClose} tip="menu-collections" />
-                        <MenuLink to="/study" icon="book" label={t('studyNav')} onClick={onClose} inTabBar />
-                        <MenuLink to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} onClick={onClose}
+                        <MenuLink {...item('focus')} onClick={onClose} inTabBar />
+                        <MenuLink {...item('routines')} onClick={onClose} tip="menu-routines" />
+                        <MenuLink {...item('notes')} onClick={onClose} tip="menu-notes" />
+                        <MenuLink {...item('collections')} onClick={onClose} tip="menu-collections" />
+                        <MenuLink {...item('study')} onClick={onClose} inTabBar />
+                        <MenuLink {...item('community')} match={isCommunityPath} onClick={onClose}
                             count={inviteCount + incomingCount + familyInviteCount} countLabel={t('communityCount')}
                             news={news.together || news.social || news.feed} newsLabel={t('menuNews')} />
                         <FamilyLinks onClick={onClose} />
                         <OnlineFriendsRow onClick={onClose} />
-                        <MenuLink to="/inbox" icon="inbox" label={t('inbox')} onClick={onClose}
+                        <MenuLink {...item('inbox')} onClick={onClose}
                             count={inboxCount} countLabel={t('inboxUnread')} />
-                        <MenuLink to="/stats" icon="history" label={t('history')} onClick={onClose} tip="menu-stats" />
-                        <MenuLink to="/arcade" icon="gamepad" label={t('arcade')} onClick={onClose} tip="menu-arcade" />
+                        <MenuLink {...item('stats')} onClick={onClose} tip="menu-stats" />
+                        <MenuLink {...item('arcade')} onClick={onClose} tip="menu-arcade" />
                     </div>
                 </nav>
 
                 <div className={styles.menuBottom} data-slide-container>
-                    {isTester && <MenuLink to="/tester" icon="flask" label={t('testerNav')} onClick={onClose} />}
+                    {isTester && <MenuLink {...item('tester')} onClick={onClose} />}
                     {isAdmin && (
-                        <MenuLink to="/admin" icon="admin" label={t('admin')} onClick={onClose}
+                        <MenuLink {...item('admin')} onClick={onClose}
                             count={adminPendingCount} countLabel={t('adminOpenRequests')} />
                     )}
                     {proOn && <MenuLink to="/pro" icon="heart" label={t('proNav')} onClick={onClose} />}
-                    <MenuLink to="/settings" icon="settings" label={t('settings')} onClick={onClose} />
-                    <MenuLink to="/feedback" icon="feedback" label={t('feedback')} onClick={onClose} />
+                    <MenuLink {...item('settings')} onClick={onClose} />
+                    <MenuLink {...item('feedback')} onClick={onClose} />
                     <div className={styles.account}>
                         {token ? <AccountSwitcher onNavigate={onClose} compact={nav === 'rail'} />
                             : <>

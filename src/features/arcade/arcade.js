@@ -9,6 +9,7 @@
 // GET /api/arcade/leaderboard?game=&level=, DELETE /api/arcade/ranked (off every board).
 
 import { apiFetch, CACHE_SHORT } from '../api/api';
+import { read, write } from '../storedSetting';
 
 // max: the most the server takes (the same numbers as ARCADE_GAMES in the api)
 export const ARCADE_GAMES = [
@@ -22,12 +23,8 @@ export const gameById = (id) => ARCADE_GAMES.find(game => game.id === id) ?? ARC
 
 export const MODES = ['ranked', 'casual'];
 const MODE_KEY = 'arcadeMode';
-export function readMode() {
-    try { return MODES.includes(localStorage.getItem(MODE_KEY)) ? localStorage.getItem(MODE_KEY) : 'casual'; } catch { return 'casual'; }
-}
-export function storeMode(mode) {
-    try { localStorage.setItem(MODE_KEY, mode); } catch { /* only for this visit */ }
-}
+export const readMode = () => read(MODE_KEY, { allowed: MODES, fallback: 'casual' });
+export const storeMode = (mode) => write(MODE_KEY, mode);
 
 export const submitScore = (game, level, score, ranked) =>
     apiFetch('/api/arcade/scores', { method: 'POST', body: JSON.stringify({ game, level, score, ranked }) });

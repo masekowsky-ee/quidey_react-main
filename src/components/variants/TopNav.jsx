@@ -6,11 +6,12 @@ import { selectHasNews } from '../../features/realtime/news';
 import styles from './TopNav.module.css';
 import Icon from '../icons';
 import { useTranslation } from '../../i18n/useTranslation';
-import { COMMUNITY_PATHS, isCommunityPath } from '../../features/community/paths';
+import { isCommunityPath } from '../../features/community/paths';
 import { selectIncomingCount } from '../../features/friends/friendsAction';
 import { selectInviteCount } from '../../features/together/togetherAction';
 import { selectTaskInviteCount } from '../../features/tasks/taskAction';
 import { selectFamilyInviteCount } from '../../features/family/family';
+import { NAV } from '../../features/app/navTable';
 
 function Tab({ to, end, match, icon, label, count = 0, countLabel, news = false, newsLabel, tip }) {
     const { pathname } = useLocation();
@@ -33,6 +34,7 @@ function Tab({ to, end, match, icon, label, count = 0, countLabel, news = false,
 // header row; their drawer opens from the header's menu button.
 export default function TopNav({ inline = false }) {
     const { t } = useTranslation();
+    const item = (id, label = NAV[id].label) => ({ to: NAV[id].path, icon: NAV[id].icon, label: t(label) });
     const dispatch = useDispatch();
     const menuBadge = useSelector(selectMenuBadgeCount);
     const hasNews = useSelector(selectHasNews);
@@ -45,17 +47,17 @@ export default function TopNav({ inline = false }) {
     return (
         <nav className={inline ? styles.inline : styles.bar} aria-label={t('mainNav')} data-part="topnav">
             <div className={styles.tabs}>
-                <Tab to="/" end icon="home" label={t('home')} tip="nav-home" />
-                <Tab to="/calendar" icon="calendar" label={t('calendar')} tip="nav-calendar"
+                <Tab {...item('home')} end tip="nav-home" />
+                <Tab {...item('calendar')} tip="nav-calendar"
                     count={taskInviteCount} countLabel={t('taskInvitesTitle')} />
-                <Tab to="/focus" icon="focus" label={t('focusRoom')} tip="nav-focus" />
-                {inline && <Tab to="/study" icon="book" label={t('studyNav')} tip="nav-study" />}
-                <Tab to={COMMUNITY_PATHS.feed} match={isCommunityPath} icon="together" label={t('community')} tip="nav-community"
+                <Tab {...item('focus')} tip="nav-focus" />
+                {inline && <Tab {...item('study')} tip="nav-study" />}
+                <Tab {...item('community')} match={isCommunityPath} tip="nav-community"
                     count={inviteCount + friendRequests + familyInvites} countLabel={t('communityCount')}
                     news={news.together || news.social || news.feed} newsLabel={t('menuNews')} />
                 {/* Notizen takes the inbox's place here: the inbox is the header's icon (and the drawer's / tab bar's entry) */}
-                <Tab to="/notes" icon="note" label={t('notesTitle')} tip="nav-notes" />
-                <Tab to="/stats" icon="history" label={t('history')} tip="nav-stats" />
+                <Tab {...item('notes')} tip="nav-notes" />
+                <Tab {...item('stats')} tip="nav-stats" />
             </div>
             {inline
                 ? <button type="button" className={styles.tab} onClick={() => dispatch(setShowMenu(true))} data-tip="nav-more"
@@ -64,7 +66,7 @@ export default function TopNav({ inline = false }) {
                     {menuBadge === 0 && hasNews && <span className={styles.dot} aria-hidden="true" />}
                 </button>
                 : <div className={styles.tabs}>
-                    <Tab to="/tester" icon="flask" label={t('testerNav')} />
+                    <Tab {...item('tester')} />
                 </div>}
         </nav>
     );

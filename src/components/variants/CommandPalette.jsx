@@ -19,6 +19,7 @@ import { useInstallState } from '../../features/pwa/install';
 import { apkOffer } from '../../features/native/androidApk';
 import { useAnalytics } from '../../features/native/analytics';
 import TaskEditDialog from '../task/TaskEditDialog.jsx';
+import { NAV } from '../../features/app/navTable';
 
 const TASKS_SHOWN = 6;
 
@@ -81,25 +82,26 @@ export default function CommandPalette() {
 
     const commands = useMemo(() => {
         const go = (to, label, icon) => ({ id: `go:${to}`, group: 'go', label, icon, run: () => navigate(to) });
+        const goNav = (id) => go(NAV[id].path, t(NAV[id].label), NAV[id].icon);
         const dark = document.documentElement.dataset.theme !== 'light';
         return [
-            go('/', t('home'), 'home'),
-            go('/calendar', t('calendar'), 'calendar'),
-            go('/focus', t('focusRoom'), 'focus'),
-            go('/routines', t('routines'), 'routine'),
-            go(COMMUNITY_PATHS.feed, t('community'), 'together'),
+            goNav('home'),
+            goNav('calendar'),
+            goNav('focus'),
+            goNav('routines'),
+            goNav('community'),
             go(COMMUNITY_PATHS.sessions, t('communityTab_sessions'), 'focus'),
             go(COMMUNITY_PATHS.friends, t('communityTab_friends'), 'social'),
             go(COMMUNITY_PATHS.family, t('communityTab_family'), 'family'),
-            go('/inbox', t('inbox'), 'inbox'),
-            go('/stats', t('history'), 'history'),
-            go('/arcade', t('arcade'), 'gamepad'),
-            go('/profile', t('profile'), 'profile'),
-            go('/settings', t('settings'), 'settings'),
-            go('/feedback', t('feedback'), 'feedback'),
-            go('/notes', t('notesTitle'), 'note'), go('/collections', t('collections'), 'collection'), go('/study', t('studyNav'), 'book'),
-            ...(isTester ? [go('/tester', t('testerNav'), 'flask')] : []),
-            ...(isAdmin ? [go('/admin', t('admin'), 'admin')] : []),
+            goNav('inbox'),
+            goNav('stats'),
+            goNav('arcade'),
+            goNav('profile'),
+            goNav('settings'),
+            goNav('feedback'),
+            goNav('notes'), goNav('collections'), goNav('study'),
+            ...(isTester ? [goNav('tester')] : []),
+            ...(isAdmin ? [goNav('admin')] : []),
             ...placeList({ isAdmin, installable, apk: Boolean(apkOffer()), analytics: analyticsAvailable }).map(place => ({
                 id: `place:${place.to}:${place.label}`, group: 'places', deep: true, icon: place.icon,
                 label: t(place.label), meta: place.parent.map(key => t(key)).join(' · '),

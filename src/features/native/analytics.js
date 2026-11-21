@@ -11,32 +11,23 @@
 //
 // Built only with the Firebase config (VITE_NATIVE_ANALYTICS=on from the Android repo's build
 // script, like push); the plugin also says whether Firebase really started (isAvailable).
-import { useSyncExternalStore } from 'react';
 import { registerPlugin } from '@capacitor/core';
 import { isNativeApp } from './native';
+import { read, write } from '../storedSetting';
+import { createExternalStore } from '../externalStore';
 
 const QuideyAnalytics = registerPlugin('QuideyAnalytics');
 const KEY = 'analytics';
 
 const analyticsBuilt = () => isNativeApp() && import.meta.env.VITE_NATIVE_ANALYTICS === 'on';
 
-const readChoice = () => {
-    try {
-        const value = localStorage.getItem(KEY);
-        return value === 'granted' || value === 'denied' ? value : null;
-    } catch {
-        return null;
-    }
-};
+const readChoice = () => read(KEY, { allowed: ['granted', 'denied'], fallback: null });
 
 // available: null until the plugin answered, then true / false. choice: 'granted' | 'denied' | null.
 // later: the question was closed without an answer on this start
-let state = { available: null, choice: readChoice(), later: false };
-const listeners = new Set();
-const set = (changes) => {
-    state = { ...state, ...changes };
-    listeners.forEach((listener) => listener());
-};
+const freshState = () => ({ available: null, choice: readChoice(), later: false });
+const store = createExternalStore(freshState());
+const set = (changes) => store.set(state => ({ ...state, ...changes }));
 
 // On every start of the app: is Firebase there, and the remembered answer handed to it again
 // (so Android and the app never disagree). Quietly nothing in the browser.
@@ -48,7 +39,7 @@ export async function setupAnalytics() {
     try {
         const { available } = await QuideyAnalytics.isAvailable();
         set({ available: Boolean(available), choice: readChoice() });
-        if (available) await QuideyAnalytics.setEnabled({ enabled: state.choice === 'granted' });
+        if (available) await QuideyAnalytics.setEnabled({ enabled: store.get().choice === 'granted' });
     } catch {
         set({ available: false });
     }
@@ -58,12 +49,12 @@ export async function setupAnalytics() {
 // and deletes what was collected on this device
 export async function setAnalyticsConsent(granted) {
     const choice = granted ? 'granted' : 'denied';
-    try { localStorage.setItem(KEY, choice); } catch { /* blocked storage: only this start */ }
+    write(KEY, choice);
     set({ choice });
-    if (state.available) await QuideyAnalytics.setEnabled({ enabled: granted }).catch(() => {});
+    if (store.get().available) await QuideyAnalytics.setEnabled({ enabled: granted }).catch(() => {});
 }
 
-const counting = () => state.available === true && state.choice === 'granted';
+const counting = () => store.get().available === true && store.get().choice === 'granted';
 
 // A page as a name: the place, never an id or a user name ('/u/anna' → 'user_profile')
 const PAGES = ['calendar', 'focus', 'stats', 'profile', 'settings', 'inbox', 'feedback', 'admin', 'tester', 'fun', 'pro', 'beta', 'notes', 'study'];
@@ -90,20 +81,15 @@ export function trackEvent(name, params = {}) {
 
 // The question is due: in the app with Firebase there, not answered on this device yet, and not
 // put aside on this start (closed without an answer: asked again next time)
-export const analyticsQuestionDue = () => state.available === true && state.choice === null && !state.later;
+export const analyticsQuestionDue = () => store.get().available === true && store.get().choice === null && !store.get().later;
 
 export function askAnalyticsLater() {
     set({ later: true });
 }
 
-const subscribe = (listener) => {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-};
-
-export const useAnalytics = () => useSyncExternalStore(subscribe, () => state, () => state);
+export const useAnalytics = store.use;
 
 // Only for tests: as on a fresh start
 export function resetAnalytics() {
-    state = { available: null, choice: readChoice(), later: false };
+    store.set(freshState(), { silent: true });
 }

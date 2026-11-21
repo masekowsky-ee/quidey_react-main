@@ -11,6 +11,7 @@ import { createSharedSession } from '../features/together/togetherAction';
 import { useTogetherRun } from '../features/together/hooks';
 import { setCustomError } from '../features/settings/settingsAction';
 import { errorText } from '../features/api/transport';
+import { write } from '../features/storedSetting';
 import {
     fetchFriends, fetchFriendRequests, sendFriendRequest,
     acceptFriendRequest, removeFriendRequest, removeFriend,
@@ -60,7 +61,7 @@ export default function Social() {
         setBusyId(null);
         if (!ok) return;
         if (homeLayout === 'team') {
-            try { localStorage.setItem('teamSessionId', String(created.id)); } catch { /* opens the newest instead */ }
+            write('teamSessionId', String(created.id));
             navigate('/');
         } else {
             navigate(`/together/${created.id}`);

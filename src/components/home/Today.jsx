@@ -18,6 +18,7 @@ import { Bone } from '../skeleton/Skeleton.jsx';
 import { useTranslation } from '../../i18n/useTranslation';
 import Icon from '../icons.jsx';
 import styles from './Today.module.css';
+import { paths } from '../../features/app/navTable';
 
 const RING = 2 * Math.PI * 26;
 
@@ -50,7 +51,7 @@ function FocusGoal() {
                     </label>
                 </div>
             </div>
-            <Link to="/focus" className={styles.cardAction}>
+            <Link to={paths.focus} className={styles.cardAction}>
                 {running ? fill(t('dashFocusRunning'), { time: formatClock(time) }) : share >= 1 ? t('dashFocusReached') : t('dashFocusStart')}
                 <Icon name="arrowRight" size={16} />
             </Link>
@@ -155,7 +156,7 @@ function UpNext({ tasks }) {
                 </ul>}
             {overdue > 0
                 ? <Link to="/calendar?view=agenda" className={`${styles.cardAction} ${styles.warn}`}>{fill(t('overdueCount'), { count: overdue })} <Icon name="arrowRight" size={16} /></Link>
-                : <Link to="/calendar" className={styles.cardAction}>{t('dashNextCalendar')} <Icon name="arrowRight" size={16} /></Link>}
+                : <Link to={paths.calendar} className={styles.cardAction}>{t('dashNextCalendar')} <Icon name="arrowRight" size={16} /></Link>}
         </section>
     );
 }
@@ -172,7 +173,7 @@ function QuickNote() {
         try {
             await createNote({ title: '', body: text.trim() });
             setText('');
-            dispatch(showToast(t('dashNoteSaved'), 'success', { to: '/focus' }));
+            dispatch(showToast(t('dashNoteSaved'), 'success', { to: paths.focus }));
         } catch {
             dispatch(showToast(t('noteSaveFailed'), 'error'));
         } finally {
@@ -186,7 +187,7 @@ function QuickNote() {
                 placeholder={t('dashNotePlaceholder')} aria-label={t('dashNoteTitle')}
                 onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) save(e); }} />
             <div className={styles.noteFoot}>
-                <Link to="/focus" className={styles.cardActionInline}>{t('dashNoteAll')}</Link>
+                <Link to={paths.focus} className={styles.cardActionInline}>{t('dashNoteAll')}</Link>
                 <button type="submit" className={styles.saveBtn} disabled={!text.trim() || saving}>{t('save')}</button>
             </div>
         </form>

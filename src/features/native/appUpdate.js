@@ -14,6 +14,8 @@
 import { registerPlugin } from '@capacitor/core';
 import { isNativeApp } from './native';
 import { rawFetch } from '../api/api';
+import { read, write } from '../storedSetting';
+import { createExternalStore } from '../externalStore';
 
 const QuideyUpdate = registerPlugin('QuideyUpdate');
 
@@ -25,16 +27,12 @@ const RECHECK_MS = 6 * 60 * 60 * 1000;
 const PLAY_REQUIRED_PRIORITY = 5;
 
 const initial = { status: 'none', latest: null, storeUrl: null, fromPlay: false, error: false };
-let state = initial;
-const listeners = new Set();
+const store = createExternalStore(initial);
 let lastCheck = 0;
 
-const set = (change) => {
-    state = { ...state, ...change };
-    listeners.forEach((listener) => listener());
-};
-export const subscribeUpdate = (listener) => { listeners.add(listener); return () => listeners.delete(listener); };
-export const updateState = () => state;
+const set = (change) => store.set(state => ({ ...state, ...change }));
+export const subscribeUpdate = store.subscribe;
+export const updateState = store.get;
 
 // What the two answers add up to. `server` is the API's answer (or null), `play` the plugin's
 // (or null: not installed from Play, or an older app without the plugin).
@@ -49,14 +47,13 @@ export function decideUpdate(server, play, { dismissedAt = 0, dismissedFor = nul
     return 'available';
 }
 
-function readDismissed() {
-    try {
-        const saved = JSON.parse(localStorage.getItem(DISMISS_KEY) ?? 'null');
+const readDismissed = () => read(DISMISS_KEY, {
+    parse: (text) => {
+        const saved = JSON.parse(text ?? 'null');
         return saved ? { dismissedAt: saved.at, dismissedFor: saved.code } : {};
-    } catch {
-        return {};
-    }
-}
+    },
+    fallback: {},
+});
 
 async function buildNumber() {
     const { App } = await import('@capacitor/app');
@@ -84,9 +81,9 @@ async function askPlay() {
 
 // Asks both. `force` skips the "not more often than" rule.
 async function checkForUpdate({ force = false } = {}) {
-    if (!isNativeApp()) return state.status;
-    if (state.status === 'downloading' || state.status === 'ready') return state.status;
-    if (!force && Date.now() - lastCheck < RECHECK_MS && state.status !== 'required') return state.status;
+    if (!isNativeApp()) return store.get().status;
+    if (store.get().status === 'downloading' || store.get().status === 'ready') return store.get().status;
+    if (!force && Date.now() - lastCheck < RECHECK_MS && store.get().status !== 'required') return store.get().status;
     lastCheck = Date.now();
     try {
         const [server, play] = await Promise.all([buildNumber().then(askServer), askPlay()]);
@@ -95,21 +92,19 @@ async function checkForUpdate({ force = false } = {}) {
     } catch {
         // no answer is no news: whatever was known stays
     }
-    return state.status;
+    return store.get().status;
 }
 
 export function dismissUpdate() {
-    if (state.status !== 'available') return;
-    try {
-        localStorage.setItem(DISMISS_KEY, JSON.stringify({ code: state.latest?.code ?? null, at: Date.now() }));
-    } catch { /* the offer simply comes back next time */ }
+    if (store.get().status !== 'available') return;
+    write(DISMISS_KEY, JSON.stringify({ code: store.get().latest?.code ?? null, at: Date.now() }));
     set({ status: 'none' });
 }
 
 export async function startUpdate() {
     if (!isNativeApp()) return;
-    const required = state.status === 'required';
-    if (state.fromPlay) {
+    const required = store.get().status === 'required';
+    if (store.get().fromPlay) {
         try {
             const { result } = await QuideyUpdate.start({ type: required ? 'immediate' : 'flexible' });
             if (result === 'ok' && !required) set({ status: 'downloading', error: false });
@@ -119,7 +114,7 @@ export async function startUpdate() {
             // Play refused (e.g. this kind of update isn't allowed right now): the store page does it
         }
     }
-    if (state.storeUrl) window.open(state.storeUrl, '_blank');
+    if (store.get().storeUrl) window.open(store.get().storeUrl, '_blank');
     else set({ error: true });
 }
 

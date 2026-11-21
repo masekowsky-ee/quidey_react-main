@@ -2,8 +2,8 @@ import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { showForms } from '../settings/settingsAction';
-import { COMMUNITY_PATHS } from '../community/paths';
 import { openCommands } from '../tester/commands';
+import { NAV, GO_IDS } from '../app/navTable';
 
 // Keyboard shortcuts, everywhere in the app while nothing is being typed: N a new task or
 // event, / the command bar (as Ctrl/⌘ K), ? their overview (components/ShortcutsDialog.jsx), and
@@ -14,15 +14,7 @@ export const OPEN_SHORTCUTS_EVENT = 'quidey:open-shortcuts';
 export const openShortcuts = () => window.dispatchEvent(new Event(OPEN_SHORTCUTS_EVENT));
 
 // G, then one of these within GO_WINDOW_MS
-const GO_KEYS = {
-    h: { to: '/', label: 'shortcut_goHome' },
-    k: { to: '/calendar', label: 'shortcut_goCalendar' },
-    f: { to: '/focus', label: 'shortcut_goFocus' },
-    r: { to: '/routines', label: 'shortcut_goRoutines' },
-    g: { to: COMMUNITY_PATHS.feed, label: 'shortcut_goCommunity' },
-    p: { to: '/inbox', label: 'shortcut_goInbox' },
-    s: { to: '/stats', label: 'shortcut_goStats' },
-};
+const GO_KEYS = Object.fromEntries(GO_IDS.map(id => [NAV[id].go.key, { to: NAV[id].path, label: NAV[id].go.label }]));
 const GO_WINDOW_MS = 1200;
 
 // what the overview lists: keys (a list means "one after the other") and the text

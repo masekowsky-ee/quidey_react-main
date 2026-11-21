@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { read, write } from '../storedSetting';
 
 // What Home's list shows: tasks, events, reminders, notes. All four at first; a tap switches one.
 // Notes are read on their own: tapping Notizen leaves only the notes (tapped again: everything),
@@ -14,22 +15,21 @@ export function toggleKind(active, kind) {
     return [...active.filter(k => k !== 'notes'), kind].sort((a, b) => HOME_KINDS.indexOf(a) - HOME_KINDS.indexOf(b));
 }
 
-function stored() {
-    try {
-        const list = JSON.parse(localStorage.getItem(KEY));
-        if (Array.isArray(list)) {
-            const kept = HOME_KINDS.filter(kind => list.includes(kind));
-            if (kept.length > 0) return kept;
-        }
-    } catch { /* no storage: everything */ }
+function parseKinds(text) {
+    const list = JSON.parse(text);
+    if (Array.isArray(list)) {
+        const kept = HOME_KINDS.filter(kind => list.includes(kind));
+        if (kept.length > 0) return kept;
+    }
     return [...HOME_KINDS];
 }
+const stored = () => read(KEY, { parse: parseKinds, fallback: [...HOME_KINDS] });
 
 export function useHomeKinds() {
     const [active, setActive] = useState(stored);
     const toggle = useCallback((kind) => setActive(prev => {
         const next = toggleKind(prev, kind);
-        try { localStorage.setItem(KEY, JSON.stringify(next)); } catch { /* not remembered */ }
+        write(KEY, JSON.stringify(next));
         return next;
     }), []);
     return [active, toggle];

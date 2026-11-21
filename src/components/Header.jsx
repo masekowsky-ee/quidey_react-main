@@ -16,6 +16,7 @@ import { openAuth } from '../features/auth/gate'
 import TopNav from './variants/TopNav'
 import { openCommands } from '../features/tester/commands'
 import { UI_VARIANTS, useNavModel, useUiVariant } from '../features/tester/variants'
+import { paths } from '../features/app/navTable';
 
 function formatTime(ms) {
     const h = Math.floor(ms / 3600000);
@@ -76,7 +77,7 @@ export default function Header(){
                     {nav === 'bar' && <TopNav inline />}
                     <div className={styles.center}>
                         {activeTimer &&
-                            <Link to="/focus" className={styles.timerChip} title={timer.active ? 'running' : 'paused'}>
+                            <Link to={paths.focus} className={styles.timerChip} title={timer.active ? 'running' : 'paused'}>
                                 <span className={`${styles.timerDot} ${timer.active ? styles.timerDotLive : ''}`}></span>
                                 <span className={styles.timerTime}>{formatTime(timer.time)}</span>
                                 {/* a stopwatch has no end to measure against */}

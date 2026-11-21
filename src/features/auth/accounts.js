@@ -5,6 +5,7 @@
 // from the server). Nothing leaves the device.
 // Switching loads the app again, so no list, socket or timer of the other account stays behind.
 import { session } from '../api/session';
+import { read, write, remove } from '../storedSetting';
 import { teardownAccount } from './teardown';
 
 const KEY = 'accounts';
@@ -15,22 +16,19 @@ const PER_ACCOUNT_KEYS = ['teamSessionId'];
 
 const sameName = (a, b) => String(a ?? '').toLowerCase() === String(b ?? '').toLowerCase();
 
-export function listAccounts() {
-    try {
-        const list = JSON.parse(localStorage.getItem(KEY) ?? '[]');
+export const listAccounts = () => read(KEY, {
+    parse: (text) => {
+        const list = JSON.parse(text ?? '[]');
         return Array.isArray(list)
             ? list.filter(account => account && typeof account.username === 'string' && typeof account.token === 'string')
             : [];
-    } catch {
-        return [];
-    }
-}
+    },
+    fallback: [],
+});
 
 function store(list) {
-    try {
-        if (list.length === 0) localStorage.removeItem(KEY);
-        else localStorage.setItem(KEY, JSON.stringify(list.slice(0, MAX_ACCOUNTS)));
-    } catch { /* storage full or blocked: only this device forgets */ }
+    if (list.length === 0) remove(KEY);
+    else write(KEY, JSON.stringify(list.slice(0, MAX_ACCOUNTS)));
 }
 
 // Adds an account or updates its token / name; it keeps its place in the list

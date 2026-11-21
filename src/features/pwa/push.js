@@ -12,8 +12,10 @@
 //
 // In the Android app the same flow runs on Firebase Cloud Messaging (native/nativePush.js): the
 // device's address is 'fcm:<token>', the permission is Android's (the branches say "app").
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect } from 'react';
 import { apiFetch, rawFetch, json } from '../api/api';
+import { read, write as writeSetting, remove } from '../storedSetting';
+import { createExternalStore } from '../externalStore';
 import { installState } from './install';
 import { isNativeApp } from '../native/native';
 import { isStandalone } from '../usage/platform';
@@ -48,32 +50,21 @@ export const PUSH_KINDS = ['plan', 'digest', 'messages', 'social', 'groups', 'st
 // small under it, so a phone that can't be signed up says why).
 // diagnosis: what the last check saw and decided (Settings → "Technische Details"), so a device
 // where it doesn't stay on can show why in a screenshot.
-let state = { status: 'unknown', kinds: null, busy: false, error: null, detail: null, asking: false, diagnosis: null };
-const listeners = new Set();
-const set = (changes) => {
-    state = { ...state, ...changes };
-    listeners.forEach((listener) => listener());
-};
+const START = { status: 'unknown', kinds: null, busy: false, error: null, detail: null, asking: false, diagnosis: null };
+const store = createExternalStore(START);
+const set = (changes) => store.set(state => ({ ...state, ...changes }));
 
-const read = (key) => {
-    try { return localStorage.getItem(key); } catch { return null; }
-};
-const write = (key, value) => {
-    try {
-        if (value === null) localStorage.removeItem(key);
-        else localStorage.setItem(key, value);
-    } catch { /* blocked storage: only this visit */ }
-};
+const write = (key, value) => (value === null ? remove(key) : writeSetting(key, value));
 
 const pushWanted = () => read(WANTED_KEY) === 'on';
 
 // Whether a push of this kind reaches this device (then the app shows no system notification
 // of its own for it, see tasks/reminders.js)
-export const pushCovers = (kind) => pushWanted() && state.status === 'on' && state.kinds?.[kind] !== false;
+export const pushCovers = (kind) => pushWanted() && store.get().status === 'on' && store.get().kinds?.[kind] !== false;
 
 // Whether new tasks start with a reminder: notifications are on for this device and it wants
 // my tasks and events (also before the check at startup has answered)
-export const pushRemindsByDefault = () => pushWanted() && ['on', 'unknown'].includes(state.status) && state.kinds?.plan !== false;
+export const pushRemindsByDefault = () => pushWanted() && ['on', 'unknown'].includes(store.get().status) && store.get().kinds?.plan !== false;
 
 // 'supported', 'install' (Safari on iPhone / iPad outside the home screen) or 'unsupported'.
 // The Android app: through Firebase, when it was built with its config (nativePush.js).
@@ -299,7 +290,7 @@ export async function enablePush() {
         try {
             const key = await serverKey();
             if (!key) {
-                set({ status: 'unavailable', diagnosis: { ...state.diagnosis, serverKey: 'none', result: 'unavailable: the server has no key' } });
+                set({ status: 'unavailable', diagnosis: { ...store.get().diagnosis, serverKey: 'none', result: 'unavailable: the server has no key' } });
                 return false;
             }
             step = 'subscribe';
@@ -307,7 +298,7 @@ export async function enablePush() {
             step = 'server';
             const kinds = await save(subscription);
             write(WANTED_KEY, 'on');
-            set({ status: 'on', kinds, diagnosis: { ...state.diagnosis, stored: 'on', subscription: endpointHost(subscription), result: 'on: turned on just now' } });
+            set({ status: 'on', kinds, diagnosis: { ...store.get().diagnosis, stored: 'on', subscription: endpointHost(subscription), result: 'on: turned on just now' } });
             return true;
         } catch (err) {
             set(failure(step, err));
@@ -335,7 +326,7 @@ export function disablePush() {
 
 // One kind on or off for this device ({ plan: false }); shown at once, put back if it fails
 export async function setPushKind(kind, on) {
-    const before = state.kinds;
+    const before = store.get().kinds;
     set({ kinds: { ...before, [kind]: on }, error: null });
     try {
         const subscription = await currentSubscription();
@@ -381,14 +372,14 @@ export function forgetPushOnSignOut(token, keep = false) {
 // After a task was created: asks once per device whether notifications should come, while they
 // are off and the browser hasn't blocked them
 export function offerPushAfterTask() {
-    if (state.status !== 'off' || read(ASKED_KEY)) return;
+    if (store.get().status !== 'off' || read(ASKED_KEY)) return;
     if (!isNativeApp() && (typeof Notification === 'undefined' || Notification.permission === 'denied')) return;
     write(ASKED_KEY, '1');
     set({ asking: true });
 }
 
 // Whether that question is open right now (onboarding waits with its own until it's answered)
-export const pushAsking = () => state.asking;
+export const pushAsking = () => store.get().asking;
 
 // The answer to that question; yes comes from a click, so it can ask for the permission
 export function answerPushOffer(yes) {
@@ -397,12 +388,7 @@ export function answerPushOffer(yes) {
     return Promise.resolve(false);
 }
 
-const subscribeStore = (listener) => {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-};
-
-export const usePushState = () => useSyncExternalStore(subscribeStore, () => state, () => state);
+export const usePushState = store.use;
 
 // In the app shell: checks this device on every start (and for another account), and opens the
 // page a clicked notification points to (the service worker's 'quidey:open', see pwa.js)
@@ -431,5 +417,5 @@ export function usePushSync(enabled, account, navigate) {
 export function resetPushState() {
     serverInfo = undefined;
     queue = Promise.resolve();
-    state = { status: 'unknown', kinds: null, busy: false, error: null, detail: null, asking: false, diagnosis: null };
+    store.set(START, { silent: true });
 }

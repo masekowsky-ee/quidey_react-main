@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { COMMUNITY_PATHS, isCommunityPath } from '../community/paths';
+import { isCommunityPath } from '../community/paths';
+import { NAV, paths, tabIds } from '../app/navTable';
 import { openMenu } from '../settings/settingsAction';
 import { animate } from 'motion';
 import { spring } from '../settings/motion';
@@ -20,15 +21,15 @@ import { project, rubberband, velocityOf } from './dragDismiss';
 // nothing moves, the pages only cross-fade.
 // study: the fourth tab is Lernen (the study plan, testers for now) instead of Sozial; Sozial then
 // lives behind "Mehr".
-export const tabPaths = (study = false) => ['/', '/calendar', '/focus', study ? '/study' : COMMUNITY_PATHS.feed];
+export const tabPaths = (study = false) => tabIds(study).map(id => NAV[id].path);
 export const TAB_PATHS = tabPaths(false);
 
-const isStudyPath = (pathname) => pathname === '/study' || pathname.startsWith('/study/');
+const isStudyPath = (pathname) => pathname === paths.study || pathname.startsWith(`${paths.study}/`);
 
 export function tabIndexOf(pathname, study = false) {
-    if (pathname === '/') return 0;
-    if (pathname === '/calendar' || pathname.startsWith('/calendar/')) return 1;
-    if (pathname === '/focus' || pathname.startsWith('/focus/')) return 2;
+    if (pathname === paths.home) return 0;
+    if (pathname === paths.calendar || pathname.startsWith(`${paths.calendar}/`)) return 1;
+    if (pathname === paths.focus || pathname.startsWith(`${paths.focus}/`)) return 2;
     if (study ? isStudyPath(pathname) : isCommunityPath(pathname)) return 3;
     return -1;
 }

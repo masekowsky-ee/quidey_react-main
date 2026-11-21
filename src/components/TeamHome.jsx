@@ -18,11 +18,10 @@ import WorkSummary from './together/WorkSummary';
 import ShareMyTasks from './together/ShareMyTasks';
 
 import Icon from './icons';
+import { read, write } from '../features/storedSetting';
 const STORAGE_KEY = 'teamSessionId';
 
-function readStoredSessionId() {
-    try { return Number(localStorage.getItem(STORAGE_KEY)) || null; } catch { return null; }
-}
+const readStoredSessionId = () => read(STORAGE_KEY, { parse: text => Number(text) || null, fallback: null });
 
 // Home page in the team layout: one shared session as a workspace. Session tasks on the left,
 // my focus in the middle (clock, my own tasks to share, the summary), the team and chat on the right.
@@ -52,7 +51,7 @@ export default function TeamHome() {
 
     const choose = (id) => {
         setChosenId(id);
-        try { localStorage.setItem(STORAGE_KEY, String(id)); } catch { /* not remembered */ }
+        write(STORAGE_KEY, String(id));
         if (creating) setCreating(false);
     };
 

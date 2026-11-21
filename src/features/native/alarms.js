@@ -14,6 +14,7 @@
 import { registerPlugin } from '@capacitor/core';
 import { isNativeApp } from './native';
 import { apiFetch } from '../api/api';
+import { read } from '../storedSetting';
 import { translate } from '../../i18n/useTranslation';
 import { occurrences, fetchReminders, SNOOZE_MINUTES } from '../reminders/reminders';
 
@@ -60,7 +61,7 @@ export function alarmsFor(list, now = new Date()) {
 }
 
 async function tellServer(alarms) {
-    const endpoint = localStorage.getItem('pushEndpoint');
+    const endpoint = read('pushEndpoint');
     if (!endpoint) return;
     await apiFetch('/api/tester/reminders/device', { method: 'PUT', body: JSON.stringify({ endpoint, alarms }) }).catch(() => {});
 }

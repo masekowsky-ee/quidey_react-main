@@ -20,6 +20,7 @@ import NotePreview from './NotePreview.jsx';
 import ConfirmDeleteButton from '../ConfirmDeleteButton.jsx';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
+import { read, write } from '../../features/storedSetting';
 import styles from './Notes.module.css';
 
 const LAYOUT_KEY = 'notesLayout';
@@ -69,10 +70,6 @@ function FolderTiles({ folders, count, onPick }) {
     );
 }
 
-const stored = (key, allowed, fallback) => {
-    try { const value = localStorage.getItem(key); return allowed.includes(value) ? value : fallback; } catch { return fallback; }
-};
-const store = (key, value) => { try { localStorage.setItem(key, value); } catch { /* private mode */ } };
 
 function ViewButton({ current, icon, emoji, label, count, onClick }) {
     return (
@@ -118,8 +115,8 @@ export default function NotesPage() {
     const [trash, setTrash] = useState(null);
     const [folders, setFolders] = useNoteFolders();
     const [query, setQuery] = useState('');
-    const [sort, setSort] = useState(() => stored(SORT_KEY, SORTS, 'updated'));
-    const [layout, setLayout] = useState(() => stored(LAYOUT_KEY, ['list', 'grid'], 'grid'));
+    const [sort, setSort] = useState(() => read(SORT_KEY, { allowed: SORTS, fallback: 'updated' }));
+    const [layout, setLayout] = useState(() => read(LAYOUT_KEY, { allowed: ['list', 'grid'], fallback: 'grid' }));
     const [addingFolder, setAddingFolder] = useState(false);
     const [renaming, setRenaming] = useState(null);
     useCollections();
@@ -335,13 +332,13 @@ export default function NotesPage() {
                             <input type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder={t('notesSearch')} aria-label={t('notesSearch')} />
                         </label>
                         {view.kind !== 'trash' && <>
-                            <select className={styles.sortSelect} value={sort} onChange={e => { setSort(e.target.value); store(SORT_KEY, e.target.value); }} aria-label={t('notesSort')}>
+                            <select className={styles.sortSelect} value={sort} onChange={e => { setSort(e.target.value); write(SORT_KEY, e.target.value); }} aria-label={t('notesSort')}>
                                 {SORTS.map(key => <option key={key} value={key}>{t(`notesSort_${key}`)}</option>)}
                             </select>
                             <div className={styles.layoutSwitch} role="group" aria-label={t('notesLayout')}>
                                 {[['list', 'list', 'notesLayoutList'], ['grid', 'grid', 'notesLayoutGrid']].map(([key, icon, label]) =>
                                     <button key={key} type="button" aria-pressed={layout === key} aria-label={t(label)} title={t(label)}
-                                        onClick={() => { setLayout(key); store(LAYOUT_KEY, key); }}>
+                                        onClick={() => { setLayout(key); write(LAYOUT_KEY, key); }}>
                                         <Icon name={icon} size={15} />
                                     </button>)}
                             </div>
