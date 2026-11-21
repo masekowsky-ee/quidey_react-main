@@ -566,41 +566,8 @@ color: var(--text-h);
 background: var(--surface-hover);
 }
 
-/* ---------- Phones: the menu is a sheet from the bottom edge, as iOS's "More" ----------
-   Full width on the edge, round top corners, a grabber, pulled down to put it away (Menu.jsx:
-   dragDismiss on the y axis). The tab bar's "More" and a swipe past the last tab open it, from
-   whichever side the drawer used to come. */
+/* iOS: a row is at least 44 pt tall (phones: the drawer comes in from the side) */
 @media (max-width: 720px) {
-  .menuDiv,
-  .menuDiv.fromRight {
-    top: auto;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: auto;
-    max-height: min(92dvh, calc(100dvh - var(--header-h, 3.5rem)));
-    border: none;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    transform: translateY(100%);
-    touch-action: pan-y;
-    padding: 1.5rem 16px calc(16px + env(safe-area-inset-bottom, 0px));
-    padding-left: calc(16px + env(safe-area-inset-left, 0px));
-    padding-right: calc(16px + env(safe-area-inset-right, 0px));
-    --menu-side: 0;
-  }
-
-  .menuDiv.open,
-  .menuDiv.fromRight.open {
-    transform: translateY(0);
-    box-shadow: 0 -16px 40px -20px rgba(0, 0, 0, 0.5);
-  }
-
-  .menuHead {
-    margin-bottom: 8px;
-  }
-
-  /* iOS: a row is at least 44 pt tall */
   .menuItem {
     min-height: 2.75rem;
   }

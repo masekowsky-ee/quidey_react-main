@@ -24,8 +24,6 @@ import { AnimatePresence, motion } from 'motion/react';
 import { MOTION, useMotionLevel } from '../features/settings/motion';
 import { useDragDismiss } from '../features/layout/dragDismiss';
 import { openAuth } from '../features/auth/gate';
-import { PHONE_QUERY, useMediaQuery } from '../features/layout/breakpoints';
-import SheetGrabber from './SheetGrabber';
 
 // One entry: icon, label and an optional count badge (or a dot: something changed there);
 // the current page is highlighted (`match`: also on other addresses that belong to it)
@@ -121,9 +119,7 @@ export default function Menu(){
     // the open drawer follows a finger pushing it back to the side it came from and closes once
     // it's pushed or flicked far enough
     const drawerRef = useRef(null);
-    // phones: a sheet from the bottom edge (iOS "More"), pulled down to put it away; wider: the drawer
-    const phone = useMediaQuery(PHONE_QUERY);
-    useDragDismiss(drawerRef, { onDismiss: onClose, enabled: isOpen, axis: phone ? 'y' : 'x', direction: phone || fromRight ? 1 : -1, media: null });
+    useDragDismiss(drawerRef, { onDismiss: onClose, enabled: isOpen, axis: 'x', direction: fromRight ? 1 : -1, media: null });
 
     // changing sides happens while it is closed and off screen: at once, so it never slides across
     const sideChanged = useRef(false);
@@ -169,7 +165,6 @@ export default function Menu(){
             {/* a closed drawer is off screen: out of the tab order and hidden from screen readers too */}
             <div className={[styles.menuDiv, isOpen && styles.open, fromRight && styles.fromRight, undocked && styles.undocked, nav === 'rail' && styles.rail].filter(Boolean).join(' ')}
                 inert={!docked && !isOpen} data-part="menu" ref={drawerRef}>
-                <SheetGrabber />
                 <div className={styles.menuHead}>
                     <Link to="/" className={styles.brand} onClick={onClose} aria-label={`Quidey, ${t('home')}`}>
                         <Logo className={styles.brandMark} />
