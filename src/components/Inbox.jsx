@@ -24,6 +24,7 @@ import { Bone, Skeleton, SkeletonRows } from './skeleton/Skeleton.jsx';
 
 import Icon from './icons';
 import ReminderList from './reminders/ReminderList.jsx';
+import { quietly } from '../features/api/quietly';
 const TABS = ['messages', 'requests', 'notices', 'reminders'];
 const SEEN_DELAY_MS = 1500;
 const REMINDER_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
@@ -133,7 +134,7 @@ function Thread({ userId, onBack }) {
     const endRef = useRef(null);
 
     const load = useCallback(() => fetchConversation(userId)
-        .then(data => { setThread(data); dispatch(fetchInboxUnread()).catch(() => {}); })
+        .then(data => { setThread(data); quietly(dispatch(fetchInboxUnread())); })
         .catch(setError), [userId, dispatch]);
 
     useEffect(() => { load(); }, [load]);
@@ -324,7 +325,7 @@ function Notices() {
         try {
             await deleteNotification(id);
             setNotices(prev => prev.filter(n => n.id !== id));
-            dispatch(fetchInboxUnread()).catch(() => {});
+            quietly(dispatch(fetchInboxUnread()));
         } catch (err) {
             dispatch(showToast(errorText(t, 'inboxError', err?.code), 'error'));
         }
@@ -428,8 +429,8 @@ export default function Inbox() {
 
     // the friends (to write to) are otherwise only loaded on the Social page
     useEffect(() => {
-        dispatch(fetchInboxUnread()).catch(() => {});
-        dispatch(fetchFriends()).catch(() => {});
+        quietly(dispatch(fetchInboxUnread()));
+        quietly(dispatch(fetchFriends()));
     }, [dispatch]);
 
     const go = (next, extra = {}) => setSearchParams(next === 'messages' && !extra.with ? {} : { tab: next, ...extra }, { replace: !extra.with });

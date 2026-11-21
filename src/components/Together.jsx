@@ -10,6 +10,7 @@ import {
 import { useTogetherRun } from '../features/together/hooks';
 import ProfileAvatar from './profile/ProfileAvatar';
 import QuickStart from './together/QuickStart';
+import { quietly } from '../features/api/quietly';
 
 // The shared sessions: invites, the open ones, a form to start one and the ended ones
 
@@ -46,7 +47,7 @@ export default function Together() {
     const [searchParams] = useSearchParams();
 
     useEffect(() => {
-        dispatch(fetchSharedSessions()).catch(() => {});
+        quietly(dispatch(fetchSharedSessions()));
     }, [dispatch]);
 
     const wantsNew = searchParams.get('new') === '1';
@@ -59,7 +60,7 @@ export default function Together() {
     const handleJoin = async (id) => {
         setBusyId(id);
         if (await run(joinSharedSession(id), 'toast_joined')) navigate(`/together/${id}`);
-        else dispatch(fetchSharedSessions()).catch(() => {});
+        else quietly(dispatch(fetchSharedSessions()));
         setBusyId(null);
     };
 

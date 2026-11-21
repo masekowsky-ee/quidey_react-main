@@ -21,6 +21,7 @@ import ProfileAvatar from '../profile/ProfileAvatar';
 import TaskMeta from '../task/TaskMeta.jsx';
 import TaskEditDialog from '../task/TaskEditDialog.jsx';
 import Icon from '../icons.jsx';
+import { quietly } from '../../features/api/quietly';
 
 const FILTERS = ['all', 'mine', 'free'];
 
@@ -90,7 +91,7 @@ export default function SharedTaskList({ session, showShareSelect = true }) {
         if (!task.done) dispatch(dropSharedFocus(id, task.id));
         if (!task.done && workingOn === task.id) await dispatch(stopWork());
         if (await run(setSharedTaskDone(id, task.id, !task.done)) && task.sourceTaskId) {
-            dispatch(fetchTaskState()).catch(() => {});
+            quietly(dispatch(fetchTaskState()));
         }
     };
 

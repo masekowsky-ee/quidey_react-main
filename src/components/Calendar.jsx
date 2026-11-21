@@ -31,6 +31,7 @@ import { useMediaQuery } from '../features/layout/breakpoints';
 import { fetchSubjects, selectSubjects } from '../features/study/study';
 import { useUntisLessons, lessonBoxes, colorLessons, useShowLessons, setShowLessons, useUntisStatus } from '../features/untis/untis';
 import { useRequireAccount } from '../features/auth/gate.js';
+import { quietly } from '../features/api/quietly';
 
 const VIEW_LABELS = { month: 'calendarViewMonth', week: 'calendarViewWeek', agenda: 'calendarViewAgenda' };
 const VIEW_KEYS = { m: 'month', w: 'week', a: 'agenda' };
@@ -95,7 +96,7 @@ export default function Calendar() {
     const subjects = useSelector(selectSubjects);
     const lessonDays = useMemo(() => lessonBoxes(colorLessons(lessons, subjects), t('untisBoxName')), [lessons, subjects, t]);
     useEffect(() => {
-        if (untisConnected && !isShared) dispatch(fetchSubjects()).catch(() => {});
+        if (untisConnected && !isShared) quietly(dispatch(fetchSubjects()));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [untisConnected, isShared]);
     const tasks = useMemo(() => (lessonDays.length ? [...baseTasks, ...lessonDays] : baseTasks), [baseTasks, lessonDays]);
@@ -153,7 +154,7 @@ export default function Calendar() {
     const overdueCount = shown.filter(task => isOverdue(task, today)).length;
 
     useEffect(() => {
-        dispatch(fetchSharedHistory()).catch(() => {});
+        quietly(dispatch(fetchSharedHistory()));
     }, [dispatch]);
 
     // not (or no longer) in that session / family: back to my own calendar

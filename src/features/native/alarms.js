@@ -17,6 +17,7 @@ import { apiFetch } from '../api/api';
 import { read } from '../storedSetting';
 import { translate } from '../../i18n/useTranslation';
 import { occurrences, fetchReminders, SNOOZE_MINUTES } from '../reminders/reminders';
+import { quietly } from '../api/quietly';
 
 const QuideyAlarms = registerPlugin('QuideyAlarms');
 
@@ -120,7 +121,7 @@ export function sendAlarmActions(dispatch, now = Date.now) {
             }
         }
         if (sent.length > 0) await QuideyAlarms.clearActions({ keys: sent }).catch(() => {});
-        await dispatch(fetchReminders()).catch(() => {});
+        await quietly(dispatch(fetchReminders()));
     })().finally(() => { sending = null; });
     return sending;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchFriends } from './friendsAction';
+import { quietly } from '../api/quietly';
 
 // My friends; loads the list once if it is still empty (otherwise only the social page loads it)
 export function useFriends() {
@@ -12,7 +13,7 @@ export function useFriends() {
     useEffect(() => {
         if (loaded || friendsLoaded || friends.length > 0) return;
         let active = true;
-        dispatch(fetchFriends()).catch(() => {}).finally(() => { if (active) setLoaded(true); });
+        quietly(dispatch(fetchFriends())).finally(() => { if (active) setLoaded(true); });
         return () => { active = false; };
     }, [dispatch, friends.length, friendsLoaded, loaded]);
     return friends;

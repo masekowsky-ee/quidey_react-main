@@ -10,6 +10,7 @@ import { RouteSkeleton } from './PageSkeletons.jsx';
 import { useTranslation } from '../../i18n/useTranslation';
 import { fetchAccess, logout } from '../../features/auth/authAction';
 import { useNavModel } from '../../features/tester/variants';
+import { quietly } from '../../features/api/quietly';
 
 const SLOW_MS = 5000;
 
@@ -31,7 +32,7 @@ export default function AppSkeleton() {
     }, []);
     const retry = async () => {
         setRetrying(true);
-        await dispatch(fetchAccess()).catch(() => {});
+        await quietly(dispatch(fetchAccess()));
         setRetrying(false);
     };
     return (

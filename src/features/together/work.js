@@ -3,6 +3,7 @@ import { useDispatch, useSelector, useStore } from 'react-redux';
 import { WORK_SWITCHED, WORK_SETTLED, WORK_RESTORED, WORK_STOPPED } from './togetherActionTypes';
 import { reportSharedActivity, fetchSharedSession, timeOf } from './togetherAction';
 import { formatClock } from '../helperFunction';
+import { quietly } from '../api/quietly';
 
 // My team stopwatch. It counts up on one task of one session at a time and books the time
 // on the server in small reports, so the others see it (nearly) live. It lives in the store
@@ -36,7 +37,7 @@ const report = (sessionId, body, booked, keepalive) => (dispatch) => {
             if (err.status === 404 || err.status === 409) {
                 // session ended, task removed or I was removed: stop, and show what's there now
                 dispatch({ type: WORK_STOPPED, payload: sessionId });
-                dispatch(fetchSharedSession(sessionId)).catch(() => {});
+                quietly(dispatch(fetchSharedSession(sessionId)));
             } else if (booked) {
                 // offline for a moment: keep the time and send it with the next report
                 dispatch({ type: WORK_RESTORED, payload: booked });

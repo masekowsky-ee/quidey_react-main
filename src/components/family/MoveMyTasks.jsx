@@ -10,6 +10,7 @@ import { useFamilyRun } from './useFamilyRun';
 import Dialog from '../Dialog.jsx';
 import Icon from '../icons';
 import OpenTaskList from '../together/OpenTaskList';
+import { quietly } from '../../features/api/quietly';
 
 // "From my tasks": my own tasks and events, each moved into the family after a question (it
 // leaves my list). subGroup: the shown sub-group, which it goes into. onChanged(family).
@@ -24,7 +25,7 @@ export default function MoveMyTasks({ family, subGroup = null, onChanged }) {
         const changed = await run(moveToFamily(family.id, task.id, subGroup ? { group_id: subGroup } : {}), 'toast_movedToFamily');
         if (!changed) return;
         onChanged(changed);
-        await dispatch(refreshTasks()).catch(() => {});
+        await quietly(dispatch(refreshTasks()));
     };
 
     return (

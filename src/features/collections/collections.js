@@ -8,6 +8,7 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiFetch } from '../api/api';
+import { quietly } from '../api/quietly';
 
 export const SET_COLLECTIONS = 'SET_COLLECTIONS';
 const COLLECTION_SAVED = 'COLLECTION_SAVED';
@@ -99,7 +100,7 @@ export function useCollections() {
     const dispatch = useDispatch();
     const loaded = useSelector(selectCollectionsLoaded);
     useEffect(() => {
-        if (!loaded) dispatch(fetchCollections()).catch(() => {});
+        if (!loaded) quietly(dispatch(fetchCollections()));
     }, [loaded, dispatch]);
     return useSelector(selectCollections);
 }

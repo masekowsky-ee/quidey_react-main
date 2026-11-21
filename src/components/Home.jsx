@@ -30,6 +30,7 @@ import Seats from './variants/Seats.jsx'
 
 import {useSelector, useDispatch} from 'react-redux';
 import { useRequireAccount } from '../features/auth/gate.js'
+import { quietly } from '../features/api/quietly';
 
 // Home, "solo" layout: the day's title, the next days, the task list, and the focus column
 // (the task being worked on and the timer). Wide screens put the focus column beside the list,
@@ -70,7 +71,7 @@ export default function Home(){
     const [releasedIds, setReleasedIds] = useState([]);
 
     useEffect(() => {
-        dispatch(fetchMySharedTasks()).catch(() => {});
+        quietly(dispatch(fetchMySharedTasks()));
     }, [dispatch]);
 
     const releaseActiveTask = () => {

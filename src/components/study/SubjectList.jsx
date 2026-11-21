@@ -17,6 +17,7 @@ import styles from './Study.module.css';
 import ScanSheet from '../scan/ScanSheet.jsx';
 import HomeworkSuggestions from './HomeworkSuggestions.jsx';
 import { useAiQuota } from '../../features/ai/ai';
+import { quietly } from '../../features/api/quietly';
 
 const NAME_MAX = 60;
 
@@ -94,7 +95,7 @@ export default function SubjectList() {
 
     return (
         <div className={styles.page} data-part="study">
-            {scanning && <ScanSheet onClose={() => setScanning(false)} onDone={(made) => { if (made.plan) dispatch(fetchSubjects()).catch(() => {}); }} />}
+            {scanning && <ScanSheet onClose={() => setScanning(false)} onDone={(made) => { if (made.plan) quietly(dispatch(fetchSubjects())); }} />}
             <header className={styles.head}>
                 <div>
                     <h1 className={styles.title}>{t('studyTitle')}</h1>

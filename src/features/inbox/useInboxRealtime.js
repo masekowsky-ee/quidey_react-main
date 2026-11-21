@@ -8,6 +8,7 @@ import { playSound } from '../settings/sound';
 import { useRealtime } from '../realtime/socket';
 import { REALTIME_RECONNECT, MESSAGE_NEW, NOTIFICATION_NEW, INBOX_READ } from '../realtime/events';
 import { fetchInboxUnread, noticeView } from './inbox';
+import { quietly } from '../api/quietly';
 
 // App-wide: keeps the inbox badge current as messages and notices come in live, and tells me
 // about them with a toast that opens the conversation (or the notices) on a click, unless I'm
@@ -17,7 +18,7 @@ export function useInboxRealtime() {
     const { t } = useTranslation();
     const location = useLocation();
 
-    const refreshBadge = () => dispatch(fetchInboxUnread()).catch(() => {});
+    const refreshBadge = () => quietly(dispatch(fetchInboxUnread()));
     const onInbox = location.pathname === '/inbox';
     const params = new URLSearchParams(location.search);
 

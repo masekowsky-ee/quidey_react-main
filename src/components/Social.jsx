@@ -16,6 +16,7 @@ import {
     fetchFriends, fetchFriendRequests, sendFriendRequest,
     acceptFriendRequest, removeFriendRequest, removeFriend,
 } from '../features/friends/friendsAction';
+import { quietly } from '../features/api/quietly';
 
 const TABS = ['friends', 'add', 'requests'];
 
@@ -76,8 +77,8 @@ export default function Social() {
     const [confirmRemoveId, setConfirmRemoveId] = useState(null);
 
     useEffect(() => {
-        dispatch(fetchFriends()).catch(() => {});
-        dispatch(fetchFriendRequests()).catch(() => {});
+        quietly(dispatch(fetchFriends()));
+        quietly(dispatch(fetchFriendRequests()));
     }, [dispatch]);
 
     const run = async (id, action) => {

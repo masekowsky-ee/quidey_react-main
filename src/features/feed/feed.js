@@ -8,6 +8,7 @@ import { markNews } from '../realtime/news';
 import { useRealtime, useRealtimeRefresh } from '../realtime/socket';
 import { FEED_CHANGED, FEED_CHEERED } from '../realtime/events';
 import { fetchProgress } from '../progress/progress';
+import { quietly } from '../api/quietly';
 
 // The feed on the Gemeinschaft page: what friends and I did (a day's focus, challenges, levels,
 // streaks) and short posts, newest first, a page at a time. Friends cheer entries on.
@@ -83,7 +84,7 @@ export const cheerFeedEntry = (entry, on) => async (dispatch) => {
     try {
         const result = await apiFetch(`/api/feed/${entry.id}/cheer`, { method: on ? 'PUT' : 'DELETE' });
         dispatch({ type: FEED_ENTRY_CHEERED, payload: { id: entry.id, ...result } });
-        dispatch(fetchProgress()).catch(() => {});
+        quietly(dispatch(fetchProgress()));
     } catch (err) {
         dispatch({ type: FEED_ENTRY_CHEERED, payload: { id: entry.id, cheers: entry.cheers, cheered: entry.cheered } });
         throw err;
@@ -98,7 +99,7 @@ export function useFeedRealtime() {
     const { t } = useTranslation();
 
     useRealtimeRefresh([FEED_CHANGED], async () => {
-        if (store.getState().feed.loaded) await dispatch(fetchFeed()).catch(() => {});
+        if (store.getState().feed.loaded) await quietly(dispatch(fetchFeed()));
     });
     useRealtime(FEED_CHANGED, () => dispatch(markNews('feed')));
     useRealtime(FEED_CHEERED, (payload) => {

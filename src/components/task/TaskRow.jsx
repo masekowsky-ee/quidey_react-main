@@ -18,6 +18,7 @@ import { createdText } from '../../features/tasks/created';
 import { Bone } from '../skeleton/Skeleton.jsx';
 import SessionMarker from '../study/SessionMarker.jsx';
 import { unpinSession } from '../../features/study/study';
+import { quietly } from '../../features/api/quietly';
 
 const SKELETON_NAME_WIDTHS = ['62%', '46%', '71%', '38%', '55%'];
 export function TaskRowSkeleton({ index = 0 }) {
@@ -146,7 +147,7 @@ const TaskRow = forwardRef(function TaskRow({
                     </button>}
                 {/* only a session of a goal can go back to the plan (one kept after its goal went is a plain task) */}
                 {task.plan_pinned && task.study && !task.done &&
-                    <button type="button" className={styles.action} onClick={() => dispatch(unpinSession(task.id)).catch(() => {})}
+                    <button type="button" className={styles.action} onClick={() => quietly(dispatch(unpinSession(task.id)))}
                         title={t('studyUnpinSession')} aria-label={`${t('studyUnpinSession')}: ${task.name}`}>
                         <Icon name="book" className={styles.actionIcon} />
                     </button>}

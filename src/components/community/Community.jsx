@@ -17,6 +17,7 @@ import OnlineNow from './OnlineNow';
 import Together from '../Together';
 import Social from '../Social';
 import Family from '../family/Family';
+import { quietly } from '../../features/api/quietly';
 
 // The progress tab: my level (with what it unlocks), today's and this week's challenges and the
 // week among friends. Wide: the level on the left, the rest beside it; narrow: one column.
@@ -54,9 +55,9 @@ export default function Community() {
     const dots = { feed: news.feed, sessions: news.together, friends: news.social };
 
     useEffect(() => {
-        dispatch(fetchProgress()).catch(() => {});
-        dispatch(fetchRanking()).catch(() => {});
-        dispatch(fetchFriends()).catch(() => {});
+        quietly(dispatch(fetchProgress()));
+        quietly(dispatch(fetchRanking()));
+        quietly(dispatch(fetchFriends()));
     }, [dispatch]);
 
     const tabs = COMMUNITY_TABS;

@@ -36,6 +36,7 @@ import { trackView } from '../usage/track.js';
 import { setUsageEnabled } from '../usage/usage.js';
 import { useActiveMinutes, useAppOpen } from '../usage/useActiveMinutes.js';
 import { preloadPages } from './pages.js';
+import { quietly } from '../api/quietly';
 
 const REQUEST_REFRESH_MS = 60 * 1000;
 
@@ -76,7 +77,7 @@ export function useSignedInStart(allowed) {
 // On the beta screen there is no connection, so a granted beta shows up within a minute.
 export function useAccessGuard({ signedIn, proOn, token }) {
   const dispatch = useDispatch();
-  const checkAccess = useCallback(() => dispatch(fetchAccess()).catch(() => {}), [dispatch]);
+  const checkAccess = useCallback(() => quietly(dispatch(fetchAccess())), [dispatch]);
   useEffect(() => {
     if (!signedIn) return;
     window.addEventListener(PRO_REQUIRED_EVENT, checkAccess);
@@ -98,12 +99,12 @@ export function useAccessGuard({ signedIn, proOn, token }) {
 export function useSignedInData(allowed) {
   const dispatch = useDispatch();
   useSafetyPoll(() => {
-    dispatch(fetchFriendRequests()).catch(() => {});
-    dispatch(fetchFriends()).catch(() => {});
-    dispatch(fetchSharedSessions()).catch(() => {});
-    dispatch(fetchMySharedTasks()).catch(() => {});
-    dispatch(fetchTaskInvites()).catch(() => {});
-    dispatch(fetchInboxUnread()).catch(() => {});
+    quietly(dispatch(fetchFriendRequests()));
+    quietly(dispatch(fetchFriends()));
+    quietly(dispatch(fetchSharedSessions()));
+    quietly(dispatch(fetchMySharedTasks()));
+    quietly(dispatch(fetchTaskInvites()));
+    quietly(dispatch(fetchInboxUnread()));
   }, { everyMs: REQUEST_REFRESH_MS, enabled: allowed, immediately: true });
 }
 
@@ -131,7 +132,7 @@ export function useAppServices(allowed, token, navigate) {
   // tasks shared with friends change on their side (announced live, see useLiveLists), my own
   // ones maybe on another device: read again as a safety net (not right at the start,
   // fetchTaskState just loaded them)
-  useSafetyPoll(() => dispatch(refreshTasks()).catch(() => {}), { everyMs: REQUEST_REFRESH_MS, enabled: allowed });
+  useSafetyPoll(() => quietly(dispatch(refreshTasks())), { everyMs: REQUEST_REFRESH_MS, enabled: allowed });
 
   useTaskReminders(allowed);
   // ...and by mail when a task asks for it: the server needs my time zone and language

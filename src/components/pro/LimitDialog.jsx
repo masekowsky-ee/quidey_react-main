@@ -9,6 +9,7 @@ import { fetchAccess } from '../../features/auth/authAction';
 import { LIMIT_EVENT } from '../../features/pro/pro';
 import Icon from '../icons';
 import Dialog from '../Dialog.jsx';
+import { quietly } from '../../features/api/quietly';
 
 // The free plan is full (after the beta: 403 LIMIT_REACHED from any request, see
 // features/helperFunction.js): a kind word instead of an error, and the way to Quidey Pro.
@@ -20,7 +21,7 @@ export default function LimitDialog() {
         const onLimit = (e) => {
             setLimit(e.detail);
             // the counts in the settings / on the Pro page come along
-            dispatch(fetchAccess()).catch(() => {});
+            quietly(dispatch(fetchAccess()));
         };
         window.addEventListener(LIMIT_EVENT, onLimit);
         return () => window.removeEventListener(LIMIT_EVENT, onLimit);

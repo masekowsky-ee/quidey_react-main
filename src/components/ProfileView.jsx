@@ -17,6 +17,7 @@ import PlantCard from './progress/PlantCard.jsx';
 import PasswordInput from './PasswordInput.jsx';
 import { errorText } from '../features/api/transport';
 import MailSpamHint from './auth/MailSpamHint.jsx';
+import { quietly } from '../features/api/quietly';
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -35,7 +36,7 @@ export default function ProfileView({ onSignOut }) {
     const trial = useSelector(state => state.auth.access.trial);
 
     // the friends list is otherwise only loaded on the Social page
-    useEffect(() => { dispatch(fetchFriends()).catch(() => {}); }, [dispatch]);
+    useEffect(() => { quietly(dispatch(fetchFriends())); }, [dispatch]);
 
     const focusMs = sessions.reduce((sum, ws) => sum + (ws.totalTime ?? 0) * 1000, 0);
 

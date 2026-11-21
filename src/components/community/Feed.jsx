@@ -9,6 +9,7 @@ import { FEED_POST_MAX, fetchFeed, fetchMoreFeed, postToFeed } from '../../featu
 import { fetchFriends } from '../../features/friends/friendsAction';
 import { friendsPath } from '../../features/community/paths';
 import FeedEntry from './FeedEntry';
+import { quietly } from '../../features/api/quietly';
 
 const locale = localeOf;
 
@@ -101,13 +102,13 @@ export default function Feed() {
     const [loadingMore, setLoadingMore] = useState(false);
 
     useEffect(() => {
-        dispatch(fetchFeed()).catch(() => {});
-        dispatch(fetchFriends()).catch(() => {});
+        quietly(dispatch(fetchFeed()));
+        quietly(dispatch(fetchFriends()));
     }, [dispatch]);
 
     const more = async () => {
         setLoadingMore(true);
-        await dispatch(fetchMoreFeed()).catch(() => {});
+        await quietly(dispatch(fetchMoreFeed()));
         setLoadingMore(false);
     };
     const time = (value) => new Date(value).toLocaleTimeString(locale(language), { hour: '2-digit', minute: '2-digit' });
@@ -121,7 +122,7 @@ export default function Feed() {
             {failed && !loaded && (
                 <p className={styles.state}>
                     {t('feedFailed')}{' '}
-                    <button type="button" className={styles.textBtn} onClick={() => dispatch(fetchFeed()).catch(() => {})}>{t('feedRetry')}</button>
+                    <button type="button" className={styles.textBtn} onClick={() => quietly(dispatch(fetchFeed()))}>{t('feedRetry')}</button>
                 </p>
             )}
             {loaded && entries.length === 0 && (

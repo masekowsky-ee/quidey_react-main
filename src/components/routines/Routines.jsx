@@ -12,6 +12,7 @@ import RoutineRunner from './RoutineRunner.jsx';
 import SheetGrabber from '../SheetGrabber.jsx';
 import { useFocusOnArrival, useSheet } from '../../features/layout/dragDismiss';
 import styles from './Routines.module.css';
+import { quietly } from '../../features/api/quietly';
 
 const EMPTY = { name: '', emoji: '✨', steps: [{ title: '', minutes: 5 }], days: [], atTime: null, remind: true };
 const STEP_MINUTES = [0, 1, 2, 3, 5, 10, 15, 20, 25, 30, 45, 60];
@@ -167,7 +168,7 @@ export default function Routines() {
     const { list, loaded } = useSelector(state => state.routines);
     const [editing, setEditing] = useState(null);
 
-    useEffect(() => { dispatch(fetchRoutines()).catch(() => {}); }, [dispatch]);
+    useEffect(() => { quietly(dispatch(fetchRoutines())); }, [dispatch]);
 
     if (id) {
         const routine = list.find(item => String(item.id) === id);

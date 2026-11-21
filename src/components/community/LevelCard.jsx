@@ -6,6 +6,7 @@ import { TIERS, UNLOCKS, fetchProgress, formatNumber, nextUnlocks, tierFor, unlo
 import Icon from '../icons';
 import LevelPlant from '../progress/LevelPlant';
 import { Link } from 'react-router-dom';
+import { quietly } from '../../features/api/quietly';
 
 // limit: at most this many rows (the next few unlocks)
 function UnlockRows({ steps, reached, t, limit = Infinity }) {
@@ -39,7 +40,7 @@ export default function LevelCard() {
                 {failed ? (
                     <p className={styles.errorLine}>
                         {t('progressFailed')}
-                        <button type="button" className={styles.textBtn} onClick={() => dispatch(fetchProgress()).catch(() => {})}>{t('feedRetry')}</button>
+                        <button type="button" className={styles.textBtn} onClick={() => quietly(dispatch(fetchProgress()))}>{t('feedRetry')}</button>
                     </p>
                 ) : (
                     <>

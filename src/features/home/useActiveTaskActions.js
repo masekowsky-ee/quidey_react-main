@@ -6,6 +6,7 @@ import { setSharedTaskDone, togetherErrorText } from '../together/togetherAction
 import { showToast } from '../toast/toast';
 import { burstFrom, useMotionLevel } from '../settings/motion';
 import { playSound } from '../settings/sound';
+import { quietly } from '../api/quietly';
 
 // What the task in focus can do, for both layouts of it (Home's FocusSheet and the focus column,
 // WorkingContainer): tick it off, save its description, add a note (the input opens for one task
@@ -16,7 +17,7 @@ export function useActiveTaskActions(activeTask, setActiveTask, { echo = false }
     const dispatch = useDispatch();
     const motionLevel = useMotionLevel();
 
-    useEffect(() => { dispatch(refreshTaskNotes()).catch(() => {}); }, [dispatch]);
+    useEffect(() => { quietly(dispatch(refreshTaskNotes())); }, [dispatch]);
 
     const [addingFor, setAddingFor] = useState(null);
     const addingNote = addingFor !== null && addingFor === activeTask?.id;

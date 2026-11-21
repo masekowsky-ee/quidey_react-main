@@ -18,6 +18,7 @@ import { listReducer } from '../listReducer';
 import { isoWeekday, timeText, weekdaysText } from '../calendar/calendar';
 import { read, remove, write } from '../storedSetting';
 import { startChecking } from '../reminders/due';
+import { quietly } from '../api/quietly';
 
 const SET_ROUTINES = 'SET_ROUTINES';
 const ROUTINE_SAVED = 'ROUTINE_SAVED';
@@ -124,7 +125,7 @@ export function useRoutineReminders(allowed) {
     const loaded = useSelector(state => state.routines.loaded);
 
     useEffect(() => {
-        if (allowed && !loaded) dispatch(fetchRoutines()).catch(() => {});
+        if (allowed && !loaded) quietly(dispatch(fetchRoutines()));
     }, [allowed, loaded, dispatch]);
 
     useEffect(() => {

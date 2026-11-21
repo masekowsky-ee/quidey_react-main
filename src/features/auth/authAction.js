@@ -8,6 +8,7 @@ import { setUsageEnabled } from '../usage/usage';
 import { refreshPush } from '../pwa/push';
 import { resetFocus } from '../session/sessionAction';
 import { saveAnswer, savedAnswer } from '../offline/offline';
+import { quietly } from '../api/quietly';
 
 // Signed in (password, Google): { token, username } from the server
 const finishSignIn = (data) => {
@@ -16,7 +17,7 @@ const finishSignIn = (data) => {
         rememberAccount({ username: data.username, token: data.token, displayName: data.display_name });
         dispatch({ type: LOGIN_SUCCESS, payload: { token: data.token, username: data.username } });
         // right after signing in: who may use the app goes in, everybody else to the beta screen
-        await dispatch(fetchAccess()).catch(() => {});
+        await quietly(dispatch(fetchAccess()));
     };
 };
 

@@ -9,6 +9,7 @@ import { formatDate } from '../features/helperFunction';
 import { fetchAccess, logout, requestBetaAccess, startTrial } from '../features/auth/authAction';
 import { useProOn } from '../features/pro/flag';
 import { LANDING_URL } from '../features/site';
+import { quietly } from '../features/api/quietly';
 
 const REASON_MIN = 10;
 const REASON_MAX = 1000;
@@ -46,7 +47,7 @@ export default function BetaGate() {
             const key = `betaError_${err.code}`;
             setError(t(key) === key ? t('friendError_generic') : t(key));
             // e.g. ALREADY_REQUESTED from another tab: show the request that exists
-            dispatch(fetchAccess()).catch(() => {});
+            quietly(dispatch(fetchAccess()));
         } finally {
             setSending(false);
         }
@@ -65,7 +66,7 @@ export default function BetaGate() {
 
     const checkAgain = async () => {
         setChecking(true);
-        await dispatch(fetchAccess()).catch(() => {});
+        await quietly(dispatch(fetchAccess()));
         setChecking(false);
     };
 

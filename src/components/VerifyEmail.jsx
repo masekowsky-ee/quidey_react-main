@@ -6,6 +6,7 @@ import { useTranslation } from '../i18n/useTranslation';
 import { verifyEmail, resendVerificationMail, setUser } from '../features/auth/authAction';
 import ResendVerification from './ResendVerification.jsx';
 import MailSpamHint from './auth/MailSpamHint.jsx';
+import { quietly } from '../features/api/quietly';
 
 // A token can only be used once: StrictMode runs the effect twice, so both runs share one request
 const requests = new Map();
@@ -43,7 +44,7 @@ export default function VerifyEmail() {
     }, [token]);
 
     useEffect(() => {
-        if (status === 'verified' && signedIn && isPro) dispatch(setUser()).catch(() => {});
+        if (status === 'verified' && signedIn && isPro) quietly(dispatch(setUser()));
     }, [status, signedIn, isPro, dispatch]);
 
     const sendNewMail = async () => {

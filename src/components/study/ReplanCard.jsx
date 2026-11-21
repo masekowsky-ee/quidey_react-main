@@ -10,6 +10,7 @@ import PlanPreview from './PlanPreview.jsx';
 import { useStudyLoad } from './useStudyLoad.js';
 import styles from './Study.module.css';
 import { read, write } from '../../features/storedSetting';
+import { quietly } from '../../features/api/quietly';
 
 const LATER_KEY = 'studyLater';
 const today = () => toInputDate(new Date());
@@ -44,18 +45,18 @@ function ReplanCardContent() {
     else if (conflict) text = t('studyCardConflict');
 
     const view = async () => {
-        await dispatch(fetchGoals()).catch(() => {});
+        await quietly(dispatch(fetchGoals()));
         setPreview(true);
     };
     const later = () => { storeLater(); setHidden(true); };
     const keep = async () => {
-        await Promise.all(behindGoals.map(g => dispatch(dismissBehind(g.goalId)).catch(() => {})));
+        await Promise.all(behindGoals.map(g => quietly(dispatch(dismissBehind(g.goalId)))));
         // freed time / a conflict have nothing to dismiss: leave them be for today
         if (behindGoals.length === 0) later();
     };
     const done = (applied) => {
         setPreview(false);
-        if (applied) dispatch(fetchStudyStatus()).catch(() => {});
+        if (applied) quietly(dispatch(fetchStudyStatus()));
     };
 
     return (

@@ -19,6 +19,7 @@ import Pattern from './Pattern';
 import Icon from '../icons.jsx';
 import { Bone } from '../skeleton/Skeleton.jsx';
 import styles from './Arcade.module.css';
+import { quietly } from '../../features/api/quietly';
 
 const COMPONENTS = { guess: WordGuess, scramble: Scramble, sequence: Sequence, reflex: Reflex, pattern: Pattern };
 const GLYPHS = { reflex: '◎', pattern: '◆◇', guess: 'Aa', scramble: '?!', sequence: '1 2 ?' };
@@ -100,7 +101,7 @@ export default function ArcadePage({ waiting = false }) {
     // still waiting: is access there yet? (the app then opens by itself, the arcade stays open)
     useEffect(() => {
         if (!waiting) return undefined;
-        const timer = setInterval(() => dispatch(fetchAccess()).catch(() => {}), ACCESS_CHECK_MS);
+        const timer = setInterval(() => quietly(dispatch(fetchAccess())), ACCESS_CHECK_MS);
         return () => clearInterval(timer);
     }, [waiting, dispatch]);
 

@@ -12,6 +12,7 @@ import { calendarLink } from '../../features/calendar/sources';
 import ProfileAvatar from '../profile/ProfileAvatar';
 import FriendPicker from '../together/FriendPicker';
 import { friendsPath } from '../../features/community/paths';
+import { quietly } from '../../features/api/quietly';
 
 function NewFamily({ onCreated }) {
     const { t } = useTranslation();
@@ -22,7 +23,7 @@ function NewFamily({ onCreated }) {
     const [invitees, setInvitees] = useState([]);
     const [busy, setBusy] = useState(false);
 
-    useEffect(() => { dispatch(fetchFriends()).catch(() => {}); }, [dispatch]);
+    useEffect(() => { quietly(dispatch(fetchFriends())); }, [dispatch]);
 
     const submit = async (e) => {
         e.preventDefault();
@@ -58,7 +59,7 @@ export default function Family() {
     const { families, invites } = useSelector(state => state.family);
     const [busyId, setBusyId] = useState(null);
 
-    useEffect(() => { dispatch(fetchFamilies()).catch(() => {}); }, [dispatch]);
+    useEffect(() => { quietly(dispatch(fetchFamilies())); }, [dispatch]);
 
     const join = async (id) => {
         setBusyId(id);

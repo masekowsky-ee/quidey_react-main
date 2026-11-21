@@ -19,6 +19,7 @@ import ShareMyTasks from './together/ShareMyTasks';
 
 import Icon from './icons';
 import { read, write } from '../features/storedSetting';
+import { quietly } from '../features/api/quietly';
 const STORAGE_KEY = 'teamSessionId';
 
 const readStoredSessionId = () => read(STORAGE_KEY, { parse: text => Number(text) || null, fallback: null });
@@ -41,7 +42,7 @@ export default function TeamHome() {
 
     // my sessions; new ones and invites arrive live afterwards (useLiveLists in App)
     useEffect(() => {
-        dispatch(fetchSharedSessions()).catch(() => {}).finally(() => setLoaded(true));
+        quietly(dispatch(fetchSharedSessions())).finally(() => setLoaded(true));
     }, [dispatch]);
 
     const open = sessions.filter(s => !s.endedAt);
@@ -60,12 +61,12 @@ export default function TeamHome() {
 
     // removed from the selected session meanwhile: the list knows which ones are left
     useEffect(() => {
-        if (missing) dispatch(fetchSharedSessions()).catch(() => {});
+        if (missing) quietly(dispatch(fetchSharedSessions()));
     }, [missing, dispatch]);
 
     const join = async (id) => {
         if (await run(joinSharedSession(id), 'toast_joined')) {
-            await dispatch(fetchSharedSessions()).catch(() => {});
+            await quietly(dispatch(fetchSharedSessions()));
             choose(id);
         }
     };

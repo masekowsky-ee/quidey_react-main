@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { parseDate } from '../helperFunction';
 import { minutesOfDay } from '../calendar/calendar';
 import { refreshTasks } from './taskAction';
+import { quietly } from '../api/quietly';
 
 export const isEvent = (task) => task?.kind === 'event';
 
@@ -93,7 +94,7 @@ export function useEventEnds(enabled = true) {
         // a little after the end, so the server sees it as over too
         const wait = Math.min(MAX_WAIT_MS, Math.max(1000, next - now + 2000));
         const id = setTimeout(() => {
-            if (Date.now() >= next) dispatch(refreshTasks()).catch(() => {});
+            if (Date.now() >= next) quietly(dispatch(refreshTasks()));
             else setRound(n => n + 1);
         }, wait);
         return () => clearTimeout(id);

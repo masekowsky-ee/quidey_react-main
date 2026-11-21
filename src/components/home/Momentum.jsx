@@ -12,6 +12,7 @@ import ProfileAvatar from '../profile/ProfileAvatar';
 import LevelPlant from '../progress/LevelPlant';
 import Icon from '../icons';
 import { Bone, Skeleton } from '../skeleton/Skeleton.jsx';
+import { quietly } from '../../features/api/quietly';
 
 const FACES = 4;
 const STREAKS_SHOWN = 3;
@@ -222,7 +223,7 @@ export default function Momentum({ stacked = false }) {
     const { t } = useTranslation();
 
     // the friends' streaks come with the week's ranking
-    useEffect(() => { dispatch(fetchRanking()).catch(() => {}); }, [dispatch]);
+    useEffect(() => { quietly(dispatch(fetchRanking())); }, [dispatch]);
 
     // nothing when it couldn't be loaded (the rest of Home works without it)
     if (!progress) return failed ? null : <MomentumSkeleton stacked={stacked} />;

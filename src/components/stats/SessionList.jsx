@@ -10,6 +10,7 @@ import { groupSittings, sittingGapMs } from '../../features/stats/sittings';
 import { fill } from '../../features/helperFunction';
 
 import Icon from '../icons';
+import { quietly } from '../../features/api/quietly';
 function formatMinutes(totalMinutes) {
     const h = Math.floor(totalMinutes / 60);
     const m = totalMinutes % 60;
@@ -39,7 +40,7 @@ export default function SessionList({ period }){
     const allShared = useSelector(state => state.together.history);
     const sharedHistory = (allShared ?? []).filter(entry => inPeriod(period, entry.lastWorkedAt));
     useEffect(() => {
-        dispatch(fetchSharedHistory()).catch(() => {});
+        quietly(dispatch(fetchSharedHistory()));
     }, [dispatch]);
 
     const allSessions = useSelector(state => state.session.workedSessionData);

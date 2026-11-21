@@ -6,6 +6,7 @@ import { showToast } from '../../features/toast/toast';
 import { useTranslation } from '../../i18n/useTranslation';
 import { countdownText } from './studyUi';
 import styles from './Study.module.css';
+import { quietly } from '../../features/api/quietly';
 
 // Homework from Untis offered as tasks (backend untis.js: GET /api/untis/suggestions): each with its
 // day, the text, a working time (the AI's estimate when the account has AI access, else empty) and
@@ -35,7 +36,7 @@ export default function HomeworkSuggestions({ subjectId = null }) {
         try {
             await takeHomeworkSuggestion(item.id, typed === '' ? null : Number(typed));
             remove(item.id);
-            dispatch(refreshTasks()).catch(() => {});
+            quietly(dispatch(refreshTasks()));
         } catch {
             dispatch(showToast(t('studyError_default'), 'error'));
         } finally {

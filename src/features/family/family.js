@@ -10,6 +10,7 @@ import { noteAction } from '../onboarding/onboarding';
 import { useTranslation } from '../../i18n/useTranslation';
 import { useRealtimeRefresh, useSafetyPoll } from '../realtime/socket';
 import { FAMILY_CHANGED } from '../realtime/events';
+import { quietly } from '../api/quietly';
 
 // Quidey Family: a fixed group of accounts with a shared calendar, a
 // list (entries without a day), a board, and a chat of their own, apart from the shared sessions. The store keeps only the list of my
@@ -53,7 +54,7 @@ export const fetchFamilies = () => loadInto(SET_FAMILIES, base);
 // Each change answers with the whole family; the list (names, counts) is loaded again afterwards
 const familyChange = (url, options) => async (dispatch) => {
     const family = await apiFetch(url, options);
-    dispatch(fetchFamilies()).catch(() => {});
+    quietly(dispatch(fetchFamilies()));
     return family;
 };
 
@@ -76,7 +77,7 @@ export const inviteToFamily = (id, userIds) => familyChange(`${familyUrl(id)}/in
 export const removeFamilyMember = (id, userId) => async (dispatch) => {
     await apiFetch(`${familyUrl(id)}/members/${userId}`, json('DELETE'));
     if (userId === 'me') dispatch({ type: FAMILY_GONE, payload: id });
-    dispatch(fetchFamilies()).catch(() => {});
+    quietly(dispatch(fetchFamilies()));
 };
 
 export const deleteFamily = (id) => async (dispatch) => {

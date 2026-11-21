@@ -6,6 +6,7 @@ import { CONNECTION_EVENT, SYNCED_EVENT, acknowledgeFailures, connectionState } 
 import { useTranslation } from '../../i18n/useTranslation';
 import { fill } from '../../features/helperFunction';
 import styles from './OfflineStatus.module.css';
+import { quietly } from '../../features/api/quietly';
 
 // While there is no connection the app shows what it saved on the device and keeps changes in a
 // queue (features/offline/offline.js). This line says so, and once the queue went out it
@@ -18,8 +19,8 @@ export default function OfflineStatus() {
     useEffect(() => {
         const onChange = (event) => setState(event.detail);
         const onSynced = () => {
-            dispatch(refreshTasks()).catch(() => {});
-            dispatch(fetchSessions()).catch(() => {});
+            quietly(dispatch(refreshTasks()));
+            quietly(dispatch(fetchSessions()));
         };
         window.addEventListener(CONNECTION_EVENT, onChange);
         window.addEventListener(SYNCED_EVENT, onSynced);

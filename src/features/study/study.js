@@ -6,6 +6,7 @@
 import { apiFetch, CACHE_MEDIUM } from '../api/api';
 import { track } from '../usage/usage';
 import { refreshTasks } from '../tasks/taskAction';
+import { quietly } from '../api/quietly';
 
 const SET_SUBJECTS = 'STUDY_SET_SUBJECTS';
 const SUBJECT_SAVED = 'STUDY_SUBJECT_SAVED';
@@ -72,7 +73,7 @@ export const formatHours = (minutes, language = 'de') => `${hoursNumber(minutes,
 
 const BASE = '/api/tester/study';
 const send = (method, body) => ({ method, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
-const reloadTasks = (dispatch) => dispatch(refreshTasks()).catch(() => {});
+const reloadTasks = (dispatch) => quietly(dispatch(refreshTasks()));
 
 // ---------- subjects ----------
 export const fetchSubjects = () => async (dispatch) => {
@@ -135,7 +136,7 @@ export const deleteGoal = (id, sessions = 'keep') => async (dispatch) => {
 // ---------- parts ----------
 // A part answers without its goal, and ticking one off changes the goal's sessions: the goal is read again.
 const goalOfPart = (getState, partId) => Object.values(getState().study.goals).find(g => g.parts?.some(p => p.id === partId));
-const reloadGoal = (dispatch, goalId) => (goalId == null ? null : dispatch(fetchGoal(goalId)).catch(() => {}));
+const reloadGoal = (dispatch, goalId) => (goalId == null ? null : quietly(dispatch(fetchGoal(goalId))));
 
 // { name?, estimateMinutes?, doneAt? } (doneAt truthy: done now, null: reopen)
 export const updatePart = (id, change) => async (dispatch, getState) => {
@@ -216,7 +217,7 @@ export const applyPlan = (inputHash, moves = []) => async (dispatch, getState) =
 
 export const dismissBehind = (goalId) => async (dispatch) => {
     const result = await apiFetch(`${BASE}/goals/${goalId}/dismiss`, send('POST'));
-    await dispatch(fetchStudyStatus()).catch(() => {});
+    await quietly(dispatch(fetchStudyStatus()));
     return result;
 };
 

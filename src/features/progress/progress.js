@@ -9,6 +9,7 @@ import { localeOf } from '../../i18n/locale';
 import { burst } from '../settings/motion';
 import { playSound } from '../settings/sound';
 import { PROFILE_COLORS, PROFILE_BANNERS, PROFILE_EMOJIS, AVATAR_FRAMES } from '../profile/profileOptions';
+import { quietly } from '../api/quietly';
 
 // Levels, XP and challenges. The server works them out (GET /api/progress, utils/progress.js in
 // the api) from focus minutes, tasks done and the challenges completed; these are the same rules,
@@ -209,7 +210,7 @@ export function useProgressWatcher(enabled) {
     useEffect(() => {
         if (!enabled) return;
         clearTimeout(timer.current);
-        timer.current = setTimeout(() => dispatch(fetchProgress()).catch(() => {}), REFRESH_DELAY_MS);
+        timer.current = setTimeout(() => quietly(dispatch(fetchProgress())), REFRESH_DELAY_MS);
         return () => clearTimeout(timer.current);
     }, [enabled, sessions, done, dispatch]);
 }

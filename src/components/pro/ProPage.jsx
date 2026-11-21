@@ -12,6 +12,7 @@ import {
     openPortal, playPlans, playCanReplace, restorePlayPurchases, sellsThroughPlay, startCheckout, upgradeInPlay, yearlyPerMonth, yearlySaves, yearlySavesPercent,
 } from '../../features/pro/pro';
 import { CANCEL_PATH } from '../../legal/paths';
+import { quietly } from '../../features/api/quietly';
 
 const FREE_ROWS = ['tasks', 'events', 'groups', 'sessions', 'friends', 'stats'];
 
@@ -58,7 +59,7 @@ export default function ProPage() {
             if (status) setBilling(status);
             if (status?.active || tries >= 10) {
                 clearInterval(timer);
-                dispatch(fetchAccess()).catch(() => {});
+                quietly(dispatch(fetchAccess()));
             }
         }, 2000);
         return () => clearInterval(timer);
@@ -96,7 +97,7 @@ export default function ProPage() {
                 if (status) {
                     setBilling(status);
                     setNotice({ ok: true, text: t('proThanksTitle') });
-                    await dispatch(fetchAccess()).catch(() => {});
+                    await quietly(dispatch(fetchAccess()));
                 }
             } else {
                 await startCheckout(plan, language, buyTier);
@@ -113,7 +114,7 @@ export default function ProPage() {
     const checkoutFailed = async (err) => {
         if (err?.code === 'ALREADY_SUBSCRIBED') {
             await load();
-            await dispatch(fetchAccess()).catch(() => {});
+            await quietly(dispatch(fetchAccess()));
             return;
         }
         // a Stripe Pro waiting for its payment: settle it first (the page is read again, so the button goes)
@@ -134,7 +135,7 @@ export default function ProPage() {
                 const status = await upgradeInPlay(upgradePlan, play.max[upgradePlan].offerToken, billing.playAccountId, { hasPlayPro: subscription?.provider === 'play' });
                 if (status) {
                     setBilling(status);
-                    await dispatch(fetchAccess()).catch(() => {});
+                    await quietly(dispatch(fetchAccess()));
                     setNotice({ ok: true, text: t('proUpgradedMax') });
                 }
                 return;
@@ -142,7 +143,7 @@ export default function ProPage() {
             const result = await startCheckout(upgradePlan, language, 'max');
             if (result?.upgraded) {
                 await load();
-                await dispatch(fetchAccess()).catch(() => {});
+                await quietly(dispatch(fetchAccess()));
                 setNotice({ ok: true, text: t('proUpgradedMax') });
             }
         } catch (err) {
@@ -162,7 +163,7 @@ export default function ProPage() {
         setBusy(true);
         const { found, accepted } = await restorePlayPurchases();
         await load();
-        await dispatch(fetchAccess()).catch(() => {});
+        await quietly(dispatch(fetchAccess()));
         setNotice(accepted ? { ok: true, text: t('proRestored') }
             : { ok: false, text: t(found ? 'proError' : 'proNothingToRestore') });
         setBusy(false);

@@ -13,6 +13,7 @@ import { useTogetherRun } from '../../features/together/hooks';
 import { selectFamilies } from '../../features/family/family';
 
 import Icon from '../icons';
+import { quietly } from '../../features/api/quietly';
 // Header button with everything collaborative one click away: invites, my families, running
 // sessions, starting a new one, friend requests. The badge counts what is waiting for me.
 export default function TeamQuickPanel() {
@@ -33,7 +34,7 @@ export default function TeamQuickPanel() {
 
     useEffect(() => {
         if (!open) return;
-        dispatch(fetchSharedSessions()).catch(() => {});
+        quietly(dispatch(fetchSharedSessions()));
         const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
         const onClick = (e) => { if (!panelRef.current?.contains(e.target)) setOpen(false); };
         window.addEventListener('keydown', onKey);

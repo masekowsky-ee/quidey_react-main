@@ -37,6 +37,7 @@ import SheetGrabber from '../SheetGrabber.jsx';
 import MicButton from '../voice/MicButton.jsx';
 import Icon from '../icons.jsx';
 import styles from './AssistantSheet.module.css';
+import { quietly } from '../../features/api/quietly';
 
 export default function AssistantSheet({ onClose, onReply }) {
     const { t, language } = useTranslation();
@@ -171,7 +172,7 @@ export default function AssistantSheet({ onClose, onReply }) {
             setEnded(true);
             addNote(t('assistantMaxEnded'));
             // the button goes once the app knows
-            dispatch(fetchAccess()).catch(() => {});
+            quietly(dispatch(fetchAccess()));
             return;
         }
         if (err.code === 'QUOTA_REACHED') {

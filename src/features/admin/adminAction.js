@@ -1,5 +1,6 @@
 import { apiFetch, json, errorText } from '../api/api';
 import { fetchAccess } from '../auth/authAction';
+import { quietly } from '../api/quietly';
 
 // Admin panel requests. The panel keeps the lists in its own state, so these just
 // return what the API answers; anything that changes the open-request count refreshes
@@ -27,7 +28,7 @@ export const fetchAdminUsersExport = () => apiFetch('/api/admin/users/export');
 // A change that answers with the updated user; afterwards my access (and the badge) is refreshed
 const adminChange = (url, options) => async (dispatch) => {
     const user = await apiFetch(url, options);
-    dispatch(fetchAccess()).catch(() => {});
+    quietly(dispatch(fetchAccess()));
     return user;
 };
 
