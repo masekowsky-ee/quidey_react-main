@@ -12,7 +12,7 @@ export function openAuth(mode = 'signin', detail = {}) {
 }
 
 // The pages a visitor without an account may look at; every other address asks them to sign in
-export const GUEST_PATHS = ['/', '/calendar', '/focus'];
+const GUEST_PATHS = ['/', '/calendar', '/focus'];
 export const isGuestPath = (pathname) => GUEST_PATHS.includes(pathname);
 
 // requireAccount(action?): with an account it runs action and answers true; without one it

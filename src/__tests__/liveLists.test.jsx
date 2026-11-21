@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { connectRealtime, disconnectRealtime, useRealtimeRefresh, useSafetyPoll, REFRESH_DELAY_MS, REALTIME_RECONNECT } from '../features/realtime/socket'
 import { useLiveLists } from '../features/realtime/useLiveLists'
@@ -82,7 +81,7 @@ describe('loading again on changes', () => {
 
     it('loads the lists a change is about: friends, sessions and invites, shared tasks', async () => {
         function Lists() { useLiveLists(); return null }
-        render(<Provider store={configureStore({ reducer: rootReducer })}><Lists /></Provider>)
+        render(<Provider store={makeStore()}><Lists /></Provider>)
         const urls = () => apiFetch.mock.calls.map(([url]) => url)
 
         await serverSends('friends:changed', {})
@@ -109,7 +108,7 @@ describe('news from the live lists', () => {
 
     // the lists as App loads them at the start, all empty
     const loadedStore = () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch({ type: SET_FRIENDS, payload: [] })
         store.dispatch({ type: SET_FRIEND_REQUESTS, payload: { incoming: [], outgoing: [] } })
         store.dispatch({ type: SET_SHARED_SESSIONS, payload: { sessions: [], invites: [] } })
@@ -144,7 +143,7 @@ describe('news from the live lists', () => {
 
     it('announces nothing from a first load, e.g. after the server restarted', async () => {
         // the friends list was never loaded on this page (only the social page loads it)
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch({ type: SET_FRIEND_REQUESTS, payload: { incoming: [], outgoing: [] } })
         render(<Provider store={store}><Lists /></Provider>)
         routes({ '/api/friends': [ben], '/api/friends/requests': { incoming: [], outgoing: [] } })

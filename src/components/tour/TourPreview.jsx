@@ -206,14 +206,13 @@ function Yours() {
     );
 }
 
-// a sketch of the app with its navigation lit: sidebar, header button, tab bar or tabs on top
+// a sketch of the app with its navigation lit: header button, tab bar or tabs on top
 function Ready({ nav }) {
     return (
         <div className={styles.device} data-nav={nav}>
             <span className={styles.deviceHeader}><span className={styles.navButton} /></span>
             {(nav === 'other' || nav === 'bar') && <span className={styles.navTop}><span /><span /><span /></span>}
             <span className={styles.deviceBody}>
-                {nav === 'sidebar' && <span className={styles.navSide}><span /><span /><span /><span /></span>}
                 <span className={styles.deviceContent}><span /><span /><span /></span>
             </span>
             {nav === 'phone' && <span className={styles.navBottom}><span /><span /><span /><span /><span /></span>}

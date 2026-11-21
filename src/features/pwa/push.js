@@ -63,7 +63,7 @@ const write = (key, value) => {
     } catch { /* blocked storage: only this visit */ }
 };
 
-export const pushWanted = () => read(WANTED_KEY) === 'on';
+const pushWanted = () => read(WANTED_KEY) === 'on';
 
 // Whether a push of this kind reaches this device (then the app shows no system notification
 // of its own for it, see tasks/reminders.js)

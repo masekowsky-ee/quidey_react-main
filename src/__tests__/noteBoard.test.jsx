@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, act, within, waitFor } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import { MemoryRouter } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { screen, fireEvent, act, within, waitFor } from '@testing-library/react'
+import { makeStore as baseStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { setLanguage } from '../features/settings/settingsAction'
@@ -19,13 +17,13 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 }))
 
 function makeStore() {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch(setLanguage('en'))
     store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 'tok', username: 'lena' } })
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isAdmin: false, isTester: false, userId: 1 } })
     return store
 }
-const wrap = (ui, store = makeStore()) => render(<Provider store={store}><MemoryRouter>{ui}</MemoryRouter></Provider>)
+const wrap = (ui, store = makeStore()) => renderWithStore(ui, { store })
 
 function serve(routes) {
     apiFetch.mockImplementation(async (url, options = {}) => {

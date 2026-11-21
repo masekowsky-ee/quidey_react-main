@@ -10,7 +10,7 @@ import { SHARED_SESSION_EVENT } from './togetherActionTypes';
 // what) and gets chat messages live. Polling is only the safety net, e.g. for somebody who
 // closed their laptop mid-task (the server can't announce that); the others' running time is
 // counted on in the browser in between (see othersRunningMs in work.js).
-export const POLL_MS = 30 * 1000;
+const POLL_MS = 30 * 1000;
 
 // Loads a session and keeps it current while shown (on every change, and as a safety net every
 // POLL_MS while the tab is visible, see useSafetyPoll). missing: I'm not (or no longer) a

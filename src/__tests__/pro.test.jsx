@@ -6,7 +6,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS } from '../features/auth/authActionTypes'
-import { PRICES, YEARLY_PER_MONTH, YEARLY_SAVES, YEARLY_SAVES_PERCENT, LIMIT_EVENT } from '../features/pro/pro'
+import { LIMIT_EVENT } from '../features/pro/pro'
 import ProPage from '../components/pro/ProPage'
 import LimitDialog from '../components/pro/LimitDialog'
 import CancelForm from '../legal/CancelForm'
@@ -40,15 +40,6 @@ function renderWith(ui, { path = '/', access = {} } = {}) {
 beforeEach(() => {
     apiFetch.mockReset()
     localStorage.clear()
-})
-
-describe('Quidey Pro: prices', () => {
-    it('the year saves 30 %: 10,88 € less than twelve months at 2,99 €', () => {
-        expect(PRICES).toEqual({ monthly: 2.99, yearly: 25 })
-        expect(YEARLY_SAVES).toBe(10.88)
-        expect(YEARLY_SAVES_PERCENT).toBe(30)
-        expect(YEARLY_PER_MONTH).toBe(2.08)
-    })
 })
 
 describe('Quidey Pro: the page', () => {

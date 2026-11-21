@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, cleanup, screen } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { lessonsToEntries, lessonBoxes, colorLessons } from '../features/untis/untis'
@@ -45,7 +44,7 @@ describe('lessons take their subject\'s colour from Lernen', () => {
 describe('a planned study session in the calendar', () => {
     const study = { goalId: 1, goalName: 'Klausur', partName: 'Kapitel 1', subjectName: 'Mathe', subjectEmoji: null, subjectColor: 'blue', goalShape: 'star' }
     const task = (over) => ({ id: 5, name: 'Mathe lernen', due: '2026-11-19', due_time: '16:00', kind: 'task', color: 'blue', study, ...over })
-    const chip = (t) => render(<Provider store={configureStore({ reducer: rootReducer })}><TaskChip task={t} today={new Date(2026, 10, 11)} onOpen={() => {}} /></Provider>)
+    const chip = (t) => render(<Provider store={makeStore()}><TaskChip task={t} today={new Date(2026, 10, 11)} onOpen={() => {}} /></Provider>)
 
     it('carries the goal\'s symbol instead of the dot', () => {
         const { container } = chip(task())
@@ -84,7 +83,7 @@ describe('subjects made by Untis', () => {
     afterEach(cleanup)
 
     function open(path) {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'u', displayName: 'U' } })
         store.dispatch({ type: SET_ACCESS, payload: { isPro: true } })
         render(<Provider store={store}><MemoryRouter initialEntries={[path]}><Routes><Route path="/study/:subjectId" element={<StudyPage />} /></Routes></MemoryRouter></Provider>)

@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore as baseStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { SET_FRIENDS } from '../features/friends/friendsActionTypes'
 import { SET_SHARED_SESSION, SHARED_SESSION_EVENT } from '../features/together/togetherActionTypes'
@@ -48,7 +47,7 @@ const ben = { id: 2, username: 'ben', displayName: 'Ben' }
 const now = () => new Date().toISOString()
 
 function makeStore() {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch({ type: SET_FRIENDS, payload: [ben] })
     return store
 }
@@ -259,7 +258,7 @@ describe('shared session chat', () => {
     const message = (id, text) => ({ id, type: 'message', text, user: ben, createdAt: now() })
 
     it('adds a live chat message once, and a slower poll does not take it away again', () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = baseStore()
         store.dispatch({ type: SET_SHARED_SESSION, payload: { session: session([message(1, 'a')]), seq: 1 } })
 
         store.dispatch({ type: SHARED_SESSION_EVENT, payload: { sessionId: 5, event: message(2, 'b') } })

@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, act, within } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { screen, act, within } from '@testing-library/react'
+import { makeStore as baseStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import { forgetAvatar } from '../features/profile/avatars'
@@ -16,11 +14,11 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 }))
 
 function makeStore({ isTester = false, isAdmin = false } = {}) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isTester, isAdmin, userId: 1 } })
     return store
 }
-const wrap = (ui, store) => render(<Provider store={store}><MemoryRouter>{ui}</MemoryRouter></Provider>)
+const wrap = (ui, store) => renderWithStore(ui, { store })
 const ANN = { id: 5, username: 'ann', displayName: 'Ann Lee' }
 
 describe('profile pictures', () => {

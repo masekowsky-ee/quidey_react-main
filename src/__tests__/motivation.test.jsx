@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_FRIENDS } from '../features/friends/friendsActionTypes'
 import { rememberPresence } from '../features/presence/presence'
@@ -39,8 +37,7 @@ const PROGRESS = {
     weekly: [],
 }
 
-const makeStore = () => configureStore({ reducer: rootReducer })
-const renderWith = (store, ui) => render(<Provider store={store}><MemoryRouter>{ui}</MemoryRouter></Provider>)
+const renderWith = (store, ui) => renderWithStore(ui, { store })
 
 beforeEach(() => {
     localStorage.clear()

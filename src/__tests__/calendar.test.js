@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore as baseStore } from './helpers/store'
 import { parseDate, formatDate, toInputDate, isOverdue, apiFetch } from '../features/helperFunction'
 import { updateTaskProps, addTask } from '../features/tasks/taskAction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
@@ -194,7 +193,7 @@ describe('iCalendar export', () => {
 
 describe('saving a task keeps its day', () => {
     const makeStore = () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = baseStore()
         store.dispatch({ type: SET_TASK_STATE, payload: { tasks: [], groups: [], notes: [] } })
         return store
     }

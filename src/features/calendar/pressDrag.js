@@ -8,7 +8,7 @@
 
 const DRAG_THRESHOLD_PX = 6;
 // how long a finger rests before the item lifts, and how far it may wander meanwhile
-export const HOLD_MS = 280;
+const HOLD_MS = 280;
 const HOLD_SLOP_PX = 10;
 // the band at a scroller's edge that scrolls along, and the fastest step per frame
 const EDGE_PX = 56;

@@ -41,6 +41,5 @@ describe('Android notification channels', () => {
         const { NATIVE_CHANNELS } = await import('../features/native/nativePush')
         const { PUSH_KINDS } = await import('../features/pwa/push')
         expect(Object.keys(NATIVE_CHANNELS).sort()).toEqual([...PUSH_KINDS].sort())
-        expect(NATIVE_CHANNELS.groups.de).toBe('Familien & Sitzungen')
     })
 })

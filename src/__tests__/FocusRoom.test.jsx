@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act, within, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { setFocusTask, setTimer } from '../features/session/sessionAction'
@@ -38,7 +37,7 @@ function mockApi() {
 }
 
 async function renderRoom() {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks: [essay], groups: [], notes: [] } })
     await act(async () => {
         render(<Provider store={store}><MemoryRouter initialEntries={['/focus']}><FocusRoom /></MemoryRouter></Provider>)

@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { loginSuccess, logout } from '../features/auth/authAction'
 import { switchAccount } from '../features/auth/accounts'
@@ -35,7 +34,7 @@ describe('App and the usage statistics', () => {
             if (url === '/api/shared-sessions') return { sessions: [], invites: [] }
             return []
         })
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         await act(async () => {
             render(<Provider store={store}><MemoryRouter initialEntries={['/stats']}><App /></MemoryRouter></Provider>)
         })
@@ -69,7 +68,7 @@ describe('accounts and the queue', () => {
 
     it('signing out takes the queue along', () => {
         localStorage.setItem('token', 'tokA')
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         away()
         setUsageEnabled(true, 1)
         track('app_open')

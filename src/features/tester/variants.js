@@ -11,7 +11,6 @@ import { DESKTOP_QUERY, useMediaQuery } from '../layout/breakpoints';
 // in src/ui-variants/<id>.css and load only once it is picked.
 //
 // nav: how the main places are reached on wide screens
-//   sidebar  the menu as a sidebar (as today)
 //   rail     a narrow rail of icons with their names under them
 //   top      tabs in a second row of the header, the rest of the menu as a drawer
 //   command  a compact sidebar plus a command bar (Ctrl/⌘ K) for jumping and doing
@@ -88,7 +87,7 @@ export const setUiColors = (variant, changes) => (dispatch, getState) => {
     try { localStorage.setItem(COLORS_KEY, JSON.stringify(getState().settings.uiColors)); } catch { /* only for this visit */ }
 };
 
-export const loadVariantStyles = (variant) => VARIANT_STYLES[variant]?.().catch(() => {});
+const loadVariantStyles = (variant) => VARIANT_STYLES[variant]?.().catch(() => {});
 
 // A variant someone picked as a tester: fetched right away, so it is ready (no flash of the
 // current look) once the account says they still are one
@@ -123,7 +122,7 @@ export function useNavModel() {
 // Whether the menu is the always-there sidebar (or rail) right now, not a drawer
 export function useMenuDocked() {
     const nav = useNavModel();
-    return nav === 'sidebar' || nav === 'rail' || nav === 'command';
+    return nav === 'rail' || nav === 'command';
 }
 
 // the mobile browser's bars match the header of the look now on <html>

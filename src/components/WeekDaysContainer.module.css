@@ -246,7 +246,7 @@
 
 /* "minimal" motion: the cards fade up in a short wave and lift a little on hover */
 :global(:root[data-motion="minimal"]) .day{
-    animation: dayRise 0.45s cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: dayRise 0.45s var(--spring-curve) both;
     transition: translate var(--ease), box-shadow var(--ease), background-color var(--ease), border-color var(--ease);
 }
 

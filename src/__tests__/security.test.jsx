@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, act } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { act } from '@testing-library/react'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch, toCsv, SIGNED_OUT_EVENT } from '../features/helperFunction'
 import { changePassword, logoutEverywhere } from '../features/auth/authAction'
 import { LOGIN_SUCCESS } from '../features/auth/authActionTypes'
@@ -45,12 +43,12 @@ describe('ended logins', () => {
     })
 
     it('the app signs out when the event comes', async () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 'tok', username: 'ann' } })
         localStorage.setItem('token', 'tok')
         fetch.mockReturnValue(respond(500, {}))
         await act(async () => {
-            render(<Provider store={store}><MemoryRouter><App /></MemoryRouter></Provider>)
+            renderWithStore(<App />, { store })
         })
         await act(async () => { window.dispatchEvent(new Event(SIGNED_OUT_EVENT)) })
         expect(store.getState().auth.token).toBeNull()
@@ -60,7 +58,7 @@ describe('ended logins', () => {
 
 describe('password change and sign out everywhere', () => {
     it('keeps this device signed in with the new token', async () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 'old', username: 'ann' } })
         fetch.mockReturnValueOnce(respond(200, { message: 'Password changed', token: 'new' }))
         await store.dispatch(changePassword('old-password', 'new-password'))
@@ -70,7 +68,7 @@ describe('password change and sign out everywhere', () => {
     })
 
     it('sign out everywhere ends this login too', async () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 'tok', username: 'ann' } })
         localStorage.setItem('token', 'tok')
         fetch.mockReturnValueOnce(respond(200, { message: 'Signed out everywhere' }))

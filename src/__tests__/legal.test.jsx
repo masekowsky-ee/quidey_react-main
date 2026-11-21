@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { setLanguage } from '../features/settings/settingsAction'
 import { apiFetch } from '../features/helperFunction'
 import LegalPage from '../legal/LegalPage'
@@ -15,7 +14,7 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 }))
 
 const renderAt = (path) => render(
-    <Provider store={configureStore({ reducer: rootReducer })}>
+    <Provider store={makeStore()}>
         <MemoryRouter initialEntries={[path]}><LegalPage /></MemoryRouter>
     </Provider>
 )
@@ -41,7 +40,7 @@ describe('legal pages', () => {
 describe('privacy page: study goals', () => {
     // The language is read from localStorage only when the settings reducer loads, so set it on the store.
     const renderPrivacyIn = (lang) => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch(setLanguage(lang))
         return render(
             <Provider store={store}>

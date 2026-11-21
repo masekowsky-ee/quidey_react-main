@@ -251,24 +251,6 @@
   transform: scale(0.96);
 }
 
-/* Menu entry that opens something instead of navigating (the tour): looks like the links */
-.menuButton {
-  width: 100%;
-  justify-content: flex-start;
-  font: inherit;
-  text-align: inherit;
-  background: none;
-  box-shadow: none;
-  border-color: transparent;
-}
-
-/* not the round wash of the global icon buttons */
-.menuButton:hover {
-  transform: none;
-  filter: none;
-  box-shadow: none;
-}
-
 /* Number of open friend requests next to "Social" */
 .badge {
   display: inline-block;
@@ -469,7 +451,7 @@
 
 /* "minimal" motion: the entries slide in shortly after the panel */
 :global(:root[data-motion="minimal"]) .menuDiv.open .menuItem{
-  animation: menuItemSoft 0.4s cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: menuItemSoft 0.4s var(--spring-curve) both;
 }
 
 :global(:root[data-motion="minimal"]) .menuDiv.open .menuList > :nth-child(2){ animation-delay: 0.02s; }
@@ -500,7 +482,7 @@
   .menuDiv.undocked {
     width: 260px;
     transform: translateX(-100%);
-    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: transform 0.4s var(--spring-curve);
     z-index: var(--z-menu);
     background: var(--surface);
     padding: 20px;

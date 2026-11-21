@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import Social from '../components/Social'
 
@@ -25,7 +24,7 @@ function mockApi({ friends = [], incoming = [], outgoing = [] } = {}) {
 }
 
 async function renderSocial(path = '/social') {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     await act(async () => {
         render(
             <Provider store={store}>

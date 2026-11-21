@@ -66,7 +66,7 @@ const SHEET_HANDLES = '[data-sheet-grabber], [data-sheet-drag]';
 // window (the Android app, phone browsers) and the sheet, resting on the bottom edge, would jump
 // while it still moves. So the sheet comes up first, then the keyboard. A field tapped meanwhile
 // keeps the focus. Returns a cleanup (the sheet closed before it arrived: nothing happens).
-export function focusOnArrival(field) {
+function focusOnArrival(field) {
     if (!field) return () => {};
     const moving = field.closest('[data-sheet]')?.getAnimations?.().filter(animation => animation.playState === 'running') ?? [];
     if (moving.length === 0 || window.matchMedia?.('(pointer: fine)')?.matches) {

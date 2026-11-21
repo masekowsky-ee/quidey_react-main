@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import togetherReducer, { idleWork } from '../features/together/togetherReducer'
 import { apiFetch, formatDuration } from '../features/helperFunction'
 import {
@@ -18,7 +17,6 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 const session = (id, extra = {}) => ({ id, name: `S${id}`, people: [], tasks: [], ...extra })
 const summary = (id) => ({ id, name: `S${id}`, memberCount: 1, workingCount: 0, totalMs: 0, myMs: 0 })
 const initial = togetherReducer(undefined, { type: '@@INIT' })
-const makeStore = () => configureStore({ reducer: rootReducer })
 const apiError = (status, code) => Object.assign(new Error(code), { status, code })
 
 beforeEach(() => { apiFetch.mockReset() })

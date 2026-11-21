@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, act, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import NoteEditor from '../components/notes/NoteEditor'
 
@@ -18,7 +17,7 @@ const puts = () => apiFetch.mock.calls.filter(([url, o]) => url === '/api/notebo
 const open = async () => {
     const onChange = vi.fn()
     const view = render(
-        <Provider store={configureStore({ reducer: rootReducer })}>
+        <Provider store={makeStore()}>
             <MemoryRouter><NoteEditor note={note} onChange={onChange} onDelete={() => {}} onClose={() => {}} /></MemoryRouter>
         </Provider>
     )

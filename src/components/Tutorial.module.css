@@ -65,7 +65,7 @@
     border-radius: inherit;
     background: var(--text-h);
     transform-origin: left;
-    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: transform 0.35s var(--spring-curve);
 }
 
 .body{

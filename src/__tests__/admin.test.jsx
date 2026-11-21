@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore as baseStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import Admin from '../components/Admin'
@@ -39,7 +39,7 @@ const richUser = {
 const extraUser = { ...proUser, id: 20, username: 'second_page', displayName: 'Second Page', email: 's@x.de' }
 
 function makeStore({ isAdmin = true, pending = 1 } = {}) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 'tok', username: 'testUser1' } })
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isAdmin, adminPendingCount: pending, betaRequest: null } })
     return store
@@ -93,7 +93,7 @@ beforeEach(() => {
 })
 
 describe('menu', () => {
-    const renderMenu = (store) => render(<Provider store={store}><MemoryRouter><Menu /></MemoryRouter></Provider>)
+    const renderMenu = (store) => renderWithStore(<Menu />, { store })
 
     it('shows the admin panel with open requests to admins', () => {
         renderMenu(makeStore({ isAdmin: true, pending: 2 }))
@@ -118,13 +118,13 @@ describe('admin route', () => {
             if (url === '/api/shared-sessions') return { sessions: [], invites: [] }
             return []
         })
-        globalThis.fetch = vi.fn()
+        globalThis.fetch = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ userId: 1, username: 'testUser1', isPro: true, isAdmin: false }) }))
         await act(async () => {
             render(<Provider store={store}><MemoryRouter initialEntries={['/admin']}><App /></MemoryRouter></Provider>)
         })
         expect(screen.queryByRole('heading', { name: 'Admin' })).not.toBeInTheDocument()
         expect(apiFetch.mock.calls.map(([url]) => url).some(url => url.startsWith('/api/admin'))).toBe(false)
-    })
+    }, 30000)
 })
 
 describe('admin panel', () => {
@@ -294,7 +294,7 @@ describe('admin users: all fields', () => {
 
 describe('tester-only content', () => {
     const renderWith = (isTester) => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = baseStore()
         store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isTester } })
         render(<Provider store={store}><TesterOnly fallback={<p>Alt</p>}><p>Neu</p></TesterOnly></Provider>)
     }

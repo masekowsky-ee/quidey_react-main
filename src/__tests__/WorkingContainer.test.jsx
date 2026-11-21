@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { createRef } from 'react'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import WorkingContainer from '../components/WorkingContainer'
 import { addTaskTime } from '../features/session/sessionAction'
@@ -16,7 +15,7 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 const task = (id, extra = {}) => ({ id, name: `task ${id}`, due: '2026-10-19T22:00:00.000Z', description: '', prio: 50, done: false, ...extra })
 
 function renderCard(activeTask) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     const setActiveTask = vi.fn()
     const ui = (t) => (
         <Provider store={store}>

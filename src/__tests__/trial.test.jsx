@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS, SET_USER } from '../features/auth/authActionTypes'
 import { LIMIT_EVENT } from '../features/pro/pro'
@@ -22,7 +22,7 @@ function Where() {
 }
 
 function renderWith(ui, { path = '/', access = {} } = {}) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch({ type: SET_ACCESS, payload: { isPro: false, accessMode: 'beta', ...access } })
     render(
         <Provider store={store}>
@@ -103,11 +103,11 @@ describe('a limit of the trial version', () => {
 describe('the profile', () => {
     async function profile(access) {
         apiFetch.mockImplementation(async (url) => (url === '/api/friends' ? [] : {}))
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch({ type: SET_USER, payload: [{ username: 'jo', display_name: 'Jo', email: 'jo@example.com', birth_date: '2000-01-01T00:00:00Z', created_at: '2026-08-15T12:00:00Z' }] })
         store.dispatch({ type: SET_ACCESS, payload: { isPro: true, accessMode: 'beta', ...access } })
         await act(async () => {
-            render(<Provider store={store}><MemoryRouter><ProfileView onSignOut={vi.fn()} /><Where /></MemoryRouter></Provider>)
+            renderWithStore(<><ProfileView onSignOut={vi.fn()} /><Where /></>, { store })
         })
     }
 

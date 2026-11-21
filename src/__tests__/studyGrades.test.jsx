@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, cleanup, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore as baseStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { parseGrade, formatGrade } from '../features/study/grades'
@@ -57,7 +57,7 @@ beforeEach(() => {
 afterEach(cleanup)
 
 function makeStore() {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'u', displayName: 'U' } })
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isAdmin: false, isTester: true, adminPendingCount: 0, betaRequest: null } })
     return store
@@ -168,7 +168,7 @@ describe('Lernen as school life: grades', () => {
 
 describe('Settings → Lernen: the grade scale', () => {
     it('switches between points and marks and saves it', async () => {
-        render(<Provider store={makeStore()}><MemoryRouter><StudySettings /></MemoryRouter></Provider>)
+        renderWithStore(<StudySettings />, { store: makeStore() })
         const marks = await screen.findByRole('radio', { name: 'Noten 1–6' })
         expect(screen.getByRole('radio', { name: 'Notenpunkte 0–15' })).toHaveAttribute('aria-checked', 'true')
         fireEvent.click(marks)

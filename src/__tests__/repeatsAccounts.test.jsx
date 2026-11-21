@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { makeStore as baseStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { SET_USER } from '../features/auth/authActionTypes'
@@ -29,13 +29,13 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 }))
 
 function makeStore({ tasks = [], eventTypes = [], language = 'en' } = {}) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch(setLanguage(language))
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks, groups: [], notes: [], eventTypes } })
     return store
 }
 
-const wrap = (store, ui) => render(<Provider store={store}><MemoryRouter>{ui}</MemoryRouter></Provider>)
+const wrap = (store, ui) => renderWithStore(ui, { store })
 const callsTo = (pattern, method) => apiFetch.mock.calls.filter(([url, options]) => pattern.test(url) && (!method || options?.method === method))
 
 beforeEach(() => {

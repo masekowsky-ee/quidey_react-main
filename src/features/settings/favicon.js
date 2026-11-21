@@ -3,7 +3,7 @@
 
 // Each palette's swatch color (its dark-mode accent): tab bars don't follow the app's theme,
 // so the icon keeps one color per accent
-export const ACCENT_COLORS = {
+const ACCENT_COLORS = {
     sunset: '#fb923c',
     green: '#0ed30e',
     ocean: '#38bdf8',
@@ -15,7 +15,7 @@ export const ACCENT_COLORS = {
 };
 
 // The logo as an SVG file in one color (see components/Logo.jsx)
-export function logoSvg(color) {
+function logoSvg(color) {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="9 5 50 50">`
         + `<defs><mask id="cut" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">`
         + `<rect width="64" height="64" fill="#fff"/>`

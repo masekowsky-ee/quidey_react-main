@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_USER } from '../features/auth/authActionTypes'
 import Profile from '../components/profile'
@@ -17,17 +17,16 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 
 const apiError = (status, code) => Object.assign(new Error(code), { status, code })
 const type = (label, value) => fireEvent.change(screen.getByLabelText(label), { target: { value } })
-const newStore = () => configureStore({ reducer: rootReducer })
 
 async function renderSignedOut() {
     localStorage.removeItem('token')
-    const store = newStore()
-    await act(async () => { render(<Provider store={store}><MemoryRouter><Profile /></MemoryRouter></Provider>) })
+    const store = makeStore()
+    await act(async () => { renderWithStore(<Profile />, { store }) })
     return store
 }
 
 async function renderVerifyPage(token) {
-    const store = newStore()
+    const store = makeStore()
     await act(async () => {
         render(
             <Provider store={store}>
@@ -128,10 +127,10 @@ describe('email verification', () => {
     })
 
     it('the profile marks an unconfirmed address and sends a new link', async () => {
-        const store = newStore()
+        const store = makeStore()
         store.dispatch({ type: SET_USER, payload: [{ username: 'jo', email: 'jo@example.com', email_verified: false }] })
         apiFetch.mockImplementation(async (url) => url === '/api/friends' ? [] : { sent: true })
-        await act(async () => { render(<Provider store={store}><MemoryRouter><ProfileView onSignOut={() => {}} /></MemoryRouter></Provider>) })
+        await act(async () => { renderWithStore(<ProfileView onSignOut={() => {}} />, { store }) })
 
         expect(screen.getByText('Nicht bestätigt')).toBeInTheDocument()
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Neuen Link senden' })) })

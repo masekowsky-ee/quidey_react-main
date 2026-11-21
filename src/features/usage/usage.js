@@ -10,7 +10,7 @@ import { platform } from './platform';
 export { platform };
 
 const KEY = 'usageQueue';
-export const QUEUE_MAX = 500;
+const QUEUE_MAX = 500;
 const CHUNK = 200;
 const KEEPALIVE_BYTES = 60_000;
 const FLUSH_MS = 60_000;
@@ -22,7 +22,7 @@ const AREAS = ['home', 'calendar', 'focus', 'stats', 'profile', 'settings', 'inb
     'notes', 'study', 'user_profile', 'session', 'family', 'routines', 'routine_run', 'community', 'community_progress',
     'community_sessions', 'community_friends', 'community_family', 'other'];
 
-export const isClientMetric = (metric) => ACTIONS.includes(metric)
+const isClientMetric = (metric) => ACTIONS.includes(metric)
     || (typeof metric === 'string' && metric.startsWith('view:') && AREAS.includes(metric.slice(5)));
 
 let enabled = false;

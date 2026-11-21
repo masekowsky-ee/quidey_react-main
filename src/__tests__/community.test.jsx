@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import { fetchProgress, levelStartXp, requiredLevel, tierFor, UNLOCKS, nextUnlocks } from '../features/progress/progress'
@@ -62,7 +61,7 @@ function Where() {
 }
 
 async function renderCommunity(path = '/community', { tester = false } = {}) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isTester: tester } })
     await act(async () => {
         render(
@@ -123,7 +122,7 @@ describe('progress toasts', () => {
     afterEach(() => { vi.useRealTimers() })
 
     it('the first look says nothing; a challenge done since and a level up come with a toast', async () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         api({ 'GET /api/progress': PROGRESS })
         await store.dispatch(fetchProgress())
         expect(store.getState().toast).toEqual([])
@@ -139,7 +138,7 @@ describe('progress toasts', () => {
     })
 
     it('a new day with other challenges is not news', async () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         api({ 'GET /api/progress': PROGRESS })
         await store.dispatch(fetchProgress())
         api({ 'GET /api/progress': { ...PROGRESS, today: '2026-10-26', daily: [{ ...challenge('focus25', 25, 25, 25, true), period: 'day' }] } })
@@ -253,7 +252,7 @@ describe('the menu and its dots', () => {
 
 describe('profile choices by level', () => {
     it("locks what my level hasn't reached, but keeps what I already have", async () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         const profile = { username: 'me', level: 5, banner: 'sky', stats: null, showcase: [] }
         await act(async () => {
             render(<Provider store={store}><ProfileEditor profile={profile} onSaved={() => {}} onClose={() => {}} /></Provider>)

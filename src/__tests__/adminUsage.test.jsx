@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore as baseStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { downloadXlsx, downloadCsv } from '../features/admin/exportTable'
 import { usageSheets } from '../features/admin/usageSheets'
@@ -64,7 +63,7 @@ const usageCalls = () => apiFetch.mock.calls.map(([url]) => url).filter(url => u
 const rawCalls = () => apiFetch.mock.calls.map(([url]) => url).filter(url => url.startsWith('/api/admin/usage/raw'))
 
 function makeStore() {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 'tok', username: 'testUser1' } })
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isAdmin: true, adminPendingCount: 0, betaRequest: null } })
     return store

@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_USER } from '../features/auth/authActionTypes'
 import { badgesFor } from '../features/profile/badges'
@@ -39,7 +39,7 @@ const friend = {
 }
 
 async function renderPage(username) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     await act(async () => {
         render(
             <Provider store={store}>
@@ -157,10 +157,10 @@ describe('customizing my profile', () => {
         interests: [], color: null, banner: null, emoji: null, showStats: true, shareActivity: true, level: 5, frame: null, title: null, showcase: [], stats: statsFixture({ sessions: 0, totalMs: 0, longestStreak: 0, longestSessionMs: 0, tasksDone: 0, sharedSessions: 0 }) }
 
     async function renderOwn() {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch({ type: SET_USER, payload: [me] })
         await act(async () => {
-            render(<Provider store={store}><MemoryRouter><ProfileView onSignOut={() => {}} /></MemoryRouter></Provider>)
+            renderWithStore(<ProfileView onSignOut={() => {}} />, { store })
         })
     }
 

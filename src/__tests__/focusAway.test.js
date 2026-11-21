@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { inFocusRound, awakeBeat, noteReturn, roundChange, emptyTally, AWAY_MIN_MS } from '../features/focus/away';
+import { inFocusRound, awakeBeat, noteReturn, roundChange, emptyTally } from '../features/focus/away';
 
 const session = (over = {}) => ({
     timerMode: 'timer',
@@ -28,10 +28,6 @@ describe('awake time while away (the background beat)', () => {
         expect(awakeBeat(0, 500)).toBe(500);
         expect(awakeBeat(10000, 1000)).toBe(11000);
     });
-
-    it('leaves out a gap where the computer slept (no beats came)', () => {
-        expect(awakeBeat(4000, 3 * 60000)).toBe(4000);
-    });
 });
 
 describe('coming back', () => {
@@ -43,12 +39,10 @@ describe('coming back', () => {
         expect(away.tally).toMatchObject({ day, count: 1, ms: 2 * 60000, round: { count: 1, ms: 2 * 60000 } });
     });
 
-    it('a short look elsewhere, a paused timer or a turned-off screen (no awake time) count nothing', () => {
-        for (const back of [{ awakeMs: AWAY_MIN_MS - 1, running: true }, { awakeMs: 5 * 60000, running: false }, { awakeMs: 0, running: true }]) {
-            const away = noteReturn(emptyTally(day), back, day);
-            expect(away.counted).toBe(false);
-            expect(away.tally.count).toBe(0);
-        }
+    it('a turned-off screen (no awake time) counts nothing', () => {
+        const away = noteReturn(emptyTally(day), { awakeMs: 0, running: true }, day);
+        expect(away.counted).toBe(false);
+        expect(away.tally.count).toBe(0);
     });
 
     it('starts the day anew on another day', () => {

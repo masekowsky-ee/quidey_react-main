@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, within, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import togetherReducer, { idleWork } from '../features/together/togetherReducer'
 import { WORK_SWITCHED, WORK_SETTLED, WORK_RESTORED, WORK_STOPPED, SHARED_SESSION_GONE } from '../features/together/togetherActionTypes'
 import { startWork, stopWork, tickWork, localMs, workTotalMs, MAX_REPORT_MS, REPORT_EVERY_MS } from '../features/together/work'
@@ -26,7 +25,6 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 const ann = { id: 1, username: 'ann', displayName: 'Ann' }
 const ben = { id: 2, username: 'ben', displayName: null }
 const t = (key) => translate('en', key)
-const makeStore = () => configureStore({ reducer: rootReducer })
 
 const session = (id = 5, extra = {}) => ({
     id, name: `Session ${id}`, createdAt: '2026-10-18T10:00:00Z', endedAt: null, owner: ann, isOwner: true, me: 1,

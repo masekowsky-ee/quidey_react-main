@@ -573,18 +573,11 @@
 .deviceContent span:nth-child(2){ width: 70%; }
 .deviceContent span:nth-child(3){ width: 45%; }
 
-.navSide,
 .navBottom,
 .navTop{
     display: flex;
     gap: 0.25rem;
     padding: 0.35rem;
-}
-
-.navSide{
-    width: 2.75rem;
-    flex-direction: column;
-    border-right: 1px solid var(--border);
 }
 
 .navBottom{
@@ -596,7 +589,6 @@
     border-bottom: 1px solid var(--border);
 }
 
-.navSide span,
 .navTop span{
     height: 0.35rem;
     width: 100%;
@@ -617,14 +609,12 @@
 }
 
 /* the part to look for is drawn in full ink and pulses twice */
-.navSide span,
 .navTop span,
 .navBottom span,
 .device[data-nav="drawer"] .navButton{
     background: var(--text-h);
 }
 
-.navSide,
 .navBottom,
 .navTop,
 .device[data-nav="drawer"] .navButton{
@@ -685,7 +675,6 @@
 }
 
 :global(:root[data-motion="minimal"]) .halo,
-:global(:root[data-motion="minimal"]) .navSide,
 :global(:root[data-motion="minimal"]) .navBottom,
 :global(:root[data-motion="minimal"]) .navTop,
 :global(:root[data-motion="minimal"]) .navButton{
@@ -701,7 +690,6 @@
     }
 
     .halo,
-    .navSide,
     .navBottom,
     .navTop,
     .navButton{

@@ -13,7 +13,7 @@ export default {
     testerUiUse: 'Verwenden',
     testerUiActive: 'Aktiv',
     testerUiNavLabel: 'Navigation: {nav}',
-    testerNav_sidebar: 'Seitenleiste',
+    testerNav_bar: 'Leiste im Kopf',
     testerNav_rail: 'schmale Leiste',
     testerNav_top: 'Reiter oben',
     testerNav_command: 'Befehlsleiste',

@@ -1,7 +1,7 @@
 // A pasted list of topics -> one name per non-empty line. A leading bullet (-, *, •) or number
 // ("1." / "2)") is removed; at most 40 lines of at most 200 characters.
 export const MAX_PARTS = 40;
-export const PART_NAME_MAX = 200;
+const PART_NAME_MAX = 200;
 
 export function parseParts(text) {
     return String(text ?? '')

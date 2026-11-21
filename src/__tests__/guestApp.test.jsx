@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, useLocation } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { LOGIN_SUCCESS, SET_ACCESS } from '../features/auth/authActionTypes'
 import App from '../App'
 
@@ -13,7 +12,7 @@ function Where() { return <output data-testid="where">{useLocation().pathname}</
 
 async function renderApp(path = '/', hash = '') {
     window.history.replaceState(null, '', path + hash)
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     await act(async () => {
         render(<Provider store={store}><MemoryRouter initialEntries={[path]}><App /><Where /></MemoryRouter></Provider>)
     })

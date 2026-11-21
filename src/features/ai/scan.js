@@ -6,8 +6,8 @@ import { apiFetch } from '../helperFunction';
 import { shrinkImage } from '../focus/notebook';
 import { refreshAiQuota } from './ai';
 
-export const SCAN_PDF_MAX_BYTES = 10 * 1024 * 1024;
-export const SCAN_IMAGES_MAX = 5;
+const SCAN_PDF_MAX_BYTES = 10 * 1024 * 1024;
+const SCAN_IMAGES_MAX = 5;
 
 const readBase64 = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader();

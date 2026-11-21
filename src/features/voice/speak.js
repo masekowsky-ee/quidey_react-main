@@ -9,7 +9,7 @@
 // A voice of the language is picked when there is one, one on the device first. Voices can load late (Chrome): when none
 // are listed yet, speaking waits for `voiceschanged` (at most VOICES_WAIT_MS), else the engine chooses.
 
-export const VOICES_WAIT_MS = 500;
+const VOICES_WAIT_MS = 500;
 
 export function speechOutputSupport() {
     return typeof window !== 'undefined' && Boolean(window.speechSynthesis) && typeof window.SpeechSynthesisUtterance === 'function';

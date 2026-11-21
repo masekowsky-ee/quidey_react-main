@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import { playPlans, buyInPlay, restorePlayPurchases, managePlaySubscription, upgradeInPlay, PLAY_PRODUCTS } from '../features/pro/pro'
@@ -179,7 +178,7 @@ describe('Google Play: the client knows both products', () => {
 })
 
 function renderPage(access = {}) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, accessMode: 'beta', ...access } })
     render(
         <Provider store={store}>

@@ -210,20 +210,6 @@
     font-size: 0.8rem;
 }
 
-.segmentedSmall {
-    composes: segmented from '../ui.module.css';
-}
-
-.segmentedSmall > button {
-    padding: 0.15rem 0.7rem;
-    font-size: 0.8rem;
-}
-
-.segmentedSmall > button[aria-pressed="true"] {
-    background: var(--surface-strong);
-    color: var(--text-h);
-}
-
 .metaText {
     color: var(--text-muted);
 }
@@ -342,12 +328,6 @@
 .checkLine[data-done] > span {
     color: var(--text-muted);
     text-decoration: line-through;
-}
-
-.emptyText {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 0.875rem;
 }
 
 .linkForm {

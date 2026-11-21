@@ -1,9 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { screen, act } from '@testing-library/react'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { openAuth } from '../features/auth/gate'
 import AuthDialog from '../components/auth/AuthDialog'
@@ -11,8 +9,8 @@ import { LANDING_URL } from '../features/site'
 
 // The window that asks a visitor to sign in or up (opened by openAuth)
 function setup() {
-    const store = configureStore({ reducer: rootReducer })
-    render(<Provider store={store}><MemoryRouter><AuthDialog /></MemoryRouter></Provider>)
+    const store = makeStore()
+    renderWithStore(<AuthDialog />, { store })
     return store
 }
 const open = (...args) => act(() => openAuth(...args))

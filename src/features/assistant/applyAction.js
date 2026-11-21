@@ -31,7 +31,7 @@ function fieldsOf(task) {
 
 // The proposed changes ({ name?, date?, time?, endTime? }) on my copy of the task → the fields
 // to save. A time without a day takes today (as in the new-task form).
-export function changedFields(task, changes = {}) {
+function changedFields(task, changes = {}) {
     const old = fieldsOf(task);
     const name = typeof changes.name === 'string' && changes.name.trim() ? changes.name.trim() : old.name;
     let day = changes.date ?? old.day;

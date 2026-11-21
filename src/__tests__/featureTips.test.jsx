@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, cleanup, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { LOGIN_SUCCESS, SET_ACCESS } from '../features/auth/authActionTypes'
 import { TIPS, BASIC_TIPS, tipsForPage, selectTips, resetTips } from '../features/tips/tips'
@@ -33,7 +33,7 @@ function Page({ withFocus = true }) {
 }
 
 function open({ path = '/', page = <Page />, seen = [], off = false } = {}) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, tipsSeen: seen, tipsOff: off } })
     render(<Provider store={store}><MemoryRouter initialEntries={[path]}>{page}<FeatureTips /></MemoryRouter></Provider>)
@@ -123,9 +123,9 @@ describe('feature tips: showing them', () => {
     })
 
     it('nothing before the server has said what was seen', () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
-        render(<Provider store={store}><MemoryRouter><Page /><FeatureTips /></MemoryRouter></Provider>)
+        renderWithStore(<><Page /><FeatureTips /></>, { store })
         expect(screen.queryByRole('dialog')).toBeNull()
     })
 

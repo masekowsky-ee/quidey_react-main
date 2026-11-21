@@ -1006,11 +1006,6 @@
     color: var(--danger);
 }
 
-.messageOk{
-    composes: message;
-    color: var(--primary-fg);
-}
-
 /* ---------- other people's profile page ---------- */
 
 .page{
@@ -1101,15 +1096,6 @@
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--text-muted);
-}
-
-.testBadge{
-    padding: 0.05rem 0.45rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    color: var(--text-h);
-    border: 1px solid var(--control-border);
-    border-radius: var(--radius-pill);
 }
 
 .avatarUpload{

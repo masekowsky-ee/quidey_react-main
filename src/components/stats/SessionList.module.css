@@ -195,42 +195,6 @@
     }
 }
 
-/* ---------- folders: sessions | completed tasks ---------- */
-
-.folders{
-    composes: tabBar from '../ui.module.css';
-    width: 100%;
-    max-width: 26rem;
-    align-self: flex-start;
-}
-
-.folderActive{
-    composes: segmentActive from '../ui.module.css';
-}
-
-.folders > button{
-    white-space: nowrap;
-}
-
-.folderBadge{
-    margin-left: 0.25rem;
-    padding: 0 0.4rem;
-    font-size: 0.75rem;
-    font-variant-numeric: tabular-nums;
-    border-radius: 999px;
-    background: color-mix(in srgb, currentColor 14%, transparent);
-}
-
-/* two tabs have room, so the count stays inline on phones */
-.folders > button > .folderBadge{
-    position: static;
-    margin-left: 0.25rem;
-    padding: 0 0.4rem;
-    font-size: 0.75rem;
-    line-height: inherit;
-    box-shadow: none;
-}
-
 .folderCount{
     margin: 0;
     font-size: 0.875rem;

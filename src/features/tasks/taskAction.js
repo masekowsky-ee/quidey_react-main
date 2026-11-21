@@ -26,7 +26,7 @@ export const fetchTaskState = () => {
 // planned time) and reminders (minutes before the start, a list), location, link and extra
 // details, colour, whether the reminders also come by mail, and task or event (kind) with the event's type; repeat_left: how
 // many more times a repeating task comes back (null: no end)
-export const TASK_EXTRA_FIELDS = ['due_time', 'duration_minutes', 'reminders', 'location', 'link', 'details', 'repeat', 'repeat_left', 'color', 'reminder_email', 'kind', 'event_type_id'];
+const TASK_EXTRA_FIELDS = ['due_time', 'duration_minutes', 'reminders', 'location', 'link', 'details', 'repeat', 'repeat_left', 'color', 'reminder_email', 'kind', 'event_type_id'];
 const extrasOf = (source) => Object.fromEntries(TASK_EXTRA_FIELDS
     .filter(field => source?.[field] !== undefined)
     .map(field => [field, source[field] === '' ? null : source[field]]));

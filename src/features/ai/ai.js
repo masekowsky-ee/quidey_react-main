@@ -20,7 +20,7 @@ export function forgetAiQuota() {
     notify();
 }
 
-export function loadAiQuota() {
+function loadAiQuota() {
     loading ??= Promise.resolve()
         .then(() => apiFetch('/api/ai/quota'))
         .then(answer => { quota = answer ?? null; notify(); return quota; })

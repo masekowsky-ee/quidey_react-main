@@ -114,7 +114,7 @@ tr[data-state="late"] .flip {
 
 /* a changed note flips in like a split-flap panel (not with minimal motion) */
 :global(:root:not([data-motion="minimal"])) .flip {
-  animation: flipIn 0.42s cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: flipIn 0.42s var(--spring-curve) both;
   transform-origin: 50% 0;
 }
 

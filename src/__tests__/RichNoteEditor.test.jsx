@@ -1,8 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import RichNoteEditor from '../components/notes/RichNoteEditor'
 
 // The notes' editor: the text without visible marks, stored as the same lines as before
@@ -10,7 +9,7 @@ const setup = (body, props = {}) => {
     let getBody = null
     const onChange = vi.fn(getter => { getBody = getter })
     render(
-        <Provider store={configureStore({ reducer: rootReducer })}>
+        <Provider store={makeStore()}>
             <RichNoteEditor body={body} onChange={onChange} label="Text der Notiz" {...props} />
         </Provider>
     )

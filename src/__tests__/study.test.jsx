@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, cleanup, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import {
@@ -28,7 +27,6 @@ vi.mock('../features/pwa/push', async (importOriginal) => ({
 
 const SETTINGS = { windows: [], sessionMinutes: 45, dailyMaxMinutes: 180, aiAuto: false, aiAvailable: true }
 const calls = (path, method = 'GET') => apiFetch.mock.calls.filter(([url, options]) => url === path && (options?.method ?? 'GET') === method)
-const makeStore = () => configureStore({ reducer: rootReducer, middleware: (get) => get({ serializableCheck: false, immutableCheck: false }) })
 
 let settings, plan
 beforeEach(() => {
@@ -49,7 +47,7 @@ beforeEach(() => {
 
 describe('study slice', () => {
     it('stores subjects and goals', async () => {
-        const store = makeStore()
+        const store = makeStore({ relaxedChecks: true })
         const subjects = [{ id: 1, name: 'Mathe', emoji: null, color: 'blue', archived: false, nextGoal: null }]
         apiFetch.mockResolvedValueOnce(subjects)
         expect(await store.dispatch(fetchSubjects())).toEqual(subjects)
@@ -69,7 +67,7 @@ describe('study slice', () => {
     })
 
     it('saves and deletes a subject; a refused name rejects with the code', async () => {
-        const store = makeStore()
+        const store = makeStore({ relaxedChecks: true })
         apiFetch.mockResolvedValueOnce({ id: 2, name: 'Bio' })
         await store.dispatch(saveSubject(null, { name: 'Bio' }))
         expect(calls('/api/tester/study/subjects', 'POST')).toHaveLength(1)
@@ -86,7 +84,7 @@ describe('study slice', () => {
     })
 
     it('renaming a subject keeps its next goal', async () => {
-        const store = makeStore()
+        const store = makeStore({ relaxedChecks: true })
         const nextGoal = { id: 5, name: 'Klausur', kind: 'exam', due: '2026-12-01', progress: 0.5, behindMinutes: 0 }
         apiFetch.mockResolvedValueOnce([{ id: 2, name: 'Bio', archived: false, nextGoal }])
         await store.dispatch(fetchSubjects())
@@ -96,7 +94,7 @@ describe('study slice', () => {
     })
 
     it('deleting a goal with its sessions reloads the tasks', async () => {
-        const store = makeStore()
+        const store = makeStore({ relaxedChecks: true })
         apiFetch.mockResolvedValueOnce({ id: 5, parts: [], sessions: [] })
         await store.dispatch(fetchGoal(5))
         apiFetch.mockImplementation(async (url) => (url.startsWith('/api/tester/study/goals/5') ? { ok: true, removedSessions: 2 } : []))
@@ -107,7 +105,7 @@ describe('study slice', () => {
     })
 
     it('settings and status are stored', async () => {
-        const store = makeStore()
+        const store = makeStore({ relaxedChecks: true })
         await store.dispatch(fetchStudySettings())
         expect(store.getState().study.settings).toEqual(SETTINGS)
         await store.dispatch(saveStudySettings({ sessionMinutes: 60 }))
@@ -119,7 +117,7 @@ describe('study slice', () => {
     })
 
     it('applyPlan: a 409 stores the fresh preview and rejects with plan_changed', async () => {
-        const store = makeStore()
+        const store = makeStore({ relaxedChecks: true })
         const fresh = { inputHash: 'b'.repeat(64), shortfall: [], goals: [] }
         apiFetch.mockRejectedValueOnce(Object.assign(new Error('The plan has changed'), { status: 409, code: 'plan_changed', data: { code: 'plan_changed', preview: fresh } }))
         await expect(store.dispatch(applyPlan('a'.repeat(64)))).rejects.toMatchObject({ code: 'plan_changed' })
@@ -128,7 +126,7 @@ describe('study slice', () => {
     })
 
     it('applyPlan reloads the goals in the store, unpinSession the goal of the session', async () => {
-        const store = makeStore()
+        const store = makeStore({ relaxedChecks: true })
         const goal = (pinned) => ({ id: 5, subjectId: 1, parts: [], sessions: [{ taskId: 9, partId: 1, due: '2026-12-01', dueTime: null, minutes: 45, done: false, focusMs: 0, pinned }] })
         let pinned = true
         apiFetch.mockImplementation(async (url) => {
@@ -145,7 +143,7 @@ describe('study slice', () => {
     })
 
     it('a new colour of a subject reloads the tasks (its sessions take it)', async () => {
-        const store = makeStore()
+        const store = makeStore({ relaxedChecks: true })
         apiFetch.mockImplementation(async (url) => (url === '/api/tasks' || url === '/api/event-types' ? [] : { id: 2, name: 'Bio', color: 'red' }))
         await store.dispatch(saveSubject(2, { name: 'Biologie' }))
         expect(calls('/api/tasks')).toHaveLength(0)
@@ -154,7 +152,7 @@ describe('study slice', () => {
     })
 
     it('applyPlan, studyNow and unpinSession reload the tasks', async () => {
-        const store = makeStore()
+        const store = makeStore({ relaxedChecks: true })
         apiFetch.mockImplementation(async (url) => (url === '/api/tasks' || url === '/api/event-types' ? [] : { ok: true, task: { id: 9 } }))
         await store.dispatch(fetchPlanPreview())
         expect(calls('/api/tester/study/plan')).toHaveLength(1)
@@ -183,7 +181,7 @@ describe('push kind study', () => {
 })
 
 function renderSettings({ tester = true, hash = '#plan' } = {}) {
-    const store = makeStore()
+    const store = makeStore({ relaxedChecks: true })
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isTester: tester } })
     render(<Provider store={store}><MemoryRouter initialEntries={[`/settings${hash}`]}><Settings /></MemoryRouter></Provider>)
     return store

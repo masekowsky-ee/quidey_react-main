@@ -12,15 +12,8 @@ import { apiFetch, CACHE_MEDIUM, LIMIT_EVENT } from '../helperFunction';
 import { isNativeApp } from '../native/native';
 
 // The prices as shown (the real ones live at Stripe / in the Play Console: keep them the same)
-export const PRICES = { monthly: 2.99, yearly: 25 };
-// 12 months at the monthly price against one year: 35,88 € → 25 €
-export const YEARLY_SAVES = Math.round((PRICES.monthly * 12 - PRICES.yearly) * 100) / 100;
-export const YEARLY_SAVES_PERCENT = Math.round((YEARLY_SAVES / (PRICES.monthly * 12)) * 100);
-export const YEARLY_PER_MONTH = Math.floor((PRICES.yearly / 12) * 100) / 100;
-
 // Quidey Max (5,99 € a month or 49 € a year) is Pro plus the AI assistant; Max includes Pro
-export const MAX_PRICES = { monthly: 5.99, yearly: 49 };
-export const PRICES_BY_TIER = { pro: PRICES, max: MAX_PRICES };
+export const PRICES_BY_TIER = { pro: { monthly: 2.99, yearly: 25 }, max: { monthly: 5.99, yearly: 49 } };
 export const yearlySaves = (tier) => Math.round((PRICES_BY_TIER[tier].monthly * 12 - PRICES_BY_TIER[tier].yearly) * 100) / 100;
 export const yearlySavesPercent = (tier) => Math.round((yearlySaves(tier) / (PRICES_BY_TIER[tier].monthly * 12)) * 100);
 export const yearlyPerMonth = (tier) => Math.floor((PRICES_BY_TIER[tier].yearly / 12) * 100) / 100;
@@ -100,7 +93,7 @@ export async function playCanReplace() {
 
 // The one Pro purchase token to replace: exactly one on the phone, or of several the latest by
 // `purchaseTime` (only when every one has it); else no safe choice (undefined)
-export function pickProToken(purchases) {
+function pickProToken(purchases) {
     if (purchases.length === 1) return purchases[0].purchaseToken;
     if (purchases.length > 1 && purchases.every((purchase) => Number.isFinite(Number(purchase.purchaseTime)))) {
         return purchases.reduce((latest, purchase) => (Number(purchase.purchaseTime) > Number(latest.purchaseTime) ? purchase : latest)).purchaseToken;

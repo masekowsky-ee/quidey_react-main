@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { addTask, deleteTask, updateTaskProps } from '../features/tasks/taskAction'
 import { saveSessionData, setSessionParams, addWorkedTask, addTaskTime, updateCurrentSessionData } from '../features/session/sessionAction'
@@ -11,7 +10,6 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
     apiFetch: vi.fn(),
 }))
 
-const makeStore = () => configureStore({ reducer: rootReducer })
 const bodyOf = (call) => JSON.parse(call[1].body)
 
 beforeEach(() => { apiFetch.mockReset() })

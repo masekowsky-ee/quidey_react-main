@@ -34,7 +34,7 @@ export function awayPlatform() {
 // the round runs right now (not paused)
 const running = (state) => inFocusRound(state) && state.session.timer.active;
 
-export const minutesText = (ms) => Math.max(1, Math.round(ms / 60000));
+const minutesText = (ms) => Math.max(1, Math.round(ms / 60000));
 
 // what the nudge says: { title, text } (title with {min} left for the app to fill in)
 function nudgeTexts(state) {

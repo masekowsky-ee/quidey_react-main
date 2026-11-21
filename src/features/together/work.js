@@ -46,7 +46,7 @@ const report = (sessionId, body, booked, keepalive) => (dispatch) => {
 
 // Work on `next` from now on: { sessionId, sessionName, taskId, taskName, baseMs }, or null to stop.
 // Books the time since the last report. Resolves once the reports are answered.
-export const switchWork = (next, { keepalive = false } = {}) => (dispatch, getState) => {
+const switchWork = (next, { keepalive = false } = {}) => (dispatch, getState) => {
     const work = getState().together.work;
     const now = Date.now();
     const ms = runningMs(work, now);

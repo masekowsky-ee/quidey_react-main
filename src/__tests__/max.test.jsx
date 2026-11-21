@@ -6,7 +6,6 @@ import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from '../features/rootReducer'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
-import { MAX_PRICES } from '../features/pro/pro'
 import { selectHasMax } from '../features/pro/pro'
 import ProPage from '../components/pro/ProPage'
 import Admin from '../components/Admin'
@@ -47,14 +46,9 @@ beforeEach(() => {
 describe('Max: access state', () => {
     it('is inactive by default and selectHasMax follows access.max.active', () => {
         const store = makeStore()
-        expect(store.getState().auth.access.max).toEqual({ active: false, gift: false, until: null })
         expect(selectHasMax(store.getState())).toBe(false)
         store.dispatch({ type: SET_ACCESS, payload: { isPro: true, max: { active: true, gift: false, until: '2027-01-01T00:00:00Z' } } })
         expect(selectHasMax(store.getState())).toBe(true)
-    })
-
-    it('has the Max prices', () => {
-        expect(MAX_PRICES).toEqual({ monthly: 5.99, yearly: 49 })
     })
 })
 

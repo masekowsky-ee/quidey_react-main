@@ -40,7 +40,7 @@ const saved = (dispatch) => (collection) => {
 
 // one request at a time: every task row's labels ask for them when they first show
 let loading = null;
-export const fetchCollections = () => (dispatch) => {
+const fetchCollections = () => (dispatch) => {
     // (an answer that isn't a list, an older server say, counts as none)
     loading ??= Promise.resolve(apiFetch('/api/tester/collections'))
         .then(answer => {
@@ -111,7 +111,7 @@ export function useCollections() {
 // calendar's filter, the new-task form and the statistics (their groups were taken over once by
 // the server). A collection then goes around as a group:
 // { id: 'collection-<id>', collection: true, collectionId, name, emoji, color }.
-export const asGroup = (collection) => ({
+const asGroup = (collection) => ({
     id: `collection-${collection.id}`, collection: true, collectionId: collection.id,
     name: collection.name, emoji: collection.emoji, color: collection.color, description: collection.description,
 });

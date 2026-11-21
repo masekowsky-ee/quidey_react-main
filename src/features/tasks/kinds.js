@@ -8,8 +8,6 @@ import { parseDate } from '../helperFunction';
 import { minutesOfDay } from '../calendar/calendar';
 import { refreshTasks } from './taskAction';
 
-export const TASK_KINDS = ['task', 'event'];
-
 export const isEvent = (task) => task?.kind === 'event';
 
 // Event types to start a list with (Settings and the editor offer them while the list is empty)

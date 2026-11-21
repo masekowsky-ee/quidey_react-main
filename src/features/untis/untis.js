@@ -7,7 +7,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { apiFetch, CACHE_MEDIUM, CACHE_LONG } from '../helperFunction';
 import { minutesOfDay } from '../calendar/calendar';
 
-export const fetchUntisStatus = () => apiFetch('/api/untis', { cacheMs: CACHE_MEDIUM });
+const fetchUntisStatus = () => apiFetch('/api/untis', { cacheMs: CACHE_MEDIUM });
 export const searchUntisSchools = (q) => apiFetch(`/api/untis/schools?q=${encodeURIComponent(q)}`, { cacheMs: CACHE_LONG });
 export const connectUntis = (body) => apiFetch('/api/untis', { method: 'PUT', body: JSON.stringify(body) });
 export const disconnectUntis = () => apiFetch('/api/untis', { method: 'DELETE' });
@@ -16,7 +16,7 @@ export const setHomeworkToTasks = (on) => apiFetch('/api/untis/settings', { meth
 export const fetchHomeworkSuggestions = () => apiFetch('/api/untis/suggestions', { cacheMs: CACHE_MEDIUM });
 export const takeHomeworkSuggestion = (id, minutes) => apiFetch(`/api/untis/suggestions/${id}/take`, { method: 'POST', body: JSON.stringify(minutes == null ? {} : { minutes }) });
 export const dismissHomeworkSuggestion = (id) => apiFetch(`/api/untis/suggestions/${id}/dismiss`, { method: 'POST' });
-export const fetchUntisLessons = (from, to) => apiFetch(`/api/untis/lessons?from=${from}&to=${to}`, { cacheMs: CACHE_MEDIUM });
+const fetchUntisLessons = (from, to) => apiFetch(`/api/untis/lessons?from=${from}&to=${to}`, { cacheMs: CACHE_MEDIUM });
 
 // lessons as calendar entries (events with a time, read-only)
 export function lessonsToEntries(lessons) {

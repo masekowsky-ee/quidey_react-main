@@ -62,12 +62,12 @@ const SWIPE_SPEED = 400;
 const FOCUSABLE = 'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])';
 
 // Where the navigation is right now: the tab bar (phones), the header's menu button (drawer),
-// the sidebar, or another way of a tester's interface variant
+// the bar, or another way of a tester's interface variant
 function useNavPlace() {
     const phone = useMediaQuery(PHONE_QUERY);
     const model = useNavModel();
     if (phone) return 'phone';
-    return model === 'drawer' || model === 'sidebar' || model === 'bar' ? model : 'other';
+    return model === 'drawer' || model === 'bar' ? model : 'other';
 }
 
 // The intro tour: one card per chapter, each with a small scene of the page it is about, a few

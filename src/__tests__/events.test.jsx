@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { makeStore as baseStore } from './helpers/store'
 import { apiFetch, isOverdue } from '../features/helperFunction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { setLanguage } from '../features/settings/settingsAction'
@@ -33,7 +32,7 @@ const bodyOf = (path, method) => {
 const WORK = { id: 7, name: 'Work', color: 'blue', position: 0 }
 
 function makeStore(tasks = [], eventTypes = []) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch(setLanguage('en'))
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks, groups: [], notes: [], eventTypes } })
     return store

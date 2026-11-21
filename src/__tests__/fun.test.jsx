@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { LOGIN_SUCCESS, SET_ACCESS } from '../features/auth/authActionTypes'
 import { resetOnboarding, useOnboarding } from '../features/onboarding/onboarding'
 import { setShowTutorial } from '../features/settings/settingsAction'
@@ -22,7 +21,6 @@ import DailyTicker from '../components/DailyTicker'
 import WordGuess from '../components/fun/WordGuess'
 import Sequence from '../components/fun/Sequence'
 
-const makeStore = () => configureStore({ reducer: rootReducer })
 
 beforeEach(() => {
     localStorage.clear()
@@ -356,7 +354,7 @@ describe('tutorial', () => {
                 expect(Array.isArray(translations[lang][`tut_${id}_tips`])).toBe(true)
                 if (id !== 'ready') expect(translations[lang][`tut_${id}_text`]).toBeTruthy()
             }
-            for (const nav of ['phone', 'drawer', 'sidebar', 'other']) expect(translations[lang][`tut_ready_text_${nav}`]).toBeTruthy()
+            for (const nav of ['phone', 'drawer', 'bar', 'other']) expect(translations[lang][`tut_ready_text_${nav}`]).toBeTruthy()
         }
     })
 

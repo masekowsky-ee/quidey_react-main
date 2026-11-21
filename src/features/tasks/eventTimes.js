@@ -5,7 +5,7 @@
 import { minutesOfDay, timeText } from '../calendar/calendar';
 
 // a length to start from when the end is set before anything else
-export const DEFAULT_EVENT_MINUTES = 60;
+const DEFAULT_EVENT_MINUTES = 60;
 
 // "16:00" for a start of "14:00" and 120 minutes; '' while one of them is missing
 export function endOf(start, duration) {

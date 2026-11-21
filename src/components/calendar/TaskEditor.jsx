@@ -44,14 +44,14 @@ function optionsSummary(t, extras, hasDate, hasTime, task) {
 // an event needs one. Picking a time before a day takes today.
 // personal: false for a task in a shared session or a family: reminders, repeating, sharing,
 // groups and event types (all personal) are left out. allowEvents: it can still be a task or an
-// event (a shared session's). Without onDelete / onLeave / onPickGroups their buttons are left out.
+// event (a shared session's). Without onDelete / onLeave their buttons are left out.
 // An event's type follows its name by the types' keywords (matchEventType) until one is picked by
 // hand, also "none"; a task whose name fits a type offers to become such an event.
 // subGroups: [{ id, name }] of a session or family (experimental, testers): a field to move the
 // entry between them (group_id). Under the fields a quiet line says when and by whom it was made.
 // Testers: an own task or event can be put into collections (with notes and other tasks).
 // remindsAll: a family's entry: not personal, but with reminders (they reach every member).
-export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, onPickGroups, personal = true, allowEvents = false, remindsAll = false, subGroups }) {
+export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, personal = true, allowEvents = false, remindsAll = false, subGroups }) {
     const { t, language } = useTranslation();
     const id = useId();
     const nameRef = useRef(null);
@@ -273,7 +273,6 @@ export default function TaskEditor({ task, onSave, onCancel, onDelete, onLeave, 
             {created && <p className={styles.createdNote}>{created}</p>}
             {error && <p className={styles.error} role="alert">{error}</p>}
             <div className={styles.editorActions}>
-                {onPickGroups && <button type="button" className={styles.groupsBtn} onClick={() => onPickGroups(task)}>{t('assignGroup')}</button>}
                 {isOwner
                     ? onDelete && <button type="button" className={styles.deleteBtn} onClick={() => onDelete(task)} aria-label={`${t(event ? 'deleteEvent' : 'deleteTask')}: ${task.name}`} title={t(event ? 'deleteEvent' : 'deleteTask')}>
                         <Icon name="delete" size={20} />

@@ -32,7 +32,7 @@ export const storeLanguage = (language) => store('language', language);
 // Accent color palettes; the values live in index.css under [data-accent]
 export const ACCENTS = ['green', 'ocean', 'violet', 'sunset', 'rose', 'cherry', 'gold', 'pine'];
 // "Abendrot" (sunset) unless another one was chosen
-export const DEFAULT_ACCENT = 'sunset';
+const DEFAULT_ACCENT = 'sunset';
 export const readStoredAccent = () => readStored('accent', ACCENTS, DEFAULT_ACCENT);
 // the swatch shown for each accent (its dark-mode colour) and its name's translation key
 export const ACCENT_SWATCHES = [
@@ -61,7 +61,7 @@ export const PALETTES = {
     mono: { dark: ['#000000', '#0f0f0f', '#ffffff'], light: ['#ffffff', '#f3f3f3', '#0a0a0a'] },
 };
 export const PALETTE_NAMES = Object.keys(PALETTES);
-export const DEFAULT_PALETTE = 'system';
+const DEFAULT_PALETTE = 'system';
 export const readStoredPalette = () => readStored('palette', PALETTE_NAMES, DEFAULT_PALETTE);
 export const storePalette = (palette) => store('palette', palette);
 
@@ -86,7 +86,7 @@ export const readStoredTimerMode = () => readStored('timerMode', TIMER_MODES, 't
 export const storeTimerMode = (mode) => store('timerMode', mode);
 
 // Pomodoro lengths in minutes and after how many focus rounds the long break comes
-export const POMODORO_DEFAULTS = { focus: 25, short: 5, long: 15, every: 4 };
+const POMODORO_DEFAULTS = { focus: 25, short: 5, long: 15, every: 4 };
 // any whole number within these (minutes; `every`: focus rounds)
 export const POMODORO_LIMITS = {
     focus: [1, 240],

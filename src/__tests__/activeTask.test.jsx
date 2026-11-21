@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, within, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore as baseStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { setMotion } from '../features/settings/settingsAction'
@@ -25,14 +25,14 @@ const tasks = [
 ]
 
 function makeStore(list = tasks) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks: list, groups: [], notes: [] } })
     // collections (in place of groups) already loaded: no request of their own in these tests
     store.dispatch({ type: 'SET_COLLECTIONS', payload: [] })
     return store
 }
 
-const wrap = (store, ui) => render(<Provider store={store}><MemoryRouter>{ui}</MemoryRouter></Provider>)
+const wrap = (store, ui) => renderWithStore(ui, { store })
 
 beforeEach(() => { apiFetch.mockReset(); localStorage.clear() })
 

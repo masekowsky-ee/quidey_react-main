@@ -1,4 +1,4 @@
-import { SET_SHOW_MENU, SET_MENU_SIDE, SET_SHOW_DONE_TASKS, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS, SET_PALETTE, SET_SOUND } from "./settingsActionTypes";
+import { SET_SHOW_MENU, SET_MENU_SIDE, SET_CUSTOM_ERROR, SET_LANGUAGE, SET_SHOW_FORMS, SET_THEME, SET_HOME_LAYOUT, SET_ACCENT, SET_DEFAULT_SESSION_MINUTES, SET_SHOW_TUTORIAL, SET_MOTION, SET_SHOW_SHARED_TASKS, SET_PALETTE, SET_SOUND } from "./settingsActionTypes";
 import { HOME_LAYOUTS, storeHomeLayout } from "./homeLayout";
 import { MOTION_LEVELS, storeMotion } from "./motion";
 import { SOUND_LEVELS, storeSound } from "./sound";
@@ -24,10 +24,6 @@ export const openMenu = (side = 'left') => (dispatch, getState) => {
     dispatch(setMenuSide(side));
     requestAnimationFrame(() => requestAnimationFrame(() => dispatch(setShowMenu(true))));
 };
-
-export const setShowDoneTasks = () => ({
-    type: SET_SHOW_DONE_TASKS,
-});
 
 export const setCustomError = (customError) => ({
     type: SET_CUSTOM_ERROR,

@@ -6,7 +6,6 @@ import { parseDate, toDateOnly } from '../helperFunction';
 export const RANGES = ['week', 'month', 'year', 'all'];
 
 const monthKey = (date) => dateKey(date).slice(0, 7);
-const yearKey = (date) => dateKey(date).slice(0, 4);
 
 // more months than this and "everything" goes by year
 const MAX_MONTH_BARS = 36;
@@ -55,7 +54,7 @@ function monthsBetween(from, to) {
 }
 
 // The bucket a day ("2026-10-20") falls into
-export const bucketKey = (unit, day) => (unit === 'day' ? day : unit === 'month' ? day.slice(0, 7) : day.slice(0, 4));
+const bucketKey = (unit, day) => (unit === 'day' ? day : unit === 'month' ? day.slice(0, 7) : day.slice(0, 4));
 
 // Sums the api's [{ day, ms }] into the period's buckets: { [bucketKey]: ms }
 export function sumByBucket(unit, days) {
@@ -85,5 +84,3 @@ export function hoursText(ms) {
     if (h === 0) return `${m} min`;
     return m === 0 ? `${h} h` : `${h} h ${m} min`;
 }
-
-export { monthKey, yearKey };

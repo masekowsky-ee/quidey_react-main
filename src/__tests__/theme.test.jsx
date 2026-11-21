@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, renderHook, act } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { screen, fireEvent, renderHook, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import settingsReducer from '../features/settings/settingsReducer'
 import { setTheme } from '../features/settings/settingsAction'
 import { resolveTheme, readStoredTheme, useApplyTheme } from '../features/settings/theme'
@@ -27,7 +26,6 @@ function mockSystemTheme(prefersLight) {
     }
 }
 
-const makeStore = () => configureStore({ reducer: rootReducer })
 const wrapperFor = (store) => ({ children }) => <Provider store={store}>{children}</Provider>
 const htmlTheme = () => document.documentElement.dataset.theme
 
@@ -134,7 +132,7 @@ describe('Settings page', () => {
     it('shows the current theme and switches it', () => {
         mockSystemTheme(false)
         const store = makeStore()
-        render(<Provider store={store}><MemoryRouter><Settings /></MemoryRouter></Provider>)
+        renderWithStore(<Settings />, { store })
 
         // nothing chosen yet: the device's
         expect(screen.getByRole('button', { name: 'System' })).toHaveAttribute('aria-pressed', 'true')

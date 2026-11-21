@@ -39,7 +39,6 @@
   --plant-soil: #57534e;
   --plant-blossom: #f9a8d4;
   --plant-fruit: #fbbf24;
-  --glow: transparent;        /* kept for old references; nothing glows */
   /* soft wash behind a hovered icon or row */
   --hover-wash: color-mix(in srgb, var(--text-h) 7%, transparent);
 
@@ -187,7 +186,6 @@
   --plant-soil: #78716c;
   --plant-blossom: #ec4899;
   --plant-fruit: #f59e0b;
-  --glow: transparent;
 
   --contrast-top: #151413;
   --contrast-bottom: #151413;

@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter, useLocation } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
@@ -40,7 +39,7 @@ function Where() {
 }
 
 function open({ path = '/', access = MAX_ON, tasks = [MATHE] } = {}) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch(setLanguage('de'))
     store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 'tok', username: 'lena' } })
     store.dispatch({ type: SET_ACCESS, payload: access })

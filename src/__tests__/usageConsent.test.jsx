@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, act, within } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
-import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { screen, fireEvent, act, within } from '@testing-library/react'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 
 const { default: OnboardingPrompts, ANALYTICS_DELAY_MS } = await import('../components/onboarding/OnboardingPrompts')
@@ -18,14 +16,14 @@ const setAccess = (patch) => act(() => {
     store.dispatch({ type: SET_ACCESS, payload: { ...store.getState().auth.access, ...patch } })
 })
 
-const renderApp = (ui) => render(<Provider store={store}><MemoryRouter>{ui}</MemoryRouter></Provider>)
+const renderApp = (ui) => renderWithStore(ui, { store })
 
 beforeEach(() => {
     localStorage.clear()
     sessionStorage.clear()
     localStorage.setItem('token', 'tok')
     resetUsageAskLater()
-    store = configureStore({ reducer: rootReducer })
+    store = makeStore()
     fetchMock = vi.fn(async (url, init) => {
         if (String(url).endsWith('/api/profile/usage-consent')) {
             const granted = JSON.parse(init.body).granted

@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { setTimer } from '../features/session/sessionAction'
 import { useFocusAway } from '../features/focus/useFocusAway'
 import { readTally } from '../features/focus/away'
@@ -19,7 +18,7 @@ const setHidden = (value) => {
 }
 
 const setup = (platform = 'desktop') => {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     render(<Provider store={store}><Tracker platform={platform} /></Provider>)
     return store
 }

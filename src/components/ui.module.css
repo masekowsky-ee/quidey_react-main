@@ -244,15 +244,6 @@
     border-radius: 0 0 var(--radius) var(--radius);
 }
 
-/* Full-width strip with a line above and below */
-.band {
-    width: 100%;
-    background-color: var(--surface);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    box-sizing: border-box;
-}
-
 /* Dimmed full-screen backdrop */
 .overlay {
     position: fixed;
@@ -260,13 +251,17 @@
     background-color: var(--overlay);
 }
 
-/* Glow colors for controls whose action has a meaning */
-.glowPrimary {
-    --glow: color-mix(in srgb, var(--primary) 70%, transparent);
-}
-
-.glowDanger {
-    --glow: color-mix(in srgb, var(--danger) 70%, transparent);
+/* Visually hidden, still read by screen readers. Modules compose this under their own .srOnly */
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
 }
 
 /* The one primary action: inverted and flat (light pill on dark, dark pill on light).
@@ -417,7 +412,7 @@
 
 /* Delete control (button or bare svg): turns red on hover */
 .deleteBtn {
-    composes: iconHover glowDanger;
+    composes: iconHover;
 }
 
 .deleteBtn:hover {
@@ -443,7 +438,7 @@
   border-radius: 999px;
   box-shadow: var(--shadow-float);
   transition: transform var(--ease), background-color var(--ease), color var(--ease);
-  animation: fabIn 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  animation: fabIn 0.35s var(--spring-curve);
   -webkit-tap-highlight-color: transparent;
 }
 

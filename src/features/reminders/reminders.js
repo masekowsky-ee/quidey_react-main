@@ -26,7 +26,7 @@ const RESET_REMINDERS = 'RESET_REMINDERS';
 export const REMINDER_TEXT_MAX = 200;
 export const SNOOZE_MINUTES = 10;
 // a due reminder still shows (and rings) this long after its time, like the server's limit
-export const LATE_LIMIT_MS = 10 * 60 * 1000;
+const LATE_LIMIT_MS = 10 * 60 * 1000;
 
 export default function remindersReducer(state = { list: [], loaded: false }, action) {
     switch (action.type) {
@@ -198,5 +198,3 @@ export function useReminders(allowed) {
         return () => window.removeEventListener('focus', take);
     }, [enabled, dispatch]);
 }
-
-export const resetReminders = () => ({ type: RESET_REMINDERS });

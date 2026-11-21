@@ -91,7 +91,6 @@ export default {
     tut_ready_text_phone: 'Unten erreichst du Start, Kalender, Fokus und Sozial, das Postfach oben rechts. Alles Weitere steckt hinter „Mehr“.',
     tut_ready_text_drawer: 'Über den Menü-Knopf links im Header erreichst du alle Seiten, dein Konto und die Einstellungen.',
     tut_ready_text_bar: 'Oben in der Leiste erreichst du Start, Kalender, Fokusraum, Sozial, Postfach und Statistiken. Unter „Mehr“ findest du den Rest, dein Konto und die Einstellungen.',
-    tut_ready_text_sidebar: 'Links in der Seitenleiste findest du alle Seiten, unten Einstellungen, Feedback und dein Konto.',
     tut_ready_text_other: 'Alle Seiten erreichst du über die Navigation deiner Oberfläche, Einstellungen und Konto über das Menü.',
     tut_ready_tips: [
         'Etwas fehlt oder hakt? Schreib uns über „Feedback“ im Menü.',

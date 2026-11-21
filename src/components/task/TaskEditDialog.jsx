@@ -1,5 +1,5 @@
 import styles from '../CalendarDay.module.css';
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -7,7 +7,6 @@ import { deleteTaskAsking, leaveTask, updateTaskProps } from '../../features/tas
 import { removeSharedTask, updateSharedTask } from '../../features/together/togetherAction';
 import { showToast } from '../../features/toast/toast';
 import TaskEditor from '../calendar/TaskEditor.jsx';
-import GroupPicker from '../GroupPicker.jsx';
 import Icon from '../calendar/icons.jsx';
 import SheetGrabber from '../SheetGrabber.jsx';
 import { useSheet } from '../../features/layout/dragDismiss';
@@ -24,11 +23,6 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
     const dispatch = useDispatch();
     const titleId = useId();
     const panelRef = useRef(null);
-    const [pickerTask, setPickerTask] = useState(null);
-    // testers sort tasks into collections (in the editor) instead of groups
-    // collections took the place of groups (the editor has its collection picker)
-    const groupsOn = false;
-    const closePicker = useCallback(() => setPickerTask(null), []);
     // on phones a sheet: pulled down, it closes like a click next to it (without saving)
     const sheet = useSheet(onClose, panelRef);
     const { dismiss } = sheet;
@@ -45,12 +39,12 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
     // Escape outside the editor's fields (the editor handles its own)
     useEffect(() => {
         const onKey = (e) => {
-            if (pickerTask || e.defaultPrevented) return;
+            if (e.defaultPrevented) return;
             if (e.key === 'Escape') dismiss();
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [pickerTask, dismiss]);
+    }, [dismiss]);
 
     const run = async (action, doneText) => {
         try {
@@ -105,10 +99,8 @@ export default function TaskEditDialog({ task, onClose, shared, handlers }) {
                         onCancel={() => dismiss()}
                         onDelete={() => run(deleteTaskAsking(task), t('taskDeleted'))}
                         onLeave={() => run(leaveTask(task), t('taskLeft'))}
-                        onPickGroups={groupsOn ? setPickerTask : undefined}
                     />}
             </div>
-            {pickerTask && <GroupPicker task={pickerTask} onClose={closePicker} />}
         </div>,
         document.body
     );

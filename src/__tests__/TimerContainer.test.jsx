@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { screen, fireEvent, act } from '@testing-library/react'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { setFocusTask } from '../features/session/sessionAction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
@@ -20,10 +18,10 @@ const taskA = { id: 1, name: 'write report', done: false }
 const taskB = { id: 2, name: 'answer mails', done: false }
 
 function renderTimer(focus = null) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks: [taskA, taskB], groups: [], notes: [] } })
     if (focus) store.dispatch(setFocusTask(focus))
-    render(<Provider store={store}><MemoryRouter><TimerContainer /></MemoryRouter></Provider>)
+    renderWithStore(<TimerContainer />, { store })
     // folded into the corner button at first
     fireEvent.click(screen.getByRole('button', { name: 'Timer öffnen' }))
     // another task taken into focus while the timer runs (Home, Fokusraum)
@@ -53,8 +51,8 @@ describe('TimerContainer', () => {
     afterEach(() => { vi.useRealTimers(); localStorage.clear() })
 
     it('starts folded into a button and keeps running while folded', async () => {
-        const store = configureStore({ reducer: rootReducer })
-        render(<Provider store={store}><MemoryRouter><TimerContainer /></MemoryRouter></Provider>)
+        const store = makeStore()
+        renderWithStore(<TimerContainer />, { store })
         expect(screen.queryByRole('button', { name: 'start timer' })).not.toBeInTheDocument()
 
         fireEvent.click(screen.getByRole('button', { name: 'Timer öffnen' }))

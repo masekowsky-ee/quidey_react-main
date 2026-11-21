@@ -3,7 +3,7 @@ import { pressDrag } from './pressDrag';
 import { minutesOfDay, timeText } from './calendar';
 
 // the timeline moves in quarter hours
-export const SNAP_MINUTES = 15;
+const SNAP_MINUTES = 15;
 const LAST_START = 24 * 60 - SNAP_MINUTES;
 
 export const snapMinutes = (minutes) =>

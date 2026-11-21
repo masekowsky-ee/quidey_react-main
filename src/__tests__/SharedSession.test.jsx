@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { useWorkReporter } from '../features/together/work'
 import { useLinkedWork } from '../features/together/linkedWork'
@@ -91,7 +90,7 @@ function Harness() {
 }
 
 async function renderSession() {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     await act(async () => {
         render(
             <Provider store={store}>

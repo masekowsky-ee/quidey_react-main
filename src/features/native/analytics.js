@@ -18,7 +18,7 @@ import { isNativeApp } from './native';
 const QuideyAnalytics = registerPlugin('QuideyAnalytics');
 const KEY = 'analytics';
 
-export const analyticsBuilt = () => isNativeApp() && import.meta.env.VITE_NATIVE_ANALYTICS === 'on';
+const analyticsBuilt = () => isNativeApp() && import.meta.env.VITE_NATIVE_ANALYTICS === 'on';
 
 const readChoice = () => {
     try {

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { makeStore as baseStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_TASK_STATE, SET_TASK_INVITES, EDIT_DISPLAYGROUP } from '../features/tasks/taskActionTypes'
 import { setLanguage } from '../features/settings/settingsAction'
@@ -38,7 +38,7 @@ const BOB = { id: 2, username: 'bob', displayName: 'Bob' }
 const ALICE = { id: 1, username: 'alice', displayName: 'Alice' }
 
 function makeStore(tasks = [], extra = {}) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch(setLanguage('en'))
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks, groups: [], notes: [] } })
     if (extra.invites) store.dispatch({ type: SET_TASK_INVITES, payload: extra.invites })
@@ -367,7 +367,7 @@ describe('invites', () => {
     it('lists tasks friends sent and accepts one', async () => {
         const invite = { id: 3, createdAt: '2026-10-19T10:00:00Z', from: ALICE, task: { id: 8, name: 'Movie night', due: apiDate(2026, 10, 24), due_time: '20:00', location: 'Cinema' } }
         const store = makeStore([], { invites: [invite] })
-        render(<Provider store={store}><MemoryRouter><TaskInvites /></MemoryRouter></Provider>)
+        renderWithStore(<TaskInvites />, { store })
         expect(screen.getByText('Alice wants to share this task with you')).toBeInTheDocument()
         expect(screen.getByText('20:00')).toBeInTheDocument()
         expect(screen.getByText('Cinema')).toBeInTheDocument()
@@ -383,7 +383,7 @@ describe('create task form', () => {
     it('creates a task with time and options and invites friends', async () => {
         const store = makeStore([], { friends: [BOB] })
         const setCreateTask = vi.fn()
-        render(<Provider store={store}><MemoryRouter><TaskForm setCreateTask={setCreateTask} /></MemoryRouter></Provider>)
+        renderWithStore(<TaskForm setCreateTask={setCreateTask} />, { store })
         fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Lunch' } })
         fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: '2026-10-22' } })
         fireEvent.change(screen.getByLabelText(/^Time/), { target: { value: '12:30' } })
@@ -407,7 +407,7 @@ describe('create task form', () => {
 
     it('only the name is needed: no day, no priority', async () => {
         const setCreateTask = vi.fn()
-        render(<Provider store={makeStore()}><MemoryRouter><TaskForm setCreateTask={setCreateTask} /></MemoryRouter></Provider>)
+        renderWithStore(<TaskForm setCreateTask={setCreateTask} />, { store: makeStore() })
         fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Read' } })
         apiFetch.mockResolvedValueOnce({ id: 31, name: 'Read' })
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Create' })) })
@@ -416,7 +416,7 @@ describe('create task form', () => {
     })
 
     it('reminders need a day; picking a time first takes today', () => {
-        render(<Provider store={makeStore()}><MemoryRouter><TaskForm setCreateTask={() => {}} /></MemoryRouter></Provider>)
+        renderWithStore(<TaskForm setCreateTask={() => {}} />, { store: makeStore() })
         fireEvent.click(screen.getByRole('button', { name: /More options/ }))
         const atTheStart = () => within(screen.getByRole('group', { name: 'Reminders' })).getByRole('button', { name: /^(At the start|On the day)$/ })
         expect(atTheStart()).toBeDisabled()
@@ -435,7 +435,7 @@ describe('create task form', () => {
     it('with notifications on, a new task reminds at its start; without, it has none', async () => {
         localStorage.setItem('push', 'on')
         resetPushState()
-        const { unmount } = render(<Provider store={makeStore()}><MemoryRouter><TaskForm setCreateTask={() => {}} /></MemoryRouter></Provider>)
+        const { unmount } = renderWithStore(<TaskForm setCreateTask={() => {}} />, { store: makeStore() })
         fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Essay' } })
         fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: '2026-10-22' } })
         apiFetch.mockResolvedValueOnce({ id: 32, name: 'Essay' })
@@ -445,7 +445,7 @@ describe('create task form', () => {
 
         apiFetch.mockClear()
         localStorage.setItem('push', 'off')
-        render(<Provider store={makeStore()}><MemoryRouter><TaskForm setCreateTask={() => {}} /></MemoryRouter></Provider>)
+        renderWithStore(<TaskForm setCreateTask={() => {}} />, { store: makeStore() })
         fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Read' } })
         fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: '2026-10-22' } })
         apiFetch.mockResolvedValueOnce({ id: 33, name: 'Read' })
@@ -503,7 +503,7 @@ describe('task colours and reminders by mail', () => {
     })
 
     it('a new task gets its colour, and the mail reminder only with a reminder', async () => {
-        render(<Provider store={makeStore()}><MemoryRouter><TaskForm setCreateTask={() => {}} /></MemoryRouter></Provider>)
+        renderWithStore(<TaskForm setCreateTask={() => {}} />, { store: makeStore() })
         fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Gym' } })
         fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: '2026-10-22' } })
         fireEvent.click(screen.getByRole('radio', { name: 'Green' }))

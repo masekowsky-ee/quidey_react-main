@@ -22,7 +22,7 @@ const LATE_LIMIT_MS = 60 * 60 * 1000;
 const STORAGE_KEY = 'shownReminders';
 const MAX_REMEMBERED = 200;
 
-export const DEFAULT_ALL_DAY_TIME = '12:00';
+const DEFAULT_ALL_DAY_TIME = '12:00';
 // at most this many per task (like the server)
 export const REMINDERS_MAX = 5;
 

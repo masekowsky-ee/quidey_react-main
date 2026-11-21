@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch, SIGNED_OUT_EVENT } from '../features/helperFunction'
 import { track, flushUsage, setUsageEnabled, resetUsage, platform } from '../features/usage/usage'
 import { trackView, trackAction } from '../features/usage/track'
@@ -271,7 +270,7 @@ describe('trackView / trackAction', () => {
 
 describe('setUsageConsent', () => {
     it('stores the answer in access.usageConsent and switches counting on', async () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         expect(selectUsageConsent(store.getState()).choice).toBe(null)
         fetchMock.mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ choice: 'granted', at: '2026-11-07T10:00:00.000Z', version: 1 }) })
         await store.dispatch(setUsageConsent(true))
@@ -285,7 +284,7 @@ describe('setUsageConsent', () => {
     })
 
     it('a no switches counting off and empties the queue', async () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         setUsageEnabled(true, ME)
         track('app_open')
         fetchMock.mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ choice: 'denied', at: 'x', version: 1 }) })

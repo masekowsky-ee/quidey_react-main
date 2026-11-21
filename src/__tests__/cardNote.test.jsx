@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import { MemoryRouter } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { screen, fireEvent, act } from '@testing-library/react'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { setLanguage } from '../features/settings/settingsAction'
 import { fetchNote, updateNote } from '../features/focus/notebook'
 import { pinCardNote, clearCardNote } from '../features/home/cardNote'
@@ -22,9 +20,9 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 const note = { id: 5, title: 'Einkauf', body: '# Liste\n- [ ] Milch\n- [x] Brot', trashedAt: null }
 
 function renderCard() {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch(setLanguage('de'))
-    render(<Provider store={store}><MemoryRouter><FocusSheet dropZoneRef={{ current: null }} activeTask={null} setActiveTask={() => {}} onRelease={() => {}} /></MemoryRouter></Provider>)
+    renderWithStore(<FocusSheet dropZoneRef={{ current: null }} activeTask={null} setActiveTask={() => {}} onRelease={() => {}} />, { store })
     return store
 }
 

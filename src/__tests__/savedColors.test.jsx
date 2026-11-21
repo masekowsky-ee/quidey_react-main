@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, cleanup, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { useState } from 'react'
-import rootReducer from '../features/rootReducer'
+import { makeStore as baseStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import { addSavedColor, removeSavedColor, selectSavedColors, SAVED_COLORS_MAX } from '../features/tasks/savedColors'
@@ -15,7 +14,7 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 }))
 
 const makeStore = (savedColors = []) => {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, savedColors } })
     return store
 }

@@ -47,13 +47,8 @@
     from{ opacity: 0; }
 }
 
-.srOnly{
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+.srOnly {
+  composes: srOnly from '../ui.module.css';
 }
 
 /* ---------- rows: a picture, a line, a shorter line ---------- */

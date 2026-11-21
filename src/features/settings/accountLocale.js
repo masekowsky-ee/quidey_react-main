@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { apiFetch } from '../helperFunction';
 
 // The device's time zone ("Europe/Berlin"), or undefined when the browser doesn't say
-export function deviceTimezone() {
+function deviceTimezone() {
     try {
         return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
     } catch {

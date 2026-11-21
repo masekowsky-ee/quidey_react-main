@@ -50,10 +50,10 @@ export const clockTick = (seconds, task) => ({
 // Sign-out or another account: nothing of the old one's session stays
 export const resetFocus = () => ({ type: RESET_FOCUS });
 
-export const selectCurrentSessionData = (state) => state.session.currentSessionData;
+const selectCurrentSessionData = (state) => state.session.currentSessionData;
 
 // The length the countdown is measured against (a stopwatch has none)
-export const selectTimerTotal = (state) => state.session.timerMode === 'pomodoro'
+const selectTimerTotal = (state) => state.session.timerMode === 'pomodoro'
     ? phaseMs(state.session.pomodoro)
     : state.session.sessionParams.time;
 
@@ -216,7 +216,7 @@ export const stopFocus = () => (dispatch, getState) => {
 export const PHASE_LABEL = { focus: 'pomodoroFocus', short: 'pomodoroShort', long: 'pomodoroLong' };
 
 // Pomodoro: what comes after a phase (focus → short break, every n-th → long break, break → focus)
-export function nextPhase(pomodoro) {
+function nextPhase(pomodoro) {
     if (pomodoro.phase !== 'focus') return { phase: 'focus', round: pomodoro.round };
     const round = pomodoro.round + 1;
     return { phase: round % pomodoro.config.every === 0 ? 'long' : 'short', round };

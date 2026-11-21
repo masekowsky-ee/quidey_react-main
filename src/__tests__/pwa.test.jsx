@@ -1,10 +1,8 @@
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { render, screen, fireEvent, act } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
-import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { screen, fireEvent, act } from '@testing-library/react'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import Settings from '../components/Settings'
 import { listenForInstallPrompt } from '../features/pwa/install'
 import { PUBLIC_FILES, serviceWorkerSource } from '../../pwa.js'
@@ -56,8 +54,7 @@ describe('web app manifest', () => {
 })
 
 describe('install as app (settings)', () => {
-    const makeStore = () => configureStore({ reducer: rootReducer })
-    const renderSettings = () => render(<Provider store={makeStore()}><MemoryRouter><Settings /></MemoryRouter></Provider>)
+    const renderSettings = () => renderWithStore(<Settings />, { store: makeStore() })
 
     beforeAll(() => listenForInstallPrompt())
     beforeEach(() => {

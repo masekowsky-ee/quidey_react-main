@@ -59,7 +59,7 @@
     border: 1px solid var(--control-border);
     border-radius: 1.4rem;
     box-shadow: var(--shadow-float);
-    animation: timerIn 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    animation: timerIn 0.35s var(--spring-curve);
     transform-origin: bottom left;
 }
 
@@ -158,7 +158,6 @@
     }
 
     .timerH2,
-    .setTimerH2,
     .stopwatchH2{
         font-size: 1.1rem;
     }
@@ -227,7 +226,7 @@
 }
 
 .btnGo{
-    composes: btn glowPrimary from './ui.module.css';
+    composes: btn from './ui.module.css';
 }
 
 /* start is the one filled control in the dock (nested so it beats the size rule above) */
@@ -242,7 +241,7 @@
 }
 
 .btnStop{
-    composes: btn glowDanger from './ui.module.css';
+    composes: btn from './ui.module.css';
 }
 
 .editTimerDiv{
@@ -261,13 +260,6 @@
     composes: iconHover from './ui.module.css';
     width: 1.3rem;
     height: 1.3rem;
-}
-
-.setTimerH2{
-    font-size: 1.25rem;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    margin: 0;
 }
 
 /* the length typed straight into its parts (the arrows still step it) */
@@ -332,10 +324,6 @@
     font-size: 2.25rem;
     line-height: 1.1;
     letter-spacing: -0.02em;
-}
-
-.inlinePanel .setTimerH2{
-    font-size: 1.75rem;
 }
 
 .inlinePanel .progress{

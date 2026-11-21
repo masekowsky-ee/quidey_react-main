@@ -1,3 +1,4 @@
+/* global process */
 import { describe, test, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -9,6 +10,11 @@ const path = resolve(import.meta.dirname, '../../../quidey_react-backend/scripts
 const cases = existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : [];
 
 describe('repeat projection matches the server', () => {
+    // The fixture lives in the backend repo: locally a missing one skips these tests, in CI it must fail
+    test.runIf(process.env.CI && !existsSync(path))('the shared fixture file is present', () => {
+        throw new Error(`Missing ${path}: check out quidey_react-backend next to this repo so the repeat projection is compared with the server`);
+    });
+
     test.skipIf(!existsSync(path))('there are enough shared fixtures', () => {
         expect(cases.length).toBeGreaterThanOrEqual(8);
     });

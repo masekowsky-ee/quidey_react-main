@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, within, act } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import { MemoryRouter } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { screen, fireEvent, within, act } from '@testing-library/react'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { setLanguage } from '../features/settings/settingsAction'
 import { REFRESH_TASKS } from '../features/tasks/taskActionTypes'
@@ -28,10 +26,10 @@ const MY_TASKS = [
 ]
 
 function setup(ui) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch(setLanguage('en'))
     store.dispatch({ type: REFRESH_TASKS, payload: MY_TASKS })
-    render(<Provider store={store}><MemoryRouter>{ui}</MemoryRouter></Provider>)
+    renderWithStore(ui, { store })
     return store
 }
 

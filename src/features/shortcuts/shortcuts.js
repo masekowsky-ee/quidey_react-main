@@ -14,7 +14,7 @@ export const OPEN_SHORTCUTS_EVENT = 'quidey:open-shortcuts';
 export const openShortcuts = () => window.dispatchEvent(new Event(OPEN_SHORTCUTS_EVENT));
 
 // G, then one of these within GO_WINDOW_MS
-export const GO_KEYS = {
+const GO_KEYS = {
     h: { to: '/', label: 'shortcut_goHome' },
     k: { to: '/calendar', label: 'shortcut_goCalendar' },
     f: { to: '/focus', label: 'shortcut_goFocus' },

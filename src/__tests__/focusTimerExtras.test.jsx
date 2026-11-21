@@ -1,15 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { setTimer, setTimerMode, setSessionParams, clockTick } from '../features/session/sessionAction'
 import { focusNotice } from '../features/session/focusNotification'
 import { focusTitle, useFocusTitle } from '../features/session/focusTitle'
 import { readStoredPomodoro } from '../features/settings/preferences'
 import DurationInput from '../components/focus/DurationInput'
 
-const makeStore = () => configureStore({ reducer: rootReducer })
 
 describe('the lasting focus notification', () => {
     afterEach(() => vi.useRealTimers())

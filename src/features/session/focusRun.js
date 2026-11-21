@@ -9,7 +9,7 @@
 
 const KEY = 'focusRun';
 // a session left alone for longer than this is not taken up again
-export const FOCUS_RUN_MAX_AGE = 18 * 60 * 60 * 1000;
+const FOCUS_RUN_MAX_AGE = 18 * 60 * 60 * 1000;
 
 const FIELDS = ['timerMode', 'timer', 'runningSince', 'sessionParams', 'pomodoro', 'focusTask', 'focusPicked', 'currentSessionData'];
 

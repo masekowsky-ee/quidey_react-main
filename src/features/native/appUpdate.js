@@ -84,7 +84,7 @@ async function askPlay() {
 }
 
 // Asks both. `force` skips the "not more often than" rule.
-export async function checkForUpdate({ force = false } = {}) {
+async function checkForUpdate({ force = false } = {}) {
     if (!isNativeApp()) return state.status;
     // while a download runs or is waiting to be installed, nothing changes
     if (state.status === 'downloading' || state.status === 'ready') return state.status;

@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { SET_USER } from '../features/auth/authActionTypes'
 import { SET_WORKED_SESSIONS } from '../features/session/sessionActionTypes'
@@ -18,7 +17,7 @@ const me = { username: 'jo', display_name: 'Jo Berg', email: 'jo@example.com', b
 const apiError = (status, code) => Object.assign(new Error(code), { status, code })
 
 async function renderProfile(path = '/profile') {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch({ type: SET_USER, payload: [me] })
     store.dispatch({ type: SET_WORKED_SESSIONS, payload: [{ id: 1, totalTime: 1500 }, { id: 2, totalTime: 2100 }] })
     const onSignOut = vi.fn()

@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, cleanup, screen, fireEvent, waitFor, within } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
-import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { cleanup, screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { setLanguage } from '../features/settings/settingsAction'
 import HomeworkSuggestions from '../components/study/HomeworkSuggestions'
@@ -37,9 +35,9 @@ beforeEach(() => {
 afterEach(cleanup)
 
 function open(props = {}) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch(setLanguage('de'))
-    render(<Provider store={store}><MemoryRouter><HomeworkSuggestions {...props} /></MemoryRouter></Provider>)
+    renderWithStore(<HomeworkSuggestions {...props} />, { store })
 }
 
 describe('homework suggestions from Untis', () => {

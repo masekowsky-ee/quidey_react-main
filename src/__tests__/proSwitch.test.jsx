@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent, renderHook } from '@testing-library/react'
+import { render, screen, renderHook } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { SET_ACCESS } from '../features/auth/authActionTypes'
 import { proBuilt, useProOn } from '../features/pro/flag'
 import { LEGAL_PATHS } from '../legal/paths'
@@ -14,7 +13,7 @@ import { androidApk, apkOffer, formatSize } from '../features/native/androidApk'
 import { placeList } from '../features/search/places'
 
 const storeWith = (access) => {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, accessMode: 'beta', ...access } })
     return store
 }

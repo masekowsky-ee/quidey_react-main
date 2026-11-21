@@ -136,12 +136,12 @@ export const fetchSharedHistory = () => async (dispatch) => {
 export const SHARED_TASK_PREFIX = 'shared-';
 export const isSharedTaskId = (id) => typeof id === 'string' && id.startsWith(SHARED_TASK_PREFIX);
 export const sharedTaskIdOf = (id) => Number(String(id).slice(SHARED_TASK_PREFIX.length));
-export const sharedGroupId = (sessionId) => `session-${sessionId}`;
+const sharedGroupId = (sessionId) => `session-${sessionId}`;
 
 // A shared task in the shape of an own task, plus where it belongs:
 // shared: { sessionId, sessionName, taskId }, assignee, myMs (my time on it so far),
 // addedBy / createdAt (who made it when), groupId (its sub-group in the session, or null)
-export const toSoloTask = (session, task) => ({
+const toSoloTask = (session, task) => ({
     id: `${SHARED_TASK_PREFIX}${task.id}`,
     name: task.name,
     description: task.description,

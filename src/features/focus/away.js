@@ -70,7 +70,7 @@ export function writeTally(tally) {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(tally)); } catch { /* full or blocked */ }
     listeners.forEach(listener => listener());
 }
-export const subscribeTally = (listener) => { listeners.add(listener); return () => listeners.delete(listener); };
+const subscribeTally = (listener) => { listeners.add(listener); return () => listeners.delete(listener); };
 
 // today's numbers (zero once the day is over)
 export const todaysAway = (tally) => (tally.day === today() ? { count: tally.count, ms: tally.ms } : { count: 0, ms: 0 });

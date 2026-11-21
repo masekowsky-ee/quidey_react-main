@@ -104,7 +104,7 @@
     background-color: var(--surface);
     border: 1px solid var(--border);
     border-radius: 999px;
-    animation: chipIn 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    animation: chipIn 0.3s var(--spring-curve);
 }
 
 @keyframes chipIn {
@@ -286,7 +286,7 @@
     background-color: color-mix(in srgb, var(--primary) 10%, var(--surface));
     border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
     border-radius: 999px;
-    animation: chipIn 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    animation: chipIn 0.3s var(--spring-curve);
 }
 
 .teamPillLink{
@@ -617,7 +617,7 @@ a.quickRowBtn{
     border: 1px solid var(--control-border);
     border-radius: var(--radius);
     box-shadow: var(--shadow-float);
-    animation: chipIn 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+    animation: chipIn 0.22s var(--spring-curve);
 }
 
 .linePopover:hover{

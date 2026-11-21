@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, act, fireEvent } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { showForms } from '../features/settings/settingsAction'
 import { startFocus } from '../features/session/sessionAction'
 import App from '../App'
@@ -11,7 +10,7 @@ import App from '../App'
 // Without an account everything that would save something asks for one instead
 async function renderApp(path = '/') {
     window.history.replaceState(null, '', path)
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     await act(async () => {
         render(<Provider store={store}><MemoryRouter initialEntries={[path]}><App /></MemoryRouter></Provider>)
     })

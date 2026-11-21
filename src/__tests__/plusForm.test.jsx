@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, act, within } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import { MemoryRouter } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { screen, fireEvent, act, within } from '@testing-library/react'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
@@ -17,12 +15,12 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 }))
 
 async function openPlus() {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch(setLanguage('de'))
     store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 'tok', username: 'lena' } })
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null } })
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks: [], groups: [], notes: [] } })
-    render(<Provider store={store}><MemoryRouter><QuickAdd /></MemoryRouter></Provider>)
+    renderWithStore(<QuickAdd />, { store })
     await act(async () => { store.dispatch(showForms(true)) })
     return store
 }

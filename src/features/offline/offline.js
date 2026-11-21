@@ -30,7 +30,7 @@ export const SLOW_MS = 8000;
 // and the outbox's request would wait in line behind such reads for minutes
 export const HARD_MS = 20000;
 // without a saved copy the person has nothing to look at meanwhile, so it waits longer
-export const NO_COPY_MS = 60000;
+const NO_COPY_MS = 60000;
 // a change that gets no answer for this long is kept in the outbox instead (a connection that
 // is there but leads nowhere never says no)
 export const WRITE_TIMEOUT_MS = 10000;
@@ -45,7 +45,7 @@ let flushing = null;
 // are answered from the saved copy, changes go to the outbox, and one request in PROBE_MS goes out
 // to find out whether the server is back. The `online` event and the app coming to the front probe
 // at once.
-export const PROBE_MS = 15000;
+const PROBE_MS = 15000;
 // the gap grows while the server stays away, so the probes themselves do not pile up
 const MAX_PROBE_MS = 60000;
 let nextTry = 0;
@@ -115,7 +115,7 @@ const idMapKey = () => `${ID_MAP_KEY}:${owner()}`;
 
 // The server couldn't be reached: no connection (fetch throws a TypeError) or a gateway that
 // has nobody behind it (502-504, e.g. while the API restarts).
-export const isUnreachable = (error) => (error instanceof TypeError && error.status === undefined)
+const isUnreachable = (error) => (error instanceof TypeError && error.status === undefined)
     || error?.name === 'AbortError'
     || [502, 503, 504].includes(error?.status);
 
@@ -126,7 +126,7 @@ function offlineError() {
     return error;
 }
 
-export const isCacheable = (url) => url.startsWith('/api/') && !NEVER_CACHED.some((prefix) => url.startsWith(prefix));
+const isCacheable = (url) => url.startsWith('/api/') && !NEVER_CACHED.some((prefix) => url.startsWith(prefix));
 
 // ---------- reads ----------
 
@@ -156,7 +156,7 @@ export async function savedAnswer(url) {
 // ---------- the writes that work offline ----------
 
 const ID = '([^/?]+)';
-export const WRITES = [
+const WRITES = [
     { name: 'task:add', method: 'POST', pattern: /^\/api\/tasks$/, creates: true },
     { name: 'task:edit', method: 'PUT', pattern: new RegExp(`^/api/tasks/${ID}$`) },
     { name: 'task:delete', method: 'DELETE', pattern: new RegExp(`^/api/tasks/${ID}(\\?.*)?$`) },
@@ -165,13 +165,11 @@ export const WRITES = [
     { name: 'session:save', method: 'POST', pattern: /^\/api\/sessions$/, creates: true },
 ];
 
-export function matchWrite(url, method = 'GET') {
+function matchWrite(url, method = 'GET') {
     const m = method.toUpperCase();
     return WRITES.find((write) => write.method === m && write.pattern.test(url));
 }
 
-const TEMP = /^local-/;
-export const isTempId = (id) => typeof id === 'string' && TEMP.test(id);
 let tempCounter = 0;
 const tempId = () => `local-${Date.now().toString(36)}${(tempCounter++).toString(36)}`;
 const newKey = () => (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`);
@@ -408,7 +406,7 @@ export async function forgetReads() {
     await Promise.all(keys.map((key) => kvDelete(key)));
 }
 
-export async function loadPending() {
+async function loadPending() {
     setStatus({ pending: (await readOutbox()).length });
 }
 

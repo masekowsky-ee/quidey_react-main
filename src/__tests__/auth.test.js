@@ -1,11 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import authReducer from '../features/auth/authReducer'
 import { checkAuth, loginSuccess, logout } from '../features/auth/authAction'
 import { LOGIN_SUCCESS, SET_USER } from '../features/auth/authActionTypes'
 
-const makeStore = () => configureStore({ reducer: rootReducer })
 const respond = (ok, body, status = ok ? 200 : 400) => fetch.mockResolvedValue({ ok, status, json: () => Promise.resolve(body) })
 
 beforeEach(() => {

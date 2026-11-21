@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import { MemoryRouter } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
@@ -70,12 +69,12 @@ describe('the microphone in the new-entry form', () => {
     afterEach(() => { delete window.SpeechRecognition })
 
     const open = () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch(setLanguage('en'))
         store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 'tok', username: 'lena' } })
         store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null } })
         store.dispatch({ type: SET_TASK_STATE, payload: { tasks: [], groups: [], notes: [] } })
-        render(<Provider store={store}><MemoryRouter><TaskForm setCreateTask={vi.fn()} /></MemoryRouter></Provider>)
+        renderWithStore(<TaskForm setCreateTask={vi.fn()} />, { store })
     }
 
     it('what is said becomes the line, and the line is read as typed', () => {
@@ -105,9 +104,9 @@ describe('dictating into a note', () => {
 
     it('keeps listening and puts in each finished sentence once, at the cursor', () => {
         const insert = vi.fn()
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch(setLanguage('en'))
-        render(<Provider store={store}><MemoryRouter><DictateButton insert={insert} /></MemoryRouter></Provider>)
+        renderWithStore(<DictateButton insert={insert} />, { store })
         fireEvent.click(screen.getByRole('button', { name: 'Speak' }))
         expect(current.continuous).toBe(true)
         act(() => { current.say('Die Zelle', false) })
@@ -127,7 +126,7 @@ describe('when the microphone is blocked', () => {
         const { default: Toaster } = await import('../components/Toaster')
         const { MemoryRouter: Router, Routes, Route, useLocation } = await import('react-router-dom')
         const Where = () => <output data-testid="where">{useLocation().pathname + useLocation().hash}</output>
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch(setLanguage('de'))
         render(<Provider store={store}><Router initialEntries={['/']}><Routes><Route path="*" element={<><DictateButton insert={() => {}} /><Toaster /><Where /></>} /></Routes></Router></Provider>)
         fireEvent.click(screen.getByRole('button', { name: 'Sprechen' }))
@@ -149,7 +148,7 @@ describe('the microphone in the settings', () => {
 
     it('says it is blocked and how to allow it; asking again shows when it works', async () => {
         const { default: MicrophoneSettings } = await import('../components/voice/MicrophoneSettings')
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch(setLanguage('de'))
         await act(async () => { render(<Provider store={store}><MicrophoneSettings /></Provider>) })
         expect(screen.getByText(/blockiert/)).toBeInTheDocument()

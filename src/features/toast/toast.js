@@ -3,8 +3,8 @@
 
 import { playSound } from '../settings/sound';
 
-export const SHOW_TOAST = "SHOW_TOAST";
-export const HIDE_TOAST = "HIDE_TOAST";
+const SHOW_TOAST = "SHOW_TOAST";
+const HIDE_TOAST = "HIDE_TOAST";
 
 export const TOAST_MS = 4000;
 const MAX_TOASTS = 3;
@@ -12,10 +12,10 @@ const MAX_TOASTS = 3;
 let nextId = 1;
 
 // Something that came in (a message, a notice) stays a little longer and can be opened
-export const LINK_TOAST_MS = 7000;
+const LINK_TOAST_MS = 7000;
 
 // One that can be undone stays long enough to reach its button
-export const ACTION_TOAST_MS = 6000;
+const ACTION_TOAST_MS = 6000;
 
 // what a toast's button does (functions stay out of the store), by toast id
 const actions = new Map();

@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { setLanguage } from '../features/settings/settingsAction'
@@ -34,7 +33,7 @@ function LocationSpy() {
 }
 
 function setup(path = '/calendar?date=2026-10-19', tasks = TASKS) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch(setLanguage('en'))
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks, groups: GROUPS, notes: [] } })
     // collections took the place of groups: "Health" holds the dentist

@@ -88,7 +88,6 @@ export default {
     tut_ready_text_phone: 'Home, calendar, focus and social are at the bottom, the inbox at the top right. Everything else is behind "More".',
     tut_ready_text_drawer: 'The menu button on the left of the header leads to every page, your account and the settings.',
     tut_ready_text_bar: 'The bar at the top takes you to Home, Calendar, Focus room, Social, Inbox and Statistics. "More" holds the rest, your account and the settings.',
-    tut_ready_text_sidebar: 'The sidebar on the left holds every page, with settings, feedback and your account at the bottom.',
     tut_ready_text_other: 'Every page is in the navigation of your interface, settings and account are in the menu.',
     tut_ready_tips: [
         'Something missing or broken? Write to us via "Feedback" in the menu.',

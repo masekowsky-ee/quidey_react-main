@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, act } from '@testing-library/react'
 import { Provider, useDispatch } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { setLanguage } from '../features/settings/settingsAction'
 import { SET_ACCESS } from '../features/auth/authActionTypes'
@@ -85,7 +84,7 @@ function FamilyList() {
 }
 
 function setup(path, { tester = true } = {}) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch(setLanguage('en'))
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isTester: tester } })
     render(

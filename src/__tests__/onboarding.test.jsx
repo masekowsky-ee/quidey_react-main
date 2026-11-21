@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore as baseStore } from './helpers/store'
 import { LOGIN_SUCCESS } from '../features/auth/authActionTypes'
 import { apiFetch } from '../features/helperFunction'
 import { installState } from '../features/pwa/install'
@@ -29,7 +28,7 @@ const Probe = () => <output data-testid="asking">{useOnboarding().asking ?? 'non
 const asked = () => screen.getByTestId('asking').textContent
 
 const makeStore = () => {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 't', username: 'ann' } })
     return store
 }

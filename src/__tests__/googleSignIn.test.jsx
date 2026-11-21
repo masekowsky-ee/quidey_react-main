@@ -4,7 +4,8 @@ import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { signInWithGoogle, registerWithGoogle, deleteAccount } from '../features/auth/authAction'
 import { GoogleSignupForm } from '../components/auth/GoogleSignIn'
@@ -14,7 +15,7 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
     apiFetch: vi.fn(),
 }))
 
-const store = () => configureStore({ reducer: rootReducer })
+const store = makeStore
 const SIGNUP = { token: 'signup-token', email: 'gina@example.com', name: 'Gina', username: 'gina' }
 
 beforeEach(() => {
@@ -105,7 +106,7 @@ describe('sign in with Google: the return from Google', () => {
 describe('sign in with Google: the rest of a new account', () => {
     it('asks for name, birth date, username and the consents; too young is refused before the server', async () => {
         const errors = []
-        render(<Provider store={store()}><MemoryRouter><GoogleSignupForm signup={SIGNUP} onCancel={() => {}} onError={(m) => errors.push(m)} /></MemoryRouter></Provider>)
+        renderWithStore(<GoogleSignupForm signup={SIGNUP} onCancel={() => {}} onError={(m) => errors.push(m)} />, { store: store() })
         expect(screen.getByText('gina@example.com')).toBeInTheDocument()
         expect(screen.getByLabelText('Anzeigename')).toHaveValue('Gina')
         expect(screen.getByLabelText('Benutzer Name')).toHaveValue('gina')

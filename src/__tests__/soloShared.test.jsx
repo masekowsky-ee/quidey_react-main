@@ -13,7 +13,6 @@ import { SET_POMODORO } from '../features/session/sessionActionTypes'
 import { useLinkedWork, workOnSharedTask, dropSharedFocus } from '../features/together/linkedWork'
 import { startWork } from '../features/together/work'
 import { WORKED_SESSIONS_FIXTURE } from './fixtures/history.js'
-import GroupPicker from '../components/GroupPicker'
 import TaskContainer from '../components/TaskContainer'
 import GroupBtnContainer from '../components/GroupBtnContainer'
 import Stats from '../components/Stats'
@@ -203,50 +202,6 @@ describe('solo sessions with shared tasks', () => {
         await act(async () => { await store.dispatch(workOnSharedTask(session5, slides)) })
         await act(async () => { store.dispatch(dropSharedFocus(5)) }) // the whole session
         expect(store.getState().session.focusTask).toBeNull()
-    })
-})
-
-describe('group picker', () => {
-    function renderPicker(store, onClose = vi.fn()) {
-        render(<Provider store={store}><GroupPicker task={ownTasks[0]} onClose={onClose} /></Provider>)
-        return onClose
-    }
-
-    it('ticks the groups the task is in and toggles them', async () => {
-        const store = makeStore()
-        apiFetch.mockResolvedValue({})
-        renderPicker(store)
-        const uni = screen.getByRole('button', { name: /Uni/ })
-        const home = screen.getByRole('button', { name: /Home/ })
-        expect(uni).toHaveAttribute('aria-pressed', 'true')
-        expect(home).toHaveAttribute('aria-pressed', 'false')
-
-        await act(async () => { fireEvent.click(home) })
-        expect(apiFetch).toHaveBeenCalledWith('/api/tasks/10/groups/2', { method: 'POST' })
-        expect(screen.getByRole('button', { name: /Home/ })).toHaveAttribute('aria-pressed', 'true')
-
-        await act(async () => { fireEvent.click(uni) })
-        expect(apiFetch).toHaveBeenCalledWith('/api/task-groups/10/1', { method: 'DELETE' })
-        expect(store.getState().task.tasks.find(t => t.id === 10).group_ids).toEqual([2])
-    })
-
-    it('creates a new group and puts the task in it', async () => {
-        const store = makeStore()
-        apiFetch.mockImplementation(async (url) => url === '/api/groups' ? { id: 9, name: 'Sport', description: '' } : {})
-        renderPicker(store)
-        fireEvent.change(screen.getByPlaceholderText('Neue Gruppe…'), { target: { value: 'Sport' } })
-        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Hinzufügen' })) })
-        expect(apiFetch).toHaveBeenCalledWith('/api/tasks/10/groups/9', { method: 'POST' })
-        expect(store.getState().task.tasks.find(t => t.id === 10).group_ids).toEqual([1, 9])
-    })
-
-    it('closes with Escape, the close button and a click next to it', () => {
-        const store = makeStore()
-        const onClose = renderPicker(store)
-        fireEvent.keyDown(window, { key: 'Escape' })
-        fireEvent.click(screen.getByRole('button', { name: 'Schließen' }))
-        fireEvent.pointerDown(screen.getByRole('dialog').parentElement)
-        expect(onClose).toHaveBeenCalledTimes(3)
     })
 })
 

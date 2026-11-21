@@ -15,13 +15,13 @@
 import { useSyncExternalStore } from 'react';
 import { apiFetch } from '../helperFunction';
 
-export const HISTORY_TURNS = 10;
+const HISTORY_TURNS = 10;
 // a request can take up to about 4 minutes on the server (6 model calls, each with a retry)
 export const ASSISTANT_TIMEOUT_MS = 5 * 60 * 1000;
 export const MESSAGE_MAX = 2000;
 
 // what goes to the server: the conversation's own turns, not notes, errors or unanswered messages
-export function historyOf(messages) {
+function historyOf(messages) {
     return messages
         .filter(m => (m.role === 'user' || m.role === 'assistant') && !m.unanswered && m.content.trim())
         .map(m => ({ role: m.role, content: m.content.slice(0, MESSAGE_MAX) }))

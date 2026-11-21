@@ -63,7 +63,7 @@ export const checklistCount = (body) => {
 
 // the text split into plain parts and links (shown as links, never as HTML)
 const URL_IN_TEXT = /(https?:\/\/[^\s<>"')]+)/g;
-export const linkParts = (text) => text.split(URL_IN_TEXT).map((part, i) => ({ link: i % 2 === 1, text: part }));
+const linkParts = (text) => text.split(URL_IN_TEXT).map((part, i) => ({ link: i % 2 === 1, text: part }));
 
 // rich: also **bold** and `code` (as marks to show, still never HTML):
 // [{ text, link?, bold?, code? }]

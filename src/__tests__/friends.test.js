@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import friendsReducer from '../features/friends/friendsReducer'
 import { apiFetch } from '../features/helperFunction'
 import {
@@ -29,7 +28,6 @@ const loaded = [
     } },
 ].reduce(friendsReducer, initial)
 
-const makeStore = () => configureStore({ reducer: rootReducer })
 const apiError = (status, code) => Object.assign(new Error(code), { status, code })
 
 beforeEach(() => { apiFetch.mockReset() })

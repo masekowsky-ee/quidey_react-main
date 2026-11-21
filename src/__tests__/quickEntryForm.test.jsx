@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import { MemoryRouter } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { screen, fireEvent, act } from '@testing-library/react'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import { apiFetch } from '../features/helperFunction'
 import { SET_TASK_STATE, SET_EVENT_TYPES } from '../features/tasks/taskActionTypes'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
@@ -27,13 +25,13 @@ const posted = (path) => {
 }
 
 function open() {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch(setLanguage('en'))
     store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 'tok', username: 'lena' } })
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isAdmin: false, isTester: false, adminPendingCount: 0, betaRequest: null } })
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks: [], groups: [], notes: [] } })
     store.dispatch({ type: SET_EVENT_TYPES, payload: TYPES })
-    render(<Provider store={store}><MemoryRouter><TaskForm setCreateTask={vi.fn()} /></MemoryRouter></Provider>)
+    renderWithStore(<TaskForm setCreateTask={vi.fn()} />, { store })
     return store
 }
 const type = (value) => fireEvent.change(screen.getByRole('textbox', { name: /name/i }), { target: { value } })

@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import TaskNoteRow from '../components/task/TaskNoteRow'
 import { refreshTaskNotes } from '../features/tasks/taskAction'
@@ -15,7 +14,7 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 }))
 
 const renderRow = (note) => render(
-    <Provider store={configureStore({ reducer: rootReducer })}>
+    <Provider store={makeStore()}>
         <MemoryRouter><ul><TaskNoteRow taskId={7} note={note} /></ul></MemoryRouter>
     </Provider>
 )
@@ -46,7 +45,7 @@ describe('notes on a task', () => {
     })
 
     it('notes written in the notebook come into the list when it is loaded again', async () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch({ type: SET_TASK_STATE, payload: { tasks: [], groups: [], notes: [] } })
         apiFetch.mockResolvedValueOnce([{ id: 3, task_id: 7, content: 'aus dem Notizbuch' }])
         await act(() => store.dispatch(refreshTaskNotes()))

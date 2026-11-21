@@ -14,7 +14,7 @@ export const BOARD_NOTES_MAX = 30;
 const BASES = { family: '/api/families', session: '/api/shared-sessions' };
 const boardUrl = (kind, id) => `${BASES[kind]}/${id}/board`;
 
-export const fetchBoard = (kind, id) => apiFetch(boardUrl(kind, id));
+const fetchBoard = (kind, id) => apiFetch(boardUrl(kind, id));
 export const fetchBoardNote = (kind, id, pinId) => apiFetch(`${boardUrl(kind, id)}/${pinId}`);
 export const pinToBoard = (kind, id, noteId) => apiFetch(boardUrl(kind, id), { method: 'POST', body: JSON.stringify({ noteId }) });
 export const unpinFromBoard = (kind, id, pinId) => apiFetch(`${boardUrl(kind, id)}/${pinId}`, { method: 'DELETE' });

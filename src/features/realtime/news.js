@@ -7,7 +7,7 @@ import { COMMUNITY_PATHS } from '../community/paths';
 // Set from the live events (useLiveLists, useFeedRealtime), cleared by visiting the tab
 // (useClearNews).
 
-export const NEWS_SECTIONS = { social: COMMUNITY_PATHS.friends, together: COMMUNITY_PATHS.sessions, feed: COMMUNITY_PATHS.feed };
+const NEWS_SECTIONS = { social: COMMUNITY_PATHS.friends, together: COMMUNITY_PATHS.sessions, feed: COMMUNITY_PATHS.feed };
 
 const MARK_NEWS = 'MARK_NEWS';
 const CLEAR_NEWS = 'CLEAR_NEWS';

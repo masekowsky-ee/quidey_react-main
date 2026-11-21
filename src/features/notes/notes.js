@@ -8,7 +8,7 @@ import { translate } from '../../i18n/useTranslation';
 
 export const TRASH_DAYS = 30;
 export const TAGS_MAX = 10;
-export const TAG_MAX = 30;
+const TAG_MAX = 30;
 export const FOLDER_NAME_MAX = 40;
 export const FOLDER_EMOJIS = ['📁', '📐', '🧪', '📖', '🧠', '💡', '🗂️', '✏️', '🌍', '💻', '🎨', '🎵', '⚖️', '🩺', '📈', '🗣️'];
 
@@ -98,7 +98,7 @@ export const firstLine = (body) => (body ?? '').split('\n').map(plainLine).find(
 
 // the first heading written in the text ("# Analysis", "## Proofs"), as it reads, or ''
 const HEADING = /^\s*#{1,2} +(.+)$/;
-export const headingOf = (body) => {
+const headingOf = (body) => {
     for (const line of (body ?? '').split('\n')) {
         const found = HEADING.exec(line);
         const text = found ? plainLine(found[1]) : '';

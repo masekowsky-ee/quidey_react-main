@@ -7,7 +7,6 @@ import { displayName, fill, isOverdue, mondayIndex, sameDay } from '../../featur
 import { addDays, dateKey, formatFocus, minutesOfDay, prioLevel, timeText } from '../../features/calendar/calendar';
 import { snapMinutes, useTimelineDrag } from '../../features/calendar/useTimelineDrag';
 import TaskLabels from '../TaskLabels.jsx';
-import GroupPicker from '../GroupPicker.jsx';
 import TaskEditor from './TaskEditor.jsx';
 import DayTimeline from './DayTimeline.jsx';
 import TaskMeta from '../task/TaskMeta.jsx';
@@ -22,7 +21,7 @@ const PRIO_TEXT = { high: 'prioHigh', medium: 'prioMedium', low: 'prioLow' };
 
 const isTyping = (el) => el?.closest?.('input, textarea, select, [contenteditable="true"]');
 
-function TaskRow({ task, today, personal, allowEvents, remindsAll, editing, onEdit, onCloseEdit, onToggleDone, onSave, onDelete, onLeave, onPickGroups, onOpenGroup }) {
+function TaskRow({ task, today, personal, allowEvents, remindsAll, editing, onEdit, onCloseEdit, onToggleDone, onSave, onDelete, onLeave, onOpenGroup }) {
     const { t } = useTranslation();
     const event = isEvent(task);
     const level = event ? null : prioLevel(task.prio);
@@ -59,7 +58,7 @@ function TaskRow({ task, today, personal, allowEvents, remindsAll, editing, onEd
                 </div>
             </div>
             {editing && (personal
-                ? <TaskEditor task={task} onSave={onSave} onCancel={onCloseEdit} onDelete={onDelete} onLeave={onLeave} onPickGroups={onPickGroups} />
+                ? <TaskEditor task={task} onSave={onSave} onCancel={onCloseEdit} onDelete={onDelete} onLeave={onLeave} />
                 : <TaskEditor task={task} personal={false} allowEvents={allowEvents} remindsAll={remindsAll} onSave={onSave} onCancel={onCloseEdit} onDelete={task.canRemove ? onDelete : undefined} />)}
         </li>
     );
@@ -126,12 +125,6 @@ export default function DayPanel({
         setLastInitialId(initialTaskId);
         setEditing({ day: key, id: initialTaskId });
     }
-    const [pickerTask, setPickerTask] = useState(null);
-    // testers sort tasks into collections (in the editor) instead of groups
-    // collections took the place of groups (the editor has its collection picker)
-    const groupsOn = false;
-    // stable, so the picker doesn't move the focus again each time the tasks change
-    const closePicker = useCallback(() => setPickerTask(null), []);
     const isToday = sameDay(date, today);
 
     // ---------- the timeline ----------
@@ -166,7 +159,7 @@ export default function DayPanel({
 
     useEffect(() => {
         const onKey = (e) => {
-            if (pickerTask || paused || e.defaultPrevented) return;
+            if (paused || e.defaultPrevented) return;
             if (e.key === 'Escape') dismiss();
             else if (!isTyping(e.target) && !e.altKey && !e.ctrlKey && !e.metaKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
                 e.preventDefault();
@@ -175,7 +168,7 @@ export default function DayPanel({
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [pickerTask, paused, dismiss, onShiftDay]);
+    }, [paused, dismiss, onShiftDay]);
 
     const leave = async (task) => {
         const ok = await onLeaveTask(task);
@@ -245,7 +238,6 @@ export default function DayPanel({
                                 onSave={(changes) => save(editingTask, changes)}
                                 onDelete={remove}
                                 onLeave={leave}
-                                onPickGroups={groupsOn ? setPickerTask : undefined}
                                 onOpenGroup={onOpenGroup}
                             />
                         )}
@@ -300,7 +292,6 @@ export default function DayPanel({
                     }
                     </DayTimeline>}
             </div>
-            {pickerTask && <GroupPicker task={pickerTask} onClose={closePicker} />}
         </div>,
         document.body
     );

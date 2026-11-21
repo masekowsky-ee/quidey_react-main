@@ -7,7 +7,7 @@
 
 import { fill, parseDate, sameDay } from '../helperFunction';
 
-export const READOUT_MAX = 8;
+const READOUT_MAX = 8;
 
 // "09:05:00" -> "9:05"
 const clock = (time) => `${Number(time.slice(0, 2))}:${time.slice(3, 5)}`;

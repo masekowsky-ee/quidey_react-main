@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { setLanguage } from '../features/settings/settingsAction'
 import { lessonsToEntries, lessonBoxes, rememberUntisStatus } from '../features/untis/untis'
@@ -69,7 +68,7 @@ describe('connecting the timetable in the settings', () => {
     afterEach(() => vi.useRealTimers())
 
     const open = async () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         store.dispatch(setLanguage('de'))
         await act(async () => { render(<Provider store={store}><UntisSettings /></Provider>) })
     }

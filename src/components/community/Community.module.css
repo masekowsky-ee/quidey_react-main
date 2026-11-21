@@ -308,7 +308,7 @@
     inset: 0;
     background: var(--primary);
     transform-origin: left center;
-    transition: transform 0.6s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: transform 0.6s var(--spring-curve);
 }
 
 .trackEnds{
@@ -522,7 +522,7 @@
     inset: 0;
     background: var(--primary);
     transform-origin: left center;
-    transition: transform 0.6s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: transform 0.6s var(--spring-curve);
 }
 
 .challengeAmount{

@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, renderHook, act } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
+import { renderWithStore } from './helpers/render'
 import settingsReducer from '../features/settings/settingsReducer'
 import { setLanguage, setAccent, setDefaultSessionMinutes } from '../features/settings/settingsAction'
 import { setTimer } from '../features/session/sessionAction'
@@ -12,7 +11,6 @@ import { useApplyTheme } from '../features/settings/theme'
 import Settings from '../components/Settings'
 import Logo from '../components/Logo'
 
-const makeStore = () => configureStore({ reducer: rootReducer })
 const initial = settingsReducer(undefined, { type: '@@INIT' })
 
 beforeEach(() => {
@@ -123,7 +121,7 @@ describe('Settings page', () => {
         // the open area lives in the address's hash: every test starts on the first one
         window.history.replaceState(null, '', '/settings')
         const store = makeStore()
-        render(<Provider store={store}><MemoryRouter><Settings /></MemoryRouter></Provider>)
+        renderWithStore(<Settings />, { store })
         return store
     }
 

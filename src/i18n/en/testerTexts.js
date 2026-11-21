@@ -10,7 +10,7 @@ export default {
     testerUiUse: 'Use',
     testerUiActive: 'In use',
     testerUiNavLabel: 'Navigation: {nav}',
-    testerNav_sidebar: 'sidebar',
+    testerNav_bar: 'bar in the header',
     testerNav_rail: 'narrow rail',
     testerNav_top: 'tabs on top',
     testerNav_command: 'command bar',

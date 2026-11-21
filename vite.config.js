@@ -41,6 +41,8 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: 'jsdom',
       setupFiles: './src/setupTests.js',
+      // only this app's tests (the ponytail/ folder has tests of its own)
+      include: ['src/**/*.test.{js,jsx}'],
     },
     server: {
       host: true,

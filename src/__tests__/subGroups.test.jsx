@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { makeStore as baseStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { SET_TASK_STATE, EDIT_DISPLAYGROUP } from '../features/tasks/taskActionTypes'
 import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
@@ -33,7 +32,7 @@ const bodyOf = (path) => {
 }
 
 function makeStore({ isTester = false } = {}) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch(setLanguage('en'))
     store.dispatch({ type: LOGIN_SUCCESS, payload: { token: 'tok', username: 'lena' } })
     store.dispatch({ type: SET_ACCESS, payload: { isPro: true, isAdmin: false, isTester, adminPendingCount: 0, betaRequest: null } })

@@ -1,12 +1,7 @@
 /* Task or event, and the event's type */
 
-.srOnly{
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
+.srOnly {
+  composes: srOnly from '../ui.module.css';
 }
 
 /* ---------- task | event: two cards side by side ---------- */

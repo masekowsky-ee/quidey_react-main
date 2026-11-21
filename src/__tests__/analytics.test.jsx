@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 
 // the app's plugin (android/…/AnalyticsPlugin.java), as the Android app would answer
 const plugin = vi.hoisted(() => ({
@@ -29,7 +28,7 @@ const { default: OnboardingPrompts, ANALYTICS_DELAY_MS } = await import('../comp
 const { default: Settings } = await import('../components/Settings')
 
 const renderWithStore = (ui) => render(
-    <Provider store={configureStore({ reducer: rootReducer })}><MemoryRouter>{ui}</MemoryRouter></Provider>
+    <Provider store={makeStore()}><MemoryRouter>{ui}</MemoryRouter></Provider>
 )
 
 beforeEach(() => {

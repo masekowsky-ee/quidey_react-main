@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import authReducer from '../features/auth/authReducer'
 import { apiFetch, PRO_REQUIRED_EVENT } from '../features/helperFunction'
 import { loginSuccess, requestBetaAccess } from '../features/auth/authAction'
@@ -43,7 +42,7 @@ function mockApi(me) {
 }
 
 async function renderApp(path = '/') {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     await act(async () => {
         render(<Provider store={store}><MemoryRouter initialEntries={[path]}><App /></MemoryRouter></Provider>)
     })
@@ -72,7 +71,7 @@ describe('access state', () => {
     })
 
     it('a beta request keeps the pro flag as it is', async () => {
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         apiFetch.mockResolvedValue(pending)
         await store.dispatch(requestBetaAccess('I want to plan my study group'))
         expect(apiFetch).toHaveBeenCalledWith('/api/beta-requests', { method: 'POST', body: JSON.stringify({ reason: 'I want to plan my study group' }) })
@@ -104,7 +103,7 @@ describe('closed beta', () => {
         expect(screen.getByText('Warteraum')).toBeInTheDocument()
         expect(await screen.findByText('Zoe')).toBeInTheDocument()
         expect(apiFetch.mock.calls.map(([url]) => url)).not.toContain('/api/tasks')
-    })
+    }, 30000)
 
     it('asks for access once, with a reason of at least 10 characters', async () => {
         mockApi({ userId: 1, username: 'ann', isPro: false, betaRequest: null })

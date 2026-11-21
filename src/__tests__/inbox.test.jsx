@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore as baseStore } from './helpers/store'
 import { apiFetch } from '../features/helperFunction'
 import { SET_TASK_STATE } from '../features/tasks/taskActionTypes'
 import { SET_FRIENDS, SET_FRIEND_REQUESTS } from '../features/friends/friendsActionTypes'
@@ -26,7 +25,7 @@ const ben = { id: 2, username: 'ben', displayName: 'Ben' }
 const cleo = { id: 3, username: 'cleo', displayName: 'Cleo' }
 
 function makeStore(tasks = []) {
-    const store = configureStore({ reducer: rootReducer })
+    const store = baseStore()
     store.dispatch({ type: SET_TASK_STATE, payload: { tasks, groups: [], notes: [] } })
     store.dispatch({ type: SET_FRIENDS, payload: [ben, cleo] })
     return store

@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { configureStore } from '@reduxjs/toolkit'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { TAB_PATHS, tabPaths, tabIndexOf } from '../features/layout/tabSwipe'
 import { keyboardInset } from '../features/layout/keyboardInset'
 import { openMenu, setShowMenu } from '../features/settings/settingsAction'
@@ -29,7 +28,7 @@ describe('swiping between the tabs (phones)', () => {
 describe('the drawer from either side', () => {
     it('opens from the left as always, and from the right only when asked, taking the side first', () => {
         vi.stubGlobal('requestAnimationFrame', (fn) => { fn(); return 0 })
-        const store = configureStore({ reducer: rootReducer })
+        const store = makeStore()
         expect(store.getState().settings.menuSide).toBe('left')
 
         store.dispatch(openMenu('right'))

@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter } from 'react-router-dom'
-import rootReducer from '../features/rootReducer'
+import { makeStore } from './helpers/store'
 import { setLanguage } from '../features/settings/settingsAction'
 import Settings from '../components/Settings'
 
@@ -13,7 +12,7 @@ vi.mock('../features/helperFunction', async (importOriginal) => ({
 }))
 
 function renderSettings(path = '/settings') {
-    const store = configureStore({ reducer: rootReducer })
+    const store = makeStore()
     store.dispatch(setLanguage('en'))
     render(<Provider store={store}><MemoryRouter initialEntries={[path]}><Settings /></MemoryRouter></Provider>)
 }

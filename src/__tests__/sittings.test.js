@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { groupSittings, sittingGapMs } from '../features/stats/sittings'
+import { groupSittings } from '../features/stats/sittings'
 
 // a saved session as GET /api/sessions returns it: started at `start` (local time), `minutes` long
 const session = (id, start, minutes, tasks = []) => ({
@@ -40,7 +40,4 @@ describe('sittings: Pomodoro rounds of one run as one row', () => {
         expect(rows.map(r => r.sessions.map(s => s.id))).toEqual([[1]])
     })
 
-    it('the pause allowed is the longest break plus five minutes', () => {
-        expect(sittingGapMs({ focus: 25, short: 5, long: 15, every: 4 })).toBe(20 * 60 * 1000)
-    })
 })

@@ -150,47 +150,11 @@
     color: var(--text-muted);
 }
 
-/* ---------- Adding a task ---------- */
-
-.quickAdd{
-    display: flex;
-    flex-direction: row;
-    gap: 0.5rem;
-}
-
-.quickAdd input{
-    flex: 1;
-    min-width: 0;
-    height: 2.4rem;
-}
-
-.addBtn{
-    composes: btnPrimary from './ui.module.css';
-}
-
-.quickAdd > .quickTime{
-    flex: 0 0 auto;
-    width: 6.75rem;
-    height: 2.4rem;
-}
-
-.quickAdd > .addBtn{
-    min-width: 0;
-    height: 2.4rem;
-}
-
-.addBtn:disabled,
 .saveBtn:disabled{
     opacity: 0.5;
     cursor: default;
     filter: none;
     transform: none;
-}
-
-.addHint{
-    margin-top: -0.5rem;
-    font-size: 0.78rem;
-    color: var(--text-muted);
 }
 
 /* ---------- Tasks of the day ---------- */
@@ -256,24 +220,6 @@
 
 .rowDone .eventMark{
     color: var(--text-muted);
-}
-
-/* Task or event for the quick add field */
-.quickKind{
-    composes: segmented from './ui.module.css';
-    align-self: flex-start;
-    margin-bottom: -0.25rem;
-}
-
-.quickKind > button{
-    padding: 0.2rem 0.8rem;
-    font-size: 0.8125rem;
-}
-
-.quickKind > .quickKindOn,
-.quickKind > .quickKindOn:hover{
-    background: var(--surface-strong);
-    color: var(--text-h);
 }
 
 .rowDone .rowName{
@@ -629,7 +575,6 @@
     flex: 1;
 }
 
-.groupsBtn,
 .cancelBtn{
     font-size: 0.85rem;
 }
@@ -845,16 +790,8 @@
     }
 }
 
-.srOnly{
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-    border: 0;
+.srOnly {
+  composes: srOnly from './ui.module.css';
 }
 
 /* --- entries without a time --- */

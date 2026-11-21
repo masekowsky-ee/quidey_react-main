@@ -231,7 +231,6 @@
 
 /* Quiet red outline; the action is reversible, so no big red block */
 .signOutBtn{
-    composes: glowDanger from './ui.module.css';
     align-self: flex-start;
     color: var(--danger);
     background: transparent;

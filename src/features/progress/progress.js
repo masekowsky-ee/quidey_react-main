@@ -12,24 +12,17 @@ import { PROFILE_COLORS, PROFILE_BANNERS, PROFILE_EMOJIS, AVATAR_FRAMES } from '
 // the api) from focus minutes, tasks done and the challenges completed; these are the same rules,
 // for showing what a level unlocks and how far the next one is. Keep both in step.
 
-export const DAY_FOCUS_XP_MAX = 600;
-export const TASK_XP = 5;
-export const DAY_TASKS_MAX = 30;
-
-// The top level. The owner's account (admin for good) is always on it, with everything unlocked.
-export const MAX_LEVEL = 50;
-
 // total XP at which a level starts: 0, 150, 375, 675, ... (150 + 75 per level for each step)
 export const levelStartXp = (level) => 150 * (level - 1) + 37.5 * (level - 1) * (level - 2);
 
 // Streaks worth celebrating (the api posts them to the feed too): the next one after `streak`
-export const STREAK_MILESTONES = [3, 7, 14, 30, 50, 100, 200, 365];
+const STREAK_MILESTONES = [3, 7, 14, 30, 50, 100, 200, 365];
 export const nextStreakMilestone = (streak, milestones = STREAK_MILESTONES) =>
     milestones.find(goal => goal > streak) ?? null;
 
 // From this hour on, a streak that today hasn't continued yet gets one reminder (once a day,
 // remembered in localStorage as `streakNudge`)
-export const STREAK_NUDGE_HOUR = 18;
+const STREAK_NUDGE_HOUR = 18;
 
 // The level names: Quidey grows like a plant, from a seed to an old forest
 export const TIERS = [
@@ -42,7 +35,7 @@ export const tierFor = (level) => [...TIERS].reverse().find(tier => level >= tie
 export const TITLES_FROM = 5;
 const BANNER_LEVELS = { gradient: 1, dots: 1, stripes: 5, grid: 5, aurora: 8, glow: 8, rings: 14, topo: 18, sky: 24 };
 const FRAME_LEVELS = { ring: 10, double: 16, dotted: 22, orbit: 30 };
-export const TITLE_LEVELS = {
+const TITLE_LEVELS = {
     ...Object.fromEntries(TIERS.map(tier => [tier.id, Math.max(TITLES_FROM, tier.level)])),
     planner: 5, nightOwl: 7, earlyBird: 7, teamPlayer: 9, deepFocus: 12, marathon: 16, mentor: 25,
 };

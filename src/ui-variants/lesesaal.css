@@ -267,7 +267,7 @@
 
 /* a task taken into focus: the lamp warms up (opacity of the pool only) */
 :root[data-ui="lesesaal"]:not([data-motion="minimal"]) [data-part="focus"][data-active] > h2 + div::before {
-  animation: lampOn 0.9s cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: lampOn 0.9s var(--spring-curve) both;
 }
 
 @keyframes lampOn {

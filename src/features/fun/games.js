@@ -13,7 +13,7 @@ export function makeRng(seed) {
     };
 }
 
-export const randomInt = (min, max, rng = Math.random) => min + Math.floor(rng() * (max - min + 1));
+const randomInt = (min, max, rng = Math.random) => min + Math.floor(rng() * (max - min + 1));
 export const pick = (list, rng = Math.random) => list[Math.floor(rng() * list.length)];
 
 export function shuffle(list, rng = Math.random) {

@@ -29,7 +29,7 @@ function joinSession(id) {
 }
 
 // Whether live updates arrive right now (then the safety-net polling can rest)
-export const isRealtimeConnected = () => Boolean(socket?.connected);
+const isRealtimeConnected = () => Boolean(socket?.connected);
 
 // Production builds talk to VITE_API_URL; locally Vite's proxy forwards /socket.io.
 // The client library is loaded only now, so the sign-in screen doesn't carry it.
