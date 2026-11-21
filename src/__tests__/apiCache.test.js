@@ -4,7 +4,7 @@ import { apiFetch, clearApiCache } from '../features/helperFunction';
 const ok = (body) => Promise.resolve({ ok: true, json: () => Promise.resolve(body) });
 
 describe('apiFetch answer cache', () => {
-    beforeEach(() => { clearApiCache(); localStorage.clear(); });
+    beforeEach(() => { clearApiCache(); localStorage.clear(); localStorage.setItem('token', 'me'); });
 
     it('serves a repeated GET from memory and shares a request in flight', async () => {
         const fetchMock = vi.fn(() => ok({ n: 1 }));
