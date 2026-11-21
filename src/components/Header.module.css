@@ -900,3 +900,19 @@ composes: btnPrimary from './ui.module.css';
 margin-left: 0.5rem;
 white-space: nowrap;
 }
+
+/* iOS: a control is at least 44 pt on a touch screen (HIG) */
+@media (pointer: coarse) {
+  .div > .btn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+  .end .btn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+  .lineBtn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}

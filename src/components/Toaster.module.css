@@ -153,3 +153,11 @@
     background: var(--hover-wash);
     box-shadow: none;
 }
+
+/* iOS: a control is at least 44 pt on a touch screen (HIG) */
+@media (pointer: coarse) {
+  .close {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}

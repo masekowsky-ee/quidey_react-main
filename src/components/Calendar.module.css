@@ -1901,3 +1901,11 @@ button.agendaName:hover{
     filter: none;
     transform: none;
 }
+
+/* iOS: a control is at least 44 pt on a touch screen (HIG) */
+@media (pointer: coarse) {
+  .nav > .navBtn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}

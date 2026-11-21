@@ -1441,3 +1441,27 @@
     border-radius: 6px;
     pointer-events: none;
 }
+
+/* iOS: a control is at least 44 pt on a touch screen (HIG) */
+@media (pointer: coarse) {
+  .head > .navBtn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+  .head > .addDayBtn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+  .head > .closeBtn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+  .editBtn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+  .deleteBtn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}
