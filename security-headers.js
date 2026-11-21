@@ -33,7 +33,7 @@ export function headersFile(apiUrl) {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+        'Permissions-Policy': 'camera=(), microphone=(self), geolocation=(), payment=(), usb=()',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
         'Cross-Origin-Opener-Policy': 'same-origin',
         // the app stays out of search results (quidey.com is the page to find); the SPA fallback
