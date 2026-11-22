@@ -11,6 +11,8 @@
 //   create_entry: made at once; `undo` deletes it again.
 //   update_entry / delete_entry: called only after the person confirmed (the card). A repeating
 //     entry's delete asks what goes (DeleteScopeDialog); `cancelled` when that was cancelled.
+//   study_create / _update / _delete / _replan: see studyActions.js (create at once with `undo`,
+//     the rest after the confirm).
 //   study_plan: opens the new-goal sheet on Lernen with what was said, where the plan is
 //     previewed before anything is saved (a draft, see features/study/goalDraft.js).
 
@@ -20,6 +22,7 @@ import { fetchSubjects } from '../study/study';
 import { writeGoalDraft } from '../study/goalDraft';
 import { endOf, fromEnd } from '../tasks/eventTimes';
 import { toInputDate } from '../helperFunction';
+import { applyStudyAction, describeStudy, isStudyAction } from './studyActions';
 
 const clock = (time) => (typeof time === 'string' && /^\d{2}:\d{2}/.test(time) ? time.slice(0, 5) : null);
 
@@ -53,8 +56,49 @@ export function changeRows(task, changes) {
 
 const snapshot = (task) => ({ id: task.id, name: task.name, kind: task.kind, due: task.due, due_time: task.due_time, duration_minutes: task.duration_minutes, repeat: task.repeat ?? null });
 
-// → { cards: [{ type, action, task? }], missing: number of entries left out }
-export function prepareActions(actions, tasks) {
+// Study actions (study_create / _update / _delete / _replan) are described from `study` (state.study):
+// an id it doesn't have is left out and counted, two updates of one target:id merge, a delete wins.
+function prepareStudy(list, study, cards, missing) {
+    const slice = study ?? { subjects: [], goals: {}, settings: null };
+    const key = (a) => (a.target === 'settings' ? 'settings' : `${a.target}:${a.id}`);
+    const deleted = new Set(list.filter(a => a?.type === 'study_delete').map(key));
+    const updates = new Map();
+    let replan = false;
+    for (const action of list) {
+        if (!isStudyAction(action)) continue;
+        if (action.type === 'study_replan') {
+            if (!replan) cards.push({ type: 'study_replan', action: { type: 'study_replan' }, study: describeStudy(action, slice) });
+            replan = true;
+            continue;
+        }
+        if (action.type === 'study_create') {
+            const info = describeStudy(action, slice);
+            if (info) cards.push({ type: action.type, action, study: info });
+            else missing.add(`study:${action.target}:${action.goalId ?? action.subjectId}`);
+            continue;
+        }
+        const k = key(action);
+        if (action.type === 'study_update' && deleted.has(k)) continue;
+        const earlier = action.type === 'study_delete' ? updates.get(`d:${k}`) : updates.get(k);
+        if (earlier) {
+            if (action.type === 'study_update') earlier.action = { ...earlier.action, changes: { ...earlier.action.changes, ...action.changes } };
+            continue;
+        }
+        const clean = action.type === 'study_delete'
+            ? { type: action.type, target: action.target, id: action.id }
+            : { type: action.type, target: action.target, ...(action.id != null ? { id: action.id } : {}), changes: action.changes ?? {} };
+        if (!describeStudy(clean, slice)) { missing.add(`study:${k}`); continue; }
+        const card = { type: action.type, action: clean };
+        updates.set(action.type === 'study_delete' ? `d:${k}` : k, card);
+        cards.push(card);
+    }
+    for (const card of cards) {
+        if (isStudyAction(card.action) && card.study === undefined) card.study = describeStudy(card.action, slice);
+    }
+}
+
+// → { cards: [{ type, action, task?, study? }], missing: number of entries left out }
+export function prepareActions(actions, tasks, study) {
     const list = Array.isArray(actions) ? actions : [];
     const deleted = new Set(list.filter(a => a?.type === 'delete_entry').map(a => a.id));
     const cards = [];
@@ -80,7 +124,9 @@ export function prepareActions(actions, tasks) {
             cards.push(card);
         }
     }
-    const shown = cards.filter(card => card.type !== 'update_entry' || changeRows(card.task, card.action.changes).length > 0);
+    prepareStudy(list, study, cards, missing);
+    const shown = cards.filter(card => (card.type !== 'update_entry' || changeRows(card.task, card.action.changes).length > 0)
+        && (card.type !== 'study_update' || card.study.rows.length > 0));
     return { cards: shown, missing: missing.size };
 }
 
@@ -149,6 +195,11 @@ export async function applyAction(action, deps) {
         }
         case 'study_plan':
             return openStudyPlan(action, deps);
+        case 'study_create':
+        case 'study_update':
+        case 'study_delete':
+        case 'study_replan':
+            return applyStudyAction(action, deps);
         default:
             return {};
     }
