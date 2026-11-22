@@ -13,6 +13,7 @@ import GoalProgress from './GoalProgress.jsx';
 import GradeSheet from './GradeSheet.jsx';
 import HomeworkSuggestions from './HomeworkSuggestions.jsx';
 import { formatGrade } from '../../features/study/grades';
+import { partCredits, useLiveSeconds } from '../../features/study/liveCredit';
 import SubjectEditSheet from './SubjectEditSheet.jsx';
 import { countdownText, goalStateKey, useStudyError } from './studyUi';
 import styles from './Study.module.css';
@@ -47,6 +48,9 @@ export default function SubjectView({ subjectId }) {
         .then(() => navigate('/study'))
         .catch((err) => dispatch(showToast(errorText(err), 'error')));
 
+    const liveSeconds = useLiveSeconds(goals);
+    const creditOf = (goal) => Object.values(partCredits(goal, liveSeconds)).reduce((total, minutes) => total + minutes, 0);
+
     const openGoals = goals.filter(g => g.status === 'active');
     const finishedGoals = goals.filter(g => g.status !== 'active');
 
@@ -64,7 +68,7 @@ export default function SubjectView({ subjectId }) {
                         {state && !finished && <span className={styles.badgeQuiet}>{t(state)}</span>}
                         {finished && goal.grade != null && <span className={styles.badge}>{fill(t('studyGradeShown'), { value: formatGrade(goal.grade, language) })}</span>}
                     </span>
-                    {!finished && goal.planMode !== 'none' && <GoalProgress credit={sum(goal.parts, 'credit')} estimate={sum(goal.parts, 'estimateMinutes')} />}
+                    {!finished && goal.planMode !== 'none' && <GoalProgress credit={creditOf(goal)} estimate={sum(goal.parts, 'estimateMinutes')} />}
                 </Link>
                 {finished && goal.status === 'done' && (
                     <button type="button" className={styles.btn} onClick={() => setGrading(goal)}

@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { useDispatch, useSelector, useStore } from 'react-redux';
 import { readGoalDraft } from '../../features/study/goalDraft';
-import { fetchStudyStatus } from '../../features/study/study';
+import { fetchGoal, fetchStudyStatus, fetchSubjects } from '../../features/study/study';
+import { quietly } from '../../features/api/quietly';
 import { matchPath, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import SubjectList from './SubjectList.jsx';
 import SubjectView from './SubjectView.jsx';
@@ -15,6 +17,18 @@ import { useStudyLoad } from './useStudyLoad.js';
 export default function StudyPage() {
     // the status feeds the goal pages' behind badge (and frees what is ahead), once per visit
     useStudyLoad((d) => [d(fetchStudyStatus())]);
+    const dispatch = useDispatch();
+    const store = useStore();
+    // a focus round was saved while the study pages are open: what it counted for is read again (the server
+    // credits it and ticks off the topics that reached their estimate)
+    const lastSaved = useSelector(state => state.session.workedSessionData[0]?.id ?? null);
+    const seen = useRef(lastSaved);
+    useEffect(() => {
+        if (lastSaved == null || lastSaved === seen.current) return;
+        seen.current = lastSaved;
+        const goals = Object.keys(store.getState().study.goals).map(Number);
+        quietly(Promise.all([dispatch(fetchStudyStatus()), dispatch(fetchSubjects()), ...goals.map(id => dispatch(fetchGoal(id)))]));
+    }, [lastSaved, dispatch, store]);
     const { pathname } = useLocation();
     const navigate = useNavigate();
     const [params] = useSearchParams();

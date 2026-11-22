@@ -90,8 +90,11 @@ export default function SubjectList() {
     const recolor = (subject, color) => dispatch(saveSubject(subject.id, { color }))
         .catch((err) => dispatch(showToast(errorText(err), 'error')));
 
-    const active = subjects.filter(s => !s.archived);
-    const archived = subjects.filter(s => s.archived);
+    // the subject worked on last first (a subject the server has no time for yet, just made, stands first)
+    const byActivity = (a, b) => (b.lastActivityAt ? Date.parse(b.lastActivityAt) : Infinity)
+        - (a.lastActivityAt ? Date.parse(a.lastActivityAt) : Infinity) || 0;
+    const active = subjects.filter(s => !s.archived).sort(byActivity);
+    const archived = subjects.filter(s => s.archived).sort(byActivity);
 
     return (
         <div className={styles.page} data-part="study">

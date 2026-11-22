@@ -184,9 +184,18 @@ export const saveStudySettings = (data) => async (dispatch) => {
 };
 
 // ---------- status and plan ----------
+// The server ticks off the topics that have reached their estimate (autoFinished): the goals they
+// belong to and the task list (their later sessions are gone) are read again.
 export const fetchStudyStatus = () => async (dispatch) => {
     const status = await apiFetch(`${BASE}/status`);
     dispatch({ type: STATUS_SET, payload: status });
+    const finished = status.autoFinished ?? [];
+    if (finished.length > 0) {
+        await Promise.all([
+            reloadTasks(dispatch),
+            ...[...new Set(finished.map(f => f.goalId))].map(id => reloadGoal(dispatch, id)),
+        ]);
+    }
     return status;
 };
 
@@ -228,6 +237,15 @@ export const estimateParts = (data) => apiFetch(`${BASE}/estimate`, send('POST',
 export const studyNow = (partId) => async (dispatch) => {
     const result = await apiFetch(`${BASE}/parts/${partId}/now`, send('POST'));
     await reloadTasks(dispatch);
+    return result;
+};
+
+// A planned session moved or made shorter by hand: { date?, time?, minutes? }. The server pins it
+// (the planner leaves it where it was put); the goal and the task list are read again.
+export const updateSession = (taskId, change) => async (dispatch, getState) => {
+    const goalId = Object.values(getState().study.goals).find(g => g.sessions?.some(s => s.taskId === taskId))?.id;
+    const result = await apiFetch(`${BASE}/sessions/${taskId}`, send('PATCH', change));
+    await Promise.all([reloadTasks(dispatch), reloadGoal(dispatch, goalId)]);
     return result;
 };
 

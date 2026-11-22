@@ -76,6 +76,17 @@ beforeEach(() => {
             for (const goal of Object.values(goals)) goal.sessions = goal.sessions.map(x => (x.taskId === Number(unpin[1]) ? { ...x, pinned: false } : x))
             return { ok: true }
         }
+        const sessionUrl = url.match(/\/sessions\/(\d+)$/)
+        if (sessionUrl && method === 'PATCH') {
+            for (const goal of Object.values(goals)) {
+                goal.sessions = goal.sessions.map(x => (x.taskId !== Number(sessionUrl[1]) ? x : {
+                    ...x, pinned: true,
+                    ...('date' in body ? { due: body.date } : {}), ...('time' in body ? { dueTime: body.time } : {}),
+                    ...('minutes' in body ? { minutes: body.minutes } : {}),
+                }))
+            }
+            return { task: { id: Number(sessionUrl[1]) } }
+        }
         if (goalUrl && method === 'DELETE') return { ok: true, removedSessions: 0 }
         const partUrl = url.match(new RegExp(`^${BASE}/parts/(\\d+)$`))
         if (partUrl && method === 'PATCH') {
@@ -164,6 +175,16 @@ describe('subject list', () => {
         expect(within(physik).getByText('Noch kein Ziel')).toBeInTheDocument()
     })
 
+    it('lists the subject worked on last first', async () => {
+        subjects[0].lastActivityAt = '2026-11-01T10:00:00Z'
+        subjects[1].lastActivityAt = '2026-11-20T10:00:00Z'
+        open('/study')
+        await screen.findByText('Mathe')
+        const names = screen.getAllByRole('link').map(a => a.textContent).filter(text => /^(Mathe|Physik)/.test(text))
+        expect(names[0]).toMatch(/^Physik/)
+        expect(names[1]).toMatch(/^Mathe/)
+    })
+
     it('a goal that is only a date shows no progress bar', async () => {
         subjects[0].nextGoal = { ...subjects[0].nextGoal, planMode: 'none', progress: 0, behindMinutes: 0 }
         open('/study')
@@ -242,9 +263,12 @@ describe('subject page', () => {
 describe('goal page', () => {
     it('shows the parts with their credit and estimate', async () => {
         open('/study/goals/10')
-        expect(await screen.findByText(/Thema 3 · 1,5 \/ 3 h/)).toBeInTheDocument()
-        expect(screen.getByText(/Thema 4 · 0 \/ 3 h/)).toBeInTheDocument()
-        expect(screen.getByText('1,5 von 7 h')).toBeInTheDocument()
+        expect(await screen.findByText(/Thema 3 · 1 h 30 min \/ 3 h/)).toBeInTheDocument()
+        expect(screen.getByText(/Thema 4 · 0 min \/ 3 h/)).toBeInTheDocument()
+        expect(screen.getByText('1 h 30 min von 7 h')).toBeInTheDocument()
+        // what is left under each topic and under the goal
+        expect(screen.getByText('noch 1 h 30 min', { selector: '[data-part="part-left"]' })).toBeInTheDocument()
+        expect(screen.getByText('noch 5 h 30 min')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Neu planen' })).toBeInTheDocument()
     })
 
@@ -322,6 +346,32 @@ describe('goal page', () => {
         expect(await screen.findByText('festgesetzt')).toBeInTheDocument()
         fireEvent.click(screen.getByRole('button', { name: 'Lösen' }))
         await waitFor(() => expect(screen.queryByText('festgesetzt')).toBeNull())
+    })
+
+    it('a planned session can be edited (day, time, length); a done one stays text', async () => {
+        goals[10].sessions.push({ taskId: 901, partId: 101, due: inDays(1), dueTime: null, minutes: 30, done: true, focusMs: 0, pinned: false })
+        open('/study/goals/10')
+        await screen.findByText(/Thema 3 ·/)
+        expect(screen.getAllByRole('button', { name: /^Sitzung bearbeiten/ })).toHaveLength(1)
+        fireEvent.click(screen.getByRole('button', { name: 'Sitzung bearbeiten: Thema 3' }))
+        const form = await screen.findByRole('form', { name: 'Sitzung bearbeiten: Thema 3' })
+        fireEvent.change(within(form).getByLabelText('Dauer (Min.)'), { target: { value: '60' } })
+        fireEvent.change(within(form).getByLabelText('Uhrzeit'), { target: { value: '18:30' } })
+        fireEvent.click(within(form).getByRole('button', { name: 'Speichern' }))
+        await waitFor(() => expect(calls(`${BASE}/sessions/900`, 'PATCH')).toHaveLength(1))
+        expect(bodyOf(calls(`${BASE}/sessions/900`, 'PATCH')[0])).toEqual({ time: '18:30', minutes: 60 })
+        const row = (await screen.findByText('festgesetzt')).closest('li')
+        expect(within(row).getByText('60 Min.')).toBeInTheDocument()
+    })
+
+    it('the running focus round counts live on the topic and takes the remainder down', async () => {
+        goals[10].sessions[0] = { ...goals[10].sessions[0], focusMs: 0 }
+        const store = makeStore()
+        store.dispatch({ type: 'UPDATE_CURRENT_SESSION_DATA', payload: { workedTasks: [{ id: 900, name: 'Thema 3', time: 20 * 60 }] } })
+        open('/study/goals/10', store)
+        // 90 min studied + 20 min of the round on this session (planned 45 min, not ticked off)
+        expect(await screen.findByText(/Thema 3 · 1 h 50 min \/ 3 h/)).toBeInTheDocument()
+        expect(screen.getByText('noch 1 h 10 min', { selector: '[data-part="part-left"]' })).toBeInTheDocument()
     })
 
     it('the goal settings save the edited fields and open the preview when the date changed', async () => {

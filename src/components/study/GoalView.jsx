@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-    fetchGoal, fetchSubjects, deleteGoal, updateGoal, updatePart, addPart, deletePart, reorderParts, studyNow, unpinSession,
-    selectGoal, selectSubjects, selectStudyStatus, formatHours, hoursNumber,
+    fetchGoal, fetchSubjects, deleteGoal, updateGoal, updatePart, addPart, deletePart, reorderParts, studyNow, unpinSession, updateSession,
+    selectGoal, selectSubjects, selectStudyStatus,
 } from '../../features/study/study';
+import { formatDuration, partCredits, remainingMinutes, useLiveSeconds } from '../../features/study/liveCredit';
 import { setFocusTask, startFocus } from '../../features/session/sessionAction';
 import { clearCardNote } from '../../features/home/cardNote';
 import { showToast } from '../../features/toast/toast';
@@ -32,9 +33,11 @@ const sum = (parts, key) => parts.reduce((total, p) => total + (p[key] ?? 0), 0)
 
 // run(action): a change; replan(action): a change of the plan's input (estimate, order, delete), which
 // offers the preview afterwards
-function PartRow({ part, index, parts, goal, busy, run, replan, onStudyNow }) {
-    const { t, language } = useTranslation();
+// credit: minutes studied on the part, live (what the running focus round has added is in it)
+function PartRow({ part, index, parts, goal, busy, run, replan, onStudyNow, credit }) {
+    const { t } = useTranslation();
     const done = Boolean(part.doneAt);
+    const left = remainingMinutes(part.estimateMinutes, credit, done);
     const review = part.role === 'review';
     const next = parts[index + 1];
     const move = (by) => {
@@ -52,8 +55,9 @@ function PartRow({ part, index, parts, goal, busy, run, replan, onStudyNow }) {
                     onChange={() => run(() => updatePart(part.id, { doneAt: done ? null : new Date().toISOString() }))} />
                 <span className={styles.partText}>
                     <span className={done ? styles.partDone : undefined}>
-                        {`${part.name} · ${hoursNumber(part.credit, language)} / ${formatHours(part.estimateMinutes, language)}`}
+                        {`${part.name} · ${formatDuration(credit)} / ${formatDuration(part.estimateMinutes)}`}
                     </span>
+                    {!done && left > 0 && <span className={styles.source} data-part="part-left">{fill(t('studyRemaining'), { time: formatDuration(left) })}</span>}
                     <span className={styles.source}>{t(`studySource_${part.estimateSource}`)}</span>
                 </span>
             </div>
@@ -87,6 +91,71 @@ function PartRow({ part, index, parts, goal, busy, run, replan, onStudyNow }) {
                 <Icon name="play" size={14} /> {t('studyStudyNow')}
             </button>
             <ConfirmDeleteButton label={fill(t('studyDeletePart'), name)} onConfirm={() => replan(() => deletePart(part.id))} />
+        </li>
+    );
+}
+
+// One planned session in the list. A session not done yet can be changed (day, time, length); the server
+// pins it then, like a session moved in the plan preview. A done one stays text.
+function SessionRow({ session, partName, busy, run }) {
+    const { t } = useTranslation();
+    const [editing, setEditing] = useState(false);
+    const [date, setDate] = useState(session.due);
+    const [time, setTime] = useState(session.dueTime ?? '');
+    const [minutes, setMinutes] = useState(String(session.minutes));
+    const length = Number(minutes);
+    const valid = Boolean(date) && Number.isInteger(length) && length >= MIN && length <= MAX;
+    const open = () => {
+        setDate(session.due);
+        setTime(session.dueTime ?? '');
+        setMinutes(String(session.minutes));
+        setEditing(true);
+    };
+    const save = async (e) => {
+        e.preventDefault();
+        if (!valid) return;
+        const change = {};
+        if (date !== session.due) change.date = date;
+        if ((time || null) !== (session.dueTime ?? null)) change.time = time || null;
+        if (length !== session.minutes) change.minutes = length;
+        if (Object.keys(change).length > 0) await run(() => updateSession(session.taskId, change));
+        setEditing(false);
+    };
+    return (
+        <li className={styles.session}>
+            <span>{formatDate(session.due)}{session.dueTime ? ` ${session.dueTime}` : ''}</span>
+            <span>{partName}</span>
+            <span>{session.minutes} {t('studyMinutes')}</span>
+            {session.done && <span className={styles.source}>{t('studySessionDone')}</span>}
+            {session.pinned && !session.done && <span className={styles.source}>{t('studySessionPinned')}</span>}
+            {!session.done && (
+                <button type="button" className={styles.btn} disabled={busy} aria-expanded={editing}
+                    aria-label={`${t('studySessionEdit')}: ${partName}`} onClick={() => (editing ? setEditing(false) : open())}>
+                    <Icon name="edit" size={14} /> {t('studySessionEdit')}
+                </button>
+            )}
+            {session.pinned && !session.done && (
+                <button type="button" className={styles.btn} disabled={busy} onClick={() => run(() => unpinSession(session.taskId))}>{t('studyUnpin')}</button>
+            )}
+            {editing && !session.done && (
+                <form className={styles.sessionEdit} onSubmit={save} aria-label={`${t('studySessionEdit')}: ${partName}`}>
+                    <label>
+                        <span className={styles.source}>{t('studySessionDate')}</span>
+                        <input type="date" value={date} required onChange={e => setDate(e.target.value)} />
+                    </label>
+                    <label>
+                        <span className={styles.source}>{t('studySessionTime')}</span>
+                        <input type="time" value={time} step={300} onChange={e => setTime(e.target.value)} />
+                    </label>
+                    <label>
+                        <span className={styles.source}>{t('studySessionLength')}</span>
+                        <input type="number" value={minutes} min={MIN} max={MAX} step={5} inputMode="numeric" required
+                            onChange={e => setMinutes(e.target.value)} />
+                    </label>
+                    <button type="submit" className={styles.btnPrimary} disabled={busy || !valid}>{t('studySessionSave')}</button>
+                    <button type="button" className={styles.btn} onClick={() => setEditing(false)}>{t('studyCancel')}</button>
+                </form>
+            )}
         </li>
     );
 }
@@ -126,6 +195,10 @@ export default function GoalView({ goalId }) {
     const parts = useMemo(() => goal?.parts ?? [], [goal]);
     const sessions = useMemo(() => [...(goal?.sessions ?? [])]
         .sort((a, b) => a.due.localeCompare(b.due) || (a.dueTime ?? '').localeCompare(b.dueTime ?? '')), [goal]);
+
+    const liveSeconds = useLiveSeconds(goal);
+    const credits = useMemo(() => partCredits(goal, liveSeconds), [goal, liveSeconds]);
+    const totalCredit = parts.reduce((total, p) => total + (credits[p.id] ?? p.credit), 0);
 
     const dateOnly = goal?.planMode === 'none';
     const planned = goal?.status === 'active' && !isPastGoal(goal) && !dateOnly;
@@ -263,13 +336,13 @@ export default function GoalView({ goalId }) {
                 </div>
             )}
 
-            {!dateOnly && <GoalProgress credit={sum(parts, 'credit')} estimate={sum(parts, 'estimateMinutes')} />}
+            {!dateOnly && <GoalProgress credit={totalCredit} estimate={sum(parts, 'estimateMinutes')} />}
 
             <h2 className={styles.sectionTitle}>{t('studyParts')}</h2>
             {parts.length === 0 ? <p className={styles.empty}>{t(dateOnly ? 'studyDateOnlyHint' : 'studyPartsEmpty')}</p> : (
                 <ul className={styles.list}>
                     {parts.map((part, index) => (
-                        <PartRow key={part.id} part={part} index={index} parts={parts} goal={goal} busy={busy} run={run}
+                        <PartRow key={part.id} part={part} index={index} parts={parts} goal={goal} busy={busy} run={run} credit={credits[part.id] ?? part.credit}
                             replan={(action) => run(action, { replan: true })} onStudyNow={studyNowOn} />
                     ))}
                 </ul>
@@ -286,16 +359,8 @@ export default function GoalView({ goalId }) {
             {sessions.length === 0 ? <p className={styles.empty}>{t('studySessionsEmpty')}</p> : (
                 <ul className={styles.sessions}>
                     {sessions.map(session => (
-                        <li key={session.taskId} className={styles.session}>
-                            <span>{formatDate(session.due)}{session.dueTime ? ` ${session.dueTime}` : ''}</span>
-                            <span>{parts.find(p => p.id === session.partId)?.name}</span>
-                            <span>{session.minutes} {t('studyMinutes')}</span>
-                            {session.done && <span className={styles.source}>{t('studySessionDone')}</span>}
-                            {session.pinned && !session.done && <span className={styles.source}>{t('studySessionPinned')}</span>}
-                            {session.pinned && !session.done && (
-                                <button type="button" className={styles.btn} disabled={busy} onClick={() => run(() => unpinSession(session.taskId))}>{t('studyUnpin')}</button>
-                            )}
-                        </li>
+                        <SessionRow key={session.taskId} session={session} busy={busy} run={run}
+                            partName={parts.find(p => p.id === session.partId)?.name} />
                     ))}
                 </ul>
             )}
