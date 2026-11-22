@@ -27,6 +27,7 @@ beforeEach(async () => {
         if (url === `${BASE}/subjects` && method === 'GET') return [{ id: 3, name: 'Biologie', color: 'green' }, { id: 4, name: 'Alt', archived: true }]
         if (url === `${BASE}/subjects` && method === 'POST') return { id: 30, ...data }
         if (url.startsWith(`${BASE}/subjects/`)) return { id: 3, ...data }
+        if (url === `${BASE}/goals` && method === 'GET') return [GOAL]
         if (url === `${BASE}/goals` && method === 'POST') return { ...GOAL, id: 50, ...data }
         if (url.startsWith(`${BASE}/goals/`) && url.endsWith('/parts')) return { id: 120, ...data }
         if (url.startsWith(`${BASE}/goals/`) && method === 'GET') return GOAL
@@ -137,7 +138,56 @@ describe('applying study actions', () => {
     })
 })
 
+describe('from a cold store', () => {
+    const cold = async (actions) => {
+        store = makeStore()
+        apiFetch.mockClear()
+        await loadStudyContext(actions, store.dispatch, store.getState)
+        return actions.map(a => describeStudy(a, store.getState().study))
+    }
+
+    it('a part update and a part delete resolve without a visited goal', async () => {
+        const [update, del] = await cold([
+            { type: 'study_update', target: 'part', id: 100, changes: { name: 'Neu' } },
+            { type: 'study_delete', target: 'part', id: 100 },
+        ])
+        expect(update).toMatchObject({ kind: 'update', rows: [{ field: 'name', from: 'Zellen', to: 'Neu' }] })
+        expect(del).toMatchObject({ kind: 'delete', title: 'Zellen' })
+        expect(calls(`${BASE}/goals`, 'GET')).toHaveLength(1)
+    })
+
+    it('a subject delete counts the sessions of its goals', async () => {
+        const [del] = await cold([{ type: 'study_delete', target: 'subject', id: 3 }])
+        expect(del).toMatchObject({ kind: 'delete', title: 'Biologie', sessions: 2 })
+    })
+
+    it('does not read the subjects again when the store has them', async () => {
+        await loadStudyContext([{ type: 'study_create', target: 'subject', name: 'x' }], store.dispatch, store.getState)
+        expect(calls(`${BASE}/subjects`, 'GET')).toHaveLength(0)
+    })
+})
+
+describe('two goals sharing one new subject', () => {
+    it('makes the subject once', async () => {
+        const goal = { type: 'study_create', target: 'goal', subjectName: 'Physik', name: 'A', kind: 'exam', due: '2026-12-01', parts: [] }
+        await applyAction(goal, deps())
+        await applyAction({ ...goal, name: 'B' }, deps())
+        expect(calls(`${BASE}/subjects`, 'POST')).toHaveLength(1)
+        expect(calls(`${BASE}/goals`, 'POST').map(c => body(c).subjectId)).toEqual([30, 30])
+    })
+})
+
 describe('preparing study actions', () => {
+    it('drops no-ops, a settings delete and a move to an unknown subject', () => {
+        const { cards, missing } = prepareActions([
+            { type: 'study_update', target: 'subject', id: 3, changes: { archived: false } },
+            { type: 'study_delete', target: 'settings' },
+            { type: 'study_update', target: 'goal', id: 10, changes: { subjectId: 99 } },
+        ], [], store.getState().study)
+        expect(cards).toEqual([])
+        expect(missing).toBe(1)
+    })
+
     const study = () => store.getState().study
     const prepare = (actions) => prepareActions(actions, [], study())
 

@@ -66,6 +66,7 @@ function prepareStudy(list, study, cards, missing) {
     let replan = false;
     for (const action of list) {
         if (!isStudyAction(action)) continue;
+        if (action.type === 'study_delete' && action.target === 'settings') continue;
         if (action.type === 'study_replan') {
             if (!replan) cards.push({ type: 'study_replan', action: { type: 'study_replan' }, study: describeStudy(action, slice) });
             replan = true;

@@ -2,7 +2,7 @@
 // app's OWN copy (state.study, never the model's words) and carried out through the study thunks,
 // the same ones the forms use (limits, validation, realtime stay as they are).
 //
-//   loadStudyContext(actions, dispatch): reads the subjects and every goal an action names, so the
+//   loadStudyContext(actions, dispatch, getState?): reads the subjects and every goal an action names, so the
 //     store has the app's copy before the cards are made.
 //   describeStudy(action, study) → { kind, title, rows: [{ field, from, to }], sessions? } | null;
 //     plain data (field names, raw values; the card translates). null: the thing isn't in `study`.
@@ -11,7 +11,7 @@
 
 import {
     saveSubject, deleteSubject, createGoal, updateGoal, deleteGoal, addPart, updatePart, deletePart,
-    saveStudySettings, fetchSubjects, fetchGoal, fetchPlanPreview, fetchStudySettings,
+    saveStudySettings, fetchSubjects, fetchGoal, fetchGoals, fetchPlanPreview, fetchStudySettings,
 } from '../study/study';
 
 export const STUDY_TYPES = ['study_create', 'study_update', 'study_delete', 'study_replan'];
@@ -21,11 +21,17 @@ const REPLAN_PATH = '/study?replan=1';
 
 const goalIdOf = (action) => (action.target === 'goal' ? action.id : action.target === 'part' && action.type === 'study_create' ? action.goalId : null);
 
-export async function loadStudyContext(actions, dispatch) {
+// Subjects: my copy in the store when it has any (writes keep it current), else read. A part, and a
+// subject's delete (its sessions are counted), need goals with their parts and sessions: one
+// GET /goals gives them all; goals named directly are read on their own when that didn't bring them.
+export async function loadStudyContext(actions, dispatch, getState) {
     const list = (Array.isArray(actions) ? actions : []).filter(isStudyAction);
     if (list.length === 0) return;
-    await dispatch(fetchSubjects()).catch(() => {});
-    const ids = [...new Set(list.map(goalIdOf).filter(id => id != null))];
+    if (!(getState?.().study?.subjects?.length > 0)) await dispatch(fetchSubjects()).catch(() => {});
+    const needAll = list.some(a => (a.target === 'part' && a.type !== 'study_create') || (a.target === 'subject' && a.type === 'study_delete'));
+    const known = new Set();
+    if (needAll) (await dispatch(fetchGoals()).catch(() => [])).forEach(g => known.add(g.id));
+    const ids = [...new Set(list.map(goalIdOf).filter(id => id != null))].filter(id => !known.has(id));
     await Promise.all(ids.map(id => dispatch(fetchGoal(id)).catch(() => {})));
 }
 
@@ -41,16 +47,25 @@ function findPart(study, id) {
     return null;
 }
 const sameName = (a, b) => String(a).trim().toLowerCase() === String(b).trim().toLowerCase();
-const openSessions = (goal) => (goal?.sessions ?? []).filter(s => !s.done).length;
+// planned sessions still to come (a done one or one of a past day stays when the goal goes)
+const openSessions = (goal) => {
+    const today = new Date().toLocaleDateString('sv');
+    return (goal?.sessions ?? []).filter(s => !s.done && !(s.due && s.due < today)).length;
+};
+const FLAGS = ['archived', 'done'];
 
 // the value of one field on my copy, as shown (a subject id becomes the subject's name)
 function currentValue(target, copy, field, study) {
     if (target === 'settings') return copy?.[field] ?? null;
     if (target === 'part' && field === 'done') return Boolean(copy.doneAt);
+    if (FLAGS.includes(field)) return Boolean(copy[field]);
     if (target === 'goal' && field === 'subjectId') return findSubject(study, copy.subjectId)?.name ?? null;
     return copy[field] ?? null;
 }
-const shownValue = (target, field, value, study) => (target === 'goal' && field === 'subjectId' ? (findSubject(study, value)?.name ?? null) : value ?? null);
+const shownValue = (target, field, value, study) => {
+    if (target === 'goal' && field === 'subjectId') return findSubject(study, value)?.name ?? null;
+    return FLAGS.includes(field) ? Boolean(value) : value ?? null;
+};
 const rowField = (target, field) => (target === 'goal' && field === 'subjectId' ? 'subject' : field);
 const equal = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
@@ -85,6 +100,7 @@ export function describeStudy(action, study) {
     else if (target === 'goal') copy = goal = findGoal(study, id);
     else if (target === 'part') ({ part: copy, goal } = findPart(study, id) ?? {});
     if (!copy) return null;
+    if (target === 'goal' && action.changes?.subjectId != null && !findSubject(study, action.changes.subjectId)) return null;
     if (action.type === 'study_delete') {
         const result = { kind: 'delete', title: copy.name, rows: [] };
         if (target === 'goal') result.sessions = openSessions(goal);
@@ -106,8 +122,9 @@ async function createGoalFor(action, { dispatch, getState }) {
     if (subjectId == null) {
         const name = String(action.subjectName ?? '').trim();
         if (!name) throw Object.assign(new Error('Subject missing'), { code: 'invalid_input' });
-        const list = await dispatch(fetchSubjects()).catch(() => getState().study.subjects);
-        const same = (list ?? []).find(s => !s.archived && sameName(s.name, name));
+        const match = (list) => (list ?? []).find(s => !s.archived && sameName(s.name, name));
+        // my copy first: a subject an earlier action of this reply just made is in it
+        const same = match(getState().study.subjects) ?? match(await dispatch(fetchSubjects()).catch(() => getState().study.subjects));
         if (same) subjectId = same.id;
         else {
             madeSubject = await dispatch(saveSubject(null, { name }));
