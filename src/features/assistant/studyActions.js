@@ -47,10 +47,21 @@ function findPart(study, id) {
     return null;
 }
 const sameName = (a, b) => String(a).trim().toLowerCase() === String(b).trim().toLowerCase();
-// planned sessions still to come (a done one or one of a past day stays when the goal goes)
+// planned sessions still to come, as the backend's isPending (utils/studyStatus.js) counts them: not
+// done, no focus time, today or later, and today's with a time only while that time is still ahead
+// (done, focused and past ones stay when the goal goes)
 const openSessions = (goal) => {
-    const today = new Date().toLocaleDateString('sv');
-    return (goal?.sessions ?? []).filter(s => !s.done && !(s.due && s.due < today)).length;
+    const now = new Date();
+    const today = now.toLocaleDateString('sv');
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    return (goal?.sessions ?? []).filter((s) => {
+        if (s.done || s.focusMs > 0) return false;
+        if (s.due && s.due < today) return false;
+        if (s.due && s.due > today) return true;
+        if (!s.dueTime) return true;
+        const [h, m] = String(s.dueTime).split(':').map(Number);
+        return h * 60 + m > nowMinutes;
+    }).length;
 };
 const FLAGS = ['archived', 'done'];
 

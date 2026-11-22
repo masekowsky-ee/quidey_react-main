@@ -1,5 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, fireEvent, act, within, waitFor } from '@testing-library/react'
+import { Provider } from 'react-redux'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { makeStore } from './helpers/store'
+import { SET_ACCESS, LOGIN_SUCCESS } from '../features/auth/authActionTypes'
+import { setLanguage } from '../features/settings/settingsAction'
+import { forgetAiQuota } from '../features/ai/ai'
+import { resetAssistantChat } from '../features/assistant/assistantApi'
+import AssistantFab from '../components/assistant/AssistantFab'
 import { apiFetch } from '../features/api/api'
 import { fetchSubjects, fetchGoal } from '../features/study/study'
 import { applyAction, prepareActions } from '../features/assistant/applyAction'
@@ -225,5 +233,183 @@ describe('preparing study actions', () => {
 
     it('works without a study slice', () => {
         expect(prepareActions([{ type: 'study_delete', target: 'goal', id: 1 }], [])).toEqual({ cards: [], missing: 1 })
+    })
+})
+
+describe('counting the sessions a delete removes', () => {
+    afterEach(() => vi.useRealTimers())
+
+    it('counts what the backend calls pending: not done, no focus, today or later, today only while ahead', () => {
+        vi.useFakeTimers({ toFake: ['Date'] })
+        vi.setSystemTime(new Date(2026, 10, 22, 12, 0))
+        const sessions = [
+            { taskId: 1, due: '2026-11-21', dueTime: '09:00' },
+            { taskId: 2, due: '2026-11-22', dueTime: '09:00' },
+            { taskId: 3, due: '2026-11-22', dueTime: '12:00' },
+            { taskId: 4, due: '2026-11-22', dueTime: '15:00' },
+            { taskId: 5, due: '2026-11-22', dueTime: null },
+            { taskId: 6, due: '2026-11-23', dueTime: '08:00' },
+            { taskId: 7, due: '2026-11-24', dueTime: null, done: true },
+            { taskId: 8, due: '2026-11-24', dueTime: null, focusMs: 60000 },
+        ]
+        const study = { subjects: [{ id: 3, name: 'Biologie' }], goals: { 10: { id: 10, subjectId: 3, name: 'Klausur', sessions } } }
+        expect(describeStudy({ type: 'study_delete', target: 'goal', id: 10 }, study).sessions).toBe(3)
+        expect(describeStudy({ type: 'study_delete', target: 'subject', id: 3 }, study).sessions).toBe(3)
+    })
+})
+
+describe('the cards in the chat', () => {
+    const QUOTA = { available: true, scan: { used: 0, max: 1 }, aiLine: { used: 0, max: 5 }, assistant: { used: 3, max: 20 }, resetsAt: '2026-11-15T23:00:00.000Z' }
+    const MAX_ON = { isPro: true, max: { active: true, gift: false, until: '2027-01-01T00:00:00Z' } }
+    const LATER = (n) => Array.from({ length: n }, (_, i) => ({ taskId: 900 + i, due: '2999-01-01', dueTime: null, done: false, focusMs: 0 }))
+    let reply, fail, sessions
+
+    function Where() {
+        const location = useLocation()
+        return <output data-testid="where">{location.pathname + location.search}</output>
+    }
+
+    function open() {
+        const chat = makeStore()
+        chat.dispatch(setLanguage('de'))
+        chat.dispatch({ type: LOGIN_SUCCESS, payload: { token: 'tok', username: 'lena' } })
+        chat.dispatch({ type: SET_ACCESS, payload: MAX_ON })
+        render(<Provider store={chat}><MemoryRouter initialEntries={['/']}><AssistantFab /><Where /></MemoryRouter></Provider>)
+        fireEvent.click(screen.getByRole('button', { name: 'KI-Assistent' }))
+    }
+
+    async function say(actions) {
+        reply = async () => ({ message: 'Das Modell sagt etwas Falsches.', actions, quota: QUOTA })
+        fireEvent.change(screen.getByRole('textbox', { name: 'Nachricht an den Assistenten' }), { target: { value: 'tu was' } })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Senden' })) })
+    }
+
+    beforeEach(() => {
+        resetAssistantChat()
+        forgetAiQuota()
+        reply = null
+        fail = null
+        sessions = GOAL.sessions
+        const base = apiFetch.getMockImplementation()
+        apiFetch.mockImplementation(async (url, options = {}) => {
+            const method = options.method ?? 'GET'
+            if (url === '/api/ai/quota') return structuredClone(QUOTA)
+            if (url === '/api/ai/assistant') return reply()
+            const err = fail?.(url.split('?')[0], method)
+            if (err) throw err
+            if (url === `${BASE}/goals/999`) throw Object.assign(new Error('Not found'), { status: 404, code: 'NOT_FOUND' })
+            if (url === `${BASE}/goals/10` && method === 'GET') return { ...GOAL, sessions }
+            return base(url, options)
+        })
+    })
+
+    it('a new subject is made at once, with Undo; Undo deletes it', async () => {
+        open()
+        await say([{ type: 'study_create', target: 'subject', name: 'Chemie' }])
+        expect(calls(`${BASE}/subjects`, 'POST')).toHaveLength(1)
+        const card = screen.getByRole('group', { name: /Chemie/ })
+        expect(within(card).getByText('Angelegt')).toBeInTheDocument()
+        await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Rückgängig' })) })
+        expect(calls(`${BASE}/subjects/30`, 'DELETE')).toHaveLength(1)
+        expect(within(card).getByText('Rückgängig gemacht')).toBeInTheDocument()
+    })
+
+    it('a goal date change shows from and to from the stored copy and applies only after Bestätigen', async () => {
+        open()
+        await say([{ type: 'study_update', target: 'goal', id: 10, changes: { due: '2026-12-20' }, summary: 'lies' }])
+        const card = screen.getByRole('group', { name: /Klausur/ })
+        expect(within(card).getByText('Sa 12.12.')).toBeInTheDocument()
+        expect(within(card).getByText('So 20.12.')).toBeInTheDocument()
+        expect(calls(`${BASE}/goals/10`, 'PATCH')).toHaveLength(0)
+        await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Bestätigen' })) })
+        expect(body(calls(`${BASE}/goals/10`, 'PATCH')[0])).toMatchObject({ due: '2026-12-20' })
+        expect(within(card).getByText('Geändert')).toBeInTheDocument()
+    })
+
+    it('cancelling leaves everything as it is', async () => {
+        open()
+        await say([{ type: 'study_update', target: 'goal', id: 10, changes: { due: '2026-12-20' } }])
+        fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }))
+        expect(calls(`${BASE}/goals/10`, 'PATCH')).toHaveLength(0)
+        expect(screen.getByText('Abgebrochen')).toBeInTheDocument()
+    })
+
+    it('deleting a goal with planned sessions asks to keep or remove them', async () => {
+        sessions = LATER(3)
+        open()
+        await say([{ type: 'study_delete', target: 'goal', id: 10 }])
+        const card = screen.getByRole('group', { name: /Klausur/ })
+        expect(within(card).getByText(/3 geplante Einheiten/)).toBeInTheDocument()
+        expect(within(card).getByRole('button', { name: 'Einheiten behalten' })).toBeInTheDocument()
+        expect(within(card).queryByRole('button', { name: 'Bestätigen' })).toBeNull()
+        await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Einheiten entfernen' })) })
+        expect(apiFetch.mock.calls.some(([url, o]) => url === `${BASE}/goals/10?sessions=delete` && o.method === 'DELETE')).toBe(true)
+        expect(within(card).getByText('Gelöscht')).toBeInTheDocument()
+    })
+
+    it('deleting a goal without planned sessions is one Bestätigen', async () => {
+        sessions = []
+        open()
+        await say([{ type: 'study_delete', target: 'goal', id: 10 }])
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Bestätigen' })) })
+        expect(apiFetch.mock.calls.some(([url]) => url === `${BASE}/goals/10?sessions=keep`)).toBe(true)
+    })
+
+    it('deleting a subject says how many planned sessions go and has one button', async () => {
+        sessions = LATER(2)
+        open()
+        await say([{ type: 'study_delete', target: 'subject', id: 3 }])
+        const card = screen.getByRole('group', { name: /Biologie/ })
+        expect(within(card).getByText(/2 geplante Einheiten werden entfernt/)).toBeInTheDocument()
+        expect(within(card).queryByRole('button', { name: 'Einheiten behalten' })).toBeNull()
+        await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Bestätigen' })) })
+        expect(calls(`${BASE}/subjects/3`, 'DELETE')).toHaveLength(1)
+    })
+
+    const ERRORS = [
+        ['due_in_past', 'Das Datum liegt in der Vergangenheit', { type: 'study_create', target: 'goal', subjectId: 3, name: 'Test', kind: 'exam', due: '2020-01-01', parts: [] }, `${BASE}/goals`],
+        ['subject_exists', 'Das Fach gibt es schon', { type: 'study_create', target: 'subject', name: 'Biologie' }, `${BASE}/subjects`],
+        ['LIMIT_REACHED', 'Mit dem Gratis-Plan sind 3 Fächer möglich', { type: 'study_create', target: 'subject', name: 'Chemie' }, `${BASE}/subjects`],
+    ]
+    it.each(ERRORS)('the %s error shows on the card, which can be tried again', async (code, message, action, path) => {
+        fail = (url, method) => (url === path && method === 'POST' ? Object.assign(new Error(message), { code, status: 400 }) : null)
+        open()
+        await say([action])
+        const card = screen.getByRole('group', { name: new RegExp(action.name) })
+        expect(within(card).getByText(`Das hat nicht geklappt: ${message}`)).toBeInTheDocument()
+        expect(within(card).queryByRole('button', { name: 'Rückgängig' })).toBeNull()
+        fail = null
+        await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Nochmal versuchen' })) })
+        expect(within(card).getByText('Angelegt')).toBeInTheDocument()
+        expect(within(card).getByRole('button', { name: 'Rückgängig' })).toBeInTheDocument()
+    })
+
+    it('a failed confirm shows the server message and can be confirmed again', async () => {
+        fail = (url, method) => (url === `${BASE}/goals/10` && method === 'PATCH' ? Object.assign(new Error('Das Datum liegt in der Vergangenheit'), { code: 'due_in_past' }) : null)
+        open()
+        await say([{ type: 'study_update', target: 'goal', id: 10, changes: { due: '2020-01-01' } }])
+        const card = screen.getByRole('group', { name: /Klausur/ })
+        await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Bestätigen' })) })
+        expect(within(card).getByText(/Das Datum liegt in der Vergangenheit/)).toBeInTheDocument()
+        fail = null
+        await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Bestätigen' })) })
+        expect(within(card).getByText('Geändert')).toBeInTheDocument()
+    })
+
+    it('a re-plan opens the preview and closes the sheet', async () => {
+        open()
+        await say([{ type: 'study_replan' }])
+        const card = screen.getByRole('group', { name: /neu planen/i })
+        await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Plan ansehen' })) })
+        expect(calls(`${BASE}/plan`, 'GET')).toHaveLength(1)
+        expect(screen.getByTestId('where')).toHaveTextContent('/study?replan=1')
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    })
+
+    it('an id the app does not have is the usual "not found" line', async () => {
+        open()
+        await say([{ type: 'study_update', target: 'goal', id: 999, changes: { name: 'x' } }])
+        expect(screen.getByText(/nicht gefunden/)).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Bestätigen' })).toBeNull()
     })
 })

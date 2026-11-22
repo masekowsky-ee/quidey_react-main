@@ -6,6 +6,8 @@
 // - New entries are made at once (one toast with "Rückgängig" for all of a reply); a move or a
 //   delete is a card that says what changes, from my own copy of the entry, and waits for
 //   "Bestätigen"; a study plan opens the new-goal sheet on Lernen, where it is previewed.
+// - Study-area actions (subjects, goals, topics, settings, re-plan) work the same way, their cards are
+//   components/assistant/StudyCard.jsx; the store's copy is read first (loadStudyContext).
 // - A request can take minutes: "denkt nach" with a Stop. Stopping or closing drops the request:
 //   an answer that comes later is not applied.
 // - Reading aloud: `readAloud` (the toggle, kept in assistantApi.js; hidden where the device can't
@@ -24,17 +26,20 @@ import {
     ASSISTANT_TIMEOUT_MS, MESSAGE_MAX,
 } from '../../features/assistant/assistantApi';
 import { applyAction, prepareActions, changeRows } from '../../features/assistant/applyAction';
+import { loadStudyContext, isStudyAction } from '../../features/assistant/studyActions';
 import { speak, speechOutputSupport, stopSpeaking } from '../../features/voice/speak';
 import { speechLang } from '../../features/voice/voice';
 import { useAiQuota, refreshAiQuota, left as leftOf } from '../../features/ai/ai';
 import { selectHasMax } from '../../features/pro/pro';
 import { fetchAccess } from '../../features/auth/authAction';
 import { showToast } from '../../features/toast/toast';
-import { fill, mondayIndex, parseDate } from '../../features/helperFunction';
+import { fill } from '../../features/helperFunction';
 import { timeText } from '../../features/calendar/calendar';
 import { useTranslation } from '../../i18n/useTranslation';
 import SheetGrabber from '../SheetGrabber.jsx';
 import MicButton from '../voice/MicButton.jsx';
+import StudyCard from './StudyCard.jsx';
+import { useDay } from './useDay';
 import Icon from '../icons.jsx';
 import styles from './AssistantSheet.module.css';
 import { quietly } from '../../features/api/quietly';
@@ -113,7 +118,7 @@ export default function AssistantSheet({ onClose, onReply }) {
         for (const card of cards) {
             try {
                 const { undo } = await applyAction(card.action, deps);
-                const name = card.action.entry.name;
+                const name = card.action.entry?.name ?? card.study.title;
                 // undone once, whether from the toast or the card (also both at the same time); a
                 // failed undo says so (on the card and as a toast) and can be tried again
                 let undone = false;
@@ -152,18 +157,23 @@ export default function AssistantSheet({ onClose, onReply }) {
         }));
     }
 
-    function answered({ message, actions, quota: answerQuota }) {
+    // a new entry or study thing is made at once; the others wait for the confirm
+    const madeAtOnce = (card) => card.type === 'create_entry' || card.type === 'study_create';
+
+    async function answered({ message, actions, quota: answerQuota }) {
         if (answerQuota?.assistant) setAnswerLeft(leftOf(answerQuota.assistant));
-        const { cards, missing } = prepareActions(actions, store.getState().task.tasks);
+        // the app's own copy of the subjects and goals the reply names, before the cards are made
+        if ((Array.isArray(actions) ? actions : []).some(isStudyAction)) await loadStudyContext(actions, dispatch, store.getState).catch(() => {});
+        const { cards, missing } = prepareActions(actions, store.getState().task.tasks, store.getState().study);
         const id = newMessageId();
-        const shown = cards.map((card, i) => ({ ...card, key: `${id}-${i}`, status: card.type === 'create_entry' ? 'busy' : 'pending' }));
+        const shown = cards.map((card, i) => ({ ...card, key: `${id}-${i}`, status: madeAtOnce(card) ? 'busy' : 'pending' }));
         updateChat(owner, list => [...list, { id, role: 'assistant', content: message, cards: shown }]);
         if (missing > 0) addNote(missing === 1 ? t('assistantMissing_one') : fill(t('assistantMissing'), { n: missing }));
         // the toggle as it is now: it may have been switched during the wait
         const aloud = getReadAloud();
         if (aloud && speechOutputSupport() && message.trim()) speak(message, { lang: speechLang(language) });
         onReply?.(message, { readAloud: aloud });
-        const creates = shown.filter(card => card.type === 'create_entry');
+        const creates = shown.filter(madeAtOnce);
         if (creates.length > 0) makeEntries(id, creates);
     }
 
@@ -209,7 +219,7 @@ export default function AssistantSheet({ onClose, onReply }) {
             if (request.current !== running) return;
             request.current = null;
             setPending(false);
-            answered(answer);
+            await answered(answer);
         } catch (err) {
             if (request.current !== running) return;
             request.current = null;
@@ -257,7 +267,7 @@ export default function AssistantSheet({ onClose, onReply }) {
                     {messages.length === 0 && <p className={styles.intro}>{t('assistantIntro')}</p>}
                     <div role="log" aria-live="polite" aria-relevant="additions" className={styles.log}>
                         {messages.map(message => (
-                            <Message key={message.id} message={message} deps={deps} onCardChange={(key, patch) => patchCard(message.id, key, patch)} onLeave={close} />
+                            <Message key={message.id} message={message} deps={deps} onCardChange={(key, patch) => patchCard(message.id, key, patch)} onCreate={(card) => makeEntries(message.id, [card])} onLeave={close} />
                         ))}
                     </div>
                     {pending && (
@@ -284,7 +294,7 @@ export default function AssistantSheet({ onClose, onReply }) {
     );
 }
 
-function Message({ message, deps, onCardChange, onLeave }) {
+function Message({ message, deps, onCardChange, onCreate, onLeave }) {
     const { t } = useTranslation();
     if (message.role === 'note') return <p className={styles.note}>{message.content}</p>;
     if (message.role === 'user') {
@@ -297,17 +307,11 @@ function Message({ message, deps, onCardChange, onLeave }) {
     return (
         <div className={styles.reply}>
             {message.content && <p className={styles.replyText}>{message.content}</p>}
-            {message.cards?.map(card => <ActionCard key={card.key} card={card} deps={deps} onChange={(patch) => onCardChange(card.key, patch)} onLeave={onLeave} />)}
+            {message.cards?.map(card => (isStudyAction(card.action)
+                ? <StudyCard key={card.key} card={card} deps={deps} onChange={(patch) => onCardChange(card.key, patch)} onCreate={onCreate} onLeave={onLeave} />
+                : <ActionCard key={card.key} card={card} deps={deps} onChange={(patch) => onCardChange(card.key, patch)} onLeave={onLeave} />))}
         </div>
     );
-}
-
-function useDay() {
-    const { t } = useTranslation();
-    return (value) => {
-        const day = parseDate(value);
-        return day ? `${t('weekDays', mondayIndex(day))} ${day.getDate()}.${day.getMonth() + 1}.` : t('assistantNoDay');
-    };
 }
 
 function ActionCard({ card, deps, onChange, onLeave }) {
