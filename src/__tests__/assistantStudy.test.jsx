@@ -13,6 +13,12 @@ import { apiFetch } from '../features/api/api'
 import { fetchSubjects, fetchGoal } from '../features/study/study'
 import { applyAction, prepareActions } from '../features/assistant/applyAction'
 import { describeStudy, loadStudyContext } from '../features/assistant/studyActions'
+import deBase from '../i18n/de/base'
+import enBase from '../i18n/en/base'
+import deAssistant from '../i18n/de/assistantTexts'
+import enAssistant from '../i18n/en/assistantTexts'
+import deStudy from '../i18n/de/studyTexts'
+import enStudy from '../i18n/en/studyTexts'
 
 vi.mock('../features/api/api', async (importOriginal) => ({
     ...(await importOriginal()),
@@ -37,6 +43,7 @@ beforeEach(async () => {
         if (url === `${BASE}/subjects` && method === 'POST') return { id: 30, ...data }
         if (url.startsWith(`${BASE}/subjects/`)) return { id: 3, ...data }
         if (url === `${BASE}/goals` && method === 'GET') return [GOAL]
+        if (url.startsWith(`${BASE}/goals?subject=`)) return []
         if (url === `${BASE}/goals` && method === 'POST') return { ...GOAL, id: 50, ...data }
         if (url.startsWith(`${BASE}/goals/`) && url.endsWith('/parts')) return { id: 120, ...data }
         if (url.startsWith(`${BASE}/goals/`) && method === 'GET') return GOAL
@@ -80,6 +87,22 @@ describe('applying study actions', () => {
         windows = []
         await applyAction({ type: 'study_create', target: 'goal', subjectId: 3, name: 'T', kind: 'exam', due: '2026-12-01', parts: [{ name: 'A', estimateMinutes: 30 }] }, deps())
         expect(body(calls(`${BASE}/goals`, 'POST')[0]).planMode).toBe('days')
+    })
+
+    it('undo of a goal that made a subject deletes the goal but keeps the subject when it has other goals', async () => {
+        const goal = { type: 'study_create', target: 'goal', name: 'Test', kind: 'exam', due: '2026-12-01', parts: [], subjectName: 'Physik' }
+        const { undo } = await applyAction(goal, deps())
+        const base = apiFetch.getMockImplementation()
+        apiFetch.mockImplementation(async (url, o) => (url === `${BASE}/goals?subject=30` ? [{ ...GOAL, id: 77, subjectId: 30 }] : base(url, o)))
+        await undo()
+        expect(calls(`${BASE}/goals/50`, 'DELETE')).toHaveLength(1)
+        expect(calls(`${BASE}/subjects/30`, 'DELETE')).toHaveLength(0)
+    })
+
+    it('a goal with the name of an archived subject uses it instead of failing with subject_exists', async () => {
+        await applyAction({ type: 'study_create', target: 'goal', name: 'Test', kind: 'exam', due: '2026-12-01', parts: [], subjectName: 'alt' }, deps())
+        expect(calls(`${BASE}/subjects`, 'POST')).toHaveLength(0)
+        expect(body(calls(`${BASE}/goals`, 'POST')[0])).toMatchObject({ subjectId: 4 })
     })
 
     it('creates a part', async () => {
@@ -154,6 +177,12 @@ describe('from a cold store', () => {
         await loadStudyContext(actions, store.dispatch, store.getState)
         return actions.map(a => describeStudy(a, store.getState().study))
     }
+
+    it('a settings change reads the settings, so the card shows the current study times as "from"', async () => {
+        const [card] = await cold([{ type: 'study_update', target: 'settings', id: null, changes: { windows: [{ weekday: 2, start: '10:00', end: '11:00' }] } }])
+        expect(calls(`${BASE}/settings`, 'GET')).toHaveLength(1)
+        expect(card.rows[0].from).toEqual(windows)
+    })
 
     it('a part update and a part delete resolve without a visited goal', async () => {
         const [update, del] = await cold([
@@ -317,6 +346,18 @@ describe('the cards in the chat', () => {
         expect(within(card).getByText('Rückgängig gemacht')).toBeInTheDocument()
     })
 
+    it('Undo of a new subject keeps it, and says so, when a goal was added to it meanwhile', async () => {
+        open()
+        await say([{ type: 'study_create', target: 'subject', name: 'Chemie' }])
+        const card = screen.getByRole('group', { name: /Chemie/ })
+        const base = apiFetch.getMockImplementation()
+        apiFetch.mockImplementation(async (url, o) => (url === `${BASE}/goals?subject=30` ? [{ ...GOAL, id: 77, subjectId: 30 }] : base(url, o)))
+        await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Rückgängig' })) })
+        expect(calls(`${BASE}/subjects/30`, 'DELETE')).toHaveLength(0)
+        expect(within(card).getByText(/Das Fach hat inzwischen Ziele/)).toBeInTheDocument()
+        expect(within(card).getByRole('button', { name: 'Rückgängig' })).toBeInTheDocument()
+    })
+
     it('a goal date change shows from and to from the stored copy and applies only after Bestätigen', async () => {
         open()
         await say([{ type: 'study_update', target: 'goal', id: 10, changes: { due: '2026-12-20' }, summary: 'lies' }])
@@ -376,16 +417,16 @@ describe('the cards in the chat', () => {
     })
 
     const ERRORS = [
-        ['due_in_past', 'Das Datum liegt in der Vergangenheit', { type: 'study_create', target: 'goal', subjectId: 3, name: 'Test', kind: 'exam', due: '2020-01-01', parts: [] }, `${BASE}/goals`],
-        ['subject_exists', 'Das Fach gibt es schon', { type: 'study_create', target: 'subject', name: 'Biologie' }, `${BASE}/subjects`],
-        ['LIMIT_REACHED', 'Mit dem Gratis-Plan sind 3 Fächer möglich', { type: 'study_create', target: 'subject', name: 'Chemie' }, `${BASE}/subjects`],
+        ['due_in_past', 'The due date is in the past', 'Der Termin dieses Ziels ist schon vorbei.', { type: 'study_create', target: 'goal', subjectId: 3, name: 'Test', kind: 'exam', due: '2020-01-01', parts: [] }, `${BASE}/goals`],
+        ['subject_exists', 'A subject with this name exists', 'Dieses Fach gibt es schon.', { type: 'study_create', target: 'subject', name: 'Biologie' }, `${BASE}/subjects`],
+        ['LIMIT_REACHED', 'Free plan limit', 'Mit dem Gratis-Plan ist das Limit erreicht.', { type: 'study_create', target: 'subject', name: 'Chemie' }, `${BASE}/subjects`],
     ]
-    it.each(ERRORS)('the %s error shows on the card, which can be tried again', async (code, message, action, path) => {
+    it.each(ERRORS)('the %s error shows in German on the card, which can be tried again', async (code, message, german, action, path) => {
         fail = (url, method) => (url === path && method === 'POST' ? Object.assign(new Error(message), { code, status: 400 }) : null)
         open()
         await say([action])
         const card = screen.getByRole('group', { name: new RegExp(action.name) })
-        expect(within(card).getByText(`Das hat nicht geklappt: ${message}`)).toBeInTheDocument()
+        expect(within(card).getByText(`Das hat nicht geklappt: ${german}`)).toBeInTheDocument()
         expect(within(card).queryByRole('button', { name: 'Rückgängig' })).toBeNull()
         fail = null
         await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Nochmal versuchen' })) })
@@ -393,13 +434,14 @@ describe('the cards in the chat', () => {
         expect(within(card).getByRole('button', { name: 'Rückgängig' })).toBeInTheDocument()
     })
 
-    it('a failed confirm shows the server message and can be confirmed again', async () => {
-        fail = (url, method) => (url === `${BASE}/goals/10` && method === 'PATCH' ? Object.assign(new Error('Das Datum liegt in der Vergangenheit'), { code: 'due_in_past' }) : null)
+    it('a failed confirm shows the German text of the error code and can be confirmed again', async () => {
+        fail = (url, method) => (url === `${BASE}/goals/10` && method === 'PATCH' ? Object.assign(new Error('The due date is in the past'), { code: 'due_in_past' }) : null)
         open()
         await say([{ type: 'study_update', target: 'goal', id: 10, changes: { due: '2020-01-01' } }])
         const card = screen.getByRole('group', { name: /Klausur/ })
         await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Bestätigen' })) })
-        expect(within(card).getByText(/Das Datum liegt in der Vergangenheit/)).toBeInTheDocument()
+        expect(within(card).getByText(/Der Termin dieses Ziels ist schon vorbei\./)).toBeInTheDocument()
+        expect(within(card).queryByText(/due date is in the past/)).toBeNull()
         fail = null
         await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Bestätigen' })) })
         expect(within(card).getByText('Geändert')).toBeInTheDocument()
@@ -459,8 +501,27 @@ describe('the cards in the chat', () => {
         open(<LimitDialog />)
         await say([{ type: 'study_create', target: 'subject', name: 'Chemie' }])
         const card = screen.getByRole('group', { name: /Chemie/ })
-        expect(within(card).getByText(/Das hat nicht geklappt: Mit dem Gratis-Plan sind 3 Fächer möglich/)).toBeInTheDocument()
+        expect(within(card).getByText(/Das hat nicht geklappt: Mit dem Gratis-Plan ist das Limit erreicht\./)).toBeInTheDocument()
         expect(screen.getByRole('alertdialog')).toBeInTheDocument()
         expect(within(card).getByRole('button', { name: 'Nochmal versuchen' })).toBeInTheDocument()
+    })
+})
+
+describe('every value the backend accepts has a label', () => {
+    const { default: de } = { default: { ...deBase, ...deAssistant, ...deStudy } }
+    const { default: en } = { default: { ...enBase, ...enAssistant, ...enStudy } }
+    const cases = [
+        ['assistantStudyStatus_', ['active', 'done', 'archived']],
+        ['studyKind_', ['exam', 'assignment', 'presentation', 'other']],
+        ['studyScale_', ['points', 'marks']],
+        ['taskColor_', ['red', 'orange', 'yellow', 'green', 'teal', 'blue', 'violet', 'pink']],
+        ['studyError_', ['due_in_past', 'subject_exists', 'goal_not_done', 'LIMIT_REACHED']],
+        ['assistantStudyField_', ['name', 'subject', 'goal', 'kind', 'due', 'dueTime', 'emoji', 'color', 'archived', 'studyFrom', 'studyTo', 'status', 'grade', 'parts', 'estimateMinutes', 'done', 'sessionMinutes', 'dailyMaxMinutes', 'windows', 'gradeScale']],
+    ]
+    it.each(cases)('%s', (prefix, values) => {
+        for (const value of values) {
+            expect(de[prefix + value], `de ${prefix}${value}`).toBeTruthy()
+            expect(en[prefix + value], `en ${prefix}${value}`).toBeTruthy()
+        }
     })
 })

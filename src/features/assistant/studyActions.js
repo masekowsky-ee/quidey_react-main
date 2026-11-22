@@ -37,6 +37,8 @@ export async function loadStudyContext(actions, dispatch, getState) {
         return fallback;
     };
     if (!(getState?.().study?.subjects?.length > 0)) await dispatch(fetchSubjects()).catch(soft());
+    // a settings card shows what the study times are now: read them when this session hasn't
+    if (list.some(a => a.target === 'settings') && !getState?.().study?.settings) await dispatch(fetchStudySettings()).catch(soft());
     const needAll = list.some(a => (a.target === 'part' && a.type !== 'study_create') || (a.target === 'subject' && a.type === 'study_delete'));
     const known = new Set();
     if (needAll) (await dispatch(fetchGoals()).catch(soft([]))).forEach(g => known.add(g.id));
@@ -137,13 +139,17 @@ export function describeStudy(action, study) {
 // the part's `done` flag is the API's doneAt (truthy: done now, null: reopened)
 const partChange = ({ done, ...rest }) => (done === undefined ? rest : { ...rest, doneAt: done ? new Date().toISOString() : null });
 
+// whether the subject has goals of any status (a subject's delete cascades to them and their sessions)
+const hasGoals = async (dispatch, subjectId) => (await dispatch(fetchGoals(subjectId))).length > 0;
+
 async function createGoalFor(action, { dispatch, getState }) {
     let subjectId = action.subjectId ?? null;
     let madeSubject = null;
     if (subjectId == null) {
         const name = String(action.subjectName ?? '').trim();
         if (!name) throw Object.assign(new Error('Subject missing'), { code: 'invalid_input' });
-        const match = (list) => (list ?? []).find(s => !s.archived && sameName(s.name, name));
+        // archived ones too: the name is unique among all of a user's subjects (nothing is un-archived here)
+        const match = (list) => (list ?? []).find(s => sameName(s.name, name));
         // my copy first: a subject an earlier action of this reply just made is in it
         const same = match(getState().study.subjects) ?? match(await dispatch(fetchSubjects()).catch(() => getState().study.subjects));
         if (same) subjectId = same.id;
@@ -167,7 +173,8 @@ async function createGoalFor(action, { dispatch, getState }) {
         return {
             undo: async () => {
                 await dispatch(deleteGoal(goal.id, 'delete'));
-                if (madeSubject) await dispatch(deleteSubject(madeSubject.id));
+                // goals added to the subject since stay: deleting it would cascade to them
+                if (madeSubject && !(await hasGoals(dispatch, madeSubject.id))) await dispatch(deleteSubject(madeSubject.id));
             },
         };
     } catch (err) {
@@ -181,7 +188,12 @@ async function create(action, deps) {
     if (action.target === 'subject') {
         const { name, emoji, color } = action;
         const subject = await dispatch(saveSubject(null, { name, ...(emoji ? { emoji } : {}), ...(color ? { color } : {}) }));
-        return { undo: () => dispatch(deleteSubject(subject.id)) };
+        return {
+            undo: async () => {
+                if (await hasGoals(dispatch, subject.id)) throw Object.assign(new Error('The subject has goals'), { code: 'subject_has_goals' });
+                await dispatch(deleteSubject(subject.id));
+            },
+        };
     }
     if (action.target === 'goal') return createGoalFor(action, deps);
     const part = await dispatch(addPart(action.goalId, { name: action.name, estimateMinutes: action.estimateMinutes }));

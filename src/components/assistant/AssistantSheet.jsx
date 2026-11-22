@@ -43,9 +43,11 @@ import { useDay } from './useDay';
 import Icon from '../icons.jsx';
 import styles from './AssistantSheet.module.css';
 import { quietly } from '../../features/api/quietly';
+import { useStudyMessage } from '../study/studyUi';
 
 export default function AssistantSheet({ onClose, onReply }) {
     const { t, language } = useTranslation();
+    const studyMessage = useStudyMessage();
     const dispatch = useDispatch();
     const store = useStore();
     const navigate = useNavigate();
@@ -133,7 +135,7 @@ export default function AssistantSheet({ onClose, onReply }) {
                             undone = true;
                             patchCard(messageId, card.key, { status: 'undone', undo: null, undoing: false });
                         } catch (err) {
-                            const message = fill(t('assistantUndoFailed'), { name });
+                            const message = fill(t(err?.code === 'subject_has_goals' ? 'assistantUndoSubjectHasGoals' : 'assistantUndoFailed'), { name });
                             patchCard(messageId, card.key, { undoing: false, undoError: message });
                             dispatch(showToast(message, 'error'));
                             throw err;
@@ -147,7 +149,7 @@ export default function AssistantSheet({ onClose, onReply }) {
                 names.push(name);
                 patchCard(messageId, card.key, { status: 'done', undo: once });
             } catch (err) {
-                patchCard(messageId, card.key, { status: 'failed', error: err.message });
+                patchCard(messageId, card.key, { status: 'failed', error: studyMessage(err) });
             }
         }
         if (undos.length === 0) return;

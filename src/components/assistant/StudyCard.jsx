@@ -9,6 +9,7 @@ import { fill } from '../../features/helperFunction';
 import { useTranslation } from '../../i18n/useTranslation';
 import Icon from '../icons.jsx';
 import { useDay } from './useDay';
+import { useStudyMessage } from '../study/studyUi';
 import styles from './AssistantSheet.module.css';
 
 const DATES = ['due', 'studyFrom', 'studyTo'];
@@ -25,6 +26,7 @@ function useShown() {
         if (field === 'dueTime') return String(value).slice(0, 5);
         if (field === 'kind') return t(`studyKind_${value}`);
         if (field === 'status') return t(`assistantStudyStatus_${value}`);
+        if (field === 'color') return t(`taskColor_${value}`);
         if (field === 'gradeScale') return t(`studyScale_${value}`);
         if (MINUTES.includes(field)) return fill(t('assistantStudyMinutes'), { n: value });
         if (field === 'windows') {
@@ -40,6 +42,7 @@ export default function StudyCard({ card, deps, onChange, onCreate, onLeave }) {
     const shown = useShown();
     const id = useId();
     const kindId = `${id}-kind`;
+    const message = useStudyMessage();
     const { type, action, study, status } = card;
     const { kind, title, rows, sessions = 0 } = study;
     const target = action.target;
@@ -53,7 +56,7 @@ export default function StudyCard({ card, deps, onChange, onCreate, onLeave }) {
             await applyAction(action, { ...deps, sessions: mode });
             onChange({ status: 'done' });
         } catch (err) {
-            onChange({ status: 'failed', error: err.code === 'NOT_FOUND' ? t('assistantGone') : err.message });
+            onChange({ status: 'failed', error: err.code === 'NOT_FOUND' ? t('assistantGone') : message(err) });
         }
     }
 
@@ -64,7 +67,7 @@ export default function StudyCard({ card, deps, onChange, onCreate, onLeave }) {
             onChange({ status: 'pending' });
             onLeave();
         } catch (err) {
-            onChange({ status: 'failed', error: err.message });
+            onChange({ status: 'failed', error: message(err) });
         }
     }
 

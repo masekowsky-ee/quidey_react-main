@@ -29,6 +29,16 @@ export function goalStateKey(goal, now = new Date()) {
 // Whether a saved goal change moves the plan (date, time, mode): then the preview opens (ruling 30)
 export const changesPlan = (change) => Boolean(change) && ['due', 'dueTime', 'planMode', 'studyFrom', 'studyTo'].some(key => key in change);
 
+// the text of a route error: the studyError_<code> text, else the error's own message
+export function useStudyMessage() {
+    const { t } = useTranslation();
+    return (err) => {
+        const key = `studyError_${err?.code}`;
+        const text = t(key);
+        return text && text !== key ? text : err?.message;
+    };
+}
+
 export function useStudyError() {
     const { t } = useTranslation();
     return (err) => {
