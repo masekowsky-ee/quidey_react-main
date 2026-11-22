@@ -136,7 +136,7 @@ export default function StudyCard({ card, deps, onChange, onCreate, onLeave }) {
                     {asks ? (
                         <>
                             <button type="button" className={styles.confirm} onClick={() => confirm('keep')} disabled={busy}>{t('assistantStudyKeep')}</button>
-                            <button type="button" className={styles.confirm} onClick={() => confirm('delete')} disabled={busy}>{t('assistantStudyRemove')}</button>
+                            <button type="button" className={styles.cancel} onClick={() => confirm('delete')} disabled={busy}>{t('assistantStudyRemove')}</button>
                         </>
                     ) : (
                         <button type="button" className={styles.confirm} onClick={() => confirm()} disabled={busy}>{t('assistantConfirm')}</button>

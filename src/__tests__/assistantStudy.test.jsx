@@ -8,6 +8,7 @@ import { setLanguage } from '../features/settings/settingsAction'
 import { forgetAiQuota } from '../features/ai/ai'
 import { resetAssistantChat } from '../features/assistant/assistantApi'
 import AssistantFab from '../components/assistant/AssistantFab'
+import LimitDialog from '../components/pro/LimitDialog'
 import { apiFetch } from '../features/api/api'
 import { fetchSubjects, fetchGoal } from '../features/study/study'
 import { applyAction, prepareActions } from '../features/assistant/applyAction'
@@ -262,19 +263,19 @@ describe('the cards in the chat', () => {
     const QUOTA = { available: true, scan: { used: 0, max: 1 }, aiLine: { used: 0, max: 5 }, assistant: { used: 3, max: 20 }, resetsAt: '2026-11-15T23:00:00.000Z' }
     const MAX_ON = { isPro: true, max: { active: true, gift: false, until: '2027-01-01T00:00:00Z' } }
     const LATER = (n) => Array.from({ length: n }, (_, i) => ({ taskId: 900 + i, due: '2999-01-01', dueTime: null, done: false, focusMs: 0 }))
-    let reply, fail, sessions
+    let reply, fail, sessions, gate
 
     function Where() {
         const location = useLocation()
         return <output data-testid="where">{location.pathname + location.search}</output>
     }
 
-    function open() {
+    function open(extra = null) {
         const chat = makeStore()
         chat.dispatch(setLanguage('de'))
         chat.dispatch({ type: LOGIN_SUCCESS, payload: { token: 'tok', username: 'lena' } })
         chat.dispatch({ type: SET_ACCESS, payload: MAX_ON })
-        render(<Provider store={chat}><MemoryRouter initialEntries={['/']}><AssistantFab /><Where /></MemoryRouter></Provider>)
+        render(<Provider store={chat}><MemoryRouter initialEntries={['/']}><AssistantFab /><Where />{extra}</MemoryRouter></Provider>)
         fireEvent.click(screen.getByRole('button', { name: 'KI-Assistent' }))
     }
 
@@ -289,13 +290,15 @@ describe('the cards in the chat', () => {
         forgetAiQuota()
         reply = null
         fail = null
+        gate = null
         sessions = GOAL.sessions
         const base = apiFetch.getMockImplementation()
         apiFetch.mockImplementation(async (url, options = {}) => {
             const method = options.method ?? 'GET'
             if (url === '/api/ai/quota') return structuredClone(QUOTA)
             if (url === '/api/ai/assistant') return reply()
-            const err = fail?.(url.split('?')[0], method)
+            if (gate && url === `${BASE}/subjects` && method === 'GET') await gate
+            const err = await fail?.(url.split('?')[0], method, options)
             if (err) throw err
             if (url === `${BASE}/goals/999`) throw Object.assign(new Error('Not found'), { status: 404, code: 'NOT_FOUND' })
             if (url === `${BASE}/goals/10` && method === 'GET') return { ...GOAL, sessions }
@@ -340,9 +343,15 @@ describe('the cards in the chat', () => {
         await say([{ type: 'study_delete', target: 'goal', id: 10 }])
         const card = screen.getByRole('group', { name: /Klausur/ })
         expect(within(card).getByText(/3 geplante Einheiten/)).toBeInTheDocument()
-        expect(within(card).getByRole('button', { name: 'Einheiten behalten' })).toBeInTheDocument()
+        expect(within(card).getByRole('button', { name: 'Ziel löschen, Einheiten behalten' })).toBeInTheDocument()
         expect(within(card).queryByRole('button', { name: 'Bestätigen' })).toBeNull()
-        await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Einheiten entfernen' })) })
+        // only the safe choice is the filled primary button, and it comes first
+        const keep = within(card).getByRole('button', { name: 'Ziel löschen, Einheiten behalten' })
+        const remove = within(card).getByRole('button', { name: 'Ziel und Einheiten löschen' })
+        expect(keep.className).toMatch(/confirm/)
+        expect(remove.className).not.toMatch(/confirm/)
+        expect(keep.compareDocumentPosition(remove) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+        await act(async () => { fireEvent.click(remove) })
         expect(apiFetch.mock.calls.some(([url, o]) => url === `${BASE}/goals/10?sessions=delete` && o.method === 'DELETE')).toBe(true)
         expect(within(card).getByText('Gelöscht')).toBeInTheDocument()
     })
@@ -361,7 +370,7 @@ describe('the cards in the chat', () => {
         await say([{ type: 'study_delete', target: 'subject', id: 3 }])
         const card = screen.getByRole('group', { name: /Biologie/ })
         expect(within(card).getByText(/2 geplante Einheiten werden entfernt/)).toBeInTheDocument()
-        expect(within(card).queryByRole('button', { name: 'Einheiten behalten' })).toBeNull()
+        expect(within(card).queryByRole('button', { name: 'Ziel löschen, Einheiten behalten' })).toBeNull()
         await act(async () => { fireEvent.click(within(card).getByRole('button', { name: 'Bestätigen' })) })
         expect(calls(`${BASE}/subjects/3`, 'DELETE')).toHaveLength(1)
     })
@@ -411,5 +420,47 @@ describe('the cards in the chat', () => {
         await say([{ type: 'study_update', target: 'goal', id: 999, changes: { name: 'x' } }])
         expect(screen.getByText(/nicht gefunden/)).toBeInTheDocument()
         expect(screen.queryByRole('button', { name: 'Bestätigen' })).toBeNull()
+    })
+
+    it('closing the sheet while the subjects and goals are read applies nothing', async () => {
+        let release
+        gate = new Promise((resolve) => { release = resolve })
+        open()
+        reply = async () => ({ message: 'ok', actions: [{ type: 'study_create', target: 'subject', name: 'Chemie' }], quota: QUOTA })
+        fireEvent.change(screen.getByRole('textbox', { name: 'Nachricht an den Assistenten' }), { target: { value: 'tu was' } })
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Senden' })) })
+        // still thinking, with its Stop button, while the lookup runs
+        expect(screen.getByText('Der Assistent denkt nach …')).toBeInTheDocument()
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Schließen' })) })
+        await act(async () => { release(); await Promise.resolve() })
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+        expect(calls(`${BASE}/subjects`, 'POST')).toHaveLength(0)
+    })
+
+    it('a failed lookup keeps the other cards and says the real reason, not "not found"', async () => {
+        fail = (url, method) => (url.startsWith(BASE) && method === 'GET' ? new TypeError('Failed to fetch') : null)
+        open()
+        await say([
+            { type: 'study_create', target: 'subject', name: 'Chemie' },
+            { type: 'study_update', target: 'goal', id: 10, changes: { name: 'x' } },
+        ])
+        expect(screen.getByRole('group', { name: /Chemie/ })).toBeInTheDocument()
+        expect(screen.getByText(/konnte gerade nicht antworten/)).toBeInTheDocument()
+        expect(screen.queryByText(/nicht gefunden/)).toBeNull()
+    })
+
+    it('a full free plan: the limit dialog opens over the sheet and the card shows the error too', async () => {
+        const { apiFetch: realFetch } = await vi.importActual('../features/api/api')
+        globalThis.fetch = vi.fn(async () => new Response(JSON.stringify({ error: 'Mit dem Gratis-Plan sind 3 Fächer möglich', code: 'LIMIT_REACHED', limit: 'subjects', max: 3 }), { status: 403 }))
+        fail = async (url, method, options) => {
+            if (url !== `${BASE}/subjects` || method !== 'POST') return null
+            return realFetch(url, options).then(() => null, (err) => err)
+        }
+        open(<LimitDialog />)
+        await say([{ type: 'study_create', target: 'subject', name: 'Chemie' }])
+        const card = screen.getByRole('group', { name: /Chemie/ })
+        expect(within(card).getByText(/Das hat nicht geklappt: Mit dem Gratis-Plan sind 3 Fächer möglich/)).toBeInTheDocument()
+        expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+        expect(within(card).getByRole('button', { name: 'Nochmal versuchen' })).toBeInTheDocument()
     })
 })

@@ -3,7 +3,8 @@
 // the same ones the forms use (limits, validation, realtime stay as they are).
 //
 //   loadStudyContext(actions, dispatch, getState?): reads the subjects and every goal an action names, so the
-//     store has the app's copy before the cards are made.
+//     store has the app's copy before the cards are made. Throws (after trying all) when a read failed
+//     for another reason than "not found".
 //   describeStudy(action, study) → { kind, title, rows: [{ field, from, to }], sessions? } | null;
 //     plain data (field names, raw values; the card translates). null: the thing isn't in `study`.
 //   applyStudyAction(action, { dispatch, getState, navigate, sessions? }) → { undo? }:
@@ -27,12 +28,21 @@ const goalIdOf = (action) => (action.target === 'goal' ? action.id : action.targ
 export async function loadStudyContext(actions, dispatch, getState) {
     const list = (Array.isArray(actions) ? actions : []).filter(isStudyAction);
     if (list.length === 0) return;
-    if (!(getState?.().study?.subjects?.length > 0)) await dispatch(fetchSubjects()).catch(() => {});
+    // a thing the server doesn't know (404) is simply not found (the card is left out and counted);
+    // any other failure (network, server) is thrown once everything else was tried, so the caller can
+    // say the real reason
+    const failures = [];
+    const soft = (fallback) => (err) => {
+        if (err?.status !== 404 && err?.code !== 'NOT_FOUND') failures.push(err);
+        return fallback;
+    };
+    if (!(getState?.().study?.subjects?.length > 0)) await dispatch(fetchSubjects()).catch(soft());
     const needAll = list.some(a => (a.target === 'part' && a.type !== 'study_create') || (a.target === 'subject' && a.type === 'study_delete'));
     const known = new Set();
-    if (needAll) (await dispatch(fetchGoals()).catch(() => [])).forEach(g => known.add(g.id));
+    if (needAll) (await dispatch(fetchGoals()).catch(soft([]))).forEach(g => known.add(g.id));
     const ids = [...new Set(list.map(goalIdOf).filter(id => id != null))].filter(id => !known.has(id));
-    await Promise.all(ids.map(id => dispatch(fetchGoal(id)).catch(() => {})));
+    await Promise.all(ids.map(id => dispatch(fetchGoal(id)).catch(soft())));
+    if (failures.length > 0) throw failures[0];
 }
 
 const subjects = (study) => study?.subjects ?? [];

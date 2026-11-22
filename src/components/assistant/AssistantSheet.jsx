@@ -160,15 +160,15 @@ export default function AssistantSheet({ onClose, onReply }) {
     // a new entry or study thing is made at once; the others wait for the confirm
     const madeAtOnce = (card) => card.type === 'create_entry' || card.type === 'study_create';
 
-    async function answered({ message, actions, quota: answerQuota }) {
+    // lookupFailed: reading the subjects / goals the reply names failed (not "not found")
+    function answered({ message, actions, quota: answerQuota }, lookupFailed = false) {
         if (answerQuota?.assistant) setAnswerLeft(leftOf(answerQuota.assistant));
-        // the app's own copy of the subjects and goals the reply names, before the cards are made
-        if ((Array.isArray(actions) ? actions : []).some(isStudyAction)) await loadStudyContext(actions, dispatch, store.getState).catch(() => {});
         const { cards, missing } = prepareActions(actions, store.getState().task.tasks, store.getState().study);
         const id = newMessageId();
         const shown = cards.map((card, i) => ({ ...card, key: `${id}-${i}`, status: madeAtOnce(card) ? 'busy' : 'pending' }));
         updateChat(owner, list => [...list, { id, role: 'assistant', content: message, cards: shown }]);
-        if (missing > 0) addNote(missing === 1 ? t('assistantMissing_one') : fill(t('assistantMissing'), { n: missing }));
+        if (missing > 0 && lookupFailed) addNote(t('assistantFailed'));
+        else if (missing > 0) addNote(missing === 1 ? t('assistantMissing_one') : fill(t('assistantMissing'), { n: missing }));
         // the toggle as it is now: it may have been switched during the wait
         const aloud = getReadAloud();
         if (aloud && speechOutputSupport() && message.trim()) speak(message, { lang: speechLang(language) });
@@ -217,9 +217,16 @@ export default function AssistantSheet({ onClose, onReply }) {
         try {
             const answer = await sendAssistant(history, language, { signal: running.controller.signal });
             if (request.current !== running) return;
+            // the app's own copy of the subjects and goals the reply names, before the cards are made; the
+            // request stays live meanwhile (Stop, closing and a new message still count)
+            let lookupFailed = false;
+            if ((Array.isArray(answer.actions) ? answer.actions : []).some(isStudyAction)) {
+                await loadStudyContext(answer.actions, dispatch, store.getState).catch(() => { lookupFailed = true; });
+                if (request.current !== running) return;
+            }
             request.current = null;
             setPending(false);
-            await answered(answer);
+            answered(answer, lookupFailed);
         } catch (err) {
             if (request.current !== running) return;
             request.current = null;
