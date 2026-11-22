@@ -145,6 +145,7 @@ const hasGoals = async (dispatch, subjectId) => (await dispatch(fetchGoals(subje
 async function createGoalFor(action, { dispatch, getState }) {
     let subjectId = action.subjectId ?? null;
     let madeSubject = null;
+    let known = null;
     if (subjectId == null) {
         const name = String(action.subjectName ?? '').trim();
         if (!name) throw Object.assign(new Error('Subject missing'), { code: 'invalid_input' });
@@ -152,12 +153,16 @@ async function createGoalFor(action, { dispatch, getState }) {
         const match = (list) => (list ?? []).find(s => sameName(s.name, name));
         // my copy first: a subject an earlier action of this reply just made is in it
         const same = match(getState().study.subjects) ?? match(await dispatch(fetchSubjects()).catch(() => getState().study.subjects));
-        if (same) subjectId = same.id;
+        if (same) { subjectId = same.id; known = same; }
         else {
             madeSubject = await dispatch(saveSubject(null, { name }));
             subjectId = madeSubject.id;
         }
     }
+    known ??= (getState().study.subjects ?? []).find(s => s.id === subjectId) ?? null;
+    // the planner skips goals of an archived subject: bring it back first (undo puts it away again)
+    const reactivated = Boolean(known?.archived);
+    if (reactivated) await dispatch(saveSubject(subjectId, { archived: false }));
     const parts = (action.parts ?? []).map(({ name, estimateMinutes }) => ({ name, estimateMinutes }));
     // as the new-goal sheet: no topics is a date only, else the study times when there are any
     let planMode = 'none';
@@ -175,10 +180,12 @@ async function createGoalFor(action, { dispatch, getState }) {
                 await dispatch(deleteGoal(goal.id, 'delete'));
                 // goals added to the subject since stay: deleting it would cascade to them
                 if (madeSubject && !(await hasGoals(dispatch, madeSubject.id))) await dispatch(deleteSubject(madeSubject.id));
+                else if (reactivated && !(await hasGoals(dispatch, subjectId))) await dispatch(saveSubject(subjectId, { archived: true }));
             },
         };
     } catch (err) {
         if (madeSubject) await dispatch(deleteSubject(madeSubject.id)).catch(() => {});
+        else if (reactivated) await dispatch(saveSubject(subjectId, { archived: true })).catch(() => {});
         throw err;
     }
 }

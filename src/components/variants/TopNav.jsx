@@ -12,12 +12,13 @@ import { selectInviteCount } from '../../features/together/togetherAction';
 import { selectTaskInviteCount } from '../../features/tasks/taskAction';
 import { selectFamilyInviteCount } from '../../features/family/family';
 import { NAV } from '../../features/app/navTable';
+import { topOnSamePlace } from '../../features/layout/scrollTop';
 
 function Tab({ to, end, match, icon, label, count = 0, countLabel, news = false, newsLabel, tip }) {
     const { pathname } = useLocation();
     const matched = match?.(pathname);
     return (
-        <NavLink to={to} end={end} data-part="topnav-tab" data-tip={tip}
+        <NavLink to={to} end={end} onClick={topOnSamePlace(pathname, to, match)} data-part="topnav-tab" data-tip={tip}
             className={({ isActive }) => `${styles.tab} ${isActive || matched ? styles.active : ''}`}
             data-active={matched || undefined}>
             <Icon name={icon} className={styles.icon} />

@@ -99,10 +99,40 @@ describe('applying study actions', () => {
         expect(calls(`${BASE}/subjects/30`, 'DELETE')).toHaveLength(0)
     })
 
-    it('a goal with the name of an archived subject uses it instead of failing with subject_exists', async () => {
-        await applyAction({ type: 'study_create', target: 'goal', name: 'Test', kind: 'exam', due: '2026-12-01', parts: [], subjectName: 'alt' }, deps())
+    it('a goal with the name of an archived subject brings the subject back first, undo puts it away again', async () => {
+        const { undo } = await applyAction({ type: 'study_create', target: 'goal', name: 'Test', kind: 'exam', due: '2026-12-01', parts: [], subjectName: 'alt' }, deps())
         expect(calls(`${BASE}/subjects`, 'POST')).toHaveLength(0)
+        const patches = calls(`${BASE}/subjects/4`, 'PATCH')
+        expect(patches).toHaveLength(1)
+        expect(body(patches[0])).toEqual({ archived: false })
         expect(body(calls(`${BASE}/goals`, 'POST')[0])).toMatchObject({ subjectId: 4 })
+        // the PATCH came before the goal was made
+        const order = apiFetch.mock.calls.map(([url, o]) => `${o?.method ?? 'GET'} ${url.split('?')[0]}`)
+        expect(order.indexOf('PATCH ' + BASE + '/subjects/4')).toBeLessThan(order.indexOf('POST ' + BASE + '/goals'))
+        await undo()
+        expect(calls(`${BASE}/goals/50`, 'DELETE')).toHaveLength(1)
+        expect(body(calls(`${BASE}/subjects/4`, 'PATCH').at(-1))).toEqual({ archived: true })
+    })
+
+    it('a goal for an archived subject given by id brings it back too', async () => {
+        await applyAction({ type: 'study_create', target: 'goal', name: 'Test', kind: 'exam', due: '2026-12-01', parts: [], subjectId: 4 }, deps())
+        expect(body(calls(`${BASE}/subjects/4`, 'PATCH')[0])).toEqual({ archived: false })
+    })
+
+    it('a goal that cannot be made puts the subject it brought back away again and says why', async () => {
+        const base = apiFetch.getMockImplementation()
+        apiFetch.mockImplementation(async (url, options = {}) => {
+            if (url === `${BASE}/goals` && options.method === 'POST') throw Object.assign(new Error('The due date is in the past'), { code: 'due_in_past' })
+            return base(url, options)
+        })
+        await expect(applyAction({ type: 'study_create', target: 'goal', name: 'Test', kind: 'exam', due: '2020-01-01', parts: [], subjectName: 'alt' }, deps())).rejects.toMatchObject({ code: 'due_in_past' })
+        const patches = calls(`${BASE}/subjects/4`, 'PATCH').map(body)
+        expect(patches).toEqual([{ archived: false }, { archived: true }])
+    })
+
+    it('an unarchived subject is not touched', async () => {
+        await applyAction({ type: 'study_create', target: 'goal', name: 'Test', kind: 'exam', due: '2026-12-01', parts: [], subjectName: 'biologie' }, deps())
+        expect(calls(`${BASE}/subjects/3`, 'PATCH')).toHaveLength(0)
     })
 
     it('creates a part', async () => {

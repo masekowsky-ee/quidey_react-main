@@ -26,6 +26,7 @@ import { MOTION, useMotionLevel } from '../features/settings/motion';
 import { useDragDismiss } from '../features/layout/dragDismiss';
 import { openAuth } from '../features/auth/gate';
 import { NAV } from '../features/app/navTable';
+import { topOnSamePlace } from '../features/layout/scrollTop';
 
 // One entry: icon, label and an optional count badge (or a dot: something changed there);
 // the current page is highlighted (`match`: also on other addresses that belong to it)
@@ -35,7 +36,7 @@ function MenuLink({ to, end, match, icon, label, onClick, count = 0, countLabel,
     // the current entry (the menu's highlight slides to it, features/layout/slidingActive.js)
     const current = match ? match(pathname) : (end ? pathname === to : pathname === to || pathname.startsWith(`${to}/`));
     return (
-        <NavLink to={to} end={end} onClick={onClick} data-part="menu-item" data-active={current || undefined} data-tip={tip} data-in-tabbar={inTabBar || undefined}
+        <NavLink to={to} end={end} onClick={topOnSamePlace(pathname, to, match, onClick)} data-part="menu-item" data-active={current || undefined} data-tip={tip} data-in-tabbar={inTabBar || undefined}
             className={({ isActive }) => `${styles.menuItem} ${isActive || match?.(pathname) ? styles.active : ''}`}>
             <Icon name={icon} className={styles.menuIcon} />
             <span className={styles.menuLabel}>{label}</span>

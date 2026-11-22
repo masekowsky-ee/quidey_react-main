@@ -16,6 +16,7 @@ import { useOnlineFriends } from '../features/presence/presence';
 import { fill } from '../features/helperFunction';
 import { tabIndexOf } from '../features/layout/tabSwipe';
 import { NAV } from '../features/app/navTable';
+import { topOnSamePlace } from '../features/layout/scrollTop';
 
 function Count({ count, label }) {
     if (count <= 0) return null;
@@ -53,7 +54,7 @@ function Tab({ to, end, match, menuOpen, tip, ...inner }) {
     const { pathname } = useLocation();
     const matched = match?.(pathname);
     return (
-        <NavLink to={to} end={end} className={({ isActive }) => `${styles.tab} ${(isActive || matched) && !menuOpen ? styles.active : ''}`}
+        <NavLink to={to} end={end} onClick={topOnSamePlace(pathname, to, match)} className={({ isActive }) => `${styles.tab} ${(isActive || matched) && !menuOpen ? styles.active : ''}`}
             data-active={matched || undefined} data-tip={tip}>
             {({ isActive }) => <TabInner on={Boolean(isActive || matched) && !menuOpen} {...inner} />}
         </NavLink>
