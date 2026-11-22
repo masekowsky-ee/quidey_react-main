@@ -30,7 +30,7 @@ import { loadStudyContext, isStudyAction } from '../../features/assistant/studyA
 import { speak, speechOutputSupport, stopSpeaking } from '../../features/voice/speak';
 import { speechLang } from '../../features/voice/voice';
 import { useAiQuota, refreshAiQuota, left as leftOf } from '../../features/ai/ai';
-import { selectHasMax } from '../../features/pro/pro';
+import { selectHasMax, selectHasAssistant } from '../../features/pro/pro';
 import { fetchAccess } from '../../features/auth/authAction';
 import { showToast } from '../../features/toast/toast';
 import { fill } from '../../features/helperFunction';
@@ -53,6 +53,7 @@ export default function AssistantSheet({ onClose, onReply }) {
     const navigate = useNavigate();
     const owner = useSelector(state => state.auth.username);
     const hasMax = useSelector(selectHasMax);
+    const hasAssistant = useSelector(selectHasAssistant);
     const { messages, readAloud } = useAssistantChat(owner);
     const quota = useAiQuota();
     const titleId = useId();
@@ -203,7 +204,7 @@ export default function AssistantSheet({ onClose, onReply }) {
         refreshAiQuota();
     }
 
-    const disabled = ended || !hasMax;
+    const disabled = ended || !hasAssistant;
 
     async function send() {
         const content = text.trim().slice(0, MESSAGE_MAX);
@@ -248,7 +249,7 @@ export default function AssistantSheet({ onClose, onReply }) {
     };
 
     const leftToday = answerLeft ?? (quota?.assistant ? leftOf(quota.assistant) : null);
-    const maxToday = quota?.assistant?.max ?? 20;
+    const maxToday = quota?.assistant?.max ?? (hasMax ? 20 : 3);
 
     // in place (as FormSheet), not in a portal: the shell's --sidebar-w and --tabbar-h place it
     return (

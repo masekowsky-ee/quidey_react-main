@@ -83,6 +83,17 @@ describe('the assistant button', () => {
         expect(screen.queryByRole('button', { name: 'KI-Assistent' })).toBeNull()
     })
 
+    it('is there for a tester without Max, who sees three messages a day', async () => {
+        reply = async () => ({ message: 'Ok.', actions: [], quota: { ...QUOTA, assistant: { used: 1, max: 3 } } })
+        const base = apiFetch.getMockImplementation()
+        apiFetch.mockImplementation(async (url, options) => (url === '/api/ai/quota' ? { ...QUOTA, assistant: { used: 0, max: 3 } } : base(url, options)))
+        open({ access: { isPro: true, max: { active: false, gift: false, until: null }, isTester: true } })
+        expect(screen.getByRole('button', { name: 'KI-Assistent' })).toBeInTheDocument()
+        openSheet()
+        await say('Hallo')
+        expect(screen.getByText(/Heute noch 2 von 3/)).toBeInTheDocument()
+    })
+
     it('is there on Home for a Max account', () => {
         open()
         expect(screen.getByRole('button', { name: 'KI-Assistent' })).toHaveAttribute('title', 'KI-Assistent')

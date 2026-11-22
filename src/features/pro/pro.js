@@ -150,6 +150,9 @@ export { LIMIT_EVENT };
 // Do I have Max (paid, gifted, or as an admin)?
 export const selectHasMax = (state) => Boolean(state.auth.access.max?.active);
 
+// May I use the AI assistant? Max, or a tester (a few messages a day, the server counts them).
+export const selectHasAssistant = (state) => Boolean(state.auth.access.max?.active || state.auth.access.isTester);
+
 // Do I really support Quidey (a gift, or a running paid subscription)? pro.active is also true for
 // admins, who count as Max without a gift or a subscription: they are not shown "thank you" texts.
 export const selectIsSupporter = (state) => {
